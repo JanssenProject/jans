@@ -2,7 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
@@ -11,9 +10,7 @@ import io.jans.ca.common.response.GetLogoutUriResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -26,7 +23,7 @@ import java.net.URLEncoder;
 
 @RequestScoped
 @Named
-public class GetLogoutUrlOperation extends TemplateOperation<GetLogoutUrlParams> {
+public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     private static final String GOOGLE_OP_HOST = "https://accounts.google.com";
 

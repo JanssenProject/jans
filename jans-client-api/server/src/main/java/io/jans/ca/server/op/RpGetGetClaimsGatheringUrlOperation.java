@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @RequestScoped
 @Named
-public class RpGetGetClaimsGatheringUrlOperation extends TemplateOperation<RpGetClaimsGatheringUrlParams> {
+public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClaimsGatheringUrlParams> {
 
     @Inject
     DiscoveryService discoveryService;

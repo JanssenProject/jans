@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObject;
@@ -10,13 +9,12 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.RequestObjectService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetRequestObjectOperation extends TemplateOperation<StringParam> {
+public class GetRequestObjectOperation extends BaseOperation<StringParam> {
     private static final Logger LOG = LoggerFactory.getLogger(GetRequestObjectOperation.class);
     @Inject
     RequestObjectService requestObjectService;

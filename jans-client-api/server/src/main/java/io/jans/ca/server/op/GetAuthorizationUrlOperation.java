@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
@@ -15,9 +14,7 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -31,7 +28,7 @@ import java.util.List;
 
 @RequestScoped
 @Named
-public class GetAuthorizationUrlOperation extends TemplateOperation<GetAuthorizationUrlParams> {
+public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorizationUrlParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
     @Inject

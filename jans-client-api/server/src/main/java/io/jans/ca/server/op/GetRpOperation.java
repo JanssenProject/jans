@@ -1,6 +1,5 @@
 package io.jans.ca.server.op;
 
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.GetRpParams;
@@ -9,8 +8,6 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.configuration.model.MinimumRp;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.RpService;
-import io.jans.ca.server.service.RpSyncService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -23,7 +20,7 @@ import java.util.List;
 
 @RequestScoped
 @Named
-public class GetRpOperation extends TemplateOperation<GetRpParams> {
+public class GetRpOperation extends BaseOperation<GetRpParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetRpOperation.class);
     @Inject

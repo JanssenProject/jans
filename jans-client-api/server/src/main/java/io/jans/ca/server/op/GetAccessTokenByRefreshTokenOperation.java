@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetAccessTokenByRefreshTokenParams;
@@ -15,7 +14,6 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -28,7 +26,7 @@ import java.util.Set;
 
 @RequestScoped
 @Named
-public class GetAccessTokenByRefreshTokenOperation extends TemplateOperation<GetAccessTokenByRefreshTokenParams> {
+public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAccessTokenByRefreshTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAccessTokenByRefreshTokenOperation.class);
 

@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-public class GetRequestObjectUriOperation extends TemplateOperation<GetRequestObjectUriParams> {
+public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObjectUriParams> {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(GetRequestObjectUriOperation.class);

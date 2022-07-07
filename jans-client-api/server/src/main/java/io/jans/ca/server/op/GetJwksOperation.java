@@ -22,7 +22,7 @@ import org.apache.commons.lang.StringUtils;
 
 @RequestScoped
 @Named
-public class GetJwksOperation extends TemplateOperation<GetJwksParams> {
+public class GetJwksOperation extends BaseOperation<GetJwksParams> {
 
     @Inject
     DiscoveryService discoveryService;

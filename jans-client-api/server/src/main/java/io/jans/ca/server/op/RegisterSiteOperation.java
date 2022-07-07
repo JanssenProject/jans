@@ -15,7 +15,6 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RegisterSiteParams;
@@ -27,8 +26,6 @@ import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.RpService;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,7 +43,7 @@ import java.util.UUID;
  * @author Yuriy Zabrovarnyy
  */
 
-public class RegisterSiteOperation extends TemplateOperation<RegisterSiteParams> {
+public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 

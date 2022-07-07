@@ -35,7 +35,7 @@ import java.util.List;
 
 @RequestScoped
 @Named
-public class RsCheckAccessOperation extends TemplateOperation<RsCheckAccessParams> {
+public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsCheckAccessOperation.class);
     @Inject

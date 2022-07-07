@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RequestScoped
 @Named
-public class IntrospectRptOperation extends TemplateOperation<IntrospectRptParams> {
+public class IntrospectRptOperation extends BaseOperation<IntrospectRptParams> {
 
     @Inject
     IntrospectionService introspectionService;

@@ -29,7 +29,7 @@ import java.util.UUID;
  * @version 0.9, 23/06/2015
  */
 
-public class ImplicitFlowOperation extends TemplateOperation<ImplicitFlowParams> {
+public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImplicitFlowOperation.class);
     @Inject

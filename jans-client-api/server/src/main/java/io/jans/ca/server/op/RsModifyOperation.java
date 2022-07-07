@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 @RequestScoped
 @Named
-public class RsModifyOperation extends TemplateOperation<RsModifyParams> {
+public class RsModifyOperation extends BaseOperation<RsModifyParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsModifyOperation.class);
 

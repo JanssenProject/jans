@@ -11,13 +11,11 @@ import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.CheckAccessTokenParams;
 import io.jans.ca.common.response.CheckAccessTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -30,7 +28,7 @@ import java.util.Date;
  * @version 0.9, 23/10/2013
  */
 
-public class CheckAccessTokenOperation extends TemplateOperation<CheckAccessTokenParams> {
+public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckAccessTokenOperation.class);
 

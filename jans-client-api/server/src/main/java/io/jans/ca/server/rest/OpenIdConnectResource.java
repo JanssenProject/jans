@@ -9,6 +9,7 @@ import io.jans.ca.server.op.GetAuthorizationCodeOperation;
 import io.jans.ca.server.op.GetAuthorizationUrlOperation;
 import io.jans.ca.server.op.GetLogoutUrlOperation;
 import io.jans.ca.server.op.GetTokensByCodeOperation;
+import io.jans.configapi.core.rest.ProtectedApi;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -27,6 +28,7 @@ public class OpenIdConnectResource extends BaseResource {
     GetLogoutUrlOperation getLogoutUrlOp;
 
     @POST
+    @ProtectedApi
     @Path("/get-authorization-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -36,6 +38,7 @@ public class OpenIdConnectResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/get-authorization-code")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -45,6 +48,7 @@ public class OpenIdConnectResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/get-tokens-by-code")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -54,6 +58,7 @@ public class OpenIdConnectResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/get-logout-uri")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

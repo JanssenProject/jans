@@ -11,7 +11,6 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.UpdateSiteParams;
@@ -22,7 +21,6 @@ import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
 import io.jans.ca.server.service.RpService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -40,7 +38,7 @@ import java.util.stream.Collectors;
 
 @RequestScoped
 @Named
-public class UpdateSiteOperation extends TemplateOperation<UpdateSiteParams> {
+public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSiteOperation.class);
 

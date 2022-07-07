@@ -4,6 +4,7 @@ import io.jans.ca.server.op.IntrospectRptOperation;
 import io.jans.ca.server.op.RsCheckAccessOperation;
 import io.jans.ca.server.op.RsModifyOperation;
 import io.jans.ca.server.op.RsProtectOperation;
+import io.jans.configapi.core.rest.ProtectedApi;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -25,6 +26,7 @@ public class UMA2ResourceServerResource extends BaseResource {
     RsCheckAccessOperation rsCheckAccessOp;
 
     @POST
+    @ProtectedApi
     @Path("/uma-rs-protect")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -34,6 +36,7 @@ public class UMA2ResourceServerResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/uma-rs-check-access")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -43,6 +46,7 @@ public class UMA2ResourceServerResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -52,6 +56,7 @@ public class UMA2ResourceServerResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/uma-rs-modify")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

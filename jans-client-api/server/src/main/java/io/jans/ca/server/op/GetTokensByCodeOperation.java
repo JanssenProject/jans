@@ -19,7 +19,6 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.*;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 @RequestScoped
 @Named
-public class GetTokensByCodeOperation extends TemplateOperation<GetTokensByCodeParams> {
+public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetTokensByCodeOperation.class);
     @Inject

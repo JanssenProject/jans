@@ -2,6 +2,7 @@ package io.jans.ca.server.rest;
 
 import io.jans.ca.common.params.StringParam;
 import io.jans.ca.server.op.*;
+import io.jans.configapi.core.rest.ProtectedApi;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -38,6 +39,7 @@ public class RpResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/authorization-code-flow")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -55,6 +57,7 @@ public class RpResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/get-request-object-uri")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

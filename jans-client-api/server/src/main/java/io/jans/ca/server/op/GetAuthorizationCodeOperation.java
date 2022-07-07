@@ -7,7 +7,6 @@ import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetAuthorizationCodeParams;
@@ -16,8 +15,6 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.HttpService;
-import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -31,7 +28,7 @@ import java.util.UUID;
 
 @RequestScoped
 @Named
-public class GetAuthorizationCodeOperation extends TemplateOperation<GetAuthorizationCodeParams> {
+public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizationCodeParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationCodeOperation.class);
     @Inject

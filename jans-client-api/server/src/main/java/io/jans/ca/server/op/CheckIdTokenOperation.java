@@ -4,7 +4,6 @@ import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.CheckIdTokenParams;
 import io.jans.ca.common.response.CheckIdTokenResponse;
@@ -14,7 +13,6 @@ import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.PublicOpKeyService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -27,7 +25,7 @@ import java.util.List;
  * @version 0.9, 18/10/2013
  */
 
-public class CheckIdTokenOperation extends TemplateOperation<CheckIdTokenParams> {
+public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckIdTokenOperation.class);
 

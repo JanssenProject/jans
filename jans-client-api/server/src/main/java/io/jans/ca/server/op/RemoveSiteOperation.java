@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RequestScoped
 @Named
-public class RemoveSiteOperation extends TemplateOperation<RemoveSiteParams> {
+public class RemoveSiteOperation extends BaseOperation<RemoveSiteParams> {
 
     @Inject
     RpService rpService;

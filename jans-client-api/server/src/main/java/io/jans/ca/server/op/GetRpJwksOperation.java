@@ -1,13 +1,11 @@
 package io.jans.ca.server.op;
 
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.GetJwksParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.KeyGeneratorService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -15,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RequestScoped
 @Named
-public class GetRpJwksOperation extends TemplateOperation<GetJwksParams> {
+public class GetRpJwksOperation extends BaseOperation<GetJwksParams> {
     @Inject
     KeyGeneratorService keyGeneratorService;
 

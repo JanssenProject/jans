@@ -9,8 +9,11 @@ package io.jans.ca.server.configuration;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
+import io.jans.ca.server.security.service.AuthorizationService;
+import io.jans.ca.server.security.service.ClientApiAuthorizationService;
 import io.jans.ca.server.service.RpService;
 import io.jans.ca.server.service.logger.LoggerServiceImpl;
+import io.jans.exception.ConfigurationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -20,6 +23,7 @@ import io.jans.service.PythonService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.timer.QuartzSchedulerManager;
+import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,6 +36,10 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 
 import java.util.Properties;
@@ -48,6 +56,8 @@ public class AppInitializer {
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
+    @Inject
+    private Instance<AuthorizationService> authorizationServiceInstance;
     @Inject
     BeanManager beanManager;
 
@@ -84,11 +94,18 @@ public class AppInitializer {
         logger.info("=============  STARTING CLIENT API APPLICATION  ========================");
         logger.info("init:{}", init);
 
-        SecurityProviderUtility.installBCProvider();
+        // Resteasy config - Turn off the default patch filter
+        System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
+        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
+        RegisterBuiltin.register(instance);
+        instance.registerProvider(ResteasyJackson2Provider.class);
+
+//        SecurityProviderUtility.installBCProvider();
 
         // configuration
         configurationFactory.create();
         persistenceEntryManagerInstance.get();
+        this.createAuthorizationService();
 
         // Initialize python interpreter
         pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
@@ -157,22 +174,33 @@ public class AppInitializer {
 
     }
 
+    @Produces
+    @ApplicationScoped
+    @Named("authorizationService")
+    private AuthorizationService createAuthorizationService() {
+        logger.info("=============  AppInitializer::createAuthorizationService()  ================  ");
+        try {
+            return authorizationServiceInstance.select(ClientApiAuthorizationService.class).get();
+        } catch (Exception ex) {
+            if (logger.isErrorEnabled()) {
+                logger.error("Failed to create AuthorizationService instance - exception:{} ", ex);
+            }
+            throw new ConfigurationException("Failed to create AuthorizationService instance , ", ex);
+        }
+    }
+
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
         closePersistenceEntryManager();
         PersistenceEntryManager ldapEntryManager = persistenceEntryManagerInstance.get();
         persistenceEntryManagerInstance.destroy(ldapEntryManager);
-        logger.debug("Recreated instance {} with operation service: {} - event:{}", ldapEntryManager,
-                ldapEntryManager.getOperationService(), event);
+        logger.debug("Recreated instance {} with operation service: {} - event:{}", ldapEntryManager, ldapEntryManager.getOperationService(), event);
     }
 
     private void closePersistenceEntryManager() {
-        PersistenceEntryManager oldInstance = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class,
-                ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
-        if (oldInstance == null || oldInstance.getOperationService() == null)
-            return;
+        PersistenceEntryManager oldInstance = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
+        if (oldInstance == null || oldInstance.getOperationService() == null) return;
 
-        logger.debug("Attempting to destroy {} with operation service: {}", oldInstance,
-                oldInstance.getOperationService());
+        logger.debug("Attempting to destroy {} with operation service: {}", oldInstance, oldInstance.getOperationService());
         oldInstance.destroy();
         logger.debug("Destroyed {} with operation service: {}", oldInstance, oldInstance.getOperationService());
     }

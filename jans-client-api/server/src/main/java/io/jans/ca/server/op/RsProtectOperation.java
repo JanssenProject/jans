@@ -10,7 +10,6 @@ import io.jans.as.model.uma.JsonLogicNode;
 import io.jans.as.model.uma.JsonLogicNodeParser;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RsProtectParams;
@@ -44,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 @RequestScoped
 @Named
-public class RsProtectOperation extends TemplateOperation<RsProtectParams> {
+public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsProtectOperation.class);
 

@@ -6,7 +6,6 @@ import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
@@ -16,8 +15,6 @@ import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.HttpService;
-import io.jans.ca.server.service.ServiceProvider;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -29,7 +26,7 @@ import java.io.IOException;
 
 @RequestScoped
 @Named
-public class GetUserInfoOperation extends TemplateOperation<GetUserInfoParams> {
+public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
     @Inject

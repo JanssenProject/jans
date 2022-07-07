@@ -1,22 +1,17 @@
 package io.jans.ca.server.op;
 
 import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetDiscoveryParams;
-import io.jans.ca.common.params.IParams;
 import io.jans.ca.common.response.GetDiscoveryResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @RequestScoped
 @Named
-public class GetDiscoveryOperation extends TemplateOperation<GetDiscoveryParams> {
+public class GetDiscoveryOperation extends BaseOperation<GetDiscoveryParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetDiscoveryOperation.class);
 

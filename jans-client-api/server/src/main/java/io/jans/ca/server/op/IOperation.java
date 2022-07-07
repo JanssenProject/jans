@@ -8,7 +8,7 @@ import io.jans.ca.common.params.IParams;
 import io.jans.ca.common.response.IOpResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
-public interface ITemplateOperation<T extends IParams> {
+public interface IOperation<T extends IParams> {
 
     /**
      * Executes operations and produces response.

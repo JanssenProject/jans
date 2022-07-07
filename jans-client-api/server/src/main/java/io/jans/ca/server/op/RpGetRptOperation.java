@@ -5,7 +5,6 @@ package io.jans.ca.server.op;
 
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
@@ -13,7 +12,6 @@ import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -33,7 +31,7 @@ import java.io.IOException;
 
 @RequestScoped
 @Named
-public class RpGetRptOperation extends TemplateOperation<RpGetRptParams> {
+public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpGetRptOperation.class);
     @Inject

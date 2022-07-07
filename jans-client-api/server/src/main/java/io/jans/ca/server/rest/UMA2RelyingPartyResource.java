@@ -2,6 +2,7 @@ package io.jans.ca.server.rest;
 
 import io.jans.ca.server.op.RpGetGetClaimsGatheringUrlOperation;
 import io.jans.ca.server.op.RpGetRptOperation;
+import io.jans.configapi.core.rest.ProtectedApi;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -19,6 +20,7 @@ public class UMA2RelyingPartyResource extends BaseResource {
     RpGetGetClaimsGatheringUrlOperation rpGetGetClaimsGatheringUrlOp;
 
     @POST
+    @ProtectedApi
     @Path("/uma-rp-get-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -28,6 +30,7 @@ public class UMA2RelyingPartyResource extends BaseResource {
     }
 
     @POST
+    @ProtectedApi
     @Path("/uma-rp-get-claims-gathering-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

@@ -8,7 +8,6 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetClientTokenParams;
@@ -18,7 +17,6 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.HttpService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -30,7 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Set;
 @RequestScoped
 @Named
-public class GetClientTokenOperation extends TemplateOperation<GetClientTokenParams> {
+public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetClientTokenOperation.class);
 

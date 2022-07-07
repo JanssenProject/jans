@@ -10,14 +10,11 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.AuthorizationCodeFlowParams;
 import io.jans.ca.common.response.AuthorizationCodeFlowResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.HttpService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +31,7 @@ import java.util.UUID;
  * @version 0.9, 19/06/2015
  */
 
-public class AuthorizationCodeFlowOperation extends TemplateOperation<AuthorizationCodeFlowParams> {
+public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationCodeFlowParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationCodeFlowOperation.class);
     @Inject

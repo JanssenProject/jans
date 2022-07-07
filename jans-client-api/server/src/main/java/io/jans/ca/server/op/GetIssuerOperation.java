@@ -3,7 +3,6 @@ package io.jans.ca.server.op;
 import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.model.discovery.WebFingerParam;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetIssuerParams;
@@ -11,7 +10,6 @@ import io.jans.ca.common.response.GetIssuerResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.BeanUtils;
@@ -22,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GetIssuerOperation extends TemplateOperation<GetIssuerParams> {
+public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetIssuerOperation.class);
 
