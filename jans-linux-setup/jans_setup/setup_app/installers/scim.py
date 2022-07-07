@@ -143,7 +143,8 @@ class ScimInstaller(JettyInstaller):
                 'jansSubjectTyp': ['pairwise'],
                 'jansTknEndpointAuthMethod': ['client_secret_basic'],
                 'inum': [Config.scim_client_id],
-                'jansClntSecret': [Config.scim_client_encoded_pw]
+                'jansClntSecret': [Config.scim_client_encoded_pw],
+                'jansRedirectURI': ['https://{}/.well-known/scim-configuration'.format(Config.hostname)]
                 })
 
         client_ldif_fd.close()
