@@ -9,7 +9,7 @@ copyright: Copyright &copy; 2022, The Janssen Project
 docs_dir: admin
 repo_name: JanssenProject/docs
 repo_url: https://github.com/JanssenProject/jans/
-edit_uri: edit/main/docs/user/
+edit_uri: edit/main/docs/admin/
 
 # Configuration
 theme:
