@@ -70,7 +70,7 @@ mvn test -Djans.base=/etc/jans
 `Djans.base` is the conf path of the local running `jans-auth-server`
 ### Running tests with external jans-client-api
 ```
-mvn test -Dtest.client.api.url=http://localhost:9999/jans-client-api-server/
+mvn test -Dmaven.test.skip=false -Dtest.client.api.url=http://localhost:9999/jans-client-api-server/
 ```
 `Dtest.client.api.url` is the url of a running `jans-client-api-server`
 
