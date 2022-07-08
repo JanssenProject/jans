@@ -15,6 +15,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
     - [Branches](#branches)
     - [PRs](#prs)
     - [Issues](#issues)
+    - [Contributing to the documentation](#contributing-to-the-documentation)
 - [Contribution Workflow](#contribution-workflow)
   - [Find Something To Work On](#find-something-to-work-on)
   - [Start a Discussion](#start-a-discussion)
@@ -22,7 +23,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
   - [Document](#document)
   - [Raise a PR](#raise-a-pr)
   - [Follow Through](#follow-through)
-  - [Contributing to the documentation](#contributing-to-the-documentation)
+  
 
 # Join the Community
 
