@@ -19,6 +19,7 @@ import requests
 import html
 import glob
 import logging
+import http.client
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -74,8 +75,7 @@ client_id = os.environ.get(my_op_mode + 'jca_client_id')
 client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
 access_token = None
 debug = os.environ.get('jans_client_debug')
-debug_log_file = os.environ.get('jans_debug_log_file')
-error_log_file = os.path.join(cur_dir, 'error.log')
+log_dir = os.environ.get('cli_log_dir', cur_dir)
 
 def encode_decode(s, decode=False):
     cmd = '/opt/jans/bin/encode.py '
@@ -153,6 +153,8 @@ parser.add_argument("--patch-replace", help="Colon delimited key:value pair for 
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
 parser.add_argument("--no-suggestion", help="Do not use prompt toolkit to display word completer", action='store_true')
 parser.add_argument("-no-color", help="Do not colorize json dumps", action='store_true')
+parser.add_argument("--log-dir", help="Log directory", default=log_dir)
+
 
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
@@ -182,7 +184,7 @@ if not(host and (client_id and client_secret or access_token)):
     client_id = args.client_id
     client_secret = args.client_secret
     debug = args.debug
-    debug_log_file = args.debug_log_file
+    log_dir = args.log_dir
 
     access_token = args.access_token
     if access_token and os.path.isfile(access_token):
@@ -211,7 +213,8 @@ if not(host and (client_id and client_secret or access_token)):
             client_secret = encode_decode(client_secret_enc, decode=True)
 
         debug = config['DEFAULT'].get('debug')
-        debug_log_file = config['DEFAULT'].get('debug_log_file')
+        log_dir = config['DEFAULT'].get('log_dir', log_dir)
+
     else:
         config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net',
                              'jca_client_id': 'your jans config api client id',
@@ -247,6 +250,7 @@ class Menu(object):
         self.children = []
         self.parent = None
         self.ignore = False
+
 
     def __iter__(self):
         self.current_index = 0
@@ -328,12 +332,17 @@ class JCA_CLI:
 
     def set_logging(self):
         if debug:
-            logging.basicConfig()
-            logging.getLogger().setLevel(logging.DEBUG)
             self.cli_logger = logging.getLogger("urllib3")
             self.cli_logger.setLevel(logging.DEBUG)
             self.cli_logger.propagate = True
             HTTPConnection.debuglevel = 1
+            file_handler = logging.FileHandler(os.path.join(log_dir, 'cli_debug.log'))
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
+            self.cli_logger.addHandler(file_handler)
+            def print_to_log(*args):
+                self.cli_logger.debug(" ".join(args))
+            http.client.print = print_to_log
 
 
     def log_response(self, response):
@@ -2062,7 +2071,12 @@ class JCA_CLI:
 
 def main():
 
+
+    error_log_file = os.path.join(log_dir, 'cli_eorror.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
+
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
     try:
         if not access_token:
