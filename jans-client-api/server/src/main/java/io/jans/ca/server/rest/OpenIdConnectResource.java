@@ -9,7 +9,7 @@ import io.jans.ca.server.op.GetAuthorizationCodeOperation;
 import io.jans.ca.server.op.GetAuthorizationUrlOperation;
 import io.jans.ca.server.op.GetLogoutUrlOperation;
 import io.jans.ca.server.op.GetTokensByCodeOperation;
-import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.ca.common.rest.ProtectedApi;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

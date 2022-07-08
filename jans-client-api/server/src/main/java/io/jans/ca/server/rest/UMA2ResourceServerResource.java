@@ -4,7 +4,7 @@ import io.jans.ca.server.op.IntrospectRptOperation;
 import io.jans.ca.server.op.RsCheckAccessOperation;
 import io.jans.ca.server.op.RsModifyOperation;
 import io.jans.ca.server.op.RsProtectOperation;
-import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.ca.common.rest.ProtectedApi;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;

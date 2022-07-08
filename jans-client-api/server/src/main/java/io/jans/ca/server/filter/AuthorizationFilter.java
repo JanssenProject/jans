@@ -7,7 +7,7 @@
 package io.jans.ca.server.filter;
 
 import io.jans.ca.server.security.service.AuthorizationService;
-import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.ca.common.rest.ProtectedApi;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;

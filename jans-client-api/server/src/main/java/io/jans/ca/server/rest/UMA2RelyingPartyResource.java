@@ -2,7 +2,7 @@ package io.jans.ca.server.rest;
 
 import io.jans.ca.server.op.RpGetGetClaimsGatheringUrlOperation;
 import io.jans.ca.server.op.RpGetRptOperation;
-import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.ca.common.rest.ProtectedApi;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
