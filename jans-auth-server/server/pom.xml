@@ -567,13 +567,6 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-client</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.testng</groupId>
