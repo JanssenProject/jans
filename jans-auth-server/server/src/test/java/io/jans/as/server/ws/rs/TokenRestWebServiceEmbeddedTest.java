@@ -9,7 +9,7 @@ package io.jans.as.server.ws.rs;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenRequest;
-import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.server.util.TestUtil;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -88,7 +88,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            TestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
             clientSecret = registerResponse.getClientSecret();
