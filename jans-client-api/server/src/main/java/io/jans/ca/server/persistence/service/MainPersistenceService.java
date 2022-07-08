@@ -18,7 +18,6 @@ import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.persistence.modal.OrganizationBranch;
 import io.jans.ca.server.persistence.modal.RpObject;
 import io.jans.ca.server.service.MigrationService;
-import io.jans.configapi.model.status.StatsData;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
@@ -49,7 +48,6 @@ public class MainPersistenceService implements PersistenceService {
     @Inject
     Logger logger;
 
-    private StatsData statsData;
     private static final String BASE_DN = "o=jans";
     private static final String OU_CONFIGURATION = "configuration";
     private static final String OU_JANS_CLIENT_API = "jans-client-api";
@@ -84,14 +82,6 @@ public class MainPersistenceService implements PersistenceService {
 
     public String getPersistenceType() {
         return configurationFactory.getBaseConfiguration().getString("persistence.type");
-    }
-
-    public StatsData getStatsData() {
-        return statsData;
-    }
-
-    public void setStatsData(StatsData statsData) {
-        this.statsData = statsData;
     }
 
     public void create() {
