@@ -10,7 +10,7 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.server.util.TestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
@@ -83,7 +83,7 @@ public class AuthorizeWithResponseModeEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            TestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
         } catch (Exception e) {

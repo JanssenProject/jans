@@ -7,7 +7,7 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.server.util.TestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -94,7 +94,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            TestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
             clientSecret = registerResponse.getClientSecret();
