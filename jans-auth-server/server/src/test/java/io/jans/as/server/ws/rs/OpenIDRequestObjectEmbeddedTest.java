@@ -7,11 +7,9 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.client.ResponseAsserter;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.client.ws.rs.ClientTestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.Prompt;
@@ -26,8 +24,15 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
+import io.jans.as.server.util.ResponseAsserter;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.as.server.util.TestUtil;
 import io.jans.util.StringHelper;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;
@@ -36,11 +41,6 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.Response;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -51,15 +51,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static io.jans.as.model.register.RegisterResponseParam.*;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for OpenID Request Object (embedded)
@@ -112,7 +105,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            TestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
             clientSecret = registerResponse.getClientSecret();
