@@ -9,7 +9,7 @@ package io.jans.as.server.ws.rs;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.client.ResponseAsserter;
+import io.jans.as.server.util.ResponseAsserter;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
