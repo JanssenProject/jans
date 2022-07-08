@@ -32,12 +32,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 @RequestScoped
 @Named
 public abstract class BaseOperation<T extends IParams> implements IOperation<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseOperation.class);
+
+    private static final String LOCALHOST_IP_ADDRESS = "127.0.0.1";
 
     @Inject
     ValidationService validationService;
@@ -53,6 +56,8 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         LOG.info("Endpoint: {}", endPointUrl);
         LOG.info("Request parameters: {}", paramsAsString);
         LOG.info("CommandType: {}", getCommandType());
+
+        validateIpAddressAllowed(httpRequest.getRemoteAddr());
 
         Object forJsonConversion = getObjectForJsonConversion(paramsAsString, getParameterClass(), httpRequest);
         String response = null;
@@ -154,6 +159,33 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         }
 
         validationService.validateAccessToken(accessToken, authorizationRpId);
+    }
+
+
+    private void validateIpAddressAllowed(String callerIpAddress) {
+        LOG.trace("Checking if caller ipAddress : {} is allowed to make request to jans_client_api.", callerIpAddress);
+        final ApiAppConfiguration conf = jansConfigurationService.find();
+        List<String> bindIpAddresses = conf.getBindIpAddresses();
+
+        //localhost as default bindAddress
+        if ((bindIpAddresses == null || bindIpAddresses.isEmpty()) && LOCALHOST_IP_ADDRESS.equalsIgnoreCase(callerIpAddress)) {
+            return;
+        }
+        //show error if ip_address of a remote caller is not set in `bind_ip_addresses`
+        if (bindIpAddresses == null || bindIpAddresses.isEmpty()) {
+            LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of configuration.");
+            throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
+        }
+        //allow all ip_address
+        if (bindIpAddresses.contains("*")) {
+            return;
+        }
+
+        if (bindIpAddresses.contains(callerIpAddress)) {
+            return;
+        }
+        LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of configuration.");
+        throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
     }
 
     public AuthCryptoProvider getCryptoProvider() throws Exception {

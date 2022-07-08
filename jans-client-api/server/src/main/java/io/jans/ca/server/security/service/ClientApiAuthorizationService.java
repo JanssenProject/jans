@@ -36,7 +36,6 @@ public class ClientApiAuthorizationService extends AuthorizationService implemen
 
     private static final long serialVersionUID = 1L;
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
-    private static final String LOCALHOST_IP_ADDRESS = "127.0.0.1";
 
     @Inject
     transient Logger LOG;
@@ -61,7 +60,6 @@ public class ClientApiAuthorizationService extends AuthorizationService implemen
                 path, method, authorization, authorizationRpId);
 
         final ApiAppConfiguration conf = jansConfigurationService.find();
-        validateIpAddressAllowed(remoteAddress);
 
         validateAuthorizationRpId(conf, authorizationRpId);
         validateAccessToken(authorization, authorizationRpId);
@@ -116,32 +114,6 @@ public class ClientApiAuthorizationService extends AuthorizationService implemen
         } else {
             LOG.warn("No RpId provided in AuthorizationRpId header. Forbidden.");
         }
-    }
-
-    private void validateIpAddressAllowed(String callerIpAddress) {
-        LOG.trace("Checking if caller ipAddress : {} is allowed to make request to jans_client_api.", callerIpAddress);
-        final ApiAppConfiguration conf = jansConfigurationService.find();
-        List<String> bindIpAddresses = conf.getBindIpAddresses();
-
-        //localhost as default bindAddress
-        if ((bindIpAddresses == null || bindIpAddresses.isEmpty()) && LOCALHOST_IP_ADDRESS.equalsIgnoreCase(callerIpAddress)) {
-            return;
-        }
-        //show error if ip_address of a remote caller is not set in `bind_ip_addresses`
-        if (bindIpAddresses == null || bindIpAddresses.isEmpty()) {
-            LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of configuration.");
-            throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
-        }
-        //allow all ip_address
-        if (bindIpAddresses.contains("*")) {
-            return;
-        }
-
-        if (bindIpAddresses.contains(callerIpAddress)) {
-            return;
-        }
-        LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of configuration.");
-        throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
     }
 
 }
