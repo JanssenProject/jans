@@ -100,8 +100,6 @@ public class AppInitializer {
         RegisterBuiltin.register(instance);
         instance.registerProvider(ResteasyJackson2Provider.class);
 
-//        SecurityProviderUtility.installBCProvider();
-
         // configuration
         configurationFactory.create();
         persistenceEntryManagerInstance.get();
