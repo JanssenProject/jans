@@ -7,7 +7,7 @@ copyright: Copyright &copy; 2022, The Janssen Project
 
 # Repository
 docs_dir: admin
-repo_name: JanssenProject/docs
+repo_name: JanssenProject/jans
 repo_url: https://github.com/JanssenProject/jans/
 edit_uri: edit/main/docs/admin/
 
