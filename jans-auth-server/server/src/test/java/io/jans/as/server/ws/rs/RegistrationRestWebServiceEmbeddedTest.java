@@ -9,7 +9,6 @@ package io.jans.as.server.ws.rs;
 import com.google.common.collect.Lists;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.ws.rs.ClientTestUtil;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -46,6 +45,7 @@ import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static io.jans.as.server.util.TestUtil.assert_;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -114,7 +114,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            assert_(registerResponse);
 
             registrationAccessToken1 = registerResponse.getRegistrationAccessToken();
             registrationClientUri1 = registerResponse.getRegistrationClientUri();
@@ -162,7 +162,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            assert_(registerResponse);
 
             JSONObject jsonObj = new JSONObject(entity);
 
