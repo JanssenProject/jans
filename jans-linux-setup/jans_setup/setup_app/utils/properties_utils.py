@@ -935,7 +935,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()
-            self.promptForEleven()
+            #self.promptForEleven()
             self.prompt_for_client_api()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()
