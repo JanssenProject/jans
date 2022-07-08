@@ -116,7 +116,7 @@ public class ClientsResource extends ConfigBaseResource {
             inum = inumService.generateClientInum();
             client.setClientId(inum);
         }
-        checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(client.getRedirectUris(), AttributeNames.REDIRECT_URIS);
         
         //scope validation
         checkScopeFormat(client);
@@ -148,7 +148,7 @@ public class ClientsResource extends ConfigBaseResource {
         }
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
-        checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(client.getRedirectUris(), AttributeNames.REDIRECT_URIS);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
         

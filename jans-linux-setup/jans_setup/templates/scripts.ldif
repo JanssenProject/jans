@@ -554,7 +554,7 @@ description: This script is a 2 in 1. It can be used to enable user to reset its
 displayName: Forgot_Password_2FA_Token
 inum: B270-381E
 jansConfProperty: {"value1":"SCRIPT_FUNCTION","value2":"forgot_password","description":""}
-jansEnabled: true
+jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"SCRIPT_FUNCTION","value2":"ldap","description":""}
 jansProgLng: python

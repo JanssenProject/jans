@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.1-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.0-1...docker-jans-auth-server-v1.0.1-1) (2022-07-06)
+
+
+### Features
+
+* add support for requestUriBlockList config ([#1572](https://github.com/JanssenProject/jans/issues/1572)) ([63b3b74](https://github.com/JanssenProject/jans/commit/63b3b7418861e8f4234c54a8d81fe5d21f56387f))
+* expose prometheus metrics via jmx exporter ([#1573](https://github.com/JanssenProject/jans/issues/1573)) ([205e320](https://github.com/JanssenProject/jans/commit/205e3206cf87bdb7cf0908bfdd7ee777d1ab955d))
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+
+
+### Bug Fixes
+
+* a workaround for fido2 dependency ([#1590](https://github.com/JanssenProject/jans/issues/1590)) ([527c928](https://github.com/JanssenProject/jans/commit/527c928d5769320a57d203d59175077e10c2d30a))
+* update external modules for otp/fido2 ([#1589](https://github.com/JanssenProject/jans/issues/1589)) ([fc42181](https://github.com/JanssenProject/jans/commit/fc4218110e5130878836a663aba72e67dcefcd10))
+
+
+### Miscellaneous Chores
+
+* prepare docker images release 1.0.1-1 ([12660a8](https://github.com/JanssenProject/jans/commit/12660a800bacb210bd3fb4b35c9156e9c5445343))
+
 ## 1.0.0-1 (2022-05-20)
 
 

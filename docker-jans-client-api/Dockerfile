@@ -44,8 +44,8 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # Client API
 # ==========
 
-ENV CN_VERSION=1.0.1-SNAPSHOT
-ENV CN_BUILD_DATE='2022-06-09 08:49'
+ENV CN_VERSION=1.0.2-SNAPSHOT
+ENV CN_BUILD_DATE='2022-07-06 12:54'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}.war
 
 COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
@@ -208,7 +208,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/client-api" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.1" \
+    version="1.0.2" \
     release="1" \
     summary="Janssen Client API" \
     description="Client software to secure apps with OAuth 2.0, OpenID Connect, and UMA"

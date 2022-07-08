@@ -17,6 +17,11 @@ from setup_app.static import AppType, InstallOption, SetupProfiles
 
 class JansAuthInstaller(JettyInstaller):
 
+    source_files = [
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
+                    ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-auth'
@@ -24,11 +29,6 @@ class JansAuthInstaller(JettyInstaller):
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installOxAuth'
         self.register_progess()
-
-        self.source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
-                    ]
 
         self.jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)

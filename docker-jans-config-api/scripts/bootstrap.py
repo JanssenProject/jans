@@ -88,6 +88,7 @@ def main():
     configure_logging()
 
     plugins = discover_plugins()
+    logger.info(f"Loaded config-api plugins: {', '.join(plugins)}")
     modify_config_api_xml(plugins)
 
     if "admin-ui" in plugins:

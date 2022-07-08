@@ -48,7 +48,7 @@ jobs:
          sudo add-apt-repository ppa:deadsnakes/ppa
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit
+         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -78,6 +78,8 @@ jobs:
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
          rm -rf install.py install jans-cli
+         rm -rf jans-src/opt/jans/jans-setup/logs/setup.log
+         rm -rf jans-src/opt/jans/jans-setup/logs/setup_error.log         
          sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
          cat run-build.sh
          sudo ./run-build.sh

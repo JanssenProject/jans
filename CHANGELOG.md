@@ -1,5 +1,92 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/v1.0.0...v1.0.1) (2022-07-06)
+
+
+### Features
+
+* add newly redesigned jans-client-api ([#1540](https://github.com/JanssenProject/jans/issues/1540)) ([4582ae5](https://github.com/JanssenProject/jans/commit/4582ae563ddf2492c519fdbc7685af2ce3c5529d))
+* add support for date ranges in statistic client [#1575](https://github.com/JanssenProject/jans/issues/1575) ([#1653](https://github.com/JanssenProject/jans/issues/1653)) ([8048cd9](https://github.com/JanssenProject/jans/commit/8048cd9b6ab393b8a3e4a1aaf36e09abe20f605b))
+* add support for requestUriBlockList config ([#1572](https://github.com/JanssenProject/jans/issues/1572)) ([63b3b74](https://github.com/JanssenProject/jans/commit/63b3b7418861e8f4234c54a8d81fe5d21f56387f))
+* **agama:** allow the config-api to perform syntax check of flows ([#1621](https://github.com/JanssenProject/jans/issues/1621)) ([2e99d3a](https://github.com/JanssenProject/jans/commit/2e99d3a9bec389f68086c606062280967ce338ce))
+* **agama:** improve flows timeout ([#1447](https://github.com/JanssenProject/jans/issues/1447)) ([ccfb62e](https://github.com/JanssenProject/jans/commit/ccfb62ec13d371c96a0d597d5a0229864f044373))
+* **agama:** reject usage of repeated input names ([#1484](https://github.com/JanssenProject/jans/issues/1484)) ([aed8cf3](https://github.com/JanssenProject/jans/commit/aed8cf33d89b98f0ac6aae52e145a84a0937d60e))
+* endpoint to get details of connected FIDO devices registered to users [#1465](https://github.com/JanssenProject/jans/issues/1465) ([#1466](https://github.com/JanssenProject/jans/issues/1466)) ([62522fe](https://github.com/JanssenProject/jans/commit/62522fe5aaa2971835c76e8e9b0d4280fee1db32))
+* enhance error handling [#1434](https://github.com/JanssenProject/jans/issues/1434) ([a3f6314](https://github.com/JanssenProject/jans/commit/a3f631421f125501f9c7cf0be207744860d856cc))
+* expose prometheus metrics via jmx exporter ([#1573](https://github.com/JanssenProject/jans/issues/1573)) ([205e320](https://github.com/JanssenProject/jans/commit/205e3206cf87bdb7cf0908bfdd7ee777d1ab955d))
+* fix the dependencies and code issues ([#1473](https://github.com/JanssenProject/jans/issues/1473)) ([f4824c6](https://github.com/JanssenProject/jans/commit/f4824c6c6c6a036c5d01b7a6710f51477a49a3fb))
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+* jans linux setup enable/disable script via arg ([#1634](https://github.com/JanssenProject/jans/issues/1634)) ([0b3cf16](https://github.com/JanssenProject/jans/commit/0b3cf16f524add8f27ca321ce2d82f6d61660456))
+* jans linux setup openbanking CLI and certificate automation ([#1472](https://github.com/JanssenProject/jans/issues/1472)) ([62b5868](https://github.com/JanssenProject/jans/commit/62b5868e1e864a000be210d250602d43a2719b51))
+* **jans-auth-server:** add support for ranges in statistic endpoint (UI team request) ([fd66720](https://github.com/JanssenProject/jans/commit/fd667203564951ba4fc450bf9fb77ba0e70a75ec))
+* **jans-auth-server:** added convenient method for up-scoping or down-scoping AT scopes [#1218](https://github.com/JanssenProject/jans/issues/1218) ([5d71655](https://github.com/JanssenProject/jans/commit/5d716553c6eb409c2f264864da8b65c0a0bcbe81))
+* **jans-auth-server:** added restriction for request_uri parameter (blocklist and allowed client.request_uri) [#1503](https://github.com/JanssenProject/jans/issues/1503) ([0696d92](https://github.com/JanssenProject/jans/commit/0696d92094eeb2ed36f6b0075680634acbf8992f))
+* **jans-auth-server:** added sid and authn_time for active sessions response ([bf9b572](https://github.com/JanssenProject/jans/commit/bf9b572b835d37cc23b2c57437a3830a8ebf55f0))
+* **jans-auth-server:** improve client assertion creation code (ClientAuthnRequest) [#1182](https://github.com/JanssenProject/jans/issues/1182) ([81946b2](https://github.com/JanssenProject/jans/commit/81946b22023e9eade94b9202adc6fb32b21652cf))
+* **jans-auth-server:** make check whether user is active case insensitive [#1550](https://github.com/JanssenProject/jans/issues/1550) ([d141837](https://github.com/JanssenProject/jans/commit/d14183708a04cdc6406167acc3126f253f212efa))
+* **jans-auth-server:** persist org_id from software statement into client's "o" attribute ([021d3bd](https://github.com/JanssenProject/jans/commit/021d3bd17f8a9814e5a0d59b4f28b0c19da88ced))
+* **jans-auth-server:** removed dcrSkipSignatureValidation configuration property [#1623](https://github.com/JanssenProject/jans/issues/1623) ([6550247](https://github.com/JanssenProject/jans/commit/6550247ca727d9437ffceec3fa12b9fef93b81e4))
+* jans-cli --no-suggestion for automated testing ([#1437](https://github.com/JanssenProject/jans/issues/1437)) ([187cc07](https://github.com/JanssenProject/jans/commit/187cc0742102e3d1a708c6b9fffce32d1ac1ebd2))
+* jans-cli tabulate scim user list ([#1518](https://github.com/JanssenProject/jans/issues/1518)) ([d370978](https://github.com/JanssenProject/jans/commit/d370978fcdad6e6a4027af1bb2610de3513653ba))
+* **jans-client-api:** migration to Weld/Resteasy and Jetty 11 - Issue 260 ([#1319](https://github.com/JanssenProject/jans/issues/1319)) ([420ffc3](https://github.com/JanssenProject/jans/commit/420ffc3329b91c52d5c9996d7c1e600d9b6fead2))
+* **jans-config-api:** agama configuration integration ([#1501](https://github.com/JanssenProject/jans/issues/1501)) ([e84575b](https://github.com/JanssenProject/jans/commit/e84575b018f1910860ca6fbf13f5418e8fa131f6))
+* **jans-config-api:** enhancement to expose user inum at root level of response ([#1477](https://github.com/JanssenProject/jans/issues/1477)) ([1e4b6bc](https://github.com/JanssenProject/jans/commit/1e4b6bc9955a0cd91d6dff000a860ca96b6bd822))
+* **jans-config-api:** fixed user management swagger spec for mandatory fields ([#1519](https://github.com/JanssenProject/jans/issues/1519)) ([29ff812](https://github.com/JanssenProject/jans/commit/29ff812c7d6cb94e98886ea7cab0ab08a44879dd))
+* **jans-config-api:** swagger spec change to expose user inum at root level of response ([#1483](https://github.com/JanssenProject/jans/issues/1483)) ([c202705](https://github.com/JanssenProject/jans/commit/c202705f2585c4f8f8c9259ad41b388e97f97573))
+* **jans-config-api:** user management endpoint 418 ([#1548](https://github.com/JanssenProject/jans/issues/1548)) ([b95fa7b](https://github.com/JanssenProject/jans/commit/b95fa7bcd56ef39f8478a9e879c493f815b29dd3))
+* **jans-core:** added Discovery.java script and sample external service ([440f2dd](https://github.com/JanssenProject/jans/commit/440f2dd41a0dafc915fd409b21da454f8cf1e046))
+* **jans-core:** added StandaloneJavaCustomScriptManagerTest ([48ba08b](https://github.com/JanssenProject/jans/commit/48ba08b2f336c2cef1f244d1411c71859fe337a4))
+* **jans-core:** added test dependencies to scripts ([53e5f67](https://github.com/JanssenProject/jans/commit/53e5f6725648521a983a86a533f62587b902f951))
+* jans-linux-setup add forgot password script ([#1587](https://github.com/JanssenProject/jans/issues/1587)) ([b2e3eb3](https://github.com/JanssenProject/jans/commit/b2e3eb3f07bfc877ee6aee9a3fdd187d7abbf52b))
+* jans-linux-setup agama ([#1486](https://github.com/JanssenProject/jans/issues/1486)) ([6b23bfe](https://github.com/JanssenProject/jans/commit/6b23bfe19ef960039f76df4de167c159312dd930))
+* proper plugin activation of config-api container ([#1627](https://github.com/JanssenProject/jans/issues/1627)) ([07cabb9](https://github.com/JanssenProject/jans/commit/07cabb9c310fb0b00afa419599b2e032c7cf1652))
+* update DSL to support shorthand for finish [#1628](https://github.com/JanssenProject/jans/issues/1628) ([71e4652](https://github.com/JanssenProject/jans/commit/71e46524492d48fccf2ed2840ede3d6ae525a3e3))
+
+
+### Bug Fixes
+
+* a workaround for fido2 dependency ([#1590](https://github.com/JanssenProject/jans/issues/1590)) ([527c928](https://github.com/JanssenProject/jans/commit/527c928d5769320a57d203d59175077e10c2d30a))
+* add path parameter to /fido2/registration/entries [#1465](https://github.com/JanssenProject/jans/issues/1465) ([#1508](https://github.com/JanssenProject/jans/issues/1508)) ([808d0c4](https://github.com/JanssenProject/jans/commit/808d0c4a9b2701c9238926141e22662b918e5990))
+* correct the link to image ([#1660](https://github.com/JanssenProject/jans/issues/1660)) ([0943d81](https://github.com/JanssenProject/jans/commit/0943d813f782a3babaa5166f426533fd561419a5))
+* fido2-plugin throwing error during deployment [#1632](https://github.com/JanssenProject/jans/issues/1632) ([#1633](https://github.com/JanssenProject/jans/issues/1633)) ([90d2c8a](https://github.com/JanssenProject/jans/commit/90d2c8ace819b784a293df698e316c13a8548fd1))
+* fix typos and other issues in jans-config-api swagger specs [#1665](https://github.com/JanssenProject/jans/issues/1665) ([#1668](https://github.com/JanssenProject/jans/issues/1668)) ([3c3a0f4](https://github.com/JanssenProject/jans/commit/3c3a0f47f6274c8b106bebabc38df927a4238ac3))
+* jans app and java version ([#1492](https://github.com/JanssenProject/jans/issues/1492)) ([1257e49](https://github.com/JanssenProject/jans/commit/1257e4923eee28e20018720c8815cd518c28bd2f))
+* Jans cli user userpassword ([#1542](https://github.com/JanssenProject/jans/issues/1542)) ([d2e13a2](https://github.com/JanssenProject/jans/commit/d2e13a2bcb16a14f63f3bd99c4b3dc83d2a96d9a))
+* **jans-auth-server:** added SessionRestWebService to rest initializer ([f0ebf67](https://github.com/JanssenProject/jans/commit/f0ebf67703d52d35c2788b1f528a9f7081dcab6a))
+* **jans-auth-server:** corrected npe in JwtAuthorizationRequest ([9c9e7bf](https://github.com/JanssenProject/jans/commit/9c9e7bf6442637e9f98e9b7765eb373714130d1d))
+* **jans-auth-server:** disable surefire for jans-auth-static ([7869efa](https://github.com/JanssenProject/jans/commit/7869efabd5bc4b32fd8bf8347093fa87ab774957))
+* **jans-auth-server:** fix missing jsonobject annotation ([#1651](https://github.com/JanssenProject/jans/issues/1651)) ([be5b82a](https://github.com/JanssenProject/jans/commit/be5b82a3ccbc7a0fe9f4ebbb97fa8054657227dc))
+* **jans-auth-server:** sql localizedstring persistence SqlEntryManager ([#1475](https://github.com/JanssenProject/jans/issues/1475)) ([b959b94](https://github.com/JanssenProject/jans/commit/b959b94e235c8bb554fcbdc8abbc22e3df540dbe))
+* jans-cli download yaml files for build ([#1635](https://github.com/JanssenProject/jans/issues/1635)) ([31b7e49](https://github.com/JanssenProject/jans/commit/31b7e49043d86c9b266590f6437146d625412f60))
+* jans-cli help message format and prompt values (ref: [#1352](https://github.com/JanssenProject/jans/issues/1352)) ([#1478](https://github.com/JanssenProject/jans/issues/1478)) ([37a9181](https://github.com/JanssenProject/jans/commit/37a91819bb7764d2dded27d6b5eafe25de083fe9))
+* jans-cli hide menu item ([#1510](https://github.com/JanssenProject/jans/issues/1510)) ([b70fc52](https://github.com/JanssenProject/jans/commit/b70fc52073a3110c767fbc239bb10cc7924838e8))
+* jans-cli user list failing for empty customAttributes ([#1525](https://github.com/JanssenProject/jans/issues/1525)) ([7cbf10b](https://github.com/JanssenProject/jans/commit/7cbf10b85187c554bf84bc0ceea6bfcf66cb0088))
+* jans-config-api add JAVA to programmingLanguage (ref: [#1656](https://github.com/JanssenProject/jans/issues/1656)) ([#1667](https://github.com/JanssenProject/jans/issues/1667)) ([a885a92](https://github.com/JanssenProject/jans/commit/a885a925cdd711158435fedd643f1dd67afad736))
+* **jans-config-api:** removed java_script from programmingLanguages ([8b935d8](https://github.com/JanssenProject/jans/commit/8b935d8249ab97f912993a07be0a093b89e52c8b))
+* **jans-config-api:** switch to 1.0.1-SNAPSHOT ([e8a9186](https://github.com/JanssenProject/jans/commit/e8a918647da488038ff593da875614b6d7c60cc2))
+* **jans-core:** switch to 1.0.1-SNAPSHOT ([dbe9355](https://github.com/JanssenProject/jans/commit/dbe9355d97618a267df1ab7aa5c0780e125a3420))
+* jans-linux-setup add gcs module path for downloading apps ([#1538](https://github.com/JanssenProject/jans/issues/1538)) ([e540738](https://github.com/JanssenProject/jans/commit/e540738e2d0e6816562b4c927c0ce4bfbaafea56))
+* jans-linux-setup add gcs path after packages check (ref: [#1514](https://github.com/JanssenProject/jans/issues/1514)) ([#1516](https://github.com/JanssenProject/jans/issues/1516)) ([31dd609](https://github.com/JanssenProject/jans/commit/31dd609ebe3fb36213cbbafa1db74c6fc50e01a2))
+* jans-linux-setup disable script Forgot_Password_2FA_Token ([#1662](https://github.com/JanssenProject/jans/issues/1662)) ([377affc](https://github.com/JanssenProject/jans/commit/377affc238bca236324dd8eeb9d9e6750879560f))
+* jans-linux-setup displayName of forgot-password script ([#1595](https://github.com/JanssenProject/jans/issues/1595)) ([07a5ea0](https://github.com/JanssenProject/jans/commit/07a5ea017c8d120b28e2bc578045160e4d3ff0ba))
+* jans-linux-setup download jans-auth for --download-exit ([#1659](https://github.com/JanssenProject/jans/issues/1659)) ([879ed87](https://github.com/JanssenProject/jans/commit/879ed87035265f6bb714ba6283fb274fcdb2fca4))
+* jans-linux-setup enable forgot-password script ([#1597](https://github.com/JanssenProject/jans/issues/1597)) ([149d19c](https://github.com/JanssenProject/jans/commit/149d19cc358b30c4cdd9d1383ace04d911402886))
+* jans-linux-setup multiple argument --import-ldif ([#1476](https://github.com/JanssenProject/jans/issues/1476)) ([5556f36](https://github.com/JanssenProject/jans/commit/5556f36073fab29f8d379fe763326c736f5186da))
+* jans-linux-setup python executable when launching setup ([#1683](https://github.com/JanssenProject/jans/issues/1683)) ([87ac58c](https://github.com/JanssenProject/jans/commit/87ac58ca72fdeaafc230183ebe0375537d1c24be))
+* jans-linux-setup remove temporary link file ([#1495](https://github.com/JanssenProject/jans/issues/1495)) ([673859a](https://github.com/JanssenProject/jans/commit/673859a864023e7f2a0ba4a7c36d6fa4a164faaa))
+* **jans-orm:** switch to 1.0.1-SNAPSHOT ([0030da7](https://github.com/JanssenProject/jans/commit/0030da76d16eedbdcfc74b72b99705a9fb63cb27))
+* main docker version ([1220e1c](https://github.com/JanssenProject/jans/commit/1220e1c892c4462b74039bcf64f0cd0cedb80d1f))
+* remove jans-auth-common dependency [#1459](https://github.com/JanssenProject/jans/issues/1459) ([75f4fb5](https://github.com/JanssenProject/jans/commit/75f4fb5487b8adc6300c939ea9a0a3302b235d0e))
+* update external modules for otp/fido2 ([#1589](https://github.com/JanssenProject/jans/issues/1589)) ([fc42181](https://github.com/JanssenProject/jans/commit/fc4218110e5130878836a663aba72e67dcefcd10))
+* update pom [#1438](https://github.com/JanssenProject/jans/issues/1438) ([#1439](https://github.com/JanssenProject/jans/issues/1439)) ([66b9962](https://github.com/JanssenProject/jans/commit/66b996286a2285986845677ea039f177f756d962))
+
+
+### Miscellaneous Chores
+
+* prepare docker images release 1.0.1-1 ([12660a8](https://github.com/JanssenProject/jans/commit/12660a800bacb210bd3fb4b35c9156e9c5445343))
+* prepare helm chart release 1.0.1 ([ae78b76](https://github.com/JanssenProject/jans/commit/ae78b760aa536ecde3b7e7972070e144d6c3c072))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-20)
 
 

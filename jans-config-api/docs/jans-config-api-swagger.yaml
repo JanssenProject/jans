@@ -1162,8 +1162,8 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
-          $ref: '#/components/responses/InternalServerError'	
-				
+          $ref: '#/components/responses/InternalServerError'
+
   /jans-config-api/api/v1/config/cache:
     get:
       summary: Returns cache configuration.
@@ -1892,8 +1892,8 @@ paths:
     post:
       tags:
         - OAuth - OpenID Connect - Clients
-      summary: Create new OpenId connect client
-      description: Create new OpenId connect client
+      summary: Create new OpenId Connect client
+      description: Create new OpenId Connect client
       operationId: post-oauth-openid-clients
       requestBody:
         content:
@@ -2462,7 +2462,7 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         '500':
           description: Internal Server Error
-		  
+  
   /jans-config-api/mgt/configuser:
     get:
       tags:
@@ -3461,7 +3461,7 @@ components:
           type: string
           enum:
             - PYTHON
-            - JAVA_SCRIPT
+            - JAVA
           description: Programming language of the custom script.
         moduleProperties:
           type: array
@@ -5048,10 +5048,7 @@ components:
       description: Client.
       type: object
       required:
-        - applicationType
-        - logout
-        - includeClaimsInIdToken
-        - displayName
+        - redirectUris
       properties:
         dn:
           type: string
@@ -6061,6 +6058,10 @@ components:
       properties:
         month:
           type: integer
+        start_month:
+          type: integer
+        end_month:
+          type: integer
         monthly_active_users:
           type: integer
           format: int64
@@ -6866,7 +6867,7 @@ components:
         inum:
           description: XRI i-number. Identifier to uniquely identify the user.
           type: string
-		  
+
     ExtendedCustomUser:
       allOf:     # Combines the CustomUser and the inline model
         - $ref: '#/components/schemas/CustomUser'
@@ -6946,4 +6947,4 @@ components:
           type: object
           additionalProperties:
             type: string
-		
+

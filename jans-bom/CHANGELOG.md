@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.0...jans-bom-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* **jans-client-api:** migration to Weld/Resteasy and Jetty 11 - Issue 260 ([#1319](https://github.com/JanssenProject/jans/issues/1319)) ([420ffc3](https://github.com/JanssenProject/jans/commit/420ffc3329b91c52d5c9996d7c1e600d9b6fead2))
+* **jans-core:** wip for java compiler ([e038ff3](https://github.com/JanssenProject/jans/commit/e038ff3b1ea0d6ec670940e140304bde65e93926))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([3df6f77](https://github.com/JanssenProject/jans/commit/3df6f7721a8e9d57e28d065ee29153d023dfe9ea))
+* release 1.0.0 ([9644d1b](https://github.com/JanssenProject/jans/commit/9644d1bd29c291e57c140b0c9ac67243c322ac35))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-19)
 
 

@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.0...jans-auth-server-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* add support for date ranges in statistic client [#1575](https://github.com/JanssenProject/jans/issues/1575) ([#1653](https://github.com/JanssenProject/jans/issues/1653)) ([8048cd9](https://github.com/JanssenProject/jans/commit/8048cd9b6ab393b8a3e4a1aaf36e09abe20f605b))
+* **agama:** improve flows timeout ([#1447](https://github.com/JanssenProject/jans/issues/1447)) ([ccfb62e](https://github.com/JanssenProject/jans/commit/ccfb62ec13d371c96a0d597d5a0229864f044373))
+* **jans-auth-server:** add support for ranges in statistic endpoint (UI team request) ([fd66720](https://github.com/JanssenProject/jans/commit/fd667203564951ba4fc450bf9fb77ba0e70a75ec))
+* **jans-auth-server:** added convenient method for up-scoping or down-scoping AT scopes [#1218](https://github.com/JanssenProject/jans/issues/1218) ([5d71655](https://github.com/JanssenProject/jans/commit/5d716553c6eb409c2f264864da8b65c0a0bcbe81))
+* **jans-auth-server:** added restriction for request_uri parameter (blocklist and allowed client.request_uri) [#1503](https://github.com/JanssenProject/jans/issues/1503) ([0696d92](https://github.com/JanssenProject/jans/commit/0696d92094eeb2ed36f6b0075680634acbf8992f))
+* **jans-auth-server:** added sid and authn_time for active sessions response ([bf9b572](https://github.com/JanssenProject/jans/commit/bf9b572b835d37cc23b2c57437a3830a8ebf55f0))
+* **jans-auth-server:** improve client assertion creation code (ClientAuthnRequest) [#1182](https://github.com/JanssenProject/jans/issues/1182) ([81946b2](https://github.com/JanssenProject/jans/commit/81946b22023e9eade94b9202adc6fb32b21652cf))
+* **jans-auth-server:** make check whether user is active case insensitive [#1550](https://github.com/JanssenProject/jans/issues/1550) ([d141837](https://github.com/JanssenProject/jans/commit/d14183708a04cdc6406167acc3126f253f212efa))
+* **jans-auth-server:** persist org_id from software statement into client's "o" attribute ([021d3bd](https://github.com/JanssenProject/jans/commit/021d3bd17f8a9814e5a0d59b4f28b0c19da88ced))
+* **jans-auth-server:** removed dcrSkipSignatureValidation configuration property [#1623](https://github.com/JanssenProject/jans/issues/1623) ([6550247](https://github.com/JanssenProject/jans/commit/6550247ca727d9437ffceec3fa12b9fef93b81e4))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** added SessionRestWebService to rest initializer ([f0ebf67](https://github.com/JanssenProject/jans/commit/f0ebf67703d52d35c2788b1f528a9f7081dcab6a))
+* **jans-auth-server:** corrected npe in JwtAuthorizationRequest ([9c9e7bf](https://github.com/JanssenProject/jans/commit/9c9e7bf6442637e9f98e9b7765eb373714130d1d))
+* **jans-auth-server:** disable surefire for jans-auth-static ([7869efa](https://github.com/JanssenProject/jans/commit/7869efabd5bc4b32fd8bf8347093fa87ab774957))
+* **jans-auth-server:** fix missing jsonobject annotation ([#1651](https://github.com/JanssenProject/jans/issues/1651)) ([be5b82a](https://github.com/JanssenProject/jans/commit/be5b82a3ccbc7a0fe9f4ebbb97fa8054657227dc))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([3df6f77](https://github.com/JanssenProject/jans/commit/3df6f7721a8e9d57e28d065ee29153d023dfe9ea))
+* release 1.0.0 ([9644d1b](https://github.com/JanssenProject/jans/commit/9644d1bd29c291e57c140b0c9ac67243c322ac35))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-19)
 
 
