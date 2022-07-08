@@ -9,7 +9,7 @@ package io.jans.as.server.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.server.util.TestUtil;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.register.ws.rs.RegisterRestWebService;
 import io.jans.as.server.util.ServerUtil;
@@ -43,7 +43,7 @@ public class TClientService {
         assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
-        ClientTestUtil.assert_(registerResponse);
+        TestUtil.assert_(registerResponse);
         return registerResponse;
     }
 }
