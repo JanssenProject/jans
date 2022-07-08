@@ -17,6 +17,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientMetadataService;
@@ -96,9 +97,9 @@ public class RegisterService {
             claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
             client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
         }
-        if (requestObject.getApplicationType() != null) {
-            client.setApplicationType(requestObject.getApplicationType());
-        }
+
+        client.setApplicationType(requestObject.getApplicationType() != null ? requestObject.getApplicationType() : ApplicationType.WEB);
+
         if (StringUtils.isNotBlank(requestObject.getSectorIdentifierUri())) {
             client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
