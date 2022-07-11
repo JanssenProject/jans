@@ -59,6 +59,8 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 1. **[jans-orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
 
+1. **[Agama](agama)**: Agama module offers an alternative way to build authentication flows in Janssen Server. With Agama, flows are coded in a DSL (domain specific language) designed for the sole purpose of writing web flows.
+
 ## Getting Started
 
 ### Installation
