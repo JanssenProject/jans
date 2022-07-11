@@ -151,14 +151,21 @@ In order to ensure consistency of style, language, format, and terminology acros
 
 This glossary helps to keep terms and their meanings consistent across documentation.
 
-`Janssen Project` or `Jans`: 
-Refers to the official project name under Linux Foundation that seeks to build the world’s fastest and most comprehensive cloud native identity and access management software platform
+- `Janssen Project` or `Jans`: 
 
-`Janssen Server`:
-Refers to a set of software components developed under the Janssen Project . Components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. The term `Janssen Server` is used to refer to these components as a group. 
+  Refers to the official project name under Linux Foundation that seeks to build the world’s fastest and most comprehensive cloud native identity and access management software platform
 
-`jans-auth-server`: 
-Refers to a module within the Janssen Server named `jans-auth-server`. This is one of the significant modules of the Janssen Server that has an implementation for OAuth and OpenId Connect. For correct naming of other modules of the Janssen Server, please refer to [README](https://github.com/JanssenProject/jans#janssen-modules)
+- `Janssen Server`:
+
+  Refers to a set of software components developed under the Janssen Project . Components of the Janssen Server include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. The term `Janssen Server` is used to refer to these components as a group. 
+
+- `jans-auth-server`: 
+
+  Refers to a module within the Janssen Server named `jans-auth-server`. This is one of the significant modules of the Janssen Server that has an implementation for OAuth and OpenId Connect. 
+
+- Janssen Server module names:
+
+  For correct naming of other modules of the Janssen Server, please refer to [README](https://github.com/JanssenProject/jans#janssen-modules)
 
 # Contribution Workflow
 
