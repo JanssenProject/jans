@@ -302,7 +302,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             log.trace("Override access token lifetime with value from script: {}", lifetimeFromScript);
         }
 
-        if (client.isAccessTokenAsJwt() && appConfiguration.getKeyRegenerationEnabled()) {
+        if (client != null && client.isAccessTokenAsJwt() && appConfiguration.getKeyRegenerationEnabled()) {
             int intervalInSeconds = appConfiguration.getKeyRegenerationInterval() * 3600;
             int timePassedInSeconds = (int) ((System.currentTimeMillis() - keyGeneratorTimer.getLastFinishedTime()) / 1000);
             final int recalculcatedLifetime = intervalInSeconds - timePassedInSeconds;
