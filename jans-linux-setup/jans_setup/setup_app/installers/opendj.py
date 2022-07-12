@@ -358,25 +358,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                     self.run(['rm', '-f', init_script_fn])
             else:
                 self.run([self.ldapDsCreateRcCommand, '--outputFile', '/etc/init.d/opendj', '--userName', Config.ldap_user])
-                # Make the generated script LSB compliant
-                lsb_str=(
-                        '### BEGIN INIT INFO\n'
-                        '# Provides:          opendj\n'
-                        '# Required-Start:    $remote_fs $syslog\n'
-                        '# Required-Stop:     $remote_fs $syslog\n'
-                        '# Default-Start:     2 3 4 5\n'
-                        '# Default-Stop:      0 1 6\n'
-                        '# Short-Description: Start daemon at boot time\n'
-                        '# Description:       Enable service provided by daemon.\n'
-                        '### END INIT INFO\n'
-                        )
-                self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
-
-                if base.os_type in ['ubuntu', 'debian']:
-                    self.run([paths.cmd_update_rc, "-f", "opendj", "remove"])
-
-                self.fix_init_scripts('opendj', init_script_fn)
-
             self.reload_daemon()
 
 

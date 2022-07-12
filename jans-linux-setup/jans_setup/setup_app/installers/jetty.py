@@ -223,8 +223,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error rendering service '%s' context xml" % service_name, True)
 
-        self.fix_init_scripts(service_name, self.jetty_bin_sh_fn)
-
         if not base.snap:
             tmpfiles_base = '/usr/lib/tmpfiles.d'
             if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
