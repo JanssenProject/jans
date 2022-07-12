@@ -35,7 +35,7 @@ The syntax of these files adhere to that of Java properties files. The suffixes 
 
 Agama engine will pick the messages from the bundle that best matches the language settings of the end-user browser. Normally, this is supplied through the HTTP header `Accept-Language`.
 
-A file with no suffix, i.e. `jans-auth.properties` is used as fallback when a message cannot be found in specific language/country combination.
+A file with no suffix, i.e. `jans-auth.properties` is used as fallback when a message cannot be found in specific language/country combination. To learn how to reference a message in a template, visit [this](./ui-pages.md#data-model) page.
 
 ### Is Javascript supported?
 
@@ -68,3 +68,15 @@ Yes. The maximum amount of time an end-user can take to fully complete a flow is
 ### Why are the contents of a list or map logged partially?
 
 This is to avoid traversing big structures fully. You can increase the value of `maxItemsLoggedInCollections` in the [engine configuration](./engine-config.md).
+
+## How to add two numbers or compare numeric values in Agama?
+
+Agama only provides operators for boolean comparison in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.
+
+## How to concatenate strings in Agama?
+
+See the previous answer.
+
+## How to know the index of a given loop iteration?
+
+See the examples in the Looping section of the DSL [full reference](./dsl-full.md#looping).
