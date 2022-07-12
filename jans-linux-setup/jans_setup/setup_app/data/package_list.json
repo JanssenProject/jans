@@ -24,6 +24,11 @@
     "mondatory": "apache2 apache2-mod_auth_openidc curl wget tar xz unzip rsyslog bzip2",
     "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography", "prompt_toolkit": "python3-prompt_toolkit"}
   },
+    "debian 11": {
+    "optional": "",
+    "mondatory": "apache2 curl wget tar xz-utils unzip rsyslog bzip2",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-cryptography", "distutils.util": "python3-distutils", "prompt_toolkit": "python3-prompt-toolkit"}
+  },
   "debian 10": {
     "optional": "",
     "mondatory": "apache2 curl wget tar xz-utils unzip rsyslog bzip2",

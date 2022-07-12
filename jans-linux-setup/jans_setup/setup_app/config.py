@@ -31,6 +31,7 @@ class Config:
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     node_home = '/opt/node'
+    unit_files_path = '/etc/systemd/system'
     output_dir = None
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     dist_app_dir = os.path.join(distFolder, 'app')
