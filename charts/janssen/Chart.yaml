@@ -28,7 +28,7 @@ annotations:
 apiVersion: v2
 
 icon: >-
-  https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+  https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
 home: https://jans.io
 sources:
   - https://jans.io
