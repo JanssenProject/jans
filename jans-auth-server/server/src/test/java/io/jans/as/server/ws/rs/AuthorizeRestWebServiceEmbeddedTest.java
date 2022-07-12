@@ -7,8 +7,6 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.client.ResponseAsserter;
-import io.jans.as.client.ws.rs.ClientTestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
@@ -16,7 +14,13 @@ import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
+import io.jans.as.server.util.ResponseAsserter;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.as.server.util.TestUtil;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;
@@ -24,24 +28,12 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for Authorize Web Services (embedded)
@@ -86,7 +78,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            TestUtil.assert_(registerResponse);
 
             clientId1 = registerResponse.getClientId();
         } catch (Exception e) {
