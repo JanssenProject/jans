@@ -69,6 +69,10 @@ public class KeyGeneratorTimer {
     private AtomicBoolean isActive;
     private long lastFinishedTime;
 
+    public long getLastFinishedTime() {
+        return lastFinishedTime;
+    }
+
     public void initTimer() {
         log.debug("Initializing Key Generator Timer");
         this.isActive = new AtomicBoolean(false);
