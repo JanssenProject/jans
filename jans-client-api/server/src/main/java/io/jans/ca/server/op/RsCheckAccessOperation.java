@@ -3,7 +3,10 @@ package io.jans.ca.server.op;
 import com.google.common.base.Strings;
 import io.jans.as.model.uma.JsonLogicNodeParser;
 import io.jans.as.model.uma.PermissionTicket;
-import io.jans.ca.common.*;
+import io.jans.ca.common.CoreUtils;
+import io.jans.ca.common.ErrorResponse;
+import io.jans.ca.common.ErrorResponseCode;
+import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.introspection.CorrectUmaPermission;
 import io.jans.ca.common.params.RsCheckAccessParams;
@@ -134,8 +137,13 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.RS_CHECK_ACCESS;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private List<String> getRequiredScopes(RsCheckAccessParams params, UmaResource resource) {

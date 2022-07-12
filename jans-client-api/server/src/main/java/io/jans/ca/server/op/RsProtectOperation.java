@@ -10,7 +10,6 @@ import io.jans.as.model.uma.JsonLogicNode;
 import io.jans.as.model.uma.JsonLogicNodeParser;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RsProtectParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -33,6 +32,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 @RequestScoped
 @Named
 public class RsProtectOperation extends BaseOperation<RsProtectParams> {
@@ -102,8 +103,13 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.RS_PROTECT;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private void persist(ResourceRegistrar registrar, Rp rp) throws IOException {

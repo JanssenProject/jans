@@ -4,7 +4,6 @@ import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.CheckIdTokenParams;
 import io.jans.ca.common.response.CheckIdTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
@@ -15,6 +14,7 @@ import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.PublicOpKeyService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,13 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.CHECK_ID_TOKEN;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

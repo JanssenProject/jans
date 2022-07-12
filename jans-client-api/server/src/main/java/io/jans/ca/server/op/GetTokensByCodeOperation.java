@@ -12,7 +12,9 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.ca.common.*;
+import io.jans.ca.common.ErrorResponseCode;
+import io.jans.ca.common.ExpiredObjectType;
+import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.GetTokensByCodeParams;
 import io.jans.ca.common.response.GetTokensByCodeResponse;
 import io.jans.ca.common.response.IOpResponse;
@@ -23,6 +25,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,8 +155,13 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_TOKENS_BY_CODE;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private void validate(GetTokensByCodeParams params) {

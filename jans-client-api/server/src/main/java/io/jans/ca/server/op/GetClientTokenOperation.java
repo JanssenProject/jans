@@ -8,7 +8,6 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetClientTokenParams;
 import io.jans.ca.common.response.GetClientTokenResponse;
@@ -21,6 +20,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,8 +101,13 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_CLIENT_TOKEN;
+    public boolean isAuthorizationRequired() {
+        return false;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private String scopeAsString(GetClientTokenParams params) throws UnsupportedEncodingException {

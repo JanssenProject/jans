@@ -2,7 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.GetLogoutUrlParams;
@@ -16,6 +15,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,8 +82,13 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_LOGOUT_URI;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private static String separator(String uri) {

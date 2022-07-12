@@ -1,6 +1,5 @@
 package io.jans.ca.server.op;
 
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.params.IntrospectRptParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -10,6 +9,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 
 @RequestScoped
 @Named
@@ -32,7 +32,13 @@ public class IntrospectRptOperation extends BaseOperation<IntrospectRptParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.INTROSPECT_RPT;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

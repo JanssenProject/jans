@@ -3,7 +3,6 @@ package io.jans.ca.server.op;
 import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.model.discovery.WebFingerParam;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetIssuerParams;
 import io.jans.ca.common.response.GetIssuerResponse;
@@ -12,6 +11,7 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.beanutils.BeanUtils;
 import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -84,7 +84,13 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.ISSUER_DISCOVERY;
+    public boolean isAuthorizationRequired() {
+        return false;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

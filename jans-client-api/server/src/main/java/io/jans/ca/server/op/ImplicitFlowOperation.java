@@ -10,13 +10,13 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.ImplicitFlowParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.ImplicitFlowResponse;
 import io.jans.ca.server.service.DiscoveryService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +108,13 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.IMPLICIT_FLOW;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

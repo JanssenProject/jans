@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.IntrospectAccessTokenParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
@@ -10,6 +9,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,13 @@ public class IntrospectAccessTokenOperation extends BaseOperation<IntrospectAcce
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.INTROSPECT_ACCESS_TOKEN;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

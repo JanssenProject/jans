@@ -6,7 +6,6 @@ package io.jans.ca.server.op;
 import io.jans.as.client.JwkClient;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetJwksParams;
 import io.jans.ca.common.response.GetJwksResponse;
@@ -18,6 +17,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 
 @RequestScoped
@@ -63,7 +63,13 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_JWKS;
+    public boolean isAuthorizationRequired() {
+        return false;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.GetAuthorizationUrlParams;
@@ -19,6 +18,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +117,13 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_AUTHORIZATION_URL;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

@@ -6,7 +6,6 @@ import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetRequestObjectUriParams;
 import io.jans.ca.common.response.GetRequestObjectUriResponse;
@@ -18,6 +17,7 @@ import io.jans.ca.server.service.KeyGeneratorService;
 import io.jans.ca.server.service.RequestObjectService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -136,7 +136,13 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_REQUEST_URI;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

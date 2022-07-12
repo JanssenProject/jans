@@ -179,7 +179,13 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.RS_MODIFY;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

@@ -11,7 +11,6 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.UpdateSiteParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -26,6 +25,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -65,8 +65,13 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.UPDATE_SITE;
+    public boolean isAuthorizationRequired() {
+        return false;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private void persistRp(Rp rp, UpdateSiteParams params) {

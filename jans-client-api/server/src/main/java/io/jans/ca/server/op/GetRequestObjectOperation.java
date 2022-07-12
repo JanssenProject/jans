@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.params.StringParam;
@@ -11,6 +10,7 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.RequestObjectService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,13 @@ public class GetRequestObjectOperation extends BaseOperation<StringParam> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_REQUEST_OBJECT_JWT;
+    public boolean isAuthorizationRequired() {
+        return false;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.TEXT_PLAIN;
+    }
+
 }

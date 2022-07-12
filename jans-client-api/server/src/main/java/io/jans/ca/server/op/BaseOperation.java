@@ -3,9 +3,10 @@
  */
 package io.jans.ca.server.op;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.HasRpIdParams;
@@ -55,16 +56,15 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         String endPointUrl = httpRequest.getRequestURL().toString();
         LOG.info("Endpoint: {}", endPointUrl);
         LOG.info("Request parameters: {}", paramsAsString);
-        LOG.info("CommandType: {}", getCommandType());
 
         validateIpAddressAllowed(httpRequest.getRemoteAddr());
 
         Object forJsonConversion = getObjectForJsonConversion(paramsAsString, getParameterClass(), httpRequest);
         String response = null;
 
-        if (getCommandType().getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
+        if (getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
             response = Jackson2.asJsonSilently(forJsonConversion);
-        } else if (getCommandType().getReturnType().equalsIgnoreCase(MediaType.TEXT_PLAIN)) {
+        } else if (getReturnType().equalsIgnoreCase(MediaType.TEXT_PLAIN)) {
             response = forJsonConversion.toString();
         }
 
@@ -75,16 +75,17 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     private <T extends IParams> Object getObjectForJsonConversion(String paramsAsString, Class<T> paramsClass, HttpServletRequest httpRequest) {
         LOG.trace("Command: {}", paramsAsString);
         T params = read(safeToJson(paramsAsString), paramsClass);
-        Command command = new Command(getCommandType(), params);
 
-        if (getCommandType().isAuthorizationRequired()) {
+        if (isAuthorizationRequired()) {
             final ApiAppConfiguration conf = jansConfigurationService.find();
             String authorization = httpRequest.getHeader("Authorization");
             String authorizationRpId = httpRequest.getHeader("AuthorizationRpId");
             validateAccessToken(authorization, safeToRpId((HasRpIdParams) params, authorizationRpId), conf);
         }
 
-        final IOpResponse response = internProcess(command, httpRequest);
+        JsonNode jsonNodeParams = JsonNodeFactory.instance.pojoNode(params);
+
+        final IOpResponse response = internProcess(jsonNodeParams, httpRequest);
         Object forJsonConversion = response;
         if (response instanceof POJOResponse) {
             forJsonConversion = ((POJOResponse) response).getNode();
@@ -92,16 +93,16 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return forJsonConversion;
     }
 
-    private IOpResponse internProcess(Command command, HttpServletRequest httpRequest) {
+    private IOpResponse internProcess(JsonNode jsonNodeParams, HttpServletRequest httpRequest) {
         try {
-            IParams iParams = Convertor.asParams(getParameterClass(), command);
+            IParams iParams = Convertor.asParams(getParameterClass(), jsonNodeParams);
             validationService.validate(iParams);
 
             IOpResponse operationResponse = execute((T) iParams, httpRequest);
             if (operationResponse != null) {
                 return operationResponse;
             } else {
-                LOG.error("No response from operation. Command: {}", getCommandType().getValue());
+                LOG.error("No response from operation. Endpoint: {}", httpRequest.getRequestURL().toString());
             }
         } catch (ClientErrorException e) {
             throw new WebApplicationException(e.getResponse().readEntity(String.class), e.getResponse().getStatus());

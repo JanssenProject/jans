@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
 import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetDiscoveryParams;
 import io.jans.ca.common.response.GetDiscoveryResponse;
@@ -12,6 +11,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +47,13 @@ public class GetDiscoveryOperation extends BaseOperation<GetDiscoveryParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_DISCOVERY;
+    public boolean isAuthorizationRequired() {
+        return false;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
 }

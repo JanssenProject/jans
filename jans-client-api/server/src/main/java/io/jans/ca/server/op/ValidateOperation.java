@@ -3,7 +3,6 @@ package io.jans.ca.server.op;
 import com.google.common.base.Strings;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.ValidateParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -17,6 +16,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 
 @RequestScoped
 @Named
@@ -31,7 +31,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
     @Inject
     OpClientFactoryImpl opClientFactory;
 
-   @Override
+    @Override
     public IOpResponse execute(ValidateParams params, HttpServletRequest httpServletRequest) throws Exception {
         validateParams(params);
 
@@ -62,8 +62,13 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.VALIDATE;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private void validateParams(ValidateParams params) {

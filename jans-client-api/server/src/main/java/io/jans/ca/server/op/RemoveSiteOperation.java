@@ -1,6 +1,5 @@
 package io.jans.ca.server.op;
 
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RemoveSiteParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -11,6 +10,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 
 @RequestScoped
 @Named
@@ -34,7 +34,13 @@ public class RemoveSiteOperation extends BaseOperation<RemoveSiteParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.REMOVE_SITE;
+    public boolean isAuthorizationRequired() {
+        return false;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

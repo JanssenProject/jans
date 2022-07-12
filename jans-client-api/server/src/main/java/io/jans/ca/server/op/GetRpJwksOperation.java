@@ -1,6 +1,5 @@
 package io.jans.ca.server.op;
 
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.GetJwksParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
@@ -10,6 +9,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 
 @RequestScoped
 @Named
@@ -35,7 +35,13 @@ public class GetRpJwksOperation extends BaseOperation<GetJwksParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_RP_JWKS;
+    public boolean isAuthorizationRequired() {
+        return false;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

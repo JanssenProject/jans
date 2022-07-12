@@ -5,13 +5,12 @@ package io.jans.ca.server.op;
 
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
-
+import io.jans.ca.server.service.UmaTokenService;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -21,8 +20,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
-import io.jans.ca.server.service.UmaTokenService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +52,13 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.RP_GET_RPT;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     public static IOpResponse handleRptError(int status, String entity) throws IOException {

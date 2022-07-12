@@ -15,7 +15,6 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RegisterSiteParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -28,6 +27,7 @@ import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.RpService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -96,8 +96,13 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.REGISTER_SITE;
+    public boolean isAuthorizationRequired() {
+        return false;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {

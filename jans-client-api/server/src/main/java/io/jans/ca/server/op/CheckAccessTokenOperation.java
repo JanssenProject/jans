@@ -11,13 +11,13 @@ import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.CheckAccessTokenParams;
 import io.jans.ca.common.response.CheckAccessTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.service.DiscoveryService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,8 +59,13 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.CHECK_ACCESS_TOKEN;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private boolean isAccessTokenValid(String p_accessToken, Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {

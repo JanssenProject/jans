@@ -6,7 +6,6 @@ import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.GetUserInfoParams;
@@ -19,6 +18,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,13 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_USER_INFO;
+    public boolean isAuthorizationRequired() {
+        return true;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

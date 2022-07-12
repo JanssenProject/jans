@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetAccessTokenByRefreshTokenParams;
 import io.jans.ca.common.response.GetClientTokenResponse;
@@ -18,6 +17,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,8 +71,13 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private String scopeAsString(GetAccessTokenByRefreshTokenParams params) throws UnsupportedEncodingException {

@@ -1,10 +1,5 @@
 package io.jans.ca.server.rest;
 
-import io.jans.ca.common.CommandType;
-import io.jans.ca.common.params.GetAuthorizationCodeParams;
-import io.jans.ca.common.params.GetAuthorizationUrlParams;
-import io.jans.ca.common.params.GetLogoutUrlParams;
-import io.jans.ca.common.params.GetTokensByCodeParams;
 import io.jans.ca.server.op.GetAuthorizationCodeOperation;
 import io.jans.ca.server.op.GetAuthorizationUrlOperation;
 import io.jans.ca.server.op.GetLogoutUrlOperation;

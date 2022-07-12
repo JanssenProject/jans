@@ -2,7 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.collect.Lists;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.RpGetClaimsGatheringUrlParams;
@@ -17,6 +16,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
@@ -71,8 +71,13 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.RP_GET_CLAIMS_GATHERING_URL;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private void validate(RpGetClaimsGatheringUrlParams params) {

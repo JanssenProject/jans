@@ -10,13 +10,13 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.AuthorizationCodeFlowParams;
 import io.jans.ca.common.response.AuthorizationCodeFlowResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.service.DiscoveryService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +53,13 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.AUTHORIZATION_CODE_FLOW;
+    public boolean isAuthorizationRequired() {
+        return true;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private AuthorizationCodeFlowResponse requestToken(OpenIdConfigurationResponse discovery, AuthorizationCodeFlowParams params) {

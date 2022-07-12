@@ -1,6 +1,5 @@
 package io.jans.ca.server.op;
 
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.GetRpParams;
 import io.jans.ca.common.response.GetRpResponse;
@@ -12,6 +11,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,13 @@ public class GetRpOperation extends BaseOperation<GetRpParams> {
     }
 
     @Override
-    public CommandType getCommandType() {
-        return CommandType.GET_RP;
+    public boolean isAuthorizationRequired() {
+        return false;
     }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }
