@@ -14,7 +14,10 @@ public class FlowStatus {
     private String templatePath;
     private long startedAt;
     private long finishBefore;
+    
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Object templateDataModel;
+
     private LinkedList<ParentFlowData> parentsData = new LinkedList<>();
     private String externalRedirectUrl;
     private boolean allowCallbackResume;
