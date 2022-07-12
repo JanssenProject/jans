@@ -996,3 +996,48 @@ x."1" = "golf"
 x[1]    //retrieves "golf"
 x[2] = "polo"    //adds the key/value pair "2" / "polo"
 ```
+
+## Language keywords
+
+The following is a list of reserved words and as such, cannot be used as variable names or maps keys (in literal notation).
+
+|Keyword|Purpose/usage|
+|-|-|
+|Basepath|header declaration|
+|Call|Java interaction|
+|Close|reserved for future use|
+|Configs|header declaration|
+|Finish|termination|
+|Flow|header declaration|
+|Inputs|header declaration|
+|Iterate over|loops|
+|Log|logging|
+|Match|conditionals|
+|Open for|reserved for future use|
+|Otherwise|conditionals|
+|Override templates|web interaction|
+|Quit|conditionals and loops|
+|Repeat|loops|
+|RFAC|web interaction|
+|RRF|web interaction|
+|seconds|header declaration|
+|Status checker|reserved for future use|
+|times max|loops|
+|to|conditionals|
+|Timeout|header declaration|
+|Trigger|subflow calls|
+|using|loops|
+|When|conditionals|
+
+|Operator|
+|-|
+|and|
+|is|
+|not|
+|or|
+
+|Special literals|
+|-|
+|true|
+|false|
+|null|
