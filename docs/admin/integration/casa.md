@@ -1,14 +1,17 @@
-**Casa** is a self service web portal that allows end users to view, enroll, and remove MFA credentials, including hardware tokens, software tokens, commercial services (like Duo), social login, biometric, and mobile.  Casa is also extensible. As new authentication technologies arise, you can download plugins to leverage them in your organization through Casa
+# Casa - Self-service MFA portal
+## Overview
 
-***
+**Casa** is a self-service web portal that allows end users to view, enroll, and remove MFA credentials, including hardware tokens, software tokens, commercial services (like Duo), social login, biometric, and mobile.  Casa is also extensible. As new authentication technologies arise, you can download plugins to leverage them in your organization through Casa
+
+## Prerequisites
+- Installed Janssen Server  
 
 ## Installing Casa
+Casa gets installed as an add-on to Janssen Server and integrates with `jans-auth-server` module as an OpenID connect Relying Party.
+Casa can be installed using command below.  
 
-Casa is an OpenID connect RP 
-<br/>Jans-auth server is the OpenID Provider.
-<br/>Currently, Casa installation is supported on CentOS 8 and Ubuntu 20.
+Currently, Casa installation is supported on CentOS 8 and Ubuntu 20.
 
-### Steps to deploy Casa 
 Assuming that you have already installed the Janssen server, the following steps will install Casa as an add-on. However, if that is not the case, the script will first install Janssen server and follow it with Casa.
 
 1. Download installer : `wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py`
