@@ -2384,9 +2384,19 @@ paths:
             type: string
           in: query
           name: month
-          description: Month for which the stat report is to be fetched.
+          description: Month for which the stat report is to be fetched. The parameter is mandatory if start_month and end_month parameters are not present.
           example:  202012 (2020 Dec) 202101 (2021 Jan))
           required: true
+        - schema:
+            type: string
+          in: query
+          name: start_month
+          description: Start-Month for which the stat report is to be fetched.
+        - schema:
+            type: string
+          in: query
+          name: end_month
+          description: End-Month for which the stat report is to be fetched.
         - schema:
             type: string
             enum:
@@ -6057,10 +6067,6 @@ components:
       description: Server statistics data
       properties:
         month:
-          type: integer
-        start_month:
-          type: integer
-        end_month:
           type: integer
         monthly_active_users:
           type: integer
