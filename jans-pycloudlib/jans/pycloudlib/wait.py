@@ -335,6 +335,12 @@ def wait_for_spanner(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
         raise WaitError("Spanner backend is not fully initialized")
 
 
+WaitCallback = _t.TypedDict("WaitCallback", {
+    "func": _t.Callable[..., None],
+    "kwargs": dict[str, _t.Any],
+})
+
+
 def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
     """Dispatch appropriate ``wait_for_*`` functions (if any).
 
@@ -365,11 +371,6 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
     :param deps: An iterable of dependencies to check.
     """
-    WaitCallback = _t.TypedDict("WaitCallback", {
-        "func": _t.Callable[..., None],
-        "kwargs": dict[str, _t.Any],
-    })
-
     callbacks: dict[str, WaitCallback] = {
         "config": {"func": wait_for_config, "kwargs": {"label": "Config"}},
         "config_conn": {

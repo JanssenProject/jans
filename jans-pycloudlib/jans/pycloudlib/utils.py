@@ -298,6 +298,10 @@ def decode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
     return unpadder.update(padded_data) + unpadder.finalize()
 
 
+#: Base directory where certs are located
+CERT_BASE_DIR = "/etc/certs"
+
+
 def generate_ssl_certkey(
     suffix: str,
     email: str,
@@ -306,7 +310,7 @@ def generate_ssl_certkey(
     country_code: str,
     state: str,
     city: str,
-    base_dir: str = "/etc/certs",
+    base_dir: str = CERT_BASE_DIR,
     extra_dns: _t.Union[list[str], None] = None,
     extra_ips: _t.Union[list[str], None] = None,
     valid_to: int = 365,
@@ -423,7 +427,7 @@ def generate_ssl_ca_certkey(
     country_code: str,
     state: str,
     city: str,
-    base_dir: str = "/etc/certs",
+    base_dir: str = CERT_BASE_DIR,
     valid_to: int = 365,
 ) -> tuple[str, str]:
     """Generate SSL public and private keys for CA.
@@ -466,7 +470,7 @@ def generate_signed_ssl_certkey(
     country_code: str,
     state: str,
     city: str,
-    base_dir: str = "/etc/certs",
+    base_dir: str = CERT_BASE_DIR,
     extra_dns: _t.Union[list[str], None] = None,
     extra_ips: _t.Union[list[str], None] = None,
     valid_to: int = 365,
