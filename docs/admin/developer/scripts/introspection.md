@@ -8,7 +8,7 @@ Introspection scripts allows to modify response of Introspection Endpoint [spec]
 
 ### Methods
 
-A definition of each method used in the script
+Introspection script should be associated with client (used for obtaining the token) in order to be run. Otherwise it's possible to set introspectionScriptBackwardCompatibility global AS configuration property to true, in this case AS will run all scripts (ignoring client configuration).
 
 ### Objects
 
