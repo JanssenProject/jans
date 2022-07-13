@@ -73,11 +73,6 @@ python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
 | 8BAF-80D7 | fido2 |
 | 92F0-BF9E | super_gluu |
 | 09A0-93D6 | twilio_sms |
-| 09A0-93D7 | smpp |
-| 5018-D4BF | otp |
-| 5018-F9CF | duo |
-| 8BAF-80D7 | fido2 |
-| 92F0-BF9E | super_gluu |
 
 4. Enable authentication mechanisms in casa : Goto `Administration console` -> `Enabled Authentication methods`. Now select all the authentication mechanisms that you wish to enable for user self service and `Save` your selections.
 
