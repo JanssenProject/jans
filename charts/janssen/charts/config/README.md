@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.0.1-dev](https://img.shields.io/badge/Version-1.0.1--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.1-dev](https://img.shields.io/badge/AppVersion-1.0.1--dev-informational?style=flat-square)
+![Version: 1.0.2-dev](https://img.shields.io/badge/Version-1.0.2--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.2-dev](https://img.shields.io/badge/AppVersion-1.0.2--dev-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -31,10 +31,8 @@ Kubernetes: `>=v1.21.0-0`
 | adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
 | city | string | `"Austin"` | City. Used for certificate creation. |
 | configmap.cnCacheType | string | `"NATIVE_PERSISTENCE"` | Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` . |
-| configmap.cnClientApiAdminCertCn | string | `"client-api"` | Client-api OAuth client admin certificate common name. This should be left to the default value client-api (deprecated). |
-| configmap.cnClientApiApplicationCertCn | string | `"client-api"` | Client-api OAuth client application certificate common name. This should be left to the default value client-api (deprecated in favor of `configmap.cnClientApiCertCn`). |
-| configmap.cnClientApiCertCn | string | `"client-api"` | Client-api OAuth certificate common name. This should be left to the default value client-api. |
 | configmap.cnClientApiBindIpAddresses | string | `"*"` | Client-api bind address. This limits what ip ranges can access the client-api. This should be left as * and controlled by a NetworkPolicy |
+| configmap.cnClientApiCertCn | string | `"client-api"` | Client-api OAuth certificate common name. This should be left to the default value client-api. |
 | configmap.cnConfigGoogleSecretNamePrefix | string | `"janssen"` | Prefix for Janssen configuration secret in Google Secret Manager. Defaults to janssen. If left intact janssen-configuration secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnConfigGoogleSecretVersionId | string | `"latest"` | Secret version to be used for configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnConfigKubernetesConfigMap | string | `"cn"` | The name of the Kubernetes ConfigMap that will hold the configuration layer |
