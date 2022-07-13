@@ -12,14 +12,25 @@ Casa can be installed using command below.
 
 Currently, Casa installation is supported on CentOS 8 and Ubuntu 20.
 
-Assuming that you have already installed the Janssen server, the following steps will install Casa as an add-on. However, if that is not the case, the script will first install Janssen server and follow it with Casa.
+The following steps will install Casa as an add-on. 
 
-1. Download installer : `wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py`
-2. Run the installer : `python3 flex_setup.py --flex-branch=flex-linux-setup-stand-alone`
+  - Download installer 
+  ```
+    wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py
+  ```
+  - Run the installer
+  ```
+    python3 flex_setup.py --flex-branch=flex-linux-setup-stand-alone
+  ```
+### Automate install
+
 <br/>If you have `setup.properties` file and want to automate installation, you can pass properties file as
-    `python3 flex_setup.py -f /path/to/setup.properties -n -c`
+    ```
+    python3 flex_setup.py -f /path/to/setup.properties -n -c
+    ```
 
     Minimal example setup.properties file:
+
     ```
     ip=10.146.197.201
     hostname=flex.gluu.org
@@ -37,10 +48,10 @@ Assuming that you have already installed the Janssen server, the following steps
 3. You will be prompted: 
 `Install Admin UI [Y/n]:`. Select `n`
 
-3. You will be prompted: 
+4. You will be prompted: 
 `Install Casa [Y/n]:`. Select `y`
 
-4. At the end of the installation you will be presented with a URL to access the Casa portal.
+5. At the end of the installation you will be presented with a URL to access the Casa portal.
 
 ### Uninstalling Casa
 Execute `python3 flex_setup.py -remove casa`
@@ -50,6 +61,7 @@ Execute `python3 flex_setup.py -remove casa`
 ## Quick configuration and Testing
 
 ### Administrator configuration:
+
 1. Goto `/opt/jans/jetty/casa` folder and execute `touch .administrable`. [Further reading]()
 2. [Enable authentication mechanisms](https://github.com/maduvena/jans-docs/wiki/Enabling-an-authentication-mechanism-(or-custom-script)) in Jan-auth server like `otp`, `fido2`, `email_otp`.
 ```
