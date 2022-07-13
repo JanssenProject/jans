@@ -38,7 +38,7 @@ class BaseInstaller:
         # copy unit file
         unit_file = os.path.join(Config.staticFolder, 'system/systemd', self.service_name + '.service')
         if os.path.exists(unit_file):
-            self.copyFile(unit_file, '/etc/systemd/system')
+            self.copyFile(unit_file, Config.unit_files_path)
 
         self.install()
         self.copy_static()
