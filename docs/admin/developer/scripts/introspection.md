@@ -2,7 +2,7 @@
 
 ## Overview
 
-Oliver was here
+Introspection scripts allows to modify response of Introspection Endpoint [spec](https://datatracker.ietf.org/doc/html/rfc7662).
 
 ## Interface
 
