@@ -1040,6 +1040,10 @@ paths:
             - '- ciba_end_user_notification'
             - '- persistence_extension'
             - '- idp'
+            - 'revoke_token'
+            - 'discovery'
+            - 'update_token'
+            - 'config_api_auth'
         name: type
         in: path
         description: Script type.
@@ -4846,10 +4850,12 @@ components:
               - USER
               - WHITEPAGES
         usageType:
-          type: object
+          type: array
           description: GluuAttributeUsageType
           items:
             type: string
+            enum:
+              - openid
         claimName:
           type: string
         seeAlso:
@@ -5010,49 +5016,102 @@ components:
       type: object
       properties:
         tlsClientAuthSubjectDn:
+          description: String representation of the expected subject distinguished name of the certificate, which the OAuth client will use in mutual TLS authentication.
           type: string
         runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-          description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
+          description: boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT.
           type: boolean
         keepClientAuthorizationAfterExpiration:
-          description: Keep Client Authorization After Expiration.
+          description: boolean property which indicates whether to keep client authorization after expiration.
           type: boolean
         allowSpontaneousScopes:
+          description: boolean, whether to allow spontaneous scopes for client.
           type: boolean
         spontaneousScopes:
+          description: List of spontaneous scope regular expression.
           type: array
           items:
             type: string
         spontaneousScopeScriptDns:
+          description: List of spontaneous scope scripts.
+          type: array
+          items:
+            type: string
+        updateTokenScriptDns:
+          description: List of update token scripts.
           type: array
           items:
             type: string
         backchannelLogoutUri:
+          description: List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
           type: array
           items:
             type: string
         backchannelLogoutSessionRequired:
+          description: Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in the Logout Token to identify the RP session with the OP when true. Default value is false.
           type: boolean
         additionalAudience:
+          description: List of additional client audience.
           type: array
           items:
             type: string
         postAuthnScripts:
+          description: List of post authentication scripts.
           type: array
           items:
             type: string
         consentGatheringScripts:
+          description: List of consent gathering scripts.
           type: array
           items:
             type: string
         introspectionScripts:
+          description: List of introspection scripts.
           type: array
           items:
             type: string
         rptClaimsScripts:
+          description: List of Requesting Party Token (RPT) claims scripts.
           type: array
           items:
             type: string
+        ropcScripts:
+          description: List of Resource Owner Password Credentials (ROPC) scripts.
+          type: array
+          items:
+            type: string
+        parLifetime:
+          description: represents the lifetime of Pushed Authorisation Request (PAR).
+          type: integer
+          format: int64
+        requirePar:
+          description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
+          type: boolean
+        authorizationSignedResponseAlg:
+          description: JWS alg algorithm JWA required for signing authorization responses.
+          type: string
+        authorizationEncryptedResponseAlg:
+          description: JWE alg algorithm JWA required for encrypting authorization responses.
+          type: string
+        authorizationEncryptedResponseEnc:
+          description: JWE enc algorithm JWA required for encrypting auhtorization responses.
+          type: string
+        publicSubjectIdentifierAttribute:
+          description: custom subject identifier attribute.
+          type: string
+        redirectUrisRegex:
+          description:  If set, redirectUri must match to this regexp
+          type: string
+        authorizedAcrValues:
+          description:  List of thentication Context Class Reference (ACR) that must exist.
+          type: array
+          items:
+            type: string
+        defaultPromptLogin:
+          description: sets prompt=login to the authorization request, which causes the authorization server to force the user to sign in again before it will show the authorization prompt.
+          type: boolean
+			
+			
     Client:
       title: Client object
       description: Client.
