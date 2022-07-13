@@ -130,3 +130,4 @@ class msg:
     exit_post_setup = "No service was selected to install. Exit now?"
 
     used_ports = "Port(s) {} should be free to continue. Please check."
+    setup_removal_warning = "Please remove the whole setup directory /opt/jans/jans-setup post-installation for a production deployment."
