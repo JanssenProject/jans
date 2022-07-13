@@ -5097,7 +5097,7 @@ components:
           description: JWE enc algorithm JWA required for encrypting auhtorization responses.
           type: string
         publicSubjectIdentifierAttribute:
-          description: property contains the unique user identifier.
+          description: custom subject identifier attribute.
           type: string
         redirectUrisRegex:
           description:  If set, redirectUri must match to this regexp
