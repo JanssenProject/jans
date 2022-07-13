@@ -76,18 +76,18 @@ jobs:
         echo "$DIRECTORIES_CHANGED"
 
     - uses: actions/setup-java@v3
+      if: contains(env.DIRECTORIES_CHANGED, matrix.fldrpath)
       with:
           java-version: '11'
           distribution: 'zulu'
 
     - name: Publish package
+      if: contains(env.DIRECTORIES_CHANGED, matrix.fldrpath)
       env:
            GITHUB_USERNAME: ${{ github.actor }}
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-          if [[ "${{ env.DIRECTORIES_CHANGED }}" =~ "${{ matrix.fldrpath }}" ]]; then
-            pwd
-            mvn clean install -DskipTests --file ${{ matrix.fldrpath }}
-            mvn -B package --file ${{ matrix.fldrpath }}/pom.xml -Dmaven.test.skip=true
-            mvn --file ${{ matrix.fldrpath }}/pom.xml deploy -Dmaven.test.skip=true
-          fi
+          pwd
+          mvn clean install -DskipTests --file ${{ matrix.fldrpath }}
+          mvn -B package --file ${{ matrix.fldrpath }}/pom.xml -Dmaven.test.skip=true
+          mvn --file ${{ matrix.fldrpath }}/pom.xml deploy -Dmaven.test.skip=true
