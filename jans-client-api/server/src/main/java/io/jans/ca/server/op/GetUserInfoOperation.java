@@ -84,11 +84,6 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

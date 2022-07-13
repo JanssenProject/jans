@@ -58,7 +58,7 @@ public class RsModifyTest extends BaseTest {
         params2.setScopes(Lists.newArrayList("http://photoz.example.com/dev/actions/see"));
 
         String strAuthorization = Tester.getAuthorization(client.getApitargetURL(), site);
-        RsModifyResponse response = client.umaRsModify(strAuthorization, null, params2);
+        RsModifyResponse response = client.umaRsModify(strAuthorization, params2.getRpId(), params2);
         assertNotNull(response.getRpId());
         return response;
     }
@@ -72,7 +72,7 @@ public class RsModifyTest extends BaseTest {
         params2.setScopeExpression(correctScopeExpression.replaceAll("'", "\""));
 
         String strAuthorization = Tester.getAuthorization(client.getApitargetURL(), site);
-        RsModifyResponse response = client.umaRsModify(strAuthorization, null, params2);
+        RsModifyResponse response = client.umaRsModify(strAuthorization, params2.getRpId(), params2);
         assertNotNull(response.getRpId());
         return response;
     }

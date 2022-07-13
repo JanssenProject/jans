@@ -117,11 +117,6 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

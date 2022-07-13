@@ -51,11 +51,6 @@ public class GetRpOperation extends BaseOperation<GetRpParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return false;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

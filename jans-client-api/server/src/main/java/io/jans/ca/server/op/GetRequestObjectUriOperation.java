@@ -136,11 +136,6 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

@@ -71,11 +71,6 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

@@ -84,11 +84,6 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return false;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

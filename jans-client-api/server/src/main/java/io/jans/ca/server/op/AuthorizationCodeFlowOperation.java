@@ -53,11 +53,6 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

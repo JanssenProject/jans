@@ -34,11 +34,6 @@ public class RemoveSiteOperation extends BaseOperation<RemoveSiteParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return false;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

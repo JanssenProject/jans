@@ -96,11 +96,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return false;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

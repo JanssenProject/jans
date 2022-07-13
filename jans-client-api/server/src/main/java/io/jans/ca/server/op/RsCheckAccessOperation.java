@@ -137,11 +137,6 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

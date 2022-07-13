@@ -70,7 +70,8 @@ public class ClientApiAuthorizationService extends AuthorizationService implemen
     private void validateAuthorizationRpId(ApiAppConfiguration conf, String authorizationRpId) {
 
         if (Util.isNullOrEmpty(authorizationRpId)) {
-            return;
+            LOG.debug("`AuthorizationRpId` header is null or Empty");
+            throw new HttpException(ErrorResponseCode.AUTHORIZATION_RP_ID_HEADER_NOT_FOUND);
         }
 
         final Rp rp = rpSyncService.getRp(authorizationRpId);
@@ -109,11 +110,7 @@ public class ClientApiAuthorizationService extends AuthorizationService implemen
             LOG.debug("No access token provided in Authorization header. Forbidden.");
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
-        if (!Util.isNullOrEmpty(authorizationRpId)) {
-            validationService.validateAccessToken(accessToken, authorizationRpId);
-        } else {
-            LOG.warn("No RpId provided in AuthorizationRpId header. Forbidden.");
-        }
+        validationService.validateAccessToken(accessToken, authorizationRpId);
     }
 
 }

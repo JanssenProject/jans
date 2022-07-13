@@ -46,11 +46,6 @@ public class GetRequestObjectOperation extends BaseOperation<StringParam> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return false;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.TEXT_PLAIN;
     }

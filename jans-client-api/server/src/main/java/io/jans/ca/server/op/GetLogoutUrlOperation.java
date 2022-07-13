@@ -82,11 +82,6 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

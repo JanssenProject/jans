@@ -37,7 +37,7 @@ public class IntrospectRptTest extends BaseTest {
         params.setRpId(site.getRpId());
         params.setRpt(rptResponse.getRpt());
 
-        final CorrectRptIntrospectionResponse response = client.introspectRpt(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final CorrectRptIntrospectionResponse response = client.introspectRpt(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
 
         assertNotNull(response);
         assertTrue(response.getActive());

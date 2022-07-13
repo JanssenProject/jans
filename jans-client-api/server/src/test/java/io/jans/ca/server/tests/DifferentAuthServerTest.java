@@ -27,7 +27,7 @@ import static io.jans.ca.server.TestUtils.notEmpty;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNotNull;
 
-//Set `protect_commands_with_access_token` field to true in client-api-server.yml file
+//Set `protect_commands_with_access_token` field to true in config register
 public class DifferentAuthServerTest extends BaseTest {
 
     @ArquillianResource

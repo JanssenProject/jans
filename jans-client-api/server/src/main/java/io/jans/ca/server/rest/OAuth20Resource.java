@@ -136,7 +136,6 @@ public class OAuth20Resource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi
     @Path("/get-issuer")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

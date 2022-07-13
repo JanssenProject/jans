@@ -18,7 +18,5 @@ public interface IOperation<T extends IParams> {
 
     Class<T> getParameterClass();
 
-    boolean isAuthorizationRequired();
-
     String getReturnType();
 }

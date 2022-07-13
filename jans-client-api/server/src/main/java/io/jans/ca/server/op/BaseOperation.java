@@ -75,14 +75,6 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     private <T extends IParams> Object getObjectForJsonConversion(String paramsAsString, Class<T> paramsClass, HttpServletRequest httpRequest) {
         LOG.trace("Command: {}", paramsAsString);
         T params = read(safeToJson(paramsAsString), paramsClass);
-
-        if (isAuthorizationRequired()) {
-            final ApiAppConfiguration conf = jansConfigurationService.find();
-            String authorization = httpRequest.getHeader("Authorization");
-            String authorizationRpId = httpRequest.getHeader("AuthorizationRpId");
-            validateAccessToken(authorization, safeToRpId((HasRpIdParams) params, authorizationRpId), conf);
-        }
-
         JsonNode jsonNodeParams = JsonNodeFactory.instance.pojoNode(params);
 
         final IOpResponse response = internProcess(jsonNodeParams, httpRequest);
@@ -135,33 +127,6 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         }
         throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_RP_ID);
     }
-
-    private String safeToRpId(HasRpIdParams params, String authorizationRpId) {
-        return Util.isNullOrEmpty(authorizationRpId) ? params.getRpId() : authorizationRpId;
-    }
-
-    private void validateAccessToken(String authorization, String authorizationRpId, ApiAppConfiguration conf) {
-        final String prefix = "Bearer ";
-
-        if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
-            LOG.debug("Skip protection because protect_commands_with_access_token: false in configuration.");
-            return;
-        }
-
-        if (Util.isNullOrEmpty(authorization)) {
-            LOG.debug("No access token provided in Authorization header. Forbidden.");
-            throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
-        }
-
-        String accessToken = authorization.substring(prefix.length());
-        if (Util.isNullOrEmpty(accessToken)) {
-            LOG.debug("No access token provided in Authorization header. Forbidden.");
-            throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
-        }
-
-        validationService.validateAccessToken(accessToken, authorizationRpId);
-    }
-
 
     private void validateIpAddressAllowed(String callerIpAddress) {
         LOG.trace("Checking if caller ipAddress : {} is allowed to make request to jans_client_api.", callerIpAddress);

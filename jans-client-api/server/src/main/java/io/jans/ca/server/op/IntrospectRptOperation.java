@@ -32,11 +32,6 @@ public class IntrospectRptOperation extends BaseOperation<IntrospectRptParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

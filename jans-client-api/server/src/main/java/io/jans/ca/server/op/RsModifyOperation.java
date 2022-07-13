@@ -179,11 +179,6 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }

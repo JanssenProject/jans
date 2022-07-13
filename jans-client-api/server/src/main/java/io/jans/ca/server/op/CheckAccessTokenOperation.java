@@ -59,11 +59,6 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
     }
 
     @Override
-    public boolean isAuthorizationRequired() {
-        return true;
-    }
-
-    @Override
     public String getReturnType() {
         return MediaType.APPLICATION_JSON;
     }
