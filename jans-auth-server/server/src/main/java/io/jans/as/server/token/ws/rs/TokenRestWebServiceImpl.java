@@ -12,11 +12,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ScopeConstants;
-import io.jans.as.model.common.TokenType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -29,34 +25,12 @@ import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.AbstractAuthorizationGrant;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCodeGrant;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.common.ClientCredentialsGrant;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.DeviceCodeGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.ResourceOwnerPasswordCredentialsGrant;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.JwrService;
-import io.jans.as.server.model.token.TokenParamsValidator;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AuthenticationFilterService;
-import io.jans.as.server.service.AuthenticationService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.GrantService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -67,13 +41,6 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -83,15 +50,21 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
 
-import static io.jans.as.model.config.Constants.OPENID;
-import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
-import static io.jans.as.model.config.Constants.X_CLIENTCERT;
+import static io.jans.as.model.config.Constants.*;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -156,6 +129,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private ExternalUpdateTokenService externalUpdateTokenService;
 
+    @Inject
+    private TokenRestWebServiceValidator tokenRestWebServiceValidator;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -185,20 +161,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
         ResponseBuilder builder = Response.ok();
 
-        String dpopStr;
-        try {
-            dpopStr = runDPoP(request);
-        } catch (InvalidJwtException | JWKException | NoSuchAlgorithmException | NoSuchProviderException e) {
-            return response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog);
-        }
+        String dpopStr = runDPoP(request, oAuth2AuditLog);
 
         try {
-            log.debug("Starting to validate request parameters");
-            if (!TokenParamsValidator.validateParams(grantType, code, redirectUri, username, password,
-                    scope, assertion, refreshToken)) {
-                log.trace("Failed to validate request parameters");
-                return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Failed to validate request parameters"), oAuth2AuditLog);
-            }
+            tokenRestWebServiceValidator.validateParams(grantType, code, redirectUri, refreshToken, oAuth2AuditLog);
 
             GrantType gt = GrantType.fromString(grantType);
             log.debug("Grant type: '{}'", gt);
@@ -233,7 +199,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setAttributeService(attributeService);
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                // todo refactor
+                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, null), oAuth2AuditLog);
                 }
 
@@ -299,7 +266,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             }
 
             if (gt == GrantType.REFRESH_TOKEN) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                // todo refactor
+                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type does not belong to client."), oAuth2AuditLog);
                 }
 
@@ -363,7 +331,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         idToken));
                 oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                // todo refactor
+                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                 }
 
@@ -397,7 +366,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         scope,
                         idToken));
             } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                // todo refactor
+                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                 }
 
@@ -413,23 +383,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
 
                 if (!authenticated) {
-                    if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
-                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
-                        context.setUser(user);
-                        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
-                            log.trace("RO PC - User is authenticated successfully by external script.");
-                            user = context.getUser();
-                        }
-                    } else {
-                        try {
-                            authenticated = authenticationService.authenticate(username, password);
-                            if (authenticated) {
-                                user = authenticationService.getAuthenticatedUser();
-                            }
-                        } catch (AuthenticationException ex) {
-                            log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
-                        }
-                    }
+                    user = authenticateUser(username, password, executionContext, user);
                 }
 
                 if (user != null) {
@@ -485,7 +439,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else if (gt == GrantType.CIBA) {
                 errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
 
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                // todo refactor
+                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
                 }
 
@@ -593,8 +548,30 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return response(builder, oAuth2AuditLog);
     }
 
+    private User authenticateUser(String username, String password, ExecutionContext executionContext, User user) {
+
+        if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
+            final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
+            context.setUser(user);
+            if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
+                log.trace("RO PC - User is authenticated successfully by external script.");
+                user = context.getUser();
+            }
+        } else {
+            try {
+                boolean authenticated = authenticationService.authenticate(username, password);
+                if (authenticated) {
+                    user = authenticationService.getAuthenticatedUser();
+                }
+            } catch (AuthenticationException ex) {
+                log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
+            }
+        }
+        return user;
+    }
+
     private void checkUser(AuthorizationGrant authorizationGrant) {
-        if (!appConfiguration.getCheckUserPresenceOnRefreshToken()) {
+        if (BooleanUtils.isFalse(appConfiguration.getCheckUserPresenceOnRefreshToken())) {
             return;
         }
 
@@ -642,7 +619,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private Response processDeviceCodeGrantType(final GrantType grantType, final Client client, final String deviceCode,
                                                 String scope, final HttpServletRequest request,
                                                 final HttpServletResponse response, final OAuth2AuditLog oAuth2AuditLog) {
-        if (!TokenParamsValidator.validateGrantType(grantType, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+        if (!TokenRestWebServiceValidator.validateGrantType(grantType, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
             return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
         }
 
@@ -767,19 +744,23 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
-    private String runDPoP(HttpServletRequest httpRequest) throws InvalidJwtException, JWKException, NoSuchAlgorithmException, NoSuchProviderException {
-        String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
-        if (StringUtils.isBlank(dpopStr)) return null;
+    private String runDPoP(HttpServletRequest httpRequest, OAuth2AuditLog oAuth2AuditLog) {
+        try {
+            String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
+            if (StringUtils.isBlank(dpopStr)) return null;
 
-        Jwt dpop = Jwt.parseOrThrow(dpopStr);
+            Jwt dpop = Jwt.parseOrThrow(dpopStr);
 
-        JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
-        String dpopJwkThumbprint = jwk.getJwkThumbprint();
+            JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
+            String dpopJwkThumbprint = jwk.getJwkThumbprint();
 
-        if (dpopJwkThumbprint == null)
-            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+            if (dpopJwkThumbprint == null)
+                throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
 
-        return dpopJwkThumbprint;
+            return dpopJwkThumbprint;
+        } catch (InvalidJwtException | JWKException | NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog));
+        }
     }
 
     /**
