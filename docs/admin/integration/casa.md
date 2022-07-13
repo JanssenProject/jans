@@ -11,7 +11,7 @@ Casa is an OpenID connect RP
 ### Steps to deploy Casa 
 Assuming that you have already installed the Janssen server, the following steps will install Casa as an add-on. However, if that is not the case, the script will first install Janssen server and follow it with Casa.
 
-1. Download installer : `wget https://raw.githubusercontent.com/GluuFederation/flex/flex-linux-setup-stand-alone/flex-linux-setup/flex_linux_setup/flex_setup.py -O flex_setup.py`
+1. Download installer : `wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py`
 2. Run the installer : `python3 flex_setup.py --flex-branch=flex-linux-setup-stand-alone`
 <br/>If you have `setup.properties` file and want to automate installation, you can pass properties file as
     `python3 flex_setup.py -f /path/to/setup.properties -n -c`

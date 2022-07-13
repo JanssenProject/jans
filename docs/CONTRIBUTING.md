@@ -15,6 +15,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
     - [Branches](#branches)
     - [PRs](#prs)
     - [Issues](#issues)
+    - [Contributing to the documentation](#contributing-to-the-documentation)
 - [Contribution Workflow](#contribution-workflow)
   - [Find Something To Work On](#find-something-to-work-on)
   - [Start a Discussion](#start-a-discussion)
@@ -22,6 +23,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
   - [Document](#document)
   - [Raise a PR](#raise-a-pr)
   - [Follow Through](#follow-through)
+  
 
 # Join the Community
 
@@ -139,6 +141,31 @@ Branch name should have component name as prefix, eg `jans-core-mybranch`
 
 ### Issues 
 - Issue titles should follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
+
+## Contributing to the documentation
+Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. 
+
+In order to ensure consistency of style, language, format, and terminology across all documents, please follow the guidelines below:
+
+### Glossary of terms
+
+This glossary helps to keep terms and their meanings consistent across documentation.
+
+- `Janssen Project` or `Jans`: 
+
+  Refers to the official project name under Linux Foundation that seeks to build the world’s fastest and most comprehensive cloud native identity and access management software platform
+
+- `Janssen Server`:
+
+  Refers to a set of software components developed under the Janssen Project . Components of the Janssen Server include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. The term `Janssen Server` is used to refer to these components as a group. 
+
+- `jans-auth-server`: 
+
+  Refers to a module within the Janssen Server named `jans-auth-server`. This is one of the significant modules of the Janssen Server that has an implementation for OAuth and OpenId Connect. 
+
+- Janssen Server module names:
+
+  For correct naming of other modules of the Janssen Server, please refer to [README](https://github.com/JanssenProject/jans#janssen-modules)
 
 # Contribution Workflow
 
