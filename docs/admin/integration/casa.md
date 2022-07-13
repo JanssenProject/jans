@@ -51,10 +51,8 @@ The following steps will install Casa as an add-on.
 4. You will be prompted: 
 `Install Casa [Y/n]:`. Select `y`
 
-5. At the end of the installation you will be presented with a URL to access the Casa portal.
-
-### Uninstalling Casa
-Execute `python3 flex_setup.py -remove casa`
+5. At the end of the installation you will be presented with a URL to access the Casa portal. 
+6. You can use this URL and log into the portal using administrator credentials that you created during the Janssen Server installation. 
 
 ***
 
@@ -81,7 +79,6 @@ python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
 | 8BAF-80D7 | fido2 |
 | 92F0-BF9E | super_gluu |
 
-3. Login to `https://your.jans.server/casa` using administrator credentials that you decided when you installed the Janssen server.
 4. Enable authentication mechanisms in casa : Goto `Administration console` -> `Enabled Authentication methods`. Now select all the authentication mechanisms that you wish to enable for user self service and `Save` your selections.
 
 ### User self-service
@@ -93,3 +90,6 @@ python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
 ```
 
 3. Login using username and password of the newly created user, and go ahead enrolling credentials for the user. 
+
+## Uninstalling Casa
+Execute `python3 flex_setup.py -remove casa`
