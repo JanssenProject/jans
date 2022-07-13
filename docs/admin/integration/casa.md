@@ -20,7 +20,7 @@ The following steps will install Casa as an add-on.
   ```
   - Run the installer
   ```
-    python3 flex_setup.py --flex-branch=flex-linux-setup-stand-alone
+    python3 flex_setup.py
   ```
 ### Automate install
 
