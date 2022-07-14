@@ -438,7 +438,6 @@ class JCA_CLI:
             self.access_token = None
 
 
-
     def check_access_token(self):
 
         if not self.access_token :
@@ -456,6 +455,15 @@ class JCA_CLI:
         except Exception as e:
             print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
             self.access_token = None
+
+
+    def validate_date_time(self, date_str):
+        try:
+            datetime.datetime.fromisoformat(date_str)
+            return True
+        except Exception as e:
+            self.log_response('invalid date-time format: %s'.format(str(e)))
+            return False
 
 
     def make_menu(self):
@@ -766,7 +774,7 @@ class JCA_CLI:
 
     def get_input(self, values=[], text='Selection', default=None, itype=None,
                   help_text=None, sitype=None, enforce='__true__',
-                  example=None, spacing=0
+                  example=None, spacing=0, iformat=None
                   ):
         if isinstance(default, str):
             default = html.escape(default)
@@ -853,6 +861,13 @@ class JCA_CLI:
                 if itype == 'array':
                     return []
                 return None
+
+            if selection and iformat:
+                if iformat == 'date-time' and not self.validate_date_time(selection):
+                    print(' ' * spacing,
+                              self.colored_text('Please enter date-time string, i.e. 2001-07-04T12:08:56.235', warning_color),
+                              sep='')
+                    continue
 
             if 'q' in values and selection == 'q':
                 print("Quiting...")
@@ -1266,12 +1281,12 @@ class JCA_CLI:
 
             
             if item['type'] == 'object' and 'properties' in item:
-                print("TO BE IMLEMENTED: Object Item")
-                
-                
-                #print()
-                #print("Data for object {}. {}".format(prop, item.get('description', '')))
 
+                print()
+                data_obj = {}
+                print("Data for object {}. {}".format(prop, item.get('description', '')))
+                result = self.get_input_for_schema_(item, data_obj)
+                data[prop] = result
                 #model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
                 #model_name = self.get_name_from_string(model_name_str)
 
@@ -1303,7 +1318,7 @@ class JCA_CLI:
                     sub_data_list.append(sub_data)
                     sub_data_list_selection = self.get_input(
                         text="Add another {}?".format(sub_data_list_title_text), values=['y', 'n'])
-                return {prop: sub_data_list}
+                data[prop] = sub_data_list
 
             else:
 
@@ -1330,9 +1345,11 @@ class JCA_CLI:
                     sitype=item.get('items', {}).get('type'),
                     enforce=enforce,
                     example=item.get('example'),
-                    spacing=spacing
+                    spacing=spacing,
+                    iformat=item.get('format')
                 )
 
+                print("assign", val, "to", prop)
                 data[prop] = val
 
         return data
@@ -1375,7 +1392,7 @@ class JCA_CLI:
                 if endpoint.info['operationId'] == 'create-user':
                     schema['required'] = ['userName', 'name', 'displayName', 'emails', 'password']
 
-            data = self.get_input_for_schema_(schema, required_only=True)
+            data = self.get_input_for_schema_(schema, data_dict, required_only=True)
 
             optional_fields = []
             required_fields = schema.get('required', []) + ['dn', 'inum']
@@ -1492,7 +1509,6 @@ class JCA_CLI:
     def process_patch(self, endpoint):
 
         schema = self.get_schema_for_endpoint(endpoint)
-        model = None
 
         if 'PatchOperation' in cfg_yml['components']['schemas']:
             schema = cfg_yml['components']['schemas']['PatchOperation'].copy()
@@ -1517,7 +1533,7 @@ class JCA_CLI:
         body = []
 
         while True:
-            data = self.get_input_for_schema_(schema, model)
+            data = self.get_input_for_schema_(schema)
             #guessed_val = self.guess_bool(data.value)
             #if not guessed_val is None:
             #    data.value = guessed_val
@@ -1532,6 +1548,10 @@ class JCA_CLI:
             if selection == 'n':
                 break
 
+        if endpoint.info['operationId'] == 'patch-oauth-uma-resources-by-id':
+            for patch_item in body:
+                if patch_item['path'] == '/clients':
+                    patch_item['value'] = patch_item['value'].split('_,')
 
         self.pretty_print(body)
 
@@ -1541,7 +1561,6 @@ class JCA_CLI:
 
             if my_op_mode == 'scim':
                 body = {'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'], 'Operations': body}
-
 
             self.patch_requests(endpoint, url_param_dict, body)
 
