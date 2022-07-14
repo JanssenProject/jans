@@ -488,6 +488,13 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
             self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
 
+            self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
+            for p in Path(Config.jansBaseFolder).rglob("*"):
+                if p.is_dir():
+                    self.run([paths.cmd_chmod, '750', p.as_posix()])
+                elif p.is_file():
+                    self.run([paths.cmd_chmod, '640', p.as_posix()])
+
             if not Config.installed_instance:
                 cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
                 self.restart(cron_service)

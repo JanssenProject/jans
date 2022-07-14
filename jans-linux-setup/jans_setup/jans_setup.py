@@ -480,6 +480,9 @@ def main():
             Config.hostname)
         print(msg_text)
         print('\n', static.colors.ENDC)
+        print(static.colors.DANGER)
+        print(msg.setup_removal_warning)
+        print(static.colors.ENDC, '\n')
         # we need this for progress write last line
         time.sleep(2)
 
