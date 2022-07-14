@@ -1,4 +1,4 @@
-# Application Session Script Guide
+# Person Authentication Guide
 
 ## Overview
 
