@@ -208,7 +208,22 @@ To run tests locally before pushing your code, refer to [TESTING] guide.
 
 ## Document
 
-PR should include changes in relevent documentation along with code changes.
+- PR should include changes in relevant documentation along with code changes.  PR is checked by bot to have either 
+of the following
+  - A commit that follows [commit guidelines](#commits) with `docs:` message 
+  - Changes in artifacts under `jans/docs`
+  
+- If PR does not need any documentation changes, then developer need to acknowledge that too in one of two ways:
+  - Add an empty commit to the PR (using `--allow-empty` git flag) with `docs:` message (i.e `docs: no doc changes required`)
+  - Add footer to the commit message of one of the code commits with `docs:` message e.g
+  ```
+  fix: typo on class name
+
+  More details here.
+
+  docs: no docs modification
+  ```
+    
 
 ## Raise a PR
 - Make sure that PR title follows these [guidelines](#prs)
