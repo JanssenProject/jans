@@ -1033,7 +1033,7 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |-|
 |and|
 |is|
-|not|
+|is not|
 |or|
 
 |Special literals|
