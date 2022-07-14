@@ -38,6 +38,7 @@
   "postLogoutRedirectUris": [
   ],
   "redirectUris": [
+  "http://localhost:8080"
   ],
   "scopes": [
   ],

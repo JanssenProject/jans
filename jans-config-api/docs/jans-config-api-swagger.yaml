@@ -1016,6 +1016,35 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.write]
+		
+  /jans-config-api/api/v1/config/scripts/name/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        description: Script name.
+        schema:
+          type: string
+    get:
+      summary: Fetch custom script by name.
+      description: Fetch custom script by name.
+      operationId: get-custom-script-by-name
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/scripts.readonly]
+
   /jans-config-api/api/v1/config/scripts/type/{type}:
     parameters:
       - schema:
@@ -4855,7 +4884,7 @@ components:
           items:
             type: string
             enum:
-              - openid
+              - OPENID
         claimName:
           type: string
         seeAlso:
@@ -6892,10 +6921,10 @@ components:
           type: string
           description: User status
           enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
+            - active
+            - inactive
+            - expired
+            - register
         userId:
           description: A domain issued and managed identifier for the user.
           type: string
