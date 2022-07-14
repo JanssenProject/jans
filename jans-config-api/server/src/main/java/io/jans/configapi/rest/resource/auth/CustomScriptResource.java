@@ -15,7 +15,6 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.service.custom.CustomScriptService;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 
@@ -40,9 +39,6 @@ public class CustomScriptResource extends ConfigBaseResource {
     private static final String PATH_SEPARATOR = "/";
 
     @Inject
-    Logger log;
-
-    @Inject
     CustomScriptService customScriptService;
 
     /***
@@ -55,8 +51,30 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getAllCustomScripts() {
         List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
-        log.debug("Custom Scripts:{}", customScripts);
+        logger.debug("Custom Scripts:{}", customScripts);
         return Response.ok(customScripts).build();
+    }
+    
+    /***
+     * Method to fetch a custom script based on name
+     * 
+     * @param name - name of custom script
+     * @throws NotAuthorizedException
+     */
+    @GET
+    @Path(PATH_SEPARATOR + ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
+    public Response getCustomScriptByName(@PathParam(ApiConstants.NAME) @NotNull String name) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Custom Script to be fetched based on type - name:{} ", escapeLog(name));
+        }
+        
+        CustomScript customScript = customScriptService.getScriptByDisplayName(name);
+        checkResourceNotNull(customScript, CUSTOM_SCRIPT);
+        
+        logger.debug("Custom Script Fetched based on name:{}, customScript:{}", name, customScript);
+        return Response.ok(customScript).build();
     }
 
     /***
@@ -72,9 +90,14 @@ public class CustomScriptResource extends ConfigBaseResource {
     public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Custom Script to be fetched based on type - type:{} , pattern:{}, limit:{} ", escapeLog(type), escapeLog(pattern), escapeLog(limit));
+        }
+        
         List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,
                 CustomScriptType.getByValue(type.toLowerCase()), limit);
-        log.debug("Custom Scripts fetched :{}", customScripts);
+        logger.debug("Custom Scripts fetched :{}", customScripts);
         if (customScripts != null && !customScripts.isEmpty())
             return Response.ok(customScripts).build();
         else
@@ -92,8 +115,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        if (log.isDebugEnabled()) {
-            log.debug("Custom Script to be fetched - inum:{} ", escapeLog(inum));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Custom Script to be fetched - inum:{} ", escapeLog(inum));
         }
         CustomScript script = null;
         try {
@@ -104,7 +127,7 @@ public class CustomScriptResource extends ConfigBaseResource {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
         }
-        log.debug("Custom Script fetched by inum :{}", script);
+        logger.debug("Custom Script fetched by inum :{}", script);
         return Response.ok(script).build();
     }
 
@@ -118,7 +141,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
     public Response createScript(@Valid CustomScript customScript) {
-        log.debug("Custom Script to create - customScript:{}", customScript);
+        logger.debug("Custom Script to create - customScript:{}", customScript);
         Objects.requireNonNull(customScript, "Attempt to create null custom script");
         String inum = customScript.getInum();
         if (StringHelper.isEmpty(inum)) {
@@ -127,7 +150,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         customScript.setDn(customScriptService.buildDn(inum));
         customScript.setInum(inum);
         customScriptService.add(customScript);
-        log.debug("Custom Script added {}", customScript);
+        logger.debug("Custom Script added {}", customScript);
         return Response.status(Response.Status.CREATED).entity(customScript).build();
     }
 
@@ -142,11 +165,11 @@ public class CustomScriptResource extends ConfigBaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
     public Response updateScript(@Valid @NotNull CustomScript customScript) {
-        log.debug("Custom Script to update - customScript:{}", customScript);
+        logger.debug("Custom Script to update - customScript:{}", customScript);
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
-        log.debug("Custom Script updated {}", customScript);
+        logger.debug("Custom Script updated {}", customScript);
         customScriptService.update(customScript);
         return Response.ok(customScript).build();
     }
@@ -163,14 +186,14 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS })
     public Response deleteScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Custom Script Resource to delete - inum:{}", escapeLog(inum));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Custom Script Resource to delete - inum:{}", escapeLog(inum));
             }
             CustomScript existingScript = customScriptService.getScriptByInum(inum);
             customScriptService.remove(existingScript);
             return Response.noContent().build();
         } catch (Exception ex) {
-            log.info("Error deleting script by inum " + inum, ex);
+            logger.info("Error deleting script by inum " + inum, ex);
             throw new NotFoundException(getNotFoundError(CUSTOM_SCRIPT));
         }
     }
@@ -193,8 +216,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Custom Script Resource to patch - inum:{} , pathString:{}", escapeLog(inum),
+        if (logger.isDebugEnabled()) {
+            logger.debug("Custom Script Resource to patch - inum:{} , pathString:{}", escapeLog(inum),
                     escapeLog(pathString));
         }
         
@@ -204,7 +227,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         customScriptService.update(existingScript);
         existingScript = customScriptService.getScriptByInum(inum);
 
-        log.debug(" Custom Script Resource after patch - existingScript:{}", existingScript);
+        logger.debug(" Custom Script Resource after patch - existingScript:{}", existingScript);
         return Response.ok(existingScript).build();
     }
 

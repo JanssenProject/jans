@@ -73,7 +73,7 @@ When method GET
 Then status 200
 And print response
 
-
+@ignore
 @CreateUpdateDelete
 Scenario: Create new OpenId Connect Client
 Given url mainUrl
@@ -105,7 +105,7 @@ When method GET
 Then status 404
 And print response
 
-
+@ignore
 Scenario: Patch openid connect client
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
