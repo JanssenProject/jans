@@ -56,10 +56,11 @@ The authentication interception script extends the base script type with methods
 
 ### Objects
 
-| First Header  | Second Header |
-| ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+Every deployment of the Gluu Server includes a number of pre-written authentication scripts out-of-the-box. Learn more in the [authentication guide.](https://gluu.org/docs/gluu-server/4.3/authn-guide/intro/)
+
+For a complete list of pre-written, open source authentication scripts, view our [server integrations.](https://github.com/GluuFederation/oxAuth/tree/master/Server/integrations)
+
+ - View a [sample Authentication Script.](https://gluu.org/docs/gluu-server/4.3/admin-guide/sample-authentication-script.py)
 
 ## Common Use Cases
 
