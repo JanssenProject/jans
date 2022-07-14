@@ -64,8 +64,4 @@ For a complete list of pre-written, open source authentication scripts, view our
 
 ## Common Use Cases
 
-
-[normal link](https://www.google.com/)
-
-<a href="https://www.google.com/" style="color: black; text-decoration: underline;text-decoration-style: dotted;">custom link</a>
-`rgb(9, 105, 218)` Descriptions of common use cases for this script, including a code snippet for each
+ Descriptions of common use cases for this script, including a code snippet for each
