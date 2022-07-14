@@ -208,12 +208,12 @@ To run tests locally before pushing your code, refer to [TESTING] guide.
 
 ## Document
 
-- PR should include changes in relevant documentation along with code changes.  PR is checked by bot to have either 
-of the following
+- PR should include changes in relevant documentation along with code changes.  PR is checked by bot to have either one 
+of the following :
   - A commit that follows [commit guidelines](#commits) with `docs:` message 
   - Changes in artifacts under `jans/docs`
   
-- If PR does not need any documentation changes, then developer need to acknowledge that too in one of two ways:
+- If PR does not need any documentation changes, then the developer needs to acknowledge that in one of two ways:
   - Add an empty commit to the PR (using `--allow-empty` git flag) with `docs:` message (i.e `docs: no doc changes required`)
   - Add footer to the commit message of one of the code commits with `docs:` message e.g
   ```
