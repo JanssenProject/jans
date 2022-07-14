@@ -1,7 +1,7 @@
 
 apiVersion: v1
 kind: ConfigMap
-metadata:
+metadata: 
   name: {{ .Release.Name }}-config-cm
   namespace: {{ .Release.Namespace }}
   labels:
@@ -17,6 +17,8 @@ metadata:
 data:
   # Jetty header size in bytes in the auth server
   CN_JETTY_REQUEST_HEADER_SIZE: {{ .Values.configmap.cnJettyRequestHeaderSize | quote }}
+  # Port used by Prometheus JMX agent
+  CN_PROMETHEUS_PORT: {{ .Values.global.cnPrometheusPort }}
   {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
   # [google_envs] Envs related to using Google
   GOOGLE_APPLICATION_CREDENTIALS: {{ .Values.global.cnGoogleApplicationCredentials | quote }}
@@ -139,8 +141,9 @@ data:
   {{- if or (eq .Values.global.cnPersistenceType "hybrid") (eq .Values.global.cnPersistenceType "ldap") }}
    # must the same as the opendj service name
   CN_CERT_ALT_NAME: {{ .Values.global.opendj.ldapServiceName }} #{{ template "cn.fullname" . }}-service
-  CN_PERSISTENCE_LDAP_MAPPING: {{ .Values.configmap.cnPersistenceHybridMapping | quote }}
+  CN_HYBRID_MAPPING: {{ .Values.configmap.cnPersistenceHybridMapping | quote }}
   {{- end }}
+  # Auto enable installation of some services
   # Auto enable installation of some services
   CN_CLIENT_API_CERT_CN: {{ .Values.configmap.cnClientApiCertCn | quote }}
   {{ if eq .Values.configmap.cnCacheType "REDIS" }}
