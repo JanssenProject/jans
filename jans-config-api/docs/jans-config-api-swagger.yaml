@@ -6892,10 +6892,10 @@ components:
           type: string
           description: User status
           enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
+            - active
+            - inactive
+            - expired
+            - register
         userId:
           description: A domain issued and managed identifier for the user.
           type: string
