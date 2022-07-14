@@ -12,10 +12,10 @@ Introspection script should be associated with client (used for obtaining the to
 
 The introspection interception script extends the base script type with the `init`, `destroy` and `getApiVersion` methods but also adds the following method(s):
 
-Method	`def modifyResponse(self, responseAsJsonObject, context)`
+|Method |`def modifyResponse(self, responseAsJsonObject, context)`|
+|:-----|:------|
+| Method Paramater| `responseAsJsonObject` is `org.codehaus.jettison.json.JSONObject`<br/> `context` is <br/> `org.gluu.oxauth.service.external.context.ExternalIntrospectionContext`|
 
-**Method Parameter**	`responseAsJsonObject` is `org.codehaus.jettison.json.JSONObject
-context` is `org.gluu.oxauth.service.external.context.ExternalIntrospectionContext`
 
 ### Snippet
 
