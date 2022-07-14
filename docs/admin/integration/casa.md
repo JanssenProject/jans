@@ -78,7 +78,7 @@ python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
 
 ### User self-service
 
-1. Download [this json file](https://raw.githubusercontent.com/maduvena/jans-docs/main/create-user.json). Edit `username` and `password` fields. Save it as `/tmp/create-user.json` 
+1. Download [this json file](https://github.com/JanssenProject/jans/blob/main/jans-scim/client/src/test/resources/single/user_minimal_web_login.json). Edit `username` and `password` fields. Save it as `/tmp/create-user.json` 
 2. Use `jans-cli` to create a user. 
 ```
 /opt/jans/jans-cli/scim-cli.py --operation-id create-user --data /tmp/create-user.json
