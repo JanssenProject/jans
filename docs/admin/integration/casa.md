@@ -70,12 +70,24 @@ python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
 | 92F0-BF9E | super_gluu |
 | 09A0-93D6 | twilio_sms |
 
+When successfully enabled, you should see confirmation message similar to the one below on console: 
+
+```
+Please wait while collecting properties...
+Enabling scripts 5018-D4BF
+```
+
 3. Login to the Casa portal as administrator 
-4. Enable authentication mechanisms in casa by navigating to `Administration console` -> `Enabled Authentication methods`. 
-5. Enable the authentication methods that you want to be available to users in the system and then click `Save` to persist your selections.
+4. Enable authentication methods by navigating to `Administration console` -> `Enabled Authentication methods`. 
+5. Activate the authentication methods that you want to be available to users in the system and then click `Save` to persist your selections.
+
+## Configuring authentication methods
 
 At this point, users can login to the Casa portal and enable/configure one or more authentication methods for their account.
 
+
+
 ## Uninstalling Casa
 Execute `python3 flex_setup.py -remove casa`
+
 
