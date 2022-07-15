@@ -78,7 +78,10 @@ Enabling scripts 5018-D4BF
 ```
 
 3. Login to the Casa portal as administrator 
-4. Enable authentication methods by navigating to `Administration console` -> `Enabled Authentication methods`. 
+4. Enable authentication methods by navigating to `Administration console` -> `Enabled Authentication methods`
+
+![](/home/dhaval/IdeaProjects/Janssen/jans/docs/assets/image-casa-enable-authn-method.png)
+
 5. Activate the authentication methods that you want to be available to users in the system and then click `Save` to persist your selections.
 
 ## Configuring authentication methods
