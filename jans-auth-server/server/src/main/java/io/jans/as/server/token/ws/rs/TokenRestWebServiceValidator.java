@@ -1,6 +1,7 @@
 package io.jans.as.server.token.ws.rs;
 
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,6 +35,8 @@ public class TokenRestWebServiceValidator {
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public void validateParams(String grantType, String code,
                                String redirectUri, String refreshToken, OAuth2AuditLog auditLog) {
@@ -73,10 +75,19 @@ public class TokenRestWebServiceValidator {
                 && clientSecret != null && !clientSecret.isEmpty();
     }
 
-    public static boolean validateGrantType(GrantType requestedGrantType, GrantType[] clientGrantTypesArray, Set<GrantType> grantTypesSupported) {
+    public void validateGrantType(GrantType requestedGrantType, GrantType[] clientGrantTypesArray, OAuth2AuditLog auditLog) {
         List<GrantType> clientGrantTypes = Arrays.asList(clientGrantTypesArray);
+        if (!clientGrantTypes.contains(requestedGrantType)) {
+            final String msg = "GrantType is not allowed by client's grantTypes.";
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), auditLog));
+        }
 
-        return clientGrantTypes.contains(requestedGrantType) && grantTypesSupported.contains(requestedGrantType);
+        if (!appConfiguration.getGrantTypesSupported().contains(requestedGrantType)) {
+            final String msg = "GrantType is not allowed by AS configuration";
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), auditLog));
+        }
     }
 
     private Response response(Response.ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
