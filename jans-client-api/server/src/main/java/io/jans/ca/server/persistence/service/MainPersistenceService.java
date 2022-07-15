@@ -104,28 +104,28 @@ public class MainPersistenceService implements PersistenceService {
             addOrganizationBranch(BASE_DN, null);
         }
         //create `ou=configuration,o=jans` if not present
-        if (!containsBranch(joinWithComa(ou(OU_CONFIGURATION), BASE_DN))) {
-            addBranch(joinWithComa(ou(OU_CONFIGURATION), BASE_DN), OU_CONFIGURATION);
+        if (!containsBranch(joinWithComma(ou(OU_CONFIGURATION), BASE_DN))) {
+            addBranch(joinWithComma(ou(OU_CONFIGURATION), BASE_DN), OU_CONFIGURATION);
         }
         //create `ou=client-api,ou=configuration,o=jans` if not present
-        if (!containsBranch(joinWithComa(ou(OU_JANS_CLIENT_API), ou(OU_CONFIGURATION), BASE_DN))) {
-            addBranch(joinWithComa(ou(OU_JANS_CLIENT_API), ou(OU_CONFIGURATION), BASE_DN), OU_JANS_CLIENT_API);
+        if (!containsBranch(joinWithComma(ou(OU_JANS_CLIENT_API), ou(OU_CONFIGURATION), BASE_DN))) {
+            addBranch(joinWithComma(ou(OU_JANS_CLIENT_API), ou(OU_CONFIGURATION), BASE_DN), OU_JANS_CLIENT_API);
         }
         //create `ou=client-api,o=jans` if not present
         if (!containsBranch(getClientApiDn())) {
             addBranch(getClientApiDn(), "client-api");
         }
         //create `ou=rp,ou=client-api,o=jans` if not present
-        if (!containsBranch(joinWithComa(getRpOu(), getClientApiDn()))) {
-            addBranch(joinWithComa(getRpOu(), getClientApiDn()), "rp");
+        if (!containsBranch(joinWithComma(getRpOu(), getClientApiDn()))) {
+            addBranch(joinWithComma(getRpOu(), getClientApiDn()), "rp");
         }
         //create `ou=expiredObjects,ou=client-api,o=jans` if not present
-        if (!containsBranch(joinWithComa(getExpiredObjOu(), getClientApiDn()))) {
-            addBranch(joinWithComa(getExpiredObjOu(), getClientApiDn()), "expiredObjects");
+        if (!containsBranch(joinWithComma(getExpiredObjOu(), getClientApiDn()))) {
+            addBranch(joinWithComma(getExpiredObjOu(), getClientApiDn()), "expiredObjects");
         }
     }
 
-    private String joinWithComa(String... words) {
+    private String joinWithComma(String... words) {
         StringBuilder stringBuilder = new StringBuilder();
         String coma = "";
         for (String word : words) {
@@ -244,7 +244,7 @@ public class MainPersistenceService implements PersistenceService {
 
     public boolean removeAllRps() {
         try {
-            this.persistenceManager.remove(joinWithComa(getRpOu(), getClientApiDn()), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceManager.remove(joinWithComma(getRpOu(), getClientApiDn()), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
             logger.debug("Removed all Rps successfully. ");
             return true;
         } catch (Exception e) {
@@ -256,7 +256,7 @@ public class MainPersistenceService implements PersistenceService {
     public Set<Rp> getRps() {
         Set<Rp> result = new HashSet<>();
         try {
-            List<RpObject> rpObjects = this.persistenceManager.findEntries(joinWithComa(getRpOu(), getClientApiDn()), RpObject.class, null);
+            List<RpObject> rpObjects = this.persistenceManager.findEntries(joinWithComma(getRpOu(), getClientApiDn()), RpObject.class, null);
             for (RpObject ele : rpObjects) {
                 Rp rp = MigrationService.parseRp(ele.getData());
                 if (rp != null) {
@@ -309,7 +309,7 @@ public class MainPersistenceService implements PersistenceService {
             final Date currentTime = cal.getTime();
             Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp", this.persistenceManager.encodeTime(BASE_DN, currentTime));
 
-            this.persistenceManager.remove(joinWithComa(getExpiredObjOu(), getClientApiDn()), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceManager.remove(joinWithComma(getExpiredObjOu(), getClientApiDn()), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
             logger.debug("Removed all expired_objects successfully. ");
             return true;
         } catch (Exception e) {
@@ -319,11 +319,11 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     public String getDnForRp(String rpId) {
-        return "jansId=" + joinWithComa(rpId, getRpOu(), getClientApiDn());
+        return "jansId=" + joinWithComma(rpId, getRpOu(), getClientApiDn());
     }
 
     public String getDnForExpiredObj(String rpId) {
-        return "rpId=" + joinWithComa(rpId, getExpiredObjOu(), getClientApiDn());
+        return "rpId=" + joinWithComma(rpId, getExpiredObjOu(), getClientApiDn());
     }
 
     public String ou(String ouName) {
@@ -331,7 +331,7 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     private String getClientApiDn() {
-        return joinWithComa(ou("client-api"), BASE_DN);
+        return joinWithComma(ou("client-api"), BASE_DN);
     }
 
     private String getRpOu() {
