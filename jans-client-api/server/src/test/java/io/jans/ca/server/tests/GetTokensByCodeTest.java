@@ -171,7 +171,7 @@ public class GetTokensByCodeTest extends BaseTest {
         refreshParams.setScope(Lists.newArrayList("openid", "jans_client_api"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
 
-        GetClientTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(Tester.getAuthorization(client.getApitargetURL(), site), null, refreshParams);
+        GetClientTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(Tester.getAuthorization(client.getApitargetURL(), site), refreshParams.getRpId(), refreshParams);
 
         assertNotNull(refreshResponse);
         notEmpty(refreshResponse.getAccessToken());
@@ -222,7 +222,7 @@ public class GetTokensByCodeTest extends BaseTest {
 
         GetTokensByCodeResponse2 resp = null;
 
-        resp = client.getTokenByCode(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        resp = client.getTokenByCode(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
         assertNotNull(resp);
         assertEquals(resp.getError(), "bad_request");
         assertEquals(resp.getErrorDescription(), "'state' is not registered.");
@@ -231,7 +231,7 @@ public class GetTokensByCodeTest extends BaseTest {
     }
 
     public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
-        return codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
+        return codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, null, site.getRpId());
     }
 
     public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, String accessToken, String authorizationRpId) {

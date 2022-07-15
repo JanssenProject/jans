@@ -6,7 +6,6 @@ import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetRequestObjectUriParams;
 import io.jans.ca.common.response.GetRequestObjectUriResponse;
@@ -14,7 +13,11 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
-import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.KeyGeneratorService;
+import io.jans.ca.server.service.RequestObjectService;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -30,15 +33,16 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
 
     private static final Logger LOG = LoggerFactory.getLogger(GetRequestObjectUriOperation.class);
 
-    public GetRequestObjectUriOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetRequestObjectUriParams.class);
-    }
+    @Inject
+    KeyGeneratorService keyGeneratorService;
+    @Inject
+    RequestObjectService requestObjectService;
 
-    public IOpResponse execute(GetRequestObjectUriParams params) {
+    public IOpResponse execute(GetRequestObjectUriParams params, HttpServletRequest httpServletRequest) {
 
         try {
             validate(params);
-            final Rp rp = getRp();
+            final Rp rp = getRp(params);
 
             SignatureAlgorithm algo = SignatureAlgorithm.fromString(params.getRequestObjectSigningAlg()) != null ? SignatureAlgorithm.fromString(params.getRequestObjectSigningAlg()) :
                     SignatureAlgorithm.fromString(rp.getRequestObjectSigningAlg());
@@ -51,11 +55,11 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
             Jwt unsignedJwt = createRequestObject(algo, rp, params);
 
             //signing request object
-            Jwt signedJwt = getKeyGeneratorService().sign(unsignedJwt, rp.getClientSecret(), algo);
+            Jwt signedJwt = keyGeneratorService.sign(unsignedJwt, rp.getClientSecret(), algo);
 
             //setting request object in Expired Object
             String requestUriId = UUID.randomUUID().toString();
-            getRequestObjectService().put(requestUriId, signedJwt.toString());
+            requestObjectService.put(requestUriId, signedJwt.toString());
 
             String requestUri = baseRequestUri(params.getRpHostUrl()) + requestUriId;
             LOG.trace("RequestObject created successfully. request_uri : {} ", requestUri);
@@ -78,7 +82,7 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
         jwt.getHeader().setType(JwtType.JWT);
         try {
             jwt.getHeader().setAlgorithm(algo);
-            String keyId = getKeyGeneratorService().getKeyId(Algorithm.fromString(algo.getName()), Use.SIGNATURE);
+            String keyId = keyGeneratorService.getKeyId(Algorithm.fromString(algo.getName()), Use.SIGNATURE);
             if (keyId != null) {
                 jwt.getHeader().setKeyId(keyId);
             }
@@ -125,4 +129,15 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
         }
         return rpHost + "/get-request-object/";
     }
+
+    @Override
+    public Class<GetRequestObjectUriParams> getParameterClass() {
+        return GetRequestObjectUriParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

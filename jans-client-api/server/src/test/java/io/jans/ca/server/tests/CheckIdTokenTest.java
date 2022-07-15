@@ -46,7 +46,7 @@ public class CheckIdTokenTest extends BaseTest {
         params.setNonce(nonce);
 
         String strAuthorization = Tester.getAuthorization(hostTargetURL, site);
-        final CheckIdTokenResponse checkR = client.checkIdToken(strAuthorization, null, params);
+        final CheckIdTokenResponse checkR = client.checkIdToken(strAuthorization, params.getRpId(), params);
         assertNotNull(checkR);
         assertTrue(checkR.isActive());
         assertNotNull(checkR.getExpiresAt());

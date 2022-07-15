@@ -2,7 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.collect.Lists;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.RpGetClaimsGatheringUrlParams;
@@ -12,36 +11,33 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 17/06/2016
- */
-
+@RequestScoped
+@Named
 public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClaimsGatheringUrlParams> {
 
-    private DiscoveryService discoveryService;
-    private StateService stateService;
-
-    public RpGetGetClaimsGatheringUrlOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, RpGetClaimsGatheringUrlParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.stateService = serviceProvider.getStateService();
-    }
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    StateService stateService;
 
     @Override
-    public IOpResponse execute(RpGetClaimsGatheringUrlParams params) throws Exception {
+    public IOpResponse execute(RpGetClaimsGatheringUrlParams params, HttpServletRequest httpServletRequest) throws Exception {
         validate(params);
 
         final UmaMetadata metadata = discoveryService.getUmaDiscoveryByRpId(params.getRpId());
-        final Rp rp = getRp();
+        final Rp rp = getRp(params);
         final String state = StringUtils.isNotBlank(params.getState()) ? stateService.putState(stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : stateService.generateState();
 
         String url = metadata.getClaimsInteractionEndpoint() +
@@ -67,6 +63,16 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
         r.setUrl(url);
         r.setState(state);
         return r;
+    }
+
+    @Override
+    public Class<RpGetClaimsGatheringUrlParams> getParameterClass() {
+        return RpGetClaimsGatheringUrlParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private void validate(RpGetClaimsGatheringUrlParams params) {

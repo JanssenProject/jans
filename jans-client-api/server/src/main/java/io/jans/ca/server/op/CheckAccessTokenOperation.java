@@ -11,12 +11,13 @@ import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.params.CheckAccessTokenParams;
 import io.jans.ca.common.response.CheckAccessTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +32,11 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckAccessTokenOperation.class);
 
-    private DiscoveryService discoveryService;
-
-    public CheckAccessTokenOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, CheckAccessTokenParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-    }
+    @Inject
+    DiscoveryService discoveryService;
 
     @Override
-    public IOpResponse execute(CheckAccessTokenParams params) throws Exception {
+    public IOpResponse execute(CheckAccessTokenParams params, HttpServletRequest httpServletRequest) throws Exception {
         final OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId());
         final String idToken = params.getIdToken();
         final String accessToken = params.getAccessToken();
@@ -54,6 +51,16 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
         opResponse.setIssuedAt(issuedAt);
         opResponse.setExpiresAt(expiresAt);
         return opResponse;
+    }
+
+    @Override
+    public Class<CheckAccessTokenParams> getParameterClass() {
+        return CheckAccessTokenParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private boolean isAccessTokenValid(String p_accessToken, Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {
