@@ -143,7 +143,7 @@ public class AppInitializer {
                 logger.info("Read backend properties: {}", backendProperties);
                 i++;
                 entryManager = factory.createEntryManager(backendProperties);
-                logger.info("Trató de leer: {}", entryManager);
+                logger.info("PersistenceEntryManager read: {}", entryManager);
             } catch (Exception e) {
                 logger.warn("Unable to create persistence entry manager, retrying in {} seconds", RETRY_INTERVAL);
                 Thread.sleep(RETRY_INTERVAL * 1000L);
@@ -199,16 +199,13 @@ public class AppInitializer {
     private void clearRPTestData() {
         try {
             String val = System.getProperty("clearTestData");
-            if (val != null && !val.isEmpty() && Boolean.valueOf(val).booleanValue()) {
+            if (val != null && !val.isEmpty() && Boolean.parseBoolean(val)) {
                 persistenceService.create();
                 rpService.removeAllRps();
                 rpService.load();
-                logger.info("Finished removeExistingRps successfullly.");
-            } else {
-                logger.info("Invalid value clearTestData.");
             }
         } catch (Exception e) {
-            logger.error("Failed to remove existing RPs.", e);
+            logger.error("Failed to execute clearTestData action", e);
         }
     }
 
