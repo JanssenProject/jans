@@ -5541,9 +5541,8 @@ components:
       description: UMAResource
       type: object
       required:
-        - id
-        - type
-        - iconUri
+        - name
+        - description
       properties:
         dn:
           type: string
