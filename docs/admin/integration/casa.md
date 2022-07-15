@@ -54,11 +54,7 @@ The following steps will install Casa as an add-on.
 5. At the end of the installation you will be presented with a URL to access the Casa portal. 
 6. You can use this URL and log into the portal using administrator credentials that you created during the Janssen Server installation. 
 
-***
-
-## Quick configuration and Testing
-
-### Administrator configuration:
+## Enabling Authentication methods
 
 1. Goto `/opt/jans/jetty/casa` folder and execute `touch .administrable`. [Further reading]()
 2. [Enable authentication mechanisms](https://github.com/maduvena/jans-docs/wiki/Enabling-an-authentication-mechanism-(or-custom-script)) in Jan-auth server like `otp`, `fido2`, `email_otp`.
@@ -74,17 +70,12 @@ python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
 | 92F0-BF9E | super_gluu |
 | 09A0-93D6 | twilio_sms |
 
-4. Enable authentication mechanisms in casa : Goto `Administration console` -> `Enabled Authentication methods`. Now select all the authentication mechanisms that you wish to enable for user self service and `Save` your selections.
+3. Login to the Casa portal as administrator 
+4. Enable authentication mechanisms in casa by navigating to `Administration console` -> `Enabled Authentication methods`. 
+5. Enable the authentication methods that you want to be available to users in the system and then click `Save` to persist your selections.
 
-### User self-service
-
-1. Download [this json file](https://github.com/JanssenProject/jans/blob/main/jans-scim/client/src/test/resources/single/user_minimal_web_login.json). Edit `username` and `password` fields. Save it as `/tmp/create-user.json` 
-2. Use `jans-cli` to create a user. 
-```
-/opt/jans/jans-cli/scim-cli.py --operation-id create-user --data /tmp/create-user.json
-```
-
-3. Login using username and password of the newly created user, and go ahead enrolling credentials for the user. 
+At this point, users can login to the Casa portal and enable/configure one or more authentication methods for their account.
 
 ## Uninstalling Casa
 Execute `python3 flex_setup.py -remove casa`
+
