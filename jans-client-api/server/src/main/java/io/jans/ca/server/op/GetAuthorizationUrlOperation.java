@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.GetAuthorizationUrlParams;
@@ -14,9 +13,12 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,34 +26,19 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/09/2015
- */
-
+@RequestScoped
+@Named
 public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorizationUrlParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
-
+    @Inject
     DiscoveryService discoveryService;
+    @Inject
     StateService stateService;
-    MainPersistenceService jansConfigurationService;
-
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    public GetAuthorizationUrlOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetAuthorizationUrlParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.stateService = serviceProvider.getStateService();
-        this.jansConfigurationService = serviceProvider.getJansConfigurationService();
-    }
 
     @Override
-    public IOpResponse execute(GetAuthorizationUrlParams params) throws Exception {
-        final Rp rp = getRp();
+    public IOpResponse execute(GetAuthorizationUrlParams params, HttpServletRequest httpServletRequest) throws Exception {
+        final Rp rp = getRp(params);
 
         String authorizationEndpoint = discoveryService.getConnectDiscoveryResponse(rp).getAuthorizationEndpoint();
 
@@ -123,4 +110,15 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             return new ArrayList<>();
         }
     }
+
+    @Override
+    public Class<GetAuthorizationUrlParams> getParameterClass() {
+        return GetAuthorizationUrlParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

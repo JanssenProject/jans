@@ -5,44 +5,37 @@ package io.jans.ca.server.op;
 
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
-
-import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.UmaTokenService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
-import io.jans.ca.server.service.UmaTokenService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 02/01/2014
- */
-
+@RequestScoped
+@Named
 public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpGetRptOperation.class);
-    private UmaTokenService umaTokenService;
-
-    public RpGetRptOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, RpGetRptParams.class);
-        this.umaTokenService = serviceProvider.getUmaTokenService();
-    }
+    @Inject
+    UmaTokenService umaTokenService;
 
     @Override
-    public IOpResponse execute(RpGetRptParams params) throws Exception {
+    public IOpResponse execute(RpGetRptParams params, HttpServletRequest httpServletRequest) throws Exception {
         try {
             validate(params);
             return umaTokenService.getRpt(params);
@@ -51,6 +44,16 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
             String entity = ex.getResponse().readEntity(String.class);
             return handleRptError(ex.getResponse().getStatus(), entity);
         }
+    }
+
+    @Override
+    public Class<RpGetRptParams> getParameterClass() {
+        return RpGetRptParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     public static IOpResponse handleRptError(int status, String entity) throws IOException {

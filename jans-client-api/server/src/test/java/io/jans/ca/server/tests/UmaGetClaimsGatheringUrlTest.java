@@ -42,7 +42,7 @@ public class UmaGetClaimsGatheringUrlTest extends BaseTest {
         params.setTicket(checkAccess.getTicket());
         params.setClaimsRedirectUri(paramRedirectUrl);
 
-        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
 
         Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
 
@@ -74,7 +74,7 @@ public class UmaGetClaimsGatheringUrlTest extends BaseTest {
         customParameterMap.put("param2", "value2");
         params.setCustomParameters(customParameterMap);
 
-        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
 
         Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
 
@@ -104,7 +104,7 @@ public class UmaGetClaimsGatheringUrlTest extends BaseTest {
         params.setClaimsRedirectUri(paramRedirectUrl);
         params.setState(state);
 
-        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
 
         Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
 

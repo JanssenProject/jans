@@ -50,7 +50,7 @@ public class IntrospectAccessTokenTest extends BaseTest {
         introspectParams.setRpId(setupResponse.getRpId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectAccessTokenResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), null, introspectParams);
+        IntrospectAccessTokenResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams.getRpId(), introspectParams);
 
         assertNotNull(introspectionResponse);
         assertTrue(introspectionResponse.isActive());

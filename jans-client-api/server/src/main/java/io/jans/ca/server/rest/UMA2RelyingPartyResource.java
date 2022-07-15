@@ -1,33 +1,42 @@
 package io.jans.ca.server.rest;
 
-import io.jans.ca.common.CommandType;
-import io.jans.ca.common.params.RpGetClaimsGatheringUrlParams;
-import io.jans.ca.common.params.RpGetRptParams;
-import jakarta.ws.rs.*;
+import io.jans.ca.server.op.RpGetGetClaimsGatheringUrlOperation;
+import io.jans.ca.server.op.RpGetRptOperation;
+import io.jans.ca.common.rest.ProtectedApi;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/")
 public class UMA2RelyingPartyResource extends BaseResource {
 
+    @Inject
+    RpGetRptOperation rpGetRptOp;
+    @Inject
+    RpGetGetClaimsGatheringUrlOperation rpGetGetClaimsGatheringUrlOp;
+
     @POST
+    @ProtectedApi
     @Path("/uma-rp-get-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRpGetRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response umaRpGetRpt(String params) {
         logger.info("Api Resource: /uma-rp-get-rpt  Params: {}", params);
-        String result = process(CommandType.RP_GET_RPT, params, RpGetRptParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return rpGetRptOp.process(params, getHttpRequest());
     }
 
     @POST
+    @ProtectedApi
     @Path("/uma-rp-get-claims-gathering-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response umaRpGetClaimsGatheringUrl(String params) {
         logger.info("Api Resource: /uma-rp-get-claims-gathering-url  Params: {}", params);
-        String result = process(CommandType.RP_GET_CLAIMS_GATHERING_URL, params, RpGetClaimsGatheringUrlParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return rpGetGetClaimsGatheringUrlOp.process(params, getHttpRequest());
     }
 
 }

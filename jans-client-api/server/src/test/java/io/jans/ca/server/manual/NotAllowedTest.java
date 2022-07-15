@@ -4,8 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.ca.client.ClientInterface;
 import io.jans.ca.client.RsProtectParams2;
-import io.jans.ca.common.Command;
-import io.jans.ca.common.CommandType;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.RegisterSiteParams;
 import io.jans.ca.common.response.RegisterSiteResponse;
@@ -52,9 +50,6 @@ public class NotAllowedTest {
         params.setClientFrontchannelLogoutUri("https://192.168.200.58:5053/logout");
         params.setAcrValues(Lists.newArrayList("gplus", "basic", "duo", "u2f"));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
-
-        final Command command = new Command(CommandType.REGISTER_SITE);
-        command.setParamsObject(params);
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
