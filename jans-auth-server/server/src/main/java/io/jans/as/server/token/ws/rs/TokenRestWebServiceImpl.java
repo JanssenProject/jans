@@ -185,6 +185,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT, "Client is disabled."), oAuth2AuditLog);
             }
 
+            tokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), oAuth2AuditLog);
+
             final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
                     tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
             final SessionId sessionIdObj = sessionIdService.getSessionId(request);
@@ -199,11 +201,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setAttributeService(attributeService);
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
-                // todo refactor
-                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, null), oAuth2AuditLog);
-                }
-
                 log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
                 final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
                 log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
@@ -266,11 +263,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             }
 
             if (gt == GrantType.REFRESH_TOKEN) {
-                // todo refactor
-                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type does not belong to client."), oAuth2AuditLog);
-                }
-
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
                 if (authorizationGrant == null) {
@@ -331,11 +323,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         idToken));
                 oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
-                // todo refactor
-                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
-                }
-
                 ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
 
                 scope = clientCredentialsGrant.checkScopesPolicy(scope);
@@ -366,11 +353,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         scope,
                         idToken));
             } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-                // todo refactor
-                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
-                }
-
                 boolean authenticated = false;
                 User user = null;
                 if (authenticationFilterService.isEnabled()) {
@@ -438,11 +420,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 }
             } else if (gt == GrantType.CIBA) {
                 errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
-
-                // todo refactor
-                if (!TokenRestWebServiceValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
-                }
 
                 log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
                 final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
@@ -619,10 +596,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private Response processDeviceCodeGrantType(final GrantType grantType, final Client client, final String deviceCode,
                                                 String scope, final HttpServletRequest request,
                                                 final HttpServletResponse response, final OAuth2AuditLog oAuth2AuditLog) {
-        if (!TokenRestWebServiceValidator.validateGrantType(grantType, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-            return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
-        }
-
         log.debug("Attempting to find authorizationGrant by deviceCode: '{}'", deviceCode);
         final DeviceCodeGrant deviceCodeGrant = authorizationGrantList.getDeviceCodeGrant(deviceCode);
 
