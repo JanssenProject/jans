@@ -598,7 +598,7 @@
         ]
     },
     {
-        "path":"/jans-config-api/scim/config",
+        "path":"/jans-config-api/scim/scim-config",
         "conditions":[
             {
                 "httpMethods":["GET"],
