@@ -86,7 +86,7 @@ Enabling scripts 5018-D4BF
 
 ## Configuring authentication methods
 
-At this point, users can login to the Casa portal and enable/configure one or more authentication methods for their account.
+At this point, users ([How to create users](https://github.com/JanssenProject/jans/blob/main/docs/admin/jans-cli/cli-user.md#creating-an-user-resources)) can login to the Casa portal and enable/configure one or more authentication methods for their account.
 
 ### One Time Password (OTP) using TOTP App
 
