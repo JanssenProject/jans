@@ -108,6 +108,16 @@ Users can enable this method to authenticate using OTP generator applications li
 
 6. Janssen Server will require user to enter Google Authenticator OTP during subsequent login attempt.
 
+### Fido 2.0
+
+### SMS OTP (Twilio)
+
+### SMS OTP (smpp)
+
+### Duo Security
+
+### Super Gluu
+
 ## Uninstalling Casa
 Execute `python3 flex_setup.py -remove casa`
 
