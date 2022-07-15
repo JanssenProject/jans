@@ -26,6 +26,9 @@ public class NativePersistenceConfiguration implements Serializable {
     @XmlElement(name = "deleteExpiredOnGetRequest")
     private boolean deleteExpiredOnGetRequest = false;
 
+    @XmlElement(name = "disableAttemptUpdateBeforeInsert")
+    private boolean disableAttemptUpdateBeforeInsert = false;
+
     @JsonIgnore
     private String baseDn;
 
@@ -53,7 +56,15 @@ public class NativePersistenceConfiguration implements Serializable {
 		this.deleteExpiredOnGetRequest = deleteExpiredOnGetRequest;
 	}
 
-	public String getBaseDn() {
+    public boolean isDisableAttemptUpdateBeforeInsert() {
+        return disableAttemptUpdateBeforeInsert;
+    }
+
+    public void setDisableAttemptUpdateBeforeInsert(boolean disableAttemptUpdateBeforeInsert) {
+        this.disableAttemptUpdateBeforeInsert = disableAttemptUpdateBeforeInsert;
+    }
+
+    public String getBaseDn() {
         return baseDn;
     }
 
@@ -64,6 +75,8 @@ public class NativePersistenceConfiguration implements Serializable {
     @Override
 	public String toString() {
 		return "NativePersistenceConfiguration [defaultPutExpiration=" + defaultPutExpiration + ", defaultCleanupBatchSize="
-				+ defaultCleanupBatchSize + ", deleteExpiredOnGetRequest=" + deleteExpiredOnGetRequest + ", baseDn=" + baseDn + "]";
+				+ defaultCleanupBatchSize + ", deleteExpiredOnGetRequest=" + deleteExpiredOnGetRequest
+                + ", disableAttemptUpdateBeforeInsert=" + disableAttemptUpdateBeforeInsert
+                + ", baseDn=" + baseDn + "]";
 	}
 }
