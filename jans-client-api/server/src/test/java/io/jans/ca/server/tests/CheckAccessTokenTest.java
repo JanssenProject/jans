@@ -43,7 +43,7 @@ public class CheckAccessTokenTest extends BaseTest {
         params.setRpId(site.getRpId());
 
         String strAuthorization = Tester.getAuthorization(hostTargetURL, site);
-        final CheckAccessTokenResponse checkR = client.checkAccessToken(strAuthorization, null, params);
+        final CheckAccessTokenResponse checkR = client.checkAccessToken(strAuthorization, params.getRpId(), params);
         assertNotNull(checkR);
         assertTrue(checkR.isActive());
         assertNotNull(checkR.getExpiresAt());

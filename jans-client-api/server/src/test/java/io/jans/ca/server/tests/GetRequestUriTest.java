@@ -46,7 +46,7 @@ public class GetRequestUriTest extends BaseTest {
         GetRequestObjectUriParams getRequestUriParams = new GetRequestObjectUriParams();
         getRequestUriParams.setRpId(site.getRpId());
         getRequestUriParams.setRpHostUrl(hostTargetURL);
-        GetRequestObjectUriResponse getRequestUriResponse = client.getRequestObjectUri(strAuthorization, null, getRequestUriParams);
+        GetRequestObjectUriResponse getRequestUriResponse = client.getRequestObjectUri(strAuthorization, getRequestUriParams.getRpId(), getRequestUriParams);
         assertNotNull(getRequestUriResponse.getRequestUri());
         //Get Request object
         String requestObjectId = getRequestUriResponse.getRequestUri().substring(getRequestUriResponse.getRequestUri().lastIndexOf('/') + 1);
@@ -58,7 +58,7 @@ public class GetRequestUriTest extends BaseTest {
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setRpId(site.getRpId());
         commandParams.setParams(paramsMap);
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(strAuthorization, null, commandParams);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(strAuthorization, commandParams.getRpId(), commandParams);
         assertNotNull(resp);
         TestUtils.notEmpty(resp.getAuthorizationUrl());
     }

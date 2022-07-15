@@ -73,7 +73,7 @@ public class RsProtectTest extends BaseTest {
         final RsProtectParams2 params = new RsProtectParams2();
         params.setRpId(site.getRpId());
         params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
-        RsProtectResponse r = client.umaRsProtect(Tester.getAuthorization(getApiTagetURL(url), site), null, params);
+        RsProtectResponse r = client.umaRsProtect(Tester.getAuthorization(getApiTagetURL(url), site), params.getRpId(), params);
         assertNotNull(r);
         assertEquals(r.getError(), "uma_protection_exists");
     }
@@ -93,7 +93,7 @@ public class RsProtectTest extends BaseTest {
         params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
         params.setOverwrite(true); // force overwrite
 
-        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(getApiTagetURL(url), site), null, params);
+        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(getApiTagetURL(url), site), params.getRpId(), params);
         assertNotNull(response);
     }
 
@@ -123,7 +123,7 @@ public class RsProtectTest extends BaseTest {
         params.setPath("/GetAll");
         params.setRpt("");
 
-        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(getApiTagetURL(url), site), null, params);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(getApiTagetURL(url), site), params.getRpId(), params);
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getAccess()));
@@ -138,7 +138,7 @@ public class RsProtectTest extends BaseTest {
             e.printStackTrace();
         }
 
-        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
         assertNotNull(resp);
         return resp;
     }

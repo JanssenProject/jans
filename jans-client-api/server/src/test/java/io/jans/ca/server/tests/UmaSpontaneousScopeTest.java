@@ -41,7 +41,7 @@ public class UmaSpontaneousScopeTest extends BaseTest {
         params.setRpId(registerResponse.getRpId());
         params.setRpt(response.getRpt());
 
-        final CorrectRptIntrospectionResponse rptIntrospectionResponse = client.introspectRpt(Tester.getAuthorization(client.getApitargetURL(), registerResponse), null, params);
+        final CorrectRptIntrospectionResponse rptIntrospectionResponse = client.introspectRpt(Tester.getAuthorization(client.getApitargetURL(), registerResponse), params.getRpId(), params);
 
         rptIntrospectionResponse.getPermissions().forEach( permission -> {
             assertTrue(permission.getScopes().contains(USER_2_SCOPE));

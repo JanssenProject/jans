@@ -41,7 +41,7 @@ public class GetUserInfoTest extends BaseTest {
         params.setAccessToken(tokens.getAccessToken());
         params.setIdToken(tokens.getIdToken());
 
-        final JsonNode resp = client.getUserInfo(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final JsonNode resp = client.getUserInfo(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
         assertNotNull(resp);
         assertNotNull(resp.get("sub"));
     }
@@ -55,7 +55,7 @@ public class GetUserInfoTest extends BaseTest {
         params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce));
         params.setState(state);
 
-        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
