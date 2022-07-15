@@ -2693,7 +2693,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/user.write]
 
  
-  /jans-config-api/scim/config:
+  /jans-config-api/scim/scim-config:
     get:
       summary: Retrieves SCIM App configuration.
       description: Retrieves SCIM configuration.
