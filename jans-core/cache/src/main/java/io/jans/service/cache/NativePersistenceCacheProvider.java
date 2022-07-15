@@ -82,6 +82,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             // CouchbaseEntryManagerFactory.PERSISTENCE_TYPE
             skipRemoveBeforePut = "couchbase".equals(persistenceType);
             attemptUpdateBeforeInsert = "sql".equals(persistenceType);
+            if (cacheConfiguration.getNativePersistenceConfiguration().isDisableAttemptUpdateBeforeInsert()) {
+                attemptUpdateBeforeInsert = false;
+            }
 
             log.info("Created NATIVE_PERSISTENCE cache provider. `baseDn`: " + baseDn);
         } catch (Exception e) {
