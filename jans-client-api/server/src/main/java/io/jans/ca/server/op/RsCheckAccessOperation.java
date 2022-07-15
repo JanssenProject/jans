@@ -3,7 +3,10 @@ package io.jans.ca.server.op;
 import com.google.common.base.Strings;
 import io.jans.as.model.uma.JsonLogicNodeParser;
 import io.jans.as.model.uma.PermissionTicket;
-import io.jans.ca.common.*;
+import io.jans.ca.common.CoreUtils;
+import io.jans.ca.common.ErrorResponse;
+import io.jans.ca.common.ErrorResponseCode;
+import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.introspection.CorrectUmaPermission;
 import io.jans.ca.common.params.RsCheckAccessParams;
@@ -18,6 +21,10 @@ import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.configuration.model.UmaResource;
 import io.jans.ca.server.service.IntrospectionService;
 import io.jans.ca.server.service.UmaTokenService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -29,30 +36,23 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 31/05/2016
- */
-
+@RequestScoped
+@Named
 public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsCheckAccessOperation.class);
-    private UmaTokenService umaTokenService;
-    private IntrospectionService introspectionService;
-    private OpClientFactoryImpl opClientFactory;
-
-    public RsCheckAccessOperation(Command command, io.jans.ca.server.service.ServiceProvider serviceProvider) {
-        super(command, serviceProvider, RsCheckAccessParams.class);
-        this.umaTokenService = serviceProvider.getUmaTokenService();
-        this.introspectionService = umaTokenService.getIntrospectionService();
-        this.opClientFactory = umaTokenService.getOpClientFactory();
-    }
+    @Inject
+    UmaTokenService umaTokenService;
+    @Inject
+    IntrospectionService introspectionService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
 
     @Override
-    public IOpResponse execute(final RsCheckAccessParams params) throws Exception {
+    public IOpResponse execute(final RsCheckAccessParams params, HttpServletRequest httpServletRequest) throws Exception {
         validate(params);
 
-        Rp rp = getRp();
+        Rp rp = getRp(params);
         UmaResource resource = rp.umaResource(params.getPath(), params.getHttpMethod());
         if (resource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
@@ -129,6 +129,16 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         LOG.debug("Access denied for path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() + ". Ticket is registered: " + opResponse);
 
         return opResponse;
+    }
+
+    @Override
+    public Class<RsCheckAccessParams> getParameterClass() {
+        return RsCheckAccessParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private List<String> getRequiredScopes(RsCheckAccessParams params, UmaResource resource) {

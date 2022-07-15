@@ -3,13 +3,15 @@ package io.jans.ca.server.op;
 import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.model.discovery.WebFingerParam;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetIssuerParams;
 import io.jans.ca.common.response.GetIssuerResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.DiscoveryService;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.beanutils.BeanUtils;
 import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -22,15 +24,14 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetIssuerOperation.class);
 
-    public GetIssuerOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetIssuerParams.class);
-    }
+    @Inject
+    DiscoveryService discoveryService;
 
-    public IOpResponse execute(GetIssuerParams params) {
+    public IOpResponse execute(GetIssuerParams params, HttpServletRequest httpServletRequest) {
         validateParams(params);
         GetIssuerResponse webfingerResponse = getWebfingerResponse(params.getResource());
 
-        String issuerFromDiscovery = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer();
+        String issuerFromDiscovery = discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer();
         validateIssuer(webfingerResponse, issuerFromDiscovery);
 
         return webfingerResponse;
@@ -76,4 +77,15 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
             throw new HttpException(ErrorResponseCode.INVALID_ISSUER_DISCOVERED);
         }
     }
+
+    @Override
+    public Class<GetIssuerParams> getParameterClass() {
+        return GetIssuerParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

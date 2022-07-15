@@ -84,7 +84,7 @@ public class RpGetRptTest extends BaseTest {
         params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
 
-        final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getRpt()));

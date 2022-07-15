@@ -3,8 +3,8 @@
  */
 package io.jans.ca.server.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.POJONode;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.IParams;
@@ -35,11 +35,11 @@ public class Convertor {
      * @param <T>   parameter calss
      * @return parameter object based on string representation
      */
-    public static <T extends IParams> T asParams(Class<T> clazz, Command command) {
-        if (command.getParams() instanceof POJONode) {
-            return (T) ((POJONode)command.getParams()).getPojo();
+    public static <T extends IParams> T asParams(Class<T> clazz, JsonNode jsonNodeParams) {
+        if (jsonNodeParams instanceof POJONode) {
+            return (T) ((POJONode) jsonNodeParams).getPojo();
         }
-        final String paramsAsString = command.paramsAsString();
+        final String paramsAsString = jsonNodeParams != null ? jsonNodeParams.toString() : "";
         try {
             T params = Jackson2.createJsonMapper().readValue(paramsAsString, clazz);
             if (params == null) {

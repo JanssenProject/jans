@@ -6,7 +6,6 @@ import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.GetUserInfoParams;
@@ -15,37 +14,30 @@ import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.HttpService;
-import io.jans.ca.server.service.ServiceProvider;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/09/2015
- */
-
+@RequestScoped
+@Named
 public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
+    @Inject
     DiscoveryService discoveryService;
-    MainPersistenceService jansConfigurationService;
+    @Inject
     OpClientFactoryImpl opClientFactory;
+    @Inject
     HttpService httpService;
 
-
-    public GetUserInfoOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetUserInfoParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.jansConfigurationService = serviceProvider.getJansConfigurationService();
-        this.opClientFactory = discoveryService.getOpClientFactory();
-        this.httpService = discoveryService.getHttpService();
-    }
-
     @Override
-    public IOpResponse execute(GetUserInfoParams params) throws IOException {
+    public IOpResponse execute(GetUserInfoParams params, HttpServletRequest httpServletRequest) throws IOException {
         getValidationService().validate(params);
 
         UserInfoClient client = opClientFactory.createUserInfoClient(discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId()).getUserInfoEndpoint());
@@ -85,4 +77,15 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
             throw new HttpException(ErrorResponseCode.FAILED_TO_VERIFY_SUBJECT_IDENTIFIER);
         }
     }
+
+    @Override
+    public Class<GetUserInfoParams> getParameterClass() {
+        return GetUserInfoParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

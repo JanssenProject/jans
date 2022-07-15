@@ -37,7 +37,7 @@ public class GetAuthorizationUrlTest extends BaseTest {
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setRpId(site.getRpId());
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), null, commandParams);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), commandParams.getRpId(), commandParams);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
     }
@@ -53,7 +53,7 @@ public class GetAuthorizationUrlTest extends BaseTest {
         commandParams.setRpId(site.getRpId());
         commandParams.setRedirectUri(paramRedirectUrl);
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), null, commandParams);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), commandParams.getRpId(), commandParams);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
@@ -69,7 +69,7 @@ public class GetAuthorizationUrlTest extends BaseTest {
         commandParams.setRpId(site.getRpId());
         commandParams.setResponseTypes(Lists.newArrayList("code", "token"));
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), null, commandParams);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), commandParams.getRpId(), commandParams);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
 
@@ -92,7 +92,7 @@ public class GetAuthorizationUrlTest extends BaseTest {
         params.put("is_valid", "true");
         commandParams.setParams(params);
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), null, commandParams);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), commandParams.getRpId(), commandParams);
         notEmpty(resp.getAuthorizationUrl());
 
         Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
@@ -116,7 +116,7 @@ public class GetAuthorizationUrlTest extends BaseTest {
         commandParams.setRedirectUri(paramRedirectUrl);
         commandParams.setState(state);
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), null, commandParams);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), commandParams.getRpId(), commandParams);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
@@ -137,7 +137,7 @@ public class GetAuthorizationUrlTest extends BaseTest {
         commandParams.setRedirectUri(paramRedirectUrl);
         commandParams.setNonce("dummy_nonce");
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), null, commandParams);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(getApiTagetURL(url), site), commandParams.getRpId(), commandParams);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));

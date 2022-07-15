@@ -45,7 +45,7 @@ public class AuthorizationCodeFlowTest extends BaseTest {
         params.setUserSecret(userSecret);
 
         String strAuthorization = Tester.getAuthorization(hostTargetURL, site);
-        final AuthorizationCodeFlowResponse resp = client.authorizationCodeFlow(strAuthorization, null, params);
+        final AuthorizationCodeFlowResponse resp = client.authorizationCodeFlow(strAuthorization, params.getRpId(), params);
         assertNotNull(resp);
 
         TestUtils.notEmpty(resp.getAccessToken());
