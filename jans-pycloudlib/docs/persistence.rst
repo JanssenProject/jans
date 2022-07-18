@@ -1,11 +1,20 @@
 Persistence
 ~~~~~~~~~~~
 
-.. module:: jans.pycloudlib.persistence
+.. module:: jans.pycloudlib.persistence.utils
 
 .. autofunction:: render_salt
 
 .. autofunction:: render_base_properties
+
+.. autodata:: PERSISTENCE_TYPES
+
+.. autodata:: PERSISTENCE_DATA_KEYS
+
+.. autoclass:: PersistenceMapper
+    :members:
+    :private-members:
+    :undoc-members:
 
 LDAP
 ====
@@ -44,17 +53,17 @@ Couchbase
 
 .. autofunction:: sync_couchbase_truststore
 
-.. autoclass:: BaseClient
+.. autoclass:: BaseApi
     :members:
     :private-members:
     :undoc-members:
 
-.. autoclass:: RestClient
+.. autoclass:: RestApi
     :members:
     :private-members:
     :undoc-members:
 
-.. autoclass:: N1qlClient
+.. autoclass:: N1qlApi
     :members:
     :private-members:
     :undoc-members:
@@ -78,6 +87,7 @@ SQL
     :members:
     :private-members:
     :undoc-members:
+    :inherited-members:
 
 Spanner
 =======
@@ -88,6 +98,7 @@ Spanner
     :members:
     :private-members:
     :undoc-members:
+    :inherited-members:
 
 Hybrid
 ======

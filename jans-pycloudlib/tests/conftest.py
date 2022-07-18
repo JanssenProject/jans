@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 
@@ -92,3 +94,33 @@ def gk8s_meta():
     meta = KubernetesMeta()
     meta.kubeconfig_file = "tests/kubeconfig"
     yield meta
+
+
+@pytest.fixture
+def google_creds(tmpdir):
+    creds = tmpdir.join("google-credentials.json")
+    creds.write(json.dumps({
+        "client_id": "random-id",
+        "client_secret": "random-secret",
+        "refresh_token": "random-refresh-token",
+        "type": "authorized_user"
+    }))
+    yield creds
+
+
+@pytest.fixture
+def spanner_client(gmanager, monkeypatch, google_creds):
+    from jans.pycloudlib.persistence.spanner import SpannerClient
+
+    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_creds))
+
+    client = SpannerClient(gmanager)
+    yield client
+
+
+@pytest.fixture
+def sql_client(gmanager):
+    from jans.pycloudlib.persistence.sql import SqlClient
+
+    client = SqlClient(gmanager)
+    yield client

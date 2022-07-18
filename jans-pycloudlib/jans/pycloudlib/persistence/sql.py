@@ -1,11 +1,16 @@
 """This module contains various helpers related to SQL persistence."""
 
+from __future__ import annotations
+
 import json
 import logging
 import os
+import typing as _t
 from collections import defaultdict
+from functools import cached_property
 from tempfile import NamedTemporaryFile
 
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import func
@@ -16,10 +21,16 @@ from ldap3.utils import dn as dnutils
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 
+if _t.TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from sqlalchemy.engine import Engine
+    from jans.pycloudlib.manager import Manager
+
 logger = logging.getLogger(__name__)
 
 
-def get_sql_password(manager) -> str:
+def get_sql_password(manager: Manager) -> str:
     """Get password used for SQL database user.
 
     Priority:
@@ -61,7 +72,7 @@ class PostgresqlAdapter:
     #: Query to display server version
     server_version_query = "SHOW server_version"
 
-    def on_create_table_error(self, exc):
+    def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
 
         :param exc: Exception instance.
@@ -71,7 +82,7 @@ class PostgresqlAdapter:
         if exc.orig.pgcode not in ["42P07"]:
             raise exc
 
-    def on_create_index_error(self, exc):
+    def on_create_index_error(self, exc: DatabaseError) -> None:
         """Handle index creation error.
 
         :param exc: Exception instance.
@@ -81,7 +92,7 @@ class PostgresqlAdapter:
         if exc.orig.pgcode not in ["42P07"]:
             raise exc
 
-    def on_insert_into_error(self, exc):
+    def on_insert_into_error(self, exc: DatabaseError) -> None:
         """Handle row insertion error.
 
         :param exc: Exception instance.
@@ -107,7 +118,7 @@ class MysqlAdapter:
     #: Query to display server version
     server_version_query = "SELECT VERSION()"
 
-    def on_create_table_error(self, exc):
+    def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
 
         :param exc: Exception instance.
@@ -117,7 +128,7 @@ class MysqlAdapter:
         if exc.orig.args[0] not in [1050]:
             raise exc
 
-    def on_create_index_error(self, exc):
+    def on_create_index_error(self, exc: DatabaseError) -> None:
         """Handle index creation error.
 
         :param exc: Exception instance.
@@ -127,7 +138,7 @@ class MysqlAdapter:
         if exc.orig.args[0] not in [1061]:
             raise exc
 
-    def on_insert_into_error(self, exc):
+    def on_insert_into_error(self, exc: DatabaseError) -> None:
         """Handle row insertion error.
 
         :param exc: Exception instance.
@@ -138,91 +149,107 @@ class MysqlAdapter:
             raise exc
 
 
-def doc_id_from_dn(dn):
+def doc_id_from_dn(dn: str) -> str:
     """Determine document ID based on LDAP's DN.
 
     :param dn: LDAP's DN string.
     """
     parsed_dn = dnutils.parse_dn(dn)
-    doc_id = parsed_dn[0][1]
+    doc_id: str = parsed_dn[0][1]
 
     if doc_id == "jans":
         doc_id = "_"
     return doc_id
 
 
-class SqlClient:
-    """This class interacts with SQL database."""
+class SqlSchemaMixin:
+    """Mixin class to deal with SQL schema."""
 
-    #: An instance of SQL adapter.
-    #: The initialized instance will be loaded based on ``CN_SQL_DB_DIALECT`` value.
-    adapter = None
+    @property
+    def schema_files(self) -> list[str]:
+        """Get list of schema files."""
+        files = [
+            "/app/schema/jans_schema.json",
+            "/app/schema/custom_schema.json",
+        ]
+        return files
 
-    def __init__(self, manager, *args, **kwargs):
+    @cached_property
+    def sql_data_types(self) -> dict[str, dict[str, _t.Any]]:
+        """Get list of data types from pre-defined file."""
+        with open("/app/static/rdbm/sql_data_types.json") as f:
+            return json.loads(f.read())  # type: ignore
+
+    @cached_property
+    def sql_data_types_mapping(self) -> dict[str, dict[str, _t.Any]]:
+        """Get a mapping of data types from pre-defined file."""
+        with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
+            return json.loads(f.read())  # type: ignore
+
+    @cached_property
+    def attr_types(self) -> list[dict[str, _t.Any]]:
+        """Get list of attribute types from pre-defined file."""
+        types = []
+        for fn in self.schema_files:
+            with open(fn) as f:
+                schema = json.loads(f.read())
+                types += schema["attributeTypes"]
+        return types
+
+    @cached_property
+    def opendj_attr_types(self) -> dict[str, str]:
+        """Get a mapping of OpenDJ attribute types from pre-defined file."""
+        with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
+            return json.loads(f.read())  # type: ignore
+
+    def get_attr_syntax(self, attr: str) -> str:
+        """Get attribute syntax.
+
+        :param attr: Attribute name.
+        """
+        syntax = ""
+        for attr_type in self.attr_types:
+            if attr not in attr_type["names"]:
+                continue
+
+            if attr_type.get("multivalued"):
+                syntax = "JSON"
+            else:
+                syntax = attr_type["syntax"]
+            break
+
+        if not syntax:
+            # fallback to OpenDJ attribute type
+            syntax = self.opendj_attr_types.get(attr, "") or "1.3.6.1.4.1.1466.115.121.1.15"
+        return syntax
+
+
+class SqlClient(SqlSchemaMixin):
+    r"""This class interacts with SQL database.
+
+    :param manager: An instance of manager class.
+    :param \*args: Positional arguments (if any).
+    :param \**kwargs: Keyword arguments (if any).
+    """
+
+    def __init__(self, manager: Manager, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> None:
         self.manager = manager
 
         dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         if dialect in ("pgsql", "postgresql"):
-            self.adapter = PostgresqlAdapter()
+            self.adapter = PostgresqlAdapter()  # type: _t.Union[PostgresqlAdapter, MysqlAdapter]
         else:
             self.adapter = MysqlAdapter()
 
         self.dialect = self.adapter.dialect
-        self.schema_files = [
-            "/app/schema/jans_schema.json",
-            "/app/schema/custom_schema.json",
-        ]
 
-        self._sql_data_types = {}
-        self._sql_data_types_mapping = {}
-        self._attr_types = []
-        self._opendj_attr_types = {}
-        self._engine = None
-        self._metadata = None
-
-    @property
-    def sql_data_types(self):
-        """Get list of data types from pre-defined file."""
-        if not self._sql_data_types:
-            with open("/app/static/rdbm/sql_data_types.json") as f:
-                self._sql_data_types = json.loads(f.read())
-        return self._sql_data_types
-
-    @property
-    def sql_data_types_mapping(self):
-        """Get a mapping of data types from pre-defined file."""
-        if not self._sql_data_types_mapping:
-            with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
-                self._sql_data_types_mapping = json.loads(f.read())
-        return self._sql_data_types_mapping
-
-    @property
-    def attr_types(self):
-        """Get list of attribute types from pre-defined file."""
-        if not self._attr_types:
-            for fn in self.schema_files:
-                with open(fn) as f:
-                    schema = json.loads(f.read())
-                    self._attr_types += schema["attributeTypes"]
-        return self._attr_types
-
-    @property
-    def opendj_attr_types(self):
-        """Get a mapping of OpenDJ attribute types from pre-defined file."""
-        if not self._opendj_attr_types:
-            with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
-                self._opendj_attr_types = json.loads(f.read())
-        return self._opendj_attr_types
-
-    @property
-    def engine(self):
+    @cached_property
+    def engine(self) -> Engine:
         """Lazy init of engine instance object."""
-        if not self._engine:
-            self._engine = create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
-        return self._engine
+        return create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
 
     @property
-    def engine_url(self):
+    def engine_url(self) -> str:
         """Engine connection URL."""
         host = os.environ.get("CN_SQL_DB_HOST", "localhost")
         port = os.environ.get("CN_SQL_DB_PORT", 3306)
@@ -231,21 +258,20 @@ class SqlClient:
         password = get_sql_password(self.manager)
         return f"{self.adapter.connector}://{user}:{password}@{host}:{port}/{database}"
 
-    @property
-    def metadata(self):
+    @cached_property
+    def metadata(self) -> MetaData:
         """Lazy init of metadata."""
-        if not self._metadata:
-            self._metadata = MetaData(bind=self.engine)
-            self._metadata.reflect()
-        return self._metadata
+        metadata = MetaData(bind=self.engine)
+        metadata.reflect()
+        return metadata
 
-    def connected(self):
+    def connected(self) -> bool:
         """Check whether connection is alive by executing simple query."""
         with self.engine.connect() as conn:
             result = conn.execute("SELECT 1 AS is_alive")
-            return result.fetchone()[0] > 0
+            return bool(result.fetchone()[0] > 0)
 
-    def create_table(self, table_name: str, column_mapping: dict, pk_column: str):
+    def create_table(self, table_name: str, column_mapping: dict[str, str], pk_column: str) -> None:
         """Create table with its columns."""
         columns = []
         for column_name, column_type in column_mapping.items():
@@ -264,12 +290,12 @@ class SqlClient:
                 conn.execute(query)
                 # refresh metadata as we have newly created table
                 self.metadata.reflect()
-            except Exception as exc:  # noqa: B902
+            except DatabaseError as exc:  # noqa: B902
                 self.adapter.on_create_table_error(exc)
 
-    def get_table_mapping(self) -> dict:
+    def get_table_mapping(self) -> dict[str, dict[str, str]]:
         """Get mapping of column name and type from all tables."""
-        table_mapping = defaultdict(dict)
+        table_mapping: dict[str, dict[str, str]] = defaultdict(dict)
         for table_name, table in self.metadata.tables.items():
             for column in table.c:
                 # truncate COLLATION string
@@ -278,19 +304,19 @@ class SqlClient:
                 table_mapping[table_name][column.name] = str(column.type)
         return dict(table_mapping)
 
-    def create_index(self, query):
+    def create_index(self, query: str) -> None:
         """Create index using raw query."""
         with self.engine.connect() as conn:
             try:
                 conn.execute(query)
-            except Exception as exc:  # noqa: B902
+            except DatabaseError as exc:  # noqa: B902
                 self.adapter.on_create_index_error(exc)
 
-    def quoted_id(self, identifier):
+    def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
         return f"{self.adapter.quote_char}{identifier}{self.adapter.quote_char}"
 
-    def row_exists(self, table_name, id_):
+    def row_exists(self, table_name: str, id_: str) -> bool:
         """Check whether a row is exist."""
         table = self.metadata.tables.get(table_name)
         if table is None:
@@ -301,9 +327,9 @@ class SqlClient:
         )
         with self.engine.connect() as conn:
             result = conn.execute(query)
-            return result.fetchone()[0] > 0
+            return bool(result.fetchone()[0] > 0)
 
-    def insert_into(self, table_name, column_mapping):
+    def insert_into(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         """Insert a row into a table."""
         table = self.metadata.tables.get(table_name)
 
@@ -319,10 +345,10 @@ class SqlClient:
         with self.engine.connect() as conn:
             try:
                 conn.execute(query)
-            except Exception as exc:  # noqa: B902
+            except DatabaseError as exc:  # noqa: B902
                 self.adapter.on_insert_into_error(exc)
 
-    def get(self, table_name, id_, column_names=None) -> dict:
+    def get(self, table_name: str, id_: str, column_names: _t.Union[list[str], None] = None) -> dict[str, _t.Any]:
         """Get a row from a table with matching ID."""
         table = self.metadata.tables.get(table_name)
 
@@ -343,7 +369,7 @@ class SqlClient:
             return {}
         return dict(entry)
 
-    def update(self, table_name, id_, column_mapping) -> bool:
+    def update(self, table_name: str, id_: str, column_mapping: dict[str, _t.Any]) -> bool:
         """Update a table row with matching ID."""
         table = self.metadata.tables.get(table_name)
 
@@ -352,7 +378,7 @@ class SqlClient:
             result = conn.execute(query)
         return bool(result.rowcount)
 
-    def search(self, table_name, column_names=None) -> dict:
+    def search(self, table_name: str, column_names: _t.Union[list[str], None] = None) -> _t.Iterator[dict[str, _t.Any]]:
         """Get all rows from a table."""
         table = self.metadata.tables.get(table_name)
 
@@ -369,39 +395,25 @@ class SqlClient:
                 yield dict(entry)
 
     @property
-    def server_version(self):
+    def server_version(self) -> str:
         """Display server version."""
-        return self.engine.scalar(self.adapter.server_version_query)
+        version: str = self.engine.scalar(self.adapter.server_version_query)
+        return version
 
-    def get_attr_syntax(self, attr):
-        """Get attribute syntax.
-
-        :param attr: Attribute name.
-        """
-        for attr_type in self.attr_types:
-            if attr not in attr_type["names"]:
-                continue
-            if attr_type.get("multivalued"):
-                return "JSON"
-            return attr_type["syntax"]
-
-        # fallback to OpenDJ attribute type
-        return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
-
-    def _transform_value(self, key, values):
+    def _transform_value(self, key: str, values: _t.Any) -> _t.Any:
         """Transform value from one to another based on its data type.
 
         :param key: Attribute name.
         :param values: Pre-transformed values.
         """
-        type_ = self.sql_data_types.get(key)
+        type_ = self.sql_data_types.get(key, {})
 
         if not type_:
             attr_syntax = self.get_attr_syntax(key)
             type_ = self.sql_data_types_mapping[attr_syntax]
 
         type_ = type_.get(self.dialect) or type_["mysql"]
-        data_type = type_["type"]
+        data_type = type_.get("type", "")
 
         if data_type in ("SMALLINT", "BOOL",):
             if values[0].lower() in ("1", "on", "true", "yes", "ok"):
@@ -433,7 +445,7 @@ class SqlClient:
         # fallback
         return values[0]
 
-    def _data_from_ldif(self, filename):
+    def _data_from_ldif(self, filename: str) -> _t.Iterator[tuple[str, dict[str, _t.Any]]]:
         """Get data from parsed LDIF file.
 
         :param filename: LDIF filename.
@@ -468,7 +480,7 @@ class SqlClient:
                     attr_mapping[attr] = self._transform_value(attr, entry[attr])
                 yield table_name, attr_mapping
 
-    def create_from_ldif(self, filepath, ctx):
+    def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
         """Create entry with data loaded from an LDIF template file.
 
         :param filepath: Path to LDIF template file.
@@ -483,10 +495,10 @@ class SqlClient:
                 self.insert_into(table_name, column_mapping)
 
 
-def render_sql_properties(manager, src: str, dest: str) -> None:
+def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to SQL database server.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
     :param src: Absolute path to the template.
     :param dest: Absolute path where generated file is located.
     """

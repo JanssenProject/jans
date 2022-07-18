@@ -22,5 +22,9 @@ module = [
     "urllib3",
     "docker.*",
     "google.cloud",
+    "ldap3.*",
+    "ldif",
+    "sqlalchemy.*",
+    "requests_toolbelt.*",
 ]
 ignore_missing_imports = true
