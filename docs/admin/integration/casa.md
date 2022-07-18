@@ -3,6 +3,10 @@
 
 **Casa** is a self-service web portal that allows end users to view, enroll, and remove MFA credentials, including hardware tokens, software tokens, commercial services (like Duo), social login, biometric, and mobile.  Casa is also extensible. As new authentication technologies arise, you can download plugins to leverage them in your organization through Casa
 
+<p align="center">
+<img src="../../assets/image-casa-module-diagram.png">
+</p>
+
 ## Prerequisites
 - Installed Janssen Server  
 
