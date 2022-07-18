@@ -1,11 +1,13 @@
 package io.jans.as.server.token.ws.rs;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -13,11 +15,14 @@ import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.apache.tika.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -71,12 +76,11 @@ public class TokenRestWebServiceValidator {
     }
 
     public static boolean validateParams(String clientId, String clientSecret) {
-        return clientId != null && !clientId.isEmpty()
-                && clientSecret != null && !clientSecret.isEmpty();
+        return StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret);
     }
 
-    public void validateGrantType(GrantType requestedGrantType, GrantType[] clientGrantTypesArray, OAuth2AuditLog auditLog) {
-        List<GrantType> clientGrantTypes = Arrays.asList(clientGrantTypesArray);
+    public void validateGrantType(GrantType requestedGrantType, Client client, OAuth2AuditLog auditLog) {
+        List<GrantType> clientGrantTypes = Arrays.asList(client.getGrantTypes());
         if (!clientGrantTypes.contains(requestedGrantType)) {
             final String msg = "GrantType is not allowed by client's grantTypes.";
             log.trace(msg);
@@ -103,4 +107,27 @@ public class TokenRestWebServiceValidator {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
+    @NotNull
+    public Client validateClient(Client client, OAuth2AuditLog auditLog) {
+        if (client == null) {
+            throw new WebApplicationException(response(error(Response.Status.UNAUTHORIZED.getStatusCode(), TokenErrorResponseType.INVALID_GRANT, "Unable to find client."), auditLog));
+        }
+
+        log.debug("Get client from session: '{}'", client.getClientId());
+        if (client.isDisabled()) {
+            throw new WebApplicationException(response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT, "Client is disabled."), auditLog));
+        }
+        return client;
+    }
+
+
+    public void validateDeviceAuthorization(Client client, String deviceCode, DeviceAuthorizationCacheControl cacheData, OAuth2AuditLog oAuth2AuditLog) {
+        if (cacheData == null) {
+            log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired."), oAuth2AuditLog));
+        }
+        if (!cacheData.getClient().getClientId().equals(client.getClientId())) {
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), oAuth2AuditLog));
+        }
+    }
 }
