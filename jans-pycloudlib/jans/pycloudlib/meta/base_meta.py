@@ -16,6 +16,8 @@ class BaseMeta(ABC):
         """Get list of containers based on label.
 
         Subclass **MUST** implement this method.
+
+        :param label: Label name, i.e. ``APP_NAME=jans-auth``.
         """
 
     @abstractmethod
@@ -23,6 +25,9 @@ class BaseMeta(ABC):
         """Get container's IP address.
 
         Subclass **MUST** implement this method.
+
+        :param container: Container object.
+        :returns: IP address associated with the container.
         """
 
     @abstractmethod
@@ -30,6 +35,8 @@ class BaseMeta(ABC):
         """Get container's name.
 
         Subclass **MUST** implement this method.
+
+        :param container: Container object.
         """
 
     @abstractmethod
@@ -37,6 +44,9 @@ class BaseMeta(ABC):
         """Copy path to container.
 
         Subclass **MUST** implement this method.
+
+        :param container: Container object.
+        :param path: Path to file or directory.
         """
 
     @abstractmethod
@@ -44,4 +54,7 @@ class BaseMeta(ABC):
         """Run command inside container.
 
         Subclass **MUST** implement this method.
+
+        :param container: Container object.
+        :param cmd: String of command.
         """

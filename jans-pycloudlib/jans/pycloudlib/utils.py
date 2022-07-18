@@ -1,7 +1,6 @@
 """This module contains various helpers."""
 
 import base64
-import contextlib
 import json
 import logging
 import pathlib
@@ -12,9 +11,7 @@ import socket
 import ssl
 import string
 import subprocess
-from typing import Any
-from typing import AnyStr
-from typing import Tuple
+import typing as _t
 
 from cryptography import x509
 from cryptography.hazmat.primitives.ciphers import Cipher
@@ -36,13 +33,13 @@ _DEFAULT_CHARS = "".join([string.ascii_letters, string.digits])
 logger = logging.getLogger(__name__)
 
 
-def as_boolean(val: Any) -> bool:
+def as_boolean(val: _t.Any) -> bool:
     """Convert value as boolean.
 
     If the value cannot be converted as boolean, return ``False`` instead.
 
     :param val: Given value with any type, though only a subset of types that supported.
-    :return: ``True`` or ``False``.
+    :returns: ``True`` or ``False``.
     """
     default = False
     truthy = {"t", "T", "true", "True", "TRUE", "1", 1, True}
@@ -55,20 +52,22 @@ def as_boolean(val: Any) -> bool:
     return default
 
 
-def safe_value(value: Any) -> str:
+def safe_value(value: _t.Any) -> str:
     """Convert given value as JSON-friendly value.
 
-    :param val: Given value with any type.
+    :param value: Given value with any type.
     :return: JSON string.
     """
-    # bytes must be converted to str first, otherwise it will throws ``TypeError``
+    # ``bytes`` must be converted to ``str`` first, otherwise it will throws ``TypeError``
     if isinstance(value, bytes):
         value = value.decode()
 
     # other types must be serialized as JSON string
     if not isinstance(value, str):
-        value = json.dumps(value)
-    return value
+        retval = json.dumps(value)
+    else:
+        retval = value
+    return retval
 
 
 def get_random_chars(size: int = 12, chars: str = "") -> str:
@@ -100,10 +99,10 @@ def get_sys_random_chars(size: int = 12, chars: str = "") -> str:
     return "".join(random.SystemRandom().choices(chars, k=size))
 
 
-def exec_cmd(cmd: str) -> Tuple[bytes, bytes, int]:
+def exec_cmd(cmd: str) -> tuple[bytes, bytes, int]:
     """Execute shell command.
 
-    :param str: Shell command to be executed.
+    :param cmd: Shell command to be executed.
     :return: A ``tuple`` consists of stdout, stderr, and return code from executed shell command.
     """
     args = shlex.split(cmd)
@@ -115,7 +114,7 @@ def exec_cmd(cmd: str) -> Tuple[bytes, bytes, int]:
     return stdout.strip(), stderr.strip(), retcode
 
 
-def safe_render(text: str, ctx: dict) -> str:
+def safe_render(text: str, ctx: dict[str, _t.Any]) -> str:
     """Safely render formatted text.
 
     Common usecase is to escape ``%`` character when using string formatting.
@@ -137,27 +136,28 @@ def reindent(text: str, num_spaces: int = 1) -> str:
     :param num_spaces: The size of indentation per line.
     :return: Reindented string.
     """
-    text = [
-        "{0}{1}".format(num_spaces * " ", line.lstrip()) for line in text.splitlines()
+    text_seq = [
+        "{0}{1}".format(num_spaces * " ", line.lstrip())
+        for line in text.splitlines()
     ]
-    text = "\n".join(text)
-    return text
+    texts = "\n".join(text_seq)
+    return texts
 
 
-def generate_base64_contents(text: AnyStr, num_spaces: int = 1) -> str:
+def generate_base64_contents(text: _t.AnyStr, num_spaces: int = 1) -> str:
     """Generate base64 string.
 
     :param text: A ``str`` or ``bytes`` of text.
     :param num_spaces: The size of indentation per line.
     :return: base64 string.
     """
-    text = base64.b64encode(anystr_to_bytes(text))
-    return reindent(text.decode(), num_spaces)
+    text_bytes = base64.b64encode(anystr_to_bytes(text))
+    return reindent(text_bytes.decode(), num_spaces)
 
 
 def cert_to_truststore(
     alias: str, cert_file: str, keystore_file: str, store_pass: str
-) -> Tuple[bytes, bytes, int]:
+) -> tuple[bytes, bytes, int]:
     """Import certificate into a Java Truststore using ``keytool`` executable.
 
     :param alias: Alias name.
@@ -175,7 +175,10 @@ def cert_to_truststore(
 
 
 def get_server_certificate(
-    host: str, port: int, filepath: str, server_hostname: str = ""
+    host: str,
+    port: int,
+    filepath: str,
+    server_hostname: str = ""
 ) -> str:
     """Get PEM-formatted certificate of a given address.
 
@@ -196,13 +199,17 @@ def get_server_certificate(
         context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
 
         with context.wrap_socket(conn, server_hostname=server_hostname) as sock:
+            # getpeercert may returns ``None`` if there's no certificate
             der = sock.getpeercert(True)
-            cert = ssl.DER_cert_to_PEM_cert(der)
+            if der:
+                cert = ssl.DER_cert_to_PEM_cert(der)
+            else:
+                cert = ""
             pathlib.Path(filepath).write_text(cert)
             return cert
 
 
-def ldap_encode(password: AnyStr) -> str:
+def ldap_encode(password: _t.AnyStr) -> _t.Any:
     """Encode the password string to comply to LDAP specification.
 
     :param password: A password with ``str`` or ``bytes`` type.
@@ -211,7 +218,7 @@ def ldap_encode(password: AnyStr) -> str:
     return hashed.hashed(hashed.HASHED_SALTED_SHA, password)
 
 
-def anystr_to_bytes(val: AnyStr) -> bytes:
+def anystr_to_bytes(val: _t.AnyStr) -> bytes:
     """Convert ``str`` or ``bytes`` as ``bytes``.
 
     If given value is a ``str``, encode it into ``bytes``.
@@ -220,11 +227,13 @@ def anystr_to_bytes(val: AnyStr) -> bytes:
     :return: A ``bytes`` type of given value.
     """
     if isinstance(val, str):
-        val = val.encode()
-    return val
+        val_bytes = val.encode()
+    else:
+        val_bytes = val
+    return val_bytes
 
 
-def encode_text(text: AnyStr, key: AnyStr) -> bytes:
+def encode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
     """Encode text using triple DES and ECB mode.
 
     .. code-block:: python
@@ -236,27 +245,29 @@ def encode_text(text: AnyStr, key: AnyStr) -> bytes:
     :param key: Key used for encoding salt.
     :returns: Encoded ``bytes`` text.
     """
-    with contextlib.suppress(AttributeError):
-        # ``key`` must be a ``bytes``
-        key = key.encode()
+    if isinstance(key, str):
+        key_bytes = key.encode()
+    else:
+        key_bytes = key
 
-    with contextlib.suppress(AttributeError):
-        # ``text`` must be a ``bytes``
-        text = text.encode()
+    if isinstance(text, str):
+        text_bytes = text.encode()
+    else:
+        text_bytes = text
 
     cipher = Cipher(
-        algorithms.TripleDES(key), modes.ECB(), backend=default_backend(),
+        algorithms.TripleDES(key_bytes), modes.ECB(), backend=default_backend(),  # nosec: B305
     )
     encryptor = cipher.encryptor()
 
     padder = padding.PKCS7(algorithms.TripleDES.block_size).padder()
-    padded_data = padder.update(text) + padder.finalize()
+    padded_data = padder.update(text_bytes) + padder.finalize()
 
     encrypted_text = encryptor.update(padded_data) + encryptor.finalize()
     return base64.b64encode(encrypted_text)
 
 
-def decode_text(text: AnyStr, key: AnyStr) -> bytes:
+def decode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
     """Decode text using triple DES and ECB mode.
 
     .. code-block:: python
@@ -270,12 +281,13 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
     """
     encoded_text = base64.b64decode(text)
 
-    with contextlib.suppress(AttributeError):
-        # ``key`` must be a ``bytes``
-        key = key.encode()
+    if isinstance(key, str):
+        key_bytes = key.encode()
+    else:
+        key_bytes = key
 
     cipher = Cipher(
-        algorithms.TripleDES(key), modes.ECB(), backend=default_backend(),
+        algorithms.TripleDES(key_bytes), modes.ECB(), backend=default_backend(),  # nosec: B305
     )
     decryptor = cipher.decryptor()
 
@@ -286,19 +298,23 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
     return unpadder.update(padded_data) + unpadder.finalize()
 
 
+#: Base directory where certs are located
+CERT_BASE_DIR = "/etc/certs"
+
+
 def generate_ssl_certkey(
-    suffix,
-    email,
-    hostname,
-    org_name,
-    country_code,
-    state,
-    city,
-    base_dir="/etc/certs",
-    extra_dns=None,
-    extra_ips=None,
-    valid_to=365,
-):
+    suffix: str,
+    email: str,
+    hostname: str,
+    org_name: str,
+    country_code: str,
+    state: str,
+    city: str,
+    base_dir: str = CERT_BASE_DIR,
+    extra_dns: _t.Union[list[str], None] = None,
+    extra_ips: _t.Union[list[str], None] = None,
+    valid_to: int = 365,
+) -> tuple[str, str]:
     """Generate SSL public and private keys.
 
     :param suffix: Suffix as basename (i.e. ``auth-server``)
@@ -318,25 +334,31 @@ def generate_ssl_certkey(
     priv_key = generate_private_key(key_fn)
 
     cert_fn = f"{base_dir}/{suffix}.crt"
-    generate_public_key(
-        cert_fn,
-        priv_key,
-        add_san=True,
-        add_key_usage=True,
-        hostname=hostname,
-        country_code=country_code,
-        state=state,
-        city=city,
-        email=email,
-        org_name=org_name,
-        extra_dns=extra_dns,
-        extra_ips=extra_ips,
-        valid_to=valid_to,
-    )
+    kwargs: dict[str, _t.Any] = {
+        "hostname": hostname,
+        "country_code": country_code,
+        "state": state,
+        "city": city,
+        "email": email,
+        "org_name": org_name,
+        "extra_dns": extra_dns,
+        "extra_ips": extra_ips,
+        "valid_to": valid_to,
+    }
+    generate_public_key(cert_fn, priv_key, add_san=True, add_key_usage=True, **kwargs)
     return cert_fn, key_fn
 
 
-def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert="", alias="", in_passwd=""):
+def generate_keystore(  # nosec: B107
+    suffix: str,
+    hostname: str,
+    keypasswd: str,
+    jks_fn: str = "",
+    in_key: str = "",
+    in_cert: str = "",
+    alias: str = "",
+    in_passwd: str = "",
+) -> None:
     """Generate Java keystore (JKS).
 
     :param suffix: Suffix as basename (i.e. ``auth-server``)
@@ -368,8 +390,8 @@ def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert
     if in_passwd:
         cmd.append(f"-passin pass:{in_passwd}")
 
-    cmd = " ".join(cmd)
-    out, err, retcode = exec_cmd(cmd)
+    cmds = " ".join(cmd)
+    out, err, retcode = exec_cmd(cmds)
     if retcode != 0:
         err = err or out
         raise RuntimeError(f"Failed to generate PKCS12 keystore {pkcs_fn}; reason={err.decode()}")
@@ -389,25 +411,25 @@ def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert
     ]
     if alias:
         cmd.append(f"-alias {alias}")
-    cmd = " ".join(cmd)
+    cmds = " ".join(cmd)
 
-    out, err, retcode = exec_cmd(cmd)
+    out, err, retcode = exec_cmd(cmds)
     if retcode != 0:
         err = err or out
         raise RuntimeError(f"Failed to generate JKS keystore {jks_fn}; reason={err.decode()}")
 
 
 def generate_ssl_ca_certkey(
-    suffix,
-    email,
-    hostname,
-    org_name,
-    country_code,
-    state,
-    city,
-    base_dir="/etc/certs",
-    valid_to=365,
-):
+    suffix: str,
+    email: str,
+    hostname: str,
+    org_name: str,
+    country_code: str,
+    state: str,
+    city: str,
+    base_dir: str = CERT_BASE_DIR,
+    valid_to: int = 365,
+) -> tuple[str, str]:
     """Generate SSL public and private keys for CA.
 
     :param suffix: Suffix as basename (i.e. ``auth-server``)
@@ -425,36 +447,34 @@ def generate_ssl_ca_certkey(
     priv_key = generate_private_key(key_fn)
 
     cert_fn = f"{base_dir}/{suffix}.crt"
-    generate_public_key(
-        cert_fn,
-        priv_key,
-        is_ca=True,
-        hostname=hostname,
-        country_code=country_code,
-        state=state,
-        city=city,
-        email=email,
-        org_name=org_name,
-        valid_to=valid_to,
-    )
+    kwargs: dict[str, _t.Any] = {
+        "hostname": hostname,
+        "country_code": country_code,
+        "state": state,
+        "city": city,
+        "email": email,
+        "org_name": org_name,
+        "valid_to": valid_to,
+    }
+    generate_public_key(cert_fn, priv_key, is_ca=True, **kwargs)
     return cert_fn, key_fn
 
 
 def generate_signed_ssl_certkey(
-    suffix,
-    ca_key_fn,
-    ca_cert_fn,
-    email,
-    hostname,
-    org_name,
-    country_code,
-    state,
-    city,
-    base_dir="/etc/certs",
-    extra_dns=None,
-    extra_ips=None,
-    valid_to=365,
-):
+    suffix: str,
+    ca_key_fn: str,
+    ca_cert_fn: str,
+    email: str,
+    hostname: str,
+    org_name: str,
+    country_code: str,
+    state: str,
+    city: str,
+    base_dir: str = CERT_BASE_DIR,
+    extra_dns: _t.Union[list[str], None] = None,
+    extra_ips: _t.Union[list[str], None] = None,
+    valid_to: int = 365,
+) -> tuple[str, str]:
     """Generate SSL public and private keys signed by CA.
 
     :param suffix: Suffix as basename (i.e. ``auth-server``)
@@ -476,20 +496,17 @@ def generate_signed_ssl_certkey(
     priv_key = generate_private_key(key_fn)
 
     csr_fn = f"{base_dir}/{suffix}.csr"
-    csr = generate_csr(
-        csr_fn,
-        priv_key,
-        add_san=True,
-        add_key_usage=True,
-        hostname=hostname,
-        country_code=country_code,
-        state=state,
-        city=city,
-        email=email,
-        org_name=org_name,
-        extra_dns=extra_dns,
-        extra_ips=extra_ips,
-    )
+    gen_kwargs: dict[str, _t.Any] = {
+        "hostname": hostname,
+        "country_code": country_code,
+        "state": state,
+        "city": city,
+        "email": email,
+        "org_name": org_name,
+        "extra_dns": extra_dns,
+        "extra_ips": extra_ips,
+    }
+    csr = generate_csr(csr_fn, priv_key, add_san=True, add_key_usage=True, **gen_kwargs)
 
     cert_fn = f"{base_dir}/{suffix}.crt"
 
@@ -503,5 +520,6 @@ def generate_signed_ssl_certkey(
     with open(ca_cert_fn, "rb") as f:
         ca_cert = x509.load_pem_x509_certificate(f.read())
 
-    sign_csr(cert_fn, csr, ca_key, ca_cert, valid_to=valid_to)
+    sign_kwargs: dict[str, _t.Any] = {"valid_to": valid_to}
+    sign_csr(cert_fn, csr, ca_key, ca_cert, **sign_kwargs)
     return cert_fn, key_fn

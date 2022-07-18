@@ -24,6 +24,10 @@ class BaseConfig(ABC):
         """Get specific config.
 
         Subclass **MUST** implement this method.
+
+        :param key: Key name.
+        :param default: Default value if key is not exist.
+        :returns: Value based on given key or default one.
         """
 
     @abstractmethod
@@ -31,6 +35,10 @@ class BaseConfig(ABC):
         """Set specific config.
 
         Subclass **MUST** implement this method.
+
+        :param key: Key name.
+        :param value: Value of the key.
+        :returns: A ``bool`` to mark whether config is set or not.
         """
 
     def all(self) -> dict[str, _t.Any]:  # noqa: A003
@@ -42,6 +50,9 @@ class BaseConfig(ABC):
         """Set all config.
 
         Subclass **MUST** implement this method.
+
+        :param data: Key-value pairs.
+        :returns: A ``bool`` to mark whether config is set or not.
         """
 
     @abstractmethod

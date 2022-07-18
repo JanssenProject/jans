@@ -50,7 +50,7 @@ class KubernetesMeta(BaseMeta):
         The namespace is resolved from value of ``CN_CONTAINER_METADATA_NAMESPACE``
         environment variable.
 
-        :params label: Label name, i.e. ``APP_NAME=oxauth``.
+        :param label: Label name, i.e. ``APP_NAME=oxauth``.
         :returns: List of pod objects.
         """
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
@@ -60,7 +60,7 @@ class KubernetesMeta(BaseMeta):
     def get_container_ip(self, container: V1Pod) -> str:
         """Get container's IP address.
 
-        :params container: Pod object.
+        :param container: Pod object.
         :returns: IP address associated with the pod.
         """
         ip: str = container.status.pod_ip
@@ -69,7 +69,7 @@ class KubernetesMeta(BaseMeta):
     def get_container_name(self, container: V1Pod) -> str:
         """Get container's name.
 
-        :params container: Pod object.
+        :param container: Pod object.
         :returns: Pod name.
         """
         name: str = container.metadata.name
@@ -78,8 +78,8 @@ class KubernetesMeta(BaseMeta):
     def copy_to_container(self, container: V1Pod, path: str) -> None:
         """Copy path to container.
 
-        :params container: Pod object.
-        :params path: Path to file or directory.
+        :param container: Pod object.
+        :param path: Path to file or directory.
         """
         # make sure parent directory is created first
         dirname = os.path.dirname(path)
@@ -125,8 +125,8 @@ class KubernetesMeta(BaseMeta):
     def exec_cmd(self, container: V1Pod, cmd: str) -> _t.Any:
         """Run command inside container.
 
-        :params container: Pod object.
-        :params cmd: String of command.
+        :param container: Pod object.
+        :param cmd: String of command.
         """
         return stream(
             self.client.connect_get_namespaced_pod_exec,
