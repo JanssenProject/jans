@@ -64,4 +64,7 @@ setup(
     entry_points={
         "console_scripts": ["jans-pycloudlib=jans.pycloudlib.cli:cli"],
     },
+    package_data={
+        "jans.pycloudlib": ["py.typed"],
+    },
 )

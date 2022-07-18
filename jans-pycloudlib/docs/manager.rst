@@ -22,7 +22,7 @@ Manager
     :undoc-members:
     :show-inheritance:
 
-.. autoclass:: jans.pycloudlib.manager._Manager
+.. autoclass:: Manager
     :members:
     :private-members:
     :undoc-members:
