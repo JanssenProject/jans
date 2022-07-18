@@ -85,13 +85,10 @@ Create ``/app/templates/jans.properties.tmpl``:
 
     persistence.type=%(persistence_type)s
 
-    oxauth_ConfigurationEntryDN=ou=oxauth,ou=configuration,o=jans
-    oxtrust_ConfigurationEntryDN=ou=oxtrust,ou=configuration,o=jans
-    oxidp_ConfigurationEntryDN=ou=oxidp,ou=configuration,o=jans
-    oxcas_ConfigurationEntryDN=ou=oxcas,ou=configuration,o=jans
-    oxpassport_ConfigurationEntryDN=ou=oxpassport,ou=configuration,o=jans
-    oxradius_ConfigurationEntryDN=ou=oxradius,ou=configuration,o=jans
-    fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=jans
+    jansAuth_ConfigurationEntryDN=ou=jans-auth,ou=configuration,o=jans
+    fido2_ConfigurationEntryDN=ou=jans-fido2,ou=configuration,o=jans
+    scim_ConfigurationEntryDN=ou=jans-scim,ou=configuration,o=jans
+    configApi_ConfigurationEntryDN=ou=jans-config-api,ou=configuration,o=jans
 
     certsDir=/etc/certs
     confDir=
