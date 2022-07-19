@@ -1,0 +1,12 @@
+{
+  "enabled": false,
+  "revision": 1,
+  "transHash": "4",
+  "source": "Sample source for agama 4",
+  "qname": "Test Agama Flow4",
+  "metadata":{
+      "funcName": "Test_fun_4",
+      "inputs":["1","abc","exyz"],
+      "timeout": 9600
+  }
+}
