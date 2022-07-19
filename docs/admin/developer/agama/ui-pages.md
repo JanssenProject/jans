@@ -149,3 +149,19 @@ One way to structure the solution is the following:
 ## Assets
 
 Web pages need their assets, be they stylesheets, images, or javascript. The template engine has no restrictions in this regard. The main concern is producing proper markup. Keep in mind assets are not stored alongisde the templates but in the parallel folder `/opt/jans/jetty/jans-auth/agama/fl`. Check [here](./lifecycle.md#upload-required-assets) to learn more.
+
+## Template overrides
+
+[Template overrides](./dsl-full.md#template-overrides) is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience. 
+
+To start, use [`Trigger`](./dsl.md#subflows) to play around with the existing flow - as is - from the flow you are creating. Collect the URLs of the pages you are not comfortable with: grab them directly from the browser's address bar. Then proceed as follows with every URL to locate the actual templates physically:
+
+1. Remove the `https://.../fl/` portion of the URL
+1. Split the URL obtained into two pieces: a *folder* name and a *remainder*. The remainder starts after the last slash found in the URL, and usually ends in `.fls`
+1. In your Janssen server, locate the directory `/opt/jans/jetty/jans-auth/agama/fl`
+1. `cd` to the directory specified by the *folder*
+1. List the contents of the directory and pick the *filename* that best matches the *remainder*
+
+Save a copy of every selected file in the directory associated to your flow (`basePath` directive) or in a subdirectory of it. Rename the files if desired too.
+
+Now, build the `Override templates` directive passing several pairs of strings separated by lines or spaces. Every pair consists of a string specifying the original template location, that is, `<folder>/<filename>` followed by the path to the new template version relative to the base path of your flow. Check [here](./dsl-full.md#template-overrides) for an example.
