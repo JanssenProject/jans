@@ -12,6 +12,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Contribute**: [Contribution Guide](docs/CONTRIBUTING.md) | [Community Docs](docs/community) | [Developer Guides](docs/developer)
 
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 ![Hex.pm](https://img.shields.io/hexpm/l/plug)
 ![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)
@@ -128,6 +129,7 @@ If you find a bug in a Janssen project, or you would like to suggest a new featu
 
 Below are the list of current mega releases that hold information about each single release of our servies and modules:
 
+- [v1.0.1](https://github.com/JanssenProject/jans/releases/tag/v1.0.1)
 - [v1.0.0](https://github.com/JanssenProject/jans/releases/tag/v1.0.0)
 - [v1.0.0-beta.16](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.16)
 - [v1.0.0-beta.15](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.15)
