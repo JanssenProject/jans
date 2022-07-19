@@ -14,12 +14,11 @@ import io.jans.agama.dsl.TranspilerException;
 import io.jans.agama.dsl.error.SyntaxException;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.service.auth.AgamaFlowService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.util.Jackson;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -28,8 +27,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.List;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -42,8 +41,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class AgamaResource extends ConfigBaseResource {
 
-    private static final String AGAMA_FLOW = "Agama flow";
-    private static final String AGAMA_QName = "FlowName";
+    private static final String AGAMA_QNAME = "FlowName";
     private static final String AGAMA_SOURCE = "source";
 
     @Inject
@@ -55,13 +53,13 @@ public class AgamaResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS })
     public Response getFlows(@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) throws Exception {
+            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
 
         if (log.isDebugEnabled()) {
             log.error("Search Agama Flow with pattern:{}, sizeLimit:{}, ", escapeLog(pattern), escapeLog(limit));
         }
 
-        List<Flow> flows = new ArrayList<Flow>();
+        List<Flow> flows = null;
         if (!pattern.isEmpty() && pattern.length() >= 2) {
             flows = agamaFlowService.searchAgamaFlows(pattern, limit);
         } else {
@@ -88,7 +86,7 @@ public class AgamaResource extends ConfigBaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
-    public Response createFlow(@Valid Flow flow) {
+    public Response createFlow(@Valid Flow flow) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException  {
         log.error(" Flow to be added flow:{}, flow.getQName():{}, flow.getSource():{} ", flow, flow.getQname(),
                 flow.getSource());
 
@@ -102,7 +100,7 @@ public class AgamaResource extends ConfigBaseResource {
     
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
-    public Response updateFlow(@Valid Flow flow) {
+    public Response updateFlow(@Valid Flow flow) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         log.error(" Flow to update flow:{}, flow.getQName():{}, flow.getSource():{} ", flow, flow.getQname(),
                 flow.getSource());
 
@@ -131,14 +129,34 @@ public class AgamaResource extends ConfigBaseResource {
         // check if flow exists
         Flow flow = agamaFlowService.getFlowByName(decodedFlowName);
         if(flow == null) {
-            thorwBadRequestException("Flow identified by "+flow.getQname()+" does not exist!" );
+            thorwBadRequestException("Flow identified by "+flowName+" does not exist!" );
         }
         
         agamaFlowService.removeAgamaFlow(flow);
         return Response.noContent().build();
     }
-
-    private void validateAgamaFlowData(Flow flow) {
+    
+    private void validateAgamaFlowData(Flow flow) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        log.error(" Validate Agama Flow data - flow:{}", flow);
+        if (flow == null) {
+            return;
+        }
+        log.error("Agama Flow to be added flow:{}, flow.getQname():{}, flow.getSource():{} ", flow,
+                flow.getQname(), flow.getSource());
+        
+        String validateMsg = agamaFlowService.validateFlowFields(flow);
+        log.error("Agama Flow to be validation msg:{} ", validateMsg);
+        if(StringUtils.isNotBlank(validateMsg)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Required feilds missing -> ");
+            sb.append(validateMsg);
+            thorwBadRequestException(sb.toString());
+        }
+        
+        validateSyntax(flow);
+    }
+    
+    private void validateAgamaFlowData2(Flow flow) {
         if (flow == null) {
             return;
         }
@@ -147,7 +165,7 @@ public class AgamaResource extends ConfigBaseResource {
                 flow.getQname(), flow.getSource());
         StringBuilder sb = new StringBuilder();
         if (StringUtils.isBlank(flow.getQname())) {
-            sb.append(AGAMA_QName).append(",");
+            sb.append(AGAMA_QNAME).append(",");
         }
 
         if (StringUtils.isBlank(flow.getSource())) {
@@ -161,19 +179,29 @@ public class AgamaResource extends ConfigBaseResource {
             thorwBadRequestException(sb.toString());
         }
         
+        
+        
+        validateSyntax(flow);
+    }
+    
+    private void validateSyntax(Flow flow) {
+        log.error("Validate Syntax - flow:{}", flow);
+        if (flow == null) {
+            return;
+        }        
         //validate syntax
         try {
             Transpiler.runSyntaxCheck(flow.getQname(), flow.getSource());
         } catch (SyntaxException se) {
-            log.error("Transpiler syntax check error :{}", se);
+            log.error("Transpiler syntax check error", se);
             try {
                 thorwBadRequestException(Jackson.asJsonNode(se.getError()).toString());
             }catch(JsonProcessingException jpe) {
-                log.error("Agama Flow Transpiler syntax error parsing error:{}", jpe);
+                log.error("Agama Flow Transpiler syntax error parsing error", jpe);
             }
         } catch (TranspilerException te) {
-            log.error("Agama Flow transpiler exception:{}", te);
-            thorwBadRequestException(sb.toString());
+            log.error("Agama Flow transpiler exception", te);
+            thorwBadRequestException(te.toString());
         }
     }
     

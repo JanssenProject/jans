@@ -3,16 +3,24 @@ package io.jans.configapi.service.auth;
 
 import io.jans.agama.model.Flow;
 import static io.jans.as.model.util.Util.escapeLog;
+
+import io.jans.configapi.core.util.DataUtil;
+import io.jans.configapi.model.configuration.AgamaConfiguration;
+import io.jans.configapi.util.AuthUtil;
+
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 
-
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -25,7 +33,13 @@ public class AgamaFlowService implements Serializable {
     public static final String AGAMA_FLOWS_BASE = "ou=flows," + AGAMA_BASE;
 
     @Inject
-    private transient Logger logger;
+    private Logger logger;
+
+    @Inject
+    AuthUtil authUtil;
+    
+    @Inject
+    DataUtil dataUtil;
 
     @Inject
     private transient PersistenceEntryManager persistenceEntryManager;
@@ -116,10 +130,59 @@ public class AgamaFlowService implements Serializable {
 
     public String getAgamaFlowDn(String flowName) {
         logger.debug("Agama flowName:{}", flowName);
-        if(StringUtils.isBlank(flowName)) {
+        if (StringUtils.isBlank(flowName)) {
             return AGAMA_FLOWS_BASE;
         }
         return String.format(String.format("%s=%s,%s", Flow.ATTR_NAMES.QNAME, flowName, AGAMA_FLOWS_BASE));
-       }
+    }
+
+    public AgamaConfiguration getAgamaConfiguration() {
+        return authUtil.getAgamaConfiguration();
+    }
+
+    public String validateFlowFields(Flow flow)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return validateFlowFields(flow, getAgamaConfiguration().getMandatoryAttributes());
+    }
+
+    public String validateFlowFields(Flow flow, List<String> mandatoryAttributes)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+        logger.debug("mandatoryAttributes:{} , ", mandatoryAttributes);
+
+        StringBuilder missingAttributes = new StringBuilder();
+
+        if (mandatoryAttributes == null || mandatoryAttributes.isEmpty()) {
+            return missingAttributes.toString();
+        }
+
+        List<Field> allFields = authUtil.getAllFields(flow.getClass());
+        logger.debug("All user fields :{} ", allFields);
+
+        Object attributeValue = null;
+        for (String attribute : mandatoryAttributes) {
+            logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
+                    authUtil.containsField(allFields, attribute));
+
+            if (authUtil.containsField(allFields, attribute)) {
+                logger.debug("Checking if attribute:{} is simple attribute", attribute);
+                attributeValue = BeanUtils.getProperty(flow, attribute);
+                logger.debug("User basic attribute:{} - attributeValue:{} ", attribute, attributeValue);
+            }
+
+            Map<String, String> objectPropertyMap = dataUtil.getFieldTypeMap(flow.getClass());
+            
+            if (attributeValue == null) {
+                missingAttributes.append(attribute).append(",");
+            }
+        }
+        logger.debug("Checking mandatory missingAttributes:{} ", missingAttributes);
+        if (missingAttributes.length() > 0) {
+            missingAttributes.replace(missingAttributes.lastIndexOf(","), missingAttributes.length(), "");
+        }
+
+        logger.debug("Returning missingAttributes:{} ", missingAttributes);
+        return missingAttributes.toString();
+    }
 
 }
