@@ -55,8 +55,8 @@ class UpdateToken(UpdateTokenType):
     # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
     def modifyAccessToken(self, accessToken, context):
         print "Update token script. Modify AT: "
-		sessionIdService = CdiUtil.bean(SessionIdService)
-		sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
+	sessionIdService = CdiUtil.bean(SessionIdService)
+	sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
         client_id = sessionId.getSessionAttributes().get("client_id")
 
         # get org_id from client_id
