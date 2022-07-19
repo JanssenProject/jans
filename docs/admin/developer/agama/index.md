@@ -47,7 +47,7 @@ The Agama engine (a.k.a the "_engine_") is the piece of software in charge of re
 
 Note the engine itself does not implement an authentication protocol. It only offers a safe way for short-lived web journeys to materialize. Hence, another piece is required to put flows in the context of a standard authorization framework like OpenId Connect. This where the "_bridge_" pitches in. 
 
-The "bridge" is a regular jython script that temporarily hands control to the engine and receives control back once the agama flow has finished. This script is in charge of doing the actual user authentication and leads to the completion of the process by taking the user's browser to a predetermined URL (the so-called `redirect_uri` where an access token or a code can be obtained.
+The "bridge" is a regular jython script that temporarily hands control to the engine and receives control back once the agama flow has finished. This script is in charge of doing the actual user authentication and leads to the completion of the process by taking the user's browser to a predetermined URL - the so-called `redirect_uri` where an access token or a code can be obtained.
 
 Account that by default, the engine is disabled in the authentication server. The [quick start](./quick-start.md) page explains how to enable it. 
 
