@@ -439,8 +439,9 @@ Finish it.nonsense
 
 - Any statements found after `Finish` is not reached and thus, not executed
 - If no `Finish` statement is found in a flow's execution, this will degenerate in flow crash 
-- When a flow is finished and was used as subflow (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later.
-- Learn about aborted flows [here](./flows-lifecycle.md#cancellation). Also check the best practices on [Finishing flows](./flows-lifecycle.md#finishing-flows).
+- When a flow is finished and was used as subflow (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later
+- A flow cannot be aborted by itself. This can only be achieved through a parent flow. Learn more about aborted flows [here](./flows-lifecycle.md#cancellation)
+- Check the best practices on finishing flows [here](./flows-lifecycle.md#finishing-flows)
 
 ## Web interaction
 
@@ -729,15 +730,30 @@ Note _list_ and _map_ literals cannot be passed as arguments to `Trigger`:
 
 ### Template overrides
 
-When re-using flows, existing templates may not match the required look-and-feel of the flow that is being built, or may require minor adjustments to fit better the parent's needs. These problems can be overcome by declaring which templates the developer would like to override for a given subflow call. Example:
+When re-using flows, existing templates may not match the required look-and-feel or layout of the flow that is being built, or may require minor adjustments to fit better the parent's needs. These can be overcome by declaring which templates the developer would like to override for a given subflow call. Example:
 
 ```
 outcome = Trigger jo.jo.PersonalInfoGathering
-    Override templates "basic.ftl" "detail.ftl"
+    Override templates "path/basic.ftl" "" "path2/dir/detail.ftl" "tmp/mydetail.ftl"
 Log "subflow returned with success?" outcome.success
 ```
 
-In an indented block, using the `Override templates` keyword one or more string literals can be provided. They specify the paths to templates of the subflow that will be overriden by the parent. In the example above, templates `basic.ftl` and `detail.ftl` of `PersonalInfoGathering` flow won't be picked from its expected location but from the base path of the current (parent) flow.
+In an indented block using the `Override templates` keyword, several string literals can be provided. They specify the paths of the (subflows) templates that will be overriden by the parent and the corresponding new paths. In the example above, templates `path/basic.ftl` and `path2/dir/detail.ftl` rendered by flow `PersonalInfoGathering` (or its subflows) won't be picked from these locations but from the base path of the current (parent) flow using names `basic.ftl` and `tmp/mydetail.ftl` respectively. Usage of empty string denotes reusing the same file name than the original file.
+
+Alternatively, every pair of original vs. overriden path can be specified in a single line for more clarity, like this:
+
+```
+outcome = Trigger jo.jo.PersonalInfoGathering
+    Override templates "path/basic.ftl" "" 
+    "path2/dir/detail.ftl" "tmp/mydetail.ftl"
+    ...
+```
+
+To learn more about how paths in template overrides work, see [writing UI pages](./ui-pages.md#template-overrides).
+
+### About recursive invocations
+
+A flow **cannot** trigger itself. Also, mutual calls (e.g. `A` triggering `B`, and `B` triggering `A`) must be **avoided** at all cost. 
 
 ## Java interaction
 
