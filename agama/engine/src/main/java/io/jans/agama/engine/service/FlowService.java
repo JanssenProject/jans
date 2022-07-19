@@ -235,7 +235,7 @@ public class FlowService {
     
         String code = fl.getTranspiled();
         if (code == null) {
-            String msg = "Source code of flow " + fl.getQName() + " ";
+            String msg = "Source code of flow " + fl.getQname() + " ";
             msg += fl.getCodeError() == null ? "has not been parsed yet" : "has errors";
             throw new IOException(msg);
         }

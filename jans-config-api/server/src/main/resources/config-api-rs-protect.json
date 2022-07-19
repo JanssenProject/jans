@@ -653,6 +653,29 @@
                 ]
             }
         ]
+    },
+	{
+        "path":"/jans-config-api/agama",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/agama.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH","POST","PUT"],
+                "scopes":[
+                    "https://jans.io/oauth/config/agama.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/agama.delete"
+                ]
+            }
+        ]
     }
 ]
 }
