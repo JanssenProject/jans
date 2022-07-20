@@ -44,16 +44,6 @@ public class AgamaFlowService implements Serializable {
     @Inject
     private transient PersistenceEntryManager persistenceEntryManager;
 
-    public Flow getFlowByInum(String inum) {
-        Flow result = null;
-        try {
-            result = persistenceEntryManager.find(Flow.class, getFlowByDn(inum));
-        } catch (Exception ex) {
-            logger.error("Failed to load flow entry", ex);
-        }
-        return result;
-    }
-
     public List<Flow> searchAgamaFlows(String pattern, int sizeLimit) {
         if (logger.isDebugEnabled()) {
             logger.debug("Search Agama Flow with pattern:{}, sizeLimit:{} ", escapeLog(pattern), escapeLog(sizeLimit));

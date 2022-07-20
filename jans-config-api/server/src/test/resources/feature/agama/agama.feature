@@ -52,7 +52,7 @@ Scenario: Fetch agama flow by name
 	Then status 200 
 	And print response
 
-	
+@ignore		
 @CreateUpdateDelete 
 Scenario: Create new agama flow
 	Given url mainUrl
@@ -64,8 +64,53 @@ Scenario: Create new agama flow
 	Then def result = response
     And print 'Old transHash ='+response.transHash 
 	Then set result.transHash = 'UpdatedAgamaFlowtransHash' 
+    And print response.qname 	
+	Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+    Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+	And request result 
+	When method PUT 
+	Then status 200 
+	And print response
  	And print response.qname 	
-	Given url mainUrl
+    And print response.transHash
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+    Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+	When method DELETE 
+	Then status 204
+	And print response
+
+	
+@CreateFlowWithDataInRequestBodyUpdateDelete
+Scenario: Create new agama flow
+    Then def flowName = 'test'
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+    And header Content-Type = 'text/plain'
+    And header Accept = 'application/json'
+	And request read('agama-source.txt') 
+	When method POST 
+    Then status 201 
+	And print response
+    And print response.qname 	
+	Then def flowName = response.qname
+    And print flowName 
+	Then def result = response
+    And print 'Old transHash ='+response.transHash 
+	Then set result.transHash = 'UpdatedAgamaFlowtransHash' 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+    Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
 	And request result 
 	When method PUT 

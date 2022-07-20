@@ -2,7 +2,16 @@
   "enabled": false,
   "revision": 1,
   "transHash": "4",
-  "source": "Sample source for agama 4",
+  "source": "
+//This is a comment
+Flow test
+    Basepath "hello" 
+
+in = { name: "John" }
+RRF "index.ftlh" in
+
+Log "Done!"
+Finish "john_doe"",
   "qname": "Test Agama Flow4",
   "metadata":{
       "funcName": "Test_fun_4",
