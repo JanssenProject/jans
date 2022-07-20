@@ -7,6 +7,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
 
@@ -128,6 +130,29 @@ public class TokenRestWebServiceValidator {
         }
         if (!cacheData.getClient().getClientId().equals(client.getClientId())) {
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), oAuth2AuditLog));
+        }
+    }
+
+    public void validateGrant(AuthorizationGrant grant, Client client, Object identifier, OAuth2AuditLog auditLog) {
+        validateGrant(grant, client, identifier, auditLog, null);
+    }
+
+
+    public void validateGrant(AuthorizationGrant grant, Client client, Object identifier, OAuth2AuditLog auditLog, Consumer<AuthorizationGrant> onFailure) {
+        if (grant == null) {
+            log.debug("AuthorizationGrant not found by clientId: '{}', identifier: '{}'", client.getClientId(), identifier);
+            if (onFailure != null) {
+                onFailure.accept(grant);
+            }
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code."), auditLog));
+        }
+
+        if (!client.getClientId().equals(grant.getClientId())) {
+            log.debug("AuthorizationCodeGrant is found but belongs to another client. Grant's clientId: '{}', identifier: '{}'", grant.getClientId(), identifier);
+            if (onFailure != null) {
+                onFailure.accept(grant);
+            }
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Client mismatch."), auditLog));
         }
     }
 }
