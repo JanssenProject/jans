@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -140,7 +141,7 @@ public class ServerUtil {
     }
 
     public static ObjectMapper createJsonMapper() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
+        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
         final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
