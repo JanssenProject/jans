@@ -1,11 +1,14 @@
 package io.jans.as.server.token.ws.rs;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantType;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -15,6 +18,8 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.Date;
 
 import static io.jans.as.server.util.TestUtil.assertBadRequest;
 import static org.junit.Assert.fail;
@@ -41,12 +46,12 @@ public class TokenRestWebServiceValidatorTest {
     private ErrorResponseFactory errorResponseFactory;
 
     @InjectMocks
-    private TokenRestWebServiceValidator tokenRestWebServiceValidator;
+    private TokenRestWebServiceValidator validator;
 
     @Test
     public void validateParams_whenGrantTypeIsBlank_shouldRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateParams("", "some_code", "https://my.redirect", "refresh_token", AUDIT_LOG);
+            validator.validateParams("", "some_code", "https://my.redirect", "refresh_token", AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -57,7 +62,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsAuthorizationCodeAndCodeIsBlank_shouldRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "", "https://my.redirect", "refresh_token", AUDIT_LOG);
+            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "", "https://my.redirect", "refresh_token", AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -69,7 +74,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsAuthorizationCodeAndRedirectUriIsBlank_shouldRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "some_code", "", "refresh_token", AUDIT_LOG);
+            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "some_code", "", "refresh_token", AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -80,7 +85,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsRefreshTokenAndRefreshTokenIsBlank_shouldRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "some_code", "https://my.redirect", "", AUDIT_LOG);
+            validator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "some_code", "https://my.redirect", "", AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -91,7 +96,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsAuthorizationCodeAndCodeIsNotBlank_shouldNotRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "some_code", "https://my.redirect", "", AUDIT_LOG);
+            validator.validateParams(GrantType.AUTHORIZATION_CODE.getValue(), "some_code", "https://my.redirect", "", AUDIT_LOG);
         } catch (WebApplicationException e) {
             fail("Error occurs. We should not get it.");
         }
@@ -100,7 +105,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateParams_whenGrantTypeIsRefreshTokenAndRefreshTokenIsNotBlank_shouldNotRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "", "https://my.redirect", "refresh_token", AUDIT_LOG);
+            validator.validateParams(GrantType.REFRESH_TOKEN.getValue(), "", "https://my.redirect", "refresh_token", AUDIT_LOG);
         } catch (WebApplicationException e) {
             fail("Error occurs. We should not get it.");
         }
@@ -109,7 +114,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateGrantType_whenClientDotNotHaveGrantType_shouldRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateGrantType(GrantType.AUTHORIZATION_CODE, new Client(), AUDIT_LOG);
+            validator.validateGrantType(GrantType.AUTHORIZATION_CODE, new Client(), AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -120,7 +125,7 @@ public class TokenRestWebServiceValidatorTest {
     @Test
     public void validateClient_whenClientIsNull_shouldRaiseError() {
         try {
-            tokenRestWebServiceValidator.validateClient(null, AUDIT_LOG);
+            validator.validateClient(null, AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), e.getResponse().getStatus());
             return;
@@ -133,7 +138,7 @@ public class TokenRestWebServiceValidatorTest {
         try {
             Client client = new Client();
             client.setDisabled(true);
-            tokenRestWebServiceValidator.validateClient(client, AUDIT_LOG);
+            validator.validateClient(client, AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertEquals(Response.Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
             return;
@@ -147,7 +152,7 @@ public class TokenRestWebServiceValidatorTest {
             Client client = new Client();
             client.setClientId("testId");
 
-            tokenRestWebServiceValidator.validateDeviceAuthorization(client, "code", null, AUDIT_LOG);
+            validator.validateDeviceAuthorization(client, "code", null, AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
@@ -164,11 +169,63 @@ public class TokenRestWebServiceValidatorTest {
             DeviceAuthorizationCacheControl deviceAuthorization = new DeviceAuthorizationCacheControl();
             deviceAuthorization.setClient(client);
 
-            tokenRestWebServiceValidator.validateDeviceAuthorization(new Client(), "code", deviceAuthorization, AUDIT_LOG);
+            validator.validateDeviceAuthorization(new Client(), "code", deviceAuthorization, AUDIT_LOG);
         } catch (WebApplicationException e) {
             assertBadRequest(e.getResponse());
             return;
         }
         fail("No error when client is null.");
+    }
+
+    @Test
+    public void validateGrant_whenGrantIsNull_shouldRaiseError() {
+        try {
+            Client client = new Client();
+            client.setClientId("testId");
+
+            validator.validateGrant(null, client, "code", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error when grant is null.");
+    }
+
+    @Test
+    public void validateGrant_whenGrantDoesNotBelongToGivenClient_shouldRaiseError() {
+        try {
+            Client client = new Client();
+            client.setClientId("testId");
+
+            AuthorizationGrant grant = new AuthorizationGrant() {
+                @Override
+                public GrantType getGrantType() {
+                    return GrantType.AUTHORIZATION_CODE;
+                }
+            };
+            grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, new Client(), new Date());
+
+            validator.validateGrant(grant, client, "code", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error when grant and client is not matched.");
+    }
+
+    @Test
+    public void validateGrant_whenGrantMatchesToClient_shouldNotRaiseError() {
+        Client client = new Client();
+        client.setClientId("testId");
+
+        AuthorizationGrant grant = new AuthorizationGrant() {
+            @Override
+            public GrantType getGrantType() {
+                return GrantType.AUTHORIZATION_CODE;
+            }
+        };
+        grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+
+        validator.validateGrant(grant, client, "code", AUDIT_LOG);
     }
 }
