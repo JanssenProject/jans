@@ -181,79 +181,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setCertAsPem(request.getHeader(X_CLIENTCERT));
             executionContext.setDpop(dpopStr);
             executionContext.setClient(client);
-            executionContext.setDpop(dpopStr);
             executionContext.setAppConfiguration(appConfiguration);
             executionContext.setAttributeService(attributeService);
+            executionContext.setAuditLog(auditLog);
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
-                log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
-                final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
-                log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
-
-                if (authorizationCodeGrant == null) {
-                    log.debug("AuthorizationCodeGrant is empty by clientId: '{}', code: '{}'", client.getClientId(), code);
-                    // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
-                    grantService.removeAllByAuthorizationCode(code);
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code."), auditLog);
-                }
-
-                if (!client.getClientId().equals(authorizationCodeGrant.getClientId())) {
-                    log.debug("AuthorizationCodeGrant is found but belongs to another client. Grant's clientId: '{}', code: '{}'", authorizationCodeGrant.getClientId(), code);
-                    // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
-                    grantService.removeAllByAuthorizationCode(code);
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Client mismatch."), auditLog);
-                }
-
-                validatePKCE(authorizationCodeGrant, codeVerifier, auditLog);
-
-                authorizationCodeGrant.setIsCachedWithNoPersistence(false);
-                authorizationCodeGrant.save();
-
-                RefreshToken reToken = createRefreshToken(request, client, scope, authorizationCodeGrant, dpopStr);
-
-                scope = authorizationCodeGrant.checkScopesPolicy(scope);
-
-                executionContext.setGrant(authorizationCodeGrant);
-                AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
-
-                IdToken idToken = null;
-                if (authorizationCodeGrant.getScopes().contains(OPENID)) {
-                    String nonce = authorizationCodeGrant.getNonce();
-                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                            appConfiguration.getLegacyIdTokenClaims());
-                    final String idTokenTokenBindingCnf = client.getIdTokenTokenBindingCnf();
-                    Function<JsonWebResponse, Void> authorizationCodePreProcessing = jsonWebResponse -> {
-                        if (StringUtils.isNotBlank(idTokenTokenBindingCnf) && StringUtils.isNotBlank(authorizationCodeGrant.getTokenBindingHash())) {
-                            TokenBindingMessage.setCnfClaim(jsonWebResponse, authorizationCodeGrant.getTokenBindingHash(), idTokenTokenBindingCnf);
-                        }
-                        return null;
-                    };
-
-                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, authorizationCodeGrant, client, appConfiguration, attributeService);
-
-                    executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
-                    executionContext.setPreProcessing(JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
-                    executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
-
-                    idToken = authorizationCodeGrant.createIdToken(
-                            nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null, executionContext);
-                }
-
-                auditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
-
-                grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
-
-                final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
-                return response(Response.ok().entity(entity), auditLog);
+                return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
             }
 
             if (gt == GrantType.REFRESH_TOKEN) {
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
-
-                if (authorizationGrant == null) {
-                    log.trace("Grant object is not found by refresh token.");
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token or otherwise token type or client does not match."), auditLog);
-                }
+                tokenRestWebServiceValidator.validateGrant(authorizationGrant, client, refreshToken, auditLog);
 
                 final RefreshToken refreshTokenObject = authorizationGrant.getRefreshToken(refreshToken);
                 if (refreshTokenObject == null || !refreshTokenObject.isValid()) {
@@ -508,6 +446,58 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         return response(builder, auditLog);
+    }
+
+    private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, ExecutionContext executionContext) {
+        Client client = executionContext.getClient();
+
+        log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
+        final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
+        log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
+
+        // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
+        tokenRestWebServiceValidator.validateGrant(authorizationCodeGrant, client, code, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
+        validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
+
+        authorizationCodeGrant.setIsCachedWithNoPersistence(false);
+        authorizationCodeGrant.save();
+
+        RefreshToken reToken = createRefreshToken(executionContext.getHttpRequest(), client, scope, authorizationCodeGrant, executionContext.getDpop());
+
+        scope = authorizationCodeGrant.checkScopesPolicy(scope);
+
+        executionContext.setGrant(authorizationCodeGrant);
+        AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
+
+        IdToken idToken = null;
+        if (authorizationCodeGrant.getScopes().contains(OPENID)) {
+            String nonce = authorizationCodeGrant.getNonce();
+            boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                    appConfiguration.getLegacyIdTokenClaims());
+            final String idTokenTokenBindingCnf = client.getIdTokenTokenBindingCnf();
+            Function<JsonWebResponse, Void> authorizationCodePreProcessing = jsonWebResponse -> {
+                if (StringUtils.isNotBlank(idTokenTokenBindingCnf) && StringUtils.isNotBlank(authorizationCodeGrant.getTokenBindingHash())) {
+                    TokenBindingMessage.setCnfClaim(jsonWebResponse, authorizationCodeGrant.getTokenBindingHash(), idTokenTokenBindingCnf);
+                }
+                return null;
+            };
+
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), authorizationCodeGrant, client, appConfiguration, attributeService);
+
+            executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
+            executionContext.setPreProcessing(JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
+            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+
+            idToken = authorizationCodeGrant.createIdToken(
+                    nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null, executionContext);
+        }
+
+        executionContext.getAuditLog().updateOAuth2AuditLog(authorizationCodeGrant, true);
+
+        grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
+
+        final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
+        return response(Response.ok().entity(entity), executionContext.getAuditLog());
     }
 
     @Nullable
