@@ -2,17 +2,8 @@
   "enabled": false,
   "revision": 1,
   "transHash": "4",
-  "source": "
-//This is a comment
-Flow test
-    Basepath "hello" 
-
-in = { name: "John" }
-RRF "index.ftlh" in
-
-Log "Done!"
-Finish "john_doe"",
-  "qname": "Test Agama Flow4",
+  "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+  "qname": "test",
   "metadata":{
       "funcName": "Test_fun_4",
       "inputs":["1","abc","exyz"],

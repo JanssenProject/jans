@@ -52,7 +52,7 @@ Scenario: Fetch agama flow by name
 	Then status 200 
 	And print response
 
-@ignore		
+	
 @CreateUpdateDelete 
 Scenario: Create new agama flow
 	Given url mainUrl
@@ -89,7 +89,7 @@ Scenario: Create new agama flow
 
 	
 @CreateFlowWithDataInRequestBodyUpdateDelete
-Scenario: Create new agama flow
+Scenario: Create new agama flow with source data in request body
     Then def flowName = 'test'
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
