@@ -64,22 +64,22 @@ nav:
     - 'Machine-to-Machine Authentication': 'deployment/machine-to-machine.md'
     - 'FAQ': 'deployment/faq.md'
 - 'Installation':
-    - 'Setup': 'install/setup.md'
     - 'VM Installation':
+        - 'VM Requirements': 'install/vm-install/vm-requirements.md'
         - 'Ubuntu': 'install/vm-install/ubuntu.md'
         - 'RHEL': 'install/vm-install/rhel.md'
         - 'Suse': 'install/vm-install/suse.md'
         - 'FIPS DISA STIG': 'install/vm-install/fips.md'
         - 'Dynamic Download': 'install/vm-install/dynamic-download.md'
-    - 'Kubernetes':
-        - 'Rancher Marketplace': 'install/kubernetes-install/rancher.md'
-        - 'Standard K8s': 'install/kubernetes-install/k8.md'
+    - 'Helm Deployments':
+        - 'Local Kubernetes Cluster': 'install/helm-install/local.md'
+        - 'Amazon EKS': 'install/helm-install/amazon-eks.md'
+        - 'Google GKE': 'install/helm-install/google-gke.md'
+        - 'Microsoft Azure AKS': 'install/helm-install/microsoft-azure.md'
+        - 'Red Hat Open Shift': 'install/helm-install/red-hat-open-shift.md'
+        - 'Using Rancher Marketplace': 'install/helm-install/rancher.md'
     - 'CORS configuration': 'install/cors.md'
     - 'FAQ': 'install/install-faq.md'
-- 'Upgrade Guide':
-    - 'VM': 'upgrade/vm-upgrade.md'
-    - 'Kubernetes': 'upgrade/kubernetes-upgrade.md'
-    - 'FAQ': 'upgrade/upgrade-faq.md'
 - 'Reference Guide':
     - 'Javadocs / OpenAPI': 'reference/openapi.md'
     - 'Database Reference':
@@ -221,4 +221,7 @@ nav:
 - 'Client API Admin Guide': 'client-api.md'
 - 'Kubernetes Operation Guide': 'kubernetes-ops.md'
 - 'VM Operation Guide': 'vm-ops.md'
-
+- 'Upgrade Guide':
+    - 'VM': 'upgrade/vm-upgrade.md'
+    - 'Kubernetes': 'upgrade/kubernetes-upgrade.md'
+    - 'FAQ': 'upgrade/upgrade-faq.md'
