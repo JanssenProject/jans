@@ -16,6 +16,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 ![Hex.pm](https://img.shields.io/hexpm/l/plug)
 ![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 **Table of Contents**
 
