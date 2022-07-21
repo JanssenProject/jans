@@ -100,7 +100,7 @@ public class AgamaResource extends ConfigBaseResource {
         }
         
         // validate flow data
-        validateAgamaFlowData(flow);
+        validateAgamaFlowData(flow, true);
         flow.setRevision(-1);
         agamaFlowService.addAgamaFlow(flow);
 
@@ -133,7 +133,7 @@ public class AgamaResource extends ConfigBaseResource {
         flow.setRevision(-1);
 
         // validate flow data
-        validateAgamaFlowData(flow);
+        validateAgamaFlowData(flow, true);
         agamaFlowService.addAgamaFlow(flow);
 
         flow = findFlow(flow.getQname(),true);
@@ -162,7 +162,7 @@ public class AgamaResource extends ConfigBaseResource {
         log.error("Flow revision after update - flow.getRevision():{}", flow.getRevision());
 
         // validate flow data
-        validateAgamaFlowData(flow);
+        validateAgamaFlowData(flow, false);
         log.error("Updating flow after validation");
         agamaFlowService.updateFlow(flow);
 
@@ -198,16 +198,16 @@ public class AgamaResource extends ConfigBaseResource {
          return flow;
     }
 
-    private void validateAgamaFlowData(Flow flow)
+    private void validateAgamaFlowData(Flow flow, boolean checkNonMandatoryFields)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        log.error(" Validate Agama Flow data - flow:{}", flow);
+        log.error(" Validate Agama Flow data - flow:{}, checkNonMandatoryFields:{}", flow, checkNonMandatoryFields);
         if (flow == null) {
             return;
         }
         log.error("Agama Flow to be added flow:{}, flow.getQname():{}, flow.getSource():{} ", flow, flow.getQname(),
                 flow.getSource());
 
-        String validateMsg = agamaFlowService.validateFlowFields(flow);
+        String validateMsg = agamaFlowService.validateFlowFields(flow, checkNonMandatoryFields);
         log.error("Agama Flow to be validation msg:{} ", validateMsg);
         if (StringUtils.isNotBlank(validateMsg)) {
             StringBuilder sb = new StringBuilder();

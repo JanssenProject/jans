@@ -12,9 +12,9 @@ public class AgamaConfiguration {
     private List<String> mandatoryAttributes;
 
     /**
-     * List of attributes that can be updated
+     * List of attributes that are optional 
      */
-    private List<String> updateAttributes;
+    private List<String> optionalAttributes;
 
     public List<String> getMandatoryAttributes() {
         return mandatoryAttributes;
@@ -24,18 +24,19 @@ public class AgamaConfiguration {
         this.mandatoryAttributes = mandatoryAttributes;
     }
 
-    public List<String> getUpdateAttributes() {
-        return updateAttributes;
+
+    public List<String> getOptionalAttributes() {
+        return optionalAttributes;
     }
 
-    public void setUpdateAttributes(List<String> updateAttributes) {
-        this.updateAttributes = updateAttributes;
+    public void setOptionalAttributes(List<String> optionalAttributes) {
+        this.optionalAttributes = optionalAttributes;
     }
 
     @Override
     public String toString() {
-        return "AgamaConfiguration [" + " mandatoryAttributes=" + mandatoryAttributes + ", updateAttributes="
-                + updateAttributes + "]";
+        return "AgamaConfiguration [" + " mandatoryAttributes=" + mandatoryAttributes + ", optionalAttributes="
+                + optionalAttributes + "]";
     }
 
 }

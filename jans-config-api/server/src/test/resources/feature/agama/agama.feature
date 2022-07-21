@@ -32,7 +32,7 @@ Scenario: Fetch all agama flows
 	Then status 200 
 	And print response
 	
-	
+@ignore
 Scenario: Fetch agama flow by name 
 	Given url mainUrl 
 	And print 'accessToken = '+accessToken
@@ -54,7 +54,8 @@ Scenario: Fetch agama flow by name
 
 	
 @CreateUpdateDelete 
-Scenario: Create new agama flow
+Scenario: Create, update and delete agama flow
+    #Create agama flow
 	Given url mainUrl
 	And header Authorization = 'Bearer ' + accessToken 
 	And request read('agama.json') 
@@ -68,7 +69,8 @@ Scenario: Create new agama flow
 	Then def flowName = response.qname
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
- 	And print encodedFlowName 
+ 	And print encodedFlowName
+    #Update agama flow
     Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
 	And request result 
@@ -81,6 +83,18 @@ Scenario: Create new agama flow
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
+	#Fetch agama flow by name
+	Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
+ 	And print response.qname 	
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	#Delete agama flow by name
     Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
 	When method DELETE 
@@ -89,7 +103,8 @@ Scenario: Create new agama flow
 
 	
 @CreateFlowWithDataInRequestBodyUpdateDelete
-Scenario: Create new agama flow with source data in request body
+Scenario: Create agama flow with source data in request body
+    #Create agama flow
     Then def flowName = 'test'
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
@@ -110,6 +125,7 @@ Scenario: Create new agama flow with source data in request body
 	Then set result.transHash = 'UpdatedAgamaFlowtransHash' 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
+    #Update agama flow
     Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
 	And request result 
@@ -122,6 +138,18 @@ Scenario: Create new agama flow with source data in request body
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
+	#Fetch agama flow by name
+	Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
+ 	And print response.qname 	
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	#Delete agama flow by name
     Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
 	When method DELETE 

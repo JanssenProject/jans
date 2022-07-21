@@ -34,13 +34,13 @@ public class AgamaFlowService implements Serializable {
     public static final String AGAMA_FLOWS_BASE = "ou=flows," + AGAMA_BASE;
 
     @Inject
-    private Logger logger;
+    private transient Logger logger;
 
     @Inject
-    AuthUtil authUtil;
+    transient AuthUtil authUtil;
 
     @Inject
-    DataUtil dataUtil;
+    transient DataUtil dataUtil;
 
     @Inject
     private transient PersistenceEntryManager persistenceEntryManager;
@@ -131,28 +131,32 @@ public class AgamaFlowService implements Serializable {
         return authUtil.getAgamaConfiguration();
     }
 
-    public String validateFlowFields(Flow flow)
+    public String validateFlowFields(Flow flow, boolean checkNonMandatoryFields)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        return validateFlowFields(flow, getAgamaConfiguration().getMandatoryAttributes());
+        return validateFlowFields(flow, getAgamaConfiguration().getMandatoryAttributes(),
+                getAgamaConfiguration().getOptionalAttributes(), checkNonMandatoryFields);
     }
 
-    public String validateFlowFields(Flow flow, List<String> mandatoryAttributes)
+    public String validateFlowFields(Flow flow, List<String> mandatoryAttributes, List<String> optionalAttributes,
+            boolean checkNonMandatoryFields)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
-        logger.error("Validate Flow Fields - mandatoryAttributes:{} , ", mandatoryAttributes);
+        logger.error(
+                "Validate Flow Fields flow - flow:{}, mandatoryAttributes:{} , optionalAttributes:{}, checkNonMandatoryFields:{}",
+                flow, mandatoryAttributes, optionalAttributes, checkNonMandatoryFields);
 
-        StringBuilder missingAttributes = new StringBuilder();
+        StringBuilder errorMsg = new StringBuilder();
 
         if (mandatoryAttributes == null || mandatoryAttributes.isEmpty()) {
-            return missingAttributes.toString();
+            return errorMsg.toString();
         }
 
         // List<Field> allFields = authUtil.getAllFields(flow.getClass());
         // logger.error("All Flow fields :{} ", allFields);
-        Map<String, String> objectPropertyMap = dataUtil.getFieldTypeMap(flow.getClass());
+        Map<String, String> objectPropertyMap = DataUtil.getFieldTypeMap(flow.getClass());
         logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
         if (objectPropertyMap == null || objectPropertyMap.isEmpty()) {
-            return missingAttributes.toString();
+            return errorMsg.toString();
         }
 
         Set<String> keys = objectPropertyMap.keySet();
@@ -164,30 +168,96 @@ public class AgamaFlowService implements Serializable {
                     keys.contains(attribute));
 
             if (keys.contains(attribute)) {
-                logger.error("Checking if attribute:{} is simple attribute", attribute);
+                logger.error("Checking value of attribute:{}", attribute);
                 attributeValue = BeanUtils.getProperty(flow, attribute);
-                logger.error("Flow basic attribute:{} - attributeValue:{} ", attribute, attributeValue);
+                logger.error("Flow attribute:{} - attributeValue:{} ", attribute, attributeValue);
             }
             logger.error("Flow attribute value attribute:{} - attributeValue:{} ", attribute, attributeValue);
 
             logger.error("Flow class attribute:{} datatype:{} ", attribute, objectPropertyMap.get(attribute));
 
-            //
-            if (("String".equalsIgnoreCase(objectPropertyMap.get(attribute)))
-                    && (attributeValue == null || StringUtils.isBlank((String) attributeValue))) {
-                missingAttributes.append(attribute).append(",");
-            } else if (attributeValue == null) {
-                missingAttributes.append(attribute).append(",");
+            if (attributeValue == null) {
+                errorMsg.append(attribute).append(",");
+            }
+
+        } // for
+        logger.error("Checking mandatory errorMsg:{} ", errorMsg);
+
+        if (errorMsg.length() > 0) {
+            errorMsg.insert(0, "Required feilds missing -> ");
+            errorMsg.replace(errorMsg.lastIndexOf(","), errorMsg.length(), "");
+        }
+
+        // Validate non-required fields
+        if (checkNonMandatoryFields) {
+            String valiateNonMandatoryFieldsMsg = validateNonMandatoryFields(flow, mandatoryAttributes,
+                    optionalAttributes);
+            logger.error("Checking mandatory valiateNonMandatoryFieldsMsg:{} ", valiateNonMandatoryFieldsMsg);
+            if (StringUtils.isNotBlank(valiateNonMandatoryFieldsMsg)) {
+                errorMsg.append("\n").append(valiateNonMandatoryFieldsMsg);
             }
         }
-        logger.error("Checking mandatory missingAttributes:{} ", missingAttributes);
 
-        if (missingAttributes.length() > 0) {
-            missingAttributes.replace(missingAttributes.lastIndexOf(","), missingAttributes.length(), "");
+        logger.error("Returning missingAttributes:{} ", errorMsg);
+        return errorMsg.toString();
+    }
+
+    public String validateNonMandatoryFields(Flow flow, List<String> mandatoryAttributes,
+            List<String> optionalAttributes)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+        logger.error("Validate Flow for Non Mandatory Fields - flow:{}, mandatoryAttributes:{}, optionalAttributes:{}",
+                flow, mandatoryAttributes, optionalAttributes);
+
+        StringBuilder unwantedAttributes = new StringBuilder();
+
+        Map<String, String> objectPropertyMap = DataUtil.getFieldTypeMap(flow.getClass());
+        logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
+        if (objectPropertyMap == null || objectPropertyMap.isEmpty()) {
+            return unwantedAttributes.toString();
         }
 
-        logger.error("Returning missingAttributes:{} ", missingAttributes);
-        return missingAttributes.toString();
+        Set<String> keys = objectPropertyMap.keySet();
+        logger.error("Flow class fields:{} ", keys);
+
+        keys.removeAll(mandatoryAttributes);
+        logger.error("After removing mandatoryAttributes:{}, keys:{} ", mandatoryAttributes, keys);
+
+        Object attributeValue = null;
+        for (String key : keys) {
+            // Check non-mandatory attributes should be null
+            logger.error("Checking value of non-mandatory attribute:{}", key);
+            attributeValue = BeanUtils.getProperty(flow, key);
+            logger.error("Flow attribute key:{} - attributeValue:{} ", key, attributeValue);
+
+            // check if the attribute is to be excluded
+            logger.error("Check id flow attribute key:{} is in optionalAttributes:{} and is to be excluded:{} ", key,
+                    optionalAttributes, optionalAttributes.contains(key));
+            if (optionalAttributes.contains(key)) {
+                logger.error("Check id flow attribute key:{} is to be excluded:{}!!! ", optionalAttributes,
+                        optionalAttributes.contains(key));
+                continue;
+            }
+
+            if (attributeValue != null) {
+                unwantedAttributes.append(key).append(",");
+                /*
+                 * if (("String".equalsIgnoreCase(objectPropertyMap.get(key))) &&
+                 * (StringUtils.isNotBlank((String) attributeValue))) {
+                 * unwantedAttributes.append(key).append(","); } else {
+                 * unwantedAttributes.append(key).append(","); }
+                 */
+            }
+        } // for
+        logger.error("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
+
+        if (unwantedAttributes.length() > 0) {
+            unwantedAttributes.insert(0, "Value of these feilds should be null -> ");
+            unwantedAttributes.replace(unwantedAttributes.lastIndexOf(","), unwantedAttributes.length(), "");
+        }
+
+        logger.error("Returning unwantedAttributes:{} ", unwantedAttributes);
+        return unwantedAttributes.toString();
     }
 
 }
