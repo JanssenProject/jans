@@ -82,7 +82,7 @@ elif os_type in ['debian', 'ubuntu']:
 else:
     service_path = '/sbin/service'
 
-if os_type in ('centos', 'red', 'fedora'):
+if os_type in ('almalinux','centos', 'red', 'fedora'):
     clone_type = 'rpm'
     httpd_name = 'httpd'
 elif os_type == 'suse':
