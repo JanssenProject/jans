@@ -80,6 +80,15 @@ nav:
         - 'Using Rancher Marketplace': 'install/helm-install/rancher.md'
     - 'CORS configuration': 'install/cors.md'
     - 'FAQ': 'install/install-faq.md'
+- 'Kubernetes Operation Guide':
+    - 'Scaling': 'kubernetes-ops/scaling.md'
+    - 'Backup and Restore': 'kubernetes-ops/backup-restore.md'
+    - 'Certificate Management': 'kubernetes-ops/cert-management.md'
+    - 'Customization': 'kubernetes-ops/customization.md'
+    - 'Start Order': 'kubernetes-ops/start-order.md'
+    - 'Logs': 'kubernetes-ops/logs.md'
+    - 'Health Check': 'kubernetes-ops/health-check.md'
+    - 'FAQ': 'kubernetes-ops/faq.md'
 - 'Reference Guide':
     - 'Javadocs / OpenAPI': 'reference/openapi.md'
     - 'Database Reference':
