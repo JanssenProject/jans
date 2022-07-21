@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +38,7 @@ public class AgamaFlowService implements Serializable {
 
     @Inject
     AuthUtil authUtil;
-    
+
     @Inject
     DataUtil dataUtil;
 
@@ -146,31 +147,41 @@ public class AgamaFlowService implements Serializable {
             return missingAttributes.toString();
         }
 
-        List<Field> allFields = authUtil.getAllFields(flow.getClass());
-        logger.error("All Flow fields :{} ", allFields);
+        // List<Field> allFields = authUtil.getAllFields(flow.getClass());
+        // logger.error("All Flow fields :{} ", allFields);
+        Map<String, String> objectPropertyMap = dataUtil.getFieldTypeMap(flow.getClass());
+        logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
+        if (objectPropertyMap == null || objectPropertyMap.isEmpty()) {
+            return missingAttributes.toString();
+        }
+
+        Set<String> keys = objectPropertyMap.keySet();
+        logger.error("Flow class fields:{} ", keys);
 
         Object attributeValue = null;
         for (String attribute : mandatoryAttributes) {
-            logger.error("Flow class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
-                    authUtil.containsField(allFields, attribute));
+            logger.error("Flow class objectPropertyMap:{} conatins attribute:{} ? :{} ", objectPropertyMap, attribute,
+                    keys.contains(attribute));
 
-            if (authUtil.containsField(allFields, attribute)) {
+            if (keys.contains(attribute)) {
                 logger.error("Checking if attribute:{} is simple attribute", attribute);
                 attributeValue = BeanUtils.getProperty(flow, attribute);
                 logger.error("Flow basic attribute:{} - attributeValue:{} ", attribute, attributeValue);
             }
             logger.error("Flow attribute value attribute:{} - attributeValue:{} ", attribute, attributeValue);
-            
-            Map<String, String> objectPropertyMap = dataUtil.getFieldTypeMap(flow.getClass());
-            logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
-            logger.error("Flow class attribute:{} datatype:{} ",attribute, objectPropertyMap.get(attribute));
-            
-            if (attributeValue == null) {
+
+            logger.error("Flow class attribute:{} datatype:{} ", attribute, objectPropertyMap.get(attribute));
+
+            //
+            if (("String".equalsIgnoreCase(objectPropertyMap.get(attribute)))
+                    && (attributeValue == null || StringUtils.isBlank((String) attributeValue))) {
+                missingAttributes.append(attribute).append(",");
+            } else if (attributeValue == null) {
                 missingAttributes.append(attribute).append(",");
             }
         }
         logger.error("Checking mandatory missingAttributes:{} ", missingAttributes);
-        
+
         if (missingAttributes.length() > 0) {
             missingAttributes.replace(missingAttributes.lastIndexOf(","), missingAttributes.length(), "");
         }
