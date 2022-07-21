@@ -18,15 +18,14 @@ import io.jans.agama.engine.service.FlowService;
 
 @WebServlet(urlPatterns = {
     "*" + ExecutionServlet.URL_SUFFIX,
-    ExecutionServlet.CALLBACK_PATH,
-    ExecutionServlet.ABORT_PATH
+    ExecutionServlet.CALLBACK_PATH
 })
 public class ExecutionServlet extends BaseServlet {
     
     public static final String URL_SUFFIX = ".fls"; 
     public static final String URL_PREFIX = "/fl/";
     public static final String CALLBACK_PATH = URL_PREFIX + "callback";
-    public static final String ABORT_PATH = URL_PREFIX + "abort";
+    public static final String ABORT_PARAM = "_abort";
     
     //TODO: put string in agama resource bundle
     private static final String NO_ACTIVE_FLOW = "No flow running currently " +
@@ -97,11 +96,11 @@ public class ExecutionServlet extends BaseServlet {
         if (processCallback(response, fstatus, path)) return;
         
         String expectedUrl = getExpectedUrl(fstatus);
-
         if (path.equals(expectedUrl)) {
-            continueFlow(response, fstatus, false, false);
-        } else if (path.equals(ABORT_PATH)) {
-            continueFlow(response, fstatus, false, true);
+            boolean aborting = request.getParameter(ABORT_PARAM) != null;
+            
+            String cancelUrl = aborting ? path.substring(URL_PREFIX.length()) : null;
+            continueFlow(response, fstatus, false, cancelUrl);
         } else {
             //This is an attempt to POST to a URL which is not the current page of this flow
             sendPageMismatch(response, expectedUrl, fstatus.getQname());
@@ -140,7 +139,7 @@ public class ExecutionServlet extends BaseServlet {
     }
     
     private void continueFlow(HttpServletResponse response, FlowStatus fstatus, boolean callbackResume,
-            boolean abortSubflow) throws IOException {
+            String cancelUrl) throws IOException {
 
         try {
             String jsonParams;
@@ -150,8 +149,8 @@ public class ExecutionServlet extends BaseServlet {
             } else {
                 jsonParams = flowUtils.toJsonString(request.getParameterMap());
             }
-            
-            fstatus = flowService.continueFlow(fstatus, jsonParams, callbackResume, abortSubflow);
+
+            fstatus = flowService.continueFlow(fstatus, jsonParams, callbackResume, cancelUrl);
             FlowResult result = fstatus.getResult();
 
             if (result == null) {
@@ -176,7 +175,7 @@ public class ExecutionServlet extends BaseServlet {
 
         if (path.equals(CALLBACK_PATH)) {
             if (fstatus.isAllowCallbackResume()) {
-                continueFlow(response, fstatus, true, false);
+                continueFlow(response, fstatus, true, null);
             } else {
                 String msg = "Unexpected incoming request to flow callback endpoint";
                 logger.warn(msg);
