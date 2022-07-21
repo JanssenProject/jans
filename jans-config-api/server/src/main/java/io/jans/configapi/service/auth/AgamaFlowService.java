@@ -138,7 +138,7 @@ public class AgamaFlowService implements Serializable {
     public String validateFlowFields(Flow flow, List<String> mandatoryAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
-        logger.debug("mandatoryAttributes:{} , ", mandatoryAttributes);
+        logger.error("Validate Flow Fields - mandatoryAttributes:{} , ", mandatoryAttributes);
 
         StringBuilder missingAttributes = new StringBuilder();
 
@@ -147,31 +147,35 @@ public class AgamaFlowService implements Serializable {
         }
 
         List<Field> allFields = authUtil.getAllFields(flow.getClass());
-        logger.debug("All user fields :{} ", allFields);
+        logger.error("All Flow fields :{} ", allFields);
 
         Object attributeValue = null;
         for (String attribute : mandatoryAttributes) {
-            logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
+            logger.error("Flow class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
                     authUtil.containsField(allFields, attribute));
 
             if (authUtil.containsField(allFields, attribute)) {
-                logger.debug("Checking if attribute:{} is simple attribute", attribute);
+                logger.error("Checking if attribute:{} is simple attribute", attribute);
                 attributeValue = BeanUtils.getProperty(flow, attribute);
-                logger.debug("User basic attribute:{} - attributeValue:{} ", attribute, attributeValue);
+                logger.error("Flow basic attribute:{} - attributeValue:{} ", attribute, attributeValue);
             }
-
+            logger.error("Flow attribute value attribute:{} - attributeValue:{} ", attribute, attributeValue);
+            
             Map<String, String> objectPropertyMap = dataUtil.getFieldTypeMap(flow.getClass());
+            logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
+            logger.error("Flow class attribute:{} datatype:{} ",attribute, objectPropertyMap.get(attribute));
             
             if (attributeValue == null) {
                 missingAttributes.append(attribute).append(",");
             }
         }
-        logger.debug("Checking mandatory missingAttributes:{} ", missingAttributes);
+        logger.error("Checking mandatory missingAttributes:{} ", missingAttributes);
+        
         if (missingAttributes.length() > 0) {
             missingAttributes.replace(missingAttributes.lastIndexOf(","), missingAttributes.length(), "");
         }
 
-        logger.debug("Returning missingAttributes:{} ", missingAttributes);
+        logger.error("Returning missingAttributes:{} ", missingAttributes);
         return missingAttributes.toString();
     }
 
