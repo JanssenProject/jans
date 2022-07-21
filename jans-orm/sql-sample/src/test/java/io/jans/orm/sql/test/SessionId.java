@@ -1,10 +1,10 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.sql.test;
+package io.jans.orm.sql.test;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
-import jakarta.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -30,6 +29,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.Deletable;
 import io.jans.orm.util.StringHelper;
+import jakarta.persistence.Transient;
 
 /**
 *

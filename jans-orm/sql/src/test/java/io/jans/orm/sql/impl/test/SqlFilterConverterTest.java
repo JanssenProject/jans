@@ -454,7 +454,7 @@ public class SqlFilterConverterTest {
         
 		ConvertedExpression expression = simpleConverter.convertToSqlFilter(filter, null, null);
 		String query = toSelectSQL(expression);
-		assertEquals(query, "select doc.`*` from `table` as doc where (lower(doc.description) like '%test_value%' or lower(doc.displayName) like '%test_value%') and doc.jansScrTyp = 'person_authentication'");
+		assertEquals(query, "select doc.`*` from `table` as doc where (lower(doc.description) like '%test_value%' or lower(doc.displayName) like '%test_value%') and doc.gluuScrTyp = 'person_authentication'");
 	}
 
 	private String toSelectSQL(ConvertedExpression convertedExpression) {
