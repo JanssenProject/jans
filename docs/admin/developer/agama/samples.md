@@ -2,6 +2,9 @@
 
 This page provides some practical flow examples to help readers in their process of learning Agama. It is recommended to visit the quick start [guide](./quick-start.md) first.
 
+!!! Warning
+    Do not deploy any of these flows to production.
+    
 ## Basic authentication
 
 This is the simplest form of authentication where end-users gain access to a protected resource (e.g. an application) by providing a valid username and password combination. In this example users will be given three attempts at most to supply valid credentials, otherwise an error page will be shown.
@@ -93,4 +96,44 @@ If the user presses the enter key when the focus is on the text field, the form 
 
 ## Combined registration and authentication flow
 
-TODO
+In this flow features like [template overrides](./dsl-full.md#template-overrides) and [flow cancellation](./flows-lifecycle.md#cancellation) are leveraged to bring a more sophisticated authentication journey. A description follows:
+
+- A login form (username/password) is shown with an auxiliary link to offer account registration
+
+- If the registration link is clicked, the user is shown a page that prompts personal details in order to create an account
+
+- Upon successful account creation, a "continue to login" page is presented
+
+- The OTP authentication flow of the previous section is reused: a standard login form is shown and then the user is prompted to enter a passcode.
+
+### Registration
+
+For the purposes of registration, a small flow was created:
+
+![registration](./registration/io.jans.flow.sample.registration.png)
+
+Source code [here](./registration/io.jans.flow.sample.registration).
+
+This flow is pretty simple and we are not going into the details here. Keep in mind the following:
+
+- Upload [confirmation.ftlh](./registration/confirmation.ftlh) and [index.ftlh](./registration/index.ftlh) files to folder `/opt/jans/jetty/jans-auth/agama/ftl/samples/registration`
+
+- Copy the file [RegistrationUtil.java](./registration/RegistrationUtil.java) to directory `/opt/jans/jetty/jans-auth/agama/io/jans/agama/samples`
+
+- Keep this flow disabled. If used standalone, it will finish but no actual person will be authenticated. It is not designed to be used directly but by other flows.
+
+### Main flow
+
+![registration and authentication](./otp-email-registration/io.jans.flow.sample.otp.emailWithRegistration.png)
+
+Source code [here](./otp-email-registration/io.jans.flow.sample.otp.emailWithRegistration).
+
+This flow is short and powerful. To start it launches the [email OTP authentication](#email-otp-authentication) flow (line 4). However, instead of the `login.ftlh` template used internally by the basic flow, a different version is used (line 5). The new template is located in this flow's basepath, i.e. `samples/otp-email-registration`, and the file name does not change.
+
+This new page simply adds a small link that reads "Don't have an account?" in a new HTML form. When clicked it will provoke the email-OTP flow to be aborted early and the condition at line 8 will be truthy. If that's not the case, the email-OTP flow will proceed as usual and the current flow will finish in the same way as email-OTP (line 16).
+
+If email-OTP is aborted, the [registration flow](#registration) that we just saw is launched (line 9). Here the template `confirmation.ftlh` is overriden too (line 10). This new page changes the label of the button that is shown after an account has been created: originally the text is "Continue" but for the current flow, "Proceed to login" is a better fit.
+
+If the registration flow finishes successfully (line 12), the email-OTP flow is triggered again (line 14) - this time without customizations. Then the user can supply his recently-created credentials to get past the basic authentication stage and finally move to the OTP challenge. Recall that via registration flow the user's e-mail address is already stored in the database.
+
+Finally, the current flow finishes identically as email-OTP did (line 16).
