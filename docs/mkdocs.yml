@@ -35,7 +35,34 @@ markdown_extensions:
 # Navigation
 nav:
 - 'Home': 'index.md'
-- 'Deployment and Planning Guide': 'deployment.md'
+- 'Deployment and Planning Guide':
+    - 'Platform Goal': 'deployment/platform-goal.md'
+    - 'Use Cases': 'deployment/use-cases.md'
+    - 'Components': 'deployment/components.md'
+    - 'Kubernetes': 'deployment/kubernetes.md'
+    - 'VM Cluster': 'deployment/vm-cluster.md'
+    - 'Persistence': 'deployment/persistence.md'
+    - 'Caching': 'deployment/caching.md'
+    - 'Security Best Practices': 'deployment/security-best-practices.md'
+    - 'Load Balancers': 'deployment/load-balancers.md'
+    - 'Certificates/Keys': 'deployment/certificates-keys.md'
+    - 'DNS': 'deployment/dns.md'
+    - 'Multi-tenancy': 'deployment/multi-tenancy.md'
+    - 'Benchmarking': 'deployment/benchmarking.md'
+    - 'Application Portal':'deployment/application-portal.md'
+    - 'Discovery': 'deployment/discovery.md'
+    - 'Customization/Localization': 'deployment/customization.md'
+    - 'Timeout Management': 'deployment/timeout-management.md'
+    - 'Identity Management': 'deployment/identity-management.md'
+    - 'Self-Service Password/2FA Portal': ''deployment/self-service-password-2fa.md'
+    - 'Identity Access Governance': 'deployment/identity-access-governance.md'
+    - 'Role Based Access Management': 'deployment/role-based-access-management.md'
+    - 'Central Authorization Service Integration': 'deployment/central-auth-service.md'
+    - 'Stepped-up Authentication': 'deployment/stepped-up-auth.md'
+    - 'Delegated User Administration': 'deployment/delegated-user-admin.md'
+    - 'Passwordless Authentication': 'deployment/passwordless-auth.md'
+    - 'Machine-to-Machine Authentication': 'deployment/machine-to-machine.md'
+    - 'FAQ': 'deployment/faq.md'
 - 'Installation':
     - 'Setup': 'install/setup.md'
     - 'VM Installation':
@@ -161,7 +188,7 @@ nav:
     - 'LDAP Configuration': 'jans-cli/cli-ldap-configuration.md'
     - 'Couchbase Configuration': 'jans-cli/cli-couchbase-configuration.md'
     - 'OAuth Scope Management': 'jans-cli/cli-oauthscopes.md'
-    - 'UMA Management': 'jans-cli/cli-oauthumaresources.md
+    - 'UMA Management': 'jans-cli/cli-oauthumaresources.md'
     - 'OpenID Connect Client Configuration': 'jans-cli/cli-openid-connect-client-configuration.md'
     - 'SMTP Configuration': 'jans-cli/cli-smtp-configuration.md'
     - 'Custom Scripts': 'jans-cli/cli-custom-scripts.md'
@@ -180,7 +207,7 @@ nav:
         - 'LDAP Configuration': 'jans-cli/im/im-ldap-configuration.md'
         - 'Couchbase Configuration': 'jans-cli/im/im-couchbase-configuration.md'
         - 'OAuth Scope Management': 'jans-cli/im/im-oauthscopes.md'
-        - 'UMA Management': 'jans-cli/im/im-oauthumaresources.md
+        - 'UMA Management': 'jans-cli/im/im-oauthumaresources.md'
         - 'OpenID Connect Client Configuration': 'jans-cli/im/im-openid-connect-client-configuration.md'
         - 'SMTP Configuration': 'jans-cli/im/im-smtp-configuration.md'
         - 'Custom Scripts': 'jans-cli/im/im-custom-scripts.md'
