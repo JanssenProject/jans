@@ -203,7 +203,7 @@ public class AgamaPersistenceService {
 
             status.setQname(null);
             status.setJsonInput(null);
-            status.setParentsData(null);                
+            status.setParentsMappings(null);                
             status.setTemplatePath(null);
             status.setTemplateDataModel(null);
             status.setExternalRedirectUrl(null);
