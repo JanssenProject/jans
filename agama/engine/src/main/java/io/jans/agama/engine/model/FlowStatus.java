@@ -3,6 +3,7 @@ package io.jans.agama.engine.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.LinkedList;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class FlowStatus {
@@ -18,7 +19,7 @@ public class FlowStatus {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Object templateDataModel;
 
-    private LinkedList<ParentFlowData> parentsData = new LinkedList<>();
+    private LinkedList<Map<String, String>> parentsMappings = new LinkedList<>();
     private String externalRedirectUrl;
     private boolean allowCallbackResume;
     private String jsonInput;
@@ -89,12 +90,12 @@ public class FlowStatus {
         this.allowCallbackResume = allowCallbackResume;
     }
 
-    public LinkedList<ParentFlowData> getParentsData() {
-        return parentsData;
+    public LinkedList<Map<String, String>> getParentsMappings() {
+        return parentsMappings;
     }
 
-    public void setParentsData(LinkedList<ParentFlowData> parentsData) {
-        this.parentsData = parentsData;
+    public void setParentsMappings(LinkedList<Map<String, String>> parentsMappings) {
+        this.parentsMappings = parentsMappings;
     }
 
     public String getJsonInput() {

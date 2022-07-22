@@ -44,12 +44,12 @@ let idx = [], _items = []
     string parsing via JS was preferred over returning a Java Map directly because it feels more
     natural for RRF to return a native JS object; it creates the illusion there was no Java involved -->
     _it2 = JSON.parse(_it.second)
-    if (_it.first.booleanValue()) return _abort(_it2)
+    _it = _it.first
+    if (!_isNil(_it)) return _abort(_it, _it2)
 
     <@util_preassign node=.node /> _it2
     <#-- Clear temp variables to make serialization lighter (in the next RRF call) -->
-    _it = null
-    _it2 = null
+    _it = _it2 = null
 </#macro>
 
 <#macro action_call>
@@ -81,8 +81,9 @@ try {
     <#else>
         _it = "${.node.qname}"
     </#if>
-    <@util_preassign node=.node />
-_flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
+_it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
+if (_it.bubbleUp) return _it.value 
+    <@util_preassign node=.node /> _it.value
 </#macro>
 
 <#macro rfac>

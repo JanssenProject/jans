@@ -84,7 +84,7 @@ This flow is extremely static and unrealistic but showcases minimal key elements
 
 ### Add the flow to the server
 
-TODO (create client? retrieve basic data of all flows, check it is not already defined, then use the easier option to add it, upload index.ftl)
+TODO (create client? retrieve basic data of all flows, check it is not already defined, then use the easier option to add it, explain enabled/disabled flow, upload index.ftl)
 
 ### Craft an authentication request
 
