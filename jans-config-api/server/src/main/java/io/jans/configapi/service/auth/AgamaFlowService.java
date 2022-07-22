@@ -2,6 +2,7 @@
 package io.jans.configapi.service.auth;
 
 import io.jans.agama.model.Flow;
+import io.jans.agama.model.FlowMetadata;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import io.jans.configapi.core.util.DataUtil;
@@ -10,12 +11,10 @@ import io.jans.configapi.util.AuthUtil;
 
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -198,6 +198,84 @@ public class AgamaFlowService implements Serializable {
         logger.error("Returning missingAttributes:{} ", errorMsg);
         return errorMsg.toString();
     }
+    
+    public String validateNonMandatoryFields(Flow flow, List<String> mandatoryAttributes,
+            List<String> optionalAttributes)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+        logger.error("Validate Flow for Non Mandatory Fields - flow:{}, mandatoryAttributes:{}, optionalAttributes:{}",
+                flow, mandatoryAttributes, optionalAttributes);
+
+        StringBuilder unwantedAttributes = new StringBuilder();
+
+        Map<String, String> objectPropertyMap = DataUtil.getFieldTypeMap(flow.getClass());
+        logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
+        if (objectPropertyMap == null || objectPropertyMap.isEmpty()) {
+            return unwantedAttributes.toString();
+        }
+
+        Set<String> keys = objectPropertyMap.keySet();
+        logger.error("Flow class fields:{} ", keys);
+
+        //remove mandatoryAttributes as they are to be excluded
+        keys.removeAll(mandatoryAttributes);
+        logger.error("After removing mandatoryAttributes:{}, keys:{} ", mandatoryAttributes, keys);
+        
+        // remove optionalAttributes as they are to be excluded
+        keys.removeAll(optionalAttributes);
+        logger.error("After removing optionalAttributes:{}, keys:{} ", optionalAttributes, keys);
+
+        Object attributeValue = null;
+        String attributeClass = null;
+        for (String key : keys) {
+                      
+            // Check non-mandatory attributes should be null
+            logger.error("Checking value of non-mandatory attribute:{}", key);
+            attributeValue = BeanUtils.getProperty(flow, key);            
+            logger.error("Flow attribute key:{} - attributeValue:{} - datatype:{} ", key, attributeValue, objectPropertyMap.get(key));
+
+            if (attributeValue != null) {
+                attributeClass = attributeValue.getClass().toString();
+                logger.error("Flow attribute key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,  attributeValue, attributeClass, objectPropertyMap.get(key));
+                //ignore if empty
+            /*    if ( ("String".equalsIgnoreCase(objectPropertyMap.get(key)) && StringUtils.isNotBlank((String) attributeValue)) 
+                        ||
+                 ("int".equalsIgnoreCase(objectPropertyMap.get(key)) && ((int)attributeValue <=0) )                    
+                    ||
+                 ("FlowMetadata".equalsIgnoreCase(objectPropertyMap.get(key)) && isFlowMetadataPresent((FlowMetadata) attributeValue))
+                 ){
+                    continue;
+                }*/
+               /* 
+                if ( "java.lang.String".equalsIgnoreCase(attributeClass) && StringUtils.isNotBlank((String) attributeValue) ) {
+                    Log.error("validateNonMandatoryFields - 1");                
+                    continue;
+                }
+                else if("java.lang.Integer".equalsIgnoreCase(objectPropertyMap.get(key)) && ((Integer)attributeValue <=0) ) {
+                    Log.error("validateNonMandatoryFields - 2");
+                    continue;
+                }
+                else if( "io.jans.agama.model.FlowMetadata".equalsIgnoreCase(attributeClass) && isFlowMetadataPresent((FlowMetadata) attributeValue) ) {
+                 {
+                     Log.error("validateNonMandatoryFields - 3");                 }
+                    continue;
+                }*/
+                
+                //report as value should be null
+                unwantedAttributes.append(key).append(",");
+            }
+        } // for
+        logger.error("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
+
+        if (unwantedAttributes.length() > 0) {
+            unwantedAttributes.insert(0, "Value of these feilds should be null -> (");
+            unwantedAttributes.replace(unwantedAttributes.lastIndexOf(","), unwantedAttributes.length(), "");
+            unwantedAttributes.append(").");
+        }
+
+        logger.error("Returning unwantedAttributes:{} ", unwantedAttributes);
+        return unwantedAttributes.toString();
+    }
 
     public String validateNonMandatoryFields(Flow flow, List<String> mandatoryAttributes,
             List<String> optionalAttributes)
@@ -226,15 +304,42 @@ public class AgamaFlowService implements Serializable {
         logger.error("After removing optionalAttributes:{}, keys:{} ", optionalAttributes, keys);
 
         Object attributeValue = null;
+        String attributeClass = null;
         for (String key : keys) {
                       
             // Check non-mandatory attributes should be null
             logger.error("Checking value of non-mandatory attribute:{}", key);
-            attributeValue = BeanUtils.getProperty(flow, key);
-            logger.error("Flow attribute key:{} - attributeValue:{} ", key, attributeValue);
+            attributeValue = BeanUtils.getProperty(flow, key);            
+            logger.error("Flow attribute key:{} - attributeValue:{} - datatype:{} ", key, attributeValue, objectPropertyMap.get(key));
 
-       
             if (attributeValue != null) {
+                attributeClass = attributeValue.getClass().toString();
+                logger.error("Flow attribute key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,  attributeValue, attributeClass, objectPropertyMap.get(key));
+                //ignore if empty
+            /*    if ( ("String".equalsIgnoreCase(objectPropertyMap.get(key)) && StringUtils.isNotBlank((String) attributeValue)) 
+                        ||
+                 ("int".equalsIgnoreCase(objectPropertyMap.get(key)) && ((int)attributeValue <=0) )                    
+                    ||
+                 ("FlowMetadata".equalsIgnoreCase(objectPropertyMap.get(key)) && isFlowMetadataPresent((FlowMetadata) attributeValue))
+                 ){
+                    continue;
+                }*/
+               /* 
+                if ( "java.lang.String".equalsIgnoreCase(attributeClass) && StringUtils.isNotBlank((String) attributeValue) ) {
+                    Log.error("validateNonMandatoryFields - 1");                
+                    continue;
+                }
+                else if("java.lang.Integer".equalsIgnoreCase(objectPropertyMap.get(key)) && ((Integer)attributeValue <=0) ) {
+                    Log.error("validateNonMandatoryFields - 2");
+                    continue;
+                }
+                else if( "io.jans.agama.model.FlowMetadata".equalsIgnoreCase(attributeClass) && isFlowMetadataPresent((FlowMetadata) attributeValue) ) {
+                 {
+                     Log.error("validateNonMandatoryFields - 3");                 }
+                    continue;
+                }*/
+                
+                //report as value should be null
                 unwantedAttributes.append(key).append(",");
             }
         } // for
@@ -248,6 +353,19 @@ public class AgamaFlowService implements Serializable {
 
         logger.error("Returning unwantedAttributes:{} ", unwantedAttributes);
         return unwantedAttributes.toString();
+    }
+    
+    private boolean isFlowMetadataPresent(FlowMetadata flowMetadata) {
+        logger.error("Validate FlowMetadata flowMetadata:{} ", flowMetadata);
+        if(flowMetadata==null) {
+            return false;
+        }
+        else if( StringUtils.isNotBlank(flowMetadata.getFuncName()) || StringUtils.isNotBlank(flowMetadata.getDisplayName()) || StringUtils.isNotBlank(flowMetadata.getAuthor()) || StringUtils.isNotBlank(flowMetadata.getDescription()) 
+        || flowMetadata.getInputs()!=null ||  !flowMetadata.getInputs().isEmpty() || flowMetadata.getTimeout()!=null || flowMetadata.getProperties()!=null || !flowMetadata.getProperties().isEmpty() ) {
+            return true;
+        }
+        
+        return false;
     }
 
 }
