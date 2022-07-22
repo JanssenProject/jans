@@ -151,8 +151,6 @@ public class AgamaFlowService implements Serializable {
             return errorMsg.toString();
         }
 
-        // List<Field> allFields = authUtil.getAllFields(flow.getClass());
-        // logger.error("All Flow fields :{} ", allFields);
         Map<String, String> objectPropertyMap = DataUtil.getFieldTypeMap(flow.getClass());
         logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
         if (objectPropertyMap == null || objectPropertyMap.isEmpty()) {
@@ -172,9 +170,7 @@ public class AgamaFlowService implements Serializable {
                 attributeValue = BeanUtils.getProperty(flow, attribute);
                 logger.error("Flow attribute:{} - attributeValue:{} ", attribute, attributeValue);
             }
-            logger.error("Flow attribute value attribute:{} - attributeValue:{} ", attribute, attributeValue);
-
-            logger.error("Flow class attribute:{} datatype:{} ", attribute, objectPropertyMap.get(attribute));
+            logger.error("Flow attribute value attribute:{} - attributeValue:{} - datatype:{} ", attribute, attributeValue, objectPropertyMap.get(attribute));
 
             if (attributeValue == null) {
                 errorMsg.append(attribute).append(",");
@@ -184,9 +180,10 @@ public class AgamaFlowService implements Serializable {
         logger.error("Checking mandatory errorMsg:{} ", errorMsg);
 
         if (errorMsg.length() > 0) {
-            errorMsg.insert(0, "Required feilds missing -> ");
+            errorMsg.insert(0, "Required feilds missing -> (");
             errorMsg.replace(errorMsg.lastIndexOf(","), errorMsg.length(), "");
-        }
+            errorMsg.append("). ");
+         }
 
         // Validate non-required fields
         if (checkNonMandatoryFields) {
@@ -194,7 +191,7 @@ public class AgamaFlowService implements Serializable {
                     optionalAttributes);
             logger.error("Checking mandatory valiateNonMandatoryFieldsMsg:{} ", valiateNonMandatoryFieldsMsg);
             if (StringUtils.isNotBlank(valiateNonMandatoryFieldsMsg)) {
-                errorMsg.append("\n").append(valiateNonMandatoryFieldsMsg);
+                errorMsg.append(valiateNonMandatoryFieldsMsg);
             }
         }
 
@@ -220,40 +217,33 @@ public class AgamaFlowService implements Serializable {
         Set<String> keys = objectPropertyMap.keySet();
         logger.error("Flow class fields:{} ", keys);
 
+        //remove mandatoryAttributes as they are to be excluded
         keys.removeAll(mandatoryAttributes);
         logger.error("After removing mandatoryAttributes:{}, keys:{} ", mandatoryAttributes, keys);
+        
+        // remove optionalAttributes as they are to be excluded
+        keys.removeAll(optionalAttributes);
+        logger.error("After removing optionalAttributes:{}, keys:{} ", optionalAttributes, keys);
 
         Object attributeValue = null;
         for (String key : keys) {
+                      
             // Check non-mandatory attributes should be null
             logger.error("Checking value of non-mandatory attribute:{}", key);
             attributeValue = BeanUtils.getProperty(flow, key);
             logger.error("Flow attribute key:{} - attributeValue:{} ", key, attributeValue);
 
-            // check if the attribute is to be excluded
-            logger.error("Check id flow attribute key:{} is in optionalAttributes:{} and is to be excluded:{} ", key,
-                    optionalAttributes, optionalAttributes.contains(key));
-            if (optionalAttributes.contains(key)) {
-                logger.error("Check id flow attribute key:{} is to be excluded:{}!!! ", optionalAttributes,
-                        optionalAttributes.contains(key));
-                continue;
-            }
-
+       
             if (attributeValue != null) {
                 unwantedAttributes.append(key).append(",");
-                /*
-                 * if (("String".equalsIgnoreCase(objectPropertyMap.get(key))) &&
-                 * (StringUtils.isNotBlank((String) attributeValue))) {
-                 * unwantedAttributes.append(key).append(","); } else {
-                 * unwantedAttributes.append(key).append(","); }
-                 */
             }
         } // for
         logger.error("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
 
         if (unwantedAttributes.length() > 0) {
-            unwantedAttributes.insert(0, "Value of these feilds should be null -> ");
+            unwantedAttributes.insert(0, "Value of these feilds should be null -> (");
             unwantedAttributes.replace(unwantedAttributes.lastIndexOf(","), unwantedAttributes.length(), "");
+            unwantedAttributes.append(").");
         }
 
         logger.error("Returning unwantedAttributes:{} ", unwantedAttributes);

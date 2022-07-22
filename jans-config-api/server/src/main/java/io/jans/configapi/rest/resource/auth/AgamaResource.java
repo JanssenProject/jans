@@ -210,10 +210,7 @@ public class AgamaResource extends ConfigBaseResource {
         String validateMsg = agamaFlowService.validateFlowFields(flow, checkNonMandatoryFields);
         log.error("Agama Flow to be validation msg:{} ", validateMsg);
         if (StringUtils.isNotBlank(validateMsg)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Required feilds missing -> ");
-            sb.append(validateMsg);
-            thorwBadRequestException(sb.toString());
+             thorwBadRequestException(validateMsg);
         }
 
         // validate no fields other than required exists
