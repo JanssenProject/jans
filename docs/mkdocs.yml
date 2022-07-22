@@ -238,9 +238,6 @@ nav:
             - 'Custom Logs': 'auth-server/logging/custom-logs.md'
             - 'log4j2 Configuration': 'auth-server/logging/log4j2.md'
 - 'Developer Guide':
-    - 'Interception Scripts': 'developer/interception-scripts.md'
-    - 'Script Debugging': 'developer/interception-scripts-debug.md'
-    - 'Customization': 'developer/customization.md'
     - 'Agama':
         - 'Overview': 'developer/agama/index.md'
         - 'Quick Start Guide': 'developer/agama/quick-start.md'
@@ -254,6 +251,16 @@ nav:
         - 'DSL Reference': 'developer/agama/dsl-full.md'
         - 'Java Classpath': 'developer/agama/java-classpath.md'
         - 'FAQ': 'developer/agama/faq.md'
+    - 'Interception Script Overview': 'developer/interception-scripts.md'
+    - 'Script Debugging': 'developer/interception-scripts-debug.md'
+    - 'External Libraries': 'developer/external-libraries.md'
+    - 'Front Channel Scripts': 'developer/front-channel-scripts.md'
+    - 'Back Channel Scripts': 'developer/back-channel-scripts.md'
+    - 'Customization':
+        - 'Message Files': 'developer/customization/message-files.md'
+        - 'Error Pages': 'developer/customization/error-pages.md'
+        - 'Logs/Consent Pages': 'developer/customization/logs-consent.md'
+        - 'Internationalization': 'developer/customization/internalization.md'
     - 'Scripts':
         - 'Person Authentication': 'developer/scripts/person-authentication.md'
         - 'Consent Gathering': 'developer/scripts/consent-gathering.md'
