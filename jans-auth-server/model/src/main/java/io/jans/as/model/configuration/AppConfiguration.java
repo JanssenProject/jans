@@ -309,6 +309,7 @@ public class AppConfiguration implements Configuration {
 
     private int discoveryCacheLifetimeInMinutes = 60;
     private List<String> discoveryAllowedKeys;
+    private List<String> discoveryDenyKeys;
 
     private List<String> enabledComponents;
 
@@ -352,6 +353,15 @@ public class AppConfiguration implements Configuration {
 
     public void setAllowIdTokenWithoutImplicitGrantType(Boolean allowIdTokenWithoutImplicitGrantType) {
         this.allowIdTokenWithoutImplicitGrantType = allowIdTokenWithoutImplicitGrantType;
+    }
+
+    public List<String> getDiscoveryDenyKeys() {
+        if (discoveryDenyKeys == null) discoveryDenyKeys = new ArrayList<>();
+        return discoveryDenyKeys;
+    }
+
+    public void setDiscoveryDenyKeys(List<String> discoveryDenyKeys) {
+        this.discoveryDenyKeys = discoveryDenyKeys;
     }
 
     public List<String> getDiscoveryAllowedKeys() {

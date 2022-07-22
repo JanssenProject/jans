@@ -4768,6 +4768,12 @@ components:
           items:
             type: string
           example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
+        discoveryDenyKeys:
+          type: array
+            description: List of configuration response claims which must not be displayed in discovery endpoint response.
+            items:
+              type: string
+            example: 'id_generation_endpoint, auth_level_mapping, etc.'
         discoveryAllowedKeys:
           type: array
           description: List of configuration response claim allowed to be displayed in discovery endpoint.
