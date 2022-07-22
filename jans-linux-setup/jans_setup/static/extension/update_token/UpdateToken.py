@@ -91,7 +91,7 @@ class UpdateToken(UpdateTokenType):
         http_client = httpService.getHttpsClient()
         http_client_params = http_client.getParams()
 
-        url = self.BILLING_API_URL + "organization_balance?organization_id"+org_id
+        url = self.BILLING_API_URL + "organization_balance?organization_id="+org_id
 
         try:
             http_service_response = httpService.executeGet(http_client, url)
