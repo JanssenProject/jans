@@ -9,14 +9,15 @@ package io.jans.orm.couchbase;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.orm.couchbase.impl.CouchbaseEntryManager;
 import io.jans.orm.couchbase.model.SimpleUser;
 import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.StringHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Movchan Date: 09/16/2019
@@ -75,8 +76,8 @@ public final class CouchbaseCustomMultiValuedTypesSample {
 
 		LOG.info("Cusom attributes '{}'", foundUpdatedUser.getCustomAttributes());
 
-		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), StringHelper.toLowerCase("jon"));
-		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("o=jans", SimpleUser.class, filter);
+		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), StringHelper.toLowerCase("john"));
+		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("ou=people,o=jans", SimpleUser.class, filter);
 		System.out.println(foundUpdatedUsers);
 		
 	}
