@@ -710,7 +710,7 @@
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>2.7.22</version>
+				<version>3.3.0</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
@@ -744,7 +744,7 @@
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
 				<artifactId>jsqlparser</artifactId>
-				<version>4.2</version>
+				<version>4.3</version>
 			</dependency>
 
 			<!-- Cloud Spanner -->
