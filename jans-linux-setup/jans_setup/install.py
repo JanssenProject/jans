@@ -202,6 +202,18 @@ def uninstall_jans():
         print("Executing", cmd)
         os.system('rm -r -f ' + p)
 
+    apache_conf_fn_list = []
+
+    if shutil.which('zypper'):
+        apache_conf_fn_list = ['/etc/apache2/vhosts.d/_https_jans.conf']
+    elif shutil.which('yum') or shutil.which('dnf'):
+        apache_conf_fn_list = ['/etc/httpd/conf.d/https_jans.conf']
+    elif shutil.which('apt'):
+        apache_conf_fn_list = ['/etc/apache2/sites-enabled/https_jans.conf', '/etc/apache2/sites-available/https_jans.conf']
+
+    for fn in apache_conf_fn_list:
+        if os.path.exists(fn):
+            os.unlink(fn)
 
 def upgrade():
     check_installation()
