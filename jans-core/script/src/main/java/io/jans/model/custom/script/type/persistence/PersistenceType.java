@@ -10,7 +10,7 @@ import java.util.Map;
 
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.type.BaseExternalType;
-import io.jans.orm.exception.extension.PersistenceExtension;
+import io.jans.orm.extension.PersistenceExtension;
 
 /**
  * Base interface for persistence script
