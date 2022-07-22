@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.couchbase.test;
+package io.jans.orm.couchbase.test;
 
 import io.jans.orm.annotation.AttributeEnum;
 

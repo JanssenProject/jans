@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.orm.exception.extension;
+package io.jans.orm.extension;
 
 /**
  * Base interface for persistence script

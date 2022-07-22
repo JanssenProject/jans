@@ -1,45 +1,34 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.sql.test;
+package io.jans.orm.couchbase.test;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import jakarta.persistence.Transient;
-
-import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
 
 import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.Deletable;
-import io.jans.orm.util.StringHelper;
+import jakarta.persistence.Transient;
 
 /**
-*
-* @author Yuriy Movchan Date: 01/15/2020
-*/
+ * @author Yuriy Zabrovarnyy
+ * @author Javier Rojas Blum
+ * @version December 8, 2018
+ */
 @DataEntry(sortBy = { "creationDate", "id" }, sortByName = { "creationDate", "jansId" })
 @ObjectClass(value = "jansSessId")
 public class SessionId implements Deletable, Serializable {
-
-    public static final String OLD_SESSION_ID_ATTR_KEY = "old_session_id";
 
     private static final long serialVersionUID = -237476411915686378L;
 
@@ -48,9 +37,6 @@ public class SessionId implements Deletable, Serializable {
 
     @AttributeName(name = "jansId")
     private String id;
-
-    @AttributeName(name = "sid")
-    private String outsideSid;
 
     @AttributeName(name = "jansLastAccessTime")
     private Date lastUsedAt;
@@ -94,9 +80,6 @@ public class SessionId implements Deletable, Serializable {
 
     @Expiration
     private int ttl;
-
-    @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     public SessionId() {
     }
@@ -189,7 +172,6 @@ public class SessionId implements Deletable, Serializable {
         this.permissionGranted = permissionGranted;
     }
 
-    @Nonnull
     public Map<String, String> getSessionAttributes() {
         if (sessionAttributes == null) {
             sessionAttributes = Maps.newHashMap();
@@ -233,53 +215,6 @@ public class SessionId implements Deletable, Serializable {
         this.creationDate = creationDate;
     }
 
-    public void setOutsideSid(String outsideSid) {
-        this.outsideSid = outsideSid;
-    }
-
-    public String getOutsideSid() {
-        if (StringUtils.isBlank(outsideSid)) {
-            outsideSid = UUID.randomUUID().toString();
-        }
-        return outsideSid;
-    }
-
-    public List<CustomAttribute> getCustomAttributes() {
-        return customAttributes;
-    }
-
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
-        this.customAttributes = customAttributes;
-    }
-
-    public String getAttribute(String ldapAttribute) {
-        String attribute = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (customAttribute.getName().equals(ldapAttribute)) {
-                    attribute = customAttribute.getValue();
-                    break;
-                }
-            }
-        }
-
-        return attribute;
-    }
-
-    public List<String> getAttributeValues(String ldapAttribute) {
-        List<String> values = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), ldapAttribute)) {
-                    values = customAttribute.getValues();
-                    break;
-                }
-            }
-        }
-
-        return values;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -296,12 +231,22 @@ public class SessionId implements Deletable, Serializable {
     }
 
     @Override
-	public String toString() {
-		return "SessionId [dn=" + dn + ", id=" + id + ", outsideSid=" + outsideSid + ", lastUsedAt=" + lastUsedAt
-				+ ", userDn=" + userDn + ", authenticationTime=" + authenticationTime + ", state=" + state
-				+ ", sessionState=" + sessionState + ", permissionGranted=" + permissionGranted + ", isJwt=" + isJwt
-				+ ", jwt=" + jwt + ", sessionAttributes=" + sessionAttributes + ", expirationDate=" + expirationDate
-				+ ", deletable=" + deletable + ", creationDate=" + creationDate + ", persisted=" + persisted + ", ttl="
-				+ ttl + "]";
-	}
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SessionIdTest {");
+        sb.append("dn='").append(dn).append('\'');
+        sb.append(", id='").append(id).append('\'');
+        sb.append(", lastUsedAt=").append(lastUsedAt);
+        sb.append(", userDn='").append(userDn).append('\'');
+        sb.append(", authenticationTime=").append(authenticationTime);
+        sb.append(", state=").append(state);
+        sb.append(", sessionState='").append(sessionState).append('\'');
+        sb.append(", permissionGranted=").append(permissionGranted);
+        sb.append(", isJwt=").append(isJwt);
+        sb.append(", jwt=").append(jwt);
+        sb.append(", sessionAttributes=").append(sessionAttributes);
+        sb.append(", persisted=").append(persisted);
+        sb.append("}");
+        return sb.toString();
+    }
 }
