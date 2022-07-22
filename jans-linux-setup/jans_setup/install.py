@@ -213,6 +213,7 @@ def uninstall_jans():
 
     for fn in apache_conf_fn_list:
         if os.path.exists(fn):
+            print("Removing", fn)
             os.unlink(fn)
 
 def upgrade():
