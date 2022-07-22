@@ -6,33 +6,41 @@
 
 package io.jans.orm.couchbase.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import io.jans.orm.annotation.AttributesList;
-import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.util.StringHelper;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 /**
- * @author Yuriy Movchan
- * Date: 12/30/2016
+ * Created by eugeniuparvan on 1/12/17.
  */
 @DataEntry
-@ObjectClass(value = "jansAttr")
-public class SimpleAttribute implements Serializable {
+@ObjectClass(value = "token")
+public class SimpleToken implements Serializable {
 
-    private static final long serialVersionUID = -1634191420188575733L;
+    private static final long serialVersionUID = 6726419630327625172L;
+
+    @AttributeName(name = "tknCde", consistency = true)
+    private String code;
+
+    @AttributeName(name = "iat")
+    private Date creationDate;
+    
+    @AttributeName(name = "exp")
+    private Date expirationDate;
+
+    @AttributeName(name = "del")
+    private boolean deletable = true;
+    
+    @AttributesList(name = "name", value = "values", sortByName = true)
+    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @DN
     private String dn;
-
-    @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -45,7 +53,39 @@ public class SimpleAttribute implements Serializable {
         this.dn = dn;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public Date getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(Date expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+
+	public boolean isDeletable() {
+		return deletable;
+	}
+
+	public void setDeletable(boolean deletable) {
+		this.deletable = deletable;
+	}
+
+	public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 

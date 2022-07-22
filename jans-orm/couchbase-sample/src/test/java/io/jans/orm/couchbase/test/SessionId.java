@@ -4,18 +4,22 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.couchbase.test;
+package io.jans.orm.couchbase.test;
 
-import com.couchbase.client.java.cluster.User;
-import com.google.common.collect.Maps;
-import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.Deletable;
-
-import jakarta.inject.Named;
-import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+
+import com.google.common.collect.Maps;
+
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.Deletable;
+import jakarta.persistence.Transient;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -73,9 +77,6 @@ public class SessionId implements Deletable, Serializable {
 
     @Transient
     private transient boolean persisted;
-
-    @Transient
-    private User user;
 
     @Expiration
     private int ttl;
@@ -153,14 +154,6 @@ public class SessionId implements Deletable, Serializable {
 
     public void setUserDn(String p_userDn) {
         userDn = p_userDn != null ? p_userDn : "";
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Date getAuthenticationTime() {
