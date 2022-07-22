@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -29,7 +29,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
 
 import io.jans.orm.annotation.AttributeEnum;
-import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapFilterConverter;
 import io.jans.orm.reflect.property.PropertyAnnotation;
@@ -178,24 +177,21 @@ public class SqlFilterConverter {
             }
         }
 
-        if (FilterType.EQUALITY == type) {
-    		if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
-    			Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+        boolean multiValued = isMultiValue(currentGenericFilter, propertiesAnnotationsMap);
 
+        if (FilterType.EQUALITY == type) {
+    			Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+    		if (multiValued) {
 				Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, expression,
 						buildTypedExpression(currentGenericFilter, true), Expressions.constant("$.v"));
 
         		return ConvertedExpression.build(operation, jsonAttributes);
-            } else {
-            	Filter usedFilter = currentGenericFilter;
-            	Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
-
-            	return ConvertedExpression.build(ExpressionUtils.eq(expression, buildTypedExpression(usedFilter)), jsonAttributes);
             }
+        	return ConvertedExpression.build(ExpressionUtils.eq(expression, buildTypedExpression(currentGenericFilter)), jsonAttributes);
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
@@ -222,7 +218,7 @@ public class SqlFilterConverter {
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
@@ -249,7 +245,7 @@ public class SqlFilterConverter {
 
         if (FilterType.PRESENCE == type) {
         	Expression expression;
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
@@ -295,7 +291,7 @@ public class SqlFilterConverter {
             }
 
             Expression expression;
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
