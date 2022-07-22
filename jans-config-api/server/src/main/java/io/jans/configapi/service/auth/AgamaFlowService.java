@@ -10,6 +10,7 @@ import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.util.AuthUtil;
 
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.search.filter.Filter;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,7 +23,6 @@ import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -231,35 +231,29 @@ public class AgamaFlowService implements Serializable {
                       
             // Check non-mandatory attributes should be null
             logger.error("Checking value of non-mandatory attribute:{}", key);
-            attributeValue = BeanUtils.getProperty(flow, key);            
-            logger.error("Flow attribute key:{} - attributeValue:{} - datatype:{} ", key, attributeValue, objectPropertyMap.get(key));
-
+            Getter getter = DataUtil.getGetterMethod(Flow.class, key);
+            Class<?> dataType = getter.getReturnType();
+            attributeValue = getter.get(flow);
+            logger.error("Flow attribute key:{}, getter:{}, dataType:{}, attributeValue:{}", key, getter, dataType, attributeValue);
+            
             if (attributeValue != null) {
                 attributeClass = attributeValue.getClass().toString();
                 logger.error("Flow attribute key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,  attributeValue, attributeClass, objectPropertyMap.get(key));
                 //ignore if empty
-            /*    if ( ("String".equalsIgnoreCase(objectPropertyMap.get(key)) && StringUtils.isNotBlank((String) attributeValue)) 
-                        ||
-                 ("int".equalsIgnoreCase(objectPropertyMap.get(key)) && ((int)attributeValue <=0) )                    
-                    ||
-                 ("FlowMetadata".equalsIgnoreCase(objectPropertyMap.get(key)) && isFlowMetadataPresent((FlowMetadata) attributeValue))
-                 ){
-                    continue;
-                }*/
-               /* 
-                if ( "java.lang.String".equalsIgnoreCase(attributeClass) && StringUtils.isNotBlank((String) attributeValue) ) {
-                    Log.error("validateNonMandatoryFields - 1");                
+          
+                if ( "java.lang.String".equalsIgnoreCase(dataType.getName()) && StringUtils.isNotBlank(String.class.cast(attributeValue)) ) {
+                    logger.error("validateNonMandatoryFields - 1");                
                     continue;
                 }
-                else if("java.lang.Integer".equalsIgnoreCase(objectPropertyMap.get(key)) && ((Integer)attributeValue <=0) ) {
-                    Log.error("validateNonMandatoryFields - 2");
+                else if("java.lang.Integer".equalsIgnoreCase(dataType.getName()) && (Integer.class.cast(attributeValue) <=0) ) {
+                    logger.error("validateNonMandatoryFields - 2");
                     continue;
                 }
-                else if( "io.jans.agama.model.FlowMetadata".equalsIgnoreCase(attributeClass) && isFlowMetadataPresent((FlowMetadata) attributeValue) ) {
+                else if( "io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName()) && isFlowMetadataPresent(FlowMetadata.class.cast(attributeValue)) ) {
                  {
-                     Log.error("validateNonMandatoryFields - 3");                 }
+                     logger.error("validateNonMandatoryFields - 3");                 }
                     continue;
-                }*/
+                }
                 
                 //report as value should be null
                 unwantedAttributes.append(key).append(",");
@@ -284,7 +278,7 @@ public class AgamaFlowService implements Serializable {
             return false;
         }
         else if( StringUtils.isNotBlank(flowMetadata.getFuncName()) || StringUtils.isNotBlank(flowMetadata.getDisplayName()) || StringUtils.isNotBlank(flowMetadata.getAuthor()) || StringUtils.isNotBlank(flowMetadata.getDescription()) 
-        || flowMetadata.getInputs()!=null ||  !flowMetadata.getInputs().isEmpty() || flowMetadata.getTimeout()!=null || flowMetadata.getProperties()!=null || !flowMetadata.getProperties().isEmpty() ) {
+        || flowMetadata.getInputs()!=null  || flowMetadata.getTimeout()!=null || flowMetadata.getProperties()!=null ) {
             return true;
         }
         
