@@ -39,8 +39,12 @@
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
         <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
         <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
-		<shrinkwrap.version>2.1.0</shrinkwrap.version>
+		<arquillian.test.version>1.7.0.Alpha10</arquillian.test.version>
+		<arquillian.jetty.embedded.11.version>1.0.0.CR4</arquillian.jetty.embedded.11.version>
+		<arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
 
+
+		<shrinkwrap.version>2.1.0</shrinkwrap.version>
 		<!-- argLine property needs to stay as POM property so that JaCoCo plugin can append it at build time -->
 		<argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
 

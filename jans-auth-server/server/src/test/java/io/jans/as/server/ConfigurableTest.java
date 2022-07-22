@@ -40,7 +40,7 @@ public abstract class ConfigurableTest extends Arquillian {
     public boolean initialized = false;
 
     @Deployment
-    @OverProtocol("Servlet 3.0")
+//    @OverProtocol("Servlet 3.0")
     public static Archive<?> createDeployment() {
         return Deployments.createDeployment();
     }
