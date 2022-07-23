@@ -566,7 +566,7 @@ dn: inum=CACD-5902,ou=scripts,o=jans
 objectClass: top
 objectClass: jansCustomScr
 description: Scan Token Update Script
-displayName: update_token_sample
+displayName: scan_update_token
 inum: CACD-5902
 jansEnabled: false
 jansLevel: 100
