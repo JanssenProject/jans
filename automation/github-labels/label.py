@@ -84,9 +84,9 @@ def auto_label(operation="pr", issue_or_pr_number=None, pr_modified_file_paths=N
     string_of_labels = ",".join(list(dict.fromkeys(labels)))
     try:
         print(f"gh {operation} edit {issue_or_pr_number} --add-label '{string_of_labels}' "
-              f"--add-project 'janssen-issue-dashboard'")
+              f"--add-project janssen-issue-dashboard")
         exec_cmd(f"gh {operation} edit {issue_or_pr_number} --add-label '{string_of_labels}' "
-                 f"--add-project 'janssen-issue-dashboard'")
+                 f"--add-project janssen-issue-dashboard")
     except Exception as e:
         print(f"Couldn't add the label to the PR {issue_or_pr_number} because {e}")
 
