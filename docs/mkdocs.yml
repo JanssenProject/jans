@@ -467,6 +467,12 @@ nav:
     - 'Gluu Casa': 'recipes/casa.md'
     - 'FAQ': 'recipes/faq.md'
 - 'Upgrade Guide':
-    - 'VM': 'upgrade/vm-upgrade.md'
-    - 'Kubernetes': 'upgrade/kubernetes-upgrade.md'
+    - 'VM':
+        - 'Version Upgrade Paths': 'upgrade/vm/paths.md'
+        - 'Backup': 'upgrade/vm/backup.md'
+        - 'Rollback': 'upgrade/vm/rollback.md'
+    - 'Kubernetes': 
+        - 'Version Upgrade Paths': 'upgrade/kubernetes/paths.md'
+        - 'Backup': 'upgrade/kubernetes/backup.md'
+        - 'Rollback': 'upgrade/kubernetes/rollback.md'
     - 'FAQ': 'upgrade/upgrade-faq.md'
