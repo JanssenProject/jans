@@ -6,15 +6,14 @@
 
 package io.jans.orm.util;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.text.StringEscapeUtils;
 
 public final class StringHelper {
 
@@ -349,10 +348,6 @@ public final class StringHelper {
     }
 
     public static boolean isEmptyString(Object string) {
-    	if (string == null) {
-    		return false;
-    	}
-
         return !(string instanceof String) || isEmpty((String) string);
     }
 
