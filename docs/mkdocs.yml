@@ -349,6 +349,14 @@ nav:
     - 'Platform Authenticator Support': 'fido/platform-authn.md'
     - 'Bluetooth Authenticator Support': 'fido/bluetooth-authn.md'
     - 'SCIM Extension': 'fido/scim.md'
+- 'SCIM Admin Guide':
+    - 'Configuration': 'scim/config.md'
+    - 'Logs': 'scim/logs.md'
+    - 'Monitoring': 'scim/monitoring.md'
+    - 'OAuth Protection': 'scim/oauth-protection.md'
+    - 'Security Considerations': 'scim/security.md'
+    - 'Bulk Adding Users': 'scim/bulk-users.md'
+    - 'Adding Custom Attributes': 'scim/custom-attributes.md'
 - 'Integration Guide':
     - 'Custom Web Development': 'integration/custom-web.md'
     - 'SAML': 'integration/saml.md'
