@@ -339,6 +339,16 @@ nav:
     - 'Testing with Amazon CloudHSM': 'eleven/cloudhsm.md'
     - 'Testing with Google Cloud Key Management': 'eleven/google-key-mgt.md'
     - 'Testing end-to-end with Auth Server': 'eleven/auth-server-test.md'
+- 'FIDO Admin Guide':
+    - 'Configuration': 'fido/config.md'
+    - 'Vendor Metadata Management': 'fido/vendor-metadata.md'
+    - 'Key Management/Rotation': 'fido/key-mgt.md'
+    - 'Logs': 'fido/logs.md'
+    - 'Monitoring': 'fido/monitoring.md'
+    - 'USB Authenticator Support': 'fido/usb-authn.md'
+    - 'Platform Authenticator Support': 'fido/platform-authn.md'
+    - 'Bluetooth Authenticator Support': 'fido/bluetooth-authn.md'
+    - 'SCIM Extension': 'fido/scim.md'
 - 'Integration Guide':
     - 'Custom Web Development': 'integration/custom-web.md'
     - 'SAML': 'integration/saml.md'
