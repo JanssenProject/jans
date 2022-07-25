@@ -111,21 +111,25 @@ LDAP=True
   echo "countryCode=${COUNTRY}" | tee -a setup.properties > /dev/null
   echo "ldapPass=${ADMIN_PASS}" | tee -a setup.properties > /dev/null
   echo "installLdap=${LDAP}" | tee -a setup.properties > /dev/null
-scp setup.properties $USERNAME@$HOST:~/
+curl https://raw.githubusercontent.com/JanssenProject/jans/$BRANCH/jans-linux-setup/jans_setup/install.py > install.py
+scp setup.properties install.py $USERNAME@$HOST:~/
+rm setup.properties install.py
 expect<<EOF
 spawn /usr/bin/ssh $USERNAME@$HOST
 expect -re "(.*)"
-send -- "curl https://raw.githubusercontent.com/JanssenProject/jans/$BRANCH/jans-linux-setup/jans_setup/install.py > install.py"
-expect  "curl https://raw.githubusercontent.com/JanssenProject/jans/$BRANCH/jans-linux-setup/jans_setup/install.py > install.py"
-send -- "\r"
+send -- "sudo apt update -y\r"
+expect "password"
+send "${PASSWD}\r"
+send -- "sudo apt install -y wget curl\r"
 expect -re "(.*)\n"
-send "python3 install.py \-\-args=\"-f setup.properties -c -n \-\-cli-test-client\"\r"
+send "sudo python3 install.py \-\-args=\"-f setup.properties -c -n \-\-cli-test-client\"\r"
 expect {
+
 "python3-ldap3" { send "y\r" }
 "install these now" { send "y\r" }
 -re "(.*)" { send "\r" }
 }
-sleep 480
+sleep 520
 expect "Janssen Server installation successful"
 expect eof
 EOF
@@ -133,7 +137,6 @@ EOF
 } 
 
 uninstall_jans(){
-
 #expect<<EOF
 
 
@@ -151,7 +154,9 @@ expect<<EOF
 
 spawn /usr/bin/ssh $USERNAME@$HOST
 expect -re "(.*)"
-send "python3 install.py -uninstall\r"
+send "sudo python3 install.py -uninstall\r"
+expect "password"
+send "${PASSWD}\r"
 expect {
 "python3: command not found" { send "sudo dnf install python3 -y\r" }
 "Jans server seems not installed" { send "yes\r" }
@@ -162,9 +167,6 @@ expect "/opt/dist"
 expect eof
 EOF
 }	
-
-
-
 
 expect <<EOF
 spawn ssh-keygen  -t rsa -P '' -f ~/.ssh/id_rsa
@@ -178,7 +180,6 @@ expect {
 expect eof
 EOF
 
-
 HOST_OS=`ssh  ${USERNAME}@${HOST} 'cat /etc/os-release | grep PRETTY_NAME | cut -d" " -f-1,2 | cut -d"\"" -f2,3'`
 echo $HOST_OS
 OSTYPE=`echo $HOST_OS |cut -d" " -f1` 
@@ -188,10 +189,8 @@ OSVERSION=`echo $HOST_OS |cut -d" " -f2`
 
 echo $OSVERSION
 echo $OSTYPE
-	
 	while true
-	
-       	do
+	   	do
 		case "$OSTYPE" 
 
 		in
@@ -202,38 +201,28 @@ echo $OSTYPE
 					then
 						uninstall_jans 
 				fi
-
-				install_jans  2>&1 >$LOG_LOCATION/install.log
+				install_jans 2>&1 >$LOG_LOCATION/install.log
 				sleep 20
 				OPENIDINUM=`ssh  ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
-				
-                                ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
+				               ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
 				
 				reportgen			
-
-                                break;;
-                                
+                               break;;            
 			"CentOS")
-	
 				echo " login to CentOS Host"
 				if ( ssh  ${USERNAME}@${HOST} 'ls /opt/jans/jans-cli/config-cli.py' )
 					then
 						uninstall_jans 
 				fi
-
 				install_jans $BRANCH 2>&1 >$LOG_LOCATION/install.log
 				sleep 20			
 				OPENIDINUM=`ssh  ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
-				
                                 ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
 				
 				reportgen			
-
-                                break;;
-                    			                                
-                    
-
-			Suse)
+                              break;;
+							    			                                
+			"Suse")
 				echo "Login to Suse Host"
 				
 			 if ( ssh  ${USERNAME}@${HOST} 'ls /opt/jans/jans-cli/config-cli.py' )
@@ -250,38 +239,21 @@ echo $OSTYPE
                                 break;;
 
 
-			Red)
+			"Red")
 				echo "Login to RHEL8 Host"
 				
 				 if ( ssh  ${USERNAME}@${HOST} 'ls /opt/jans/jans-cli/config-cli.py' )
                                         then
-
-expect<<EOF
-spawn /usr/bin/ssh $USERNAME@$HOST
-expect -re "(.*)"
-send "python3 install.py -uninstall\r"
-expect -re "(.*)"
-send "yes\r"
-sleep 10
-expect "/opt/dist"
-expect eof
-EOF
-                                fi
-
-
-                                
+								uninstall_jans	2>&1 >$LOG_LOCATION/install.log
+                                fi                             
                                # ./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
 				install_jans $BRANCH 2>&1 >$LOG_LOCATION/install.log
                                 OPENIDINUM=`ssh  ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
                                 ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
-				
 				reportgen
-
                                 break;;
 			Rocky)
 				echo "Login to Rocky Linux 8 Host"
-
-
                                 ./install.exp ${HOST} ${USERNAME}
                                 break;;
 
@@ -289,3 +261,6 @@ EOF
 	
 	done
 #rm -rf logs/ report/
+sed -i 's///g' ./logs/*.log
+sed -i 's/^[//g' ./logs/*.log
+sed -i 's/^G//g' ./logs/*.log
