@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -51,12 +51,8 @@ public class SimpleClient implements Serializable {
         this.dn = dn;
     }
 
-    public String getClientName() {
-		return clientName;
-	}
-
-	public void setClientName(String clientName) {
-		this.clientName = clientName;
+    public List<CustomAttribute> getCustomAttributes() {
+        return customAttributes;
 	}
 
 	public String[] getDefaultAcrValues() {
@@ -67,8 +63,12 @@ public class SimpleClient implements Serializable {
 		this.defaultAcrValues = defaultAcrValues;
 	}
 
-	public List<CustomAttribute> getCustomAttributes() {
-        return customAttributes;
+    public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
     }
 
     public void setCustomAttributes(List<CustomAttribute> customAttributes) {

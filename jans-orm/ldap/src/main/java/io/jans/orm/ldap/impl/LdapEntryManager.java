@@ -6,8 +6,35 @@
 
 package io.jans.orm.ldap.impl;
 
-import com.unboundid.ldap.sdk.*;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.Modification;
+import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.util.StaticUtils;
+
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.AuthenticationException;
@@ -20,31 +47,28 @@ import io.jans.orm.exception.operation.SearchScopeException;
 import io.jans.orm.impl.BaseEntryManager;
 import io.jans.orm.ldap.operation.LdapOperationService;
 import io.jans.orm.ldap.operation.impl.LdapOperationServiceImpl;
-import io.jans.orm.model.*;
+import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.AttributeDataModification;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.DefaultBatchOperation;
+import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.LocalizedString;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.*;
 
 import static io.jans.orm.model.base.LocalizedString.*;
 
 /**
  * LDAP Entry Manager
  *
- * @author Yuriy Movchan
- * @version April 25, 2022
+ * @author Yuriy Movchan Date: 10.07.2010
  */
-public class LdapEntryManager extends BaseEntryManager implements Serializable {
+public class LdapEntryManager extends BaseEntryManager<LdapOperationService> implements Serializable {
 
     private static final long serialVersionUID = -2544614410981223105L;
 
@@ -136,7 +160,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
         LOG.debug(String.format("LDAP entry to remove: %s", dnValue.toString()));
 
-        remove(dnValue.toString());
+        remove(dnValue.toString(), entryClass);
     }
 
     @Override
@@ -339,14 +363,14 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     subscriber.onAfterRemove(dn, objectClasses);
                 }
             } else {
-                removeSubtreeThroughIteration(dn);
+                removeSubtreeThroughIteration(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
-    private void removeSubtreeThroughIteration(String dn) {
+    private void removeSubtreeThroughIteration(String dn, String[] objectClasses) {
         SearchScope scope = SearchScope.SUB;
 
         SearchResult searchResult = null;
@@ -369,7 +393,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         Collections.sort(removeEntriesDn, LINE_LENGHT_COMPARATOR);
 
         for (String removeEntryDn : removeEntriesDn) {
-            remove(removeEntryDn);
+            removeByDn(removeEntryDn, objectClasses);
         }
     }
 
@@ -895,7 +919,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public List<AttributeData> exportEntry(String dn, String objectClass) {
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
         return exportEntry(dn);
     }
 
@@ -1001,11 +1025,13 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         public void performAction(List<T> entries) {
             for (T entity : entries) {
                 try {
-                    String dnValue = ldapEntryManager.getDNValue(entity).toString();
+					Class<?> entryClass = entity.getClass();
+					
+					String dnValue = ldapEntryManager.getDNValue(entity, entryClass).toString();
                     if (ldapEntryManager.hasBranchesSupport(dnValue)) {
-                        ldapEntryManager.removeRecursively(dnValue);
+						ldapEntryManager.removeRecursively(dnValue, entryClass);
                     } else {
-                        ldapEntryManager.remove(dnValue);
+						ldapEntryManager.remove(dnValue, entryClass);
                     }
                     LOG.trace("Removed {}", dnValue);
                 } catch (Exception e) {

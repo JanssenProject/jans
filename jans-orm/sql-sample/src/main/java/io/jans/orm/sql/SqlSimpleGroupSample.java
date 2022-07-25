@@ -1,7 +1,7 @@
 /*
  * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.orm.sql;
@@ -33,12 +33,12 @@ public final class SqlSimpleGroupSample {
         // Create SQL entry manager
         SqlEntryManager sqlEntryManager = sqlEntryManagerSample.createSqlEntryManager();
         
-        String personDN = "inum=ae8c7ff9-def7-4b42-8147-de8380617a37,ou=people,o=gluu";
+        String personDN = "inum=ae8c7ff9-def7-4b42-8147-de8380617a37,ou=people,o=jans";
 		Filter ownerFilter = Filter.createEqualityFilter("owner", personDN);
 		Filter memberFilter = Filter.createEqualityFilter("member", personDN);
 		Filter searchFilter = Filter.createORFilter(ownerFilter, memberFilter);
 
-		List<SimpleGroup> result = sqlEntryManager.findEntries("ou=groups,o=gluu", SimpleGroup.class, searchFilter, 1);
+		List<SimpleGroup> result = sqlEntryManager.findEntries("ou=groups,o=jans", SimpleGroup.class, searchFilter, 1);
 		System.out.println(result);
     }
 

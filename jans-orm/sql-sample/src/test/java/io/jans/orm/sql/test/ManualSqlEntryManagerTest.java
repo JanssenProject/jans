@@ -1,10 +1,10 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.cloud.spanner.test;
+package io.jans.orm.sql.test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -25,29 +25,29 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import io.jans.orm.cloud.spanner.impl.SpannerEntryManager;
-import io.jans.orm.cloud.spanner.impl.SpannerEntryManagerFactory;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.ProcessBatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.sql.impl.SqlEntryManager;
+import io.jans.orm.sql.impl.SqlEntryManagerFactory;
 import io.jans.orm.util.Pair;
 
 /**
  * @author Yuriy Movchan Date: 01/15/2020
  */
-public class ManualSpannerEntryManagerTest {
+public class ManualSqlEntryManagerTest {
 	
-	private SpannerEntryManager manager;
+	private SqlEntryManager manager;
 	private SessionId persistedSessionId;
 	
 	private int totalProcessedCount;
 	
 	@BeforeClass(enabled = false)
 	public void init() throws IOException {
-        manager = createSpannerEntryManager();
+        manager = createSqlEntryManager();
 	}
 
 	@AfterClass(enabled = false)
@@ -327,7 +327,7 @@ public class ManualSpannerEntryManagerTest {
         Properties properties = new Properties();
 
         try (InputStream is = new FileInputStream("V://Development//jans//conf/jans-sql.properties")) {
-//        try (InputStream is = ManualSpannerEntryManagerTest.class.getResourceAsStream("sql-backend.jans.io.properties")) {
+//        try (InputStream is = ManualSqlEntryManagerTest.class.getResourceAsStream("sql-backend.jans.io.properties")) {
             Properties props = new Properties();
             props.load(is);
 
@@ -349,12 +349,12 @@ public class ManualSpannerEntryManagerTest {
         return properties;
     }
 
-    public SpannerEntryManager createSpannerEntryManager() throws IOException {
-    	SpannerEntryManagerFactory sqlEntryManagerFactory = new SpannerEntryManagerFactory();
+    public SqlEntryManager createSqlEntryManager() throws IOException {
+    	SqlEntryManagerFactory sqlEntryManagerFactory = new SqlEntryManagerFactory();
     	sqlEntryManagerFactory.create();
 
-        SpannerEntryManager sqlEntryManager = sqlEntryManagerFactory.createEntryManager(loadProperties());
-        System.out.println("Created SpannerEntryManager: " + sqlEntryManager);
+        SqlEntryManager sqlEntryManager = sqlEntryManagerFactory.createEntryManager(loadProperties());
+        System.out.println("Created SqlEntryManager: " + sqlEntryManager);
 
         return sqlEntryManager;
     }
