@@ -82,4 +82,12 @@ public class FlowMetadata {
         this.properties = properties;
     }
 
+    @Override
+    public String toString() {
+        return "FlowMetadata [funcName=" + funcName + ", inputs=" + inputs + ", timeout=" + timeout + ", displayName="
+                + displayName + ", author=" + author + ", timestamp=" + timestamp + ", description=" + description
+                + ", properties=" + properties + "]";
+    }
+
+    
 }
