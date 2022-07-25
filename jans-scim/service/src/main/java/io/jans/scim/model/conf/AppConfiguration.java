@@ -117,7 +117,7 @@ public class AppConfiguration implements Configuration, Serializable {
         return bulkMaxPayloadSize;
     }
     
-    public void setBulkMaxPayloadSize() {
+    public void setBulkMaxPayloadSize(long bulkMaxPayloadSize) {
         this.bulkMaxPayloadSize = bulkMaxPayloadSize;
     }
 
