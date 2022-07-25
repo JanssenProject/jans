@@ -391,6 +391,12 @@ nav:
     - 'Monitoring': 'client-api/monitoring.md'
     - 'Key Management': 'client-api/key-mgt.md'
     - 'SDKs': 'client-api/sdks.md'
+- 'Config API Admin Guide':
+    - 'Configuration': 'config-api/config.md'
+    - 'Security': 'config-api/security.md'
+    - 'Logs': 'config-api/logs.md'
+    - 'Monitoring': 'config-api/monitoring.md'
+    - 'Plugins': 'config-api/plugins.md'
 - 'Upgrade Guide':
     - 'VM': 'upgrade/vm-upgrade.md'
     - 'Kubernetes': 'upgrade/kubernetes-upgrade.md'
