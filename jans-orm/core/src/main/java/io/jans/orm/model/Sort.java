@@ -33,6 +33,18 @@ public class Sort {
 		return sortOrder;
 	}
 
+	public static Sort desc(String name) {
+		return new Sort(name, SortOrder.DESCENDING);
+	}
+
+	public static Sort asc(String name) {
+		return new Sort(name, SortOrder.ASCENDING);
+	}
+
+	public static Sort def(String name) {
+		return new Sort(name, SortOrder.DEFAULT);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

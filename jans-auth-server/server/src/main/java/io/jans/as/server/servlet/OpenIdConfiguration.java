@@ -111,34 +111,34 @@ import static io.jans.as.model.util.StringUtils.implode;
 @WebServlet(urlPatterns = "/.well-known/openid-configuration", loadOnStartup = 10)
 public class OpenIdConfiguration extends HttpServlet {
 
-    private static final long serialVersionUID = -8224898157373678903L;
+    private static final long serialVersionUID = -8224898157373678904L;
 
     @Inject
-    private Logger log;
+    private transient Logger log;
 
     @Inject
-    private AppConfiguration appConfiguration;
+    private transient AppConfiguration appConfiguration;
 
     @Inject
-    private AttributeService attributeService;
+    private transient AttributeService attributeService;
 
     @Inject
-    private ScopeService scopeService;
+    private transient ScopeService scopeService;
 
     @Inject
-    private ExternalAuthenticationService externalAuthenticationService;
+    private transient ExternalAuthenticationService externalAuthenticationService;
 
     @Inject
-    private ExternalDynamicScopeService externalDynamicScopeService;
+    private transient ExternalDynamicScopeService externalDynamicScopeService;
 
     @Inject
-    private ExternalDiscoveryService externalDiscoveryService;
+    private transient ExternalDiscoveryService externalDiscoveryService;
 
     @Inject
-    private CIBAConfigurationService cibaConfigurationService;
+    private transient CIBAConfigurationService cibaConfigurationService;
 
     @Inject
-    private LocalResponseCache localResponseCache;
+    private transient LocalResponseCache localResponseCache;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -148,7 +148,7 @@ public class OpenIdConfiguration extends HttpServlet {
      * @param httpResponse   servlet response
      * @throws IOException
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "java:S3776"})
     protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) throws IOException {
         if (!(externalAuthenticationService.isLoaded() && externalDynamicScopeService.isLoaded())) {
             httpResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
@@ -429,7 +429,7 @@ public class OpenIdConfiguration extends HttpServlet {
             // CIBA Configuration
             cibaConfigurationService.processConfiguration(jsonObj);
 
-            filterOutKeys(jsonObj);
+            filterOutKeys(jsonObj, appConfiguration);
             localResponseCache.putDiscoveryResponse(jsonObj);
 
             JSONObject clone = new JSONObject(jsonObj.toString());
@@ -445,6 +445,7 @@ public class OpenIdConfiguration extends HttpServlet {
         }
     }
 
+    @SuppressWarnings("java:S3776")
     private void addMtlsAliases(JSONObject jsonObj) {
         JSONObject aliases = new JSONObject();
 
@@ -478,23 +479,31 @@ public class OpenIdConfiguration extends HttpServlet {
             aliases.put(PAR_ENDPOINT, appConfiguration.getMtlsParEndpoint());
         }
 
-        log.trace("MTLS aliases: " + aliases.toString());
-        if (!aliases.isEmpty())
+        if (log.isTraceEnabled()) {
+            log.trace("MTLS aliases: {}", aliases);
+        }
+        if (!aliases.isEmpty()) {
             jsonObj.put(MTLS_ENDPOINT_ALIASES, aliases);
+        }
     }
 
-    private void filterOutKeys(JSONObject jsonObj) {
-        final List<String> allowedKeys = appConfiguration.getDiscoveryAllowedKeys();
-        if (allowedKeys == null || allowedKeys.isEmpty()) {
-            return; // nothing to filter
+    public static void filterOutKeys(JSONObject jsonObj, AppConfiguration appConfiguration) {
+        final List<String> denyKeys = appConfiguration.getDiscoveryDenyKeys();
+        if (!denyKeys.isEmpty()) {
+            for (String key : new HashSet<>(jsonObj.keySet())) {
+                if (denyKeys.contains(key)) {
+                    jsonObj.remove(key);
+                }
+            }
         }
 
-        for (String key : new HashSet<>(jsonObj.keySet())) {
-            if (allowedKeys.contains(key)) {
-                continue;
+        final List<String> allowedKeys = appConfiguration.getDiscoveryAllowedKeys();
+        if (!allowedKeys.isEmpty()) {
+            for (String key : new HashSet<>(jsonObj.keySet())) {
+                if (!allowedKeys.contains(key)) {
+                    jsonObj.remove(key);
+                }
             }
-
-            jsonObj.remove(key);
         }
     }
 
@@ -514,10 +523,11 @@ public class OpenIdConfiguration extends HttpServlet {
      * /.well-known/gluu-configuration
      */
     @Deprecated
+    @SuppressWarnings("java:S3776")
     private JSONArray createScopeToClaimsMapping(JSONArray scopesSupported, JSONArray claimsSupported) {
         final JSONArray scopeToClaimMapping = new JSONArray();
-        Set<String> scopes = new HashSet<String>();
-        Set<String> claims = new HashSet<String>();
+        Set<String> scopes = new HashSet<>();
+        Set<String> claims = new HashSet<>();
 
         try {
             for (Scope scope : scopeService.getAllScopesList()) {
@@ -589,8 +599,8 @@ public class OpenIdConfiguration extends HttpServlet {
         final JSONObject mappings = new JSONObject();
         try {
             Map<Integer, Set<String>> map = externalAuthenticationService.levelToAcrMapping();
-            for (Integer level : map.keySet())
-                mappings.put(level.toString(), map.get(level));
+            for (Map.Entry<Integer, Set<String>> entry : map.entrySet())
+                mappings.put(entry.getKey().toString(), entry.getValue());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

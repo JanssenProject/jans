@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -40,6 +40,7 @@ import io.jans.orm.exception.KeyConversionException;
 import io.jans.orm.exception.MappingException;
 import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.exception.operation.ConnectionException;
+import io.jans.orm.exception.operation.PersistenceException;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.PropertiesHelper;
@@ -431,10 +432,11 @@ public class SpannerConnectionProvider {
     }
 
 	public TableMapping getTableMappingByKey(String key, String objectClass, String tableName) {
-		Map<String, StructField> columTypes = tableColumnsMap.get(tableName);
 		if (!tableColumnsMap.containsKey(tableName)) {
-			throw new MappingException(String.format("Table '%s' metadata is not exists '", tableName));
+			throw new MappingException(String.format("Table '%s' is not exists in metadata'", tableName));
 		}
+
+		Map<String, StructField> columTypes = tableColumnsMap.get(tableName);
 
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);
@@ -456,7 +458,13 @@ public class SpannerConnectionProvider {
 
 	 public TableMapping getChildTableMappingByKey(String key, TableMapping tableMapping, String columnName) {
 		String childTableName = tableMapping.getTableName() + "_" + columnName;
+
+		if (!tableColumnsMap.containsKey(childTableName)) {
+			return null;
+		}
+
 		TableMapping childTableMapping = getTableMappingByKey(key, tableMapping.getObjectClass(), childTableName);
+			
 		return childTableMapping;
 	}
 
@@ -473,6 +481,10 @@ public class SpannerConnectionProvider {
 		Map<String, TableMapping> childTableMapping = new HashMap<>();
 		for (String childAttribute : childAttributes) {
 			TableMapping childColumTypes = getChildTableMappingByKey(key, tableMapping, childAttribute);
+			if (childColumTypes == null) {
+				String childTableName = tableMapping.getTableName() + "_" + childAttribute;
+				throw new MappingException(String.format("Table '%s' is not exists in metadata'", childTableName));
+			}
 			childTableMapping.put(childAttribute.toLowerCase(), childColumTypes);
 		}
 		

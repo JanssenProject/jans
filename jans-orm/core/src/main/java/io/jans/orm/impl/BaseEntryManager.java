@@ -6,18 +6,52 @@
 
 package io.jans.orm.impl;
 
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.annotation.*;
+import io.jans.orm.annotation.AttributeEnum;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.AttributesList;
+import io.jans.orm.annotation.CustomObjectClass;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.LanguageTag;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.SchemaEntry;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
-import io.jans.orm.exception.extension.PersistenceExtension;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.LocalizedString;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.reflect.property.PropertyAnnotation;
@@ -26,24 +60,13 @@ import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 /**
  * Abstract Entry Manager
  *
- * @author Yuriy Movchan
- * @version April 25, 2022
+ * @author Yuriy Movchan Date: 10.07.2010
  */
-public abstract class BaseEntryManager implements PersistenceEntryManager {
+public abstract class BaseEntryManager<O extends PersistenceOperationService> implements PersistenceEntryManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
@@ -80,7 +103,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	protected static final int DEFAULT_PAGINATION_SIZE = 100;
 
-	protected PersistenceOperationService operationService = null;
+	protected O operationService = null;
 	protected PersistenceExtension persistenceExtension = null;
 
 	@Override
@@ -447,7 +470,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	protected abstract void merge(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications, Integer expiration);
 
-	protected abstract <T> void removeByDn(String dn, String[] objectClasses);
+	public abstract <T> void removeByDn(String dn, String[] objectClasses);
 
 	@Deprecated
 	public void remove(String primaryKey) {
@@ -467,7 +490,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		removeByDn(primaryKey, objectClasses);
 	}
 
-	protected abstract <T> void removeRecursivelyFromDn(String primaryKey, String[] objectClasses);
+	public abstract <T> void removeRecursivelyFromDn(String primaryKey, String[] objectClasses);
 
 	@Deprecated
 	public void removeRecursively(String primaryKey) {
@@ -2224,6 +2247,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		if (this.operationService != null) {
 			this.operationService.setPersistenceExtension(persistenceExtension);
 		}
+	}
+
+	@Override
+	public <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName) {
+        throw new UnsupportedOperationException("Method not implemented.");
 	}
 
 	protected static final class PropertyComparator<T> implements Comparator<T>, Serializable {
