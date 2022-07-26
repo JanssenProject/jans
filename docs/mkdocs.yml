@@ -18,7 +18,7 @@ theme:
         primary: 'green'
         accent: 'green'
     logo: 'janssen_project.png'
-    favicon: 'janssen_project_favicon_transparent_50px_50px.png'
+    favicon: 'janssen_project_favicon_transparent_50px_50px.ico'
 extra_css:
   - css/tabs.css
 
