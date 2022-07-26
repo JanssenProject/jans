@@ -2948,29 +2948,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-		  
-  /jans-config-api/agama:
-    get:
-      summary: Retrieves Agama flows.
-      description: Retrieves Agama flows.
-      operationId: get-agama-flows
-      security:
-        - oauth2: [https://jans.io/oauth/config/agama.readonly]
-      tags:
-        - Agama - Flow
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: Agama Flow Details
-                description:  Agama Flow Details.
-                $ref: '#/components/schemas/AgamaFlow'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
   
   /jans-config-api/api/v1/jans-auth-server/health:
     get:

@@ -238,22 +238,18 @@ public class AgamaFlowService implements Serializable {
 
             if (attributeValue != null) {
                 attributeClass = attributeValue.getClass().toString();
-                logger.error(" Flow attribute data - key:{} - attributeValue:{}, attributeClass:{}, dataType:{}", key,
+                logger.debug(" Flow attribute data - key:{} - attributeValue:{}, attributeClass:{}, dataType:{}", key,
                         attributeValue, attributeClass, dataType);
                 
-                logger.error("Non Mandatory attribute check result - key:{} - attributeValue:{}, dataType:{}, !isStringDataPresent(dataType, attributeValue):{}, !isIntegerDataPresent(dataType, attributeValue):{}, !isFlowMetadataPresent(dataType, attributeValue):{}",  key,
+                logger.trace("Non Mandatory attribute check result - key:{} - attributeValue:{}, dataType:{}, !isStringDataPresent(dataType, attributeValue):{}, !isIntegerDataPresent(dataType, attributeValue):{}, !isFlowMetadataPresent(dataType, attributeValue):{}",  key,
                         attributeValue, dataType, !isStringDataPresent(dataType, attributeValue), !isIntegerDataPresent(dataType, attributeValue), !isFlowMetadataPresent(dataType, attributeValue));
-                
-                logger.error(" NonMandatoryFields key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,
-                        attributeValue, attributeClass, objectPropertyMap.get(key));
-                // ignore if empty
-                if (!isStringDataPresent(dataType, attributeValue) || !isIntegerDataPresent(dataType, attributeValue)
-                        || !isFlowMetadataPresent(dataType, attributeValue)) {
-                    continue;
-                }
 
-                // report as value should be null
-                unwantedAttributes.append(key).append(",");
+                // ignore if empty
+                if (isStringDataPresent(dataType, attributeValue) || isIntegerDataPresent(dataType, attributeValue)
+                        || isFlowMetadataPresent(dataType, attributeValue)) {
+                 // report as value should be null
+                    unwantedAttributes.append(key).append(",");
+                }                
             }
         } // for
         logger.debug("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
@@ -273,7 +269,7 @@ public class AgamaFlowService implements Serializable {
         if (dataType == null || attributeValue == null) {
             return false;
         } else if ("java.lang.String".equalsIgnoreCase(dataType.getName())
-                && StringUtils.isNotBlank(String.class.cast(attributeValue))) {
+                && StringUtils.isNotEmpty(String.class.cast(attributeValue))) {
             return true;
         }
 
@@ -298,8 +294,7 @@ public class AgamaFlowService implements Serializable {
         if (dataType == null || attributeValue == null) {
             return false;
         }
-
-        if ("io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName())) {
+        else if ("io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName())) {
             FlowMetadata flowMetadata = FlowMetadata.class.cast(attributeValue);
 
             if (flowMetadata == null) {
