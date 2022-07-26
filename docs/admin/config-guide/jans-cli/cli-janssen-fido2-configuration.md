@@ -79,7 +79,7 @@ To perform this operation, let's check the schema first.
 
 This command will create a fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
 
-![janssen fido2 configuration](../../assets/image-cl-fido2-update-03042021.png)
+![janssen fido2 configuration](../../img/image-cl-fido2-update-03042021.png)
 
 Now let's do the operation:
 

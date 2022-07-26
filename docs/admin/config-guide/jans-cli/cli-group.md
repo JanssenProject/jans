@@ -184,7 +184,7 @@ root@testjans:~# /opt/jans/jans-cli/scim-cli.py --schema /components/schemas/Gro
 ```
 The schema defines the properties of an attribute.Just Create a json file with each properties in schema filling by a value.
 
-![](../../assets/image-cl-scim-create-group-03042021.png)
+![](../../img/image-cl-scim-create-group-03042021.png)
 
 As you see, I have removed `members` from the schema. We will add members in this group later. Let's use the command to create the group with this data.
 
@@ -332,7 +332,7 @@ Let's get the schema first:
 
 let's modify this schema to add members into a selected group:
 
-![](../../assets/image-cl-scim-group-update-03042021.png)
+![](../../img/image-cl-scim-group-update-03042021.png)
 
 - displayName: It should be a group name
 - id: Selected group id which one you want to updae
