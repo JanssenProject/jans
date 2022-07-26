@@ -5,7 +5,7 @@
 </br>
 
 <p align="center">
- <img src="../../assets/image-using-jans-cli-comp-04222022.png">
+ <img src="../../img/image-using-jans-cli-comp-04222022.png">
 </p>
 
 `jans-cli` offers two modes in which it can be used. Command-line and interactive mode. 
@@ -19,7 +19,7 @@
 - **Interactive mode**: Interactive mode is a terminal based menu-driven mode where user can select intended action from available options and also provide input parameters required for that action.
 
 <p align="center">
-  <img src="../../assets/gif-jans-cli-interactive-mode-04232022.gif" width="850" height="641" />
+  <img src="../../img/gif-jans-cli-interactive-mode-04232022.gif" width="850" height="641" />
 </p>
 
 # Documentation Index

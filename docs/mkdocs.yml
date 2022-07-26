@@ -18,7 +18,7 @@ theme:
         primary: 'green'
         accent: 'green'
     logo: 'janssen_project.png'
-    favicon: 'janssen_project_favicon_transparent_50px_50px.png'
+    favicon: 'janssen_project_favicon_transparent_50px_50px.ico'
 extra_css:
   - css/tabs.css
 
@@ -104,7 +104,7 @@ nav:
     - 'Configuration CLI':
         - 'Standalone Installation': 'config-guide/jans-cli/install.md'
         - 'Interactive Mode':
-            - 'Overview': 'config-guide/jans-cli/im/index.md'
+            - 'Overview': 'config-guide/jans-cli/im/im-index.md'
             - 'Attribute': 'config-guide/jans-cli/im/im-attribute.md'
             - 'Default Authentication': 'config-guide/jans-cli/im/im-authentication-method.md'
             - 'Cache Configuration': 'config-guide/jans-cli/im/im-cache-configuration.md'
@@ -122,7 +122,7 @@ nav:
             - 'SCIM User Resources': 'config-guide/jans-cli/im/im-user.md'
             - 'SCIM Group Management': 'config-guide/jans-cli/im/im-group.md'
         - 'Batch Mode':    
-            - 'Overview': 'config-guide/jans-cli/index.md'
+            - 'Overview': 'config-guide/jans-cli/cli-index.md'
             - 'Attribute': 'config-guide/jans-cli/cli-attribute.md'
             - 'Default Authentication': 'config-guide/jans-cli/cli-default-authentication-method.md'
             - 'Cache Configuration': 'config-guide/jans-cli/cli-cache-configuration.md'
