@@ -2391,6 +2391,26 @@ paths:
         - oauth2: [https://jans.io/oauth/config/scopes.write]
 
   /jans-config-api/api/v1/agama:
+    get:
+      summary: Fetches all agama flow.
+      description: Fetches all agama flow.
+      operationId: get-agama-flows
+      tags:
+        - Configuration – Agama Flow
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.readonly]
     post:
       summary: Create a new agama flow.
       description: Create a new agama flow.
@@ -2415,6 +2435,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.write]
+		
   /jans-config-api/api/v1/agama/{qname}:
     parameters:
       - schema:
@@ -2443,6 +2464,34 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.readonly]
+	    
+    post:
+      summary: Create a new agama flow from source file.
+      description: Create a new agama flow from source file.
+      operationId: post-agama-flow-from-source
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+		
+   
     put:
       summary: Updates an agama flow based on Qname.
       description: Updates an agama based on Qname.

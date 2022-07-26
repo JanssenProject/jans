@@ -141,7 +141,7 @@ public class AgamaFlowService implements Serializable {
             boolean checkNonMandatoryFields)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
-        logger.error(
+        logger.debug(
                 "Validate Flow Fields flow - flow:{}, mandatoryAttributes:{} , optionalAttributes:{}, checkNonMandatoryFields:{}",
                 flow, mandatoryAttributes, optionalAttributes, checkNonMandatoryFields);
 
@@ -152,25 +152,25 @@ public class AgamaFlowService implements Serializable {
         }
 
         Map<String, String> objectPropertyMap = DataUtil.getFieldTypeMap(flow.getClass());
-        logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
+        logger.debug("Flow class objectPropertyMap:{} ", objectPropertyMap);
         if (objectPropertyMap == null || objectPropertyMap.isEmpty()) {
             return errorMsg.toString();
         }
 
         Set<String> keys = objectPropertyMap.keySet();
-        logger.error("Flow class fields:{} ", keys);
+        logger.debug("Flow class fields:{} ", keys);
 
         Object attributeValue = null;
         for (String attribute : mandatoryAttributes) {
-            logger.error("Flow class objectPropertyMap:{} conatins attribute:{} ? :{} ", objectPropertyMap, attribute,
+            logger.debug("Flow class objectPropertyMap:{} conatins attribute:{} ? :{} ", objectPropertyMap, attribute,
                     keys.contains(attribute));
 
             if (keys.contains(attribute)) {
-                logger.error("Checking value of attribute:{}", attribute);
+                logger.debug("Checking value of attribute:{}", attribute);
                 attributeValue = BeanUtils.getProperty(flow, attribute);
-                logger.error("Flow attribute:{} - attributeValue:{} ", attribute, attributeValue);
+                logger.debug("Flow attribute:{} - attributeValue:{} ", attribute, attributeValue);
             }
-            logger.error("Flow attribute value attribute:{} - attributeValue:{} - datatype:{} ", attribute,
+            logger.debug("Flow attribute value attribute:{} - attributeValue:{} - datatype:{} ", attribute,
                     attributeValue, objectPropertyMap.get(attribute));
 
             if (attributeValue == null) {
@@ -178,7 +178,7 @@ public class AgamaFlowService implements Serializable {
             }
 
         } // for
-        logger.error("Checking mandatory errorMsg:{} ", errorMsg);
+        logger.debug("Checking mandatory errorMsg:{} ", errorMsg);
 
         if (errorMsg.length() > 0) {
             errorMsg.insert(0, "Required feilds missing -> (");
@@ -190,74 +190,70 @@ public class AgamaFlowService implements Serializable {
         if (checkNonMandatoryFields) {
             String valiateNonMandatoryFieldsMsg = validateNonMandatoryFields(flow, mandatoryAttributes,
                     optionalAttributes);
-            logger.error("Checking mandatory valiateNonMandatoryFieldsMsg:{} ", valiateNonMandatoryFieldsMsg);
+            logger.debug("Checking mandatory valiateNonMandatoryFieldsMsg:{} ", valiateNonMandatoryFieldsMsg);
             if (StringUtils.isNotBlank(valiateNonMandatoryFieldsMsg)) {
                 errorMsg.append(valiateNonMandatoryFieldsMsg);
             }
         }
 
-        logger.error("Returning missingAttributes:{} ", errorMsg);
+        logger.debug("Returning missingAttributes:{} ", errorMsg);
         return errorMsg.toString();
     }
 
     public String validateNonMandatoryFields(Flow flow, List<String> mandatoryAttributes,
             List<String> optionalAttributes)
-            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+      {
 
-        logger.error("Validate Flow for Non Mandatory Fields - flow:{}, mandatoryAttributes:{}, optionalAttributes:{}",
+        logger.debug("Validate Flow for Non Mandatory Fields - flow:{}, mandatoryAttributes:{}, optionalAttributes:{}",
                 flow, mandatoryAttributes, optionalAttributes);
 
         StringBuilder unwantedAttributes = new StringBuilder();
 
         Map<String, String> objectPropertyMap = DataUtil.getFieldTypeMap(flow.getClass());
-        logger.error("Flow class objectPropertyMap:{} ", objectPropertyMap);
+        logger.debug("Flow class objectPropertyMap:{} ", objectPropertyMap);
         if (objectPropertyMap == null || objectPropertyMap.isEmpty()) {
             return unwantedAttributes.toString();
         }
 
         Set<String> keys = objectPropertyMap.keySet();
-        logger.error("Flow class fields:{} ", keys);
+        logger.debug("Flow class fields:{} ", keys);
 
         // remove mandatoryAttributes as they are to be excluded
         keys.removeAll(mandatoryAttributes);
-        logger.error("After removing mandatoryAttributes:{}, keys:{} ", mandatoryAttributes, keys);
+        logger.debug("After removing mandatoryAttributes:{}, keys:{} ", mandatoryAttributes, keys);
 
         // remove optionalAttributes as they are to be excluded
         keys.removeAll(optionalAttributes);
-        logger.error("After removing optionalAttributes:{}, keys:{} ", optionalAttributes, keys);
+        logger.debug("After removing optionalAttributes:{}, keys:{} ", optionalAttributes, keys);
 
         Object attributeValue = null;
         String attributeClass = null;
         for (String key : keys) {
 
             // Check non-mandatory attributes should be null
-            logger.error("Checking value of non-mandatory attribute:{}", key);
+            logger.debug("Checking value of non-mandatory attribute:{}", key);
             Getter getter = DataUtil.getGetterMethod(Flow.class, key);
             Class<?> dataType = getter.getReturnType();
             attributeValue = getter.get(flow);
-            logger.error("Flow attribute key:{}, getter:{}, dataType:{}, attributeValue:{}", key, getter, dataType,
+            logger.debug("Flow attribute key:{}, getter:{}, dataType:{}, attributeValue:{}", key, getter, dataType,
                     attributeValue);
 
             if (attributeValue != null) {
                 attributeClass = attributeValue.getClass().toString();
-                logger.error("Flow attribute key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,
+                logger.debug("Flow attribute key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,
                         attributeValue, attributeClass, objectPropertyMap.get(key));
                 // ignore if empty
 
                 if ("java.lang.String".equalsIgnoreCase(dataType.getName())
                         && StringUtils.isBlank(String.class.cast(attributeValue))) {
-                    logger.error("validateNonMandatoryFields - 1");
                     continue;
                 } else if ("java.lang.Integer".equalsIgnoreCase(dataType.getName())
                         && (Integer.class.cast(attributeValue) <= 0)) {
-                    logger.error("validateNonMandatoryFields - 2");
                     continue;
                 } else if ("int".equalsIgnoreCase(dataType.getName()) && (Integer.class.cast(attributeValue) <= 0)) {
-                    logger.error("validateNonMandatoryFields - 3");
                     continue;
                 } else if ("io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName())
                         && !isFlowMetadataPresent(FlowMetadata.class.cast(attributeValue))) {
-                    logger.error("validateNonMandatoryFields - 4");
                     continue;
                 }
 
@@ -265,7 +261,7 @@ public class AgamaFlowService implements Serializable {
                 unwantedAttributes.append(key).append(",");
             }
         } // for
-        logger.error("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
+        logger.debug("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
 
         if (unwantedAttributes.length() > 0) {
             unwantedAttributes.insert(0, "Value of these feilds should be null -> (");
@@ -273,12 +269,12 @@ public class AgamaFlowService implements Serializable {
             unwantedAttributes.append(").");
         }
 
-        logger.error("Returning unwantedAttributes:{} ", unwantedAttributes);
+        logger.debug("Returning unwantedAttributes:{} ", unwantedAttributes);
         return unwantedAttributes.toString();
     }
 
     private boolean isFlowMetadataPresent(FlowMetadata flowMetadata) {
-        logger.error("Validate FlowMetadata flowMetadata:{} ", flowMetadata);
+        logger.debug("Validate FlowMetadata flowMetadata:{} ", flowMetadata);
 
         if (flowMetadata == null) {
             return false;
@@ -290,7 +286,7 @@ public class AgamaFlowService implements Serializable {
                 || StringUtils.isNotBlank(flowMetadata.getDescription()) || flowMetadata.getInputs() != null
                 || (flowMetadata.getTimeout() != null && flowMetadata.getTimeout() > 0)
                 || flowMetadata.getProperties() != null || flowMetadata.getTimestamp() > 0) {
-            logger.error("FlowMetadata is not null !!!");
+            logger.debug("FlowMetadata is not null !!!");
             return true;
         }
 

@@ -40,10 +40,7 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AgamaResource extends ConfigBaseResource {
-
-    private static final String AGAMA_QNAME = "FlowName";
-    private static final String AGAMA_SOURCE = "source";
-
+    
     @Inject
     Logger log;
 
@@ -56,7 +53,7 @@ public class AgamaResource extends ConfigBaseResource {
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
 
         if (log.isDebugEnabled()) {
-            log.error("Search Agama Flow with pattern:{}, sizeLimit:{}, ", escapeLog(pattern), escapeLog(limit));
+            log.debug("Search Agama Flow with pattern:{}, sizeLimit:{}, ", escapeLog(pattern), escapeLog(limit));
         }
 
         List<Flow> flows = null;
@@ -74,11 +71,11 @@ public class AgamaResource extends ConfigBaseResource {
     @Path(ApiConstants.QNAME_PATH)
     public Response getFlowByName(@PathParam(ApiConstants.QNAME) @NotNull String flowName) {
         if (log.isDebugEnabled()) {
-            log.error("Search Agama with flowName:{}, ", escapeLog(flowName));
+            log.debug("Search Agama with flowName:{}, ", escapeLog(flowName));
         }
 
         String decodedFlowName = getURLDecodedValue(flowName);
-        log.error(" Agama Decoded flow name decodedFlowName:{}", decodedFlowName);
+        log.trace(" Agama Decoded flow name decodedFlowName:{}", decodedFlowName);
         Flow flow = findFlow(decodedFlowName, true);
 
         return Response.ok(flow).build();
@@ -88,12 +85,12 @@ public class AgamaResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
     public Response createFlow(@Valid Flow flow)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        log.error(" Flow to be added flow:{}, flow.getQName():{}, flow.getSource():{} ", flow, flow.getQname(),
+        log.debug(" Flow to be added flow:{}, flow.getQName():{}, flow.getSource():{} ", flow, flow.getQname(),
                 flow.getSource());
 
         // check if flow with same name already exists
         Flow existingFlow = findFlow(flow.getQname(), false);
-        log.error(" existingFlow:{}", existingFlow);
+        log.debug(" existingFlow:{}", existingFlow);
         if (existingFlow != null) {
             thorwBadRequestException("Flow identified by name '" + flow.getQname() + "' already exist!");
         }
@@ -113,14 +110,14 @@ public class AgamaResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
     public Response createFlowFromFile(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        log.error(" Flow to be created flowName:{}, source:{}", flowName, source);
+        log.debug(" Flow to be created flowName:{}, source:{}", flowName, source);
 
         String decodedFlowName = getURLDecodedValue(flowName);
-        log.error(" Agama Decoded flow name for create is:{}", decodedFlowName);
+        log.trace(" Agama Decoded flow name for create is:{}", decodedFlowName);
 
         // check if flow with same name already exists
         Flow existingFlow = findFlow(decodedFlowName, false);
-        log.error(" existingFlow:{}", existingFlow);
+        log.debug(" existingFlow:{}", existingFlow);
         if (existingFlow != null) {
             thorwBadRequestException("Flow identified by name '" + decodedFlowName + "' already exist!");
         }
@@ -144,25 +141,25 @@ public class AgamaResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
     public Response updateFlow(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid Flow flow)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        log.error(" Flow to update flowName:{}, flow:{}, flow.getQName():{}, flow.getSource():{} ", flowName, flow,
+        log.debug(" Flow to update flowName:{}, flow:{}, flow.getQName():{}, flow.getSource():{} ", flowName, flow,
                 flow.getQname(), flow.getSource());
 
         String decodedFlowName = getURLDecodedValue(flowName);
-        log.error(" Agama Decoded flow name for update is:{}", decodedFlowName);
+        log.trace(" Agama Decoded flow name for update is:{}", decodedFlowName);
 
         // check if flow exists
         Flow existingFlow = findFlow(decodedFlowName, true);
 
         // set flow data
         flow.setQname(decodedFlowName);
-        log.error("Flow revision check - flow.getRevision():{}, existingFlow.getRevision():{}", flow.getRevision(),
+        log.trace("Flow revision check - flow.getRevision():{}, existingFlow.getRevision():{}", flow.getRevision(),
                 existingFlow.getRevision());
         getRevision(flow, existingFlow);
-        log.error("Flow revision after update - flow.getRevision():{}", flow.getRevision());
+        log.debug("Flow revision after update - flow.getRevision():{}", flow.getRevision());
 
         // validate flow data
         validateAgamaFlowData(flow, false);
-        log.error("Updating flow after validation");
+        log.debug("Updating flow after validation");
         agamaFlowService.updateFlow(flow);
 
         flow = findFlow(decodedFlowName, true);
@@ -173,9 +170,9 @@ public class AgamaResource extends ConfigBaseResource {
     @Path(ApiConstants.QNAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS })
     public Response deleteAttribute(@PathParam(ApiConstants.QNAME) @NotNull String flowName) {
-        log.error(" Flow to delete - flowName:{}", flowName);
+        log.debug(" Flow to delete - flowName:{}", flowName);
         String decodedFlowName = getURLDecodedValue(flowName);
-        log.error(" Agama Decoded flow name is:{}", decodedFlowName);
+        log.trace(" Agama Decoded flow name is:{}", decodedFlowName);
 
         // check if flow exists
         Flow flow = findFlow(decodedFlowName, true);
@@ -199,15 +196,15 @@ public class AgamaResource extends ConfigBaseResource {
 
     private void validateAgamaFlowData(Flow flow, boolean checkNonMandatoryFields)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        log.error(" Validate Agama Flow data - flow:{}, checkNonMandatoryFields:{}", flow, checkNonMandatoryFields);
+        log.debug(" Validate Agama Flow data - flow:{}, checkNonMandatoryFields:{}", flow, checkNonMandatoryFields);
         if (flow == null) {
             return;
         }
-        log.error("Agama Flow to be added flow:{}, flow.getQname():{}, flow.getSource():{} ", flow, flow.getQname(),
+        log.debug("Agama Flow to be added flow:{}, flow.getQname():{}, flow.getSource():{} ", flow, flow.getQname(),
                 flow.getSource());
 
         String validateMsg = agamaFlowService.validateFlowFields(flow, checkNonMandatoryFields);
-        log.error("Agama Flow to be validation msg:{} ", validateMsg);
+        log.debug("Agama Flow to be validation msg:{} ", validateMsg);
         if (StringUtils.isNotBlank(validateMsg)) {
             thorwBadRequestException(validateMsg);
         }
@@ -217,7 +214,7 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     private void validateSyntax(Flow flow) {
-        log.error("Validate Flow Source Syntax - flow:{}", flow);
+        log.debug("Validate Flow Source Syntax - flow:{}", flow);
         if (flow == null) {
             return;
         }
@@ -227,7 +224,7 @@ public class AgamaResource extends ConfigBaseResource {
         } catch (SyntaxException se) {
             log.error("Transpiler syntax check error", se);
             try {
-                log.error("Throwing BadRequestException 400 :{} ", Jackson.asJson(se));
+                log.debug("Throwing BadRequestException 400 :{} ", Jackson.asJson(se));
                 thorwBadRequestException(Jackson.asJson(se));
             } catch (IOException io) {
                 log.error("Agama Flow Transpiler syntax error parsing error", io);
@@ -240,7 +237,7 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     private String getURLDecodedValue(String pathParam) {
-        log.error(" Decode pathParam():{} ", pathParam);
+        log.debug(" Decode pathParam():{} ", pathParam);
         try {
             return URLDecoder.decode(pathParam, UTF_8.name());
         } catch (UnsupportedEncodingException uee) {
@@ -250,13 +247,13 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     private Flow getRevision(Flow flow, Flow existingFlow) {
-        log.error("Flow revision check - flow:{}, existingFlow:{}", flow, existingFlow);
+        log.debug("Flow revision check - flow:{}, existingFlow:{}", flow, existingFlow);
 
         if (flow == null || existingFlow == null) {
             return flow;
         }
 
-        log.error("Flow revision check - flow.getRevision():{}, existingFlow.getRevision():{}", flow.getRevision(),
+        log.debug("Flow revision check - flow.getRevision():{}, existingFlow.getRevision():{}", flow.getRevision(),
                 existingFlow.getRevision());
 
         if (flow.getSource() != null && flow.getRevision() == 0) {
@@ -266,7 +263,7 @@ public class AgamaResource extends ConfigBaseResource {
                 flow.setRevision(existingFlow.getRevision() + 1);
             }
         }
-        log.error("Final flow revision to be updated to - flow.getRevision():{}", flow.getRevision());
+        log.debug("Final flow revision to be updated to - flow.getRevision():{}", flow.getRevision());
         return flow;
     }
 }
