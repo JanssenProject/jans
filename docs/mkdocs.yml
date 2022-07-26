@@ -102,6 +102,7 @@ nav:
     - 'FAQ': 'vm-ops/faq.md'
 - 'Configuration Guide':
     - 'Configuration CLI':
+        - 'Overview': 'config-guide/jans-cli/index.md'
         - 'Standalone Installation': 'config-guide/jans-cli/install.md'
         - 'Interactive Mode':
             - 'Overview': 'config-guide/jans-cli/im/im-index.md'
