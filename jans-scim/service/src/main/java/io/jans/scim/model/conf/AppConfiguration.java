@@ -34,6 +34,8 @@ public class AppConfiguration implements Configuration, Serializable {
     
     private ScimMode protectionMode;
     private int maxCount;
+    private int bulkMaxOperations;
+    private long bulkMaxPayloadSize;
     private String userExtensionSchemaURI;
 
     private String loggingLevel;
@@ -101,6 +103,22 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setMaxCount(int maxCount) {
         this.maxCount = maxCount;
+    }
+    
+    public int getBulkMaxOperations() {
+        return bulkMaxOperations;
+    }
+    
+    public void setBulkMaxOperations(int bulkMaxOperations) {
+        this.bulkMaxOperations = bulkMaxOperations;
+    }
+    
+    public long getBulkMaxPayloadSize() {
+        return bulkMaxPayloadSize;
+    }
+    
+    public void setBulkMaxPayloadSize(long bulkMaxPayloadSize) {
+        this.bulkMaxPayloadSize = bulkMaxPayloadSize;
     }
 
     public String getUserExtensionSchemaURI() {
