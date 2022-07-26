@@ -45,7 +45,7 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # ==========
 
 ENV CN_VERSION=1.0.2-SNAPSHOT
-ENV CN_BUILD_DATE='2022-07-19 09:19'
+ENV CN_BUILD_DATE='2022-07-26 14:20'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}.war
 
 COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
