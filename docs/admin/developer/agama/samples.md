@@ -74,7 +74,7 @@ Source code [here](./otp-email/io.jans.flow.sample.otp.email).
 
 - Lines 24-26. If delivery failed, the flow is finished
 
-- Line 28. Renders the template `otp.ftlh` passing `obj` as data model. Source code of the template [here](./otp-mail/otp.ftlh). After form submission, `obj` will have up to two keys: `passcode` and `resend`. The former will hold whatever the user entered in the passcode text field, and the latter will exist if the "resend code" link was clicked
+- Line 28. Renders the template `otp.ftlh` passing `obj` as data model. Source code of the template [here](./otp-email/otp.ftlh). After form submission, `obj` will have up to two keys: `passcode` and `resend`. The former will hold whatever the user entered in the passcode text field, and the latter will exist if the "resend code" link was clicked
 
 - Line 31. Variable `sendEmail` is set to true if the user clicked on the "resend code" link
 
@@ -84,7 +84,7 @@ Source code [here](./otp-email/io.jans.flow.sample.otp.email).
 
 ### UI template
 
-Source code of `otp.ftlh` can be found [here](./otp-mail/otp.ftlh). It is on the same lines of the template used in the basic authentication flow. Here the form has three relevant elements:
+Source code of `otp.ftlh` can be found [here](./otp-email/otp.ftlh). It is on the same lines of the template used in the basic authentication flow. Here the form has three relevant elements:
 
 - A textfield to enter the passcode (around line 35)
 
