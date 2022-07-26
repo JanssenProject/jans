@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AgamaResource extends ConfigBaseResource {
-    
+
     @Inject
     Logger log;
 
@@ -209,7 +209,7 @@ public class AgamaResource extends ConfigBaseResource {
             thorwBadRequestException(validateMsg);
         }
 
-        //validate syntax
+        // validate syntax
         validateSyntax(flow);
     }
 

@@ -12,7 +12,7 @@ public class AgamaConfiguration {
     private List<String> mandatoryAttributes;
 
     /**
-     * List of attributes that are optional 
+     * List of attributes that are optional
      */
     private List<String> optionalAttributes;
 
@@ -23,7 +23,6 @@ public class AgamaConfiguration {
     public void setMandatoryAttributes(List<String> mandatoryAttributes) {
         this.mandatoryAttributes = mandatoryAttributes;
     }
-
 
     public List<String> getOptionalAttributes() {
         return optionalAttributes;

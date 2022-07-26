@@ -201,8 +201,7 @@ public class AgamaFlowService implements Serializable {
     }
 
     public String validateNonMandatoryFields(Flow flow, List<String> mandatoryAttributes,
-            List<String> optionalAttributes)
-      {
+            List<String> optionalAttributes) {
 
         logger.debug("Validate Flow for Non Mandatory Fields - flow:{}, mandatoryAttributes:{}, optionalAttributes:{}",
                 flow, mandatoryAttributes, optionalAttributes);
@@ -229,7 +228,6 @@ public class AgamaFlowService implements Serializable {
         Object attributeValue = null;
         String attributeClass = null;
         for (String key : keys) {
-
             // Check non-mandatory attributes should be null
             logger.debug("Checking value of non-mandatory attribute:{}", key);
             Getter getter = DataUtil.getGetterMethod(Flow.class, key);
@@ -240,20 +238,17 @@ public class AgamaFlowService implements Serializable {
 
             if (attributeValue != null) {
                 attributeClass = attributeValue.getClass().toString();
-                logger.debug("Flow attribute key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,
+                logger.error(" Flow attribute data - key:{} - attributeValue:{}, attributeClass:{}, dataType:{}", key,
+                        attributeValue, attributeClass, dataType);
+                
+                logger.error("Non Mandatory attribute check result - key:{} - attributeValue:{}, dataType:{}, !isStringDataPresent(dataType, attributeValue):{}, !isIntegerDataPresent(dataType, attributeValue):{}, !isFlowMetadataPresent(dataType, attributeValue):{}",  key,
+                        attributeValue, dataType, !isStringDataPresent(dataType, attributeValue), !isIntegerDataPresent(dataType, attributeValue), !isFlowMetadataPresent(dataType, attributeValue));
+                
+                logger.error(" NonMandatoryFields key:{} - attributeValue:{}, attributeClass:{}, datatype:{}", key,
                         attributeValue, attributeClass, objectPropertyMap.get(key));
                 // ignore if empty
-
-                if ("java.lang.String".equalsIgnoreCase(dataType.getName())
-                        && StringUtils.isBlank(String.class.cast(attributeValue))) {
-                    continue;
-                } else if ("java.lang.Integer".equalsIgnoreCase(dataType.getName())
-                        && (Integer.class.cast(attributeValue) <= 0)) {
-                    continue;
-                } else if ("int".equalsIgnoreCase(dataType.getName()) && (Integer.class.cast(attributeValue) <= 0)) {
-                    continue;
-                } else if ("io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName())
-                        && !isFlowMetadataPresent(FlowMetadata.class.cast(attributeValue))) {
+                if (!isStringDataPresent(dataType, attributeValue) || !isIntegerDataPresent(dataType, attributeValue)
+                        || !isFlowMetadataPresent(dataType, attributeValue)) {
                     continue;
                 }
 
@@ -273,21 +268,51 @@ public class AgamaFlowService implements Serializable {
         return unwantedAttributes.toString();
     }
 
-    private boolean isFlowMetadataPresent(FlowMetadata flowMetadata) {
-        logger.debug("Validate FlowMetadata flowMetadata:{} ", flowMetadata);
+    private boolean isStringDataPresent(Class<?> dataType, Object attributeValue) {
+        logger.debug("Validate Flow String data - dataType:{}, attributeValue:{}", dataType, attributeValue);
+        if (dataType == null || attributeValue == null) {
+            return false;
+        } else if ("java.lang.String".equalsIgnoreCase(dataType.getName())
+                && StringUtils.isNotBlank(String.class.cast(attributeValue))) {
+            return true;
+        }
 
-        if (flowMetadata == null) {
+        return false;
+    }
+
+    private boolean isIntegerDataPresent(Class<?> dataType, Object attributeValue) {
+        logger.debug("Validate Flow Integer data - dataType:{}, attributeValue:{}", dataType, attributeValue);
+        if (dataType == null || attributeValue == null) {
+            return false;
+        } else if (("java.lang.Integer".equalsIgnoreCase(dataType.getName())
+                || "int".equalsIgnoreCase(dataType.getName())) && (Integer.class.cast(attributeValue) > 0)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isFlowMetadataPresent(Class<?> dataType, Object attributeValue) {
+        logger.debug("Validate FlowMetadata data - dataType:{}, attributeValue:{}", dataType, attributeValue);
+
+        if (dataType == null || attributeValue == null) {
             return false;
         }
 
-        else if (StringUtils.isNotBlank(flowMetadata.getFuncName())
-                || StringUtils.isNotBlank(flowMetadata.getDisplayName())
-                || StringUtils.isNotBlank(flowMetadata.getAuthor())
-                || StringUtils.isNotBlank(flowMetadata.getDescription()) || flowMetadata.getInputs() != null
-                || (flowMetadata.getTimeout() != null && flowMetadata.getTimeout() > 0)
-                || flowMetadata.getProperties() != null || flowMetadata.getTimestamp() > 0) {
-            logger.debug("FlowMetadata is not null !!!");
-            return true;
+        if ("io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName())) {
+            FlowMetadata flowMetadata = FlowMetadata.class.cast(attributeValue);
+
+            if (flowMetadata == null) {
+                return false;
+            } else if (StringUtils.isNotBlank(flowMetadata.getFuncName())
+                    || StringUtils.isNotBlank(flowMetadata.getDisplayName())
+                    || StringUtils.isNotBlank(flowMetadata.getAuthor())
+                    || StringUtils.isNotBlank(flowMetadata.getDescription()) || flowMetadata.getInputs() != null
+                    || (flowMetadata.getTimeout() != null && flowMetadata.getTimeout() > 0)
+                    || flowMetadata.getProperties() != null || flowMetadata.getTimestamp() > 0) {
+                logger.debug("FlowMetadata is not null !!!");
+                return true;
+            }
         }
 
         return false;

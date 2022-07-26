@@ -655,7 +655,7 @@
         ]
     },
 	{
-        "path":"/jans-config-api/agama",
+        "path":"/jans-config-api/api/v1/agama",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -664,7 +664,7 @@
                 ]
             },
             {
-                "httpMethods":["PATCH","POST","PUT"],
+                "httpMethods":["POST","PUT"],
                 "scopes":[
                     "https://jans.io/oauth/config/agama.write"
                 ]
