@@ -24,7 +24,7 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
 
 ## Component Setup
 
-![Component Diagram](../../../assets/image-howto-mod-auth-comp-04222022.png)
+![Component Diagram](../../img/image-howto-mod-auth-comp-04222022.png)
 
 In this setup, we have four important components.
 - **Protected resource** is a resource that we need to protect using authentication. A web application for example. 
@@ -48,7 +48,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
   - Run the command below on Janssen server to enter interactive mode.
 
 
-     > Note: </br> `jans-cli` has to be authenticated and authorized with the respective Janssen server. If `jans-cli` is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-index.md#cli-authorization) to continue running the command.
+     > Note: </br> `jans-cli` has to be authenticated and authorized with the respective Janssen server. If `jans-cli` is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../../config-guide/jans-cli/cli-index.md#cli-authorization) to continue running the command.
   
     ```
     /opt/jans/jans-cli/config-cli.py
@@ -56,7 +56,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
 
     Running above command will bring up main menu as shown in sample below:
     
-    ![CLI-main-menu](../../../assets/image-howto-mod-auth-cli-main-menu-04292022.png)
+    ![CLI-main-menu](../../img/image-howto-mod-auth-cli-main-menu-04292022.png)
     
     To register a new OpenID Connect client, select `OAuth OpenID Connect - Clients` option (`16` in above sample). Selecting an appropriate option will bring up related sub-menu. 
    

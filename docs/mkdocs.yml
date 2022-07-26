@@ -102,6 +102,7 @@ nav:
     - 'FAQ': 'vm-ops/faq.md'
 - 'Configuration Guide':
     - 'Configuration CLI':
+        - 'Overview': 'config-guide/jans-cli/index.md'
         - 'Standalone Installation': 'config-guide/jans-cli/install.md'
         - 'Interactive Mode':
             - 'Overview': 'config-guide/jans-cli/im/im-index.md'
@@ -285,7 +286,6 @@ nav:
         - 'SCIM': 'developer/scripts/scim.md'
         - 'Persistence': 'developer/scripts/persistence.md'
         - 'Config API': 'developer/scripts/config-api.md'
-    - 'FAQ': 'developer/developer-faq.md'
 - 'Reference Guide':
     - 'Javadocs / OpenAPI': 'reference/openapi.md'
     - 'Database Reference': 
@@ -326,7 +326,7 @@ nav:
             - 'FIDO': 'reference/kubernetes/image-fido.md'
             - 'SCIM': 'reference/kubernetes/image-scim.md'
             - 'Client API': 'reference/kubernetes/image-client-api.md'
-            - 'Persistence': 'reference/kubernetes/persistence.md'
+            - 'Persistence': 'reference/kubernetes/image-persistence.md'
             - 'Gluu Cert Manager': 'reference/kubernetes/image-cert-mgr.md'
             - 'Gluu OpenDJ': 'reference/kubernetes/image-opendj.md'
 - 'Jans Eleven Admin Guide':
