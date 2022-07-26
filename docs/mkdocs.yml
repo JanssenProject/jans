@@ -17,8 +17,8 @@ theme:
     palette:
         primary: 'green'
         accent: 'green'
-#    logo: 'janssen_project.png'
-#    favicon: 'janssen_project_favicon_transparent_50px_50px.png'
+    logo: 'janssen_project.png'
+    favicon: 'janssen_project_favicon_transparent_50px_50px.png'
 extra_css:
   - css/tabs.css
 
@@ -111,7 +111,7 @@ nav:
             - 'Auth Server Configuration': 'config-guide/jans-cli/im/im-jans-authorization-server.md'
             - 'FIDO2 Configuration': 'config-guide/jans-cli/im/im-janssen-fido2.md'
             - 'Logging': 'config-guide/jans-cli/im/im-janssen-logging-configuration.md'
-            - 'JSON Web Key': 'config-guide/jans-cli/im/im-jwk-json-web-key.md'
+            - 'JSON Web Key': 'config-guide/jans-cli/im/im-json-web-key.md'
             - 'LDAP Configuration': 'config-guide/jans-cli/im/im-ldap-configuration.md'
             - 'Couchbase Configuration': 'config-guide/jans-cli/im/im-couchbase-configuration.md'
             - 'OAuth Scope Management': 'config-guide/jans-cli/im/im-oauth-scopes.md'
