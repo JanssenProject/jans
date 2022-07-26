@@ -1,0 +1,22 @@
+dn: inum=@!1111!E521.2AE6,ou=scripts,o=gluu
+objectClass: oxCustomScript
+objectClass: top
+displayName: gplus
+gluuStatus: true
+inum: @!1111!E521.2AE6
+oxConfigurationProperty: {"value1":"gplus_client_secrets_file","value2":"/et
+ c/certs/gplus_client_secrets.json","description":""}
+oxConfigurationProperty: {"value1":"gplus_deployment_type","value2":"enroll"
+ ,"description":""}
+oxConfigurationProperty: {"value1":"gplus_local_attributes_list","value2":"u
+ id, mail, givenName, sn, cn, preferredLanguage","description":""}
+oxConfigurationProperty: {"value1":"gplus_remote_attributes_list","value2":"
+ email, email, given_name, family_name, given_name, locale","description":""}
+oxLevel: 22
+oxModuleProperty: {"value1":"usage_type","value2":"interactive","description
+ ":""}
+oxRevision: 1
+oxScript: <copy content of the file from GooglePlusExternalAuthenticator.py>
+oxScriptType: person_authentication
+programmingLanguage: python
+
