@@ -69,7 +69,7 @@ nano /tmp/log-config.json
 
 Here I have updated `loggingLevel` to `DEBUG` and `enabledOAuditLogging` to `true` as below image.
 
-![updated logging](../../img/image-cl-update-logging-03042021.png)
+![updated logging](../../assets/image-cl-update-logging-03042021.png)
 
 
 Let's do the operation:
