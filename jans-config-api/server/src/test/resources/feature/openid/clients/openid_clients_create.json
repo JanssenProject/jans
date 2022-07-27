@@ -95,15 +95,15 @@
         "redirectUrisRegex": "sdfsdf",
         "parLifetime": 3600,
         "requirePar": true,
-        "defaultPromptLogin": true,
+        "jansDefaultPromptLogin": true,
         "jansAuthorizedAcr": [
             "inum=3000-F75A,ou=scripts,o=jans"
         ],
         "updateTokenScriptDns": [],
         "ropcScripts": [],
         "jansAuthSignedRespAlg": "HS384",
-        "authorizationEncryptedResponseAlg": "A128KW",
-        "authorizationEncryptedResponseEnc": "A128GCM"
+        "jansAuthEncRespAlg": "A128KW",
+        "jansAuthEncRespEnc": "A128GCM"
     },
     "tlsClientAuthSubjectDn": "123",
     "frontChannelLogoutSessionRequired": true,
@@ -124,7 +124,7 @@
     "requirePar": true,
     "updateTokenScriptDns": [],
     "ropcScripts": [],
-    "jansAuthEncRespAlg": "HS384",
+    "authorizationSignedResponseAlg": "HS384",
     "authorizationEncryptedResponseAlg": "A128KW",
     "authorizationEncryptedResponseEnc": "A128GCM",
     "postAuthnScripts": [],
@@ -136,7 +136,7 @@
         "dsfsdfsdf"
     ],
     "defaultPromptLogin": true,
-    "authorizedAcrValues": [
+    "jansAuthorizedAcr": [
         "inum=3000-F75A,ou=scripts,o=jans"
     ],
     "customObjectClasses": [],
