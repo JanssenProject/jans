@@ -24,7 +24,7 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
 
 ## Component Setup
 
-![Component Diagram](../../img/image-howto-mod-auth-comp-04222022.png)
+![Component Diagram](../../assets/image-howto-mod-auth-comp-04222022.png)
 
 In this setup, we have four important components.
 - **Protected resource** is a resource that we need to protect using authentication. A web application for example. 
@@ -56,7 +56,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
 
     Running above command will bring up main menu as shown in sample below:
     
-    ![CLI-main-menu](../../img/image-howto-mod-auth-cli-main-menu-04292022.png)
+    ![CLI-main-menu](../../assets/image-howto-mod-auth-cli-main-menu-04292022.png)
     
     To register a new OpenID Connect client, select `OAuth OpenID Connect - Clients` option (`16` in above sample). Selecting an appropriate option will bring up related sub-menu. 
    
