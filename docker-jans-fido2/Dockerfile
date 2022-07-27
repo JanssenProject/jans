@@ -1,11 +1,11 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.15
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk upgrade \
+    && apk upgrade --available \
     && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio \
     && apk add --no-cache --virtual .build-deps wget git zip \
     && mkdir -p /usr/java/latest \
@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.8
+ARG JETTY_VERSION=11.0.11
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
