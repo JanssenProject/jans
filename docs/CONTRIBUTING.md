@@ -279,24 +279,13 @@ Navigate to `Configuration` > `Authentication` and click the `Passport` tab
  
 ### Linking
 
-#### Linking to a page within the same repo
- - Use this format: `[text for the link](./where/the/link/goes.md)`
+We recommend using relative linking syntax when linking to other artifacts in repository. Linking to a page within the same repo use this format: `[text for the link](../where/the/link/goes.md)`
  - You must link to the `.md` file on GitHub for it to work properly
  - As an example, to make [this link](./example.md) to an example page, you'd type it as `[this link](./example.md)`
  
-#### Linking to an external page in a Different Repo
- - Link to the rendered documentation page (on https://gluu.org/docs/*)
- - For instance, use `[this link](https://www.gluu.org/docs/ce/installation-guide/install/)` to get to [this link](https://www.gluu.org/docs/ce/installation-guide/install/)
- 
-#### Pictures
- - Displaying a live picture uses the same relative linking syntax as a normal link, except that it leads with an exclamation point
- - For instance, it will look like `![this link](../img/example.png)`
- 
 #### Service Commands 
 
-The Gluu Server supports many different Operating Systems (e.g. RHEL, Debian, Ubuntu, etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for [Service Commands](https://gluu.org/docs/ce/4.0/operation/services/). 
-
-For example, see [this section](https://gluu.org/docs/ce/4.0/admin-guide/attribute/#opendj) of the docs for a production example. 
+The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for [Service Commands](https://jans.io/docs/vm-ops/checking-service-status/). 
 
 In documenting a process that involves a service restart, the Service Command documentation is linked:  
 
@@ -304,7 +293,7 @@ In documenting a process that involves a service restart, the Service Command do
 ## Add the attribute to LDAP
 
  - Add custom attribute 
- - [Restart](https://gluu.org/docs/ce/4.0/operation/services/) the ldap service.
+ - [Restart](https://jans.io/docs/vm-ops/restarting-services/) the `jans-auth.service` service.
 ```
 
 The word `Restart` is simply linked to the dedicated doc for Service Commands. 
