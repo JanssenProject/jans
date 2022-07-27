@@ -63,18 +63,4 @@ public class Flow extends ProtoFlow  {
         this.codeError = codeError;
     }
 
-    @Override
-    public String toString() {
-        return "Flow [metadata=" + metadata 
-                + ", source=" + source
-                + ", transpiled=" + transpiled
-                + ", codeError=" + codeError
-                + ", qname=" + getQname()
-                + ", transHash=" + getTransHash()
-                + ", revision=" + getRevision()
-                + "]";
-    }
-    
-    
-
 }
