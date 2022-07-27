@@ -63,7 +63,9 @@ jobs:
           sudo python3 ./automation/github-labels/label.py ${issue_or_pull_number} ${changed_files} ${branch} ${operation} ${title}
 
       # Remove once add-project option in gh cli support project beta. Add to labels.py
+      # TODO: Add PR to project
       - name: Add issue to project
+        if: github.event_name != 'pull_request'
         env:
           ISSUE_ID: ${{ github.event.issue.node_id }}
           PROJECT_ID: ${{ secrets.JANSSEN_ISSUE_DASHBOARD_PROJECT_ID }}
