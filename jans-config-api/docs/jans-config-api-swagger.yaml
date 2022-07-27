@@ -2168,6 +2168,38 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
+  /jans-config-api/api/v1/uma/resources/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        description: Client ID.
+        schema:
+          type: string
+    get:
+      tags:
+        - OAuth - UMA Resources
+      summary: Fetch uma resources by client id.
+      description: Fetch uma resources by client id.
+      operationId: get-oauth-uma-resources-by-clientid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA Resource list.
+                description: List of UMA Resource.
+                items:
+                  $ref: '#/components/schemas/UmaResource'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
     delete:
       tags:
         - OAuth - UMA Resources
@@ -5122,27 +5154,27 @@ components:
         requirePar:
           description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
           type: boolean
-        authorizationSignedResponseAlg:
+        jansAuthSignedRespAlg:
           description: JWS alg algorithm JWA required for signing authorization responses.
           type: string
-        authorizationEncryptedResponseAlg:
+        jansAuthEncRespAlg:
           description: JWE alg algorithm JWA required for encrypting authorization responses.
           type: string
-        authorizationEncryptedResponseEnc:
+        jansAuthEncRespEnc:
           description: JWE enc algorithm JWA required for encrypting auhtorization responses.
           type: string
-        publicSubjectIdentifierAttribute:
+        jansSubAttr:
           description: custom subject identifier attribute.
           type: string
         redirectUrisRegex:
           description:  If set, redirectUri must match to this regexp
           type: string
-        authorizedAcrValues:
+        jansAuthorizedAcr:
           description:  List of thentication Context Class Reference (ACR) that must exist.
           type: array
           items:
             type: string
-        defaultPromptLogin:
+        jansDefaultPromptLogin:
           description: sets prompt=login to the authorization request, which causes the authorization server to force the user to sign in again before it will show the authorization prompt.
           type: boolean
 			
