@@ -9,6 +9,7 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.UmaResourceService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -40,17 +41,17 @@ public class UmaResourcesResource extends ConfigBaseResource {
     private static final String UMA_RESOURCE = "Uma resource";
 
     @Inject
-    Logger log;
+    UmaResourceService umaResourceService;
 
     @Inject
-    UmaResourceService umaResourceService;
+    ClientService clientService;
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
     public Response fetchUmaResources(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-        log.debug("UMA_RESOURCE to be fetched - limit = " + limit + " , pattern = " + pattern);
+        logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}", limit, pattern);
         final List<UmaResource> resources;
         if (!pattern.isEmpty() && pattern.length() >= 2) {
             resources = umaResourceService.findResources(pattern, 1000);
@@ -63,15 +64,25 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @GET
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
-    public Response getUmaResourceByImun(@PathParam(value = ApiConstants.ID) @NotNull String id) {
-        log.debug("UMA_RESOURCE to fetch by id = " + id);
+    public Response getUmaResourceByInum(@PathParam(value = ApiConstants.ID) @NotNull String id) {
+        logger.debug("UMA_RESOURCE to fetch by id:{}", id);
         return Response.ok(findOrThrow(id)).build();
+    }
+
+    @GET
+    @Path("/"+ApiConstants.CLIENTID + ApiConstants.CLIENTID_PATH)
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
+    public Response getUmaResourceByAssociatedClient(
+            @PathParam(value = ApiConstants.CLIENTID) @NotNull String associatedClientId) {
+        logger.debug("UMA_RESOURCE to fetch by associatedClientId:{} ", associatedClientId);
+
+        return Response.ok(getUmaResourceByClient(associatedClientId)).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
     public Response createUmaResource(@Valid UmaResource umaResource) {
-        log.debug("UMA_RESOURCE to be added umaResource = " + umaResource);
+        logger.debug("UMA_RESOURCE to be added umaResource:{}", umaResource);
         checkNotNull(umaResource.getName(), AttributeNames.NAME);
         checkNotNull(umaResource.getDescription(), AttributeNames.DESCRIPTION);
         String id = UUID.randomUUID().toString();
@@ -96,7 +107,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
     public Response updateUmaResource(@Valid UmaResource resource) {
-        log.debug("UMA_RESOURCE to be upated - umaResource = " + resource);
+        logger.debug("UMA_RESOURCE to be upated - umaResource:{}", resource);
         String id = resource.getId();
         checkNotNull(id, AttributeNames.ID);
         UmaResource existingResource = findOrThrow(id);
@@ -113,7 +124,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug("UMA_RESOURCE to be patched - id = " + id + " , pathString = " + pathString);
+        logger.debug("Patch for  id:{} , pathString:{}", id, pathString);
         UmaResource existingResource = findOrThrow(id);
 
         existingResource = Jackson.applyPatch(pathString, existingResource);
@@ -125,9 +136,19 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS })
     public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
-        log.debug("UMA_RESOURCE to delete - id = " + id);
+        logger.debug("UMA_RESOURCE to delete - id:{}", id);
         UmaResource umaResource = findOrThrow(id);
         umaResourceService.remove(umaResource);
         return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    private List<UmaResource> getUmaResourceByClient(String associatedClientId) {
+        logger.debug("UMA RESOURCE to be fetched based on  associatedClientId:{}", associatedClientId);
+
+        // Get client DN
+        String associatedClientDn = this.clientService.getDnForClient(associatedClientId);
+        logger.debug("UMA RESOURCE to be fetched based on  associatedClientId:{}", associatedClientId);
+
+        return umaResourceService.getResourcesByClient(associatedClientDn);
     }
 }
