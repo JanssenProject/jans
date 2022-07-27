@@ -825,7 +825,6 @@ public abstract class BaseTest {
             assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
 
             assertTrue(response.getScopesSupported().size() > 0, "The scopesSupported is empty");
-            assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
             assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
             assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
             assertTrue(response.getAcrValuesSupported().size() >= 0, "The acrValuesSupported is empty");
