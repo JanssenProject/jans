@@ -128,6 +128,7 @@ Then status 200
 And print response
 And assert response.length !=0
 
+@ignore
 @CreateUpdateDelete
 Scenario: Create new OpenId Connect Client
 Given url mainUrl
