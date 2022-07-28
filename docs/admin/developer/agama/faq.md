@@ -25,6 +25,10 @@ This is a limitation of the scripting engine. Here, classes have to be imported 
 
 Groovy 4.0 and Java 11. The runtime is Amazon Corretto 11.
 
+### How to append data to a flow's log directly?
+
+This can be done by calling method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](./dsl-full.md#logging).
+
 ## Templates
 
 ### How to implement localization?

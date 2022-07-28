@@ -58,7 +58,7 @@ Your first taste of agama will be through a dummy "hello world" flow. Here, the 
 
 ### Flow code
 
-The source code (written in agama DSL dialect) is found [here](TODO). Note the absence of parenthesis and semicolons - in general the syntax is very lightweight.
+The [source code](./test) (written in agama DSL dialect) is shown below. Note the absence of parenthesis and semicolons - in general the syntax is very lightweight.
 
 ![hello world flow](./hello_world.png)
 
@@ -74,7 +74,7 @@ A line-by-line description follows:
 
 - Line 6: RRF is used to send a response to the user's browser: it takes the path to a template (`hello/index.ftlh`) and injects a value into it (`in` in this case). The produced (**R**endered) markup is sent (**R**eplied) to the browser. Finally, the result of the interaction of the user with the page can be retrieved (**F**etched), however, this is skipped here because we are no capturing anything at the client side.
 
-- The contents of [index.ftlh](TODO) should be familiar to web developers. The `${...}` notation is used to dynamically insert values in the markup: the text `John` in this case. Expressions like this are integral part of Freemarker. Once form submission occurs, flow execution continues at line 8.
+- The contents of [index.ftlh](./index.ftlh) should be familiar to web developers. The `${...}` notation is used to dynamically insert values in the markup: the text `John` in this case. Expressions like this are integral part of Freemarker. Once form submission occurs, flow execution continues at line 8.
 
 - Line 8: a logging statement. This appends the text `Done!` to the flow's log. The `Log` instruction is pretty versatile; it is used in its simplest form here.
 
@@ -102,11 +102,11 @@ This usually boils down to create and launch a URL looking like `https://<your-h
 
 Launch the authentication request in a web browser. You will be taken to a plain HTML page with a salutation and a "continue" button. After submission, a quick "Redirecting you" page will be shown and you will be taken probably to an error page showing "Unable to determine identity of user". That's expected.
 
-Let's start by changing the salutation. (TODO)
+Let's start by changing the salutation. Download the [source code](./test) and [template](./index.ftlh). In a text editor, modify line 5 of the source by changing the name surrounded  by double quotes to a different word. Save the file and send the update as regarded in [Add the flow to the server](#add-the-flow-to-the-server). 
 
-Generate an authentication request again and launch it. You will be able to see the changes. Feel free to edit `index.ftlh` and re-upload - templates changes are picked up immediately.
+Wait for one minute. Generate an authentication request again and launch it. You will be able to see the changes. Feel free to edit `index.ftlh` and re-upload - templates changes are picked up immediately.
 
-Now pick an existing username from your user base and alter the flow's code so that such user gets authenticated. Edit line 9. (TODO)
+Now pick an existing username from your user base and alter the flow's code so that such user gets authenticated. Edit line 9 for this purpose, for example, `Finish "admin"`.
 
 If things went fine, after the form submission your browser should have been taken to the `redirect_uri` defined for the authentication request. Depending on how evolved your client application is, it may have created a session for such user and obtained profile data already!.
 
