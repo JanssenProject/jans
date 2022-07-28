@@ -588,7 +588,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
                 && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
                 && identity.getSessionId().getAuthenticationTime() != null
-                && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 200) {
+                && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 500) {
             prompts.add(Prompt.LOGIN);
         }
     }

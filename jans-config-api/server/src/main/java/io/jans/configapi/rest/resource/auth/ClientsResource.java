@@ -109,8 +109,9 @@ public class ClientsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client details to be added - client:{}", escapeLog(client));
+            logger.debug("Client to be added - client:{}, client.getAttributes():{}, client.getCustomAttributes():{}", escapeLog(client), escapeLog(client.getAttributes()), escapeLog(client.getCustomAttributes()));
         }
+        
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
             inum = inumService.generateClientInum();
@@ -132,7 +133,7 @@ public class ClientsResource extends ConfigBaseResource {
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         ignoreCustomObjectClassesForNonLDAP(client);  
         
-        logger.debug("Final Client details to be added - client:{}", client);      
+        logger.trace("Final Client details to be added - client:{}, client.getAttributes():{}, client.getCustomAttributes():{}", client, client.getAttributes(), client.getCustomAttributes());      
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));

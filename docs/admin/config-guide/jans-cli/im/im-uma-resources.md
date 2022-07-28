@@ -4,7 +4,7 @@
 
 UMA helps to manage user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
 
-![](../../../img/image-im-uma-menu-03042021.png)
+![](../../../assets/image-im-uma-menu-03042021.png)
 
 you can perform such operations:
 - view/find

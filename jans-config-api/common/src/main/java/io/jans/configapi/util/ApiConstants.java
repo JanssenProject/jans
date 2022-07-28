@@ -74,7 +74,8 @@ public class ApiConstants {
     public static final String ORG = "/org";
     public static final String SERVER_STAT = "/server-stat";
     public static final String USERNAME_PATH = "/{username}";
-    public static final String AGAMA = "/agama";
+    public static final String CLIENTID_PATH = "/{clientId}";
+	public static final String AGAMA = "/agama";
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
     public static final String QNAME = "qname";
@@ -90,6 +91,7 @@ public class ApiConstants {
     public static final String NAME = "name";
     public static final String DISPLAY_NAME = "displayName";
     public static final String KID = "kid";
+    public static final String CLIENTID = "clientId";
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
