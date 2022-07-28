@@ -3,9 +3,10 @@
 ## Supported versions
 - Ubuntu 20.04
 
-## Steps for installation
+!!! note
+    SELinux should be disabled
 
-**Note:** *SELinux should be disabled*
+## Steps for installation
 
 ```
 apt install wget curl

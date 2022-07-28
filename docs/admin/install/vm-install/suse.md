@@ -3,9 +3,10 @@
 ## Supported versions
 - SUSE 15
 
-## Steps for installation
+!!! note
+    SELinux should be disabled
 
-**Note:** *SELinux should be disabled*
+## Steps for installation
 
 ```
 zypper install curl

@@ -4,9 +4,10 @@
 - Red Hat 8
 - CentOS 8
 
-## Steps for installation
+!!! note
+    SELinux should be disabled
 
-**Note:** *SELinux should be disabled*
+## Steps for installation
 
 ```
 yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
