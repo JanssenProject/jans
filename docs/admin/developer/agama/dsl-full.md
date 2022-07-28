@@ -535,8 +535,6 @@ The three-param variant can be used when:
 - The decision to redirect to an external site can only be done from the browser itself
 - The external site expects to receive an HTTP POST
 
-Status checker TODO.
-
 ## Looping
 
 There are two constructs available for looping in Agama: `Repeat` and `Iterate over`.

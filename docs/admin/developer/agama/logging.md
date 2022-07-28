@@ -9,5 +9,5 @@ Depending on the specificity required, you may have to change the logging level 
 Useful resources:
 
 - [`Log` instruction](./dsl-full.md#logging) from the full reference
-- [How to send data to the flows' log from Java](./faq.md#TODO)
-- [How lists and maps are logged](./faq.md#TODO) 
+- [How to send data to the flows' log from Java](./faq.md#how-to-append-data-to-a-flows-log-directly)
+- [How lists and maps are logged](./engine-config.md#TODO) 
