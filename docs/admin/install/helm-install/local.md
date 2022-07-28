@@ -2,13 +2,13 @@
 
 ## System Requirements
 
-For local deployments like `minikube` and `microk8s` or cloud installations in demo mode, resources may be set to the minimum as below:
+For local deployments like `minikube` and `MicroK8s` or cloud installations in demo mode, resources may be set to the minimum as below:
 
 - 8GB RAM
 - 4 CPU cores
 - 50GB hard-disk
 
-Please calculate the minimum required resources as per services deployed. The following table contains default recommended resources to start with. Depending on the use of each service the resources may be increased or decreased.
+Use the listing below for detailed estimation of minimum required resources. The able contains default recommended resources to start with per service. Depending on the use of each service the resources may be increased or decreased.
 
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
 | ----------------- | -------- | ----- | ---------- | -------------- | ---------------------------------- |
