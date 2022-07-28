@@ -18,6 +18,9 @@ jobs:
       issues: write
       pull-requests: write
     steps:
+      - name: Wait for 5 seconds so that GH can attach issue to the PR if already mentioned by author
+        run: sleep 5s
+        shell: bash
       - name: Install dependencies
         run: |
           sudo apt-get update
