@@ -6,12 +6,12 @@ Creating the pages that make up an agama flow is rather straightforward for a de
 
 To generate all output to be sent to the browser, the [Apache FreeMarker](https://freemarker.apache.org) template engine is used. This is a lightweight, versatile, and easy-to-learn open-source Java library. With FreeMarker any kind of text output can be produced, so agama flows are not restricted to HTML markup exclusively.
 
-Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. The key concept there is `Template + data-model = output` which is pretty natural. The sumation in this equation is generally referred to as "rendering a template" in agama documentation.
+Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. The key concept there is `Template + data-model = output` which is pretty natural. The sumation in this equation is generally referred to as "rendering a template" in Agama documentation.
 
 The following resources are useful as introduction as well:
 
-- The Hello World sample flow presented in the [quick start](./quick-start.md#flow-code) guide. Pay attention to the `RRF` instruction there
-- more sample flows. TODO
+- The Hello World flow presented in the [quick start](./quick-start.md#flow-code) guide. Pay attention to the `RRF` instruction there
+- Agama [sample flows](./sample-flows.md)
 
 As you will see, the task boils down to produce the desired markup plus adding some placeholders for information that is dynamic.
 
