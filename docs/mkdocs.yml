@@ -198,47 +198,47 @@ nav:
             - 'Back Channel': 'auth-server/openid-features/logout/back-channel.md'
             - 'Customizing Logout': 'auth-server/openid-features/logout/customizing-logout.md'
             - 'Forcing Logout on Browser Exit': 'auth-server/openid-features/logout/forcing-logout.md'
-        - 'OAuth Features':
-            - 'Password Grant': 'auth-server/oauth-features/password-grant.md'
-            - 'Device Grant': 'auth-server/oauth-features/device-grant.md'
-            - 'Client Credential Grant': 'auth-server/oauth-features/client-credential-grant.md'
-            - 'PKCE': 'auth-server/oauth-features/pkce.md'
-            - 'DPoP': 'auth-server/oauth-features/dpop.md'
-            - 'MTLS': 'auth-server/oauth-features/mtls.md'
-            - 'PAR': 'auth-server/oauth-features/par.md'
-        - 'UMA Features':
-            - 'Overview': 'auth-server/uma-features/index.md'
-            - 'RPT Endpoint': 'auth-server/uma-features/rpt-endpoint.md'
-            - 'Claims Gathering Endpoint': 'auth-server/uma-features/claims-gathering-endpoint.md'
-        - 'Client Management':
-            - 'Overview': 'auth-server/client-management/index.md'
-            - 'Client Schema': 'auth-server/client-management/client-schema.md'
-            - 'Client Authentication': 'auth-server/client-management/client-authn.md'
-            - 'Configuration':
-                - 'Redirect URIs': 'auth-server/client-management/configuration/redirect-uris.md'
-                - 'Grants': 'auth-server/client-management/configuration/grants.md'
-                - 'Response Types': 'auth-server/client-management/configuration/response-types.md'
-                - 'Pre-authorization': 'auth-server/client-management/configuration/pre-authorization.md'
-                - 'Client Crypto': 'auth-server/client-management/configuration/client-crypto.md'
-            - 'Software Statements': 'auth-server/client-management/software-statements.md'
-            - 'Sector Identifiers': 'auth-server/client-management/sector-identifiers.md'
-            - 'Client Scripts': 'auth-server/client-management/client-scripts.md'
-        - 'Internationalization':
-            - 'Web Pages': 'auth-server/international/web-pages.md'
-            - 'Client Configuration': 'auth-server/international/client-config.md'
-            - 'Scope Descriptions': 'auth-server/international/scope-descriptions.md'
-        - 'Reporting and Metrics':
-            - 'Health': 'auth-server/reporting-metrics/health.md'
-            - 'Monthly Active Users': 'auth-server/reporting-metrics/mau.md'
-            - 'Failed/Successful Authentications': 'auth-server/reporting-metrics/failed-success-authn.md'
-            - 'Tokens Issued': 'auth-server/reporting-metrics/tokens-issued.md'
-            - 'User/Client Counts': 'auth-server/reporting-metrics/user-client-count.md'
-        - 'Logging':
-            - 'Standard Logs': 'auth-server/logging/standard-logs.md'
-            - 'Log Levels': 'auth-server/logging/log-levels.md'
-            - 'Audit Logs': 'auth-server/logging/audit-logs.md'
-            - 'Custom Logs': 'auth-server/logging/custom-logs.md'
-            - 'log4j2 Configuration': 'auth-server/logging/log4j2.md'
+    - 'OAuth Features':
+        - 'Password Grant': 'auth-server/oauth-features/password-grant.md'
+        - 'Device Grant': 'auth-server/oauth-features/device-grant.md'
+        - 'Client Credential Grant': 'auth-server/oauth-features/client-credential-grant.md'
+        - 'PKCE': 'auth-server/oauth-features/pkce.md'
+        - 'DPoP': 'auth-server/oauth-features/dpop.md'
+        - 'MTLS': 'auth-server/oauth-features/mtls.md'
+        - 'PAR': 'auth-server/oauth-features/par.md'
+    - 'UMA Features':
+        - 'Overview': 'auth-server/uma-features/index.md'
+        - 'RPT Endpoint': 'auth-server/uma-features/rpt-endpoint.md'
+        - 'Claims Gathering Endpoint': 'auth-server/uma-features/claims-gathering-endpoint.md'
+    - 'Client Management':
+        - 'Overview': 'auth-server/client-management/index.md'
+        - 'Client Schema': 'auth-server/client-management/client-schema.md'
+        - 'Client Authentication': 'auth-server/client-management/client-authn.md'
+        - 'Configuration':
+            - 'Redirect URIs': 'auth-server/client-management/configuration/redirect-uris.md'
+            - 'Grants': 'auth-server/client-management/configuration/grants.md'
+            - 'Response Types': 'auth-server/client-management/configuration/response-types.md'
+            - 'Pre-authorization': 'auth-server/client-management/configuration/pre-authorization.md'
+            - 'Client Crypto': 'auth-server/client-management/configuration/client-crypto.md'
+        - 'Software Statements': 'auth-server/client-management/software-statements.md'
+        - 'Sector Identifiers': 'auth-server/client-management/sector-identifiers.md'
+        - 'Client Scripts': 'auth-server/client-management/client-scripts.md'
+    - 'Internationalization':
+        - 'Web Pages': 'auth-server/international/web-pages.md'
+        - 'Client Configuration': 'auth-server/international/client-config.md'
+        - 'Scope Descriptions': 'auth-server/international/scope-descriptions.md'
+    - 'Reporting and Metrics':
+        - 'Health': 'auth-server/reporting-metrics/health.md'
+        - 'Monthly Active Users': 'auth-server/reporting-metrics/mau.md'
+        - 'Failed/Successful Authentications': 'auth-server/reporting-metrics/failed-success-authn.md'
+        - 'Tokens Issued': 'auth-server/reporting-metrics/tokens-issued.md'
+        - 'User/Client Counts': 'auth-server/reporting-metrics/user-client-count.md'
+    - 'Logging':
+        - 'Standard Logs': 'auth-server/logging/standard-logs.md'
+        - 'Log Levels': 'auth-server/logging/log-levels.md'
+        - 'Audit Logs': 'auth-server/logging/audit-logs.md'
+        - 'Custom Logs': 'auth-server/logging/custom-logs.md'
+        - 'log4j2 Configuration': 'auth-server/logging/log4j2.md'
 - 'Developer Guide':
     - 'Agama':
         - 'Overview': 'developer/agama/index.md'
