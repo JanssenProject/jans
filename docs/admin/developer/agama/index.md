@@ -31,7 +31,7 @@ As expected, the more sophisticated the flow, the more specialized knowlege is d
 With respect to jython-based flows, agama differs radically in two aspects:
 
 - A DSL is used to structure flows where business logic and computations are delegated to Java
-- Flow execution proceeds in a traditional, sequential manner. With jython scripts, an inversion of control (IoC) is employed where control jumps from one method to another in a script
+- Flow execution proceeds in a traditional, sequential manner. With jython scripts, an inversion of control (IoC) mechanism is employed where control jumps from one method to another in a script
 
 Despite the above, if you have coded jython authentication scripts in the past, this may represent an advantage since you will probably have acquaintance with some of the auth-server Java APIs.
 
