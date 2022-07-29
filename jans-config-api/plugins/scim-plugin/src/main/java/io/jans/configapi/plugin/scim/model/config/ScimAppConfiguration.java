@@ -68,6 +68,14 @@ public class ScimAppConfiguration implements Configuration, Serializable {
     private Boolean disableJdkLogger = true;
     private Boolean useLocalCache = false;
 
+    @JsonProperty("bulkMaxOperations")
+    @AttributeName(name = "bulkMaxOperations")
+    private int bulkMaxOperations;
+
+    @JsonProperty("bulkMaxPayloadSize")
+    @AttributeName(name = "bulkMaxPayloadSize")
+    private long bulkMaxPayloadSize;
+
     public String getBaseDn() {
         return baseDn;
     }
@@ -195,6 +203,22 @@ public class ScimAppConfiguration implements Configuration, Serializable {
     public void setUseLocalCache(Boolean useLocalCache) {
         this.useLocalCache = useLocalCache;
     }
+    
+    public int getBulkMaxOperations() {
+        return bulkMaxOperations;
+    }
+
+    public void setBulkMaxOperations(int bulkMaxOperations) {
+        this.bulkMaxOperations = bulkMaxOperations;
+    }
+
+    public long getBulkMaxPayloadSize() {
+        return bulkMaxPayloadSize;
+    }
+
+    public void setBulkMaxPayloadSize(long bulkMaxPayloadSize) {
+        this.bulkMaxPayloadSize = bulkMaxPayloadSize;
+    }
 
     @Override
     public String toString() {
@@ -205,7 +229,7 @@ public class ScimAppConfiguration implements Configuration, Serializable {
                 + externalLoggerConfig + ", metricReportInterval=" + metricReportInterval
                 + ", metricReportKeepDataDays=" + metricReportKeepDataDays + ", metricReportEnabled="
                 + metricReportEnabled + ", disableJdkLogger=" + disableJdkLogger + ", useLocalCache=" + useLocalCache
-                + "]";
+                + ", bulkMaxOperations=" + bulkMaxOperations + ", bulkMaxPayloadSize=" + bulkMaxPayloadSize + "]";
     }
-
+    
 }
