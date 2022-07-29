@@ -1019,7 +1019,6 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |-|-|
 |Basepath|header declaration|
 |Call|Java interaction|
-|Close|reserved for future use|
 |Configs|header declaration|
 |Finish|termination|
 |Flow|header declaration|
@@ -1027,7 +1026,6 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |Iterate over|loops|
 |Log|logging|
 |Match|conditionals|
-|Open for|reserved for future use|
 |Otherwise|conditionals|
 |Override templates|web interaction|
 |Quit|conditionals and loops|
@@ -1035,7 +1033,6 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |RFAC|web interaction|
 |RRF|web interaction|
 |seconds|header declaration|
-|Status checker|reserved for future use|
 |times max|loops|
 |to|conditionals|
 |Timeout|header declaration|
