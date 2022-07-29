@@ -159,7 +159,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         String tokenBindingHeader = request.getHeader("Sec-Token-Binding");
 
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
-        ResponseBuilder builder = Response.ok();
 
         String dpopStr = runDPoP(request, auditLog);
 
@@ -238,13 +237,14 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     grantService.removeByCode(refreshToken); // remove refresh token after access token and id_token is created.
                 }
 
-                builder.entity(getJSonResponse(accToken,
+                auditLog.updateOAuth2AuditLog(authorizationGrant, true);
+
+                return response(Response.ok().entity(getJSonResponse(accToken,
                         accToken.getTokenType(),
                         accToken.getExpiresIn(),
                         reToken,
                         scope,
-                        idToken));
-                auditLog.updateOAuth2AuditLog(authorizationGrant, true);
+                        idToken)), auditLog);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
                 ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
 
@@ -269,12 +269,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 }
 
                 auditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
-                builder.entity(getJSonResponse(accessToken,
+
+                return response(Response.ok().entity(getJSonResponse(accessToken,
                         accessToken.getTokenType(),
                         accessToken.getExpiresIn(),
                         null,
                         scope,
-                        idToken));
+                        idToken)), auditLog);
             } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
                 boolean authenticated = false;
                 User user = null;
@@ -331,15 +332,16 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
 
                     auditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
-                    builder.entity(getJSonResponse(accessToken,
+
+                    return response(Response.ok().entity(getJSonResponse(accessToken,
                             accessToken.getTokenType(),
                             accessToken.getExpiresIn(),
                             reToken,
                             scope,
-                            idToken));
+                            idToken)), auditLog);
                 } else {
                     log.debug("Invalid user", new RuntimeException("User is empty"));
-                    builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
+                    return response(error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user."), auditLog);
                 }
             } else if (gt == GrantType.CIBA) {
                 errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
@@ -352,8 +354,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 if (cibaGrant != null) {
                     if (!cibaGrant.getClientId().equals(client.getClientId())) {
-                        builder = error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED);
-                        return response(builder, auditLog);
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), auditLog);
                     }
                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                             cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
@@ -381,28 +382,27 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                             scope = cibaGrant.checkScopesPolicy(scope);
 
-                            builder.entity(getJSonResponse(accessToken,
+                            auditLog.updateOAuth2AuditLog(cibaGrant, true);
+
+                            return response(Response.ok().entity(getJSonResponse(accessToken,
                                     accessToken.getTokenType(),
                                     accessToken.getExpiresIn(),
                                     reToken,
                                     scope,
-                                    idToken));
-
-                            auditLog.updateOAuth2AuditLog(cibaGrant, true);
+                                    idToken)), auditLog);
                         } else {
-                            builder = error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available.");
+                            return response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), auditLog);
                         }
                     } else {
                         log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
-                        builder = error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode");
+                        return response(error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode"), auditLog);
                     }
                 } else {
                     final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
                     log.trace("Ciba request : '{}'", cibaRequest);
                     if (cibaRequest != null) {
                         if (!cibaRequest.getClient().getClientId().equals(client.getClientId())) {
-                            builder = error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED);
-                            return response(builder, auditLog);
+                            return response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), auditLog);
                         }
                         long currentTime = new Date().getTime();
                         Long lastAccess = cibaRequest.getLastAccessControl();
@@ -418,21 +418,21 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                             if (timeFromLastAccess > intervalSeconds * 1000) {
                                 log.debug("Access hasn't been granted yet for authReqId: '{}'", authReqId);
-                                builder = error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet");
+                                return response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), auditLog);
                             } else {
                                 log.debug("Slow down protection authReqId: '{}'", authReqId);
-                                builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
+                                return response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), auditLog);
                             }
                         } else if (cibaRequest.getStatus() == CibaRequestStatus.DENIED) {
                             log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
-                            builder = error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request.");
+                            return response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), auditLog);
                         } else if (cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
                             log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
-                            builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired");
+                            return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), auditLog);
                         }
                     } else {
                         log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
-                        builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
+                        return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id."), auditLog);
                     }
                 }
             } else if (gt == GrantType.DEVICE_CODE) {
@@ -441,11 +441,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
-            builder = Response.status(500);
             log.error(e.getMessage(), e);
+            return response(Response.status(500), auditLog);
         }
 
-        return response(builder, auditLog);
+        throw new WebApplicationException(tokenRestWebServiceValidator.error(400, TokenErrorResponseType.UNSUPPORTED_GRANT_TYPE, "Unsupported Grant Type.").build());
     }
 
     private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, ExecutionContext executionContext) {
