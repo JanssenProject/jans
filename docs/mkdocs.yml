@@ -252,6 +252,7 @@ nav:
         - 'Sample Flows': 'developer/agama/samples.md'
         - 'DSL Reference': 'developer/agama/dsl-full.md'
         - 'Java Classpath': 'developer/agama/java-classpath.md'
+        - 'A closer look to the engine': 'developer/agama/hello-world-closer.md'
         - 'FAQ': 'developer/agama/faq.md'
     - 'Interception Script Overview': 'developer/interception-scripts.md'
     - 'Script Debugging': 'developer/interception-scripts-debug.md'
