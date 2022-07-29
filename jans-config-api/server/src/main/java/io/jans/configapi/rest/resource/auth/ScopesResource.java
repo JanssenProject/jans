@@ -10,6 +10,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.rest.model.CustomScope;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -58,13 +59,14 @@ public class ScopesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
         log.debug("SCOPES to be fetched type = " + type + " , limit = " + limit + " , pattern = " + pattern);
-        final List<Scope> scopes;
+        final List<CustomScope> scopes;
         if (StringHelper.isNotEmpty(pattern)) {
-            scopes = scopeService.searchScopes(pattern, limit, type);
+            scopes = scopeService.searchScopes(pattern, limit, type, withAssociatedClients);
         } else {
-            scopes = scopeService.getAllScopesList(limit, type);
+            scopes = scopeService.getAllScopesList(limit, type, withAssociatedClients);
         }
         return Response.ok(scopes).build();
     }
@@ -72,9 +74,10 @@ public class ScopesResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum) {
+    public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum,
+                                 @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
         log.debug("SCOPES to be fetched - inum = " + inum);
-        Scope scope = scopeService.getScopeByInum(inum);
+        Scope scope = scopeService.getScopeByInum(inum, withAssociatedClients);
         checkResourceNotNull(scope, SCOPE);
         return Response.ok(scope).build();
     }
