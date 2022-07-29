@@ -10,13 +10,13 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.params.AuthorizationCodeFlowParams;
 import io.jans.ca.common.response.AuthorizationCodeFlowResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.HttpService;
-import io.jans.ca.server.service.ServiceProvider;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,24 +34,27 @@ import java.util.UUID;
 public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationCodeFlowParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationCodeFlowOperation.class);
-
-    private DiscoveryService discoveryService;
-    private HttpService httpService;
-
-    public AuthorizationCodeFlowOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, AuthorizationCodeFlowParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.httpService = serviceProvider.getHttpService();
-    }
+    @Inject
+    DiscoveryService discoveryService;
 
     @Override
-    public IOpResponse execute(AuthorizationCodeFlowParams params) {
+    public IOpResponse execute(AuthorizationCodeFlowParams params, HttpServletRequest httpServletRequest) {
         final OpenIdConfigurationResponse discovery = discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId());
         if (discovery != null) {
             return requestToken(discovery, params);
         }
 
         return null;
+    }
+
+    @Override
+    public Class<AuthorizationCodeFlowParams> getParameterClass() {
+        return AuthorizationCodeFlowParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
     }
 
     private AuthorizationCodeFlowResponse requestToken(OpenIdConfigurationResponse discovery, AuthorizationCodeFlowParams params) {

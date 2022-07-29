@@ -25,6 +25,10 @@ This is a limitation of the scripting engine. Here, classes have to be imported 
 
 Groovy 4.0 and Java 11. The runtime is Amazon Corretto 11.
 
+### How to append data to a flow's log directly?
+
+This can be done by calling method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](./dsl-full.md#logging).
+
 ## Templates
 
 ### How to implement localization?
@@ -75,8 +79,17 @@ Agama only provides operators for boolean comparison in conditional statements. 
 
 ## How to concatenate strings in Agama?
 
-See the previous answer.
+See the previous answer. A two-lines solution could be:
+
+```
+strings = [ s1, s2, ... ]
+Call java.lang.String#join "" strings
+```
 
 ## How to know the index of a given loop iteration?
 
 See the examples in the Looping section of the DSL [full reference](./dsl-full.md#looping).
+
+## Can Agama code be called from Java?
+
+No. These two languages are supposed to play roles that should not be mixed, check [here](./dsl.md#introduction) and [here](./lifecycle.md#design-and-code).

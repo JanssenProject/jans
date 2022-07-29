@@ -112,7 +112,7 @@ y = false
 ...
 ```
 
-See the [full reference](./dsl-full.md#TODO) to learn more about flow structure.
+See the [full reference](./dsl-full.md#flow-structure) to learn more about flow structure.
 
 ## Logging
 
@@ -300,7 +300,7 @@ This loop runs `x` iterations at most. At every iteration the template `guess_bi
 **Notes:**
 - `Quit` and the statements following are optional
 - The variable assignment before the `Repeat` keyword is optional
-- See the [full reference](./dsl-full.md#TODO) to learn more about `Repeat`
+- See the [full reference](./dsl-full.md#repeat) to learn more about `Repeat`
 
 ### Iterate over
 
@@ -319,7 +319,7 @@ Iterate over seasons using sn
 
 The above features loop nesting. The outer loop iterates over `seasons` list and the inner one over `sports`. The variables `sn` and `sport` hold the current visited element. The inner loop is aborted upon a given condition. The total number of complete iterations is recorded in `y` every time the inner loop finishes.
 
-See the [full reference](./dsl-full.md#TODO) to learn more about `Iterate over`.
+See the [full reference](./dsl-full.md#iterate-over) to learn more about `Iterate over`.
 
 ## Subflows
 
@@ -340,4 +340,4 @@ Agama interfaces seemlessly with Java or Groovy by means of the `Call` instructi
 
 Recall the DSL is designed to force developers use Java when the task at hand cannot be implemented by simple data manipulation or comparison of values. This way a flow written in agama DSL serves fundamentally as a depiction of the flow itself, hiding most of the internal details and low-level computations.
 
-See the [full reference](./dsl-full.md#TODO) to learn more about `Call`.
+See the [full reference](./dsl-full.md#java-interaction) to learn more about `Call`.

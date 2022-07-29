@@ -15,7 +15,13 @@ import io.jans.ca.rs.protect.resteasy.PatProvider;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.configuration.model.UmaResource;
-import io.jans.ca.server.service.*;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.RpService;
+import io.jans.ca.server.service.UmaTokenService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -27,29 +33,24 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequestScoped
+@Named
 public class RsModifyOperation extends BaseOperation<RsModifyParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsModifyOperation.class);
 
-    private UmaTokenService umaTokenService;
-    private DiscoveryService discoveryService;
-    private RpService rpService;
-    private HttpService httpService;
-
-    public RsModifyOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, RsModifyParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.umaTokenService = serviceProvider.getUmaTokenService();
-        this.httpService = serviceProvider.getHttpService();
-        this.rpService = serviceProvider.getRpService();
-    }
-
+    @Inject
+    UmaTokenService umaTokenService;
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    RpService rpService;
 
     @Override
-    public IOpResponse execute(final RsModifyParams params) throws Exception {
+    public IOpResponse execute(final RsModifyParams params, HttpServletRequest httpServletRequest) throws Exception {
         validate(params);
 
-        Rp rp = getRp();
+        Rp rp = getRp(params);
 
         PatProvider patProvider = new PatProvider() {
             @Override
@@ -171,4 +172,15 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
             }
         }
     }
+
+    @Override
+    public Class<RsModifyParams> getParameterClass() {
+        return RsModifyParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
 }

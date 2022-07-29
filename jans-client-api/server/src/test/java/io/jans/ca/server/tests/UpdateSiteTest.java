@@ -69,7 +69,7 @@ public class UpdateSiteTest extends BaseTest {
         updateParams.setScope(Lists.newArrayList("profile"));
         updateParams.setAcrValues(Lists.newArrayList("acrAfter"));
 
-        UpdateSiteResponse updateResponse = getClientInterface(url).updateSite(Tester.getAuthorization(getApiTagetURL(url), registerResponse), null, updateParams);
+        UpdateSiteResponse updateResponse = getClientInterface(url).updateSite(Tester.getAuthorization(getApiTagetURL(url), registerResponse), updateParams.getRpId(), updateParams);
         assertNotNull(updateResponse);
 
         String strAuthorization2 = Tester.getAuthorization(getApiTagetURL(url), registerResponse, updateParams.getScope());
@@ -81,13 +81,13 @@ public class UpdateSiteTest extends BaseTest {
 
     public static Rp fetchRp(String apiTargetUrl, RegisterSiteResponse site) throws IOException {
         String strAuthorization = Tester.getAuthorization(apiTargetUrl, site);
-        final String rpAsJson = Tester.newClient(apiTargetUrl).getRp(strAuthorization, null, new GetRpParams(site.getRpId()));
+        final String rpAsJson = Tester.newClient(apiTargetUrl).getRp(strAuthorization, site.getRpId(), new GetRpParams(site.getRpId()));
         GetRpResponse resp = Jackson2.createJsonMapper().readValue(rpAsJson, GetRpResponse.class);
         return Jackson2.createJsonMapper().readValue(resp.getNode().toString(), Rp.class);
     }
 
     public static Rp fetchRp(String apiTargetUrl, String strAuthorization, String rpId) throws IOException {
-        final String rpAsJson = Tester.newClient(apiTargetUrl).getRp(strAuthorization, null, new GetRpParams(rpId));
+        final String rpAsJson = Tester.newClient(apiTargetUrl).getRp(strAuthorization, rpId, new GetRpParams(rpId));
         GetRpResponse resp = Jackson2.createJsonMapper().readValue(rpAsJson, GetRpResponse.class);
         return Jackson2.createJsonMapper().readValue(resp.getNode().toString(), Rp.class);
     }

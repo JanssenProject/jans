@@ -46,6 +46,7 @@ release = find_version("../jans/pycloudlib/version.py")
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx_click",
+    "sphinx.ext.intersphinx",
 ]
 
 autodoc_mock_imports = [
@@ -88,3 +89,5 @@ autodoc_default_options = {
     "undoc-members": True,
     "exclude-members": "_abc_impl",
 }
+autodoc_typehints = "description"
+intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}

@@ -72,7 +72,7 @@ public class RsCheckAccessTest extends BaseTest {
         params.setRpt("dummy");
         params.setScopes(scopeList);
 
-        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getAccess()));
@@ -87,7 +87,7 @@ public class RsCheckAccessTest extends BaseTest {
         params.setRpt("dummy");
         params.setScopes(scopeList);
         try {
-            RsCheckAccessResponse r = client.umaRsCheckAccess(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+            RsCheckAccessResponse r = client.umaRsCheckAccess(Tester.getAuthorization(client.getApitargetURL(), site), params.getRpId(), params);
             assertNotNull(r);
             assertNotNull(r.getError());
 

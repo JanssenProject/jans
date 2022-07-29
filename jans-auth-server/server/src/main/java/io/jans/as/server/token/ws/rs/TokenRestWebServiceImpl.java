@@ -12,11 +12,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ScopeConstants;
-import io.jans.as.model.common.TokenType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -29,34 +25,12 @@ import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.AbstractAuthorizationGrant;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCodeGrant;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.common.ClientCredentialsGrant;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.DeviceCodeGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.ResourceOwnerPasswordCredentialsGrant;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.JwrService;
-import io.jans.as.server.model.token.TokenParamsValidator;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AuthenticationFilterService;
-import io.jans.as.server.service.AuthenticationService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.GrantService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -67,13 +41,6 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -83,15 +50,21 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
 
-import static io.jans.as.model.config.Constants.OPENID;
-import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
-import static io.jans.as.model.config.Constants.X_CLIENTCERT;
+import static io.jans.as.model.config.Constants.*;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -156,6 +129,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private ExternalUpdateTokenService externalUpdateTokenService;
 
+    @Inject
+    private TokenRestWebServiceValidator tokenRestWebServiceValidator;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -175,49 +151,26 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             return umaTokenService.requestRpt(grantType, ticket, claimToken, claimTokenFormat, pctCode, rptCode, scope, request, response);
         }
 
-        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REQUEST);
-        oAuth2AuditLog.setClientId(clientId);
-        oAuth2AuditLog.setUsername(username);
-        oAuth2AuditLog.setScope(scope);
+        OAuth2AuditLog auditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REQUEST);
+        auditLog.setClientId(clientId);
+        auditLog.setUsername(username);
+        auditLog.setScope(scope);
 
         String tokenBindingHeader = request.getHeader("Sec-Token-Binding");
 
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
         ResponseBuilder builder = Response.ok();
 
-        String dpopStr;
-        try {
-            dpopStr = runDPoP(request);
-        } catch (InvalidJwtException | JWKException | NoSuchAlgorithmException | NoSuchProviderException e) {
-            return response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog);
-        }
+        String dpopStr = runDPoP(request, auditLog);
 
         try {
-            log.debug("Starting to validate request parameters");
-            if (!TokenParamsValidator.validateParams(grantType, code, redirectUri, username, password,
-                    scope, assertion, refreshToken)) {
-                log.trace("Failed to validate request parameters");
-                return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Failed to validate request parameters"), oAuth2AuditLog);
-            }
+            tokenRestWebServiceValidator.validateParams(grantType, code, redirectUri, refreshToken, auditLog);
 
             GrantType gt = GrantType.fromString(grantType);
             log.debug("Grant type: '{}'", gt);
 
-            SessionClient sessionClient = identity.getSessionClient();
-            Client client = null;
-            if (sessionClient != null) {
-                client = sessionClient.getClient();
-                log.debug("Get sessionClient: '{}'", sessionClient);
-            }
-
-            if (client == null) {
-                return response(error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find client."), oAuth2AuditLog);
-            }
-
-            log.debug("Get client from session: '{}'", client.getClientId());
-            if (client.isDisabled()) {
-                return response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT, "Client is disabled."), oAuth2AuditLog);
-            }
+            Client client = tokenRestWebServiceValidator.validateClient(getClient(), auditLog);
+            tokenRestWebServiceValidator.validateGrantType(gt, client, auditLog);
 
             final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
                     tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
@@ -228,92 +181,22 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setCertAsPem(request.getHeader(X_CLIENTCERT));
             executionContext.setDpop(dpopStr);
             executionContext.setClient(client);
-            executionContext.setDpop(dpopStr);
             executionContext.setAppConfiguration(appConfiguration);
             executionContext.setAttributeService(attributeService);
+            executionContext.setAuditLog(auditLog);
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, null), oAuth2AuditLog);
-                }
-
-                log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
-                final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
-                log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
-
-                if (authorizationCodeGrant == null) {
-                    log.debug("AuthorizationCodeGrant is empty by clientId: '{}', code: '{}'", client.getClientId(), code);
-                    // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
-                    grantService.removeAllByAuthorizationCode(code);
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code."), oAuth2AuditLog);
-                }
-
-                if (!client.getClientId().equals(authorizationCodeGrant.getClientId())) {
-                    log.debug("AuthorizationCodeGrant is found but belongs to another client. Grant's clientId: '{}', code: '{}'", authorizationCodeGrant.getClientId(), code);
-                    // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
-                    grantService.removeAllByAuthorizationCode(code);
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Client mismatch."), oAuth2AuditLog);
-                }
-
-                validatePKCE(authorizationCodeGrant, codeVerifier, oAuth2AuditLog);
-
-                authorizationCodeGrant.setIsCachedWithNoPersistence(false);
-                authorizationCodeGrant.save();
-
-                RefreshToken reToken = createRefreshToken(request, client, scope, authorizationCodeGrant, dpopStr);
-
-                scope = authorizationCodeGrant.checkScopesPolicy(scope);
-
-                executionContext.setGrant(authorizationCodeGrant);
-                AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
-
-                IdToken idToken = null;
-                if (authorizationCodeGrant.getScopes().contains(OPENID)) {
-                    String nonce = authorizationCodeGrant.getNonce();
-                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                            appConfiguration.getLegacyIdTokenClaims());
-                    final String idTokenTokenBindingCnf = client.getIdTokenTokenBindingCnf();
-                    Function<JsonWebResponse, Void> authorizationCodePreProcessing = jsonWebResponse -> {
-                        if (StringUtils.isNotBlank(idTokenTokenBindingCnf) && StringUtils.isNotBlank(authorizationCodeGrant.getTokenBindingHash())) {
-                            TokenBindingMessage.setCnfClaim(jsonWebResponse, authorizationCodeGrant.getTokenBindingHash(), idTokenTokenBindingCnf);
-                        }
-                        return null;
-                    };
-
-                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, authorizationCodeGrant, client, appConfiguration, attributeService);
-
-                    executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
-                    executionContext.setPreProcessing(JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
-                    executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
-
-                    idToken = authorizationCodeGrant.createIdToken(
-                            nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null, executionContext);
-                }
-
-                oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
-
-                grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
-
-                final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
-                return response(Response.ok().entity(entity), oAuth2AuditLog);
+                return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
             }
 
             if (gt == GrantType.REFRESH_TOKEN) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type does not belong to client."), oAuth2AuditLog);
-                }
-
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
-
-                if (authorizationGrant == null) {
-                    log.trace("Grant object is not found by refresh token.");
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
-                }
+                tokenRestWebServiceValidator.validateGrant(authorizationGrant, client, refreshToken, auditLog);
 
                 final RefreshToken refreshTokenObject = authorizationGrant.getRefreshToken(refreshToken);
                 if (refreshTokenObject == null || !refreshTokenObject.isValid()) {
                     log.trace("Invalid refresh token.");
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find refresh token or otherwise token type or client does not match."), auditLog);
                 }
 
                 executionContext.setGrant(authorizationGrant);
@@ -361,12 +244,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         reToken,
                         scope,
                         idToken));
-                oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
+                auditLog.updateOAuth2AuditLog(authorizationGrant, true);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
-                }
-
                 ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
 
                 scope = clientCredentialsGrant.checkScopesPolicy(scope);
@@ -389,7 +268,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             null, null, null, null, null, executionContext);
                 }
 
-                oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
+                auditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
                 builder.entity(getJSonResponse(accessToken,
                         accessToken.getTokenType(),
                         accessToken.getExpiresIn(),
@@ -397,10 +276,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         scope,
                         idToken));
             } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
-                }
-
                 boolean authenticated = false;
                 User user = null;
                 if (authenticationFilterService.isEnabled()) {
@@ -413,23 +288,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
 
                 if (!authenticated) {
-                    if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
-                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
-                        context.setUser(user);
-                        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
-                            log.trace("RO PC - User is authenticated successfully by external script.");
-                            user = context.getUser();
-                        }
-                    } else {
-                        try {
-                            authenticated = authenticationService.authenticate(username, password);
-                            if (authenticated) {
-                                user = authenticationService.getAuthenticatedUser();
-                            }
-                        } catch (AuthenticationException ex) {
-                            log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
-                        }
-                    }
+                    user = authenticateUser(username, password, executionContext, user);
                 }
 
                 if (user != null) {
@@ -471,7 +330,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 null, null, null, null, null, executionContext);
                     }
 
-                    oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
+                    auditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
                     builder.entity(getJSonResponse(accessToken,
                             accessToken.getTokenType(),
                             accessToken.getExpiresIn(),
@@ -485,10 +344,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else if (gt == GrantType.CIBA) {
                 errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
 
-                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
-                }
-
                 log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
                 final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
                 executionContext.setGrant(cibaGrant);
@@ -498,7 +353,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 if (cibaGrant != null) {
                     if (!cibaGrant.getClientId().equals(client.getClientId())) {
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED);
-                        return response(builder, oAuth2AuditLog);
+                        return response(builder, auditLog);
                     }
                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                             cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
@@ -533,7 +388,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     scope,
                                     idToken));
 
-                            oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
+                            auditLog.updateOAuth2AuditLog(cibaGrant, true);
                         } else {
                             builder = error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available.");
                         }
@@ -547,7 +402,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (cibaRequest != null) {
                         if (!cibaRequest.getClient().getClientId().equals(client.getClientId())) {
                             builder = error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED);
-                            return response(builder, oAuth2AuditLog);
+                            return response(builder, auditLog);
                         }
                         long currentTime = new Date().getTime();
                         Long lastAccess = cibaRequest.getLastAccessControl();
@@ -581,7 +436,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
                 }
             } else if (gt == GrantType.DEVICE_CODE) {
-                return processDeviceCodeGrantType(gt, client, deviceCode, scope, request, response, oAuth2AuditLog);
+                return processDeviceCodeGrantType(client, deviceCode, scope, request, response, auditLog);
             }
         } catch (WebApplicationException e) {
             throw e;
@@ -590,11 +445,96 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             log.error(e.getMessage(), e);
         }
 
-        return response(builder, oAuth2AuditLog);
+        return response(builder, auditLog);
+    }
+
+    private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, ExecutionContext executionContext) {
+        Client client = executionContext.getClient();
+
+        log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
+        final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
+        log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
+
+        // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
+        tokenRestWebServiceValidator.validateGrant(authorizationCodeGrant, client, code, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
+        validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
+
+        authorizationCodeGrant.setIsCachedWithNoPersistence(false);
+        authorizationCodeGrant.save();
+
+        RefreshToken reToken = createRefreshToken(executionContext.getHttpRequest(), client, scope, authorizationCodeGrant, executionContext.getDpop());
+
+        scope = authorizationCodeGrant.checkScopesPolicy(scope);
+
+        executionContext.setGrant(authorizationCodeGrant);
+        AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
+
+        IdToken idToken = null;
+        if (authorizationCodeGrant.getScopes().contains(OPENID)) {
+            String nonce = authorizationCodeGrant.getNonce();
+            boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                    appConfiguration.getLegacyIdTokenClaims());
+            final String idTokenTokenBindingCnf = client.getIdTokenTokenBindingCnf();
+            Function<JsonWebResponse, Void> authorizationCodePreProcessing = jsonWebResponse -> {
+                if (StringUtils.isNotBlank(idTokenTokenBindingCnf) && StringUtils.isNotBlank(authorizationCodeGrant.getTokenBindingHash())) {
+                    TokenBindingMessage.setCnfClaim(jsonWebResponse, authorizationCodeGrant.getTokenBindingHash(), idTokenTokenBindingCnf);
+                }
+                return null;
+            };
+
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), authorizationCodeGrant, client, appConfiguration, attributeService);
+
+            executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
+            executionContext.setPreProcessing(JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
+            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+
+            idToken = authorizationCodeGrant.createIdToken(
+                    nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null, executionContext);
+        }
+
+        executionContext.getAuditLog().updateOAuth2AuditLog(authorizationCodeGrant, true);
+
+        grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
+
+        final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
+        return response(Response.ok().entity(entity), executionContext.getAuditLog());
+    }
+
+    @Nullable
+    private Client getClient() {
+        SessionClient sessionClient = identity.getSessionClient();
+        Client client = null;
+        if (sessionClient != null) {
+            client = sessionClient.getClient();
+            log.debug("Get sessionClient: '{}'", sessionClient);
+        }
+        return client;
+    }
+
+    private User authenticateUser(String username, String password, ExecutionContext executionContext, User user) {
+
+        if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
+            final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
+            context.setUser(user);
+            if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
+                log.trace("RO PC - User is authenticated successfully by external script.");
+                user = context.getUser();
+            }
+        } else {
+            try {
+                boolean authenticated = authenticationService.authenticate(username, password);
+                if (authenticated) {
+                    user = authenticationService.getAuthenticatedUser();
+                }
+            } catch (AuthenticationException ex) {
+                log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
+            }
+        }
+        return user;
     }
 
     private void checkUser(AuthorizationGrant authorizationGrant) {
-        if (!appConfiguration.getCheckUserPresenceOnRefreshToken()) {
+        if (BooleanUtils.isFalse(appConfiguration.getCheckUserPresenceOnRefreshToken())) {
             return;
         }
 
@@ -631,21 +571,16 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     /**
      * Processes token request for device code grant type.
      *
-     * @param grantType      Grant type used, should be device code.
      * @param client         Client in process.
      * @param deviceCode     Device code generated in device authn request.
      * @param scope          Scope registered in device authn request.
      * @param request        HttpServletRequest
      * @param response       HttpServletResponse
-     * @param oAuth2AuditLog OAuth2AuditLog
+     * @param auditLog OAuth2AuditLog
      */
-    private Response processDeviceCodeGrantType(final GrantType grantType, final Client client, final String deviceCode,
+    private Response processDeviceCodeGrantType(final Client client, final String deviceCode,
                                                 String scope, final HttpServletRequest request,
-                                                final HttpServletResponse response, final OAuth2AuditLog oAuth2AuditLog) {
-        if (!TokenParamsValidator.validateGrantType(grantType, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-            return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
-        }
-
+                                                final HttpServletResponse response, final OAuth2AuditLog auditLog) {
         log.debug("Attempting to find authorizationGrant by deviceCode: '{}'", deviceCode);
         final DeviceCodeGrant deviceCodeGrant = authorizationGrantList.getDeviceCodeGrant(deviceCode);
 
@@ -653,7 +588,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         if (deviceCodeGrant != null) {
             if (!deviceCodeGrant.getClientId().equals(client.getClientId())) {
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), oAuth2AuditLog));
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), auditLog));
             }
             RefreshToken refToken = createRefreshToken(request, client, scope, deviceCodeGrant, null);
 
@@ -681,7 +616,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
-            oAuth2AuditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
+            auditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
 
             grantService.removeByCode(deviceCodeGrant.getDeviceCode());
 
@@ -690,13 +625,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         } else {
             final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);
             log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);
-            if (cacheData == null) {
-                log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired."), oAuth2AuditLog));
-            }
-            if (!cacheData.getClient().getClientId().equals(client.getClientId())) {
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), oAuth2AuditLog));
-            }
+            tokenRestWebServiceValidator.validateDeviceAuthorization(client, deviceCode, cacheData, auditLog);
+
             long currentTime = new Date().getTime();
             Long lastAccess = cacheData.getLastAccessControl();
             if (lastAccess == null) {
@@ -711,18 +641,18 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 if (timeFromLastAccess > intervalSeconds * 1000) {
                     log.debug("Access hasn't been granted yet for deviceCode: '{}'", deviceCode);
-                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), oAuth2AuditLog));
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), auditLog));
                 } else {
                     log.debug("Slow down protection deviceCode: '{}'", deviceCode);
-                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), oAuth2AuditLog));
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), auditLog));
                 }
             }
             if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
                 log.debug("The end-user denied the authorization request for deviceCode: '{}'", deviceCode);
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), oAuth2AuditLog));
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), auditLog));
             }
             log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
-            throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), oAuth2AuditLog));
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), auditLog));
         }
     }
 
@@ -767,19 +697,23 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
-    private String runDPoP(HttpServletRequest httpRequest) throws InvalidJwtException, JWKException, NoSuchAlgorithmException, NoSuchProviderException {
-        String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
-        if (StringUtils.isBlank(dpopStr)) return null;
+    private String runDPoP(HttpServletRequest httpRequest, OAuth2AuditLog oAuth2AuditLog) {
+        try {
+            String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
+            if (StringUtils.isBlank(dpopStr)) return null;
 
-        Jwt dpop = Jwt.parseOrThrow(dpopStr);
+            Jwt dpop = Jwt.parseOrThrow(dpopStr);
 
-        JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
-        String dpopJwkThumbprint = jwk.getJwkThumbprint();
+            JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
+            String dpopJwkThumbprint = jwk.getJwkThumbprint();
 
-        if (dpopJwkThumbprint == null)
-            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+            if (dpopJwkThumbprint == null)
+                throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
 
-        return dpopJwkThumbprint;
+            return dpopJwkThumbprint;
+        } catch (InvalidJwtException | JWKException | NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog));
+        }
     }
 
     /**

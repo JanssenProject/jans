@@ -1016,6 +1016,35 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.write]
+		
+  /jans-config-api/api/v1/config/scripts/name/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        description: Script name.
+        schema:
+          type: string
+    get:
+      summary: Fetch custom script by name.
+      description: Fetch custom script by name.
+      operationId: get-custom-script-by-name
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/scripts.readonly]
+
   /jans-config-api/api/v1/config/scripts/type/{type}:
     parameters:
       - schema:
@@ -1040,6 +1069,10 @@ paths:
             - '- ciba_end_user_notification'
             - '- persistence_extension'
             - '- idp'
+            - 'revoke_token'
+            - 'discovery'
+            - 'update_token'
+            - 'config_api_auth'
         name: type
         in: path
         description: Script type.
@@ -2135,6 +2168,38 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
+  /jans-config-api/api/v1/uma/resources/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        description: Client ID.
+        schema:
+          type: string
+    get:
+      tags:
+        - OAuth - UMA Resources
+      summary: Fetch uma resources by client id.
+      description: Fetch uma resources by client id.
+      operationId: get-oauth-uma-resources-by-clientid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA Resource list.
+                description: List of UMA Resource.
+                items:
+                  $ref: '#/components/schemas/UmaResource'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
     delete:
       tags:
         - OAuth - UMA Resources
@@ -2384,9 +2449,19 @@ paths:
             type: string
           in: query
           name: month
-          description: Month for which the stat report is to be fetched.
+          description: Month for which the stat report is to be fetched. The parameter is mandatory if start_month and end_month parameters are not present.
           example:  202012 (2020 Dec) 202101 (2021 Jan))
           required: true
+        - schema:
+            type: string
+          in: query
+          name: start_month
+          description: Start-Month for which the stat report is to be fetched.
+        - schema:
+            type: string
+          in: query
+          name: end_month
+          description: End-Month for which the stat report is to be fetched.
         - schema:
             type: string
             enum:
@@ -2650,7 +2725,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/user.write]
 
  
-  /jans-config-api/scim/config:
+  /jans-config-api/scim/scim-config:
     get:
       summary: Retrieves SCIM App configuration.
       description: Retrieves SCIM configuration.
@@ -4725,6 +4800,12 @@ components:
           items:
             type: string
           example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
+        discoveryDenyKeys:
+          type: array
+          description: List of configuration response claims which must not be displayed in discovery endpoint response.
+          items:
+            type: string
+          example: 'id_generation_endpoint, auth_level_mapping, etc.'
         discoveryAllowedKeys:
           type: array
           description: List of configuration response claim allowed to be displayed in discovery endpoint.
@@ -4836,10 +4917,12 @@ components:
               - USER
               - WHITEPAGES
         usageType:
-          type: object
+          type: array
           description: GluuAttributeUsageType
           items:
             type: string
+            enum:
+              - OPENID
         claimName:
           type: string
         seeAlso:
@@ -5000,49 +5083,102 @@ components:
       type: object
       properties:
         tlsClientAuthSubjectDn:
+          description: String representation of the expected subject distinguished name of the certificate, which the OAuth client will use in mutual TLS authentication.
           type: string
         runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-          description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
+          description: boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT.
           type: boolean
         keepClientAuthorizationAfterExpiration:
-          description: Keep Client Authorization After Expiration.
+          description: boolean property which indicates whether to keep client authorization after expiration.
           type: boolean
         allowSpontaneousScopes:
+          description: boolean, whether to allow spontaneous scopes for client.
           type: boolean
         spontaneousScopes:
+          description: List of spontaneous scope regular expression.
           type: array
           items:
             type: string
         spontaneousScopeScriptDns:
+          description: List of spontaneous scope scripts.
+          type: array
+          items:
+            type: string
+        updateTokenScriptDns:
+          description: List of update token scripts.
           type: array
           items:
             type: string
         backchannelLogoutUri:
+          description: List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
           type: array
           items:
             type: string
         backchannelLogoutSessionRequired:
+          description: Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in the Logout Token to identify the RP session with the OP when true. Default value is false.
           type: boolean
         additionalAudience:
+          description: List of additional client audience.
           type: array
           items:
             type: string
         postAuthnScripts:
+          description: List of post authentication scripts.
           type: array
           items:
             type: string
         consentGatheringScripts:
+          description: List of consent gathering scripts.
           type: array
           items:
             type: string
         introspectionScripts:
+          description: List of introspection scripts.
           type: array
           items:
             type: string
         rptClaimsScripts:
+          description: List of Requesting Party Token (RPT) claims scripts.
           type: array
           items:
             type: string
+        ropcScripts:
+          description: List of Resource Owner Password Credentials (ROPC) scripts.
+          type: array
+          items:
+            type: string
+        parLifetime:
+          description: represents the lifetime of Pushed Authorisation Request (PAR).
+          type: integer
+          format: int64
+        requirePar:
+          description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
+          type: boolean
+        jansAuthSignedRespAlg:
+          description: JWS alg algorithm JWA required for signing authorization responses.
+          type: string
+        jansAuthEncRespAlg:
+          description: JWE alg algorithm JWA required for encrypting authorization responses.
+          type: string
+        jansAuthEncRespEnc:
+          description: JWE enc algorithm JWA required for encrypting auhtorization responses.
+          type: string
+        jansSubAttr:
+          description: custom subject identifier attribute.
+          type: string
+        redirectUrisRegex:
+          description:  If set, redirectUri must match to this regexp
+          type: string
+        jansAuthorizedAcr:
+          description:  List of thentication Context Class Reference (ACR) that must exist.
+          type: array
+          items:
+            type: string
+        jansDefaultPromptLogin:
+          description: sets prompt=login to the authorization request, which causes the authorization server to force the user to sign in again before it will show the authorization prompt.
+          type: boolean
+			
+			
     Client:
       title: Client object
       description: Client.
@@ -5443,9 +5579,8 @@ components:
       description: UMAResource
       type: object
       required:
-        - id
-        - type
-        - iconUri
+        - name
+        - description
       properties:
         dn:
           type: string
@@ -6057,10 +6192,6 @@ components:
       description: Server statistics data
       properties:
         month:
-          type: integer
-        start_month:
-          type: integer
-        end_month:
           type: integer
         monthly_active_users:
           type: integer
@@ -6827,10 +6958,10 @@ components:
           type: string
           description: User status
           enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
+            - active
+            - inactive
+            - expired
+            - register
         userId:
           description: A domain issued and managed identifier for the user.
           type: string

@@ -46,6 +46,8 @@ jobs:
           fi
 
   check_pr:
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -53,17 +55,30 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install latest GH
+        continue-on-error: true
+        run: |
+          VERSION=`curl  "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-` 
+          echo $VERSION
+          curl -sSL https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz -o gh_${VERSION}_linux_amd64.tar.gz
+          tar xvf gh_${VERSION}_linux_amd64.tar.gz
+          sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
+          gh version
+
       - name: Check commit message
         continue-on-error: true
         id: check_message
         run: |
-          MESSAGE=$(git log --pretty=format:%s ${{ github.head_ref }}..main | grep "^docs:")
-          if [ -n "$MESSAGE" ]; then
-            echo "conventional commit exists starting with docs:"
-            exit 0
-          else
+          PULL_NUMBER=$(echo "$GITHUB_REF" | awk -F / '{print $3}')
+          echo "Parsing commits from PR $PULL_NUMBER"
+          MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq '.' | grep "messageHeadline" | cut -d: -f2- | grep "docs:" || echo "")
+          echo "$MESSAGE"
+          if [[ -z "$MESSAGE" ]]; then
             echo "conventional commit starting with docs: does not exist"
             exit 1
+          else
+            echo "conventional commit exists starting with docs:"
+            exit 0
           fi
 
       - name: Verify Changed files

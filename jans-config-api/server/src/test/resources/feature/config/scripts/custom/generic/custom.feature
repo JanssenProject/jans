@@ -21,9 +21,28 @@ Feature: Verify Custom Script configuration endpoint
     And print response
     And assert response.length != null
 
-
+   	@scripts-get-custom-script-by-name
+	Scenario: Fetch all custom scripts by name
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    And print response[0]
+	And print 'Script inum = '+response[0].name
+    And assert response[0].name != null
+	And print  'Script Name = '+response[0].name
+	And print 'Fetching script by name' + '-' +response[0].name
+	Given url mainUrl + '/name' + '/'+response[0].name
+	And header Authorization = 'Bearer ' + accessToken
+	When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+	
    	@scripts-get-person-custom-scripts
-	Scenario: Fetch all person custom scripts without bearer token
+	Scenario: Fetch all person custom script 
 	Given url mainUrl + '/type'
 	And path 'person_authentication'
 	And header Authorization = 'Bearer ' + accessToken
@@ -34,7 +53,7 @@ Feature: Verify Custom Script configuration endpoint
 
 
     @scripts-get-introspection-custom-scripts
-	Scenario: Fetch all introspection scripts without bearer token
+	Scenario: Fetch all introspection scripts 
 	Given url mainUrl + '/type'
 	And path 'introspection'
 	And header Authorization = 'Bearer ' + accessToken

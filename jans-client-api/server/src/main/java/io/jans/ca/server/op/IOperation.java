@@ -5,13 +5,7 @@ package io.jans.ca.server.op;
 
 import io.jans.ca.common.params.IParams;
 import io.jans.ca.common.response.IOpResponse;
-
-/**
- * Base interface for client-api operations. Operation parameter must be specified via contructor.
- *
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 09/08/2013
- */
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface IOperation<T extends IParams> {
 
@@ -20,7 +14,9 @@ public interface IOperation<T extends IParams> {
      *
      * @return command response
      */
-    IOpResponse execute(T params) throws Exception;
+    IOpResponse execute(T params, HttpServletRequest httpRequest) throws Exception;
 
     Class<T> getParameterClass();
+
+    String getReturnType();
 }

@@ -6,7 +6,8 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
+import com.couchbase.client.java.env.ClusterEnvironment;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.google.common.base.Joiner;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.CouchbaseConfService;
@@ -15,6 +16,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
+
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;
@@ -23,6 +25,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -32,11 +36,8 @@ import java.util.Properties;
 public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Inject
-    Logger log;
-
-    @Inject
     CouchbaseConfService couchbaseConfService;
-
+   
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS })
     public Response get() {
@@ -47,14 +48,14 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS })
     public Response getWithName(@PathParam(ApiConstants.NAME) String name) {
-        log.debug("CouchbaseConfigurationResource::getWithName() -  name = " + name + "\n\n");
+        logger.debug("CouchbaseConfigurationResource::getWithName() -  name:{}" ,name);
         return Response.ok(findByName(name)).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS })
     public Response add(@Valid @NotNull CouchbaseConnectionConfiguration conf) {
-        log.debug("COUCHBASE details to be added - conf = " + conf);
+        logger.debug("COUCHBASE details to be added - conf:{}",conf);
         couchbaseConfService.save(conf);
         conf = findByName(conf.getConfigId());
         return Response.status(Response.Status.CREATED).entity(conf).build();
@@ -63,7 +64,7 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS })
     public Response update(@Valid @NotNull CouchbaseConnectionConfiguration conf) {
-        log.debug("COUCHBASE details to be updated - conf = " + conf);
+        logger.debug("COUCHBASE details to be updated - conf:{}",conf);
         findByName(conf.getConfigId());
         couchbaseConfService.save(conf);
         return Response.ok(conf).build();
@@ -73,9 +74,9 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_DELETE_ACCESS })
     public Response delete(@PathParam(ApiConstants.NAME) String name) {
-        log.debug("COUCHBASE to be deleted - name = " + name);
+        logger.debug("COUCHBASE to be deleted - name:{}",name);
         findByName(name);
-        log.trace("Delete configuration by name " + name);
+        logger.trace("Delete configuration by name:{} ",name);
         this.couchbaseConfService.remove(name);
         return Response.noContent().build();
     }
@@ -84,10 +85,10 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS })
-    public Response patch(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws Exception {
-        log.debug("COUCHBASE to be patched - name = " + name + " , requestString = " + requestString);
+    public Response patch(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws JsonPatchException, IOException {
+        logger.debug("COUCHBASE to be patched - name:{}, requestString:{}", name, requestString);
         CouchbaseConnectionConfiguration conf = findByName(name);
-        log.info("Patch configuration by name " + name);
+        logger.info("Patch configuration by name:{} ",name);
         conf = Jackson.applyPatch(requestString, conf);
         couchbaseConfService.save(conf);
         return Response.ok(conf).build();
@@ -97,7 +98,7 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS })
     public Response test(@Valid @NotNull CouchbaseConnectionConfiguration conf) {
-        log.debug("COUCHBASE to be tested - conf = " + conf);
+        logger.debug("COUCHBASE to be tested - conf:{}",conf);
         Properties properties = new Properties();
 
         properties.put("couchbase.servers", Joiner.on(",").join(conf.getServers()));
@@ -107,15 +108,17 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
         properties.put("couchbase.bucket.default", conf.getDefaultBucket());
         properties.put("couchbase.password.encryption.method", conf.getPasswordEncryptionMethod());
 
-        CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(properties,
-                DefaultCouchbaseEnvironment.create());
+        ClusterEnvironment.Builder clusterEnvironmentBuilder = ClusterEnvironment.builder();
+        ClusterEnvironment clusterEnvironment = clusterEnvironmentBuilder.build();
+        logger.error("clusterEnvironment:{}",clusterEnvironment);
+        CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(properties, clusterEnvironment);
         return Response.ok(connectionProvider.isConnected()).build();
     }
 
     private CouchbaseConnectionConfiguration findByName(String name) {
         final Optional<CouchbaseConnectionConfiguration> optional = this.couchbaseConfService.findByName(name);
         if (optional.isEmpty()) {
-            log.trace("Could not find configuration by name '" + name + "'");
+            logger.trace("Could not find configuration by name:{}", name);
             throw new NotFoundException(getNotFoundError("Configuration - '" + name + "'"));
         }
         return optional.get();

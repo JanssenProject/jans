@@ -11,7 +11,6 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.UpdateSiteParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -20,8 +19,13 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
-import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.RpService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -32,29 +36,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 11/03/2016
- */
-
+@RequestScoped
+@Named
 public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSiteOperation.class);
 
     private Rp rp;
 
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    public UpdateSiteOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, UpdateSiteParams.class);
-    }
+    @Inject
+    RpService rpService;
 
     @Override
-    public IOpResponse execute(UpdateSiteParams params) {
-        rp = getRp();
+    public IOpResponse execute(UpdateSiteParams params, HttpServletRequest httpServletRequest) {
+        rp = getRp(params);
 
         LOG.info("Updating rp ... rp: " + rp);
         persistRp(rp, params);
@@ -64,13 +59,23 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         return response;
     }
 
+    @Override
+    public Class<UpdateSiteParams> getParameterClass() {
+        return UpdateSiteParams.class;
+    }
+
+    @Override
+    public String getReturnType() {
+        return MediaType.APPLICATION_JSON;
+    }
+
     private void persistRp(Rp rp, UpdateSiteParams params) {
 
         try {
             RegisterRequest registerRequest = createRegisterClientRequest(rp, params);
             updateRegisteredClient(rp, registerRequest);
             RegisterRequestMapper.fillRp(rp, registerRequest);
-            getRpService().update(rp);
+            rpService.update(rp);
 
             LOG.info("RP updated: " + rp);
         } catch (Exception e) {
@@ -84,7 +89,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             throw new HttpException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
         }
 
-        final RegisterClient registerClient = getRpService().createRegisterClient(rp.getClientRegistrationClientUri(), registerRequest);
+        final RegisterClient registerClient = rpService.createRegisterClient(rp.getClientRegistrationClientUri(), registerRequest);
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (response.getStatus() == 200) {

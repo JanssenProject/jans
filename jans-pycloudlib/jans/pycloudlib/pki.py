@@ -1,6 +1,7 @@
 """This module contains various Public Key Infrastucture (PKI) helpers."""
 
 import os
+import typing as _t
 from datetime import datetime
 from datetime import timedelta
 from ipaddress import IPv4Address
@@ -13,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
 
-def generate_private_key(filename):
+def generate_private_key(filename: str) -> rsa.RSAPrivateKeyWithSerialization:
     """Generate private key.
 
     :param filename: Path to generated private key.
@@ -33,15 +34,22 @@ def generate_private_key(filename):
     return private_key
 
 
-def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_key_usage=False, **kwargs):  # noqa: D412
-    """Generate public key (cert).
+def generate_public_key(
+    filename: str,
+    private_key: rsa.RSAPrivateKey,
+    is_ca: bool = False,
+    add_san: bool = False,
+    add_key_usage: bool = False,
+    **kwargs: dict[str, _t.Any]
+) -> x509.Certificate:  # noqa: D412
+    r"""Generate public key (cert).
 
     :param filename: Path to generated public key.
     :param private_key: An instance of PrivateKey object.
     :param is_ca: Whether add constraint extension as CA.
     :param add_san: Whether to add SubjectAlternativeName extension.
     :param add_key_usage: Whether to add KeyUsage extension.
-    :param kwargs: Keyword arguments.
+    :param \**kwargs: Keyword arguments.
 
     Keyword arguments:
 
@@ -56,16 +64,24 @@ def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_k
     - ``valid_to``: Validity length in days.
     """
     valid_from = datetime.utcnow()
-    valid_to = valid_from + timedelta(days=kwargs.get("valid_to", 365))
+    validity = str(kwargs.get("valid_to", 365))
+    valid_to = valid_from + timedelta(days=float(validity))
+
+    country_code = str(kwargs.get("country_code", ""))
+    state = str(kwargs.get("state", ""))
+    city = str(kwargs.get("city", ""))
+    org_name = str(kwargs.get("org_name", ""))
+    hostname = str(kwargs.get("hostname", ""))
+    email = str(kwargs.get("email", ""))
 
     # issuer equals subject because we use self-signed
     subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, kwargs.get("country_code")),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, kwargs.get("state")),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, kwargs.get("city")),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, kwargs.get("org_name")),
-        x509.NameAttribute(NameOID.COMMON_NAME, kwargs.get("hostname")),
-        x509.NameAttribute(NameOID.EMAIL_ADDRESS, kwargs.get("email")),
+        x509.NameAttribute(NameOID.COUNTRY_NAME, country_code),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, state),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, city),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, org_name),
+        x509.NameAttribute(NameOID.COMMON_NAME, hostname),
+        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
     ])
 
     builder = (
@@ -86,19 +102,17 @@ def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_k
         # SANs
         suffix, _ = os.path.splitext(os.path.basename(filename))
 
-        sans = [
-            x509.DNSName(kwargs.get("hostname")),
+        sans: list[x509.GeneralName] = [
+            x509.DNSName(hostname),
             x509.DNSName(suffix),
         ]
 
         # add Domains to SAN
-        extra_dns = kwargs.get("extra_dns") or []
-        for dn in extra_dns:
+        for dn in kwargs.get("extra_dns", []):
             sans.append(x509.DNSName(dn))
 
         # add IPs to SAN
-        extra_ips = kwargs.get("extra_ips") or []
-        for ip in extra_ips:
+        for ip in kwargs.get("extra_ips", []):
             sans.append(x509.IPAddress(IPv4Address(ip)))
 
         # make SANs unique
@@ -136,14 +150,20 @@ def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_k
     return public_key
 
 
-def generate_csr(filename, private_key, add_san=False, add_key_usage=False, **kwargs):  # noqa: D412
-    """Generate a certificate signing request (CSR).
+def generate_csr(
+    filename: str,
+    private_key: rsa.RSAPrivateKeyWithSerialization,
+    add_san: bool = False,
+    add_key_usage: bool = False,
+    **kwargs: _t.Mapping[str, _t.Any]
+) -> x509.CertificateSigningRequest:  # noqa: D412
+    r"""Generate a certificate signing request (CSR).
 
     :param filename: Path to generate CSR.
     :param private_key: An instance of PrivateKey object.
     :param add_san: Whether to add SubjectAlternativeName extension.
     :param add_key_usage: Whether to add KeyUsage extension.
-    :param kwargs: Keyword arguments.
+    :param \**kwargs: Keyword arguments.
 
     Keyword arguments:
 
@@ -156,13 +176,20 @@ def generate_csr(filename, private_key, add_san=False, add_key_usage=False, **kw
     - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
     - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
     """
+    country_code = str(kwargs.get("country_code", ""))
+    state = str(kwargs.get("state", ""))
+    city = str(kwargs.get("city", ""))
+    org_name = str(kwargs.get("org_name", ""))
+    hostname = str(kwargs.get("hostname", ""))
+    email = str(kwargs.get("email", ""))
+
     subject = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, kwargs.get("country_code")),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, kwargs.get("state")),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, kwargs.get("city")),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, kwargs.get("org_name")),
-        x509.NameAttribute(NameOID.COMMON_NAME, kwargs.get("hostname")),
-        x509.NameAttribute(NameOID.EMAIL_ADDRESS, kwargs.get("email")),
+        x509.NameAttribute(NameOID.COUNTRY_NAME, country_code),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, state),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, city),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, org_name),
+        x509.NameAttribute(NameOID.COMMON_NAME, hostname),
+        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
     ])
 
     builder = (
@@ -174,19 +201,17 @@ def generate_csr(filename, private_key, add_san=False, add_key_usage=False, **kw
         # SANs
         suffix, _ = os.path.splitext(os.path.basename(filename))
 
-        sans = [
-            x509.DNSName(kwargs.get("hostname")),
+        sans: list[x509.GeneralName] = [
+            x509.DNSName(hostname),
             x509.DNSName(suffix),
         ]
 
         # add Domains to SAN
-        extra_dns = kwargs.get("extra_dns") or []
-        for dn in extra_dns:
+        for dn in kwargs.get("extra_dns", []):
             sans.append(x509.DNSName(dn))
 
         # add IPs to SAN
-        extra_ips = kwargs.get("extra_ips") or []
-        for ip in extra_ips:
+        for ip in kwargs.get("extra_ips", []):
             sans.append(x509.IPAddress(IPv4Address(ip)))
 
         # make SANs unique
@@ -222,16 +247,24 @@ def generate_csr(filename, private_key, add_san=False, add_key_usage=False, **kw
     return csr
 
 
-def sign_csr(filename, csr, ca_private_key, ca_public_key, **kwargs):
-    """Sign a certificate signing request (CSR).
+def sign_csr(
+    filename: str,
+    csr: x509.CertificateSigningRequest,
+    ca_private_key: rsa.RSAPrivateKeyWithSerialization,
+    ca_public_key: x509.Certificate,
+    **kwargs: _t.Mapping[str, _t.Any]
+) -> x509.Certificate:
+    r"""Sign a certificate signing request (CSR).
 
     :param filename: Path to signed certificate.
     :param csr: An instance of CertificateSigningRequest object.
     :param ca_private_key: An instance of CA PrivateKey object.
     :param ca_public_key: An instance of CA Certificate object.
+    :param \**kwargs: Keyword arguments.
     """
     valid_from = datetime.utcnow()
-    valid_to = valid_from + timedelta(days=kwargs.get("valid_to", 365))
+    validity = str(kwargs.get("valid_to", 365))
+    valid_to = valid_from + timedelta(days=float(validity))
 
     builder = (
         x509.CertificateBuilder()

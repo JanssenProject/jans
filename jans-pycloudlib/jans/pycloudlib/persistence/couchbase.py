@@ -1,12 +1,18 @@
 """This module contains various helpers related to Couchbase persistence."""
 
+from __future__ import annotations
+
 import contextlib
 import json
 import logging
 import os
+import typing as _t
+from abc import ABC
+from abc import abstractmethod
+from abc import abstractproperty
 from datetime import datetime
+from functools import cached_property
 from functools import partial
-from typing import NoReturn
 from tempfile import NamedTemporaryFile
 
 import requests
@@ -20,12 +26,18 @@ from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import safe_render
 
+if _t.TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from jans.pycloudlib.manager import Manager
+    from requests import Response
+
 CN_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
 logger = logging.getLogger(__name__)
 
 
-def _get_cb_password(manager, password_file, secret_name):
+def _get_cb_password(manager: Manager, password_file: str, secret_name: str) -> str:
     """Get Couchbase user's password.
 
     Priority:
@@ -33,7 +45,7 @@ def _get_cb_password(manager, password_file, secret_name):
     1. get from password file (for backward-compat)
     2. get from secrets
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :param manager: An instance of manager class.
     :param password_file: Path to file contains password.
     :param secret_name: Name of the secrets to pull/push the password.
     :returns: Plaintext password.
@@ -52,7 +64,7 @@ def _get_cb_password(manager, password_file, secret_name):
     return password
 
 
-def get_couchbase_user(manager=None) -> str:
+def get_couchbase_user(manager: _t.Union[Manager, None] = None) -> str:
     """Get Couchbase username from ``CN_COUCHBASE_USER`` environment variable (default to ``admin``).
 
     :param manager: A no-op argument, preserved for backward compatibility.
@@ -61,13 +73,13 @@ def get_couchbase_user(manager=None) -> str:
     return os.environ.get("CN_COUCHBASE_USER", "admin")
 
 
-def get_couchbase_password(manager) -> str:
+def get_couchbase_password(manager: Manager) -> str:
     """Get Couchbase user's password from file.
 
     Default file is set to ``/etc/jans/conf/couchbase_password``.
     To change the location, simply pass ``CN_COUCHBASE_PASSWORD_FILE`` environment variable.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :param manager: An instance of manager class.
     :returns: Plaintext password.
     """
     secret_name = "couchbase_password"  # nosec: B105
@@ -75,7 +87,7 @@ def get_couchbase_password(manager) -> str:
     return _get_cb_password(manager, password_file, secret_name)
 
 
-def get_couchbase_superuser(manager=None) -> str:
+def get_couchbase_superuser(manager: _t.Union[Manager, None] = None) -> str:
     """Get Couchbase username from ``CN_COUCHBASE_SUPERUSER`` environment variable (default to empty-string).
 
     :param manager: A no-op argument, preserved for backward compatibility.
@@ -84,13 +96,13 @@ def get_couchbase_superuser(manager=None) -> str:
     return os.environ.get("CN_COUCHBASE_SUPERUSER", "")
 
 
-def get_couchbase_superuser_password(manager) -> str:
+def get_couchbase_superuser_password(manager: Manager) -> str:
     """Get Couchbase superuser's password from file.
 
     Default file is set to ``/etc/jans/conf/couchbase_superuser_password``.
     To change the location, simply pass ``CN_COUCHBASE_SUPERUSER_PASSWORD_FILE`` environment variable.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :param manager: An instance of manager class.
     :returns: Plaintext password.
     """
     secret_name = "couchbase_superuser_password"  # nosec: B105
@@ -151,10 +163,10 @@ def get_couchbase_scan_consistency() -> str:
     return opt
 
 
-def render_couchbase_properties(manager, src: str, dest: str) -> None:
+def render_couchbase_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to Couchbase server.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :param manager: An instance of manager class.
     :param src: Absolute path to the template.
     :param dest: Absolute path where generated file is located.
     """
@@ -165,16 +177,16 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
     groups = mapper.groups()["couchbase"]
 
     mappings = {}
-    for mapping, rdn in RDN_MAPPING.items():
-        if mapping not in groups:
+    for rmapping, rdn in RDN_MAPPING.items():
+        if rmapping not in groups:
             continue
 
-        if mapping == "default":
+        if rmapping == "default":
             bucket = ""
         else:
-            bucket = f"{bucket_prefix}_{mapping}"
+            bucket = f"{bucket_prefix}_{rmapping}"
 
-        mappings[mapping] = {
+        mappings[rmapping] = {
             "bucket": bucket,
             "rdn": rdn,
         }
@@ -228,7 +240,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
 
 
 # DEPRECATED
-def sync_couchbase_cert(manager=None) -> str:
+def sync_couchbase_cert(manager: _t.Union[Manager, None] = None) -> str:
     """Synchronize Couchbase certificate.
 
     This function is deprecated and will be removed in future versions.
@@ -238,10 +250,10 @@ def sync_couchbase_cert(manager=None) -> str:
         return f.read()
 
 
-def sync_couchbase_truststore(manager, dest: str = "/etc/certs/couchbase.pkcs12") -> None:
+def sync_couchbase_truststore(manager: Manager, dest: str = "/etc/certs/couchbase.pkcs12") -> None:
     """Pull secret contains base64-string contents of Couchbase truststore and save it as a JKS file.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :param manager: An instance of manager class.
     :param dest: Absolute path where generated file is located.
     """
     cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
@@ -251,25 +263,28 @@ def sync_couchbase_truststore(manager, dest: str = "/etc/certs/couchbase.pkcs12"
     )
 
 
-class BaseClient:
+class BaseApi(ABC):
     """A base class for API client."""
 
-    def __init__(self, hosts, user, password):
+    @abstractproperty
+    def port(self) -> int:
+        """Port used by API server."""
+
+    def __init__(self, hosts: str, user: str, password: str) -> None:
         self._hosts = hosts
         self.host = ""
         self.user = user
         self.password = password
-        self._session = None
 
     @property
-    def scheme(self):
+    def scheme(self) -> str:
         """Scheme used when connecting to Couchbase server."""
         if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)):
             return "https"
         return "http"
 
-    @property
-    def session(self):
+    @cached_property
+    def session(self) -> requests.Session:
         """Get an instance of ``requests.Session``.
 
         By default, the session will not use certificate verification.
@@ -284,16 +299,15 @@ class BaseClient:
         """
         suppress_verification_warning()
 
-        if not self._session:
-            self._session = requests.Session()
-            self._session.verify = False
+        session = requests.Session()
+        session.verify = False
 
-            verify = as_boolean(os.environ.get("CN_COUCHBASE_VERIFY", False))
-            if verify:
-                self._session.mount("https://", HostHeaderSSLAdapter())
-                self._session.verify = os.environ.get("CN_COUCHBASE_CERT_FILE") or "/etc/certs/couchbase.crt"
-                self._session.headers["Host"] = os.environ.get("CN_COUCHBASE_HOST_HEADER") or "localhost"
-        return self._session
+        verify = as_boolean(os.environ.get("CN_COUCHBASE_VERIFY", False))
+        if verify:
+            session.mount("https://", HostHeaderSSLAdapter())
+            session.verify = os.environ.get("CN_COUCHBASE_CERT_FILE") or "/etc/certs/couchbase.crt"
+            session.headers["Host"] = os.environ.get("CN_COUCHBASE_HOST_HEADER") or "localhost"
+        return session
 
     def resolve_host(self) -> str:
         """Get active/ready host from a list of servers.
@@ -313,36 +327,36 @@ class BaseClient:
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={exc}")
         return self.host
 
-    def healthcheck(self, host) -> NoReturn:  # pragma: no cover
+    @abstractmethod
+    def healthcheck(self, host: str) -> Response:  # pragma: no cover
         """Run healthcheck to a host.
 
         Subclass **MUST** implement this method.
         """
-        raise NotImplementedError
 
-    def exec_api(self, path, **kwargs) -> NoReturn:  # pragma: no cover
+    @abstractmethod
+    def exec_api(self, path: str, **kwargs: dict[str, _t.Any]) -> Response:  # pragma: no cover
         """Execute a request to an API server.
 
         Subclass **MUST** implement this method.
         """
-        raise NotImplementedError
 
 
-class N1qlClient(BaseClient):
+class N1qlApi(BaseApi):
     """This class interacts with N1QL server (part of Couchbase)."""
 
     @property
-    def port(self):
+    def port(self) -> int:
         """Port where N1QL server is bind to."""
         if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)):
             return 18093
         return 8093
 
-    def healthcheck(self, host):
+    def healthcheck(self, host: str) -> Response:
         """Run healthcheck to a host.
 
         :param host: Hostname or IP address.
-        :returns: An instance of ``requests.models.Response``.
+        :returns: An instance of ``requests.Response``.
         """
         return self.session.post(
             f"{self.scheme}://{host}:{self.port}/query/service",
@@ -351,12 +365,12 @@ class N1qlClient(BaseClient):
             timeout=10,
         )
 
-    def exec_api(self, path, **kwargs):
+    def exec_api(self, path: str, **kwargs: dict[str, _t.Any]) -> Response:
         """Execute a request to REST server.
 
         :param path: Path (or sub-URL) of API server.
         :param kwargs: Keyword-argument passed to ``requests.api.*`` function.
-        :returns: An instance of ``requests.models.Response``.
+        :returns: An instance of ``requests.Response``.
         """
         data = kwargs.get("data", {})
 
@@ -368,7 +382,7 @@ class N1qlClient(BaseClient):
         return resp
 
 
-def build_n1ql_request_body(query: str, *args, **kwargs) -> dict:
+def build_n1ql_request_body(query: str, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> dict[str, _t.Any]:
     """Build request body for N1QL REST API.
 
     Request body consists of ``statement`` key, ``args`` key
@@ -393,21 +407,21 @@ def build_n1ql_request_body(query: str, *args, **kwargs) -> dict:
     return body
 
 
-class RestClient(BaseClient):
+class RestApi(BaseApi):
     """This class interacts with REST server (part of Couchbase)."""
 
     @property
-    def port(self):
+    def port(self) -> int:
         """Port where REST server is bind to."""
         if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)):
             return 18091
         return 8091
 
-    def healthcheck(self, host):
+    def healthcheck(self, host: str) -> Response:
         """Run healthcheck to a host.
 
         :param host: Hostname or IP address.
-        :returns: An instance of ``requests.models.Response``.
+        :returns: An instance of ``requests.Response``.
         """
         return self.session.get(
             f"{self.scheme}://{host}:{self.port}/pools/",
@@ -415,15 +429,15 @@ class RestClient(BaseClient):
             timeout=10,
         )
 
-    def exec_api(self, path, **kwargs):
+    def exec_api(self, path: str, **kwargs: dict[str, _t.Any]) -> Response:
         """Execute a request to REST server.
 
         :param path: Path (or sub-URL) of API server.
         :param kwargs: Keyword-argument passed to ``requests.api.*`` function.
-        :returns: An instance of ``requests.models.Response``.
+        :returns: An instance of ``requests.Response``.
         """
         data = kwargs.get("data", {})
-        method = kwargs.get("method")
+        method = str(kwargs.get("method", ""))
 
         callbacks = {
             "GET": self.session.get,
@@ -435,7 +449,7 @@ class RestClient(BaseClient):
         if not callable(req):
             raise ValueError(f"Unsupported method {method}")
 
-        resp = req(
+        resp: Response = req(
             f"{self.scheme}://{self.host}:{self.port}/{path}",
             auth=(self.user, self.password),
         )
@@ -445,29 +459,20 @@ class RestClient(BaseClient):
 class AttrProcessor:
     """Attribute processor."""
 
-    def __init__(self):
-        self._attrs = {}
-        self._attr_maps = {}
-        self._schemas = {}
-
-    @property
-    def attr_maps(self):
+    @cached_property
+    def attr_maps(self) -> dict[str, list[str]]:
         """Get a mapping of OpenDJ types."""
-        if not self._attr_maps:
-            with open("/app/schema/opendj_types.json") as f:
-                self._attr_maps = json.loads(f.read())
-        return self._attr_maps
+        with open("/app/schema/opendj_types.json") as f:
+            return json.loads(f.read())  # type: ignore
 
-    @property
-    def schemas(self):
+    @cached_property
+    def schemas(self) -> list[dict[str, _t.Any]]:
         """Get a mapping of schemas from pre-defined file."""
-        if not self._schemas:
-            with open("/app/schema/jans_schema.json") as f:
-                self._schemas = json.loads(f.read()).get("attributeTypes", {})
-        return self._schemas
+        with open("/app/schema/jans_schema.json") as f:
+            return json.loads(f.read()).get("attributeTypes", [])  # type: ignore
 
     @property
-    def syntax_types(self):
+    def syntax_types(self) -> dict[str, str]:
         """Get a mapping of syntax types."""
         return {
             '1.3.6.1.4.1.1466.115.121.1.7': 'boolean',
@@ -475,7 +480,7 @@ class AttrProcessor:
             '1.3.6.1.4.1.1466.115.121.1.24': 'datetime',
         }
 
-    def process(self):
+    def process(self) -> dict[str, _t.Any]:
         """Pre-populate attributes."""
         attrs = {}
 
@@ -502,151 +507,160 @@ class AttrProcessor:
         attrs["member"]["multivalued"] = True
         return attrs
 
-    @property
-    def attrs(self):
+    @cached_property
+    def attrs(self) -> dict[str, _t.Any]:
         """Get a mapping of attributes."""
-        if not self._attrs:
-            self._attrs = self.process()
-        return self._attrs
+        return self.process()
 
-    def is_multivalued(self, name):
+    def is_multivalued(self, name: str) -> bool:
         """Check whether attribute is multivalued.
 
         :param name: Attribute name.
         """
-        return self.attrs.get(name, {}).get("multivalued", False)
+        return bool(self.attrs.get(name, {}).get("multivalued", False))
 
-    def get_type(self, name):
+    def get_type(self, name: str) -> str:
         """Get attribute's data type.
 
         :param name: Attribute name.
         """
-        return self.attrs.get(name, {}).get("type", "string")
+        return str(self.attrs.get(name, {}).get("type", "string"))
 
 
 class CouchbaseClient:
-    """This class interacts with Couchbase server."""
+    r"""This class interacts with Couchbase server.
 
-    def __init__(self, manager, *args, **kwargs):
+    :param manager: An instance of manager class.
+    :param \*args: Positional arguments (if any).
+    :param \**kwargs: Keyword arguments (if any).
+    """
+
+    def __init__(self, manager: Manager, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> None:
         self.manager = manager
 
-        self.hosts = kwargs.get("hosts") or os.environ.get("CN_COUCHBASE_URL", "localhost")
-        self.user = kwargs.get("user") or get_couchbase_superuser(manager) or get_couchbase_user(manager)
+        self.hosts = str(kwargs.get("hosts", "")) or os.environ.get("CN_COUCHBASE_URL", "localhost")
+        self.user = str(kwargs.get("user", "")) or get_couchbase_superuser(manager) or get_couchbase_user(manager)
 
-        password = kwargs.get("password", "")
+        password = str(kwargs.get("password", ""))
         with contextlib.suppress(FileNotFoundError):
             password = get_couchbase_superuser_password(manager)
-        self.password = password or get_couchbase_password(manager)
+        self.password: str = password or get_couchbase_password(manager)
 
-        self._rest_client = None
-        self._n1ql_client = None
         self.attr_processor = AttrProcessor()
 
-    @property
-    def rest_client(self):
-        """Get instance of :class:`~jans.pycloudlib.persistence.couchbase.RestClient`."""
-        if not self._rest_client:
-            self._rest_client = RestClient(self.hosts, self.user, self.password)
-            self._rest_client.resolve_host()
-            if not self._rest_client.host:
-                raise ValueError(f"Unable to resolve host for data service from {self.hosts} list")
-        return self._rest_client
+    @cached_property
+    def rest_client(self) -> RestApi:
+        """Get instance of :class:`~jans.pycloudlib.persistence.couchbase.RestApi`."""
+        client = RestApi(self.hosts, self.user, self.password)
+        client.resolve_host()
+        if not client.host:
+            raise ValueError(f"Unable to resolve host for data service from {self.hosts} list")
+        return client
 
-    @property
-    def n1ql_client(self):
-        """Get instance of :class:`~jans.pycloudlib.persistence.couchbase.N1qlClient`."""
-        if not self._n1ql_client:
-            self._n1ql_client = N1qlClient(self.hosts, self.user, self.password)
-            self._n1ql_client.resolve_host()
-            if not self._n1ql_client.host:
-                raise ValueError(f"Unable to resolve host for query service from {self.hosts} list")
-        return self._n1ql_client
+    @cached_property
+    def n1ql_client(self) -> N1qlApi:
+        """Get instance of :class:`~jans.pycloudlib.persistence.couchbase.N1qlApi`."""
+        client = N1qlApi(self.hosts, self.user, self.password)
+        client.resolve_host()
+        if not client.host:
+            raise ValueError(f"Unable to resolve host for query service from {self.hosts} list")
+        return client
 
-    def get_buckets(self):
+    def get_buckets(self) -> Response:
         """Get all buckets.
 
-        :returns: An instance of ``requests.models.Response``.
+        :returns: An instance of ``requests.Response``.
         """
-        return self.rest_client.exec_api("pools/default/buckets", method="GET",)
+        kwargs: dict[str, _t.Any] = {"method": "GET"}
+        resp: Response = self.rest_client.exec_api("pools/default/buckets", **kwargs)
+        return resp
 
-    def add_bucket(self, name: str, memsize: int = 100, type_: str = "couchbase"):
+    def add_bucket(self, name: str, memsize: int = 100, type_: str = "couchbase") -> Response:
         r"""Add new bucket.
 
         :param name: Bucket's name.
         :param memsize: Desired memory size of the bucket.
         :param type\_: Bucket's type.
-        :returns: An instance of ``requests.models.Response``.
+        :returns: An instance of ``requests.Response``.
         """
-        return self.rest_client.exec_api(
-            "pools/default/buckets",
-            data={
+        kwargs: dict[str, _t.Any] = {
+            "data": {
                 "name": name,
                 "bucketType": type_,
                 "ramQuotaMB": memsize,
                 "authType": "sasl",
             },
-            method="POST",
-        )
+            "method": "POST",
+        }
+        resp: Response = self.rest_client.exec_api("pools/default/buckets", **kwargs)
+        return resp
 
-    def get_system_info(self) -> dict:
+    def get_system_info(self) -> dict[str, _t.Any]:
         """Get system info of Couchbase server.
 
         :returns: A ``dict`` of system information retrieved from Couchbase server.
         """
         sys_info = {}
-        resp = self.rest_client.exec_api("pools/default", method="GET",)
+        kwargs: dict[str, _t.Any] = {"method": "GET"}
+        resp = self.rest_client.exec_api("pools/default", **kwargs)
 
         if resp.ok:
             sys_info = resp.json()
         return sys_info
 
-    def exec_query(self, query: str, *args, **kwargs):
+    def exec_query(self, query: str, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> Response:
         """Execute N1QL query.
 
         :param query: N1QL query string.
-        :returns: An instance of ``requests.models.Response``.
+        :returns: An instance of ``requests.Response``.
         """
         data = build_n1ql_request_body(query, *args, **kwargs)
-        return self.n1ql_client.exec_api("query/service", data=data)
+        resp: Response = self.n1ql_client.exec_api("query/service", data=data)
+        return resp
 
-    def create_user(self, username, password, fullname, roles):
+    def create_user(self, username: str, password: str, fullname: str, roles: str) -> Response:
         """Create user by making request to REST API."""
-        data = {
-            "name": fullname,
-            "password": password,
-            "roles": roles,
+        kwargs: dict[str, _t.Any] = {
+            "data": {
+                "name": fullname,
+                "password": password,
+                "roles": roles,
+            },
+            "method": "PUT",
         }
-        return self.rest_client.exec_api(
-            f"settings/rbac/users/local/{username}", data=data, method="PUT",
-        )
+        resp: Response = self.rest_client.exec_api(f"settings/rbac/users/local/{username}", **kwargs)
+        return resp
 
-    def get_index_nodes(self):
+    def get_index_nodes(self) -> list[str]:
         """Get list of nodes that has index service."""
-        resp = self.rest_client.exec_api("pools/default", method="GET")
+        kwargs: dict[str, _t.Any] = {"method": "GET"}
+        resp = self.rest_client.exec_api("pools/default", **kwargs)
         if not resp.ok:
             return []
         return [node for node in resp.json()["nodes"] if "index" in node["services"]]
 
-    def _transform_value(self, name, values):
+    def _transform_value(self, name: str, values: _t.Any) -> _t.Any:
         """Transform value from one to another based on its data type.
 
         :param name: Attribute name.
         :param values: Pre-transformed values.
         """
-        def as_dict(val):
-            return json.loads(val)
+        def as_dict(val: _t.Any) -> dict[str, _t.Any]:
+            retval: dict[str, _t.Any] = json.loads(val)
+            return retval
 
-        def as_bool(val):
+        def as_bool(val: _t.Any) -> bool:
             return val.lower() in ("true", "yes", "1", "on")
 
-        def as_int(val):
+        def as_int(val: _t.Any) -> _t.Union[int, _t.Any]:
+            retval = val
             try:
-                val = int(val)
+                retval = int(val)
             except (TypeError, ValueError):
                 pass
-            return val
+            return retval
 
-        def as_datetime(val):
+        def as_datetime(val: _t.Any) -> str:
             if '.' in val:
                 date_format = '%Y%m%d%H%M%S.%fZ'
             else:
@@ -666,14 +680,14 @@ class CouchbaseClient:
         }
 
         type_ = self.attr_processor.get_type(name)
-        callback = callbacks.get(type_)
+        callback: _t.Union[_t.Callable[..., _t.Any], None] = callbacks.get(type_)
 
         # maybe string
         if not callable(callback):
             return values
         return [callback(item) for item in values]
 
-    def _transform_entry(self, entry):
+    def _transform_entry(self, entry: dict[str, _t.Any]) -> dict[str, _t.Any]:
         for k, v in entry.items():
             v = self._transform_value(k, v)
 
@@ -693,7 +707,7 @@ class CouchbaseClient:
             entry[k] = ocs[0]
         return entry
 
-    def create_from_ldif(self, filepath, ctx):
+    def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
         """Create entry with data loaded from an LDIF template file.
 
         :param filepath: Path to LDIF template file.
@@ -731,9 +745,10 @@ class CouchbaseClient:
         :param bucket: Bucket name.
         :param id_: ID of document.
         """
+        kwargs: dict[str, _t.Any] = {"key": id_}
         req = self.exec_query(
             f"SELECT objectClass FROM {bucket} USE KEYS $key",  # nosec: B608
-            key=id_,
+            **kwargs,
         )
 
         if not req.ok:
@@ -752,15 +767,15 @@ class CouchbaseClient:
 
 
 # backward-compat
-def suppress_verification_warning():
+def suppress_verification_warning() -> None:
     """Hide verification warning when using non-secure connection."""
     import urllib3
 
     if as_boolean(os.environ.get("CN_COUCHBASE_SUPPRESS_VERIFICATION", True)):
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type: ignore
 
 
-def get_couchbase_keepalive_interval():
+def get_couchbase_keepalive_interval() -> int:
     """Get keep-alive interval to Couchbase server.
 
     Default keep-alive interval is 30000  milliseconds. To change the value, pass
@@ -777,7 +792,7 @@ def get_couchbase_keepalive_interval():
     return val
 
 
-def get_couchbase_keepalive_timeout():
+def get_couchbase_keepalive_timeout() -> int:
     """Get keep-alive timeout to Couchbase server.
 
     Default keepalive timeout is 2500  milliseconds. To change the value, pass
@@ -794,7 +809,7 @@ def get_couchbase_keepalive_timeout():
     return val
 
 
-def id_from_dn(dn):
+def id_from_dn(dn: str) -> str:
     """Determine document ID based on LDAP's DN.
 
     :param dn: LDAP's DN string.
@@ -808,7 +823,7 @@ def id_from_dn(dn):
     return '_'.join(dns) or "_"
 
 
-def get_bucket_for_key(key):
+def get_bucket_for_key(key: str) -> str:
     """Determine which bucket goes for specific key."""
     bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
