@@ -77,7 +77,7 @@ public class ScopesResource extends ConfigBaseResource {
     public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum,
                                  @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
         log.debug("SCOPES to be fetched - inum = " + inum);
-        Scope scope = scopeService.getScopeByInum(inum, withAssociatedClients);
+        CustomScope scope = scopeService.getScopeByInum(inum, withAssociatedClients);
         checkResourceNotNull(scope, SCOPE);
         return Response.ok(scope).build();
     }
