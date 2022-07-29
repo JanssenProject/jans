@@ -54,12 +54,12 @@ If OpenID Client properties `run_introspection_script_before_access_token_as_jwt
 
 ## Script Type: Python
 
-### [Retrieve Grant, Session and User Details from Access Token](introspection/introspection-custom-parameters/introspection_custom_params.py)
+### [Retrieve Grant, Session and User Details from Access Token](introspection-custom-parameters/introspection_custom_params.py)
 
 The sample code snippet shows how to work backwards from an AccessToken to Grant, Session and User information.
 
 ## Script Type: Java
 
-### [Retrieve Grant, Session and User Details from Access Token](introspection/introspection-custom-parameters/introspection_custom_params.java)
+### [Retrieve Grant, Session and User Details from Access Token](introspection-custom-parameters/introspection_custom_params.java)
 
 The sample code snippet shows how to work backwards from an AccessToken to Grant, Session and User information.
