@@ -2295,6 +2295,12 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: withAssociatedClients
+          description: Also fetch associated clients with scopes.
     post:
       tags:
         - OAuth - Scopes
@@ -2353,6 +2359,12 @@ paths:
         name: inum
         in: path
         required: true
+      - schema:
+          type: boolean
+          default: false
+        in: query
+        name: withAssociatedClients
+        description: Also fetch associated clients with scopes.
     get:
       tags:
         - OAuth - Scopes
