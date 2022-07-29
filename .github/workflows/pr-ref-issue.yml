@@ -18,8 +18,8 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - name: Wait for 5 seconds so that GH can attach issue to the PR if already mentioned by author
-        run: sleep 5s
+      - name: Wait for 15 seconds so that GH can attach issue to the PR if already mentioned by author
+        run: sleep 15s
         shell: bash
       - name: Install dependencies
         run: |
