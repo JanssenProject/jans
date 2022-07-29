@@ -16,19 +16,25 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-
+import org.slf4j.LoggerFactory;
 public class BaseResource {
 
+    private static Logger log = LoggerFactory.getLogger(BaseResource.class);
     // Custom CODE
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
     public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
 
-    @Inject
-    Logger log;
 
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
@@ -45,6 +51,23 @@ public class BaseResource {
     public static void checkNotNull(String[] attributes, String attributeName) {
         if (attributes == null || attributes.length <= 0) {
             throw new BadRequestException(getMissingAttributeError(attributeName));
+        }
+    }
+    
+    public static void checkNotNull(HashMap<String,String> attributeMap) {
+        if (attributeMap.isEmpty()) {
+            return;
+        }
+        
+        Map<String, String> map = (Map<String,String>) attributeMap.entrySet()
+                .stream()
+                .filter(k -> (k.getValue() == null || StringUtils.isNotEmpty(k.getValue())) )
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+               
+        
+        log.debug(" map:{}", map);
+        if(!map.isEmpty()) {
+            throw new BadRequestException(getMissingAttributeError(map.keySet().toString()));
         }
     }
 
