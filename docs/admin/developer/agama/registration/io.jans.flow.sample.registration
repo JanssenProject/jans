@@ -13,6 +13,6 @@ Repeat 3 times max
         RRF "confirmation.ftlh" o
         Finish true
     
-    Log "Error creating user %" o.error
+    Log "Error creating user %: %" o.name o.error
 
 Finish false
