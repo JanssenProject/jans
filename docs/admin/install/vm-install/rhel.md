@@ -1,4 +1,4 @@
-# Install Janssen Server using Enterprise Linux package
+# Install Janssen Server using Enterprise Linux Package
 
 ## Supported versions
 - Red Hat 8
@@ -7,7 +7,11 @@
 !!! note
     SELinux should be disabled
 
-## Steps for installation
+## System Requirements
+
+System should meet [minimum VM system requirements](vm-requirements.md)
+
+## Installation Steps
 
 ```
 yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm

@@ -6,7 +6,7 @@ For this quick start we will use a [single node Kubernetes install in docker wit
     For a more generic setup, use Rancher UI to deploy the setup. For more options please follow this [link](https://rancher.com/docs/rancher/v2.6/en/installation/).
 
 
-## Steps for Installation
+## Installation Steps
 
 1. Provision a Linux 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Save the VM IP address. For development environments, the VM can be set up using VMWare Workstation Player or VirtualBox with Ubuntu 20.0.4 operating system running on VM.
 2. Install [Docker](https://docs.docker.com/engine/install/).

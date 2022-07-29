@@ -1,4 +1,4 @@
-# VM system requirements
+# VM System Requirements
 
 Janssen Server needs below-mentioned minimal resources on VM.
 

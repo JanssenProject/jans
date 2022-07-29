@@ -1,16 +1,17 @@
-# Install Janssen Server using dynamic download
+# Install Janssen Server using Dynamic Download
+
+Dynamic download installs the latest development version of Janssen Server. This installation method is suitable for setting up development environments.
 
 ## System Requirements
-- 4 GB RAM
-- 2 CPU
-- 20 GB Disk
 
-## Supported Linux distributions
+System should meet [minimum VM system requirements](vm-requirements.md)
+
+## Supported Linux Distributions
 - Enterprise Linux 8 (CentOS 8 and Red Hat 8)
 - Ubuntu 20
 - SUSE 15
 
-## Steps for installation
+## Installation Steps
 
 1. Download installer
 ```

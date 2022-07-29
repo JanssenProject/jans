@@ -1,4 +1,4 @@
-# Install Janssen Server using SUSE Linux package
+# Install Janssen Server using SUSE Linux Package
 
 ## Supported versions
 - SUSE 15
@@ -6,7 +6,11 @@
 !!! note
     SELinux should be disabled
 
-## Steps for installation
+## System Requirements
+
+System should meet [minimum VM system requirements](vm-requirements.md)
+
+## Installation Steps
 
 ```
 zypper install curl

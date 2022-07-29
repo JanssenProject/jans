@@ -8,7 +8,7 @@ For local deployments like `minikube` and `MicroK8s` or cloud installations in d
 - 4 CPU cores
 - 50GB hard-disk
 
-Use the listing below for detailed estimation of minimum required resources. The able contains default recommended resources to start with per service. Depending on the use of each service the resources may be increased or decreased.
+Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may be increase or decrease.
 
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
 | ----------------- | -------- | ----- | ---------- | -------------- | ---------------------------------- |
@@ -25,7 +25,7 @@ Use the listing below for detailed estimation of minimum required resources. The
 
 Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
-## Steps for Installation
+## Installation Steps
 
 Start a fresh ubuntu `18.04` or `20.04` 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Then execute the following
 

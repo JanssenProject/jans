@@ -1,12 +1,16 @@
-# Install Janssen Server using Ubuntu Linux package
+# Install Janssen Server using Ubuntu Linux Package
 
-## Supported versions
+## Supported Versions
 - Ubuntu 20.04
 
 !!! note
     SELinux should be disabled
 
-## Steps for installation
+## System Requirements
+
+System should meet [minimum VM system requirements](vm-requirements.md)
+
+## Installation Steps
 
 ```
 apt install wget curl
