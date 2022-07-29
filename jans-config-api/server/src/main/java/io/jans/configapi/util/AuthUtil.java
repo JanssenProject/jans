@@ -8,6 +8,7 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -89,6 +90,11 @@ public class AuthUtil {
     public List<String> getUserMandatoryAttributes() {
         return this.configurationFactory.getApiAppConfiguration().getUserMandatoryAttributes();
     }
+    
+    public AgamaConfiguration getAgamaConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getAgamaConfiguration();
+    }
+
 
     public String getTokenUrl() {
         return this.configurationService.find().getTokenEndpoint();
