@@ -6853,6 +6853,13 @@ components:
         useLocalCache:
           type: boolean
           description: Boolean value specifying whether to enable local in-memory cache.
+        bulkMaxOperations:
+          type: integer
+          description: Specifies maximum bulk operations.
+        bulkMaxPayloadSize:
+          type: integer
+          format: int64
+          description: Specifies maximum payload size of bulk operations.
   
     Organization:
       type: object
