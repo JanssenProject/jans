@@ -105,7 +105,7 @@ public class TokenRestWebServiceValidator {
         return builder.build();
     }
 
-    private Response.ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
+    public Response.ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
