@@ -130,7 +130,7 @@ Source code [here](./otp-email-registration/io.jans.flow.sample.otp.emailWithReg
 
 This flow is short and powerful. To start it launches the [email OTP authentication](#email-otp-authentication) flow (line 4). However, instead of the `login.ftlh` template used internally by the basic flow, a different version is used (line 5). The new template is located in this flow's basepath, i.e. `samples/otp-email-registration`, and the file name does not change.
 
-This new page simply adds a small link that reads "Don't have an account?" in a new HTML form. When clicked it will provoke the email-OTP flow to be aborted early and the condition at line 8 will be truthy. If that's not the case, the email-OTP flow will proceed as usual and the current flow will finish in the same way as email-OTP (line 16).
+This new page simply adds a small link that reads "Don't have an account?" in a new HTML form. When clicked it will provoke the email-OTP flow to be aborted early and the condition at line 7 will be truthy. If that's not the case, the email-OTP flow will proceed as usual and the current flow will finish in the same way as email-OTP (line 16).
 
 If email-OTP is aborted, the [registration flow](#registration) that we just saw is launched (line 9). Here the template `confirmation.ftlh` is overriden too (line 10). This new page changes the label of the button that is shown after an account has been created: originally the text is "Continue" but for the current flow, "Proceed to login" is a better fit.
 
