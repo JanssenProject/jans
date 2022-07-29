@@ -42,11 +42,6 @@
 			<artifactId>jans-scim-client</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
-				<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-scim-service</artifactId>
-			<version>${jans.version}</version>
-		</dependency>
 
 		<!-- Microprofile -->
 		<dependency>
