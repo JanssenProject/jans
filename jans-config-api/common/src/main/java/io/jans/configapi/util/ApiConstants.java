@@ -75,7 +75,7 @@ public class ApiConstants {
     public static final String SERVER_STAT = "/server-stat";
     public static final String USERNAME_PATH = "/{username}";
     public static final String CLIENTID_PATH = "/{clientId}";
-	public static final String AGAMA = "/agama";
+    public static final String AGAMA = "/agama";
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
     public static final String QNAME = "qname";
@@ -83,6 +83,7 @@ public class ApiConstants {
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
     public static final String PATTERN = "pattern";
+    public static final String WITH_ASSOCIATED_CLIENTS = "withAssociatedClients";
     public static final String STATUS = "status";
     public static final String INUM = "inum";
     public static final String ID = "id";

@@ -69,6 +69,10 @@ public class UmaResourceService {
         return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, null, sizeLimit);
     }
 
+    public List<UmaResource> getAllResources() {
+        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, null);
+    }
+
     public void addResource(UmaResource resource) {
         persistenceEntryManager.persist(resource);
     }
