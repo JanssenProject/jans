@@ -553,7 +553,7 @@
 
 			<!-- Jython -->
 			<dependency>
-				<groupId>org.gluufederation</groupId>
+				<groupId>io.jans</groupId>
 				<artifactId>jython-standalone</artifactId>
 				<version>2.7.3</version>
 			</dependency>

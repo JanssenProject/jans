@@ -476,7 +476,7 @@
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>org.gluufederation</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
@@ -991,12 +991,13 @@
 				</repository>
 			</repositories>
 			<dependencies>
+<!--
 				<dependency>
-					<groupId>com.notnoop.apns</groupId>
-					<artifactId>apns</artifactId>
-					<version>1.0.0.Beta6</version>
-					<scope>compile</scope>
+				    <groupId>com.eatthepath</groupId>
+				    <artifactId>pushy</artifactId>
+				    <version>0.15.1</version>
 				</dependency>
+-->
 				<dependency>
 					<groupId>com.google.gcm</groupId>
 					<artifactId>gcm-server</artifactId>
