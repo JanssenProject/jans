@@ -76,6 +76,7 @@ Use [config/production.js](https://github.com/GluuFederation/tutorials/blob/mast
 | saltFile | Just a text file with random text. After Janssen server installation you will get the salt file at `/etc/jans/conf/salt`. Use this same file, during verification Janssen, uses the same salt file. It is used to encrypt user data that is inside jwt. Check [server/routes.js:L175](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/server/routes.js#L175) for details and implementation. |
 | postProfileEndpoint | `Format: https://<your.jans.server.com>/jans-auth/postlogin.htm`, After getting user info passport sends user jwt to this endpoint for further auth flow. |
 | failureRedirectUrl | `Format: https://<your.jans.server.com>/jans-auth/auth/passport/passportlogin.htm`, Once anything fails at the passport side then it will redirect to failureRedirectUrl with an error message. |
+| loggingDirPath | Default is `./logs/` means you will find logs in your current Passport-JS project folder. |
 
 check [config/production.js](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/config/production.js) for other application configurations.
 
