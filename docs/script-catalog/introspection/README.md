@@ -17,12 +17,7 @@ In order to be run and Introspection script should be associated with an OpenID 
 
 ### Methods
 
-The introspection interception script extends the base script type with the methods:-
-- `init`, 
-- `destroy`
-- `getApiVersion` 
-
-It also adds the `modifyResponse` method.
+The introspection interception script extends the base script type with the methods -
 
 | Method | Method description |
 |:-----|:------|
@@ -31,7 +26,10 @@ It also adds the `modifyResponse` method.
 | `def getApiVersion(self, configurationAttributes, customScript)` | **Inherited Method** The `getApiVersion` method allows API changes in order to do transparent migration from an old script to a new API. **NOTE**: - Only include the customScript variable if the value for `getApiVersion` is greater than 10 |
 | `def modifyResponse(self, responseAsJsonObject, context)` | This method is called after the introspection response is ready. This method can modify the introspection response.<br/>`responseAsJsonObject` is `org.codehaus.jettison.json.JSONObject`<br/> `context` is `io.jans.as.service.external.context.ExternalIntrospectionContext` |
 
-The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomProperty>`.
+The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomProperty>`. 
+
+    configurationAttributes = new HashMap<String, SimpleCustomProperty>();
+    configurationAttributes.put("Location Type", new SimpleCustomProperty("location_type", "ldap", "Storage Location for the script"));
 
 ### Snippet
 
