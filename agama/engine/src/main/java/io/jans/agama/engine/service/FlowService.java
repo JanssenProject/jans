@@ -3,6 +3,7 @@ package io.jans.agama.engine.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jdi.InvalidTypeException;
 
 import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.engine.continuation.PendingException;
@@ -43,6 +44,7 @@ import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
 import org.slf4j.Logger;
 
 @RequestScoped
@@ -113,7 +115,8 @@ public class FlowService {
                 parentsMappings = status.getParentsMappings();
 
                 Object[] params = getFuncParams(fl, status.getJsonInput());
-                NativeObject result = (NativeObject) scriptCtx.callFunctionWithContinuations(f, globalScope, params);                
+                Object val = scriptCtx.callFunctionWithContinuations(f, globalScope, params);
+                NativeObject result = checkJSReturnedValue(val);                
                 finishFlow(result, status);
                 
             } catch (ContinuationPending pe) {
@@ -152,8 +155,9 @@ public class FlowService {
                 logger.debug("Resuming flow");
                 parentsMappings = status.getParentsMappings();
 
-                NativeObject result = (NativeObject) scriptCtx.resumeContinuation(pcont.getSecond(), 
+                Object val = scriptCtx.resumeContinuation(pcont.getSecond(), 
                         globalScope, new Pair<>(cancelUrl, jsonParameters));
+                NativeObject result = checkJSReturnedValue(val);
                 finishFlow(result, status);
 
             } catch (ContinuationPending pe) {
@@ -346,6 +350,19 @@ public class FlowService {
         
     }
     
+    private NativeObject checkJSReturnedValue(Object obj) throws InvalidTypeException {
+
+        try {
+            //obj is not null
+            return NativeObject.class.cast(obj);
+        } catch (ClassCastException e) {
+            if (Undefined.isUndefined(obj)) {
+                throw new InvalidTypeException("No Finish instruction was reached");
+            } else throw e;
+        }
+
+    }
+
     private void makeCrashException(Exception e) throws FlowCrashException {
 
         String msg;

@@ -82,6 +82,7 @@ try {
         _it = "${.node.qname}"
     </#if>
 _it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
+if (_it === undefined) return
 if (_it.bubbleUp) return _it.value 
     <@util_preassign node=.node /> _it.value
 </#macro>
