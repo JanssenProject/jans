@@ -189,93 +189,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             }
 
             if (gt == GrantType.REFRESH_TOKEN) {
-                AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
-                tokenRestWebServiceValidator.validateGrant(authorizationGrant, client, refreshToken, auditLog);
-
-                final RefreshToken refreshTokenObject = authorizationGrant.getRefreshToken(refreshToken);
-                if (refreshTokenObject == null || !refreshTokenObject.isValid()) {
-                    log.trace("Invalid refresh token.");
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find refresh token or otherwise token type or client does not match."), auditLog);
-                }
-
-                executionContext.setGrant(authorizationGrant);
-
-                // The authorization server MAY issue a new refresh token, in which case
-                // the client MUST discard the old refresh token and replace it with the new refresh token.
-                RefreshToken reToken = null;
-                if (isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
-                    if (isTrue(appConfiguration.getRefreshTokenExtendLifetimeOnRotation())) {
-                        reToken = createRefreshToken(request, client, scope, authorizationGrant, dpopStr); // extend lifetime
-                    } else {
-                        log.trace("Create refresh token with fixed (not extended) lifetime taken from previous refresh token.");
-
-                        reToken = authorizationGrant.createRefreshToken(executionContext, refreshTokenObject.getExpirationDate()); // do not extend lifetime
-                    }
-                }
-
-                scope = authorizationGrant.checkScopesPolicy(scope);
-
-                AccessToken accToken = authorizationGrant.createAccessToken(executionContext); // create token after scopes are checked
-
-                IdToken idToken = null;
-                if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && authorizationGrant.getScopes().contains(OPENID)) {
-                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                            appConfiguration.getLegacyIdTokenClaims());
-
-                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, authorizationGrant, client, appConfiguration, attributeService);
-                    context.setExecutionContext(executionContext);
-
-                    executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
-                    executionContext.setPreProcessing(idTokenPreProcessing);
-                    executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
-
-                    idToken = authorizationGrant.createIdToken(
-                            null, null, accToken, null, null, executionContext);
-                }
-
-                if (reToken != null && refreshToken != null) {
-                    grantService.removeByCode(refreshToken); // remove refresh token after access token and id_token is created.
-                }
-
-                auditLog.updateOAuth2AuditLog(authorizationGrant, true);
-
-                return response(Response.ok().entity(getJSonResponse(accToken,
-                        accToken.getTokenType(),
-                        accToken.getExpiresIn(),
-                        reToken,
-                        scope,
-                        idToken)), auditLog);
+                return processRefreshTokenGrant(scope, refreshToken, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
-                ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
-
-                scope = clientCredentialsGrant.checkScopesPolicy(scope);
-
-                executionContext.setGrant(clientCredentialsGrant);
-                AccessToken accessToken = clientCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
-
-                IdToken idToken = null;
-                if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && clientCredentialsGrant.getScopes().contains(OPENID)) {
-                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                            appConfiguration.getLegacyIdTokenClaims());
-
-                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, clientCredentialsGrant, client, appConfiguration, attributeService);
-
-                    executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
-                    executionContext.setPreProcessing(idTokenPreProcessing);
-                    executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
-
-                    idToken = clientCredentialsGrant.createIdToken(
-                            null, null, null, null, null, executionContext);
-                }
-
-                auditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
-
-                return response(Response.ok().entity(getJSonResponse(accessToken,
-                        accessToken.getTokenType(),
-                        accessToken.getExpiresIn(),
-                        null,
-                        scope,
-                        idToken)), auditLog);
+                return processClientGredentials(scope, request, auditLog, client, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
                 boolean authenticated = false;
                 User user = null;
@@ -294,6 +210,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 if (user != null) {
                     ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
+                    executionContext.setGrant(resourceOwnerPasswordCredentialsGrant);
+
                     SessionId sessionId = identity.getSessionId();
                     if (sessionId != null) {
                         resourceOwnerPasswordCredentialsGrant.setAcrValues(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
@@ -307,12 +225,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         }
                     }
 
-
-                    RefreshToken reToken = createRefreshToken(request, client, scope, resourceOwnerPasswordCredentialsGrant, null);
+                    RefreshToken reToken = createRefreshToken(executionContext, scope);
 
                     scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
 
-                    executionContext.setGrant(resourceOwnerPasswordCredentialsGrant);
                     AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
 
                     IdToken idToken = null;
@@ -359,7 +275,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                             cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
                         if (!cibaGrant.isTokensDelivered()) {
-                            RefreshToken refToken = createRefreshToken(request, client, scope, cibaGrant, null);
+                            RefreshToken refToken = createRefreshToken(executionContext, scope);
                             AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
 
                             ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, cibaGrant, client, appConfiguration, attributeService);
@@ -436,7 +352,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
                 }
             } else if (gt == GrantType.DEVICE_CODE) {
-                return processDeviceCodeGrantType(client, deviceCode, scope, request, response, auditLog);
+                return processDeviceCodeGrantType(executionContext, deviceCode, scope);
             }
         } catch (WebApplicationException e) {
             throw e;
@@ -448,11 +364,104 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         throw new WebApplicationException(tokenRestWebServiceValidator.error(400, TokenErrorResponseType.UNSUPPORTED_GRANT_TYPE, "Unsupported Grant Type.").build());
     }
 
+    private Response processClientGredentials(String scope, HttpServletRequest request, OAuth2AuditLog auditLog, Client client, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
+        ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
+
+        scope = clientCredentialsGrant.checkScopesPolicy(scope);
+
+        executionContext.setGrant(clientCredentialsGrant);
+        AccessToken accessToken = clientCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
+
+        IdToken idToken = null;
+        if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && clientCredentialsGrant.getScopes().contains(OPENID)) {
+            boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                    appConfiguration.getLegacyIdTokenClaims());
+
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, clientCredentialsGrant, client, appConfiguration, attributeService);
+
+            executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
+            executionContext.setPreProcessing(idTokenPreProcessing);
+            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+
+            idToken = clientCredentialsGrant.createIdToken(
+                    null, null, null, null, null, executionContext);
+        }
+
+        auditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
+
+        return response(Response.ok().entity(getJSonResponse(accessToken,
+                accessToken.getTokenType(),
+                accessToken.getExpiresIn(),
+                null,
+                scope,
+                idToken)), auditLog);
+    }
+
+    private Response processRefreshTokenGrant(String scope, String refreshToken, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
+        final Client client = executionContext.getClient();
+        final OAuth2AuditLog auditLog = executionContext.getAuditLog();
+
+        AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
+        tokenRestWebServiceValidator.validateGrant(authorizationGrant, client, refreshToken, auditLog);
+
+        final RefreshToken refreshTokenObject = authorizationGrant.getRefreshToken(refreshToken);
+        tokenRestWebServiceValidator.validateRefreshToken(refreshTokenObject, auditLog);
+
+        executionContext.setGrant(authorizationGrant);
+
+        // The authorization server MAY issue a new refresh token, in which case
+        // the client MUST discard the old refresh token and replace it with the new refresh token.
+        RefreshToken reToken = null;
+        if (isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
+            if (isTrue(appConfiguration.getRefreshTokenExtendLifetimeOnRotation())) {
+                reToken = createRefreshToken(executionContext, scope); // extend lifetime
+            } else {
+                log.trace("Create refresh token with fixed (not extended) lifetime taken from previous refresh token.");
+
+                reToken = authorizationGrant.createRefreshToken(executionContext, refreshTokenObject.getExpirationDate()); // do not extend lifetime
+            }
+        }
+
+        scope = authorizationGrant.checkScopesPolicy(scope);
+
+        AccessToken accToken = authorizationGrant.createAccessToken(executionContext); // create token after scopes are checked
+
+        IdToken idToken = null;
+        if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && authorizationGrant.getScopes().contains(OPENID)) {
+            boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                    appConfiguration.getLegacyIdTokenClaims());
+
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), authorizationGrant, client, appConfiguration, attributeService);
+            context.setExecutionContext(executionContext);
+
+            executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
+            executionContext.setPreProcessing(idTokenPreProcessing);
+            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+
+            idToken = authorizationGrant.createIdToken(
+                    null, null, accToken, null, null, executionContext);
+        }
+
+        if (reToken != null && refreshToken != null) {
+            grantService.removeByCode(refreshToken); // remove refresh token after access token and id_token is created.
+        }
+
+        auditLog.updateOAuth2AuditLog(authorizationGrant, true);
+
+        return response(Response.ok().entity(getJSonResponse(accToken,
+                accToken.getTokenType(),
+                accToken.getExpiresIn(),
+                reToken,
+                scope,
+                idToken)), auditLog);
+    }
+
     private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, ExecutionContext executionContext) {
         Client client = executionContext.getClient();
 
         log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
         final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
+        executionContext.setGrant(authorizationCodeGrant);
         log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
 
         // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
@@ -462,11 +471,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
         authorizationCodeGrant.save();
 
-        RefreshToken reToken = createRefreshToken(executionContext.getHttpRequest(), client, scope, authorizationCodeGrant, executionContext.getDpop());
+        RefreshToken reToken = createRefreshToken(executionContext, scope);
 
         scope = authorizationCodeGrant.checkScopesPolicy(scope);
 
-        executionContext.setGrant(authorizationCodeGrant);
         AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
 
         IdToken idToken = null;
@@ -546,21 +554,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     @Nullable
-    private RefreshToken createRefreshToken(@NotNull HttpServletRequest request, @NotNull Client client, @NotNull String scope, @NotNull AuthorizationGrant grant, String dpop) {
-        if (!isRefreshTokenAllowed(client, scope, grant)) {
+    private RefreshToken createRefreshToken(@NotNull ExecutionContext executionContext, @NotNull String scope) {
+        final AuthorizationGrant grant = executionContext.getGrant();
+        if (!isRefreshTokenAllowed(executionContext.getClient(), scope, grant)) {
             return null;
         }
 
         checkUser(grant);
 
-        ExecutionContext executionContext = new ExecutionContext(request, null);
-        executionContext.setGrant(grant);
-        executionContext.setClient(client);
-        executionContext.setAttributeService(attributeService);
-        executionContext.setAppConfiguration(appConfiguration);
-        executionContext.setDpop(dpop);
+        final ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), grant, executionContext.getClient(), appConfiguration, attributeService);
+        context.setExecutionContext(executionContext);
 
-        final ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, grant, client, appConfiguration, attributeService);
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
         if (refreshTokenLifetimeInSeconds > 0) {
             return grant.createRefreshToken(executionContext, refreshTokenLifetimeInSeconds);
@@ -571,37 +575,28 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     /**
      * Processes token request for device code grant type.
      *
-     * @param client         Client in process.
+     * @param executionContext Execution context
      * @param deviceCode     Device code generated in device authn request.
      * @param scope          Scope registered in device authn request.
-     * @param request        HttpServletRequest
-     * @param response       HttpServletResponse
-     * @param auditLog OAuth2AuditLog
      */
-    private Response processDeviceCodeGrantType(final Client client, final String deviceCode,
-                                                String scope, final HttpServletRequest request,
-                                                final HttpServletResponse response, final OAuth2AuditLog auditLog) {
+    private Response processDeviceCodeGrantType(ExecutionContext executionContext, final String deviceCode, String scope) {
         log.debug("Attempting to find authorizationGrant by deviceCode: '{}'", deviceCode);
+        final Client client = executionContext.getClient();
         final DeviceCodeGrant deviceCodeGrant = authorizationGrantList.getDeviceCodeGrant(deviceCode);
+        executionContext.setGrant(deviceCodeGrant);
 
         log.trace("DeviceCodeGrant : '{}'", deviceCodeGrant);
 
         if (deviceCodeGrant != null) {
             if (!deviceCodeGrant.getClientId().equals(client.getClientId())) {
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), auditLog));
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), executionContext.getAuditLog()));
             }
-            RefreshToken refToken = createRefreshToken(request, client, scope, deviceCodeGrant, null);
 
-            final ExecutionContext executionContext = new ExecutionContext(request, response);
-            executionContext.setGrant(deviceCodeGrant);
-            executionContext.setCertAsPem(request.getHeader(X_CLIENTCERT));
-            executionContext.setClient(client);
-            executionContext.setAppConfiguration(appConfiguration);
-            executionContext.setAttributeService(attributeService);
+            RefreshToken refToken = createRefreshToken(executionContext, scope);
 
             AccessToken accessToken = deviceCodeGrant.createAccessToken(executionContext);
 
-            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, deviceCodeGrant, client, appConfiguration, attributeService);
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), deviceCodeGrant, client, appConfiguration, attributeService);
             context.setExecutionContext(executionContext);
 
 
@@ -616,7 +611,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
-            auditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
+            executionContext.getAuditLog().updateOAuth2AuditLog(deviceCodeGrant, true);
 
             grantService.removeByCode(deviceCodeGrant.getDeviceCode());
 
@@ -625,7 +620,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         } else {
             final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);
             log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);
-            tokenRestWebServiceValidator.validateDeviceAuthorization(client, deviceCode, cacheData, auditLog);
+            tokenRestWebServiceValidator.validateDeviceAuthorization(client, deviceCode, cacheData, executionContext.getAuditLog());
 
             long currentTime = new Date().getTime();
             Long lastAccess = cacheData.getLastAccessControl();
@@ -641,18 +636,18 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 if (timeFromLastAccess > intervalSeconds * 1000) {
                     log.debug("Access hasn't been granted yet for deviceCode: '{}'", deviceCode);
-                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), auditLog));
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), executionContext.getAuditLog()));
                 } else {
                     log.debug("Slow down protection deviceCode: '{}'", deviceCode);
-                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), auditLog));
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), executionContext.getAuditLog()));
                 }
             }
             if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
                 log.debug("The end-user denied the authorization request for deviceCode: '{}'", deviceCode);
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), auditLog));
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), executionContext.getAuditLog()));
             }
             log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
-            throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), auditLog));
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), executionContext.getAuditLog()));
         }
     }
 
