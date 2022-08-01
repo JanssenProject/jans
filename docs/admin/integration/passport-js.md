@@ -2,35 +2,23 @@
 
 The [Janssen](https://github.com/JanssenProject/jans) platform provides the facility to make a fully customizable authentication flow. In these docs, We will guide you on user authentication at external Social Providers by using Passport-JS(a.k.a "inbound identity").
 
-The integration consists of custom authentication scripts and web pages for Janssen server, and the Passport Node.js application. Together, these assets coordinate the flows and interfaces required to configure the Janssen Server to support inbound identity with a range of external social providers e.g. Google, Apple, Facebook, etc.
+The integration consists of custom authentication scripts, web pages for Janssen server, and the Passport Node.js application. Together, these assets coordinate the flows and interfaces required to configure the Janssen Server to support inbound identity with a range of external social providers e.g. Google, Apple, Facebook, etc.
 
-# Table of contents
+# Components
 
-- [What is Inbound identity?](#what-is-inbound-identity)
-- [Prerequisites](#prerequisites)
-- [How does passport pass user-data securely to the janssen server?](#how-does-a-passport-pass-user-data-securely-to-the-janssen-server)
-- [Setup and configurations](#setup-and-configurations)
-  - [Setup Passport JS Project](#setup-passport-js-project)
-  - [Apache proxy setup](#apache-proxy-setup)
-  - [Add passport-social script](#add-passport-social-script)
-  - [Generate Keystore](#generate-keystore)
-- [Testing at RP application](#testing-at-rp-application)
+Below are the key Components of this inbound identity flow:
 
-# What is Inbound identity?
+- A Janssen auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))
+- The [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py)
+- The [Passport JS Project](https://github.com/GluuFederation/tutorials/tree/master/oidc-sso-tutorials/code/node/jans-passport)
 
-You can add any external social login options(e.g. google, facebook), authentications, and add authenticated users to your Janssen server.
+# Authentication Flow
+
+User authenticate at external social provider, get back to Janssen server, user verification, and add authenticated user to Janssen server. `RP(Relying party)` application is your end-user application that will be used by your users and where you want to add this auth feature.
 
 ![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/181759293-ed5457f4-0089-4c69-9184-7ab2c5353152.png)
 
 [sequencediagram.org source file is here](https://github.com/GluuFederation/tutorials/files/9219902/inbound-identity-sequence.txt)
-
-# Prerequisites
-
-- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))
-- The [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py)
-- The [Passport JS Project](https://github.com/GluuFederation/tutorials/tree/master/oidc-sso-tutorials/code/node/jans-passport)
-- External Social Provider credentials: we are going to integrate google as an external provider so create credentials from [google developer portal](https://console.developers.google.com/apis/credentials)
-- RP application: This is your application that will be used by your users and where you want to add this auth feature. 
 
 # How does a passport pass user data securely to the Janssen server?
 
