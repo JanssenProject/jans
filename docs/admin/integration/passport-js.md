@@ -201,6 +201,10 @@ The custom script has the following properties:
 
 > Note: Once you initiate auth request from your RP Application make sure to add `acr_values=passport-social` in the request. acr_values is your script name.
 
+## Customize login pages 
+
+`Passport-social` script uses `passportlogin.xhtml` and `passportpostlogin.xhtml` which are already comes which Janssen installation. No need to do anything. For UI Customization, you can download current page source code from [here](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth/passport), modify UI, replace pages at path `/opt/jans/jetty/jans-auth/custom/pages/auth/passport/` and restart `jans-auth` server.
+
 ## Generate Keystore
 
 passport sends private key sign user data jwt to janssen server, for that we need to generate Keystore. keystore is a safe and passport-protected private key container. Use the below commands:
