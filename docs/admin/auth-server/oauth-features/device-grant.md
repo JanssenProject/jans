@@ -233,3 +233,6 @@ Server: Jetty(9.4.19.v20190610)
 
 **Other errors**
 This token endpoint can return any error code already defined, for example whether client can't be authenticated or the grant type sent is invalid. Some of them could be: `invalid_client`, `invalid_grant`, `invalid_request` and others.
+
+### Customizing Device Grant page
+More about customising [this page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml)  to include your organization's stylesheets, images and content in this [article](https://jans.io/docs/developer/customization/customize-web-pages.md)
