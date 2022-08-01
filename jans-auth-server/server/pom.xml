@@ -289,6 +289,12 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-common</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- persistence model -->
 		<dependency>
@@ -309,10 +315,22 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-util</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -325,10 +343,22 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-server</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -612,7 +642,6 @@
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
 			<artifactId>arquillian-container-test-impl-base</artifactId>
-			<version>${arquillian.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -641,7 +670,6 @@
 		<dependency>
 			<groupId>org.jboss.arquillian.protocol</groupId>
 			<artifactId>arquillian-protocol-servlet</artifactId>
-			<version>${arquillian.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 

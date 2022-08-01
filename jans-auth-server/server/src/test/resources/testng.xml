@@ -25,7 +25,7 @@
         </classes>
     </test>
 
-	<!-- Application Type Restriction (embedded) -->
+<!--	 Application Type Restriction (embedded) -->
 	<test name="Application Type Restriction (embedded)" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ApplicationTypeRestrictionEmbeddedTest" />
@@ -162,7 +162,7 @@
 		</classes>
 	</test>
 
-	<!-- Signature test -->
+<!--	 Signature test-->
 	<test name="Signature test (embedded)" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.comp.SignatureTest" />

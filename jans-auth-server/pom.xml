@@ -52,6 +52,8 @@
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<weld.version>4.0.3.Final</weld.version>
+		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 	</properties>
 
 	<prerequisites>
@@ -120,6 +122,15 @@
                 <artifactId>hll</artifactId>
                 <version>1.6.0</version>
             </dependency>
+
+			<!-- Weld -->
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core-parent</artifactId>
+				<version>${weld.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
 
          	<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
 			<dependency>
@@ -374,6 +385,11 @@
 				<artifactId>swagger-annotations</artifactId>
 				<version>${swagger.version}</version>
 	            <scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-client-microprofile</artifactId>
+				<version>${org.jboss.resteasy.client.microprofile.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -29,7 +29,7 @@ public class UmaConfigurationWSTest extends BaseTest {
     @Parameters({"umaConfigurationPath"})
     @Test
     public void configurationPresence(final String umaConfigurationPath) throws Exception {
-        final UmaMetadata c = TUma.requestConfiguration(url, umaConfigurationPath);
+        final UmaMetadata c = TUma.requestConfiguration(getApiTagetURI(url), umaConfigurationPath);
         UmaTestUtil.assertIt(c);
     }
 }
