@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -155,10 +156,9 @@ public class ScriptUtils {
     public static boolean pathMatching(String url, Collection<String> paths) {
         
         LOG.trace("Matching {} to any of {}", url, paths);
-        java.util.function.Function<String, String> unsuffixed = 
-                s -> s.substring(0, s.lastIndexOf("."));
+        UnaryOperator<String> unsuffixed = s -> s.substring(0, s.lastIndexOf("."));
 
-        String path = unsuffixed.apply(url);;        
+        String path = unsuffixed.apply(url);
         return paths.stream().map(unsuffixed).anyMatch(path::equals);
         
     }
@@ -187,7 +187,7 @@ public class ScriptUtils {
             name = cls.getSimpleName();
         }
         return name;
-        
+
     }
 
 }
