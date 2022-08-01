@@ -16,9 +16,9 @@ Below are the key Components of this inbound identity flow:
 
 User authenticate at external social provider, get back to Janssen server, user verification, and add authenticated user to Janssen server. `RP(Relying party)` application is your end-user application that will be used by your users and where you want to add this auth feature.
 
-![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/182106547-7082409c-2567-4b7c-89a3-72eb655fc22a.png)
+[Diagram source file](https://github.com/GluuFederation/tutorials/files/9219902/inbound-identity-sequence.txt)
 
-[sequencediagram.org source file is here](https://github.com/GluuFederation/tutorials/files/9219902/inbound-identity-sequence.txt)
+![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/182106547-7082409c-2567-4b7c-89a3-72eb655fc22a.png)
 
 # How does a passport pass user data securely to the Janssen server?
 
@@ -26,7 +26,7 @@ In the below flow diagram you can see how the passport-js project encrypts and s
 
 On the Janssen server side the verification of jwt, decryption of data, add/update user into LDAP, and authenticate user, all these things happen in [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py). You can check logic and flow in [the script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py).
 
-[sequencediagram.org source file is here](https://github.com/GluuFederation/tutorials/files/9219915/passport-data-sequence.txt)
+[Diagram source file](https://github.com/GluuFederation/tutorials/files/9219915/passport-data-sequence.txt)
 
 ![jans-passport-data](https://user-images.githubusercontent.com/39133739/181759914-a89bb296-fd98-4856-a611-567b68593a07.png)
 
