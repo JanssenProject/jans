@@ -22,7 +22,7 @@ User authenticate at external social provider, get back to Janssen server, user 
 
 # How does a passport pass user data securely to the Janssen server?
 
-In the below flow diagram you can see how the passport encrypts and sign the user data and pass it to the Janssen server.
+In the below flow diagram you can see how the passport-js project encrypts and sign the user data and pass it to the Janssen server.
 
 On the Janssen server side the verification of jwt, decryption of data, add/update user into LDAP, and authenticate user, all these things happen in [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py). You can check logic and flow in [the script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py).
 
@@ -62,7 +62,7 @@ pm2 stop <id>
 pm2 restart <id>
 ```
 
-### passport configurations
+## Passport-JS Project configurations
 
 Use [config/production.js](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/config/production.js) for configurations.
 
@@ -79,7 +79,7 @@ Use [config/production.js](https://github.com/GluuFederation/tutorials/blob/mast
 
 check [config/production.js](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/config/production.js) for other application configurations.
 
-### External Social Provider configurations
+## External Social Provider configurations
 
 It is an array of JSON objects. Each object will be your provider. We are using [Passport-JS](https://www.passportjs.org/). Below is the sample for google, apple, and Facebook as external social providers.
 
@@ -151,9 +151,9 @@ It is an array of JSON objects. Each object will be your provider. We are using 
 | emailLinkingSafe | It is not required to be `true`. If you want to link to existing users then set it to true |
 | options | For social provider you just need to set two-property inside `options` i.e. `clientID` and `clientSecret`. In `apple` case few more properties. you can check [strategies documents](https://www.passportjs.org/packages/) for extra options. |
 
-### Strategies and configurations
+## Passport-JS Strategies and configurations
 
-Below strategies are already available in the passport.
+Below strategies are already available in the Passport-JS project.
 
 | Provider | Strategy Id | Mapping |
 |----------|-------------|---------|
@@ -185,7 +185,8 @@ Now you will understand why we have `jans-fqdn` in passport provider callback UR
 ## Add passport-social script
 
 Download the script from [here](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py) and add it to Janssen Server using `jans-cli`. After Janssen Server installation, you will get `jans-cli`. 
-Follow the [instructions here](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) to add a custom script in Janssen.
+
+Follow [this jans-cli guide](https://jans.io/docs/config-guide/jans-cli/im/im-custom-scripts/) to add a custom script in Janssen.
 
 The custom script has the following properties:
 
@@ -194,9 +195,6 @@ The custom script has the following properties:
 | key_store_file | Keystore file path. Use [these instructions](#generate-keystore) to create a keystore. |
 | key_store_password | Keystore file secret password |
 | providers_json_file | Provider JSON file which you are also using for passport config. |
-
-Given is the example of `jans-cli` to add the script:
-![jans-cli-script-add](https://user-images.githubusercontent.com/39133739/176181846-d7c6dbd3-fc3b-4942-9595-66ef56672f11.png)
 
 > Note: After adding and enabling successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://your-jans-server.com/.well-known/openid-configuration. Find `"acr_values_supported"` and you should see `passport-social`. 
 
