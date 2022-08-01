@@ -58,6 +58,8 @@ function _flowCall(flowName, basePath, urlOverrides, args) {
     let result = f.apply(null, params)
 
     _scriptUtils.closeSubflow()
+    if (_isNil(result)) return     //return undefined
+    
     return { value: result,
         //determines if the parent should handle this returned value
         bubbleUp: result.aborted == true && !_scriptUtils.pathMatching(result.url, p) }
