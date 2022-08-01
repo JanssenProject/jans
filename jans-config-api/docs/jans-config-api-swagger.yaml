@@ -2265,7 +2265,7 @@ paths:
                 title: Scope description list.
                 description: List of scope description.
                 items:
-                  $ref: '#/components/schemas/Scope'
+                  $ref: '#/components/schemas/ExtendedScope'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2295,6 +2295,12 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: withAssociatedClients
+          description: Also fetch associated clients with scopes.
     post:
       tags:
         - OAuth - Scopes
@@ -2353,6 +2359,12 @@ paths:
         name: inum
         in: path
         required: true
+      - schema:
+          type: boolean
+          default: false
+        in: query
+        name: withAssociatedClients
+        description: Also fetch associated clients with scopes.
     get:
       tags:
         - OAuth - Scopes
@@ -2365,7 +2377,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scope'
+                $ref: '#/components/schemas/ExtendedScope'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -5205,6 +5217,17 @@ components:
           description: Expiry date of the Scope.
           type: string
           format: date
+    ExtendedScope:
+      allOf: # Combines the Scope and the inline model
+        - $ref: '#/components/schemas/Scope'
+        - type: object
+        - type: object
+          properties:
+            clients:
+              description: Associated oidc clients
+              type: array
+              items:
+                $ref: '#/components/schemas/Client'
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
