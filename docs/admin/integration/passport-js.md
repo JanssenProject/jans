@@ -16,7 +16,7 @@ Below are the key Components of this inbound identity flow:
 
 User authenticate at external social provider, get back to Janssen server, user verification, and add authenticated user to Janssen server. `RP(Relying party)` application is your end-user application that will be used by your users and where you want to add this auth feature.
 
-![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/181759293-ed5457f4-0089-4c69-9184-7ab2c5353152.png)
+![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/182106547-7082409c-2567-4b7c-89a3-72eb655fc22a.png)
 
 [sequencediagram.org source file is here](https://github.com/GluuFederation/tutorials/files/9219902/inbound-identity-sequence.txt)
 
