@@ -3,7 +3,7 @@
 This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that  are **input-constrained** or **browser-less** . The authorization flow defined by this [RFC 8628](https://tools.ietf.org/html/rfc8628), sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.
 
 ### Sequence Diagram
-![](https://github.com/JanssenProject/jans/tree/main/docs/assets/device_auth_flow.png)
+![](https://github.com/JanssenProject/jans/blob/main/docs/assets/device_auth_flow.png)
 
 Paste the following source text of the sequence diagram on [sequencediagram.org](https://sequencediagram.org/) 
 ```
@@ -38,19 +38,19 @@ Third Party App->Device App: return Response
 
 1. First, the user requests authorization from the device:
 
-![DeviceFlow1](https://github.com/JanssenProject/jans/tree/main/docs/assets/device-flow-1.png)
+![DeviceFlow1](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-1.png)
 
 2. At the URL displayed on the screen, the user can input the displayed code in the device.
 
-![DeviceFlow2](https://github.com/JanssenProject/jans/tree/main/docs/assets/device-flow-2.png)
+![DeviceFlow2](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-2.png)
 
 3. After that, user could need to authenticate, then decide whether permissions will be granted.
 
-![DeviceFlow3](https://github.com/JanssenProject/jans/tree/main/docs/assets/device-flow-3.png)
+![DeviceFlow3](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-3.png)
 
 4. Finally, the confirmation screen will be shown.
 
-![DeviceFlow4](https://github.com/JanssenProject/jans/tree/main/docs/assets/device-flow-4.png)
+![DeviceFlow4](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-4.png)
 
 
 ## Request user and device codes
@@ -233,3 +233,6 @@ Server: Jetty(9.4.19.v20190610)
 
 **Other errors**
 This token endpoint can return any error code already defined, for example whether client can't be authenticated or the grant type sent is invalid. Some of them could be: `invalid_client`, `invalid_grant`, `invalid_request` and others.
+
+### Customizing Device Grant page
+More about customising [this page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml)  to include your organization's stylesheets, images and content in this [article](https://jans.io/docs/developer/customization/customize-web-pages.md)

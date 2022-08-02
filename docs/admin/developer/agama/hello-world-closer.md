@@ -12,6 +12,9 @@ In normal circumstances the flow is launched through a web browser via an [OIDC 
 
 ## Stage 2
 
+!!! Note
+    A preliminary reading of concepts presented in [flows lifecycle](./flows-lifecycle.md) is recommended before proceeding
+
 ### First request cycle
 
 The GET request for `agama.fls` is processed by [this servlet](https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/servlet/ExecutionServlet.java). Most of logic takes place at method `startFlow` of [FlowService](

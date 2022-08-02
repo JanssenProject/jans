@@ -6,11 +6,11 @@ Janssen Server can be installed on various OS platforms and hardware environment
 
 ### Production Environment
 
-| Hardware config <br/> <br/>OS platform | VM                                    | Cloud (Kubernetes)                              |
-|-----------------------------------------|---------------------------------------|-------------------------------------------------|
-| Ubuntu 20.04                            | [Linux package](vm-install/ubuntu.md) | [Rancher Marketplace](helm-install/rancher.md)  |
-| EL 8 (CentOS 8 and Red Hat 8)           | [Linux package](vm-install/rhel.md)   | [Rancher Marketplace](helm-install/rancher.md) |
-| SUSE 15                                 | [Linux package](vm-install/suse.md)   | [Rancher Marketplace](helm-install/rancher.md)  |
+| Hardware config <br/> <br/>OS platform | VM                                    | Cloud (Kubernetes)                                                                                                                 |
+|-----------------------------------------|---------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| Ubuntu 20.04                            | [Linux package](vm-install/ubuntu.md) | [Google Cloud Platform (GCP)]()<br/>[Amazon Web Services (AWS)]()<br/>[Azure]()<br/>[Rancher Marketplace](helm-install/rancher.md) |
+| EL 8 (CentOS 8 and Red Hat 8)           | [Linux package](vm-install/rhel.md)   | [Google Cloud Platform (GCP)]()<br/>[Amazon Web Services (AWS)]()<br/>[Azure]()<br/>[Rancher Marketplace](helm-install/rancher.md)                                                                                     |
+| SUSE 15                                 | [Linux package](vm-install/suse.md)   | [Google Cloud Platform (GCP)]()<br/>[Amazon Web Services (AWS)]()<br/>[Azure]()<br/>[Rancher Marketplace](helm-install/rancher.md)                                                                                     |
 
 ### Non-Production Environments
 
