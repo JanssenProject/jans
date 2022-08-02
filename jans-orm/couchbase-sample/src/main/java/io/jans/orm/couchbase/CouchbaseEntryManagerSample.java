@@ -9,6 +9,7 @@ package io.jans.orm.couchbase;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+
 import io.jans.orm.couchbase.impl.CouchbaseEntryManager;
 import io.jans.orm.couchbase.impl.CouchbaseEntryManagerFactory;
 
@@ -26,14 +27,19 @@ public class CouchbaseEntryManagerSample {
         connectionProperties.put("couchbase#servers", "localhost");
         connectionProperties.put("couchbase#auth.userName", "admin");
         connectionProperties.put("couchbase#auth.userPassword", "secret");
-//        connectionProperties.put("couchbase#buckets", "jans");
-        connectionProperties.put("couchbase#buckets", "jans, jans_user, jans_token");
+
+        connectionProperties.put("couchbase#connection.dns.use-lookup", "false");
+        
+        connectionProperties.put("couchbase#buckets", "jans, jans_user, jans_site, jans_cache, jans_token, jans_session");
 
         connectionProperties.put("couchbase#bucket.default", "jans");
-        connectionProperties.put("couchbase#bucket.jans_user.mapping", "people, groups");
-        connectionProperties.put("couchbase#bucket.jans_token.mapping", "sessions");
+        connectionProperties.put("couchbase#bucket.jans_user.mapping", "people, groups, authorizations");
+        connectionProperties.put("couchbase#bucket.jans_site.mapping", "cache-refresh");
+        connectionProperties.put("couchbase#bucket.jans_cache.mapping", "cache");
+        connectionProperties.put("couchbase#bucket.jans_token.mapping", "tokens");
+        connectionProperties.put("couchbase#bucket.jans_session.mapping", "sessions");
 
-        connectionProperties.put("couchbase#password.encryption.method", "CRYPT-SHA-256");
+        connectionProperties.put("couchbase#password.encryption.method", "SSHA-256");
 
         return connectionProperties;
     }

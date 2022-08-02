@@ -31,6 +31,7 @@ tags:
   - name: OAuth - OpenID Connect - Clients
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
+  - name: Configuration – Agama Flow
   - name: Statistics - User
   - name: Health - Check
   - name: Server Stats
@@ -2168,6 +2169,38 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
+  /jans-config-api/api/v1/uma/resources/clientId/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        description: Client ID.
+        schema:
+          type: string
+    get:
+      tags:
+        - OAuth - UMA Resources
+      summary: Fetch uma resources by client id.
+      description: Fetch uma resources by client id.
+      operationId: get-oauth-uma-resources-by-clientid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA Resource list.
+                description: List of UMA Resource.
+                items:
+                  $ref: '#/components/schemas/UmaResource'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
     delete:
       tags:
         - OAuth - UMA Resources
@@ -2232,7 +2265,7 @@ paths:
                 title: Scope description list.
                 description: List of scope description.
                 items:
-                  $ref: '#/components/schemas/Scope'
+                  $ref: '#/components/schemas/ExtendedScope'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2262,6 +2295,12 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: withAssociatedClients
+          description: Also fetch associated clients with scopes.
     post:
       tags:
         - OAuth - Scopes
@@ -2320,6 +2359,12 @@ paths:
         name: inum
         in: path
         required: true
+      - schema:
+          type: boolean
+          default: false
+        in: query
+        name: withAssociatedClients
+        description: Also fetch associated clients with scopes.
     get:
       tags:
         - OAuth - Scopes
@@ -2332,7 +2377,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scope'
+                $ref: '#/components/schemas/ExtendedScope'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2388,6 +2433,153 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/scopes.write]
+
+  /jans-config-api/api/v1/agama:
+    get:
+      summary: Fetches all agama flow.
+      description: Fetches all agama flow.
+      operationId: get-agama-flows
+      tags:
+        - Configuration – Agama Flow
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.readonly]
+    post:
+      summary: Create a new agama flow.
+      description: Create a new agama flow.
+      operationId: post-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgamaFlow'
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+		
+  /jans-config-api/api/v1/agama/{qname}:
+    parameters:
+      - schema:
+          type: string
+        name: qname
+        in: path
+        description: flow qname.
+        required: true
+    get:
+      summary: Gets an agama flow based on Qname.
+      description: Gets an agama flow based on Qname.
+      operationId: get-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.readonly]
+	    
+    post:
+      summary: Create a new agama flow from source file.
+      description: Create a new agama flow from source file.
+      operationId: post-agama-flow-from-source
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+		
+   
+    put:
+      summary: Updates an agama flow based on Qname.
+      description: Updates an agama based on Qname.
+      operationId: put-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgamaFlow'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]	
+    delete:
+      summary: Deletes an agama flow based on Qname.
+      description: Deletes an agama flow based on Qname.
+      operationId: delete-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.delete]
+		
   /jans-config-api/api/v1/stat:
     get:
       summary: Provides server with basic statistic.
@@ -4768,6 +4960,12 @@ components:
           items:
             type: string
           example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
+        discoveryDenyKeys:
+          type: array
+          description: List of configuration response claims which must not be displayed in discovery endpoint response.
+          items:
+            type: string
+          example: 'id_generation_endpoint, auth_level_mapping, etc.'
         discoveryAllowedKeys:
           type: array
           description: List of configuration response claim allowed to be displayed in discovery endpoint.
@@ -5019,6 +5217,17 @@ components:
           description: Expiry date of the Scope.
           type: string
           format: date
+    ExtendedScope:
+      allOf: # Combines the Scope and the inline model
+        - $ref: '#/components/schemas/Scope'
+        - type: object
+        - type: object
+          properties:
+            clients:
+              description: Associated oidc clients
+              type: array
+              items:
+                $ref: '#/components/schemas/Client'
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
@@ -5116,27 +5325,27 @@ components:
         requirePar:
           description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
           type: boolean
-        authorizationSignedResponseAlg:
+        jansAuthSignedRespAlg:
           description: JWS alg algorithm JWA required for signing authorization responses.
           type: string
-        authorizationEncryptedResponseAlg:
+        jansAuthEncRespAlg:
           description: JWE alg algorithm JWA required for encrypting authorization responses.
           type: string
-        authorizationEncryptedResponseEnc:
+        jansAuthEncRespEnc:
           description: JWE enc algorithm JWA required for encrypting auhtorization responses.
           type: string
-        publicSubjectIdentifierAttribute:
+        jansSubAttr:
           description: custom subject identifier attribute.
           type: string
         redirectUrisRegex:
           description:  If set, redirectUri must match to this regexp
           type: string
-        authorizedAcrValues:
+        jansAuthorizedAcr:
           description:  List of thentication Context Class Reference (ACR) that must exist.
           type: array
           items:
             type: string
-        defaultPromptLogin:
+        jansDefaultPromptLogin:
           description: sets prompt=login to the authorization request, which causes the authorization server to force the user to sign in again before it will show the authorization prompt.
           type: boolean
 			
@@ -6815,6 +7024,13 @@ components:
         useLocalCache:
           type: boolean
           description: Boolean value specifying whether to enable local in-memory cache.
+        bulkMaxOperations:
+          type: integer
+          description: Specifies maximum bulk operations.
+        bulkMaxPayloadSize:
+          type: integer
+          format: int64
+          description: Specifies maximum payload size of bulk operations.
   
     Organization:
       type: object
@@ -7041,3 +7257,69 @@ components:
           additionalProperties:
             type: string
 
+
+    FlowMetadata:
+      title: Agama Flow meta data
+      description: Object for Agama Flow meta data.
+      type: object
+      properties:
+        funcName:
+          description: name of the function.
+          type: string
+        inputs:
+          description: Agama Flow inputs.
+          type: array
+          items:
+            type: string
+        timeout:
+          description: flow timeout value.
+          type: integer
+          format: int64
+          default: 0
+        displayName:
+          description: Flow name
+          type: string
+        author:
+          description: Author of the agama flow
+          type: string
+        timestamp:
+          description: flow update time.
+          type: string
+          format: date
+			
+			
+    AgamaFlow:
+      title: Agama Flow object
+      description: Object for Agama Flow.
+      type: object
+      properties:
+        dn:
+          description: Domain name
+          type: string
+        QName:
+          description: Agama flow identifier.
+          type: string
+        transHash:
+          description: Agama Flow custom message.
+          type: string
+        revision:
+          description: Update revision number of the script.
+          type: integer
+          format: int64
+          default: 0
+        enabled:
+          description: boolean value indicating if script enabled.
+          type: boolean
+          default: false
+        metadata:
+          description: Agama Flow metadata.
+          $ref: '#/components/schemas/FlowMetadata'
+        source:
+          description: Agama Flow source.
+          type: string
+        transpiled:
+          description: Agama Flow translate compiler.
+          type: string
+        codeError:
+          type: string
+          description: Possible errors assosiated with the flow.

@@ -17,7 +17,11 @@ import org.apache.commons.lang.StringUtils;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
+import java.util.Collections;
 import java.util.List;
+
+import org.slf4j.Logger;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -30,6 +34,9 @@ public class UmaResourceService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private Logger logger;
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
@@ -49,16 +56,21 @@ public class UmaResourceService {
     }
 
     public List<UmaResource> findResourcesByName(String name, int sizeLimit) {
+
         if (StringUtils.isNotBlank(name)) {
             Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
             return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, searchFilter,
                     sizeLimit);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public List<UmaResource> getAllResources(int sizeLimit) {
         return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, null, sizeLimit);
+    }
+
+    public List<UmaResource> getAllResources() {
+        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, null);
     }
 
     public void addResource(UmaResource resource) {
@@ -81,6 +93,22 @@ public class UmaResourceService {
         prepareBranch();
         final String dn = getDnForResource(id);
         return persistenceEntryManager.find(UmaResource.class, dn);
+    }
+
+    public List<UmaResource> getResourcesByClient(String clientDn) {
+        try {
+            logger.debug(" Fetch UmaResource based on client - clientDn:{} ", clientDn);
+            prepareBranch();
+
+            if (StringUtils.isNotBlank(clientDn)) {
+                return persistenceEntryManager.findEntries(getBaseDnForResource(), UmaResource.class,
+                        Filter.createEqualityFilter("jansAssociatedClnt", clientDn));
+            }
+
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return Collections.emptyList();
     }
 
     private void prepareBranch() {

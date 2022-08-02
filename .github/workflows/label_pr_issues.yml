@@ -61,3 +61,20 @@ jobs:
             title=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
           fi
           sudo python3 ./automation/github-labels/label.py ${issue_or_pull_number} ${changed_files} ${branch} ${operation} ${title}
+
+      # Remove once add-project option in gh cli support project beta. Add to labels.py
+      # TODO: Add PR to project
+      - name: Add issue to project
+        if: github.event_name != 'pull_request'
+        env:
+          ISSUE_ID: ${{ github.event.issue.node_id }}
+          PROJECT_ID: ${{ secrets.JANSSEN_ISSUE_DASHBOARD_PROJECT_ID }}
+        run: |
+          item_id="$( gh api graphql -f query='
+            mutation($project:ID!, $issue:ID!) {
+              addProjectNextItem(input: {projectId: $project, contentId: $issue}) {
+                projectNextItem {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectNextItem.projectNextItem.id')"

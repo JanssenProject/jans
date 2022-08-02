@@ -128,3 +128,14 @@ Then status 200
 And print response
 And assert response.length !=0
 
+@ignore
+@CreateUpdateDelete
+Scenario: Create new OpenId Connect Client
+Given url mainUrl
+And header Authorization = 'Bearer ' + accessToken
+And request read('openid_clients_create.json')
+When method POST
+Then status 201
+And print response
+
+

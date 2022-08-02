@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -34,7 +34,7 @@ public final class SpannerUmaResourceSample {
         // Create SQL entry manager
         SpannerEntryManager sqlEntryManager = sqlEntryManagerSample.createSpannerEntryManager();
 
-        final Filter filter = Filter.createEqualityFilter("jansAssociatedClnt", "inum=AB77-1A2B,ou=clients,o=jans");
+        final Filter filter = Filter.createEqualityFilter("jansAssociatedClnt", "inum=AB77-1A2B,ou=clients,o=jans").multiValued();
         List<UmaResource> umaResource = sqlEntryManager.findEntries("ou=resources,ou=uma,o=jans", UmaResource.class, filter);
 
         LOG.info("Found umaResources: " + umaResource);

@@ -3,12 +3,8 @@ package io.jans.orm.sql.model;
 import java.io.Serializable;
 import java.util.Date;
 
-/*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
 import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
@@ -21,6 +17,8 @@ public class SimpleCacheEntry extends DeletableEntity implements Serializable, D
 
 	private static final long serialVersionUID = 3360900373193184522L;
 
+	@DN
+    private String dn;
     @Expiration
     private Integer ttl;
     @AttributeName(name = "uuid")
@@ -29,6 +27,14 @@ public class SimpleCacheEntry extends DeletableEntity implements Serializable, D
     private Date creationDate;
     @AttributeName(name = "dat")
     private String data;
+
+    public String getDn() {
+        return dn;
+    }
+
+    public void setDn(String dn) {
+        this.dn = dn;
+    }
 
 	public Integer getTtl() {
 		return ttl;
@@ -64,7 +70,7 @@ public class SimpleCacheEntry extends DeletableEntity implements Serializable, D
 
     @Override
 	public String toString() {
-		return "NativePersistenceCacheEntity [dn=" + getDn() + ", ttl=" + ttl + ", id=" + id + ", creationDate=" + creationDate + ", data="
+		return "NativePersistenceCacheEntity [dn=" + dn + ", ttl=" + ttl + ", id=" + id + ", creationDate=" + creationDate + ", data="
 				+ data + "]";
 	}
 }

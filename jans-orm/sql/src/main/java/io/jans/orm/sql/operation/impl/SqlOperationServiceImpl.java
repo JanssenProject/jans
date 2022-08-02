@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -42,20 +42,21 @@ import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 
 import io.jans.orm.exception.MappingException;
-import io.jans.orm.exception.extension.PersistenceExtension;
 import io.jans.orm.exception.operation.DeleteException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryConvertationException;
 import io.jans.orm.exception.operation.EntryNotFoundException;
 import io.jans.orm.exception.operation.PersistenceException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
 import io.jans.orm.sql.model.ConvertedExpression;
@@ -175,13 +176,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean addEntryImpl(TableMapping tableMapping, String key, Collection<AttributeData> attributes) throws PersistenceException {
 		try {
-			Map<String, String> columTypes = tableMapping.getColumTypes();
+			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 			SQLInsertClause sqlInsertQuery = this.sqlQueryFactory.insert(tableRelationalPath);
 
 			for (AttributeData attribute : attributes) {
-				String attributeType = columTypes.get(attribute.getName().toLowerCase());
+				String attributeType = columTypes.get(attribute.getName().toLowerCase()).getType();
 				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
 
 				sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
@@ -215,7 +216,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean updateEntryImpl(TableMapping tableMapping, String key, List<AttributeDataModification> mods) throws PersistenceException {
 		try {
-			Map<String, String> columTypes = tableMapping.getColumTypes();
+			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 			SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
@@ -224,7 +225,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 				AttributeData attribute = attributeMod.getAttribute();
 				Path path = Expressions.stringPath(attribute.getName());
 
-				String attributeType = columTypes.get(attribute.getName().toLowerCase());
+				String attributeType = columTypes.get(attribute.getName().toLowerCase()).getType();
 				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
 				
 				AttributeModificationType type = attributeMod.getModificationType();
@@ -426,6 +427,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	            boolean collectSearchResult;
 	
 	            SQLQuery<?> query;
+	            ResultSet resultSet = null;
 	            int currentLimit;
 	    		try {
 	                int resultCount = 0;
@@ -443,9 +445,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                    queryStr = query.getSQL().getSQL();
 	                    LOG.debug("Executing query: '" + queryStr + "'");
 
-	                    try (ResultSet resultSet = query.getResults()) {
-	                    	lastResult = getEntryDataList(tableMapping, resultSet);
-	                    }
+	                    resultSet = query.getResults();
+	                    lastResult = getEntryDataList(tableMapping, resultSet);
 
 		    			lastCountRows = lastResult.size();
 		    			
@@ -471,6 +472,14 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         			throw new SearchException(String.format("Failed to build search entries query. Key: '%s', expression: '%s'", key, expression.expression()), ex);
 	    		} catch (SQLException | EntryConvertationException ex) {
 	    			throw new SearchException(String.format("Failed to execute query '%s'  with key: '%s'", queryStr, key), ex);
+	    		} finally {
+	    			if (resultSet != null) {
+	    				try {
+							resultSet.close();
+						} catch (SQLException ex) {
+			    			throw new SearchException(String.format("Failed to close query after paged result collection. Query '%s'  with key: '%s'", queryStr, key), ex);
+						}
+	    			}
 	    		}
 	        } else {
 	    		try {
@@ -872,12 +881,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		}
 	}
 
-	private boolean isJsonColumn(String tableName, String columnTypeName) {
+	public boolean isJsonColumn(String tableName, String columnTypeName) {
 		if (columnTypeName == null) {
 			return false;
 		}
-		
-		if (mariaDb && "longtext".equals(columnTypeName)) {
+
+		if (mariaDb && SqlConnectionProvider.LONGTEXT_TYPE_NAME.equals(columnTypeName)) {
 			return true;
 		}
 		
@@ -886,7 +895,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 //			return "longtext".equals(columnTypeName);
 //		}
 
-		return "json".equals(columnTypeName);
+		return SqlConnectionProvider.JSON_TYPE_NAME.equals(columnTypeName);
 		
 	}
 

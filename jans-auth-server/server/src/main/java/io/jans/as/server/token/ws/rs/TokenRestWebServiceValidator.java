@@ -9,6 +9,7 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.RefreshToken;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -105,7 +106,7 @@ public class TokenRestWebServiceValidator {
         return builder.build();
     }
 
-    private Response.ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
+    public Response.ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
@@ -153,6 +154,13 @@ public class TokenRestWebServiceValidator {
                 onFailure.accept(grant);
             }
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Client mismatch."), auditLog));
+        }
+    }
+
+    public void validateRefreshToken(RefreshToken refreshTokenObject, OAuth2AuditLog auditLog) {
+        if (refreshTokenObject == null || !refreshTokenObject.isValid()) {
+            log.trace("Invalid refresh token.");
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find refresh token or otherwise token type or client does not match."), auditLog));
         }
     }
 }

@@ -10,6 +10,7 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantType;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.RefreshToken;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
@@ -227,5 +228,27 @@ public class TokenRestWebServiceValidatorTest {
         grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
 
         validator.validateGrant(grant, client, "code", AUDIT_LOG);
+    }
+
+    @Test
+    public void validateRefreshToken_whenRefreshTokenIsNull_shouldRaiseError() {
+        try {
+            validator.validateRefreshToken(null, AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error when refreshToken is null.");
+    }
+
+    @Test
+    public void validateRefreshToken_whenRefreshTokenIsExpired_shouldRaiseError() {
+        try {
+            validator.validateRefreshToken(new RefreshToken("code", new Date(), new Date(0)), AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error when refreshToken is expired.");
     }
 }

@@ -61,6 +61,7 @@ function() {
         auth_health_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/health',
 		org_configuration_url: baseUrl + '/jans-config-api/api/v1/org',
         user_url: baseUrl + '/jans-config-api/api/v1/user',
+		agama_url: baseUrl + '/jans-config-api/api/v1/agama',
     };
 
     karate.configure('connectTimeout', 30000);

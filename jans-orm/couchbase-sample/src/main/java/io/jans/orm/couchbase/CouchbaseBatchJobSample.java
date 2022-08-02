@@ -11,9 +11,10 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 
 import io.jans.orm.couchbase.impl.CouchbaseEntryManager;
+import io.jans.orm.couchbase.model.SimpleCache;
 import io.jans.orm.couchbase.model.SimpleClient;
 import io.jans.orm.couchbase.model.SimpleSession;
-import io.jans.orm.couchbase.model.SimpleTokenCouchbase;
+import io.jans.orm.couchbase.model.SimpleToken;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.DefaultBatchOperation;
@@ -48,12 +49,12 @@ public final class CouchbaseBatchJobSample {
         // Create Couchbase entry manager
         final CouchbaseEntryManager couchbaseEntryManager = couchbaseEntryManagerSample.createCouchbaseEntryManager();
 
-        BatchOperation<SimpleTokenCouchbase> tokenCouchbaseBatchOperation = new ProcessBatchOperation<SimpleTokenCouchbase>() {
+        BatchOperation<SimpleToken> tokenCouchbaseBatchOperation = new ProcessBatchOperation<SimpleToken>() {
             private int processedCount = 0;
 
             @Override
-            public void performAction(List<SimpleTokenCouchbase> objects) {
-                for (SimpleTokenCouchbase simpleTokenCouchbase : objects) {
+            public void performAction(List<SimpleToken> objects) {
+                for (SimpleToken simpleTokenCouchbase : objects) {
                     try {
                         CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, simpleTokenCouchbase.getDn(), "exp",
                                 simpleTokenCouchbase.getAttribute("exp"));
@@ -70,7 +71,7 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter1 = Filter.createPresenceFilter("exp");
-        couchbaseEntryManager.findEntries("o=jans", SimpleTokenCouchbase.class, filter1, SearchScope.SUB, new String[] {"exp"},
+        couchbaseEntryManager.findEntries("ou=tokens,o=jans", SimpleToken.class, filter1, SearchScope.SUB, new String[] {"exp"},
                 tokenCouchbaseBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {
@@ -95,34 +96,59 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter2 = Filter.createPresenceFilter("jansLastAccessTime");
-        couchbaseEntryManager.findEntries("o=jans", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"jansLastAccessTime"},
+        couchbaseEntryManager.findEntries("ou=sessions,o=jans", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"jansLastAccessTime"},
                 sessionBatchOperation, 0, 0, 100);
 
-        BatchOperation<SimpleClient> clientBatchOperation = new ProcessBatchOperation<SimpleClient>() {
+        if (false) {
+            Calendar calendar = Calendar.getInstance();
+            Date jansLastAccessTimeDate = new Date();
+            calendar.setTime(jansLastAccessTimeDate);
+            calendar.add(Calendar.SECOND, 60);
+            Date date = calendar.getTime();
+
+            for (int i = 0; i < 1111; i++) {
+	            String id = String.format("cache_%06d", i);
+	            String dn = String.format("id=%s,ou=cache,o=jans", id);
+	
+	            SimpleCache newCache = new SimpleCache();
+	            newCache.setDn(dn);
+	            newCache.setId(id);
+	            newCache.setData("{'sample_data': 'sample_data_value'}");
+	            newCache.setExpirationDate(date);
+	            newCache.setDeletable(true);
+	
+	    		try {
+	                couchbaseEntryManager.persist(newCache);
+	            } catch (Throwable e) {
+	                e.printStackTrace();
+	            }
+	        }
+        }
+
+        BatchOperation<SimpleCache> clientBatchOperation = new ProcessBatchOperation<SimpleCache>() {
             private int processedCount = 0;
 
             @Override
-            public void performAction(List<SimpleClient> objects) {
-                for (SimpleClient simpleClient : objects) {
+            public void performAction(List<SimpleCache> objects) {
+                for (SimpleCache simpleCache : objects) {
                     processedCount++;
                 }
 
                 LOG.info("Total processed: " + processedCount);
             }
         };
-
         final Filter filter3 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result3 = couchbaseEntryManager.findEntries("o=jans", SimpleClient.class, filter3, SearchScope.SUB,
-                new String[] {"exp"}, clientBatchOperation, 0, 0, 1000);
+        List<SimpleCache> result3 = couchbaseEntryManager.findEntries("ou=cache,o=jans", SimpleCache.class, filter3, SearchScope.SUB,
+                new String[] {"exp"}, clientBatchOperation, 0, 0, 333);
 
         LOG.info("Result count (without collecting results): " + result3.size());
 
-        BatchOperation<SimpleClient> clientBatchOperation2 = new DefaultBatchOperation<SimpleClient>() {
+        BatchOperation<SimpleCache> clientBatchOperation2 = new DefaultBatchOperation<SimpleCache>() {
             private int processedCount = 0;
 
             @Override
-            public void performAction(List<SimpleClient> objects) {
-                for (SimpleClient simpleClient : objects) {
+            public void performAction(List<SimpleCache> objects) {
+                for (SimpleCache simpleCache : objects) {
                     processedCount++;
                 }
 
@@ -131,8 +157,8 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter4 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result4 = couchbaseEntryManager.findEntries("o=jans", SimpleClient.class, filter4, SearchScope.SUB,
-                new String[] {"exp"}, clientBatchOperation2, 0, 0, 1000);
+        List<SimpleCache> result4 = couchbaseEntryManager.findEntries("ou=cache,o=jans", SimpleCache.class, filter4, SearchScope.SUB,
+                new String[] {"exp"}, clientBatchOperation2, 0, 0, 333);
 
         LOG.info("Result count (with collecting results): " + result4.size());
     }

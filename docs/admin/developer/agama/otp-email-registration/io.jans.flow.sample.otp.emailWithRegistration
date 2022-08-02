@@ -1,0 +1,16 @@
+Flow io.jans.flow.sample.otp.emailWithRegistration
+    Basepath "samples/otp-email-registration"
+
+obj = Trigger io.jans.flow.sample.otp.email
+    Override templates "samples/basic/login.ftlh" ""
+
+When obj.aborted is true
+    //Take the registration path
+    obj = Trigger io.jans.flow.sample.registration
+        Override templates "samples/registration/confirmation.ftlh" ""
+    
+    When obj.success is true
+        //Use otp-email registration as is
+        obj = Trigger io.jans.flow.sample.otp.email
+
+Finish obj 

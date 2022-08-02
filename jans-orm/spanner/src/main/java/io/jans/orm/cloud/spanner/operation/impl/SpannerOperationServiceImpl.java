@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -42,7 +42,6 @@ import com.google.cloud.spanner.TransactionRunner.TransactionCallable;
 import com.google.cloud.spanner.Type;
 import com.google.cloud.spanner.Type.Code;
 import com.google.cloud.spanner.Type.StructField;
-import com.google.cloud.spanner.ValueBinder;
 
 import io.jans.orm.cloud.spanner.impl.SpannerBatchOperationWraper;
 import io.jans.orm.cloud.spanner.model.ConvertedExpression;
@@ -52,7 +51,6 @@ import io.jans.orm.cloud.spanner.model.ValueWithStructField;
 import io.jans.orm.cloud.spanner.operation.SpannerOperationService;
 import io.jans.orm.cloud.spanner.operation.watch.OperationDurationUtil;
 import io.jans.orm.cloud.spanner.util.SpannerValueHelper;
-import io.jans.orm.exception.extension.PersistenceExtension;
 import io.jans.orm.exception.operation.DeleteException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryConvertationException;
@@ -60,18 +58,22 @@ import io.jans.orm.exception.operation.EntryNotFoundException;
 import io.jans.orm.exception.operation.IncompatibleTypeException;
 import io.jans.orm.exception.operation.PersistenceException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.Sort;
 import io.jans.orm.model.SortOrder;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+
+import com.google.cloud.spanner.ValueBinder;
+
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -623,7 +625,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
 	                    // Change limit and offset
 	    	    		limit.setRowCount(new LongValue(currentLimit));
-	    	    		offset.setOffset(start + resultCount);
+	    	    		offset.setOffset(new LongValue(start + resultCount));
 	                    
 	    				Statement.Builder statementBuilder = Statement.newBuilder(sqlSelectQuery.toString());
 	    				applyParametersBinding(statementBuilder, expression);
@@ -672,7 +674,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
     	    		if (start > 0) {
 	    	    		Offset offset = new Offset();
-	    	    		offset.setOffset(start);
+	    	    		offset.setOffset(new LongValue(start));
 	    	    		sqlSelectQuery.setOffset(offset);
 	                }
 	
