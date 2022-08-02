@@ -131,7 +131,7 @@
 							<filters>
 								<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
 								<filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter>
-								<filter>${basedir}/profiles/${cfg}/config-oxauth-sql.properties</filter>
+<!--								<filter>${basedir}/profiles/${cfg}/config-oxauth-sql.properties</filter>-->
 							</filters>
 						</configuration>
 					</execution>
