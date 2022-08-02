@@ -182,7 +182,7 @@
         </classes>
     </test>
 
-    <test name="Default Prompt Login True Test" enabled="true">
+    <test name="Default Prompt Login True Test" enabled="false">
         <classes>
             <class name="io.jans.as.client.ws.rs.DefaultPromptLoginTest"></class>
         </classes>
