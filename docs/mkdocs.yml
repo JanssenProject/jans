@@ -260,10 +260,8 @@ nav:
     - 'Front Channel Scripts': 'developer/front-channel-scripts.md'
     - 'Back Channel Scripts': 'developer/back-channel-scripts.md'
     - 'Customization':
-        - 'Message Files': 'developer/customization/message-files.md'
-        - 'Error Pages': 'developer/customization/error-pages.md'
-        - 'Logs/Consent Pages': 'developer/customization/logs-consent.md'
-        - 'Internationalization': 'developer/customization/internationalization.md'
+        - 'Customize Web pages': 'developer/customization/customize-web-pages.md'
+        - 'Custom client logs': 'developer/customization/custom-client-logs.md'
     - 'Scripts':
         - 'Person Authentication': 'developer/scripts/person-authentication.md'
         - 'Consent Gathering': 'developer/scripts/consent-gathering.md'

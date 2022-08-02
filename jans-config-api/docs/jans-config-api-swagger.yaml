@@ -2169,7 +2169,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
-  /jans-config-api/api/v1/uma/resources/{clientId}:
+  /jans-config-api/api/v1/uma/resources/clientId/{clientId}:
     parameters:
       - name: clientId
         in: path

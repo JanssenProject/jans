@@ -89,15 +89,15 @@ jobs:
         run: |
           if [ $GITHUB_BASE_REF ]; then
             # Pull Request
-            echo "Triggerring event: pull request"
+            echo "Triggering event: pull request"
             echo Pull request base ref: $GITHUB_BASE_REF
             git fetch origin $GITHUB_BASE_REF --depth=1
             if [ ${{ github.event.action }} = "opened" ]; then
-              echo "Triggerring action: opened"
+              echo "Triggering action: opened"
               echo "CHANGED_DIR=$( git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >> ${GITHUB_ENV}
             fi
             if [ ${{ github.event.action }} = "synchronize" ]; then
-              echo "Triggerring action: synchronize"
+              echo "Triggering action: synchronize"
               echo "CHANGED_DIR=$( git diff --name-only ${{ github.event.before }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >>${GITHUB_ENV}
             fi
           else
