@@ -8,7 +8,6 @@ on:
   pull_request:
     types:
       - opened
-      - edited
   workflow_dispatch:
 jobs:
   check-prs-issue:
@@ -87,6 +86,7 @@ jobs:
             printf "%b" "$PR_BODY\nCloses #$ISSUE_NUMBER, " | gh pr edit "$PR_NUMBER" \
               --body-file - \
               --repo "$REPO_FULL_NAME"
-
-            exit 1
+            # Report bad practice
+            curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: It seems like @${{github.actor}} did not follow the structure flow in GH Issue --> PR. Hi @$PR_USER, You did not reference an open issue in your [PR]((https://github.com/${{github.repository}}/pull/$PR_NUMBER)) body before opening it. I attempted to create an [issue](https://github.com/${{github.repository}}/issues/$ISSUE_NUMBER) for you :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue","text":"We are not too happy with your PR practices. Always open a detailed issue before opening a PR. Make sure to reference that PR.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+            exit 0
           fi
