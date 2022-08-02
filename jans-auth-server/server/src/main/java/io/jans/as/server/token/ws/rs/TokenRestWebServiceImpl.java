@@ -39,6 +39,7 @@ import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.uma.service.UmaTokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.AuthenticationException;
+import io.jans.orm.exception.operation.SearchException;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import jakarta.inject.Inject;
@@ -193,164 +194,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
                 return processClientGredentials(scope, request, auditLog, client, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-                boolean authenticated = false;
-                User user = null;
-                if (authenticationFilterService.isEnabled()) {
-                    String userDn = authenticationFilterService.processAuthenticationFilters(request.getParameterMap());
-                    if (StringHelper.isNotEmpty(userDn)) {
-                        user = userService.getUserByDn(userDn);
-                        authenticated = true;
-                    }
-                }
-
-
-                if (!authenticated) {
-                    user = authenticateUser(username, password, executionContext, user);
-                }
-
-                if (user != null) {
-                    ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
-                    executionContext.setGrant(resourceOwnerPasswordCredentialsGrant);
-
-                    SessionId sessionId = identity.getSessionId();
-                    if (sessionId != null) {
-                        resourceOwnerPasswordCredentialsGrant.setAcrValues(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
-                        resourceOwnerPasswordCredentialsGrant.setSessionDn(sessionId.getDn());
-                        resourceOwnerPasswordCredentialsGrant.save(); // call save after object modification!!!
-
-                        sessionId.getSessionAttributes().put(Constants.AUTHORIZED_GRANT, gt.getValue());
-                        boolean updateResult = sessionIdService.updateSessionId(sessionId, false, true, true);
-                        if (!updateResult) {
-                            log.debug("Failed to update session entry: '{}'", sessionId.getId());
-                        }
-                    }
-
-                    RefreshToken reToken = createRefreshToken(executionContext, scope);
-
-                    scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
-
-                    AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
-
-                    IdToken idToken = null;
-                    if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
-                        boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                appConfiguration.getLegacyIdTokenClaims());
-
-                        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, resourceOwnerPasswordCredentialsGrant, client, appConfiguration, attributeService);
-                        context.setExecutionContext(executionContext);
-
-                        executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
-                        executionContext.setPreProcessing(idTokenPreProcessing);
-                        executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
-
-                        idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                null, null, null, null, null, executionContext);
-                    }
-
-                    auditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
-
-                    return response(Response.ok().entity(getJSonResponse(accessToken,
-                            accessToken.getTokenType(),
-                            accessToken.getExpiresIn(),
-                            reToken,
-                            scope,
-                            idToken)), auditLog);
-                } else {
-                    log.debug("Invalid user", new RuntimeException("User is empty"));
-                    return response(error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user."), auditLog);
-                }
+                return processROPC(username, password, scope, gt, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.CIBA) {
-                errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
-
-                log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
-                final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
-                executionContext.setGrant(cibaGrant);
-
-                log.trace("AuthorizationGrant : '{}'", cibaGrant);
-
-                if (cibaGrant != null) {
-                    if (!cibaGrant.getClientId().equals(client.getClientId())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), auditLog);
-                    }
-                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
-                            cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-                        if (!cibaGrant.isTokensDelivered()) {
-                            RefreshToken refToken = createRefreshToken(executionContext, scope);
-                            AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
-
-                            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, cibaGrant, client, appConfiguration, attributeService);
-                            context.setExecutionContext(executionContext);
-
-                            executionContext.setIncludeIdTokenClaims(false);
-                            executionContext.setPreProcessing(idTokenPreProcessing);
-                            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
-
-                            IdToken idToken = cibaGrant.createIdToken(
-                                    null, null, accessToken, refToken, null, executionContext);
-
-                            cibaGrant.setTokensDelivered(true);
-                            cibaGrant.save();
-
-                            RefreshToken reToken = null;
-                            if (isRefreshTokenAllowed(client, scope, cibaGrant)) {
-                                reToken = refToken;
-                            }
-
-                            scope = cibaGrant.checkScopesPolicy(scope);
-
-                            auditLog.updateOAuth2AuditLog(cibaGrant, true);
-
-                            return response(Response.ok().entity(getJSonResponse(accessToken,
-                                    accessToken.getTokenType(),
-                                    accessToken.getExpiresIn(),
-                                    reToken,
-                                    scope,
-                                    idToken)), auditLog);
-                        } else {
-                            return response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), auditLog);
-                        }
-                    } else {
-                        log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
-                        return response(error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode"), auditLog);
-                    }
-                } else {
-                    final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
-                    log.trace("Ciba request : '{}'", cibaRequest);
-                    if (cibaRequest != null) {
-                        if (!cibaRequest.getClient().getClientId().equals(client.getClientId())) {
-                            return response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), auditLog);
-                        }
-                        long currentTime = new Date().getTime();
-                        Long lastAccess = cibaRequest.getLastAccessControl();
-                        if (lastAccess == null) {
-                            lastAccess = currentTime;
-                        }
-                        cibaRequest.setLastAccessControl(currentTime);
-                        cibaRequestService.update(cibaRequest);
-
-                        if (cibaRequest.getStatus() == CibaRequestStatus.PENDING) {
-                            int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
-                            long timeFromLastAccess = currentTime - lastAccess;
-
-                            if (timeFromLastAccess > intervalSeconds * 1000) {
-                                log.debug("Access hasn't been granted yet for authReqId: '{}'", authReqId);
-                                return response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), auditLog);
-                            } else {
-                                log.debug("Slow down protection authReqId: '{}'", authReqId);
-                                return response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), auditLog);
-                            }
-                        } else if (cibaRequest.getStatus() == CibaRequestStatus.DENIED) {
-                            log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
-                            return response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), auditLog);
-                        } else if (cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
-                            log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
-                            return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), auditLog);
-                        }
-                    } else {
-                        log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
-                        return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id."), auditLog);
-                    }
-                }
+                return processCIBA(scope, authReqId, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(executionContext, deviceCode, scope);
             }
@@ -362,6 +208,72 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         throw new WebApplicationException(tokenRestWebServiceValidator.error(400, TokenErrorResponseType.UNSUPPORTED_GRANT_TYPE, "Unsupported Grant Type.").build());
+    }
+
+    private Response processROPC(String username, String password, String scope, GrantType gt, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) throws SearchException {
+        boolean authenticated = false;
+        User user = null;
+        if (authenticationFilterService.isEnabled()) {
+            String userDn = authenticationFilterService.processAuthenticationFilters(executionContext.getHttpRequest().getParameterMap());
+            if (StringHelper.isNotEmpty(userDn)) {
+                user = userService.getUserByDn(userDn);
+                authenticated = true;
+            }
+        }
+
+
+        if (!authenticated) {
+            user = authenticateUser(username, password, executionContext, user);
+        }
+
+        tokenRestWebServiceValidator.validateUser(user, executionContext.getAuditLog());
+
+        ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, executionContext.getClient());
+        executionContext.setGrant(resourceOwnerPasswordCredentialsGrant);
+
+        SessionId sessionId = identity.getSessionId();
+        if (sessionId != null) {
+            resourceOwnerPasswordCredentialsGrant.setAcrValues(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+            resourceOwnerPasswordCredentialsGrant.setSessionDn(sessionId.getDn());
+            resourceOwnerPasswordCredentialsGrant.save(); // call save after object modification!!!
+
+            sessionId.getSessionAttributes().put(Constants.AUTHORIZED_GRANT, gt.getValue());
+            boolean updateResult = sessionIdService.updateSessionId(sessionId, false, true, true);
+            if (!updateResult) {
+                log.debug("Failed to update session entry: '{}'", sessionId.getId());
+            }
+        }
+
+        RefreshToken reToken = createRefreshToken(executionContext, scope);
+
+        scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
+
+        AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
+
+        IdToken idToken = null;
+        if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
+            boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                    appConfiguration.getLegacyIdTokenClaims());
+
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), resourceOwnerPasswordCredentialsGrant, executionContext.getClient(), appConfiguration, attributeService);
+            context.setExecutionContext(executionContext);
+
+            executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
+            executionContext.setPreProcessing(idTokenPreProcessing);
+            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+
+            idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
+                    null, null, null, null, null, executionContext);
+        }
+
+        executionContext.getAuditLog().updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
+
+        return response(Response.ok().entity(getJSonResponse(accessToken,
+                accessToken.getTokenType(),
+                accessToken.getExpiresIn(),
+                reToken,
+                scope,
+                idToken)), executionContext.getAuditLog());
     }
 
     private Response processClientGredentials(String scope, HttpServletRequest request, OAuth2AuditLog auditLog, Client client, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
@@ -738,5 +650,106 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         return jsonObj.toString();
+    }
+
+    private Response processCIBA(String scope, String authReqId, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
+        errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
+
+        log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
+        final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+        executionContext.setGrant(cibaGrant);
+
+        log.trace("AuthorizationGrant : '{}'", cibaGrant);
+
+        Client client = executionContext.getClient();
+
+        if (cibaGrant != null) {
+            tokenRestWebServiceValidator.validateGrant(cibaGrant, client, authReqId, executionContext.getAuditLog());
+
+            if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
+                    cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+                if (!cibaGrant.isTokensDelivered()) {
+                    RefreshToken refToken = createRefreshToken(executionContext, scope);
+                    AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
+
+                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), cibaGrant, client, appConfiguration, attributeService);
+                    context.setExecutionContext(executionContext);
+
+                    executionContext.setIncludeIdTokenClaims(false);
+                    executionContext.setPreProcessing(idTokenPreProcessing);
+                    executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+
+                    IdToken idToken = cibaGrant.createIdToken(
+                            null, null, accessToken, refToken, null, executionContext);
+
+                    cibaGrant.setTokensDelivered(true);
+                    cibaGrant.save();
+
+                    RefreshToken reToken = null;
+                    if (isRefreshTokenAllowed(client, scope, cibaGrant)) {
+                        reToken = refToken;
+                    }
+
+                    scope = cibaGrant.checkScopesPolicy(scope);
+
+                    executionContext.getAuditLog().updateOAuth2AuditLog(cibaGrant, true);
+
+                    return response(Response.ok().entity(getJSonResponse(accessToken,
+                            accessToken.getTokenType(),
+                            accessToken.getExpiresIn(),
+                            reToken,
+                            scope,
+                            idToken)), executionContext.getAuditLog());
+                } else {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), executionContext.getAuditLog());
+                }
+            } else {
+                log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
+                return response(error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode"), executionContext.getAuditLog());
+            }
+        } else {
+            return processCIBAIfGrantIsNull(authReqId, executionContext);
+        }
+    }
+
+    private Response processCIBAIfGrantIsNull(String authReqId, ExecutionContext executionContext) {
+        final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
+        log.trace("Ciba request : '{}'", cibaRequest);
+        if (cibaRequest != null) {
+            if (!cibaRequest.getClient().getClientId().equals(executionContext.getClient().getClientId())) {
+                return response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), executionContext.getAuditLog());
+            }
+            long currentTime = new Date().getTime();
+            Long lastAccess = cibaRequest.getLastAccessControl();
+            if (lastAccess == null) {
+                lastAccess = currentTime;
+            }
+            cibaRequest.setLastAccessControl(currentTime);
+            cibaRequestService.update(cibaRequest);
+
+            if (cibaRequest.getStatus() == CibaRequestStatus.PENDING) {
+                int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
+                long timeFromLastAccess = currentTime - lastAccess;
+
+                if (timeFromLastAccess > intervalSeconds * 1000) {
+                    log.debug("Access hasn't been granted yet for authReqId: '{}'", authReqId);
+                    return response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), executionContext.getAuditLog());
+                } else {
+                    log.debug("Slow down protection authReqId: '{}'", authReqId);
+                    return response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), executionContext.getAuditLog());
+                }
+            } else if (cibaRequest.getStatus() == CibaRequestStatus.DENIED) {
+                log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
+                return response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), executionContext.getAuditLog());
+            } else if (cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
+                log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
+                return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), executionContext.getAuditLog());
+            }
+        } else {
+            log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
+            return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id."), executionContext.getAuditLog());
+        }
+
+        return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id."), executionContext.getAuditLog());
     }
 }
