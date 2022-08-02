@@ -94,6 +94,28 @@ Scenario: Create, update and delete agama flow
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
+	#Fetch agama flow by name and with source
+	Given url mainUrl + '/' +encodedFlowName + '?includeSource'
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
+ 	And print response.qname 	
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	#Fetch agama flow by name and with source
+	Given url mainUrl + '?includeSource'
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
+ 	And print response.qname 	
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
 	#Delete agama flow by name
     Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
@@ -156,4 +178,90 @@ Scenario: Create agama flow with source data in request body
 	Then status 204
 	And print response
 	
+@CreateAndUpdateFlowWithDataInRequestBodyUpdateDelete
+Scenario: Create agama flow with source data in request body
+    #Create agama flow
+    Then def flowName = 'test'
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+    And header Content-Type = 'text/plain'
+    And header Accept = 'application/json'
+	And request read('agama-source.txt') 
+	When method POST 
+    Then status 201 
+	And print response
+    And print response.qname 	
+	Then def flowName = response.qname
+    And print flowName 
+	Then def result = response
+    And print 'Old transHash ='+response.transHash 
+	Then set result.transHash = 'UpdatedAgamaFlowtransHash' 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+    #Update agama flow
+	Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+    And header Content-Type = 'text/plain'
+    And header Accept = 'application/json'
+	And request read('agama-source.txt') 
+	When method PUT 
+	Then status 200 
+	And print response
+ 	And print response.qname 	
+    And print response.transHash
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	#Fetch agama flow by name
+	Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
+ 	And print response.qname 	
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	#Delete agama flow by name
+    Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+	When method DELETE 
+	Then status 204
+	And print response
 	
+@CreateAndPatchFlow
+Scenario: Create and Patch agama flow
+    #Create agama flow
+	Given url mainUrl
+	And header Authorization = 'Bearer ' + accessToken 
+	And request read('agama.json') 
+	When method POST 
+    Then status 201 
+	And print response
+	Then def result = response
+    And print response.qname 	
+	Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName
+    #Patch agama flow
+	Then def revision_before = response.revision
+	And print 'revision = '+revision_before
+    And print result.jansHideOnDiscovery
+    And def orig_jansHideOnDiscovery = (result.jansHideOnDiscovery == null ? false : result.jansHideOnDiscovery)
+    And def request_body = (result.jansHideOnDiscovery == null ? "[ {\"op\":\"add\", \"path\": \"/jansHideOnDiscovery\", \"value\":"+orig_jansHideOnDiscovery+" } ]" : "[ {\"op\":\"replace\", \"path\": \"/jansHideOnDiscovery\", \"value\":"+orig_jansHideOnDiscovery+" } ]")
+    And print 'request_body ='+request_body
+    Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And request request_body
+	Then print request
+    When method PATCH
+    Then status 200
+    And print response	

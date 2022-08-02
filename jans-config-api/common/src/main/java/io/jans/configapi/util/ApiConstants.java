@@ -79,6 +79,7 @@ public class ApiConstants {
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
     public static final String QNAME = "qname";
+    public static final String INCLUDE_SOURCE = "includeSource";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";

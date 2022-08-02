@@ -181,7 +181,7 @@ public class AgamaFlowService implements Serializable {
         logger.debug("Checking mandatory errorMsg:{} ", errorMsg);
 
         if (errorMsg.length() > 0) {
-            errorMsg.insert(0, "Required feilds missing -> (");
+            errorMsg.insert(0, "Required fields missing -> (");
             errorMsg.replace(errorMsg.lastIndexOf(","), errorMsg.length(), "");
             errorMsg.append("). ");
         }
