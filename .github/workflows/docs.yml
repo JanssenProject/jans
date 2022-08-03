@@ -42,7 +42,7 @@ jobs:
             gh pr merge --squash --auto $PULL_NUMBER
             echo ""
           else
-            echo "Bot will not merge this as it does not meet the requirments."
+            echo "Bot will not merge this as it does not meet the requirements."
             echo "Either the developer has merged with doc changes code changes or an external contributor has requested doc changes."
           fi
 
