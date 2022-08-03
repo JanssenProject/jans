@@ -1,14 +1,14 @@
-# Overview
+## Overview
 
 This is a guide for user authentication at any external Social Providers(Google, Apple, Facebook, etc) using Passport-JS(a.k.a "inbound identity").
 
-# Components
+## Components
 
 - A Janssen auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))
 - The [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py)
 - The [Passport JS Project](https://github.com/GluuFederation/tutorials/tree/master/oidc-sso-tutorials/code/node/jans-passport)
 
-# Authentication Flow
+## Authentication Flow
 
 After users authenticate at the external social identity provider, the control flows back to Janssen Authentication server where the user is verified and the user-id is provisioned into the Janssen server.
 
@@ -16,7 +16,7 @@ After users authenticate at the external social identity provider, the control f
 
 ![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/182554283-b0846b8c-e3d5-4796-85a3-794776713c95.png)
 
-# Role of Passport-JS and Janssen's Authentication server
+## Role of Passport-JS and Janssen's Authentication server
 
 1. Passport-js library encrypts and signs user data before passing it to the Janssen server.
 2. Janssen Auth server verifies the received JWT, decrypts data, add/update user into LDAP, and marks the user as authenticated. 
@@ -26,9 +26,9 @@ Check [Passport-JS](https://github.com/GluuFederation/tutorials/blob/master/oidc
 
 ![jans-passport-data](https://user-images.githubusercontent.com/39133739/181759914-a89bb296-fd98-4856-a611-567b68593a07.png)
 
-# Setup and configurations
+## Setup and configurations
 
-## Setup Passport JS Project
+### Setup Passport JS Project
 
 This project generates auth request for your external social providers, get the user information, and send it to the Janssen server.
 
@@ -58,7 +58,7 @@ pm2 stop <id>
 pm2 restart <id>
 ```
 
-## Passport-JS Project configurations
+### Passport-JS Project configurations
 
 Use [config/production.js](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/config/production.js) for configurations.
 
@@ -76,7 +76,7 @@ Use [config/production.js](https://github.com/GluuFederation/tutorials/blob/mast
 
 check [config/production.js](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/config/production.js) for other application configurations.
 
-## External Social Provider configurations
+### External Social Provider configurations
 
 It is an array of JSON objects. Each object will be your provider. We are using [Passport-JS](https://www.passportjs.org/). Below is the sample for google, apple, and Facebook as external social providers.
 
@@ -148,7 +148,7 @@ It is an array of JSON objects. Each object will be your provider. We are using 
 | emailLinkingSafe | It is not required to be `true`. If you want to link to existing users then set it to true |
 | options | For social provider you just need to set two-property inside `options` i.e. `clientID` and `clientSecret`. In `apple` case few more properties. you can check [strategies documents](https://www.passportjs.org/packages/) for extra options. |
 
-## Passport-JS Strategies and configurations
+### Passport-JS Strategies and configurations
 
 Below strategies are already available in the Passport-JS project.
 
@@ -164,7 +164,7 @@ Below strategies are already available in the Passport-JS project.
 | Dropbox | passport-dropbox-oauth2 | dropbox |
 | Windows Live | passport-windowslive | windowslive |
 
-## Apache proxy setup
+### Apache proxy setup
 
 For seamless flow, we used an apache proxy pass to configure the passport with jans-server. Add the below configuration to the Janssen apache server and restart the apache server.
 
@@ -179,7 +179,7 @@ For seamless flow, we used an apache proxy pass to configure the passport with j
 Now you will understand why we have `jans-fqdn` in passport provider callback URL config.
 
 
-## Add passport-social script
+### Add passport-social script
 
 Download the script from [here](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py) and add it to Janssen Server using `jans-cli`. After Janssen Server installation, you will get `jans-cli`. 
 
@@ -197,11 +197,11 @@ The custom script has the following properties:
 
 > Note: Once you initiate auth request from your RP Application make sure to add `acr_values=passport-social` in the request. acr_values is your script name.
 
-## Customize login pages 
+### Customize login pages 
 
 `Passport-social` script uses `passportlogin.xhtml` and `passportpostlogin.xhtml` which are already comes which Janssen installation. No need to do anything. For UI Customization, you can download current page source code from [here](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth/passport), modify UI, replace pages at path `/opt/jans/jetty/jans-auth/custom/pages/auth/passport/` and restart `jans-auth` server.
 
-## Generate Keystore
+### Generate Keystore
 
 Passport sends private key sign user data jwt to janssen server, for that we need to generate Keystore. keystore is a safe and passport-protected private key container. Use the below commands:
 
@@ -252,7 +252,7 @@ nualRv0U2Y5EYkekj180KnAR
 
 we need this file for the passport `keyPath` config.
 
-# Testing at RP application
+## Testing at RP application
 
 RP(Relying party) is an application that will be used by your users when you want to add authentication and protect resources. Once you initiate auth request from your RP Application make sure to add `acr_values=passport-social` in the request. acr_values is your script name as configured above.
 
