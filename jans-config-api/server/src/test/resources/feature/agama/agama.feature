@@ -113,18 +113,6 @@ Scenario: Create, update and delete agama flow
 	When method GET 
     Then status 200 
 	And print response
- 	And print response.qname 	
-    Then def flowName = response.qname
-    And print flowName 
-	Then def encodedFlowName = funGetEncodedValue(flowName)
- 	And print encodedFlowName 
-	#Fetch agama flow by name and with source
-	Given url mainUrl + '?includeSource=true'
-	And header Authorization = 'Bearer ' + accessToken 
-	When method GET 
-    Then status 200 
-	And print response
- 	And print response.qname 	
     Then def flowName = response.qname
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
@@ -136,7 +124,7 @@ Scenario: Create, update and delete agama flow
 	Then status 204
 	And print response
 
-	
+@ignore	
 @CreateFlowWithDataInRequestBodyUpdateDelete
 Scenario: Create agama flow with source data in request body
     #Create agama flow
@@ -199,7 +187,8 @@ Scenario: Create agama flow with source data in request body
 	When method DELETE 
 	Then status 204
 	And print response
-	
+
+@ignore	
 @CreateAndUpdateFlowWithDataInRequestBodyUpdateDelete
 Scenario: Create agama flow with source data in request body
     #Create agama flow
@@ -265,7 +254,8 @@ Scenario: Create agama flow with source data in request body
 	When method DELETE 
 	Then status 204
 	And print response
-	
+
+@ignore	
 @CreateAndPatchFlow
 Scenario: Create and Patch agama flow
     #Create agama flow
