@@ -500,6 +500,7 @@ nav:
             - 'GitHub CI': 'developer/ci-cd/github-ci.md'
             - 'Jenkins CI': 'developer/ci-cd/jenkins-ci.md'
             - 'Release Process': 'developer/ci-cd/release-process.md'
+      - 'Developer FAQ': 'developer/developer-faq.md'
 - 'Governance':
       - 'Charter': 'governance/charter.md'
       - 'Copyright-notice': 'governance/copyright-notices.md'
