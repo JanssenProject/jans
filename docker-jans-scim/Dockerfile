@@ -35,7 +35,8 @@ EXPOSE 8080
 # ======
 
 ARG JYTHON_VERSION=2.7.3
-RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+ARG JYTHON_BUILD_DATE='2022-08-01 07:49'
+RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
@@ -45,7 +46,7 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # ====
 
 ENV CN_VERSION=1.0.2-SNAPSHOT
-ENV CN_BUILD_DATE='2022-07-26 14:19'
+ENV CN_BUILD_DATE='2022-08-03 12:38'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
