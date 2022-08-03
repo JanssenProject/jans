@@ -69,7 +69,7 @@ jobs:
           fi
           # Detect actual docker folders that changed if error arises default to all images
           pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
+          DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
             echo "A change in this images directory has occured"
             echo ::set-output name=build::${BUILD}
