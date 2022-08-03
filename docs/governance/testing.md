@@ -22,3 +22,13 @@ testing.
 
 # Dependency Vulnerabilities
 Dependency vulnerabilities are monitored by Gihub. In addition we plan to use the [Linux Foundation Community Bridge](https://security.communitybridge.org) vulnerability detection platform.
+
+# Documentation local testing
+While contributing documentation to official Janssen Project [documentation](https://jans.io/docs/) it is important to make sure that documents meet [style guidelines](../CONTRIBUTING.md#documentation-style-guide) and have been proofread to remove any typographical or grammatical errors.
+Janssen Project uses [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) to create the documenation site. Before new content is pushed to the repository on GitHub, it should be tested locally by the author. Author can do this by deploying Material for MkDocs locally.
+
+High-level steps involve:
+1. [Install Material for MkDocs](https://squidfunk.github.io/mkdocs-material/getting-started/#installation)
+2. [Preview as you write](https://squidfunk.github.io/mkdocs-material/creating-your-site/#previewing-as-you-write)
+
+
