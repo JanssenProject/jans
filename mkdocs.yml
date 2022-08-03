@@ -70,7 +70,6 @@ nav:
         - 'Machine-to-Machine Authentication': 'admin/deployment/machine-to-machine.md'
         - 'FAQ': 'admin/deployment/faq.md'
     - 'Installation':
-        - 'admin/install/index.md'
         - 'VM Installation':
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
