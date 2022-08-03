@@ -1,12 +1,8 @@
 # Overview
 
-The [Janssen](https://github.com/JanssenProject/jans) platform provides the facility to make a fully customizable authentication flow. In these docs, We will guide you on user authentication at external Social Providers by using Passport-JS(a.k.a "inbound identity").
-
-The integration consists of custom authentication scripts, web pages for Janssen server, and the Passport Node.js application. Together, these assets coordinate the flows and interfaces required to configure the Janssen Server to support inbound identity with a range of external social providers e.g. Google, Apple, Facebook, etc.
+This is a guide for user authentication at any external Social Providers(Google, Apple, Facebook, etc) using Passport-JS(a.k.a "inbound identity").
 
 # Components
-
-Below are the key Components of this inbound identity flow:
 
 - A Janssen auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))
 - The [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py)
@@ -14,19 +10,19 @@ Below are the key Components of this inbound identity flow:
 
 # Authentication Flow
 
-User authenticate at external social provider, get back to Janssen server, user verification, and add authenticated user to Janssen server. `RP(Relying party)` application is your end-user application that will be used by your users and where you want to add this auth feature.
+After users authenticate at the external social identity provider, the control flows back to Janssen Authentication server where the user is verified and the user-id is provisioned into the Janssen server.
 
-[Diagram source file](https://github.com/GluuFederation/tutorials/files/9219902/inbound-identity-sequence.txt)
+[Diagram source file](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/files/inbound-identity-sequence.txt)
 
-![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/182106547-7082409c-2567-4b7c-89a3-72eb655fc22a.png)
+![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/182554283-b0846b8c-e3d5-4796-85a3-794776713c95.png)
 
-# How does a passport pass user data securely to the Janssen server?
+# Role of Passport-JS and Janssen's Authentication server
 
-In the below flow diagram you can see how the passport-js project encrypts and sign the user data and pass it to the Janssen server.
+1. Passport-js library encrypts and signs user data before passing it to the Janssen server.
+2. Janssen Auth server verifies the received JWT, decrypts data, add/update user into LDAP, and marks the user as authenticated. 
+Check [Passport-JS](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/server/routes.js#L175) and [Script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py#L366) Code For details.
 
-On the Janssen server side the verification of jwt, decryption of data, add/update user into LDAP, and authenticate user, all these things happen in [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py). You can check logic and flow in [the script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py).
-
-[Diagram source file](https://github.com/GluuFederation/tutorials/files/9219915/passport-data-sequence.txt)
+[Diagram source file](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/files/passport-data-sequence.txt)
 
 ![jans-passport-data](https://user-images.githubusercontent.com/39133739/181759914-a89bb296-fd98-4856-a611-567b68593a07.png)
 
@@ -207,7 +203,7 @@ The custom script has the following properties:
 
 ## Generate Keystore
 
-passport sends private key sign user data jwt to janssen server, for that we need to generate Keystore. keystore is a safe and passport-protected private key container. Use the below commands:
+Passport sends private key sign user data jwt to janssen server, for that we need to generate Keystore. keystore is a safe and passport-protected private key container. Use the below commands:
 
 ```
 # generate Keystore
