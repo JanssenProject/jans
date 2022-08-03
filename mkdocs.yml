@@ -483,6 +483,8 @@ nav:
             - 'Rollback': 'admin/upgrade/kubernetes/rollback.md'
         - 'FAQ': 'admin/upgrade/upgrade-faq.md'
 - 'Developer':
+      - 'Contribution Guidelines': 'CONTRIBUTING.md'
+      - 'Code of Conduct': 'CODE_OF_CONDUCT.md'
       - 'Design and Implementation':
             - 'Agama': 'developer/implementation-design/agama.md'
             - 'fidowallet': 'developer/implementation-design/fidowallet.md'
@@ -500,12 +502,11 @@ nav:
             - 'GitHub CI': 'developer/ci-cd/github-ci.md'
             - 'Jenkins CI': 'developer/ci-cd/jenkins-ci.md'
             - 'Release Process': 'developer/ci-cd/release-process.md'
+      - 'Development': 'developer/development.md'
+      - 'Testing': 'governance/testing.md'
       - 'Developer FAQ': 'developer/developer-faq.md'
 - 'Governance':
       - 'Charter': 'governance/charter.md'
       - 'Copyright-notice': 'governance/copyright-notices.md'
-      - 'Testing': 'governance/testing.md'
       - 'Triage': 'governance/triage.md'
-- 'Contribute':
-      - 'Contribution Guidelines': 'CONTRIBUTING.md'
-      - 'Code of Conduct': 'CODE_OF_CONDUCT.md'
+
