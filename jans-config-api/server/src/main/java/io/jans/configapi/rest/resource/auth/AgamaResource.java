@@ -8,7 +8,6 @@ package io.jans.configapi.rest.resource.auth;
 
 import io.jans.agama.model.Flow;
 import io.jans.agama.model.FlowMetadata;
-import io.jans.as.common.model.registration.Client;
 import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.dsl.TranspilerException;
 import io.jans.agama.dsl.error.SyntaxException;
