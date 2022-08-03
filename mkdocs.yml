@@ -485,7 +485,18 @@ nav:
 - 'Developer':
       - 'Design and Implementation':
             - 'Agama': 'developer/implementation-design/agama.md'
+            - 'fidowallet': 'developer/implementation-design/fidowallet.md'
             - 'jans-auth-server': 'developer/implementation-design/jans-auth-server.md'
+            - 'jans-cli': 'developer/implementation-design/jans-cli.md'
+            - 'jans-client-api': 'developer/implementation-design/jans-client-api.md'
+            - 'jans-config-api': 'developer/implementation-design/jans-config-api.md'
+            - 'jans-core': 'developer/implementation-design/jans-core.md'
+            - 'jans-eleven': 'developer/implementation-design/jans-eleven.md'
+            - 'jans-fido2': 'developer/implementation-design/jans-fido2.md'
+            - 'jans-notify': 'developer/implementation-design/jans-notify.md'
+            - 'jans-orm': 'developer/implementation-design/jans-orm.md'
+            - 'jans-scim': 'developer/implementation-design/jans-scim.md'
+
 - 'Governance':
       - 'Charter': 'governance/charter.md'
 - 'Contribute':
