@@ -9,6 +9,8 @@ on:
     types:
       - opened
       - reopened
+    paths-ignore:
+      - "docs/**"
   workflow_dispatch:
 jobs:
   check-prs-issue:
