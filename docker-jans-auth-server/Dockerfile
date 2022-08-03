@@ -35,7 +35,8 @@ EXPOSE 8080
 # ======
 
 ARG JYTHON_VERSION=2.7.3
-RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+ARG JYTHON_BUILD_DATE='2022-08-01 07:49'
+RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
@@ -55,7 +56,7 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # ===========
 
 ENV CN_VERSION=1.0.2-SNAPSHOT
-ENV CN_BUILD_DATE='2022-07-26 14:17'
+ENV CN_BUILD_DATE='2022-08-03 12:37'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -117,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=7ad2b06edf70322d85b40de05a423c2f8cdd4200
+ARG JANS_SOURCE_VERSION=9b543572bcb893683b4d425ebe2b36f5ccfc0ee9
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
