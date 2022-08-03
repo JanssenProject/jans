@@ -2053,6 +2053,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/openid/clients.write]
+		
   /jans-config-api/api/v1/uma/resources:
     get:
       tags:
@@ -2169,6 +2170,58 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
+		
+    delete:
+      tags:
+        - OAuth - UMA Resources
+      summary: Deletes an UMA resource.
+      description: Deletes an UMA resource.
+      operationId: delete-oauth-uma-resources-by-id
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/uma/resources.delete]
+		
+    patch:
+      tags:
+        - OAuth - UMA Resources
+      summary: Partially updates an UMA resource by Inum.
+      description: Partially updates an UMA resource by Inum.
+      operationId: patch-oauth-uma-resources-by-id
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMAResource
+                $ref: '#/components/schemas/UmaResource'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/uma/resources.write]
+		
+		
   /jans-config-api/api/v1/uma/resources/clientId/{clientId}:
     parameters:
       - name: clientId
@@ -2201,54 +2254,8 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
-    delete:
-      tags:
-        - OAuth - UMA Resources
-      summary: Deletes an UMA resource.
-      description: Deletes an UMA resource.
-      operationId: delete-oauth-uma-resources-by-id
-      responses:
-        '204':
-          description: No Content
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oauth2: [https://jans.io/oauth/config/uma/resources.delete]
-    patch:
-      tags:
-        - OAuth - UMA Resources
-      summary: Partially updates an UMA resource by Inum.
-      description: Partially updates an UMA resource by Inum.
-      operationId: patch-oauth-uma-resources-by-id
-      requestBody:
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/PatchRequest'
-                description: String representing patch-document.
-                example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: UMAResource
-                $ref: '#/components/schemas/UmaResource'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oauth2: [https://jans.io/oauth/config/uma/resources.write]
+
+
   /jans-config-api/api/v1/scopes:
     get:
       tags:
@@ -2561,51 +2568,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oauth2: [https://jans.io/oauth/config/agama.write]
-
-    put:
-      summary: Updates agama flow from source file.
-      description: Updates agama flow from source file..
-      operationId: put-agama-flow-from-source
-      tags:
-        - Configuration – Agama Flow
-      requestBody:
-        content:
-          text/plain:
-            schema:
-              type: string
-
-      responses:
-        '201':
-          description: CREATED
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgamaFlow'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oauth2: [https://jans.io/oauth/config/agama.write]
-		
-    patch:
-      summary: Partially modify Agama Flow.
-      description: Partially modify Agama Flow.
-      operationId: patch-agama-flow
-      security:
-        - oauth2: [https://jans.io/oauth/config/agama.write]
-      tags:
-        - Configuration – Agama Flow
-      requestBody:
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/PatchRequest'
-                description: String representing patch-document.
-                example: '[ {op:replace, path: revision, value: \"2\" } ]'
+        - oauth2: [https://jans.io/oauth/config/agama.write] 
 		
     delete:
       summary: Deletes an agama flow based on Qname.
