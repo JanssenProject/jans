@@ -221,7 +221,7 @@ Scenario: Create agama flow with source data in request body
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
     #Update agama flow
-	Given url mainUrl + '/' +encodedFlowName
+	Given url mainUrl + '/source/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
     And header Content-Type = 'text/plain'
     And header Accept = 'application/json'
