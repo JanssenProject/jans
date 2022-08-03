@@ -73,6 +73,13 @@ public class TestInjectionService {
     private PersistenceEntryManager persistenceEntryManager;
 
     public void initInjection() {
+        // If tests are skipped,then injection is not loaded for tests
+        if (System.getProperties().containsKey("maven.test.skip")) {
+            String strTestSkip = System.getProperties().getProperty("maven.test.skip");
+            if ("true".equals(strTestSkip)) {
+                return;
+            }
+        }
         HM_TEST_INJECTOR.put("InumGenerator", inumGenerator);
         HM_TEST_INJECTOR.put("StaticConfiguration", staticConfiguration);
         HM_TEST_INJECTOR.put("ClientService", clientService);

@@ -573,12 +573,8 @@ public class ConfigurationFactory {
     }
 
     private void loadBaseConfiguration() {
-        log.info("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
-
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
         this.baseConfigurationFileLastModifiedTime = new File(BASE_PROPERTIES_FILE).lastModified();
-
-        log.info("Loaded base configuration:{}", this.baseConfiguration.getProperties());
     }
 
     public void loadCryptoConfigurationSalt() {
