@@ -108,11 +108,11 @@ def generate_public_key(
         ]
 
         # add Domains to SAN
-        for dn in kwargs.get("extra_dns", []):
+        for dn in kwargs.get("extra_dns") or []:
             sans.append(x509.DNSName(dn))
 
         # add IPs to SAN
-        for ip in kwargs.get("extra_ips", []):
+        for ip in kwargs.get("extra_ips") or []:
             sans.append(x509.IPAddress(IPv4Address(ip)))
 
         # make SANs unique
@@ -207,11 +207,11 @@ def generate_csr(
         ]
 
         # add Domains to SAN
-        for dn in kwargs.get("extra_dns", []):
+        for dn in kwargs.get("extra_dns") or []:
             sans.append(x509.DNSName(dn))
 
         # add IPs to SAN
-        for ip in kwargs.get("extra_ips", []):
+        for ip in kwargs.get("extra_ips") or []:
             sans.append(x509.IPAddress(IPv4Address(ip)))
 
         # make SANs unique
