@@ -496,9 +496,11 @@ nav:
             - 'jans-notify': 'developer/implementation-design/jans-notify.md'
             - 'jans-orm': 'developer/implementation-design/jans-orm.md'
             - 'jans-scim': 'developer/implementation-design/jans-scim.md'
-
 - 'Governance':
       - 'Charter': 'governance/charter.md'
+      - 'Copyright-notice': 'governance/copyright-notices.md'
+      - 'Testing': 'governance/testing.md'
+      - 'Triage': 'governance/triage.md'
 - 'Contribute':
       - 'Contribution Guidelines': 'CONTRIBUTING.md'
       - 'Code of Conduct': 'CODE_OF_CONDUCT.md'
