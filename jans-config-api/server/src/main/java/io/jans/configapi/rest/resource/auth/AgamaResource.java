@@ -185,7 +185,7 @@ public class AgamaResource extends ConfigBaseResource {
 
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
-    @Path(ApiConstants.QNAME_PATH)
+    @Path(ApiConstants.SOURCE + ApiConstants.QNAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
     public Response updateFlowFromFile(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
