@@ -62,9 +62,22 @@ Scenario: Create, update and delete agama flow
 	When method POST 
     Then status 201 
 	And print response
+	And print response.qname 	
+	Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName
+	#Fetch agama flow by name and with source
+    Given url mainUrl + '/' +encodedFlowName+ '?includeSource=true'
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
 	Then def result = response
-    And print 'Old transHash ='+response.transHash 
-	Then set result.transHash = 'UpdatedAgamaFlowtransHash' 
+    And print result
+    And print 'Old revision ='+response.revision 
+	Then set result.revision = response.revision+1
+    And print result
     And print response.qname 	
 	Then def flowName = response.qname
     And print flowName 
@@ -78,7 +91,7 @@ Scenario: Create, update and delete agama flow
 	Then status 200 
 	And print response
  	And print response.qname 	
-    And print response.transHash
+    And print response.revision
     Then def flowName = response.qname
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
@@ -95,7 +108,7 @@ Scenario: Create, update and delete agama flow
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
 	#Fetch agama flow by name and with source
-	Given url mainUrl + '/' +encodedFlowName + '?includeSource'
+	Given url mainUrl + '/' +encodedFlowName + '?includeSource=true'
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
     Then status 200 
@@ -106,7 +119,7 @@ Scenario: Create, update and delete agama flow
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
 	#Fetch agama flow by name and with source
-	Given url mainUrl + '?includeSource'
+	Given url mainUrl + '?includeSource=true'
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
     Then status 200 
@@ -139,13 +152,22 @@ Scenario: Create agama flow with source data in request body
 	When method POST 
     Then status 201 
 	And print response
+	Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName
+	#Fetch agama flow by name and with source
+    Given url mainUrl + '/' +encodedFlowName+ '?includeSource=true'
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
     And print response.qname 	
 	Then def flowName = response.qname
     And print flowName 
 	Then def result = response
-    And print 'Old transHash ='+response.transHash 
-	Then set result.transHash = 'UpdatedAgamaFlowtransHash' 
-	Then def encodedFlowName = funGetEncodedValue(flowName)
+    And print 'Old revision ='+response.revision 
+	Then set result.revision = response.revision+1
  	And print encodedFlowName 
     #Update agama flow
     Given url mainUrl + '/' +encodedFlowName
@@ -155,7 +177,7 @@ Scenario: Create agama flow with source data in request body
 	Then status 200 
 	And print response
  	And print response.qname 	
-    And print response.transHash
+    And print response.revision
     Then def flowName = response.qname
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
@@ -193,12 +215,22 @@ Scenario: Create agama flow with source data in request body
 	When method POST 
     Then status 201 
 	And print response
+	Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName
+	#Fetch agama flow by name and with source
+    Given url mainUrl + '/' +encodedFlowName+ '?includeSource=true'
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
     And print response.qname 	
 	Then def flowName = response.qname
     And print flowName 
 	Then def result = response
-    And print 'Old transHash ='+response.transHash 
-	Then set result.transHash = 'UpdatedAgamaFlowtransHash' 
+    And print 'Old revision ='+response.revision 
+	Then set result.revision = response.revision+1
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
     #Update agama flow
@@ -211,7 +243,7 @@ Scenario: Create agama flow with source data in request body
 	Then status 200 
 	And print response
  	And print response.qname 	
-    And print response.transHash
+    And print response.revision
     Then def flowName = response.qname
     And print flowName 
 	Then def encodedFlowName = funGetEncodedValue(flowName)
@@ -243,6 +275,16 @@ Scenario: Create and Patch agama flow
 	When method POST 
     Then status 201 
 	And print response
+	Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName
+	#Fetch agama flow by name and with source
+    Given url mainUrl + '/' +encodedFlowName+ '?includeSource=true'
+	And header Authorization = 'Bearer ' + accessToken 
+	When method GET 
+    Then status 200 
+	And print response
 	Then def result = response
     And print response.qname 	
 	Then def flowName = response.qname
@@ -253,8 +295,7 @@ Scenario: Create and Patch agama flow
 	Then def revision_before = response.revision
 	And print 'revision = '+revision_before
     And print result.jansHideOnDiscovery
-    And def orig_jansHideOnDiscovery = (result.jansHideOnDiscovery == null ? false : result.jansHideOnDiscovery)
-    And def request_body = (result.jansHideOnDiscovery == null ? "[ {\"op\":\"add\", \"path\": \"/jansHideOnDiscovery\", \"value\":"+orig_jansHideOnDiscovery+" } ]" : "[ {\"op\":\"replace\", \"path\": \"/jansHideOnDiscovery\", \"value\":"+orig_jansHideOnDiscovery+" } ]")
+    And def request_body = (result.revision == null ? "[ {\"op\":\"add\", \"path\": \"/revision\", \"value\":revision_before+1 } ]" : "[ {\"op\":\"replace\", \"path\": \"/revision\", \"value\":revision_before+1 } ]")
     And print 'request_body ='+request_body
     Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 

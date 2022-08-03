@@ -351,16 +351,21 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     private List<Flow> getAgamaFlowDetails(List<Flow> flows, boolean includeSource) {
-        if (flows == null || flows.isEmpty() || !includeSource) {
+
+        log.debug("Flow data filter - flows:{}, includeSource:{}", flows, includeSource);
+        if (flows == null || flows.isEmpty()) {
             return flows;
         }
 
         for (Flow flow : flows) {
-            flow.setBaseDn(null);
-            flow.setDn(null);
-            flow.setSource(null);
-            flow.setTransHash(null);
+            
             flow.setTranspiled(null);
+            flow.setTransHash(null);
+            
+            if (!includeSource) {
+                flow.setSource(null);
+            }
+
         }
         return flows;
 

@@ -2561,7 +2561,52 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oauth2: [https://jans.io/oauth/config/agama.write]	
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+
+    put:
+      summary: Updates agama flow from source file.
+      description: Updates agama flow from source file..
+      operationId: put-agama-flow-from-source
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+		
+    patch:
+      summary: Partially modify Agama Flow.
+      description: Partially modify Agama Flow.
+      operationId: patch-agama-flow
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: revision, value: \"2\" } ]'
+		
     delete:
       summary: Deletes an agama flow based on Qname.
       description: Deletes an agama flow based on Qname.
@@ -3577,6 +3622,9 @@ components:
             https://jans.io/oauth/config/user.readonly: View user related information
             https://jans.io/oauth/config/user.write: Manage user related information
             https://jans.io/oauth/config/user.delete: Delete user related information
+            https://jans.io/oauth/config/agama.readonly: View Agama Flow related information
+            https://jans.io/oauth/config/agama.write: Manage Agama Flow related information
+            https://jans.io/oauth/config/agama.delete: Delete Agama Flow related information
             
 
   responses:
