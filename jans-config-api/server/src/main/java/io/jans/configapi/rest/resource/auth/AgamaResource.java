@@ -229,7 +229,7 @@ public class AgamaResource extends ConfigBaseResource {
         log.trace(" Flow name for update is:{}", decodedFlowName);
 
         // check if flow exists
-        Flow existingFlow = findFlow(decodedFlowName, false, false);
+        Flow existingFlow = findFlow(decodedFlowName, false, true);
         log.debug(" existingFlow:{}", existingFlow);
 
         existingFlow = Jackson.applyPatch(pathString, existingFlow);

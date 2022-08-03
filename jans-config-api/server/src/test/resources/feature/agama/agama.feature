@@ -124,7 +124,7 @@ Scenario: Create, update and delete agama flow
 	Then status 204
 	And print response
 
-@ignore	
+
 @CreateFlowWithDataInRequestBodyUpdateDelete
 Scenario: Create agama flow with source data in request body
     #Create agama flow
@@ -188,7 +188,7 @@ Scenario: Create agama flow with source data in request body
 	Then status 204
 	And print response
 
-@ignore	
+
 @CreateAndUpdateFlowWithDataInRequestBodyUpdateDelete
 Scenario: Create agama flow with source data in request body
     #Create agama flow
@@ -218,8 +218,6 @@ Scenario: Create agama flow with source data in request body
 	Then def flowName = response.qname
     And print flowName 
 	Then def result = response
-    And print 'Old revision ='+response.revision 
-	Then set result.revision = response.revision+1
 	Then def encodedFlowName = funGetEncodedValue(flowName)
  	And print encodedFlowName 
     #Update agama flow
@@ -255,8 +253,8 @@ Scenario: Create agama flow with source data in request body
 	Then status 204
 	And print response
 
-@ignore	
-@CreateAndPatchFlow
+	
+@CreateAndPatchFlowAndDelete
 Scenario: Create and Patch agama flow
     #Create agama flow
 	Given url mainUrl
@@ -284,8 +282,10 @@ Scenario: Create and Patch agama flow
     #Patch agama flow
 	Then def revision_before = response.revision
 	And print 'revision = '+revision_before
+    Then def revision_updated = revision_before+1
+	And print 'revision_updated = '+revision_updated
     And print result.jansHideOnDiscovery
-    And def request_body = (result.revision == null ? "[ {\"op\":\"add\", \"path\": \"/revision\", \"value\":revision_before+1 } ]" : "[ {\"op\":\"replace\", \"path\": \"/revision\", \"value\":revision_before+1 } ]")
+    And def request_body = (result.revision == null ? "[ {\"op\":\"add\", \"path\": \"/revision\", \"value\":"+revision_updated+" } ]" : "[ {\"op\":\"replace\", \"path\": \"/revision\", \"value\":"+revision_updated+" } ]")
     And print 'request_body ='+request_body
     Given url mainUrl + '/' +encodedFlowName
 	And header Authorization = 'Bearer ' + accessToken 
@@ -296,3 +296,13 @@ Scenario: Create and Patch agama flow
     When method PATCH
     Then status 200
     And print response	
+    Then def flowName = response.qname
+    And print flowName 
+	Then def encodedFlowName = funGetEncodedValue(flowName)
+ 	And print encodedFlowName 
+	#Delete agama flow by name
+    Given url mainUrl + '/' +encodedFlowName
+	And header Authorization = 'Bearer ' + accessToken 
+	When method DELETE 
+	Then status 204
+	And print response
