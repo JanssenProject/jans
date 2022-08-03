@@ -3,7 +3,6 @@ package io.jans.agama.engine.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.jdi.InvalidTypeException;
 
 import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.engine.continuation.PendingException;
@@ -350,14 +349,14 @@ public class FlowService {
         
     }
     
-    private NativeObject checkJSReturnedValue(Object obj) throws InvalidTypeException {
+    private NativeObject checkJSReturnedValue(Object obj) throws Exception {
 
         try {
             //obj is not null
             return NativeObject.class.cast(obj);
         } catch (ClassCastException e) {
             if (Undefined.isUndefined(obj)) {
-                throw new InvalidTypeException("No Finish instruction was reached");
+                throw new Exception("No Finish instruction was reached");
             } else throw e;
         }
 
