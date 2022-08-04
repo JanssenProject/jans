@@ -32,22 +32,22 @@ public class DataUtil {
     private static final Logger logger = LoggerFactory.getLogger(DataUtil.class);
 
     public static Class<?> getPropertType(String className, String name) throws MappingException {
-        logger.error("className:{} , name:{} ", className, name);
+        logger.debug("className:{} , name:{} ", className, name);
         return ReflectHelper.reflectedPropertyClass(className, name);
     }
 
     public static Getter getGetterMethod(Class<?> clazz, String name) throws MappingException {
-        logger.error("Get Getter fromclazz:{} , name:{} ", clazz, name);
+        logger.debug("Get Getter fromclazz:{} , name:{} ", clazz, name);
         return ReflectHelper.getGetter(clazz, name);
     }
 
     public static Setter getSetterMethod(Class<?> clazz, String name) throws MappingException {
-        logger.error("Get Setter from clazz:{} for name:{} ", clazz, name);
+        logger.debug("Get Setter from clazz:{} for name:{} ", clazz, name);
         return ReflectHelper.getSetter(clazz, name);
     }
 
     public static Object getValue(Object object, String property) throws MappingException {
-        logger.error("Get value from object:{} for property:{} ", object, property);
+        logger.debug("Get value from object:{} for property:{} ", object, property);
         return ReflectHelper.getValue(object, property);
     }
 
@@ -61,10 +61,10 @@ public class DataUtil {
 
     public static Object invokeMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        logger.error("Invoke clazz:{} on methodName:{} with name:{} ", clazz, methodName, parameterTypes);
+        logger.debug("Invoke clazz:{} on methodName:{} with name:{} ", clazz, methodName, parameterTypes);
         Method m = clazz.getDeclaredMethod(methodName, parameterTypes);
         Object obj = m.invoke(null, parameterTypes);
-        logger.error("methodName:{} returned obj:{} ", methodName, obj);
+        logger.debug("methodName:{} returned obj:{} ", methodName, obj);
         return obj;
     }
 
@@ -105,41 +105,41 @@ public class DataUtil {
     }
 
     public static boolean containsField(List<Field> allFields, String attribute) {
-        logger.error("allFields:{},  attribute:{}, allFields.contains(attribute):{} ", allFields, attribute,
+        logger.debug("allFields:{},  attribute:{}, allFields.contains(attribute):{} ", allFields, attribute,
                 allFields.stream().anyMatch(f -> f.getName().equals(attribute)));
 
         return allFields.stream().anyMatch(f -> f.getName().equals(attribute));
     }
 
     public boolean isStringField(Map<String, String> objectPropertyMap, String attribute) {
-        logger.error("Check if field is string objectPropertyMap:{}, attribute:{} ", objectPropertyMap, attribute);
+        logger.debug("Check if field is string objectPropertyMap:{}, attribute:{} ", objectPropertyMap, attribute);
         if (objectPropertyMap == null || StringUtils.isBlank(attribute)) {
             return false;
         }
-        logger.error("attribute:{} , datatype:{}", attribute, objectPropertyMap.get(attribute));
+        logger.debug("attribute:{} , datatype:{}", attribute, objectPropertyMap.get(attribute));
         return ("java.lang.String".equalsIgnoreCase(objectPropertyMap.get(attribute)));
     }
 
     public static List<Field> getAllFields(Class<?> type) {
         List<Field> allFields = new ArrayList<>();
         getAllFields(allFields, type);
-        logger.error("Fields:{} of type:{}  ", allFields, type);
+        logger.debug("Fields:{} of type:{}  ", allFields, type);
         return allFields;
     }
 
     public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
-        logger.error("Getting fields type:{} - fields:{} ", type, fields);
+        logger.debug("Getting fields type:{} - fields:{} ", type, fields);
         fields.addAll(Arrays.asList(type.getDeclaredFields()));
 
         if (type.getSuperclass() != null) {
             getAllFields(fields, type.getSuperclass());
         }
-        logger.error("Final fields:{} of type:{} ", fields, type);
+        logger.debug("Final fields:{} of type:{} ", fields, type);
         return fields;
     }
 
     public static Map<String, String> getFieldTypeMap(Class<?> clazz) {
-        logger.error("clazz:{} ", clazz);
+        logger.debug("clazz:{} ", clazz);
         Map<String, String> propertyTypeMap = new HashMap<>();
 
         if (clazz == null) {
@@ -147,17 +147,17 @@ public class DataUtil {
         }
 
         List<Field> fields = getAllFields(clazz);
-        logger.error("AllFields:{} ", fields);
+        logger.debug("AllFields:{} ", fields);
 
         for (Field field : fields) {
-            logger.error(
+            logger.debug(
                     "field:{} , field.getAnnotatedType():{}, field.getAnnotations():{} , field.getType().getAnnotations():{}, field.getType().getCanonicalName():{} , field.getType().getClass():{} , field.getType().getClasses():{} , field.getType().getComponentType():{}",
                     field, field.getAnnotatedType(), field.getAnnotations(), field.getType().getAnnotations(),
                     field.getType().getCanonicalName(), field.getType().getClass(), field.getType().getClasses(),
                     field.getType().getComponentType());
             propertyTypeMap.put(field.getName(), field.getType().getSimpleName());
         }
-        logger.error("Final propertyTypeMap{} ", propertyTypeMap);
+        logger.debug("Final propertyTypeMap{} ", propertyTypeMap);
         return propertyTypeMap;
     }
 
@@ -166,23 +166,23 @@ public class DataUtil {
     }
 
     public static boolean isKeyPresentInMap(String key, Map<String, String> map) {
-        logger.error("Check key:{} is present in map:{}", key, map);
+        logger.debug("Check key:{} is present in map:{}", key, map);
         if (StringHelper.isEmpty(key) || map == null || map.isEmpty()) {
             return false;
         }
-        logger.error(" key:{} present in map:{} ?:{}", key, map, map.keySet().contains(key));
+        logger.debug(" key:{} present in map:{} ?:{}", key, map, map.keySet().contains(key));
         return map.keySet().contains(key);
     }
 
     public static boolean isAttributeInExclusion(String className, String attribute,
             Map<String, List<String>> exclusionMap) {
-        logger.error("Check if object:{} attribute:{} is in exclusionMap:{}", className, attribute, exclusionMap);
+        logger.debug("Check if object:{} attribute:{} is in exclusionMap:{}", className, attribute, exclusionMap);
         if (StringHelper.isEmpty(className) || StringHelper.isEmpty(attribute) || exclusionMap == null
                 || exclusionMap.isEmpty()) {
             return false;
         }
 
-        logger.error("Map contains key exclusionMap.keySet().contains(className):{}",
+        logger.debug("Map contains key exclusionMap.keySet().contains(className):{}",
                 exclusionMap.keySet().contains(className));
 
         if (exclusionMap.keySet().contains(className)) {
