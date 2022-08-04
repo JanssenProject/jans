@@ -498,7 +498,7 @@ public class UmaValidationService {
     public void validateResource(io.jans.as.model.uma.UmaResource resource) {
         validateScopeExpression(resource.getScopeExpression());
 
-        List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
+        List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(resource.getScopes());
         if (scopeDNs.isEmpty() && StringUtils.isBlank(resource.getScopeExpression())) {
             log.error("Invalid resource. Both `scope` and `scope_expression` are blank.");
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Invalid resource. Both `scope` and `scope_expression` are blank.");
