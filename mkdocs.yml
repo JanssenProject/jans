@@ -503,7 +503,7 @@ nav:
             - 'Jenkins CI': 'developer/ci-cd/jenkins-ci.md'
             - 'Release Process': 'developer/ci-cd/release-process.md'
       - 'Development': 'developer/development.md'
-      - 'Testing': 'governance/testing.md'
+      - 'Testing': 'developer/testing.md'
       - 'Developer FAQ': 'developer/developer-faq.md'
 - 'Governance':
       - 'Charter': 'governance/charter.md'
