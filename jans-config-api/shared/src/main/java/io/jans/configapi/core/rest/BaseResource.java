@@ -17,7 +17,6 @@ import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +92,10 @@ public class BaseResource {
         throw new BadRequestException(getBadRequestException(msg));
     }
     
+    public static void thorwBadRequestException(Object obj) {
+        throw new BadRequestException(getBadRequestException(obj));
+    }
+    
     public static void thorwInternalServerException(String msg) {
         throw new InternalServerErrorException(getInternalServerException(msg));
     }
@@ -126,6 +129,10 @@ public class BaseResource {
         return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
     }
 
+    protected static Response getBadRequestException(Object obj) {
+        return Response.status(Response.Status.BAD_REQUEST).entity(obj).build();
+    }
+    
     protected static Response getInternalServerException(String msg) {
         ApiError error = new ApiError.ErrorBuilder()
                 .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg)
