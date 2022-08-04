@@ -9,15 +9,9 @@ package io.jans.as.server.comp;
 import io.jans.as.model.common.IdType;
 import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.idgen.ws.rs.InumGenerator;
-import io.jans.as.server.service.AppInitializer;
-import io.jans.as.server.service.TestInjectionService;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import jakarta.inject.Inject;
-
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
