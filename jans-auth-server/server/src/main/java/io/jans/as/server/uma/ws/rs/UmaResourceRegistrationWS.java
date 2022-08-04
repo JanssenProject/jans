@@ -298,7 +298,7 @@ public class UmaResourceRegistrationWS {
         }
 
         final String resourceDn = resourceService.getDnForResource(rsid);
-        final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
+        final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(resource.getScopes());
 
         final Calendar calendar = Calendar.getInstance();
         Date iat = calendar.getTime();
@@ -355,7 +355,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setName(resource.getName());
         ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
-        ldapResource.setScopes(umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes()));
+        ldapResource.setScopes(umaScopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(resource.getScopes()));
         ldapResource.setScopeExpression(resource.getScopeExpression());
         ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
         ldapResource.setType(resource.getType());
