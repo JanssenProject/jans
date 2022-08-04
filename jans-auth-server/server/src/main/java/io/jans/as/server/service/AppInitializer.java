@@ -249,7 +249,7 @@ public class AppInitializer {
                 .fire(new ApplicationInitializedEvent());
 
         //Loading injection instances for tests
-        testInjectionService.initInjection();
+//        testInjectionService.initInjection();
 
     }
 

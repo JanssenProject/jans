@@ -24,8 +24,7 @@ import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaRptService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
-
-import static io.jans.as.server.service.TestInjectionService.HM_TEST_INJECTOR;
+import io.jans.service.cdi.util.CdiUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,74 +43,74 @@ public abstract class BaseComponentTest extends BaseTest {
     }
 
     public static InumGenerator getInumGenerator() {
-        return (InumGenerator) HM_TEST_INJECTOR.get("InumGenerator");
+        return CdiUtil.bean(InumGenerator.class);
     }
 
     public static StaticConfiguration getStaticConfiguration() {
-        return (StaticConfiguration) HM_TEST_INJECTOR.get("StaticConfiguration");
+        return CdiUtil.bean(StaticConfiguration.class);
     }
 
     public ClientService getClientService() {
-        return (ClientService) HM_TEST_INJECTOR.get("ClientService");
+        return CdiUtil.bean(ClientService.class);
     }
 
     public InumService getInumService() {
-        return (InumService) HM_TEST_INJECTOR.get("InumService");
+        return CdiUtil.bean(InumService.class);
     }
 
     public CleanerTimer getCleanerTimer() {
-        return (CleanerTimer) HM_TEST_INJECTOR.get("CleanerTimer");
+        return CdiUtil.bean(CleanerTimer.class);
     }
 
     public CacheService getCacheService() {
-        return (CacheService) HM_TEST_INJECTOR.get("CacheService");
+        return CdiUtil.bean(CacheService.class);
     }
 
     public UmaRptService getUmaRptService() {
-        return (UmaRptService) HM_TEST_INJECTOR.get("UmaRptService");
+        return CdiUtil.bean(UmaRptService.class);
     }
 
     public UmaResourceService getUmaResourceService() {
-        return (UmaResourceService) HM_TEST_INJECTOR.get("UmaResourceService");
+        return CdiUtil.bean(UmaResourceService.class);
     }
 
     public UmaPermissionService getUmaPermissionService() {
-        return (UmaPermissionService) HM_TEST_INJECTOR.get("UmaPermissionService");
+        return CdiUtil.bean(UmaPermissionService.class);
     }
 
     public UmaPctService getUmaPctService() {
-        return (UmaPctService) HM_TEST_INJECTOR.get("UmaPctService");
+        return CdiUtil.bean(UmaPctService.class);
     }
 
     public AuthorizationGrantList getAuthorizationGrantList() {
-        return (AuthorizationGrantList) HM_TEST_INJECTOR.get("AuthorizationGrantList");
+        return CdiUtil.bean(AuthorizationGrantList.class);
     }
 
     public GrantService getGrantService() {
-        return (GrantService) HM_TEST_INJECTOR.get("GrantService");
+        return CdiUtil.bean(GrantService.class);
     }
 
     public EncryptionService getEncryptionService() {
-        return (EncryptionService) HM_TEST_INJECTOR.get("EncryptionService");
+        return CdiUtil.bean(EncryptionService.class);
     }
 
     public ConfigurationFactory getConfigurationFactory() {
-        return (ConfigurationFactory) HM_TEST_INJECTOR.get("ConfigurationFactory");
+        return CdiUtil.bean(ConfigurationFactory.class);
     }
 
     public AbstractCryptoProvider getAbstractCryptoProvider() {
-        return (AbstractCryptoProvider) HM_TEST_INJECTOR.get("AbstractCryptoProvider");
+        return CdiUtil.bean(AbstractCryptoProvider.class);
     }
 
     public SessionIdService getSessionIdService() {
-        return (SessionIdService) HM_TEST_INJECTOR.get("SessionIdService");
+        return CdiUtil.bean(SessionIdService.class);
     }
 
     public UserService getUserService() {
-        return (UserService) HM_TEST_INJECTOR.get("UserService");
+        return CdiUtil.bean(UserService.class);
     }
 
     public PersistenceEntryManager getPersistenceEntryManager() {
-        return (PersistenceEntryManager) HM_TEST_INJECTOR.get("PersistenceEntryManager");
+        return CdiUtil.bean(PersistenceEntryManager.class);
     }
 }

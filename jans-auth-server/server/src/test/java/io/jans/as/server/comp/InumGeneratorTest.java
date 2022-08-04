@@ -28,7 +28,7 @@ public class InumGeneratorTest extends BaseComponentTest {
 
     @Test
     public void test() {
-        InumGenerator inumGenerator = (InumGenerator) TestInjectionService.HM_TEST_INJECTOR.get("InumGenerator");
+        InumGenerator inumGenerator = getInumGenerator();
         final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
         Assert.assertTrue(StringUtils.isNotBlank(inum));
     }
