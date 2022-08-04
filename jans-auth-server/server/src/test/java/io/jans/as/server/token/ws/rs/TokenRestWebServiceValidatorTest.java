@@ -251,4 +251,30 @@ public class TokenRestWebServiceValidatorTest {
         }
         fail("No error when refreshToken is expired.");
     }
+
+    @Test
+    public void validateUser_whenUserIsNull_shouldRaiseError() {
+        try {
+            validator.validateUser(null, AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertEquals(e.getResponse().getStatus(), 401);
+            return;
+        }
+        fail("No error when user is null.");
+    }
+
+    @Test
+    public void validateUser_whenUserIsValid_shouldNotRaiseError() {
+        try {
+            final User user = new User();
+            user.setUserId("test_user");
+            user.setCreatedAt(new Date());
+
+            validator.validateUser(user, AUDIT_LOG);
+            return;
+        } catch (WebApplicationException e) {
+            // ignore
+        }
+        fail("Error for valid user is raised.");
+    }
 }

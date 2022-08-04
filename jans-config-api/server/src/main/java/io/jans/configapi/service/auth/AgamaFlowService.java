@@ -181,7 +181,7 @@ public class AgamaFlowService implements Serializable {
         logger.debug("Checking mandatory errorMsg:{} ", errorMsg);
 
         if (errorMsg.length() > 0) {
-            errorMsg.insert(0, "Required feilds missing -> (");
+            errorMsg.insert(0, "Required fields missing -> (");
             errorMsg.replace(errorMsg.lastIndexOf(","), errorMsg.length(), "");
             errorMsg.append("). ");
         }
@@ -255,7 +255,7 @@ public class AgamaFlowService implements Serializable {
         logger.debug("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
 
         if (unwantedAttributes.length() > 0) {
-            unwantedAttributes.insert(0, "Value of these feilds should be null -> (");
+            unwantedAttributes.insert(0, "Value of these fields should be null -> (");
             unwantedAttributes.replace(unwantedAttributes.lastIndexOf(","), unwantedAttributes.length(), "");
             unwantedAttributes.append(").");
         }
@@ -304,7 +304,7 @@ public class AgamaFlowService implements Serializable {
                     || StringUtils.isNotBlank(flowMetadata.getAuthor())
                     || StringUtils.isNotBlank(flowMetadata.getDescription()) || flowMetadata.getInputs() != null
                     || (flowMetadata.getTimeout() != null && flowMetadata.getTimeout() > 0)
-                    || flowMetadata.getProperties() != null || flowMetadata.getTimestamp() > 0) {
+                    || flowMetadata.getProperties() != null ) {
                 logger.debug("FlowMetadata is not null !!!");
                 return true;
             }

@@ -44,6 +44,10 @@ Agama engine will pick the messages from the bundle that best matches the langua
 
 A file with no suffix, i.e. `jans-auth.properties` is used as fallback when a message cannot be found in specific language/country combination. To learn how to reference a message in a template, visit [this](./ui-pages.md#data-model) page.
 
+### How to modify the built-in error pages?
+
+Agama features some error pages out-of-the-box. They can be customized by editing the corresponding files referenced in the [configuration](./engine-config.md) doc page.  
+
 ### Is Javascript supported?
 
 Yes, the template engine is not concerned about the kind of contents linked in markup. It does not even care if your markup makes any sense. For FreeMarker, templates just produce a textual output. 
