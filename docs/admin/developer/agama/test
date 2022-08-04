@@ -1,6 +1,6 @@
 //This is a comment
 Flow test
-    Basepath "hello" 
+    Basepath "hello"
 
 in = { name: "John" }
 RRF "index.ftlh" in

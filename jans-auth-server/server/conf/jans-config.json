@@ -437,7 +437,7 @@
         "finishedFlowPage": "finished.ftlh",
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
-            "Expires": "0"
+            "Cache-Control": "max-age=0, no-store"
         }
     }
 }
