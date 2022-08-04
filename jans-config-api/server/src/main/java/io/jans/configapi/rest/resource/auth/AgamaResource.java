@@ -184,8 +184,8 @@ public class AgamaResource extends ConfigBaseResource {
         String decodedFlowName = getURLDecodedValue(flowName);
         logger.trace(" Agama flow name for update is:{}", decodedFlowName);
 
-        // check if flow with same name already exists
-        Flow existingFlow = findFlow(decodedFlowName, false, false);
+        // check if flow with same name exists
+        Flow existingFlow = findFlow(decodedFlowName, true, false);
         logger.debug(" Agama existingFlow:{}", existingFlow);
 
         // Update source and revision
@@ -265,7 +265,7 @@ public class AgamaResource extends ConfigBaseResource {
         } catch (EntryPersistenceException e) {
             logger.error("No flow found with the name:{} ", flowName);
             if (throwError) {
-                throw new NotFoundException(getNotFoundError("Flow - " + flowName + "!!!"));
+                throw new NotFoundException(getNotFoundError("Flow - '" + flowName + "'"));
             }
         }
         return flow;
@@ -387,7 +387,6 @@ public class AgamaResource extends ConfigBaseResource {
         }
 
         for (Flow flow : flows) {
-
             flow.setTranspiled(null);
             flow.setTransHash(null);
 
