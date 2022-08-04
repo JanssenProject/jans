@@ -8,11 +8,13 @@ package io.jans.as.server.service;
 
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.CreatorType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Pair;
 import io.jans.as.persistence.model.Scope;
+import org.apache.commons.lang3.BooleanUtils;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
@@ -47,7 +49,7 @@ public class SpontaneousScopeService {
         }
 
         final Pair<Boolean, String> isAllowed = isAllowedBySpontaneousScopes(regExps, scopeId);
-        if (!isAllowed.getFirst()) {
+        if (BooleanUtils.isFalse(isAllowed.getFirst())) {
             log.error("Forbidden by client. Check client configuration.");
             return null;
         }
@@ -64,12 +66,13 @@ public class SpontaneousScopeService {
         scope.setDeletable(true);
         scope.setExpirationDate(new Date(getLifetime()));
         scope.setDn("inum=" + scope.getInum() + "," + staticConfiguration.getBaseDn().getScopes());
-        scope.getAttributes().setSpontaneousClientId(clientId);
+        scope.setCreatorId(clientId);
+        scope.setCreatorType(CreatorType.CLIENT);
         scope.getAttributes().setSpontaneousClientScopes(Lists.newArrayList(isAllowed.getSecond()));
         scope.setUmaAuthorizationPolicies(regexpScope != null ? regexpScope.getUmaAuthorizationPolicies() : new ArrayList<>());
 
         scopeService.persist(scope);
-        log.trace("Created spontaneous scope: " + scope.getId() + ", dn: " + scope.getDn());
+        log.trace("Created spontaneous scope: {}, dn: {}", scope.getId(), scope.getDn());
         return scope;
     }
 
@@ -84,14 +87,14 @@ public class SpontaneousScopeService {
     }
 
     public boolean isAllowedBySpontaneousScopes(Client client, String scopeRequested) {
-        if (!client.getAttributes().getAllowSpontaneousScopes()) {
+        if (BooleanUtils.isFalse(client.getAttributes().getAllowSpontaneousScopes())) {
             return false;
         }
 
         return isAllowedBySpontaneousScopes(Sets.newHashSet(client.getAttributes().getSpontaneousScopes()), scopeRequested).getFirst();
     }
 
-    public boolean isAllowedBySpontaneousScopes_(Set<String> regExps, String scopeRequested) {
+    public boolean isAllowedBySpontaneousScopeRegExps(Set<String> regExps, String scopeRequested) {
         return isAllowedBySpontaneousScopes(regExps, scopeRequested).getFirst();
     }
 
