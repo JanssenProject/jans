@@ -255,5 +255,3 @@ we need this file for the passport `keyPath` config.
 ## Testing at RP application
 
 RP(Relying party) is an application that will be used by your users when you want to add authentication and protect resources. Once you initiate auth request from your RP Application make sure to add `acr_values=passport-social` in the request. acr_values is your script name as configured above.
-
-You can use [`OIDC Authorization Code Flow`](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/tutorials/OpenID-Connect-OAuth2-SSO-with-Gluu.md) to initiate auth request to Janssen server. For testing, you can use [node-gluu-sso](https://github.com/GluuFederation/tutorials/tree/master/oidc-sso-tutorials/code/node/node-gluu-sso) as an RP application for quick testing.
