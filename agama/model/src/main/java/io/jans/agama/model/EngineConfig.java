@@ -7,7 +7,6 @@ import io.jans.agama.model.serialize.Type;
 import io.jans.util.Pair;
 
 import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,9 +37,7 @@ public class EngineConfig {
     private String bridgeScriptPage = "agama.xhtml";
     
     private Map<String, String> defaultResponseHeaders = Stream.of(
-                  new Pair<>(HttpHeaders.EXPIRES, "0")
-                //, new Pair<>(HttpHeaders.CACHE_CONTROL, "no-cache")
-                //, new Pair<>(HttpHeaders.CACHE_CONTROL, "no-store")
+                new Pair<>(HttpHeaders.CACHE_CONTROL, "max-age=0, no-store")
         ).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
     public String getJsonErrorPage(String page) {
