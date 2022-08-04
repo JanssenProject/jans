@@ -5,26 +5,26 @@ This is a guide for user authentication at any external Social Providers(Google,
 ## Components
 
 - A Janssen auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))
-- The [Passport Social authentication script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py)
+- The [Passport Social authentication script](../../script-catalog/person_authentication/passport/passport-social-jans-script.py)
 - The [Passport JS Project](https://github.com/GluuFederation/tutorials/tree/master/oidc-sso-tutorials/code/node/jans-passport)
 
 ## Authentication Flow
 
 After users authenticate at the external social identity provider, the control flows back to Janssen Authentication server where the user is verified and the user-id is provisioned into the Janssen server.
 
-[Diagram source file](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/files/inbound-identity-sequence.txt)
+[Diagram source file](../../admin/assets/sequence-source-passport-js-auth-flow.txt)
 
-![jans-passport-inbound-identity](https://user-images.githubusercontent.com/39133739/182554283-b0846b8c-e3d5-4796-85a3-794776713c95.png)
+![jans-passport-inbound-identity](../../admin/assets/image-pasport-js-auth-flow.png)
 
 ## Role of Passport-JS and Janssen's Authentication server
 
 1. Passport-js library encrypts and signs user data before passing it to the Janssen server.
 2. Janssen Auth server verifies the received JWT, decrypts data, add/update user into LDAP, and marks the user as authenticated. 
-Check [Passport-JS](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/server/routes.js#L175) and [Script](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py#L366) Code For details.
+Check [Passport-JS](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/server/routes.js#L175) and [Script](../../script-catalog/person_authentication/passport/passport-social-jans-script.py#L366) Code For details.
 
-[Diagram source file](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/files/passport-data-sequence.txt)
+[Diagram source file](../../admin/assets/sequence-source-passport-js-data-flow.txt)
 
-![jans-passport-data](https://user-images.githubusercontent.com/39133739/181759914-a89bb296-fd98-4856-a611-567b68593a07.png)
+![jans-passport-data](../../admin/assets/image-pasport-js-data-flow.png)
 
 ## Setup and configurations
 
@@ -181,7 +181,7 @@ Now you will understand why we have `jans-fqdn` in passport provider callback UR
 
 ### Add passport-social script
 
-Download the script from [here](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/code/node/jans-passport/passport-social-jans-script.py) and add it to Janssen Server using `jans-cli`. After Janssen Server installation, you will get `jans-cli`. 
+Download the script from [here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py) and add it to Janssen Server using `jans-cli`. After Janssen Server installation, you will get `jans-cli`. 
 
 Follow [this jans-cli guide](https://jans.io/docs/config-guide/jans-cli/im/im-custom-scripts/) to add a custom script in Janssen.
 
