@@ -40,6 +40,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+import com.github.fge.jsonpatch.JsonPatch;
 
 @Path(ApiConstants.AGAMA)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -107,10 +108,7 @@ public class AgamaResource extends ConfigBaseResource {
 
         // validate flow data
         validateAgamaFlowData(flow, true);
-        flow.setRevision(-1);
-        FlowMetadata flowMetadata = new FlowMetadata();
-        flowMetadata.setTimestamp(System.currentTimeMillis());
-        flow.setMetadata(flowMetadata);
+        updateFlowDetails(flow, null);
         agamaFlowService.addAgamaFlow(flow);
 
         flow = findFlow(flow.getQname(), true, false);
@@ -139,10 +137,7 @@ public class AgamaResource extends ConfigBaseResource {
         flow.setQname(decodedFlowName);
         flow.setSource(source);
         flow.setEnabled(true);
-        flow.setRevision(-1);
-        FlowMetadata flowMetadata = new FlowMetadata();
-        flowMetadata.setTimestamp(System.currentTimeMillis());
-        flow.setMetadata(flowMetadata);
+        updateFlowDetails(flow, null);
 
         // validate flow data
         validateAgamaFlowData(flow, true);
@@ -170,7 +165,7 @@ public class AgamaResource extends ConfigBaseResource {
         flow.setQname(decodedFlowName);
         log.trace("Flow revision check - flow.getRevision():{}, existingFlow.getRevision():{}", flow.getRevision(),
                 existingFlow.getRevision());
-        getRevision(flow, existingFlow);
+        updateFlowDetails(flow, existingFlow);
         log.debug("Flow revision after update - flow.getRevision():{}", flow.getRevision());
 
         // validate flow data
@@ -201,7 +196,7 @@ public class AgamaResource extends ConfigBaseResource {
         if (existingFlow != null) {
             existingFlow.setSource(source);
 
-            getRevision(existingFlow, existingFlow);
+            updateFlowDetails(existingFlow, existingFlow);
 
             // validate flow data
             validateAgamaFlowData(existingFlow, false);
@@ -213,26 +208,31 @@ public class AgamaResource extends ConfigBaseResource {
         return Response.status(Response.Status.OK).entity(existingFlow).build();
     }
 
+   
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @Path(ApiConstants.QNAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
-    public Response patchFlow(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @NotNull String pathString)
+    public Response patchFlow(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @NotNull JsonPatch jsonPatch)
             throws JsonPatchException, IOException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Flow details to be patched - flowName:{}, pathString:{}", escapeLog(flowName),
-                    escapeLog(pathString));
+            logger.debug("Flow details to be patched - flowName:{}, jsonPatch:{}", escapeLog(flowName),
+                    escapeLog(jsonPatch));
         }
+        logger.error("Flow details to be patched - flowName:{}, jsonPatch:{}", escapeLog(flowName),
+                escapeLog(jsonPatch));
+        
         String decodedFlowName = getURLDecodedValue(flowName);
-        log.trace(" Flow name for update is:{}", decodedFlowName);
+        log.error(" Flow to be patched is name:{}", decodedFlowName);
 
         // check if flow exists
         Flow existingFlow = findFlow(decodedFlowName, false, true);
-        log.debug(" existingFlow:{}", existingFlow);
+        log.error(" Flow to be patched:{}", existingFlow);
 
-        existingFlow = Jackson.applyPatch(pathString, existingFlow);
-        getRevision(existingFlow, existingFlow);
+        existingFlow = Jackson.applyJsonPatch(jsonPatch, existingFlow);
+        log.error(" After patch flow:{}", existingFlow);
+        updateFlowDetails(existingFlow, existingFlow);
 
         // validate flow data
         validateAgamaFlowData(existingFlow, false);
@@ -262,10 +262,12 @@ public class AgamaResource extends ConfigBaseResource {
             flow = agamaFlowService.getFlowByName(flowName);
 
             // filter values
-            List<Flow> flows = Arrays.asList(flow);
-            getAgamaFlowDetails(flows, includeSource);
-            if (flows != null && !flows.isEmpty()) {
-                flow = flows.get(0);
+            if (flow != null) {
+                List<Flow> flows = Arrays.asList(flow);
+                getAgamaFlowDetails(flows, includeSource);
+                if (flows != null && !flows.isEmpty()) {
+                    flow = flows.get(0);
+                }
             }
         } catch (EntryPersistenceException e) {
             log.error("No flow found with the name:{} ", flowName);
@@ -328,24 +330,57 @@ public class AgamaResource extends ConfigBaseResource {
         return pathParam;
     }
 
-    private Flow getRevision(Flow flow, Flow existingFlow) {
-        log.debug("Flow revision check - flow:{}, existingFlow:{}", flow, existingFlow);
+    private Flow updateFlowDetails(Flow flow, Flow existingFlow) {
+        log.error("Update Flow details - flow:{}, existingFlow:{}", flow, existingFlow);
 
-        if (flow == null || existingFlow == null) {
+        updateRevision(flow, existingFlow);
+        updateMetadata(flow);
+        return flow;
+    }
+    
+    private Flow updateRevision(Flow flow, Flow existingFlow) {
+        log.error("Flow revision check - flow:{}, existingFlow:{}", flow, existingFlow);
+
+        if (flow == null) {
             return flow;
         }
 
-        log.debug("Flow revision check - flow.getRevision():{}, existingFlow.getRevision():{}", flow.getRevision(),
+        if(existingFlow == null) {
+            flow.setRevision(-1);
+            return flow;
+        }
+        
+        log.error("Flow revision before update - flow.getRevision():{}, existingFlow.getRevision():{}", flow.getRevision(),
                 existingFlow.getRevision());
 
-        if (flow.getSource() != null && flow.getRevision() == 0) {
-            if (existingFlow.getRevision() == 0 || existingFlow.getRevision() == -1) {
+        if (flow.getSource() != null && (flow.getRevision() <=0 || flow.getRevision() == existingFlow.getRevision()) ){
+            if (existingFlow.getRevision() <= 0 ) {
                 flow.setRevision(1);
             } else {
                 flow.setRevision(existingFlow.getRevision() + 1);
             }
         }
-        log.debug("Final flow revision to be updated to - flow.getRevision():{}", flow.getRevision());
+        log.error("Flow revision after update - flow.getRevision():{}", flow.getRevision());
+        return flow;
+    }
+    
+    private Flow updateMetadata(Flow flow) {
+        log.error("Update Flow Metadata - flow:{}", flow);
+
+        if (flow == null) {
+            return flow;
+        }
+
+        FlowMetadata flowMetadata = flow.getMetadata();
+        if(flowMetadata == null) {
+            flowMetadata = new FlowMetadata();
+        }
+        
+        log.error("Flow Metadata Timestamp before update - flowMetadata.getTimestamp():{}", flowMetadata.getTimestamp());
+        flowMetadata.setTimestamp(System.currentTimeMillis());
+        flow.setMetadata(flowMetadata);
+        
+        log.error("Flow Metadata Timestamp after update - flowMetadata.getTimestamp():{}", flowMetadata.getTimestamp());
         return flow;
     }
 
@@ -357,10 +392,10 @@ public class AgamaResource extends ConfigBaseResource {
         }
 
         for (Flow flow : flows) {
-            
+
             flow.setTranspiled(null);
             flow.setTransHash(null);
-            
+
             if (!includeSource) {
                 flow.setSource(null);
             }
