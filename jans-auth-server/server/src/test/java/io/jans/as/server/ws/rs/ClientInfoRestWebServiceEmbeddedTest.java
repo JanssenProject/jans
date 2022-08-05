@@ -62,7 +62,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -121,7 +121,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -162,7 +162,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"clientInfoPath"})
     @Test(dependsOnMethods = "requestClientInfoStep1ImplicitFlow")
     public void requestClientInfoStep2PostImplicitFlow(final String clientInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + clientInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + clientInfoPath).request();
 
         request.header("Authorization", "Bearer " + accessToken1);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
@@ -207,7 +207,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         io.jans.as.client.ClientInfoRequest clientInfoRequest = new io.jans.as.client.ClientInfoRequest(null);
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + clientInfoPath + "?" + clientInfoRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + clientInfoPath + "?" + clientInfoRequest.getQueryString()).request();
 
         request.header("Authorization", "Bearer " + accessToken1);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
@@ -247,7 +247,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestClientInfoStep1PasswordFlow(final String tokenPath, final String userId, final String userSecret)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -288,7 +288,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"clientInfoPath"})
     @Test(dependsOnMethods = "requestClientInfoStep1PasswordFlow")
     public void requestClientInfoStep2PasswordFlow(final String clientInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + clientInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + clientInfoPath).request();
 
         request.header("Authorization", "Bearer " + accessToken3);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
@@ -330,7 +330,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"clientInfoPath"})
     @Test
     public void requestClientInfoInvalidRequest(final String clientInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + clientInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + clientInfoPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -358,7 +358,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"clientInfoPath"})
     @Test
     public void requestClientInfoInvalidToken(final String clientInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + clientInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + clientInfoPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 

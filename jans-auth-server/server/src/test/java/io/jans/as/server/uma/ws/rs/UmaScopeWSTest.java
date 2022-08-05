@@ -38,7 +38,7 @@ public class UmaScopeWSTest extends BaseTest {
         String path = umaScopePath + "/" + "modify";
         System.out.println("Path: " + path);
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + path).request();
         request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
         Response response = request.get();
         String entity = response.readEntity(String.class);

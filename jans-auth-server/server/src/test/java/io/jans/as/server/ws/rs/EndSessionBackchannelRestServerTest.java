@@ -42,7 +42,6 @@ import static org.testng.Assert.fail;
 /**
  * @author Yuriy Zabrovarnyy
  */
-@RunAsClient
 public class EndSessionBackchannelRestServerTest extends BaseTest {
 
     private static io.jans.as.client.RegisterResponse registerResponse;
@@ -61,7 +60,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         registerRequest.setBackchannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
-        registerResponse = TClientService.register(registerRequest, url);
+        registerResponse = TClientService.register(registerRequest, getApiTagetURL(url));
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -83,7 +82,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Invocation.Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -132,7 +131,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         endSessionRequest.setSid(sid);
 
         Invocation.Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
         Response response = request.get();
