@@ -71,7 +71,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -127,7 +127,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
@@ -166,7 +166,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowStep1"}, priority = 10)
     public void completeFlowStep2(final String tokenPath, final String validateTokenPath, final String redirectUri)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode1);
@@ -211,7 +211,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Parameters({"tokenPath"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowStep2"}, priority = 10)
     public void completeFlowStep3(final String tokenPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
         tokenRequest.setRefreshToken(refreshToken2);
@@ -267,7 +267,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -306,7 +306,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowWithOptionalNonceStep1"}, priority = 20)
     public void completeFlowWithOptionalNonceStep2(final String tokenPath, final String validateTokenPath,
                                                    final String redirectUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode4);
@@ -354,7 +354,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Parameters({"tokenPath"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowWithOptionalNonceStep2"}, priority = 20)
     public void completeFlowWithOptionalNonceStep3(final String tokenPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
         tokenRequest.setRefreshToken(refreshToken3);
@@ -418,7 +418,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         authorizationRequest.setState(state);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
@@ -457,7 +457,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Parameters({"tokenPath", "redirectUri"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "revokeTokensStep1"}, priority = 30)
     public void revokeTokensStep2n3(final String tokenPath, final String redirectUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode2);
         tokenRequest.setRedirectUri(redirectUri);
@@ -490,7 +490,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
             accessToken1 = jsonObj.getString("access_token");
             refreshToken1 = jsonObj.getString("refresh_token");
 
-            Builder request2 = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+            Builder request2 = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
             io.jans.as.client.TokenRequest tokenRequest2 = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest2.setCode(authorizationCode2);
             tokenRequest2.setRedirectUri(redirectUri);
@@ -529,7 +529,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Parameters({"tokenPath"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "revokeTokensStep2n3"}, priority = 30)
     public void revokeTokensStep4(final String tokenPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
         tokenRequest.setRefreshToken(refreshToken1);
@@ -560,7 +560,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "revokeTokensStep4", priority = 30)
     public void revokeTokensStep5(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
 
         request.header("Authorization", "Bearer " + accessToken1);
 
@@ -618,7 +618,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
             authorizationRequest.setState(state);
 
             Builder request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
@@ -666,7 +666,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         System.out.println("Sleeping for 20 seconds .....");
         Thread.sleep(20000);
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode3);

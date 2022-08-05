@@ -75,7 +75,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -114,7 +114,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenCustomAuth1Step1(final String registerPath, final String redirectUris,
                                                    final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -157,7 +157,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestAccessTokenCustomAuth1Step1")
     public void requestAccessTokenCustomAuth1Step2(final String tokenPath, final String userInum,
                                                    final String userEmail) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -200,7 +200,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     public void requestAccessTokenCustomAuth2Step1(final String registerPath, final String redirectUris,
                                                    final String jwksUri) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -243,7 +243,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestAccessTokenCustomAuth2Step1")
     public void requestAccessTokenCustomAuth2Step2(final String tokenPath, final String userId, final String userSecret)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -285,7 +285,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenCustomAuth3Step1(final String registerPath, final String redirectUris,
                                                    final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -328,7 +328,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestAccessTokenCustomAuth3Step1")
     public void requestAccessTokenCustomAuth3Step2(final String tokenPath, final String userInum,
                                                    final String userEmail) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setScope("email read_stream manage_pages");
@@ -370,7 +370,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenCustomAuth4Step1(final String registerPath, final String redirectUris,
                                                    final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -415,7 +415,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     public void requestAccessTokenCustomAuth4Step2(final String tokenPath, final String userId, final String userSecret,
                                                    final String audience, final String keyId, final String dnName, final String keyStoreFile,
                                                    final String keyStoreSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -463,7 +463,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                                                   final String userSecret, final String redirectUri) throws Exception {
         final String state = UUID.randomUUID().toString();
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + authorizePath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -514,7 +514,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = {"requestAccessTokenCustomAuthStep1", "dynamicClientRegistration"})
     public void requestAccessTokenCustomAuthStep2(final String tokenPath, final String validateTokenPath,
                                                   final String redirectUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode1);
