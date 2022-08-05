@@ -5071,7 +5071,7 @@ components:
           description: Enable/Disable usage of highest level script in case ACR script does not exist.
         agamaConfiguration:
           type: object
-          desciption: Engine Config which offers an alternative way to build authentication flows in Janssen server
+          description: Engine Config which offers an alternative way to build authentication flows in Janssen server
           $ref: '#/components/schemas/EngineConfig'
 
     GluuAttribute:
@@ -5273,14 +5273,32 @@ components:
           type: object
           description: ScopeAttributes
           properties:
-            spontaneousClientId:
-              type: string
             spontaneousClientScopes:
               type: array
               items:
                 type: string
             showInConfigurationEndpoint:
               type: boolean
+        creatorId:
+          description: Id of the scope creator. If creator is client then client_id if user then user_id
+          type: string
+        creatorType:
+          description: Scope creator type
+          type: string
+          enum:
+            - NONE
+            - CLIENT
+            - USER
+            - AUTO
+        creationDate:
+          description: Scope creation date time.
+          type: string
+          format: date
+        creatorAttributes:
+          description: Stores creator attributes
+          type: object
+          additionalProperties:
+            type: string
         umaType:
           description: Specifies if the scope is of type UMA.
           type: boolean
@@ -5293,6 +5311,9 @@ components:
           description: Expiry date of the Scope.
           type: string
           format: date
+		  
+
+		  
     ExtendedScope:
       allOf: # Combines the Scope and the inline model
         - $ref: '#/components/schemas/Scope'
@@ -5304,6 +5325,7 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Client'
+				
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
