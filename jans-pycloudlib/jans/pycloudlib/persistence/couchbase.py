@@ -772,7 +772,7 @@ def suppress_verification_warning() -> None:
     import urllib3
 
     if as_boolean(os.environ.get("CN_COUCHBASE_SUPPRESS_VERIFICATION", True)):
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type: ignore
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def get_couchbase_keepalive_interval() -> int:
