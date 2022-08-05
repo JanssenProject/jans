@@ -61,7 +61,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test
     public void requestClientRegistrationWithCustomAttributes(final String registerPath, final String redirectUris)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -114,7 +114,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -151,7 +151,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = {"requestAccessTokenCustomClientAuth1Step1"})
     public void requestAccessTokenCustomClientAuth1Step2(final String tokenPath, final String redirectUri)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode1);
@@ -194,7 +194,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
     public void requestAccessTokenCustomClientAuth2(final String tokenPath, final String userId,
                                                     final String userSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);

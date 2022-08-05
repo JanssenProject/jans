@@ -45,7 +45,7 @@ public class JwkRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestJwks(final String jwksPath) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + jwksPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + jwksPath).request();
         request.header("Accept", MediaType.APPLICATION_JSON);
 
         Response response = request.get();
