@@ -202,7 +202,7 @@ public class ScopeService {
                     customScope.getClients().add(client);
                 }
             } else if (scope.getScopeType() == ScopeType.SPONTANEOUS) {
-                if (client.getClientId().equals(customScope.getAttributes().getSpontaneousClientId())) {
+                if (client.getClientId().equals(customScope.getCreatorId())) {
                     customScope.getClients().add(client);
                 }
             }
