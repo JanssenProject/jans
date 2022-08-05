@@ -755,10 +755,6 @@ class CtxGenerator:
         # self.set_secret("jca_pw", "admin")
         pass
 
-    def fido2_ctx(self):
-        # TODO: hardcoded in persistence-loader?
-        self.set_config("fido2ConfigFolder", "/etc/jans/conf/fido2")
-
     def sql_ctx(self):
         self.set_secret("sql_password", self.params["sql_pw"])
 
@@ -797,9 +793,6 @@ class CtxGenerator:
             self.couchbase_ctx()
 
         # self.jackrabbit_ctx()
-
-        if "fido2" in opt_scopes:
-            self.fido2_ctx()
 
         if "sql" in opt_scopes:
             self.sql_ctx()
