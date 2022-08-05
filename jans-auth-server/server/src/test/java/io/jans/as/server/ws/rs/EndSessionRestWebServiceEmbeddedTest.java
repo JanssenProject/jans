@@ -55,7 +55,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestEndSessionStep1(final String registerPath, final String redirectUris,
                                        final String postLogoutRedirectUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -112,7 +112,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -162,8 +162,9 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
         endSessionRequest.setSid(sid);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        request.cookie(AuthorizeResponseParam.SESSION_ID, sessionId);
 
         Response response = request.get();
         String entity = response.readEntity(String.class);
@@ -206,8 +207,8 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
         EndSessionRequest endSessionRequest = new EndSessionRequest(null, null, null);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
-        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                .target(getApiTagetURL(url) + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+        request.header("Content-Type", MediaType.TEXT_PLAIN);
 
         Response response = request.get();
         String entity = response.readEntity(String.class);
@@ -234,7 +235,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                 endSessionId);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
         Response response = request.get();

@@ -55,9 +55,6 @@ import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
@@ -70,6 +67,9 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -244,6 +244,7 @@ public class AppInitializer {
         // Notify plugins about finish application initialization
         eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
                 .fire(new ApplicationInitializedEvent());
+
     }
 
     protected void initSchedulerService() {
