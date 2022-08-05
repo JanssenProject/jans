@@ -33,4 +33,16 @@ public class TestUtil {
     public static void assertErrorCode(Response response, String expectedErrorCode) {
         assertEquals(response.readEntity(ErrorResponse.class).getErrorCode(), expectedErrorCode);
     }
+
+    public static boolean testWithExternalApiUrl() {
+        return System.getProperties().containsKey("test.jans.auth.url");
+    }
+
+    public static String readExternalApiUrl() {
+        if (testWithExternalApiUrl()) {
+            return System.getProperties().getProperty("test.jans.auth.url");
+        }
+        return null;
+    }
+
 }
