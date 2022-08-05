@@ -5286,13 +5286,14 @@ components:
           description: Scope creator type
           type: string
           enum:
-            - client
-            - user
-            - auto
-            - none
+            - NONE
+            - CLIENT
+            - USER
+            - AUTO
         creationDate:
           description: Scope creation date time.
-          type: date-time
+          type: string
+          format: date
         creatorAttributes:
           description: Stores creator attributes
           type: object
