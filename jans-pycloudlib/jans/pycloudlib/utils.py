@@ -539,6 +539,5 @@ def generate_signed_ssl_certkey(
     with open(ca_cert_fn, "rb") as f:
         ca_cert = x509.load_pem_x509_certificate(f.read())
 
-    sign_kwargs: dict[str, _t.Any] = {"valid_to": valid_to}
-    sign_csr(cert_fn, csr, ca_key, ca_cert, **sign_kwargs)
+    sign_csr(cert_fn, csr, ca_key, ca_cert, valid_to=valid_to)
     return cert_fn, key_fn

@@ -233,7 +233,7 @@ class SqlClient(SqlSchemaMixin):
     :param \**kwargs: Keyword arguments (if any).
     """
 
-    def __init__(self, manager: Manager, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> None:
+    def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
         self.manager = manager
 
         dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")

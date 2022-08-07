@@ -40,7 +40,7 @@ def generate_public_key(
     is_ca: bool = False,
     add_san: bool = False,
     add_key_usage: bool = False,
-    **kwargs: dict[str, _t.Any]
+    **kwargs: _t.Any
 ) -> x509.Certificate:  # noqa: D412
     r"""Generate public key (cert).
 
@@ -64,15 +64,15 @@ def generate_public_key(
     - ``valid_to``: Validity length in days.
     """
     valid_from = datetime.utcnow()
-    validity = str(kwargs.get("valid_to", 365))
+    validity = kwargs.get("valid_to", 365)
     valid_to = valid_from + timedelta(days=float(validity))
 
-    country_code = str(kwargs.get("country_code", ""))
-    state = str(kwargs.get("state", ""))
-    city = str(kwargs.get("city", ""))
-    org_name = str(kwargs.get("org_name", ""))
-    hostname = str(kwargs.get("hostname", ""))
-    email = str(kwargs.get("email", ""))
+    country_code = kwargs.get("country_code", "")
+    state = kwargs.get("state", "")
+    city = kwargs.get("city", "")
+    org_name = kwargs.get("org_name", "")
+    hostname = kwargs.get("hostname", "")
+    email = kwargs.get("email", "")
 
     # issuer equals subject because we use self-signed
     subject = issuer = x509.Name([
@@ -155,7 +155,7 @@ def generate_csr(
     private_key: rsa.RSAPrivateKeyWithSerialization,
     add_san: bool = False,
     add_key_usage: bool = False,
-    **kwargs: _t.Mapping[str, _t.Any]
+    **kwargs: _t.Any
 ) -> x509.CertificateSigningRequest:  # noqa: D412
     r"""Generate a certificate signing request (CSR).
 
@@ -176,12 +176,12 @@ def generate_csr(
     - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
     - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
     """
-    country_code = str(kwargs.get("country_code", ""))
-    state = str(kwargs.get("state", ""))
-    city = str(kwargs.get("city", ""))
-    org_name = str(kwargs.get("org_name", ""))
-    hostname = str(kwargs.get("hostname", ""))
-    email = str(kwargs.get("email", ""))
+    country_code = kwargs.get("country_code", "")
+    state = kwargs.get("state", "")
+    city = kwargs.get("city", "")
+    org_name = kwargs.get("org_name", "")
+    hostname = kwargs.get("hostname", "")
+    email = kwargs.get("email", "")
 
     subject = x509.Name([
         x509.NameAttribute(NameOID.COUNTRY_NAME, country_code),
@@ -252,7 +252,7 @@ def sign_csr(
     csr: x509.CertificateSigningRequest,
     ca_private_key: rsa.RSAPrivateKeyWithSerialization,
     ca_public_key: x509.Certificate,
-    **kwargs: _t.Mapping[str, _t.Any]
+    **kwargs: _t.Any
 ) -> x509.Certificate:
     r"""Sign a certificate signing request (CSR).
 
@@ -263,7 +263,7 @@ def sign_csr(
     :param \**kwargs: Keyword arguments.
     """
     valid_from = datetime.utcnow()
-    validity = str(kwargs.get("valid_to", 365))
+    validity = kwargs.get("valid_to", 365)
     valid_to = valid_from + timedelta(days=float(validity))
 
     builder = (

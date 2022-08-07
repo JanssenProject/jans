@@ -334,7 +334,7 @@ class BaseApi(ABC):
         """
 
     @abstractmethod
-    def exec_api(self, path: str, **kwargs: dict[str, _t.Any]) -> Response:  # pragma: no cover
+    def exec_api(self, path: str, **kwargs: _t.Any) -> Response:  # pragma: no cover
         """Execute a request to an API server.
 
         Subclass **MUST** implement this method.
@@ -364,7 +364,7 @@ class N1qlApi(BaseApi):
             timeout=10,
         )
 
-    def exec_api(self, path: str, **kwargs: dict[str, _t.Any]) -> Response:
+    def exec_api(self, path: str, **kwargs: _t.Any) -> Response:
         """Execute a request to REST server.
 
         :param path: Path (or sub-URL) of API server.
@@ -381,7 +381,7 @@ class N1qlApi(BaseApi):
         return resp
 
 
-def build_n1ql_request_body(query: str, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> dict[str, _t.Any]:
+def build_n1ql_request_body(query: str, *args: _t.Any, **kwargs: _t.Any) -> dict[str, _t.Any]:
     """Build request body for N1QL REST API.
 
     Request body consists of ``statement`` key, ``args`` key
@@ -428,7 +428,7 @@ class RestApi(BaseApi):
             timeout=10,
         )
 
-    def exec_api(self, path: str, **kwargs: dict[str, _t.Any]) -> Response:
+    def exec_api(self, path: str, **kwargs: _t.Any) -> Response:
         """Execute a request to REST server.
 
         :param path: Path (or sub-URL) of API server.
@@ -436,7 +436,7 @@ class RestApi(BaseApi):
         :returns: An instance of ``requests.Response``.
         """
         data = kwargs.get("data", {})
-        method = str(kwargs.get("method", ""))
+        method = kwargs.get("method", "")
 
         callbacks = {
             "GET": self.session.get,
@@ -534,13 +534,13 @@ class CouchbaseClient:
     :param \**kwargs: Keyword arguments (if any).
     """
 
-    def __init__(self, manager: Manager, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> None:
+    def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
         self.manager = manager
 
-        self.hosts = str(kwargs.get("hosts", "")) or os.environ.get("CN_COUCHBASE_URL", "localhost")
-        self.user = str(kwargs.get("user", "")) or get_couchbase_superuser(manager) or get_couchbase_user(manager)
+        self.hosts = kwargs.get("hosts", "") or os.environ.get("CN_COUCHBASE_URL", "localhost")
+        self.user = kwargs.get("user", "") or get_couchbase_superuser(manager) or get_couchbase_user(manager)
 
-        password = str(kwargs.get("password", ""))
+        password = kwargs.get("password", "")
         with contextlib.suppress(FileNotFoundError):
             password = get_couchbase_superuser_password(manager)
         self.password: str = password or get_couchbase_password(manager)
@@ -607,7 +607,7 @@ class CouchbaseClient:
             sys_info = resp.json()
         return sys_info
 
-    def exec_query(self, query: str, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> Response:
+    def exec_query(self, query: str, *args: _t.Any, **kwargs: _t.Any) -> Response:
         """Execute N1QL query.
 
         :param query: N1QL query string.

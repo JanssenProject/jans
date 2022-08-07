@@ -106,8 +106,8 @@ class LdapClient:
     # shortcut to ldap3.MODIFY_DELETE
     MODIFY_DELETE: _t.Final[str] = LDAP3_MODIFY_DELETE
 
-    def __init__(self, manager: Manager, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> None:
-        host = str(kwargs.get("host", "")) or os.environ.get("CN_LDAP_URL", "localhost:1636")
+    def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
+        host = kwargs.get("host", "") or os.environ.get("CN_LDAP_URL", "localhost:1636")
         # we only need host part as port will be resolved from env that controls
         # SSL or non-SSL connetion
         host = extract_ldap_host(host)

@@ -127,7 +127,7 @@ retry_on_exception = backoff.on_exception(
 
 
 @retry_on_exception
-def wait_for_config(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:  # noqa: D412
+def wait_for_config(manager: Manager, **kwargs: _t.Any) -> None:  # noqa: D412
     r"""Wait for readiness/availability of config backend.
 
     Keyword arguments:
@@ -149,7 +149,7 @@ def wait_for_config(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:  # n
 
 
 @retry_on_exception
-def wait_for_secret(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:  # noqa: D412
+def wait_for_secret(manager: Manager, **kwargs: _t.Any) -> None:  # noqa: D412
     r"""Wait for readiness/availability of secret backend.
 
     Keyword arguments:
@@ -175,7 +175,7 @@ _ADMIN_GROUP_DN = "inum=60B7,ou=groups,o=jans"
 
 
 @retry_on_exception
-def wait_for_ldap(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_ldap(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/availability of LDAP server based on existing entry.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
@@ -205,7 +205,7 @@ def wait_for_ldap(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_ldap_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_ldap_conn(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/availability of LDAP server based on connection status.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
@@ -217,7 +217,7 @@ def wait_for_ldap_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_couchbase(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_couchbase(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/availability of Couchbase server based on existing entry.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
@@ -244,7 +244,7 @@ def wait_for_couchbase(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_couchbase_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_couchbase_conn(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/availability of Couchbase server based on connection status.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
@@ -258,7 +258,7 @@ def wait_for_couchbase_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> No
 
 
 @retry_on_exception
-def wait_for_sql_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_sql_conn(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/liveness of an SQL database connection.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
@@ -271,7 +271,7 @@ def wait_for_sql_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_sql(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_sql(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/liveness of an SQL database.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
@@ -297,7 +297,7 @@ def wait_for_sql(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_spanner_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_spanner_conn(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/liveness of an Spanner database connection.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
@@ -310,7 +310,7 @@ def wait_for_spanner_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None
 
 
 @retry_on_exception
-def wait_for_spanner(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
+def wait_for_spanner(manager: Manager, **kwargs: _t.Any) -> None:
     r"""Wait for readiness/liveness of an Spanner database.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
