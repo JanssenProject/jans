@@ -127,8 +127,6 @@ def get_base_ctx(manager):
         "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
 
         "admin_inum": manager.config.get("admin_inum"),
-        "scim_client_id": manager.config.get("scim_client_id"),
-        "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
         "jca_client_id": manager.config.get("jca_client_id"),
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
@@ -198,20 +196,6 @@ def merge_auth_ctx(ctx):
 
     # determine role scope mappings
     ctx["role_scope_mappings"] = json.dumps(get_role_scope_mappings())
-    return ctx
-
-
-def merge_scim_ctx(ctx):
-    basedir = '/app/templates/jans-scim'
-    file_mappings = {
-        'scim_dynamic_conf_base64': 'dynamic-conf.json',
-        'scim_static_conf_base64': 'static-conf.json',
-    }
-
-    for key, file_ in file_mappings.items():
-        file_path = os.path.join(basedir, file_)
-        with open(file_path) as fp:
-            ctx[key] = generate_base64_contents(fp.read() % ctx)
     return ctx
 
 
@@ -303,7 +287,6 @@ def prepare_template_ctx(manager):
     ctx = merge_extension_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
     ctx = merge_config_api_ctx(ctx)
-    ctx = merge_scim_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
     return ctx
 
@@ -345,13 +328,6 @@ def get_ldif_mappings(group, optional_scopes=None):
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",
         ]
-
-        if "scim" in optional_scopes:
-            files += [
-                "jans-scim/configuration.ldif",
-                "jans-scim/scopes.ldif",
-                "jans-scim/clients.ldif",
-            ]
 
         return files
 

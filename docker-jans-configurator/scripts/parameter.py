@@ -25,7 +25,6 @@ DEFAULT_SCOPES = (
 
 OPTIONAL_SCOPES = (
     "ldap",
-    "scim",
     "couchbase",
     "redis",
     "sql",
@@ -34,6 +33,7 @@ OPTIONAL_SCOPES = (
     "fido2",
     "client-api",
     "casa",
+    "scim",
 )
 
 
