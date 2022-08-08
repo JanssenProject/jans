@@ -170,7 +170,7 @@ class VaultSecret(BaseSecret):
         import urllib3
 
         if scheme == "https" and verify is False:
-            urllib3.disable_warnings()  # type: ignore
+            urllib3.disable_warnings()
             logger.warning(
                 "All requests to Vault will be unverified. "
                 "Please adjust CN_SECRET_VAULT_SCHEME and "
