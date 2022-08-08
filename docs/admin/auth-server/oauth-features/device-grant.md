@@ -4,31 +4,32 @@ This OAuth 2.0 protocol extension enables OAuth clients to request user authoriz
 
 ### Sequence Diagram
 
+Oauth2.0 Device Authorization Flow
+
 ``` mermaid
 sequenceDiagram
-  title Oauth2.0 Device Authorization flow
   participant User
   participant Browser on Computer / Smartphone
   participant Device App
   participant Jans AS
   participant Third Party App
-  User->Device App:Opens an app on device
-  Device App->Jans AS:Sends authorization request \n"jans-server.com/jans-auth/restv1/device_authorization"
-  Jans AS->Device App:Response - \nuser_code, device_code, verification_url, interval, expiration
-  Device App ->User: Instructs the user to access Verification URL \nand enter user_code
+  User->>Device App:Opens an app on device
+  Device App->>Jans AS:Sends authorization request \n"jans-server.com/jans-auth/restv1/device_authorization"
+  Jans AS->>Device App:Response - \nuser_code, device_code, verification_url, interval, expiration
+  Device App ->>User: Instructs the user to access Verification URL \nand enter user_code
   note over Device App:Device App will keep polling AS for Access Token \nuntil device authorization is completed
   loop till Device App recieves Access Token:
-      Device App->Jans AS:request Access Token
-      Jans AS->Device App:Response - \naccess_denied \nOR expired_token \nOR authorization_pending \nOR Access token
+      Device App->>Jans AS:request Access Token
+      Jans AS->>Device App:Response - \naccess_denied \nOR expired_token \nOR authorization_pending \nOR Access token
   end 
-  User->Browser on Computer / Smartphone:Opens a browser \nand access verification URL
-  Browser on Computer / Smartphone->Jans AS:send user_code to verification URL
-  Browser on Computer / Smartphone <-Jans AS:Login and authorization prompt
-  Browser on Computer / Smartphone->Jans AS:Authentication and consent
-  Jans AS->Jans AS: Mark device as Authorized
+  User->>Browser on Computer / Smartphone:Opens a browser \nand access verification URL
+  Browser on Computer / Smartphone->>Jans AS:send user_code to verification URL
+  Jans AS->>Browser on Computer / Smartphone:Login and authorization prompt
+  Browser on Computer / Smartphone->>Jans AS:Authentication and consent
+  Jans AS->>Jans AS: Mark device as Authorized
   note over Jans AS:Subsequent polling by the Device App \nwill return an Access Token as indicated \nby the loop above
-  Device App->Third Party App:Invoke API with Access Token
-  Third Party App->Device App: return Response
+  Device App->>Third Party App:Invoke API with Access Token
+  Third Party App->>Device App: return Response
 ```
 
 ## User Experience
