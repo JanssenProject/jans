@@ -105,7 +105,7 @@ public class AgamaResource extends ConfigBaseResource {
         }
 
         // validate flow data
-        updateFlowDetails(flow, null);
+        updateFlowDetails(flow, null, true);
         validateAgamaFlowData(flow, true);
         agamaFlowService.addAgamaFlow(flow);
 
@@ -135,7 +135,7 @@ public class AgamaResource extends ConfigBaseResource {
         flow.setQname(decodedFlowName);
         flow.setSource(source);
         flow.setEnabled(true);
-        updateFlowDetails(flow, null);
+        updateFlowDetails(flow, null, true);
 
         // validate flow data
         validateAgamaFlowData(flow, true);
@@ -161,7 +161,7 @@ public class AgamaResource extends ConfigBaseResource {
 
         // set flow data
         flow.setQname(decodedFlowName);
-        updateFlowDetails(flow, existingFlow);
+        updateFlowDetails(flow, existingFlow, false);
         logger.debug("Flow revision after update - flow.getRevision():{}", flow.getRevision());
 
         // validate flow data
@@ -192,7 +192,7 @@ public class AgamaResource extends ConfigBaseResource {
         if (existingFlow != null) {
             existingFlow.setSource(source);
 
-            updateFlowDetails(existingFlow, existingFlow);
+            updateFlowDetails(existingFlow, existingFlow,false);
 
             // validate flow data
             validateAgamaFlowData(existingFlow, false);
@@ -225,8 +225,7 @@ public class AgamaResource extends ConfigBaseResource {
 
         existingFlow = Jackson.applyJsonPatch(jsonPatch, existingFlow);
         logger.debug(" After patch flow:{}", existingFlow);
-        updateFlowDetails(existingFlow, existingFlow);
-
+        
         // validate flow data
         validateAgamaFlowData(existingFlow, false);
         logger.debug("Updating flow after validation");
@@ -300,6 +299,7 @@ public class AgamaResource extends ConfigBaseResource {
             Transpiler.runSyntaxCheck(flow.getQname(), flow.getSource());
         } catch (SyntaxException se) {
             logger.error("Transpiler syntax check error", se);
+            se.setStackTrace(new StackTraceElement[0]);
             try {
                 logger.debug("Throwing BadRequestException 400 :{} ", Jackson.asPrettyJson(se));
                 thorwBadRequestException(se);
@@ -309,6 +309,7 @@ public class AgamaResource extends ConfigBaseResource {
             }
         } catch (TranspilerException te) {
             logger.error("Agama Flow transpiler exception", te);
+            te.setStackTrace(new StackTraceElement[0]);
             thorwBadRequestException(te);
         }
     }
@@ -323,11 +324,13 @@ public class AgamaResource extends ConfigBaseResource {
         return pathParam;
     }
 
-    private Flow updateFlowDetails(Flow flow, Flow existingFlow) {
-        logger.debug("Update Flow details - flow:{}, existingFlow:{}", flow, existingFlow);
+    private Flow updateFlowDetails(Flow flow, Flow existingFlow, boolean  updateMetadata) {
+        logger.debug("Update Flow details - flow:{}, existingFlow:{}, updateMetadata:{}", flow, existingFlow, updateMetadata);
 
         updateRevision(flow, existingFlow);
-        updateMetadata(flow);
+        if(updateMetadata) {
+            updateMetadata(flow);
+        }
         return flow;
     }
 

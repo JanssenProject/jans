@@ -72,7 +72,8 @@ Scenario: Create new user, patch and delete
     And print result
     And assert result != null
 	And assert result.customAttributes.length != null
-    Then def inum = funGetCustomAttributes(result.customAttributes,'inum')
+    #Then def inum = funGetCustomAttributes(result.customAttributes,'inum')
+	Then def inum = result.inum
     And print inum
     And assert inum != null
 	And print result.userId
