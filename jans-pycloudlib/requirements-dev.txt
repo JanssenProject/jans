@@ -1,0 +1,9 @@
+# editable install of jans-pycloudlib
+-e .
+
+# type-checker; run it with 'mypy --install-types jans'
+mypy>=0.971
+
+# internal docs generator
+sphinx-autobuild>=2021.3.14
+sphinx-click>=4.3.0
