@@ -32,11 +32,16 @@ markdown_extensions:
 - admonition
 - attr_list
 - toc:
-     permalink: '#'
+    permalink: '#'
 - codehilite
-- pymdownx.superfences
+- pymdownx.superfences:
+    custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 - pymdownx.tabbed
-
+    alternate_style: true 
+    
 # Navigation
 nav:
 - 'Administration':
