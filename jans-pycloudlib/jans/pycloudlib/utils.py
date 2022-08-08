@@ -20,6 +20,7 @@ from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from ldap3.utils import hashed
 
 from jans.pycloudlib.pki import generate_private_key
@@ -516,6 +517,19 @@ def generate_signed_ssl_certkey(
             None,
             default_backend(),
         )
+
+        # The generated ``ca_key`` object has the following type:
+        #
+        # ``Union[DHPrivateKey, Ed25519PrivateKey, Ed448PrivateKey,
+        #         RSAPrivateKey, DSAPrivateKey, EllipticCurvePrivateKey,
+        #         X25519PrivateKey, X448PrivateKey]``
+        #
+        # Passing the ``ca_key`` to ``sign_csr`` function will produces
+        # incompatible type error as reported by ``mypy``, hence we're casting
+        # the type as ``RSAPrivateKey`` for type-checking only.
+        #
+        # Note that the actual type and value of ``ca_key`` are left intact.
+        ca_key = _t.cast(RSAPrivateKey, ca_key)
 
     with open(ca_cert_fn, "rb") as f:
         ca_cert = x509.load_pem_x509_certificate(f.read())
