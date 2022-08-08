@@ -46,7 +46,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.0.2-SNAPSHOT
-ENV CN_BUILD_DATE='2022-08-03 12:38'
+ENV CN_BUILD_DATE='2022-08-04 15:32'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -59,6 +59,41 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
     && cp jans-scim.war ${JETTY_BASE}/jans-scim/webapps/jans-scim.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-to-start=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate \
     && rm -rf /tmp/jans-scim.war /tmp/WEB-INF
+
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ENV JANS_LINUX_SETUP_VERSION=2c1414dfc4edd2c14061d375622d56ed8542e08d
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_LINUX_SETUP_VERSION} \
+    && git sparse-checkout set ${JANS_SETUP_DIR}
+
+RUN mkdir -p /app/static/rdbm \
+    /app/schema \
+    /app/templates/jans-scim
+
+# sync static files from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-scim/configuration.ldif /app/templates/jans-scim/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-scim/dynamic-conf.json /app/templates/jans-scim/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-scim/static-conf.json /app/templates/jans-scim/
+
+# cleanup
+RUN rm -rf /tmp/jans
 
 # ======
 # Python
@@ -187,6 +222,7 @@ RUN mkdir -p /etc/certs \
 COPY jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
 COPY conf/*.tmpl /app/templates/
+COPY templates /app/templates
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
