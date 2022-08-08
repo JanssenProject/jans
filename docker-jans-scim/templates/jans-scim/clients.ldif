@@ -20,4 +20,3 @@ jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 objectClass: top
 objectClass: jansClnt
-
