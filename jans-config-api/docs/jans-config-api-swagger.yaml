@@ -2517,8 +2517,8 @@ paths:
         - oauth2: [https://jans.io/oauth/config/agama.readonly]
 	    
     post:
-      summary: Create a new agama flow from source file.
-      description: Create a new agama flow from source file.
+      summary: Create a new agama flow from source.
+      description: Create a new agama flow from source.
       operationId: post-agama-flow-from-source
       tags:
         - Configuration – Agama Flow
@@ -2541,33 +2541,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.write]
-
-    put:
-      summary: Updates an agama flow based on Qname.
-      description: Updates an agama based on Qname.
-      operationId: put-agama-flow
-      tags:
-        - Configuration – Agama Flow
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AgamaFlow'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgamaFlow'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oauth2: [https://jans.io/oauth/config/agama.write] 		
    
     patch:
       summary: Partially modify a Agama Flow.
