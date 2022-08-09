@@ -154,7 +154,7 @@ class ConsulConfig(BaseConfig):
         import urllib3
 
         if scheme == "https" and verify is False:
-            urllib3.disable_warnings()  # type: ignore
+            urllib3.disable_warnings()
             logger.warning(
                 "All requests to Consul will be unverified. "
                 "Please adjust CN_CONFIG_CONSUL_SCHEME and "
