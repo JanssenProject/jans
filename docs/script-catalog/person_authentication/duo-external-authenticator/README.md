@@ -29,24 +29,5 @@ sudo systemctl restart jans-auth
 
 ## Configuring Custom Script Properties
 - TODO: list other properties. Mandatory and optional
-- 
 
-
-
-- populating `/etc/certs/duo_creds.json`
-    - goto duo.com > login > after login go to applications -> select web-sdk, here you will find client id, secret and api hostname
-    - ikey(integration key) is client id
-    - skey(secret key) is secret key
-    - akey is a randomly generated id
-        - use instructions at https://duo.com/docs/duoweb-v2
-            - copy content below in a new .py file
-          ```
-          import os, hashlib
-          print(hashlib.sha1(os.urandom(32)).hexdigest())
-          ```
-          and then run the py file using python3
-          ```
-          python3 temp/p.py
-          ```
-          it'll print a alpha-numeric string e.g `f9998e03344e39cac0eee42e3c725b8ed975d6c3` which you can use as akey
 
