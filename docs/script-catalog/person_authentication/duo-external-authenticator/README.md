@@ -28,6 +28,11 @@ sudo systemctl restart jans-auth
 - Provide these values by editing file `/etc/certs/duo_creds.json`
 
 ## Configuring Custom Script Properties
-- TODO: list other properties. Mandatory and optional
 
+- There are two mandatory properties that Duo custom script requires
+  - duo_creds_file : This should be the path to the file where values for ikey, skey and akey are stored. For example, `/etc/certs/duo_creds.json`
+  - duo_host : This should be the name of the host supplied by Duo Security for your web-sdk to connect. For example: `api-random.duosecurity.com`
+  Update the custom script using `jans-cli` to set these two properties. There are other optional properties that you can set as per the requirements. Find complete list [here](TODO) 
 
+## Install Casa Duo plugin
+Follow [these instructions](https://gluu.org/docs/casa/plugins/duo/#add-the-plugin-to-casa) to install Casa plugin and [test](https://gluu.org/docs/casa/plugins/duo/#testing) Duo as authentication method.  
