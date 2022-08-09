@@ -190,19 +190,15 @@ public class AgamaResource extends ConfigBaseResource {
         Flow existingFlow = findFlow(decodedFlowName, true);
         logger.debug(" Agama existingFlow:{}", existingFlow);
 
-        // Update source and revision
-        if (existingFlow != null) {
-            existingFlow.setSource(source);
+        existingFlow.setSource(source);
+        updateFlowDetails(existingFlow, existingFlow, false);
 
-            updateFlowDetails(existingFlow, existingFlow, false);
+        // validate flow data
+        validateAgamaFlowData(existingFlow, false);
+        logger.debug("Update flow after validation");
+        agamaFlowService.updateFlow(existingFlow);
 
-            // validate flow data
-            validateAgamaFlowData(existingFlow, false);
-            logger.debug("Update flow after validation");
-            agamaFlowService.updateFlow(existingFlow);
-
-            existingFlow = findFlow(existingFlow.getQname(), true);
-        }
+        existingFlow = findFlow(existingFlow.getQname(), true);
         return Response.status(Response.Status.OK).entity(minimize(existingFlow, false)).build();
     }
 
