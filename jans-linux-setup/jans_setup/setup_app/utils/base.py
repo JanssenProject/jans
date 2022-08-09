@@ -92,6 +92,19 @@ else:
     clone_type = 'deb'
     httpd_name = 'apache2'
 
+def get_os_description():
+    desc_dict = { 'suse': 'SUSE', 'red': 'RHEL', 'ubuntu': 'Ubuntu', 'deb': 'Debian', 'centos': 'CentOS', 'fedora': 'Fedora' }
+    descs = desc_dict.get(os_type, os_type)
+    descs += ' ' + os_version
+
+    fipsl = subprocess.getoutput("sysctl crypto.fips_enabled").strip().split()
+
+    if fipsl and fipsl[0] == 'crypto.fips_enabled' and fipsl[-1] == '1':
+        descs += ' [FIPS]'
+    if snap:
+        descs += ' [SNAP]'
+
+    return descs
 
 if snap:
     snapctl = shutil.which('snapctl')
