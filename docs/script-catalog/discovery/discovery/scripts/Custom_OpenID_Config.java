@@ -1,8 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- * Copyright (c) 2018, Janssen
+ * Copyright (c) 2022, Janssen Project
  * 
- * Author: Uwaraj Waman
+ * Author: Gluu
  *    1. Filter out a value
  *    2. Add a value
  *    3. Get ip address of the client making the request
@@ -74,7 +73,7 @@ public class Discovery implements DiscoveryType {
         response.remove("pushed_authorization_request_endpoint");
 
         // Get an IP Address of the Client making the request
-        response.accumulate("Client IP Address",ctx.getHttpRequest().getHeader("X-Forwarded-For"));
+        response.accumulate("Client IP Address", ctx.getHttpRequest().getHeader("X-Forwarded-For"));
         
         return true;
     }
