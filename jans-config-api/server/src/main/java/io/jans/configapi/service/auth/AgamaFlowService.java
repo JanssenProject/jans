@@ -114,9 +114,9 @@ public class AgamaFlowService implements Serializable {
         persistenceEntryManager.merge(flow);
     }
 
-    public void removeAgamaFlow(Flow flow) {
-        logger.debug("Remove Agama Flow:{}", flow);
-        persistenceEntryManager.removeRecursively(flow.getDn(), Flow.class);
+    public void removeAgamaFlow(String flowName) {
+        logger.debug("Remove Agama Flow:{}", flowName);
+        persistenceEntryManager.removeRecursively(getAgamaFlowDn(flowName), Flow.class);
     }
 
     public String getAgamaFlowDn(String flowName) {
@@ -162,7 +162,7 @@ public class AgamaFlowService implements Serializable {
 
         Object attributeValue = null;
         for (String attribute : mandatoryAttributes) {
-            logger.debug("Flow class objectPropertyMap:{} conatins attribute:{} ? :{} ", objectPropertyMap, attribute,
+            logger.debug("Flow class objectPropertyMap:{} contains attribute:{} ? :{} ", objectPropertyMap, attribute,
                     keys.contains(attribute));
 
             if (keys.contains(attribute)) {
