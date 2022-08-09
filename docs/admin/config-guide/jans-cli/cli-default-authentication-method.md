@@ -1,4 +1,4 @@
-# Default AUthentication Method
+# Default Authentication Method
 
 > Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
 
