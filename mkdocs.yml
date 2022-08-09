@@ -26,6 +26,7 @@ theme:
         - navigation.indexes
 extra_css:
   - css/tabs.css
+  - stylesheets/mermaid-extra.css
 
 # Extensions
 markdown_extensions:
