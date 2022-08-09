@@ -1,11 +1,9 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Janssen
+# Copyright (c) 2022, Janssen Project
 #
-# Author: Uwaraj Waman
+# Author: Gluu
 #    1. Filter out a value
 #    2. Add a value
 #    3. Get ip address of the client making the request
-#
 #
 from io.jans.model.custom.script.type.discovery import DiscoveryType
 from java.lang import String
@@ -31,8 +29,8 @@ class Discovery(DiscoveryType):
     # Returns boolean, true - apply Discovery method, false - ignore it.
     # This method is called after Discovery response is ready. This method can modify Discovery response.
     # Note :
-    # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
-    # context is reference of io.jans.as.service.external.context.ExternalScriptContext (in https://github.com/JanssenFederation/oxauth project, )
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext (in https://github.com/JanssenProject project, )
     def modifyResponse(self, responseAsJsonObject, context):
 
         print "Custom - Inside modifyResponse method of Discovery script ...."
@@ -44,6 +42,6 @@ class Discovery(DiscoveryType):
         responseAsJsonObject.remove("pushed_authorization_request_endpoint")
 
         # Get an IP Address of the Client making the request
-        responseAsJsonObject.accumulate("Client IP Address",context.getHttpRequest().getHeader("X-Forwarded-For"))
+        responseAsJsonObject.accumulate("Client IP Address", context.getHttpRequest().getHeader("X-Forwarded-For"))
         
         return True
