@@ -16,6 +16,7 @@ from google.api_core.exceptions import NotFound
 from google.api_core.exceptions import FailedPrecondition
 from google.cloud.spanner_v1 import Client
 from google.cloud.spanner_v1.keyset import KeySet
+from google.cloud.spanner_v1.param_types import STRING
 from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
@@ -120,9 +121,11 @@ class SpannerClient(SqlSchemaMixin):
         for table in self.database.list_tables():  # type: ignore
             with self.database.snapshot() as snapshot:  # type: ignore
                 result = snapshot.execute_sql(
-                    f"select column_name, spanner_type "
+                    "select column_name, spanner_type "
                     "from information_schema.columns "
-                    f"where table_name = '{table.table_id}'"
+                    "where table_name = @table_name",
+                    params={"table_name": table.table_id},
+                    param_types={"table_name": STRING},
                 )
                 table_mapping[table.table_id] = dict(result)
         return table_mapping

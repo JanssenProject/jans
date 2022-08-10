@@ -69,6 +69,7 @@ def gmanager(gconsul_config, gvault_secret):
             "couchbase_password": "secret",
             "couchbase_superuser_password": "secret",
             "random": ENCODED_PW,
+            "couchbase_truststore_pw": "newsecret",
         }
         return ctx.get(key) or default
 
