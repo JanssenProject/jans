@@ -22,6 +22,7 @@ from ldif import LDIFParser
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import RDN_MAPPING
 from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import safe_render
@@ -31,8 +32,6 @@ if _t.TYPE_CHECKING:  # pragma: no cover
     # these won't be executed in runtime
     from jans.pycloudlib.manager import Manager
     from requests import Response
-
-CN_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
 logger = logging.getLogger(__name__)
 
@@ -227,7 +226,7 @@ def render_couchbase_properties(manager: Manager, src: str, dest: str) -> None:
             )).lower(),
             "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn") or "/etc/certs/couchbase.pkcs12",
             "encoded_couchbaseTrustStorePass": encode_text(
-                CN_COUCHBASE_TRUSTSTORE_PASSWORD,
+                resolve_couchbase_truststore_pw(manager),
                 manager.secret.get("encoded_salt"),
             ).decode(),
             "couchbase_conn_timeout": get_couchbase_conn_timeout(),
@@ -259,7 +258,7 @@ def sync_couchbase_truststore(manager: Manager, dest: str = "/etc/certs/couchbas
     cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
     dest = dest or manager.config.get("couchbaseTrustStoreFn")
     cert_to_truststore(
-        "couchbase", cert_file, dest, CN_COUCHBASE_TRUSTSTORE_PASSWORD,
+        "couchbase", cert_file, dest, resolve_couchbase_truststore_pw(manager),
     )
 
 
@@ -841,3 +840,16 @@ def get_bucket_for_key(key: str) -> str:
     else:
         bucket = bucket_prefix
     return bucket
+
+
+def resolve_couchbase_truststore_pw(manager: Manager) -> str:
+    """Resolve Couchbase truststore password.
+
+    :param manager: An instance of manager class.
+    """
+    pw: str = manager.secret.get("couchbase_truststore_pw")
+
+    if not pw:
+        pw = get_random_chars()
+        manager.secret.set("couchbase_truststore_pw", pw)
+    return pw
