@@ -40,7 +40,8 @@ def get_sql_password(manager: Manager) -> str:
 
     :returns: Plaintext password.
     """
-    secret_name = "sql_password"
+    # ignore bandit rule as secret_name refers to attribute name of secrets
+    secret_name = "sql_password"  # nosec: B105
     password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
 
     if os.path.isfile(password_file):

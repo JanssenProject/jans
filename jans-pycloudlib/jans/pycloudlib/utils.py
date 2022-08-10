@@ -10,7 +10,7 @@ import shlex
 import socket
 import ssl
 import string
-import subprocess
+import subprocess  # nosec: B404
 import typing as _t
 
 from cryptography import x509
@@ -86,7 +86,8 @@ def get_random_chars(size: int = 12, chars: str = "") -> str:
     :return: A random string.
     """
     chars = chars or _DEFAULT_CHARS
-    return "".join(random.choices(chars, k=size))
+    # ignore bandit rule due to compatibility with CE
+    return "".join(random.choices(chars, k=size))  # nosec: B311
 
 
 def get_sys_random_chars(size: int = 12, chars: str = "") -> str:
@@ -107,7 +108,8 @@ def exec_cmd(cmd: str) -> tuple[bytes, bytes, int]:
     :return: A ``tuple`` consists of stdout, stderr, and return code from executed shell command.
     """
     args = shlex.split(cmd)
-    popen = subprocess.Popen(
+    # ignore bandit rule as input is escaped via ``shlex.split``
+    popen = subprocess.Popen(  # nosec: B603
         args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
     stdout, stderr = popen.communicate()
@@ -256,6 +258,7 @@ def encode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
     else:
         text_bytes = text
 
+    # ignore bandit rule due to compatibility with CE
     cipher = Cipher(
         algorithms.TripleDES(key_bytes), modes.ECB(), backend=default_backend(),  # nosec: B305
     )
@@ -287,6 +290,7 @@ def decode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
     else:
         key_bytes = key
 
+    # ignore bandit rule due to compatibility with CE
     cipher = Cipher(
         algorithms.TripleDES(key_bytes), modes.ECB(), backend=default_backend(),  # nosec: B305
     )
@@ -350,6 +354,7 @@ def generate_ssl_certkey(
     return cert_fn, key_fn
 
 
+# ignore bandit rule as invalid input will throw error
 def generate_keystore(  # nosec: B107
     suffix: str,
     hostname: str,
