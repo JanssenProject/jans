@@ -1,4 +1,4 @@
-# SMTP Condifuration
+# SMTP Configuration
 
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
