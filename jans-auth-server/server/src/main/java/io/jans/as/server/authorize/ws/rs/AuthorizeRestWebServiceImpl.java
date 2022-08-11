@@ -785,7 +785,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
         executionContext.setGrant(cibaGrant);
-        executionContext.setIncludeIdTokenClaims(false);
+        executionContext.setIncludeIdTokenClaims(Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims()));
 
         IdToken idToken = cibaGrant.createIdToken(null, null, accessToken, refreshToken, null, executionContext);
 
