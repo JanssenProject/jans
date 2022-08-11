@@ -32,7 +32,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -145,36 +144,6 @@ public class AgamaResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(minimize(flow, false)).build();
     }
 
-    //TODO: determine if this endpoint is really needed in practice
-    /*
-    @PUT
-    @Path(ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
-    public Response updateFlow(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid Flow flow)
-            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        logger.debug(" Flow to update flowName:{}, flow:{}, flow.getQName():{}, flow.getSource():{} ", flowName, flow,
-                flow.getQname(), flow.getSource());
-
-        String decodedFlowName = getURLDecodedValue(flowName);
-        logger.trace(" Agama Decoded flow name for update is:{}", decodedFlowName);
-
-        // check if flow exists
-        Flow existingFlow = findFlow(decodedFlowName, true, false);
-
-        // set flow data
-        flow.setQname(decodedFlowName);
-        updateFlowDetails(flow, existingFlow, false);
-        logger.debug("Flow revision after update - flow.getRevision():{}", flow.getRevision());
-
-        // validate flow data
-        validateAgamaFlowData(flow, false);
-        logger.debug("Updating flow after validation");
-        agamaFlowService.updateFlow(flow);
-
-        flow = findFlow(decodedFlowName, true, false);
-        return Response.status(Response.Status.OK).entity(flow).build();
-    }*/
-
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Path(ApiConstants.SOURCE + ApiConstants.QNAME_PATH)
@@ -240,7 +209,7 @@ public class AgamaResource extends ConfigBaseResource {
         logger.trace(" Agama Decoded flow name is:{}", decodedFlowName);
 
         // check if flow exists
-        Flow flow = findFlow(decodedFlowName, true);
+        findFlow(decodedFlowName, true);
 
         agamaFlowService.removeAgamaFlow(flowName);
         return Response.noContent().build();
@@ -365,7 +334,6 @@ public class AgamaResource extends ConfigBaseResource {
 
         flow.setTranspiled(null);
         flow.setTransHash(null);
-        flow.setCodeError(null);
         if (!includeSource) {
             flow.setSource(null);
         }
