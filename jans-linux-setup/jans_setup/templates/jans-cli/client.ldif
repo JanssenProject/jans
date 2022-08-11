@@ -25,7 +25,6 @@ jansLogoutURI: http://localhost:4100/logout
 jansLogoutURI: https://%(hostname)s/admin/logout
 jansPostLogoutRedirectURI: http://localhost:4100
 jansPostLogoutRedirectURI: https://%(hostname)s/admin
-jansRequireAuthTime: false
 jansRespTyp: code
 jansRptAsJwt: false
 jansScope: inum=C4F7,ou=scopes,o=jans
