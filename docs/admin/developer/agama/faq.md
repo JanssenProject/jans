@@ -2,9 +2,13 @@
 
 ## Common errors
 
-### Source code of flow ... has not been parsed yet or has errors
+### Source code of flow ... has errors
 
-TODO
+Details [here](./lifecycle.md#about-syntax-errors).
+
+### Source code of flow ... has not been parsed yet
+
+This may happen when a flow is launched right after its creation and [transpilation](./dsl.md#language-compiler) has not occurred yet. Try again in the next few seconds.
 
 ### Unable to find a constructor with arity ... in class ...
 
@@ -84,13 +88,17 @@ The quick start guide is a must, followed by [Hello world flow for project maint
 
 ## Miscellaneous
 
-### Does flow execution times out?
+### Does flow execution timeout?
 
 Yes. The maximum amount of time an end-user can take to fully complete a flow is driven by the configuration of the authentication server and can be constrained even more in the flow itself. Read about timeouts [here](./flows-lifecycle.md#timeouts).
 
 ### How to prevent launching a flow directly from the browser?
 
 Disable the flow. It will still be callable from other flows. 
+
+### Updates in a flow's code are not reflected in its execution
+
+Ensure the engine is [enabled](./quick-startm.md#enable-the-engine). Use the REST API (PUT method) to [update](./lifecycle.md#flow-updates) the flow's code. Wait one minute and then retrieve (GET) this flow's data. The property `codeError` in the response should have the cause.   
 
 ### Why are the contents of a list or map logged partially?
 
