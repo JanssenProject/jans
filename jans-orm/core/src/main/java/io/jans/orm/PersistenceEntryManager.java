@@ -6,6 +6,7 @@
 
 package io.jans.orm;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
+import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
@@ -139,6 +141,13 @@ public interface PersistenceEntryManager extends EntityManager {
     void setPersistenceExtension(PersistenceExtension persistenceExtension);
 
     <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName);
+
+    Class<?> getCustomAttributesListItemType(Object entry, AttributesList attributesList,
+			String propertyName);
+	List<AttributeData> getAttributeDataListFromCustomAttributesList(Object entry, AttributesList attributesList,
+			String propertyName);
+	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
+			String propertyName, Collection<AttributeData> attributes);
 
     boolean destroy();
 
