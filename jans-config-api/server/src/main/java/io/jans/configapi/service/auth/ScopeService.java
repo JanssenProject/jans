@@ -15,6 +15,7 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.rest.model.CustomScope;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,7 +86,7 @@ public class ScopeService {
         persistenceEntryManager.merge(scope);
     }
 
-    public CustomScope getScopeByInum(String inum){
+    public CustomScope getScopeByInum(String inum) {
         return getScopeByInum(inum, false);
     }
 
@@ -132,8 +134,9 @@ public class ScopeService {
         return searchScopes(pattern, sizeLimit, scopeType, false);
     }
 
-    public List<CustomScope> searchScopes(String pattern, int sizeLimit, String scopeType, boolean withAssociatedClients) {
-        String[] targetArray = new String[]{pattern};
+    public List<CustomScope> searchScopes(String pattern, int sizeLimit, String scopeType,
+            boolean withAssociatedClients) {
+        String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
         Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
@@ -143,13 +146,14 @@ public class ScopeService {
             searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("jansScopeTyp", scopeType), searchFilter);
         }
         try {
-            List<CustomScope> scopes = persistenceEntryManager.findEntries(getDnForScope(null), CustomScope.class, searchFilter, sizeLimit);
+            List<CustomScope> scopes = persistenceEntryManager.findEntries(getDnForScope(null), CustomScope.class,
+                    searchFilter, sizeLimit);
 
             if (withAssociatedClients) {
                 List<Client> clients = clientService.getAllClients();
                 List<UmaResource> umaResources = umaResourceService.getAllResources();
-                List<CustomScope> custScopes = scopes.stream().map(scope -> setClients(scope, clients, umaResources)).collect(Collectors.toList());
-                return custScopes;
+                return (scopes.stream().map(scope -> setClients(scope, clients, umaResources))
+                        .collect(Collectors.toList()));
             }
 
             return scopes;
@@ -172,15 +176,37 @@ public class ScopeService {
         if (StringHelper.isNotEmpty(scopeType)) {
             searchFilter = Filter.createEqualityFilter("jansScopeTyp", scopeType);
         }
-        List<CustomScope> scopes = persistenceEntryManager.findEntries(getDnForScope(null), CustomScope.class, searchFilter, size);
+        List<CustomScope> scopes = persistenceEntryManager.findEntries(getDnForScope(null), CustomScope.class,
+                searchFilter, size);
 
         if (withAssociatedClients) {
             List<Client> clients = clientService.getAllClients();
             List<UmaResource> umaResources = umaResourceService.getAllResources();
-            List<CustomScope> custScopes = scopes.stream().map(scope -> setClients(scope, clients, umaResources)).collect(Collectors.toList());
-            return custScopes;
+            return (scopes.stream().map(scope -> setClients(scope, clients, umaResources))
+                    .collect(Collectors.toList()));
         }
         return scopes;
+    }
+
+    public List<CustomScope> searchScope(SearchRequest searchRequest) {
+        logger.debug("Search Scope with searchRequest:{}", searchRequest);
+
+        if (searchRequest != null && searchRequest.getFilterAttributes() != null
+                && !searchRequest.getFilterAttributes().isEmpty()) {
+
+            ArrayList<Filter> searchFilters = new ArrayList<>();
+
+            for (String filterAttribute : searchRequest.getFilterAttributes()) {
+                Filter filter = Filter.createEqualityFilter(filterAttribute, searchRequest.getFilter());
+                searchFilters.add(filter);
+            }
+            logger.debug("Search Scope with searchFilters:{}", searchFilters);
+            return persistenceEntryManager.findEntries(getDnForScope(null), CustomScope.class,
+                    Filter.createANDFilter(searchFilters));
+
+        }
+
+        return Collections.emptyList();
     }
 
     private CustomScope setClients(Scope scope, List<Client> clients, List<UmaResource> umaResources) {
@@ -192,13 +218,18 @@ public class ScopeService {
             if (client.getScopes() == null) {
                 continue;
             }
-            if (scope.getScopeType() == ScopeType.OPENID || scope.getScopeType() == ScopeType.OAUTH || scope.getScopeType() == ScopeType.DYNAMIC) {
+            if (scope.getScopeType() == ScopeType.OPENID || scope.getScopeType() == ScopeType.OAUTH
+                    || scope.getScopeType() == ScopeType.DYNAMIC) {
                 if (Arrays.asList(client.getScopes()).contains(getDnForScope(scope.getInum()))) {
                     customScope.getClients().add(client);
                 }
             } else if (scope.getScopeType() == ScopeType.UMA) {
-                List<UmaResource> umaRes = umaResources.stream().filter(umaResource -> (umaResource.getScopes() != null && umaResource.getScopes().contains(getDnForScope(scope.getInum())))).collect(Collectors.toList());
-                if (umaRes.stream().anyMatch(ele -> ele.getClients().contains(clientService.getDnForClient(client.getClientId())))) {
+                List<UmaResource> umaRes = umaResources.stream()
+                        .filter(umaResource -> (umaResource.getScopes() != null
+                                && umaResource.getScopes().contains(getDnForScope(scope.getInum()))))
+                        .collect(Collectors.toList());
+                if (umaRes.stream().anyMatch(
+                        ele -> ele.getClients().contains(clientService.getDnForClient(client.getClientId())))) {
                     customScope.getClients().add(client);
                 }
             } else if (scope.getScopeType() == ScopeType.SPONTANEOUS) {
