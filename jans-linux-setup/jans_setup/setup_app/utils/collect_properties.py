@@ -143,8 +143,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         Config.cache_provider_type = str(oxCacheConfiguration['cacheProviderType'])
 
-        Config.scim_rp_client_jks_pass = 'secret' # this is static
-
         # Other clients
         client_var_id_list = [
                     ('oxauth_client_id', '1001.'),
