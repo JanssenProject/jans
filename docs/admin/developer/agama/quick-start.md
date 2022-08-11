@@ -10,8 +10,8 @@ These are key concepts to keep in mind before starting.
 
 Ensure the agama engine is enabled in your installation. Do the following:
 
-- Enable Agama bridge script: TODO (cli?)
-- Update `enabled` property in agama configuration: TODO (cli?)
+- Enable Agama bridge script: TODO
+- Update `enabled` property in Agama configuration: TODO
 
 ### Flow data
 
