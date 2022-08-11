@@ -247,9 +247,6 @@ public class RegisterService {
         if (requestObject.getDefaultMaxAge() != null) {
             client.setDefaultMaxAge(requestObject.getDefaultMaxAge());
         }
-        if (requestObject.getRequireAuthTime() != null) {
-            client.setRequireAuthTime(requestObject.getRequireAuthTime());
-        }
         List<String> defaultAcrValues = requestObject.getDefaultAcrValues();
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             defaultAcrValues = new ArrayList<>(new HashSet<>(defaultAcrValues)); // Remove repeated elements

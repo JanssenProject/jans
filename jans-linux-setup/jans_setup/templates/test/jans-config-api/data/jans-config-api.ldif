@@ -22,7 +22,6 @@ jansIdTknSignedRespAlg: RS256
 jansInclClaimsInIdTkn: FALSE
 jansLogoutSessRequired: FALSE
 jansPersistClntAuthzs: TRUE
-jansRequireAuthTime: FALSE
 jansRespTyp: code
 jansRptAsJwt: FALSE
 jansSubjectTyp: pairwise
