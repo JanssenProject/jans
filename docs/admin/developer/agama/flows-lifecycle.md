@@ -96,10 +96,7 @@ When a page POSTs a cancellation as described earlier, the flow to return contro
 
 ## Timeouts
 
-Authentication flows are normally short-lived. They usually span no more than a few minutes. In agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the configuration of the authentication server, specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw an error page.
-
-!!! Note
-    To modify the value of `sessionIdUnauthenticatedUnusedLifetime`, see TODO
+Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/jans-cli/im/im-jans-authorization-server.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw an error page.
 
 Moreover, a flow may specify its own timeout in the [header](./dsl-full#header-basics). In practice, the effective timeout is the smallest value between `sessionIdUnauthenticatedUnusedLifetime` and the value supplied in the header, if any.
 

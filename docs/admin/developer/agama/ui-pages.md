@@ -1,12 +1,12 @@
 # Writing UI pages
 
-Creating the pages that make up an agama flow is rather straightforward for a developer. Depending on the sophistication required for the UI/UX, more effort might be demanded, however with agama, developers focus more on writing HTML markup than dealing with complexities of a UI framework. Here, there is considerably less wrestling in comparison to using big frameworks like JSF.
+Creating the pages that make up an Agama flow is rather straightforward for a developer. Depending on the sophistication required for the UI/UX, more effort might be demanded, however with Agama, developers focus more on writing HTML markup than dealing with complexities of a UI framework. Here, there is considerably less wrestling in comparison to using big frameworks like JSF.
 
 ## Template engine
 
-To generate all output to be sent to the browser, the [Apache FreeMarker](https://freemarker.apache.org) template engine is used. This is a lightweight, versatile, and easy-to-learn open-source Java library. With FreeMarker any kind of text output can be produced, so agama flows are not restricted to HTML markup exclusively.
+To generate all output to be sent to the browser, the [Apache FreeMarker](https://freemarker.apache.org) template engine is used. This is a lightweight, versatile, and easy-to-learn open-source Java library. With FreeMarker any kind of text output can be produced, so Agama flows are not restricted to HTML markup exclusively.
 
-Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. The key concept there is `Template + data-model = output` which is pretty natural. The sumation in this equation is generally referred to as "rendering a template" in Agama documentation.
+Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. The key concept there is `Template + data-model = output` which is pretty natural. The sumation in this equation is generally referred to as "rendering a template" in this documentation.
 
 The following resources are useful as introduction as well:
 
@@ -17,7 +17,7 @@ As you will see, the task boils down to produce the desired markup plus adding s
 
 ## Data model
 
-In agama, every template is generally "injected" some data, see [RRF](./dsl.md#rrf). This data, in FreeMarker terms, is known as "data-model". In practice, this will be an agama [map](./dsl.md#maps) which can be accessed from the templates using standard FreeMarker notation. This _map_ is attached a couple of additional keys for developer's convenience:
+In Agama, every template is generally "injected" some data, see [RRF](./dsl.md#rrf). This data in FreeMarker terms is known as "data-model". In practice, this will be an agama [map](./dsl.md#maps) which can be accessed from the templates using standard FreeMarker notation. This _map_ is attached a couple of additional keys for developer's convenience:
 
 - `webCtx`. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect [here](https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java). Take a look at the getters; writing `${webCtx.contextPath}` in a template will insert the result of calling method `getContextPath` - normally the string `/jans-auth`.
 
@@ -29,7 +29,7 @@ The character encoding of the response sent to browser is by default `UTF-8`. To
 
 ## Reusable templates
 
-A widespread practice in web page authoring is to compose pages based on reusable pieces. As an example, the need for a common header and footer is ubiquitous in HTML projects. With FreeMarker composition can be achieved by means of [macros](https://freemarker.apache.org/docs/ref_directive_macro.html). These are the equivalent to functions in programming, they can generate output based on parameters passed and can be called anywhere in a template.
+A widespread practice in web page authoring is to compose pages based on reusable pieces. As an example, the need for a common header and footer is ubiquitous in HTML projects. With FreeMarker, composition can be achieved by means of [macros](https://freemarker.apache.org/docs/ref_directive_macro.html). These are the equivalent to functions in programming, they can generate output based on parameters passed and can be called anywhere in a template.
 
 Agama already makes use of macros for this purpose. Take a look at the `ftlh` files found at `/opt/jans/jetty/jans-auth/agama`. These templates are used to present errors, like timeouts, flow crashes, etc.
 
