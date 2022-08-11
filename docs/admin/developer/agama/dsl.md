@@ -28,9 +28,9 @@ Intrinsic properties to highlight:
 
 ## Language compiler
 
-Agama is not a compiled language. Code is transpiled to an intermediate representation which is then interpreted at runtime. Developers don't need to issue special commands for transpilation to occur. This is automatically executed in the background by the engine after a flow has been added or modified.
+Agama is not a compiled language. Code is transpiled to an intermediate representation which is then interpreted at runtime. Developers don't need to issue special commands for transpilation to occur. This is automatically executed in the background by the engine some seconds after a flow has been added or modified.
 
-The process of checking and fixing potential syntax errors is described [here](./lifecycle.md#creating-a-flow-in-janssen).
+The process of checking and fixing potential syntax errors is described [here](./lifecycle.md#about-syntax-errors).
 
 ## Syntactic features
 
