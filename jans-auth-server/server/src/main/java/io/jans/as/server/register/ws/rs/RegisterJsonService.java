@@ -69,7 +69,6 @@ import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCR
 import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
 import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
 import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
 import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_PAR;
 import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
 import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
@@ -169,7 +168,6 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOKEN_ENDPOINT_AUTH_METHOD.toString(), client.getTokenEndpointAuthMethod());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), client.getTokenEndpointAuthSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, DEFAULT_MAX_AGE.toString(), client.getDefaultMaxAge());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, REQUIRE_AUTH_TIME.toString(), client.getRequireAuthTime());
         Util.addToJSONObjectIfNotNull(responseJsonObject, DEFAULT_ACR_VALUES.toString(), client.getDefaultAcrValues());
         Util.addToJSONObjectIfNotNull(responseJsonObject, INITIATE_LOGIN_URI.toString(), client.getInitiateLoginUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, POST_LOGOUT_REDIRECT_URIS.toString(), client.getPostLogoutRedirectUris());

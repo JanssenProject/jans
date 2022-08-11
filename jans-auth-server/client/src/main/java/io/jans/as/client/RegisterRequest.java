@@ -103,7 +103,6 @@ public class RegisterRequest extends BaseRequest {
     private AuthenticationMethod tokenEndpointAuthMethod;
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
-    private Boolean requireAuthTime;
     private List<String> defaultAcrValues;
     private String initiateLoginUri;
     private List<String> postLogoutRedirectUris;
@@ -1039,26 +1038,6 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
-     * Returns the Boolean value specifying whether the auth_time claim in the id_token is required.
-     * It is required when the value is true. The auth_time claim request in the request object overrides this setting.
-     *
-     * @return The Boolean value specifying whether the auth_time claim in the id_token is required.
-     */
-    public Boolean getRequireAuthTime() {
-        return requireAuthTime;
-    }
-
-    /**
-     * Sets the Boolean value specifying whether the auth_time claim in the id_token is required.
-     * Ir is required when the value is true. The auth_time claim request in the request object overrides this setting.
-     *
-     * @param requireAuthTime The Boolean value specifying whether the auth_time claim in the id_token is required.
-     */
-    public void setRequireAuthTime(Boolean requireAuthTime) {
-        this.requireAuthTime = requireAuthTime;
-    }
-
-    /**
      * Returns the Default requested Authentication Context Class Reference values.
      *
      * @return The Default requested Authentication Context Class Reference values.
@@ -1379,7 +1358,6 @@ public class RegisterRequest extends BaseRequest {
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
         result.setPostLogoutRedirectUris(extractListByKey(requestObject, POST_LOGOUT_REDIRECT_URIS.toString()));
         result.setDefaultAcrValues(extractListByKey(requestObject, DEFAULT_ACR_VALUES.toString()));
-        result.setRequireAuthTime(requestObject.optBoolean(REQUIRE_AUTH_TIME.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setBackchannelLogoutUris(extractListByKey(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
@@ -1585,9 +1563,6 @@ public class RegisterRequest extends BaseRequest {
         }
         if (defaultMaxAge != null) {
             function.apply(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
-        }
-        if (requireAuthTime != null) {
-            function.apply(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
         }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));

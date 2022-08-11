@@ -151,9 +151,6 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansDefMaxAge")
     private Integer defaultMaxAge;
 
-    @AttributeName(name = "jansRequireAuthTime")
-    private boolean requireAuthTime;
-
     @AttributeName(name = "jansDefAcrValues")
     private String[] defaultAcrValues;
 
@@ -1039,26 +1036,6 @@ public class Client extends DeletableEntity implements Serializable {
      */
     public void setDefaultMaxAge(Integer defaultMaxAge) {
         this.defaultMaxAge = defaultMaxAge;
-    }
-
-    /**
-     * Returns a boolean value specifying whether the auth_time Claim in the ID Token is required.
-     * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
-     *
-     * @return The required authentication time.
-     */
-    public boolean getRequireAuthTime() {
-        return requireAuthTime;
-    }
-
-    /**
-     * Sets a boolean value specifying whether the auth_time Claim in the ID Token is required.
-     * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
-     *
-     * @param requireAuthTime The required authentication time.
-     */
-    public void setRequireAuthTime(boolean requireAuthTime) {
-        this.requireAuthTime = requireAuthTime;
     }
 
     /**
