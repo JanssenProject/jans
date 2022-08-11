@@ -316,7 +316,6 @@ class JansCliApp(Application, JansAuthServer):
 
     def show_jans_dialog(self, dialog):
         async def coroutine():
-            self.layout.focus(dialog)
             result = await self.show_dialog_as_float(dialog)
             return result
         ensure_future(coroutine())
