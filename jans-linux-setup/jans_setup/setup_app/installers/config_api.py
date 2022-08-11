@@ -174,7 +174,6 @@ class ConfigApiInstaller(JettyInstaller):
                 'jansInclClaimsInIdTkn': ['false'],
                 'jansLogoutSessRequired': ['false'],
                 'jansPersistClntAuthzs': ['true'],
-                'jansRequireAuthTime': ['false'],
                 'jansRespTyp': ['code'],
                 'jansRptAsJwt': ['false'],
                 'jansScope': jansUmaScopes_all,
