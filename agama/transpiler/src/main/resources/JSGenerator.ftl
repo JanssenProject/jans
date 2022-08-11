@@ -31,8 +31,7 @@ let idx = [], _items = []
 
 <#macro rrf_call>
     <#local hasbool = .node.BOOL?size gt 0>
-    
-    <#if .node.statusr_block?size gt 0><#visit .node.statusr_block></#if>    
+
     <#if .node.variable?size = 0>
         _it = {}
     <#else>
@@ -192,15 +191,6 @@ _equals(${.node.simple_expr[0]}, ${.node.simple_expr[1]})
 
 <#macro log>
 _log(<@util_argslist node=.node />)
-</#macro>
-
-<#macro statusr_block>
-    <#local isuint = .node.statusr_allow.variable?size = 0>
-    <#local isequality = statusr_until.boolean_expr.NOT?size gt 0>
-<#--
-_allowStatusRequest(${isuint?then(.node.statusr_allow.UINT!"", .node.statusr_allow.variable!"")},
-    "${.node.statusr_until.boolean_expr.simple_expr[0]!""}", "${.node.statusr_until.boolean_expr.simple_expr[1]!""}",
-    ${isequality?c}, [<#recurse .node.statusr_reply>]) -->
 </#macro>
 
 <#macro util_loop_body node>
