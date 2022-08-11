@@ -9,6 +9,7 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.CustomScope;
 import io.jans.configapi.service.auth.ScopeService;
@@ -27,6 +28,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -82,6 +84,30 @@ public class ScopesResource extends ConfigBaseResource {
         return Response.ok(scope).build();
     }
 
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @Path(ApiConstants.CREATOR + ApiConstants.CREATORID_PATH)
+    public Response getScopeByClientId(@NotNull @PathParam(ApiConstants.CREATORID) String creatorId) {
+        log.debug("SCOPES to be fetched by creatorId:{}", creatorId);
+        SearchRequest searchReq = new SearchRequest();
+        searchReq.setFilterAttributes(Arrays.asList("creatorId"));
+        searchReq.setFilter(creatorId);
+        List<CustomScope> scopes = scopeService.searchScope(searchReq);
+        return Response.ok(scopes).build();
+    }
+
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @Path(ApiConstants.TYPE + ApiConstants.TYPE_PATH)
+    public Response getScopeByType(@NotNull @PathParam(ApiConstants.TYPE) String type) {
+        log.debug("SCOPES to be fetched by type:{}", type);
+        SearchRequest searchReq = new SearchRequest();
+        searchReq.setFilterAttributes(Arrays.asList("jansScopeTyp"));
+        searchReq.setFilter(type);
+        List<CustomScope> scopes = scopeService.searchScope(searchReq);
+        return Response.ok(scopes).build();
+    }
+
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response createOpenidScope(@Valid Scope scope) {
@@ -115,7 +141,7 @@ public class ScopesResource extends ConfigBaseResource {
         if (scope.getScopeType() == null) {
             scope.setScopeType(ScopeType.OAUTH);
         }
-   
+
         scope.setInum(existingScope.getInum());
         scope.setBaseDn(scopeService.getDnForScope(inum));
         scopeService.updateScope(scope);
