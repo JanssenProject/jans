@@ -30,7 +30,7 @@ This is a limitation of the scripting engine. Here, classes have to be imported 
 
 ### How to append data to a flow's log directly?
 
-This can be done by calling method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](./dsl-full.md#logging).
+Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](./dsl-full.md#logging).
 
 ### What Groovy and Java versions are supported?
 
@@ -98,7 +98,7 @@ Disable the flow. It will still be callable from other flows.
 
 ### Updates in a flow's code are not reflected in its execution
 
-Ensure the engine is [enabled](./quick-startm.md#enable-the-engine). Use the REST API (PUT method) to [update](./lifecycle.md#flow-updates) the flow's code. Wait one minute and then retrieve (GET) this flow's data. The property `codeError` in the response should have the cause.   
+Ensure the engine is [enabled](./quick-start.md#enable-the-engine). Use the REST API (PUT method) to [update](./lifecycle.md#flow-updates) the flow's code. Wait one minute and then retrieve (GET) this flow's data. The property `codeError` in the response should have the cause.   
 
 ### Why are the contents of a list or map logged partially?
 

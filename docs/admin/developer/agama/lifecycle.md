@@ -11,7 +11,7 @@ In this page an overview of the flow development process is presented. In short 
 As usual, several iterations will take place until you get it right.
 
 !!! Note
-    Throughout this document it is assumed you have a single VM standard Janssen installation working
+    Throughout this document it is assumed you have a working single VM standard Janssen installation
     
 ## Design and code
 
@@ -19,15 +19,15 @@ It is up to developers how to design. This will normally require identifying the
 
 Agama DSL was made to structure flows only, not for doing general purpose programming. This means developers have to use Java for doing low-level computations. This way, the resulting implementation (in DSL) serves as a depiction of the flow itself, hiding most of the internal details.      
 
-Knowledge of the DSL is a requirement as consequence of the above. Fortunately agama is small and very easy to learn. Check the DSL basics [here](./dsl.md). Also the ["Hello World"](./quick-start.md#hello-world-sample-flow) sample flow will give you a first impresssion on the language.  
+Knowledge of the DSL is a requirement as consequence of the above. Fortunately Agama is small and very easy to learn. Check the DSL basics [here](./dsl.md). Also the ["Hello World"](./quick-start.md#hello-world-sample-flow) sample flow will give you a first impresssion on the language.  
 
-Currently there are no IDE/editor plugins for coding in agama available. We hope to deliver tools in the future to ease the development experience.
+Currently there are no IDE/editor plugins for coding in Agama available. We hope to deliver tools in the future to ease the development experience.
 
 ### About crashes
 
 As a flow executes things can go wrong for reasons that developers cannot foresee. A database may have crashed, a connection to an external system may have failed, the flow engine may have some bug, etc. When an abnormal situation is presented, a flow simply crashes.
 
-If a flow crashes, its parent flow (or flows) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting.  Thus, coding defensively is not recommended. While in Agama is possible to deal with Java exceptions, that feature should be used sparingly.
+If a flow crashes, its parent flows (or flow) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting.  Thus, coding defensively is not recommended. While in Agama is possible to deal with Java exceptions, that feature should be used sparingly.
 
 ## Creating a flow
 
@@ -51,13 +51,16 @@ There are two ways available to add a flow:
 - Creates a flow named `com.acme.myflow` using as source the data stored in file `flow.txt`
 
     ```
-    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain' --data-binary @flow.txt https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow
+    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain'
+         --data-binary @flow.txt
+         https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow
     ```
 
 - Creates a flow based on the data stored in file `flow.js`
 
     ```
-    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -d@flow.js https://bull.co/jans-config-api/api/v1/agama
+    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json'
+         -d@flow.js https://<your-host>/jans-config-api/api/v1/agama
     ```
 
 where `flow.js` might look like this:
@@ -70,7 +73,7 @@ where `flow.js` might look like this:
   "metadata": {
     "displayName": "Biometric authentication",
     "author": "John",
-    "description": "This has not be written yet",
+    "description": "This has not been written yet",
     "properties": {
       "api_key": "e2987c51",
       "secret": "change it"
@@ -80,6 +83,7 @@ where `flow.js` might look like this:
 ```
 
 **Notes:**
+
 - Only `qname` and `source` are required in the JSON payload
 - `properties` in `metadata` refers to the configuration parameters of the flow. See `Configs` keyword [here](./dsl-full.md#header-basics)
 - If `enabled` is absent, a `false` value is used by default in the JSON-based endpoint. The text-based version always assumes `true`. This property allows or prevents launching a flow directly from the browser
@@ -121,7 +125,7 @@ The quick start guide exemplifies how to [run a flow](./quick-start.md#craft-an-
 
 Thinks to keep in mind when testing flows:
 
-- Once you can successfully start your first flow, it is recommended to take a look at the log statements your flow may have produced via the `Log` instruction. Click [here](./logging.md) to learn more. 
+- Once you can successfully start your first flow, it is recommended to take a look at the log statements your flow may have produced. Click [here](./logging.md) to learn more. 
 
 - When a flow crashes for some reason, a page is shown summarizing the error details. Sometimes this is enough to fix the problems, however logs tend to offer quite a better insight.
 
@@ -145,7 +149,7 @@ You may like to make modifications and enhancements to your flow. There are two 
 
 - Ensure the tokens used have scope `https://jans.io/oauth/config/agama.write`
 - Altering the source code of a flow via PATCH is possible but requires transforming the code into a (one liner) JSON string; this will be a repetitive burden. The PUT version is clearly more straightforward. If you still want to use PATCH, ensure to also modify the integer property `revision` increasing it by one. This will ensure the source changes are effectively picked.
-- The response of a successful operation returns a 200 status code (i.e. created) and a JSON representation of the updated flow - source code not included
+- The response of a successful operation returns a 200 status code and a JSON representation of the updated flow - source code not included
 - A 400 response (i.e. bad request) is generally obtained if the source code was modified and has [syntax problems](#about-syntax-errors)
 
 **Examples:**
@@ -153,12 +157,17 @@ You may like to make modifications and enhancements to your flow. There are two 
 - Modifies the flow `com.acme.myflow` replacing its source with the data stored in file `flow.txt`
 
     ```
-    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain' -X PUT --data-binary @flow.txt https://<your-host>/jans-config-api/api/v1/agama/source/com.acme.myflow
+    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain'
+         -X PUT --data-binary @flow.txt
+         https://<your-host>/jans-config-api/api/v1/agama/source/com.acme.myflow
     ```
 
-- Applies a series of modifications to the flow `com.acme.myflow`: nullifies its description, sets the value of configuration properties, and modifies the creation timestamp to Aug 8th 23:06:40 UTC
+- Applies a series of modifications to the flow `com.acme.myflow`: nullifies its description, sets the value of configuration properties, and modifies the creation timestamp to *Aug 8th 23:06:40 UTC*
+
     ```
-    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json' -X PATCH -d@patch.js https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow
+    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
+         -X PATCH -d@patch.js
+         https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow
     ```
 
 where `patch.js` contents are:
@@ -184,20 +193,6 @@ where `patch.js` contents are:
 }
 ]
 
-{
-  "qname": "com.acme.myflow",
-  "source": "Flow com.acme.myflow\n\tBasepath \"\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nFinish \"john_doe\"",
-  "enabled": true,
-  "metadata": {
-    "displayName": "Biometric authentication",
-    "author": "John",
-    "description": "This has not be written yet",
-    "properties": {
-      "api_key": "e2987c51",
-      "secret": "change it"
-    }
-  }
-}
 ```
 
 ## Flow retrieval and removal
@@ -215,23 +210,26 @@ There are two endpoints for retrieval:
 **Notes:**
 
 - Ensure the tokens used have scope `https://jans.io/oauth/config/agama.readonly`
-- The response of a successful operation returns a 200 status code (i.e. created) with a JSON representation of the flow(s).  If some fields result unfamiliar to you, consult the swagger (open api) document linked [above](#creating-a-flow) 
-- By default the source code is not included (this may clutter the output considerably). Append `?includeSource=true` to the endpoint URL to have the source in the output.
+- The response of a successful operation returns a 200 status code with a JSON representation of the flow(s).  If some fields result unfamiliar to you, consult the swagger (open api) document linked [above](#creating-a-flow) 
+- By default the source code is not included (this may clutter the output considerably). Append `?includeSource=true` to the endpoint URL to have the source in the output
 
 Example:
 
 - Retrieve the data associated to the flow `com.acme.myflow` including its source code
 
     ```
-    curl -k -i -H 'Authorization: Bearer <token> https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow?includeSource=true
+    curl -k -i -H 'Authorization: Bearer <token>'
+         https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow?includeSource=true
     ```
-There is one endpoint for removing a flow:
+
+There is one endpoint to remove a flow:
 
 |Endpoint|Method|Description|
 |-|-|-|
 |`/jans-config-api/api/v1/agama/{qname}`|DELETE|Removes the flow identified by the given qualified name (*qname*)|
 
 **Notes**:
+
 - Ensure the tokens used have scope `https://jans.io/oauth/config/agama.delete`
 - The output of a successful removal is 204 (no content).
 
@@ -239,9 +237,10 @@ Example:
 
 - Remove the the flow `com.acme.myflow`
 
-```
-curl -k -i -H 'Authorization: Bearer <token>' -X DELETE https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow
-```
+    ```
+    curl -k -i -H 'Authorization: Bearer <token>' -X DELETE
+         https://<your-host>/jans-config-api/api/v1/agama/com.acme.myflow
+    ```
 
 ## About syntax errors
 
