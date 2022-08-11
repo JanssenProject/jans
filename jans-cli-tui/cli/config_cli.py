@@ -429,9 +429,12 @@ class JCA_CLI:
                 verify=self.verify_ssl,
                 cert=self.mtls_client_cert
             )
-            
+
         self.log_response(response)
         if response.status_code != 200:
+            if self.wrapped:
+                return response.text
+
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(response.text), error_color))
 
@@ -445,6 +448,9 @@ class JCA_CLI:
 
         if not response.status_code == 200:
             self.access_token = None
+            return response.text
+
+        return True
 
 
     def check_access_token(self):

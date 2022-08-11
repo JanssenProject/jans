@@ -101,6 +101,7 @@ class JansCliApp(Application, JansAuthServer):
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
 
+
         self.yes_button = Button(text="Yes", handler=accept_yes)
         self.no_button = Button(text="No", handler=accept_no)
         self.status_bar = TextArea(style="class:status", height=1, focusable=False)
@@ -169,11 +170,20 @@ class JansCliApp(Application, JansAuthServer):
                 wrapped=True
             )
 
+
+        status = self.cli_object.check_connection()
+
+        if status is True:
+            return
+
+        self.show_message("Error getting Access Token", status)
+
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
             self.jans_creds_dialog()
         else :
             self.create_cli()
+
 
     def dialog_back_but(self): ## BACK
         self.active_dialog_select = ''
@@ -342,8 +352,12 @@ class JansCliApp(Application, JansAuthServer):
         dialog = EditScopeDialog(self,**params)
         self.show_jans_dialog(dialog)
 
+    def show_message(self, title, message):
+        body = HSplit([Label(message)])
+        dialog = JansGDialog(title=title, body=body)
+        self.show_jans_dialog(dialog)
 
-
+  
 application = JansCliApp()
 
 def run():
