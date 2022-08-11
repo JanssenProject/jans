@@ -7275,53 +7275,53 @@ components:
             $ref: '#/components/schemas/CustomAttribute'
 
     EngineConfig:
-      title: Engine config object
-      description: Engine config object that offers an alternative way to build authentication flows in Janssen server.
+      title: Agama engine configuration
+      description: Agama engine configuration object
       type: object
       properties:
         enabled:
           type: boolean
-          description: boolean value indicating if agama configuration enabled.
+          description: A boolean value that specifies if the engine is enabled
           default: false
         templatesPath:
           type: string
-          description: path to the templates
+          description: Root of templates
           default: '/ftl'
         scriptsPath:
           type: string
-          description: path to the scripts
+          description: Root of the hierarchy of classes that can be added on the fly
           default: '/scripts'
         serializerType:
           type: string
-          description: type of supported serializer
+          description: Used for continuations serialization
           default: KRYO
           enum:
             - KRYO
             - FST
         maxItemsLoggedInCollections:
           type: integer
-          description: maximum logged in collection item
+          description: Number of items to traverse in a collection when it is logged
           default: 3
           minimum: 1
         pageMismatchErrorPage:
           type: string
-          description: mismatch error page.
+          description: Location of the page used when an unexpected URL is requested
           default: mismatch.ftl
         interruptionErrorPage:
           type: string
-          description: interruption error page.
+          description: Location of the page shown when a user exceeds the amount of time allowed to take a flow to completion
           default: timeout.ftl
         crashErrorPage:
           type: string
-          description: crash error page.
+          description: Location of the page shown when an error has occured while running a flow
           default: crash.ftl
         finishedFlowPage:
           type: string
-          description: finished flow page.
+          description: Location of the page shown when a flow has finished
           default: finished.ftl
         bridgeScriptPage:
           type: string
-          description: bridge script page.
+          description: JSF page of the bridge script
           default: agama.xhtml
         defaultResponseHeaders:
           type: object
@@ -7330,67 +7330,69 @@ components:
 
 
     FlowMetadata:
-      title: Agama Flow meta data
-      description: Object for Agama Flow meta data.
+      title: Metadata of an Agama flow
+      description: Metadata of an Agama flow
       type: object
       properties:
         funcName:
-          description: name of the function.
+          description: For internal use only. This property should not be modified
           type: string
         inputs:
-          description: Agama Flow inputs.
+          description: For internal use only. This property should not be modified
           type: array
           items:
             type: string
         timeout:
-          description: flow timeout value.
+          description: For internal use only. This property should not be modified
           type: integer
           format: int64
           default: 0
         displayName:
-          description: Flow name
+          description: Name of the flow for displaying purposes
           type: string
         author:
-          description: Author of the agama flow
+          description: Author of the flow
           type: string
         timestamp:
-          description: flow update time.
+          description: Flow creation timestamp relative to UNIX epoch
+          type: integer
+          format: int64
+          default: 0
+        description:
+          description: Descriptive details of the flow
           type: string
-          format: date
-			
-			
+        properties:
+          description: Configuration parameters of the flow
+          type: object
+          additionalProperties:
+            type: string
+
     AgamaFlow:
-      title: Agama Flow object
-      description: Object for Agama Flow.
+      title: Agama flow object
+      description: Object that represents an Agama flow
       type: object
       properties:
         dn:
-          description: Domain name
+          description: Flow distinguished name
           type: string
-        QName:
-          description: Agama flow identifier.
-          type: string
-        transHash:
-          description: Agama Flow custom message.
+        qname:
+          description: Flow qualified name
           type: string
         revision:
-          description: Update revision number of the script.
+          description: Revision number of the flow
           type: integer
           format: int64
           default: 0
         enabled:
-          description: boolean value indicating if script enabled.
+          description: Whether the flow can be launched directly from an authentication request
           type: boolean
           default: false
         metadata:
-          description: Agama Flow metadata.
+          description: Flow metadata
           $ref: '#/components/schemas/FlowMetadata'
         source:
-          description: Agama Flow source.
-          type: string
-        transpiled:
-          description: Agama Flow translate compiler.
+          description: Source code
           type: string
         codeError:
           type: string
-          description: Possible errors assosiated with the flow.
+          description: Errors in the flow source detected by Agama transpiler
