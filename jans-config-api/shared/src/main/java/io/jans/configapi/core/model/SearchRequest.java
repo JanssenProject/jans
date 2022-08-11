@@ -3,14 +3,13 @@ package io.jans.configapi.core.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchRequest {
-    
+
     private String schemas;
     private List<String> attributes;
     private List<String> excludedAttributes;
@@ -20,23 +19,21 @@ public class SearchRequest {
     private Integer startIndex;
     private Integer count;
     private int maxCount;
+    private List<String> filterAttributes;
 
     @JsonIgnore
     private String attributesStr;
 
     @JsonIgnore
     private String excludedAttributesStr;
-  
-    
+
     public String getSchemas() {
         return schemas;
     }
 
-
-    public void setSchemas (String schemas) {
+    public void setSchemas(String schemas) {
         this.schemas = schemas;
     }
-
 
     public List<String> getAttributes() {
         return attributes;
@@ -54,7 +51,6 @@ public class SearchRequest {
         return excludedAttributes;
     }
 
-
     public void setExcludedAttributes(List<String> excludedAttributes) {
         this.excludedAttributes = excludedAttributes;
     }
@@ -67,71 +63,58 @@ public class SearchRequest {
         return filter;
     }
 
-
     public void setFilter(String filter) {
         this.filter = filter;
     }
-
 
     public String getSortBy() {
         return sortBy;
     }
 
-
     public void setSortBy(String sortBy) {
         this.sortBy = sortBy;
     }
-
 
     public String getSortOrder() {
         return sortOrder;
     }
 
-
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
     }
-
 
     public Integer getStartIndex() {
         return startIndex;
     }
 
-
     public void setStartIndex(Integer startIndex) {
         this.startIndex = startIndex;
     }
-
 
     public Integer getCount() {
         return count;
     }
 
-
     public void setCount(Integer count) {
         this.count = count;
     }
-
 
     public String getAttributesStr() {
         return attributes == null ? null : attributes.stream().collect(Collectors.joining(","));
     }
 
-
     public void setAttributesStr(String attributesStr) {
         this.attributesStr = attributesStr;
     }
-
 
     public String getExcludedAttributesStr() {
         return excludedAttributes == null ? null : excludedAttributes.stream().collect(Collectors.joining(","));
     }
 
-
     public void setExcludedAttributesStr(String excludedAttributesStr) {
         this.excludedAttributesStr = excludedAttributesStr;
     }
-    
+
     public int getMaxCount() {
         return this.maxCount;
     }
@@ -140,19 +123,21 @@ public class SearchRequest {
         this.maxCount = maxCount;
     }
 
+    public List<String> getFilterAttributes() {
+        return filterAttributes;
+    }
 
+    public void setFilterAttributes(List<String> filterAttributes) {
+        this.filterAttributes = filterAttributes;
+    }
 
     @Override
     public String toString() {
         return "SearchRequest [schemas=" + schemas + ", attributes=" + attributes + ", excludedAttributes="
                 + excludedAttributes + ", filter=" + filter + ", sortBy=" + sortBy + ", sortOrder=" + sortOrder
-                + ", startIndex=" + startIndex + ", count=" + count + ", attributesStr=" + attributesStr
-                + ", excludedAttributesStr=" + excludedAttributesStr 
-                + ", maxCount=" + maxCount
-                + "]";
+                + ", startIndex=" + startIndex + ", count=" + count + ", maxCount=" + maxCount + ", filterAttributes="
+                + filterAttributes + ", attributesStr=" + attributesStr + ", excludedAttributesStr="
+                + excludedAttributesStr + "]";
     }
-    
-    
-    
 
 }
