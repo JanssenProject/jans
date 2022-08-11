@@ -84,6 +84,7 @@ jansClaim: inum=36D9,ou=attributes,o=jans
 jansClaim: inum=BE64,ou=attributes,o=jans
 jansClaim: inum=6493,ou=attributes,o=jans
 jansClaim: inum=4CF1,ou=attributes,o=jans
+jansClaim: inum=29DA,ou=attributes,o=jans
 jansDefScope: false
 jansId: profile
 jansScopeTyp: openid
