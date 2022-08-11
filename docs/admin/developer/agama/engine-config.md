@@ -1,6 +1,6 @@
 # Agama engine configuration
 
-The [engine](./index.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and this is integral part of the general authentication server's JSON configuration. To learn how to perform changes in the server's configuration click [here](TODO).
+The [engine](./index.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and this is integral part of the general authentication server's JSON configuration. To learn how to perform changes in the server's configuration click [here](../../../config-guide/jans-cli/im/im-jans-authorization-server.md).
 
 The properties of Agama engine configuration are described in the following:
 
@@ -12,7 +12,7 @@ The properties of Agama engine configuration are described in the following:
 
 - `serializerType`: A low-level property related to [continuations](./hello-world-closer.md#stage-2) serialization. Set this to `null` if your flows present crashes due to issues with Java serialization. Default value is `KRYO`
 
-- `maxItemsLoggedInCollections`: When a list or map is [logged](./dsl.md#logging) in a flow, only the first few items are included in the output. You can use this property to increase this limit. Default value is `3`
+- `maxItemsLoggedInCollections`: When a list or map is [logged](./dsl.md#logging) in a flow, only the first few items are included in the output. You can use this property to increase that limit. Default value is `3`
 
 - `pageMismatchErrorPage`: A path relative to `/opt/jans/jetty/jans-auth/server/agama` containing the location of the page shown when an unexpected URL is requested while a flow is in course. Default value is `mismatch.ftlh`
 
