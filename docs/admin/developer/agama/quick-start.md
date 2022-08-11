@@ -8,17 +8,17 @@ These are key concepts to keep in mind before starting.
 
 ### Enable the engine
 
-Ensure the agama engine is enabled in your installation. Do the following:
+Ensure the Agama engine is enabled in your installation. Do the following:
 
-- Enable Agama bridge script: TODO
-- Update `enabled` property in Agama configuration: TODO
+- Enable Agama bridge script. You can find details on how to manipulate custom scripts [here](../../config-guide/jans-cli/im/im-custom-scripts.md).
+- Update `enabled` property in Agama configuration. This can be found in the `agamaConfiguration` section of the [auth server configuration](../../config-guide/jans-cli/im/im-jans-authorization-server.md)
 
 ### Flow data
 
 Every flow has some associated information. At minimum this is required:
 
 - Qualified name: The flow identifer. This is normally expressed using an Internet domain reverse notation, e.g. `co.acme.SmsOTP`
-- Source code: The flow implementation using agama DSL
+- Source code: The flow implementation using Agama DSL
 
 Optional details include:
 
@@ -34,9 +34,9 @@ More on how to supply this data later.
 
 These are elements used to build the user interface such as templates, images, stylesheets, and javascript code.
 
-Templates are written using [FreeMarker Template Language](https://freemarker.apache.org/docs/index.html) (FTL). This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in agama have the extension `ftlh`.
+Templates are written using [FreeMarker Template Language](https://freemarker.apache.org/docs/index.html) (FTL). This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in Agama have the extension `ftlh`.
 
-In agama, templates must reside in the filesystem under `/opt/jans/jetty/jans-auth/agama/ftl` directory.
+In Agama, templates must reside in the filesystem under `/opt/jans/jetty/jans-auth/agama/ftl` directory.
 
 All the other assets (CSS, JS, etc.) are expected to be under `/opt/jans/jetty/jans-auth/agama/fl`.
 
@@ -48,7 +48,7 @@ Agama DSL supports calling Java code - it is designed to force developers use Ja
 
 This is the target application that end-users will get access to after a successful authentication. In OpenId Connect terms, a "Relying Party" or RP. It is advisable to have this application ready before proceeding to the next section of this document.
 
-Depending on the tools and acquaintance with OpenId Connect protocol, this may take some time for developers. Note it may also require to apply configurations at the (Janssen) server for this purpose.
+Depending on the tools and acquaintance with OpenId Connect protocol, this may take some time for developers. Note it may also require to apply configurations in the (Janssen) server for this purpose.
 
 A low resistance path we recommend is trying the stripped down [Javascript client example](https://nat.sakimura.org/2014/12/10/making-a-javascript-openid-connect-client/) by Nat Sakimura. Here, the discovery URL is your server's URL. 
 
@@ -56,7 +56,7 @@ Another alternative is trying [mod_auth_openidc](https://github.com/zmartzone/mo
 
 ## Hello world sample flow
 
-Your first taste of agama will be through a dummy "hello world" flow. Here, the end-user will be presented a salutation page with a submit button which once pressed, will finish the process. For the sake of simplicity, the user to be authenticated will be a hardcoded one. This way we avoid gathering data at the browser and any other further processing in order to keep the example as short and simple as possible.
+Your first taste of Agama will be through a dummy "hello world" flow. Here, the end-user will be presented a salutation page with a submit button which once pressed, will finish the process. For the sake of simplicity, the user to be authenticated will be a hardcoded one. This way we avoid gathering data at the browser and any other further processing in order to keep the example as short and simple as possible.
 
 !!! Note
     While in most cases flows need to externally "receive" data and configuration parameters to properly drive their behavior, this is not the case here. The flow will only show a static salutation message and will terminate logging in a certain user, if existing.
@@ -89,7 +89,7 @@ This flow is extremely static and unrealistic but showcases minimal key elements
 
 ### Getting an access token
 
-In order to add/modify flow data, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and collect the id and secret of the jans-config-api client this way:
+In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and collect the id and secret of the jans-config-api client this way:
 
 ```
 cat /root/.config/jans-cli.ini | grep 'jca_client_id'
@@ -103,7 +103,7 @@ Tokens are required to have the right scopes depending on the operation to invok
 |scope|permission allowed|
 |-|-|
 |`https://jans.io/oauth/config/agama.readonly`|Retrieve flow data|
-|`https://jans.io/oauth/config/agama.write`|Create or modify existing flow data|
+|`https://jans.io/oauth/config/agama.write`|Create or modify a flow|
 |`https://jans.io/oauth/config/agama.delete`|Remove a flow|
 
 Find [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml) the  open API definition of the REST API - locate the endpoints starting with `/jans-config-api/api/v1/agama`.
@@ -111,7 +111,9 @@ Find [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/doc
 The following is an example of how to get a token using `curl`. Replace data in the placeholders appropriately:
 
 ```
-curl -u '<jca_client_id:jca_client_secret>' -d scope='https://jans.io/oauth/config/agama.write' -d grant_type=client_credentials https://<your-host>/jans-auth/restv1/token
+curl -u '<jca_client_id:jca_client_secret>'
+     -d scope='https://jans.io/oauth/config/agama.write'
+     -d grant_type=client_credentials https://<your-host>/jans-auth/restv1/token
 ```
 
 You can extract the token from the (JSON) response obtained which is a self-explanatory. Add the `-k` switch if your server uses a self-signed certificate.
@@ -124,40 +126,45 @@ You can extract the token from the (JSON) response obtained which is a self-expl
 
 ### Add the flow to the server
 
-The easiest way to create a flow is issuing a POST passing the code in the payload. For our example, if the flow's source code resides in a file named `flow.txt`, the request would look this way: 
+The easiest way to create a flow is issuing a POST passing the source code in the payload. For our example, if the flow's source code resides in a file named `flow.txt`, the request would look this way: 
 
 ```
-curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain' --data-binary @flow.txt https://<your-host>/jans-config-api/api/v1/agama/test
+curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain'
+     --data-binary @flow.txt https://<your-host>/jans-config-api/api/v1/agama/test
 ```
 
 (the `-i` switch is useful to check the HTTP headers sent with the response).
  
 **Notes:**
 
-- The qualified named (`test`) was supplied as the last component of the URL to send the POST to
-- The expected status code of the response is 201 (i.e. created) unless there was some problem to process the request Particularly, if 401 (unauthorized) was obtained, it means your token is no longer valid
+- `test` (the qualified named) was supplied as the last component of the URL to send the POST to
+- The expected status code of the response is 201 (i.e. created) unless there was some problem to process the request. Particularly, if 401 (unauthorized) was obtained, it means your token is no longer valid
 - A successful response contains a summary (in JSON format) of the flow created 
 
 If we had to modify the code of this flow, a similar operation could be used:
 
 ```
-curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain' -X PUT --data-binary @flow.txt https://<your-host>/jans-config-api/api/v1/agama/source/test
+curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain'
+     -X PUT --data-binary @flow.txt
+     https://<your-host>/jans-config-api/api/v1/agama/source/test
 ```
 
-`/jans-config-api/api/v1/agama/source` is a dedicated endpoint that replaces a flow's code whose name is supplied in the last component of the URL.
+`/jans-config-api/api/v1/agama/source` is a dedicated endpoint that replaces a flow's code whose name is supplied in the end of the URL.
 
 If things went wrong and you want to start all over again, you can easily remove the flow like this (ensuring the token has the right scope):
 
 ```
-curl -k -i -H 'Authorization: Bearer <token>' -X DELETE https://<your-host>/jans-config-api/api/v1/agama/test
+curl -k -i -H 'Authorization: Bearer <token>' -X DELETE
+     https://<your-host>/jans-config-api/api/v1/agama/test
 ```
 
-The output of a successful removal is empty (204).
+The status code of a successful removal is 204 (empty).
 
 To retrieve the flow's data, a request like the below can be used:
 
 ```
-curl -k -i -H 'Authorization: Bearer <token> https://<your-host>/jans-config-api/api/v1/agama/test
+curl -k -i -H 'Authorization: Bearer <token>'
+     https://<your-host>/jans-config-api/api/v1/agama/test
 ```
 
 Note the source code is not part of the response by default. Append `?includeSource=true` to the URL for the source to be included.
@@ -178,7 +185,7 @@ This section assumes your [client application](#client-application) is ready, or
 
 This usually boils down to create and launch a URL looking like `https://<your-host>/jans-auth/restv1/authorize?acr_values=agama&customParam1=test&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. You may like to check the [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details, however, keep in mind that:
 
-- To trigger an agama flow, the `acr_values` parameter must be equal to `agama`
+- To trigger an Agama flow, the `acr_values` parameter must be equal to `agama`
 
 - The identifier (qualified name) of the flow to trigger is passed using an already registered custom parameter. By now it suffices to say that `customParam1` will work in most installations. Note the parameter value in the example equals the name given to the Hello World flow
 
@@ -186,7 +193,7 @@ This usually boils down to create and launch a URL looking like `https://<your-h
 
 ### Testing
 
-Launch the authentication request in a web browser. You will be taken to a plain HTML page with a salutation and a "continue" button. After submission, a quick "Redirecting you" page will be shown and you will be taken probably to an error page showing "Unable to determine identity of user". That's expected.
+Launch the authentication request in a web browser - preferably in a private window, a.k.a. incognito. You will be taken to a plain HTML page with a salutation and a "continue" button. After submission, a quick "Redirecting you" page will be shown and you will be taken probably to an error page showing "Unable to determine identity of user". That's expected.
 
 Let's start by changing the salutation. Download the [source code](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/test) and [template](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/index.ftlh). In a text editor, modify line 5 of the source by changing the name surrounded  by double quotes to a different word. Save the file and send the update as regarded in [Add the flow to the server](#add-the-flow-to-the-server). 
 
@@ -204,7 +211,7 @@ We have barely scratched the surface so far. There is lots more to learn in orde
 
 - [Development lifecycle](./lifecycle.md): a quick reference on how flows can be setup and run. Some of these steps were already performed for Hello World, however they are presented in a more detailed manner there. 
 
-- [DSL basics](./dsl.md): an introduction and quick reference to agama language.
+- [DSL basics](./dsl.md): an introduction and quick reference to Agama language
 
 - [Agama logging](./logging.md)
 
