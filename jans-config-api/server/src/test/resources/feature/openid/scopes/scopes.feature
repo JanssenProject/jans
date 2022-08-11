@@ -50,6 +50,20 @@ Then status 200
 And print response
 And assert response.length == 1
 
+Scenario: Fetch scopes based on creator
+Given url mainUrl + '/creator/abc'
+And header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 200
+And print response
+
+Scenario: Fetch scopes based on type
+Given url mainUrl + '/type/uma'
+And header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 200
+And print response
+
 
 @CreateUpdateDelete
 Scenario: Create new OpenId Connect Scope
