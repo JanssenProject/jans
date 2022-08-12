@@ -190,9 +190,9 @@ public class AuthClientFactory {
         return null;
     }
 
-    public static RevokeSessionResponse revokeSession(String url, String header, String token, String userId) {
-        log.debug("Request for Access Token -  url:{}, header:{}, token:{}, userId:{} ", url,
-                header, token, userId);
+    public static RevokeSessionResponse revokeSession(String url, String token, String userId) {
+        log.debug("Request for Access Token -  url:{}, token:{}, userId:{} ", url,
+                token, userId);
         Response response = null;
         try {
             RevokeSessionRequest revokeSessionRequest = new RevokeSessionRequest("uid", "test");

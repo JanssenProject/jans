@@ -71,10 +71,17 @@ public class AuthUtil {
         return this.configurationService.find().getIssuer();
     }
     
+    public String getIntrospectionEndpoint() {
+        return configurationService.find().getIntrospectionEndpoint();
+    }
+
+    public String getTokenEndpoint() {
+        return configurationService.find().getTokenEndpoint();
+    }
+    
     public String getEndSessionEndpoint() {
         return this.configurationService.find().getEndSessionEndpoint();
     }
-
 
     public String getServiceUrl(String url) {
         return this.getIssuer() + url;
@@ -254,8 +261,19 @@ public class AuthUtil {
             scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
         }
     }
+    
+    public String requestAccessToken(final String clientId, final List<String> scope) {
+        log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
+        String tokenUrl = getTokenEndpoint();
+        Token token = getAccessToken(tokenUrl, clientId, scope);
+        log.info("oAuth AccessToken response - token:{}", token);
+        if (token != null) {
+            return token.getAccessToken();
+        }
+        return null;
+    }
 
-    public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes) {
+    public Token getAccessToken(final String tokenUrl, final String clientId, final List<String> scopes) {
         log.debug("Access Token Request - tokenUrl:{}, clientId:{}, scopes:{}", tokenUrl, clientId, scopes);
 
         // Get clientSecret
@@ -415,12 +433,12 @@ public class AuthUtil {
      }
 
    
-     public RevokeSessionResponse revokeSession(final String url, final String header, final String token, final String userId) {
-         log.debug("Revoke session Request - url:{}, header:{}, token:{}, userId:{}", url, header, token, userId);
+     public RevokeSessionResponse revokeSession(final String url,final String token, final String userId) {
+         log.debug("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
 
         
 
-         RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, header, token,userId);
+         RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, token,userId);
          log.debug("revokeSessionResponse:{}",revokeSessionResponse);
          if (revokeSessionResponse != null) {
 

@@ -47,7 +47,8 @@ public class SessionResource extends ConfigBaseResource {
     
     @POST
     //@ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
-    public Response getAppConfiguration(@NotNull SessionId sessionId) {
+    @Path(ApiConstants.SESSIONID_PATH)
+    public Response getAppConfiguration(@PathParam(ApiConstants.SESSIONID) @NotNull String sessionId) {
         logger.error("sessionId:{}", sessionId);
         sessionService.revokeSession(sessionId);
         
