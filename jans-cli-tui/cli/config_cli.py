@@ -641,15 +641,7 @@ class JCA_CLI:
         return response.json()
 
 
-    def get_jwt_access_token(self):
-
-
-        """
-        STEP 1: Get device verification code
-        This fucntion requests user code from jans-auth, print result and
-        waits untill verification done.
-        """
-
+    def get_device_verification_code(self):
         response = requests.post(
             url='https://{}/jans-auth/restv1/device_authorization'.format(self.host),
             auth=(self.client_id, self.client_secret),
@@ -657,27 +649,45 @@ class JCA_CLI:
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
         )
+
         self.log_response(response)
-        if response.status_code != 200:
-            raise ValueError(
-                self.colored_text("Unable to get device authorization user code: {}".format(response.reason), error_color))
 
-        result = response.json()
+        return response
 
-        if 'verification_uri' in result and 'user_code' in result:
 
-            print("Please visit verification url {} and enter user code {} in {} secods".format(
-                    self.colored_text(result['verification_uri'], success_color),
-                    self.colored_text(result['user_code'], bold_color),
-                    result['expires_in']
-                    )
-                )
+    def get_jwt_access_token(self, device_verified=None):
 
-            input(self.colored_text("Please press «Enter» when ready", warning_color))
+
+        """
+        STEP 1: Get device verification code
+        This fucntion requests user code from jans-auth, print result and
+        waits untill verification done.
+        """
+        if not device_verified:
+            response = self.get_device_verification_code()
+            if response.status_code != 200:
+                msg = "Unable to get device authorization user code: {}".format(response.reason)
+                raise ValueError(
+                    self.colored_text(msg, error_color))
+
+            result = response.json()
+
+            if 'verification_uri' in result and 'user_code' in result:
+
+                msg = "Please visit verification url {} and enter user code {} in {} secods".format(
+                        self.colored_text(result['verification_uri'], success_color),
+                        self.colored_text(result['user_code'], bold_color),
+                        result['expires_in']
+                        )
+                print(msg)
+                input(self.colored_text("Please press «Enter» when ready", warning_color))
+
+            else:
+                msg = "Unable to get device authorization user code"
+                raise ValueError(self.colored_text(msg))
 
         else:
-            raise ValueError(self.colored_text("Unable to get device authorization user code"))
-
+            result = device_verified
 
         """
         STEP 2: Get access token for retreiving user info
@@ -748,6 +758,7 @@ class JCA_CLI:
         config['DEFAULT']['access_token_enc'] = access_token_enc
         write_config()
 
+        return True, ''
 
     def get_access_token(self, scope):
         if self.use_test_client:
@@ -755,6 +766,7 @@ class JCA_CLI:
         elif not self.access_token:
             self.check_access_token()
             self.get_jwt_access_token()
+        return True, ''
 
     def print_exception(self, e):
         error_printed = False

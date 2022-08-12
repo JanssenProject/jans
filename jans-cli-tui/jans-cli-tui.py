@@ -169,14 +169,27 @@ class JansCliApp(Application, JansAuthServer):
                 test_client=test_client
             )
 
-        open("/tmp/cc.txt", "a").write("Checking connection\n")
         status = self.cli_object.check_connection()
 
-        if status is True:
-            return
+        if status is not True:
+            buttons = [Button("OK", handler=self.jans_creds_dialog)]
+            self.show_message("Error getting Connection Config Api", status, buttons=buttons)
+        else:
+            if not test_client and not self.cli_object.access_token:
+                try:
+                    response = self.cli_object.get_device_verification_code()
+                    result = response.json()
 
-        buttons = [Button("OK", handler=self.jans_creds_dialog)]
-        self.show_message("Error getting Access Token", status, buttons=buttons)
+                    msg = "Please visit verification url {} and enter user code {} in {} secods".format(
+                        result['verification_uri'], result['user_code'], result['expires_in']
+                        )
+
+                    self.show_message("Waiting Response", msg)
+                    self.cli_object.get_jwt_access_token(result)
+
+                except Exception as e:
+                    self.show_message("ERROR", "An Error ocurred while getting device authorization code: " + str(e))
+
 
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
