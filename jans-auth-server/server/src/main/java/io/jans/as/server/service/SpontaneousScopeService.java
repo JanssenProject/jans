@@ -14,19 +14,16 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Pair;
 import io.jans.as.persistence.model.Scope;
-import org.apache.commons.lang3.BooleanUtils;
-import org.python.google.common.collect.Sets;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Set;
-import java.util.UUID;
+import org.python.google.common.collect.Sets;
+import org.slf4j.Logger;
+
+import java.util.*;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 @Stateless
 @Named
@@ -49,7 +46,7 @@ public class SpontaneousScopeService {
         }
 
         final Pair<Boolean, String> isAllowed = isAllowedBySpontaneousScopes(regExps, scopeId);
-        if (BooleanUtils.isFalse(isAllowed.getFirst())) {
+        if (isFalse(isAllowed.getFirst())) {
             log.error("Forbidden by client. Check client configuration.");
             return null;
         }
@@ -87,7 +84,11 @@ public class SpontaneousScopeService {
     }
 
     public boolean isAllowedBySpontaneousScopes(Client client, String scopeRequested) {
-        if (BooleanUtils.isFalse(client.getAttributes().getAllowSpontaneousScopes())) {
+        if (isFalse(appConfiguration.getAllowSpontaneousScopes())) {
+            return false;
+        }
+
+        if (isFalse(client.getAttributes().getAllowSpontaneousScopes())) {
             return false;
         }
 

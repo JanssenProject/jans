@@ -4249,6 +4249,9 @@ components:
         umaRestrictResourceToAssociatedClient:
           type: boolean
           description: Restrict access to resource by associated client.
+        allowSpontaneousScopes:
+          type: boolean
+          description: Specifies whether to allow spontaneous scopes
         spontaneousScopeLifetime:
           type: integer
           description: The lifetime of spontaneous scope in seconds.
