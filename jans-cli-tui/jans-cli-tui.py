@@ -176,7 +176,8 @@ class JansCliApp(Application, JansAuthServer):
         if status is True:
             return
 
-        self.show_message("Error getting Access Token", status)
+        buttons = [Button("Exit", handler=do_exit)]
+        self.show_message("Error getting Access Token", status)#, buttons=buttons)
 
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
@@ -280,18 +281,21 @@ class JansCliApp(Application, JansAuthServer):
         float_ = Float(content=dialog)
         self.root_layout.floats.insert(0, float_)
 
-        app = get_app()
-
-        focused_before = app.layout.current_window
-        app.layout.focus(dialog)
         result = await dialog.future
-        app.layout.focus(focused_before)
 
         if float_ in self.root_layout.floats:
             self.root_layout.floats.remove(float_)
 
         return result
 
+    def show_jans_dialog(self, dialog):
+        async def coroutine():
+            focused_before = self.layout.current_window
+            self.layout.focus(dialog)
+            result = await self.show_dialog_as_float(dialog)
+            self.layout.focus(focused_before)
+            return result
+        ensure_future(coroutine())
 
     def data_display_dialog(self, **params):
 
@@ -324,11 +328,6 @@ class JansCliApp(Application, JansAuthServer):
 
         self.create_cli()
 
-    def show_jans_dialog(self, dialog):
-        async def coroutine():
-            result = await self.show_dialog_as_float(dialog)
-            return result
-        ensure_future(coroutine())
 
     def jans_creds_dialog(self):
 
@@ -352,9 +351,9 @@ class JansCliApp(Application, JansAuthServer):
         dialog = EditScopeDialog(self,**params)
         self.show_jans_dialog(dialog)
 
-    def show_message(self, title, message):
+    def show_message(self, title, message, buttons=[]):
         body = HSplit([Label(message)])
-        dialog = JansGDialog(title=title, body=body)
+        dialog = JansGDialog(title=title, body=body, buttons=buttons)
         self.show_jans_dialog(dialog)
 
   
