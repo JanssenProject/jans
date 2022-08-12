@@ -335,10 +335,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             request.setDefaultMaxAge(params.getDefaultMaxAge());
         }
 
-        if (params.getRequireAuthTime() != null) {
-            request.setRequireAuthTime(params.getRequireAuthTime());
-        }
-
         if (!Strings.isNullOrEmpty(params.getInitiateLoginUri())) {
             request.setInitiateLoginUri(params.getInitiateLoginUri());
         }
