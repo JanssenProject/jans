@@ -12,7 +12,7 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.jsf2.service.FacesService;

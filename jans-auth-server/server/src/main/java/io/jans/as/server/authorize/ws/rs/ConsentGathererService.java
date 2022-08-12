@@ -13,7 +13,7 @@ import io.jans.as.model.util.StringUtils;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.AuthorizeService;
 import io.jans.as.server.service.ClientService;
