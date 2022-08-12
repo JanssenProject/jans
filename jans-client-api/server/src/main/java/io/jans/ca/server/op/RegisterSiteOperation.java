@@ -702,10 +702,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             request.setDefaultMaxAge(params.getDefaultMaxAge());
         }
 
-        if (params.getRequireAuthTime() != null) {
-            request.setRequireAuthTime(params.getRequireAuthTime());
-        }
-
         if (!Strings.isNullOrEmpty(params.getInitiateLoginUri())) {
             request.setInitiateLoginUri(params.getInitiateLoginUri());
         }
