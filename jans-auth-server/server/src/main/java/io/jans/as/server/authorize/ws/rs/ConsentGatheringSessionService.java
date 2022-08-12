@@ -9,7 +9,7 @@ package io.jans.as.server.authorize.ws.rs;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;

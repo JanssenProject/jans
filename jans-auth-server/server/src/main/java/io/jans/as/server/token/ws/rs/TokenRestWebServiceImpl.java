@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.*;
