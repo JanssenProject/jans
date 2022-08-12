@@ -83,7 +83,7 @@ RUN mkdir -p /opt/prometheus \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=819fc2bc8ca596845a17498f7bd2e101cc466775
+ENV JANS_SOURCE_VERSION=22dcc768ff288f767059e458654d5f91935118ac
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -91,7 +91,7 @@ ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_LINUX_SETUP_VERSION} \
+    && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout set ${JANS_SETUP_DIR}
 
 RUN mkdir -p /app/static/rdbm /app/schema /app/templates/jans-client-api
