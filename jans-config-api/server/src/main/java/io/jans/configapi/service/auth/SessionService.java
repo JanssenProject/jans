@@ -6,11 +6,9 @@
 
 package io.jans.configapi.service.auth;
 
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.uma.wrapper.Token;
 import io.jans.configapi.model.common.SessionId;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.PersistenceEntryManager;
@@ -19,7 +17,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -41,9 +38,6 @@ public class SessionService {
     @Inject
     AuthUtil authUtil;
     
-    @Inject 
-    UserService userService;
-
     @Inject
     private Logger logger;
     
@@ -75,7 +69,7 @@ public class SessionService {
     }
     
     public void revokeSession(String sid) {
-        logger.error("Revoke session sid:{}, authUtil:{}, userService:{}", sid, authUtil, userService);
+        logger.error("Revoke session sid:{}, authUtil:{}", sid, authUtil);
         logger.error("authUtil.getEndSessionEndpoint():{}",  authUtil.getEndSessionEndpoint());
         
         //Get Session details
@@ -88,6 +82,10 @@ public class SessionService {
         //Get Username
         logger.error("Fetch session user details - session.getUserDn():{}",session.getUserDn());
         User user = getUserBasedOnInum(session.getUserDn());
+        if(session==null) {
+            throw new NoSuchElementException(session.getUserDn());
+        }
+        
         logger.error("Session user detail - user:{}",user);
         authUtil.revokeSession(authUtil.getEndSessionEndpoint(),requestAccessToken(user.getUserId()), user.getUserId());
     }
@@ -96,21 +94,21 @@ public class SessionService {
         logger.error("Fetch user inum:{}",inum);
         User result = null;
         try {
-            result = userService.getUserByInum(inum);
+            result = getUserByDn(inum);
         } catch (Exception ex) {
             logger.error("Failed to load user entry", ex);
         }
         return result;
     }
     
-    private List<String> getPersonCustomObjectClassList() {
-        return appConfiguration.getPersonCustomObjectClassList();
+    private User getUserByDn(String dn, String... returnAttributes) {
+        logger.error("Fetch user - dn:{}",dn);
+        if (StringHelper.isEmpty(dn)) {
+            return null;
+        }
+        return persistenceEntryManager.find(dn, User.class, returnAttributes);
     }
 
-
-    private String getPeopleBaseDn() {
-        return staticConfiguration.getBaseDn().getPeople();
-    }
     
     public String requestAccessToken(final String clientId) {
         final List<String> scopes = Arrays.asList("revoke_session");
