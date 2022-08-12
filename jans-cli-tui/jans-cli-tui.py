@@ -158,7 +158,7 @@ class JansCliApp(Application, JansAuthServer):
 
         # Since first module is oauth, set center frame to my oauth main container.
         self.oauth_set_center_frame()
-    
+
     def create_cli(self):
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
@@ -166,18 +166,17 @@ class JansCliApp(Application, JansAuthServer):
                 client_id=config_cli.client_id,
                 client_secret=config_cli.client_secret, 
                 access_token=config_cli.access_token, 
-                test_client=test_client,
-                wrapped=True
+                test_client=test_client
             )
 
-
+        open("/tmp/cc.txt", "a").write("Checking connection\n")
         status = self.cli_object.check_connection()
 
         if status is True:
             return
 
-        buttons = [Button("Exit", handler=do_exit)]
-        self.show_message("Error getting Access Token", status)#, buttons=buttons)
+        buttons = [Button("OK", handler=self.jans_creds_dialog)]
+        self.show_message("Error getting Access Token", status, buttons=buttons)
 
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
@@ -213,9 +212,9 @@ class JansCliApp(Application, JansAuthServer):
         self.bindings.add("s-tab")(self.focus_previous)
         self.bindings.add("c-c")(do_exit)
 
-    def getTitledText(self, title, name, height=1, jans_help='', width=None):
+    def getTitledText(self, title, name, value='', height=1, jans_help='', width=None):
         multiline = height > 1
-        ta = TextArea(multiline=multiline, style='class:textarea')
+        ta = TextArea(text=value, multiline=multiline, style='class:textarea')
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
         if width:
@@ -290,10 +289,14 @@ class JansCliApp(Application, JansAuthServer):
 
     def show_jans_dialog(self, dialog):
         async def coroutine():
-            focused_before = self.layout.current_window
+            app = get_app()
+            focused_before = app.layout.current_window
             self.layout.focus(dialog)
             result = await self.show_dialog_as_float(dialog)
-            self.layout.focus(focused_before)
+            try:
+                app.layout.focus(focused_before)
+            except:
+                app.layout.focus(self.center_frame)
             return result
         ensure_future(coroutine())
 
@@ -329,12 +332,12 @@ class JansCliApp(Application, JansAuthServer):
         self.create_cli()
 
 
-    def jans_creds_dialog(self):
+    def jans_creds_dialog(self, *params):
 
         body=HSplit([
-            self.getTitledText("Hostname", name='jans_host', jans_help="FQN name of Jannsen Config Api Server"),
-            self.getTitledText("Client ID", name='jca_client_id', jans_help="Jannsen Config Api Client ID"),
-            self.getTitledText("Client Secret", name='jca_client_secret', jans_help="Jannsen Config Api Client Secret")
+            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server"),
+            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
+            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
             ])
 
         buttons = [Button("Save", handler=self.save_creds)]

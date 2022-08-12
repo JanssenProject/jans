@@ -291,13 +291,13 @@ class Menu(object):
 
 class JCA_CLI:
 
-    def __init__(self, host, client_id, client_secret, access_token, test_client=False, wrapped=False):
+    def __init__(self, host, client_id, client_secret, access_token, test_client=False):
         self.host = self.idp_host = host
         self.client_id = client_id
         self.client_secret = client_secret
         self.use_test_client = test_client
         self.getCredintials()
-        self.wrapped = wrapped
+        self.wrapped = __name__ != "__main__"
         self.access_token = access_token or config['DEFAULT'].get('access_token')
         self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.idp_host)
         self.set_user()
@@ -422,13 +422,22 @@ class JCA_CLI:
 
     def check_connection(self):
         url = 'https://{}/jans-auth/restv1/token'.format(self.idp_host)
-        response = requests.post(
-                url=url,
-                auth=(self.client_id, self.client_secret),
-                data={"grant_type": "client_credentials"},
-                verify=self.verify_ssl,
-                cert=self.mtls_client_cert
-            )
+        try:
+
+            response = requests.post(
+                    url=url,
+                    auth=(self.client_id, self.client_secret),
+                    data={"grant_type": "client_credentials"},
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+        except Exception as e:
+            if self.wrapped:
+                return str(e)
+
+            raise ValueError(
+                self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
+
 
         self.log_response(response)
         if response.status_code != 200:
