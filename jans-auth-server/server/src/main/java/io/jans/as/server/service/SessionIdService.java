@@ -27,8 +27,8 @@ import io.jans.as.model.util.Util;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
@@ -88,7 +88,6 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 @Named
 public class SessionIdService {
 
-    public static final String OP_BROWSER_STATE = "opbs";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
     private static final int MAX_MERGE_ATTEMPTS = 3;
     private static final int DEFAULT_LOCAL_CACHE_EXPIRATION = 2;
@@ -452,7 +451,7 @@ public class SessionIdService {
         final String redirectUri = sessionIdAttributes.get("redirect_uri");
         final String sessionState = computeSessionState(clientId, redirectUri, opbs, salt);
         final String dn = buildDn(internalSid);
-        sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
+        sessionIdAttributes.put(SessionId.OP_BROWSER_STATE, opbs);
 
         Preconditions.checkNotNull(dn);
 

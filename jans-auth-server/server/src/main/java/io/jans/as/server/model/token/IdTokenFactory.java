@@ -27,7 +27,7 @@ import io.jans.as.server.model.common.CIBAGrant;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
