@@ -512,7 +512,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             context.setExecutionContext(executionContext);
 
 
-            executionContext.setIncludeIdTokenClaims(false);
+            executionContext.setIncludeIdTokenClaims(Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims()));
             executionContext.setPreProcessing(null);
             executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 
@@ -675,7 +675,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), cibaGrant, client, appConfiguration, attributeService);
                     context.setExecutionContext(executionContext);
 
-                    executionContext.setIncludeIdTokenClaims(false);
+                    executionContext.setIncludeIdTokenClaims(Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims()));
                     executionContext.setPreProcessing(idTokenPreProcessing);
                     executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 

@@ -1,6 +1,6 @@
 ## Agama DSL reference
 
-This document surveys the different constructs of the agama domain-specific language.
+This document surveys the different constructs of the Agama domain-specific language.
 
 ## Code comments
 
@@ -209,7 +209,7 @@ y = false
 ...
 ```
 
-There are several types of statements: branching, looping, web interaction, etc. They will be regarded in the subsequent sections of this document. Note agama does not support the concept of subroutines/procedures; this is not needed because functional decomposition is carried out by calling [subflows](#subflows).
+There are several types of statements: branching, looping, web interaction, etc. They will be regarded in the subsequent sections of this document. Note Agama does not support the concept of subroutines/procedures; this is not needed because functional decomposition is carried out by calling [subflows](#subflows).
 
 ## Logging
 
@@ -673,7 +673,7 @@ Iterate over seasons using sn
 
 ## Subflows
 
-A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in agama.
+A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in Agama.
 
 <table>
 	<tr><th>Example</th><th>Notes</th></tr>
