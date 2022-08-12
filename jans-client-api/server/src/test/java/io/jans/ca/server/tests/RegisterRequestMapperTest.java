@@ -136,7 +136,6 @@ public class RegisterRequestMapperTest {
         assertEquals(newRp.getRequestObjectEncryptionAlg(), rp.getRequestObjectEncryptionAlg());
         assertEquals(newRp.getRequestObjectEncryptionEnc(), rp.getRequestObjectEncryptionEnc());
         assertEquals(newRp.getDefaultMaxAge(), rp.getDefaultMaxAge());
-        assertEquals(newRp.getRequireAuthTime(), rp.getRequireAuthTime());
         assertEquals(newRp.getInitiateLoginUri(), rp.getInitiateLoginUri());
         assertEquals(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(newRp.getAuthorizedOrigins())),
                 Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(rp.getAuthorizedOrigins())));
