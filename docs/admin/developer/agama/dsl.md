@@ -28,9 +28,9 @@ Intrinsic properties to highlight:
 
 ## Language compiler
 
-Agama is not a compiled language. Code is transpiled to an intermediate representation which is then interpreted at runtime. Developers don't need to issue special commands for transpilation to occur. This is automatically executed in the background by the engine after a flow has been added or modified.
+Agama is not a compiled language. Code is transpiled to an intermediate representation which is then interpreted at runtime. Developers don't need to issue special commands for transpilation to occur. This is automatically executed in the background by the engine some seconds after a flow has been added or modified.
 
-The process of checking and fixing potential syntax errors is described [here](./lifecycle.md#creating-a-flow-in-janssen).
+The process of checking and fixing potential syntax errors is described [here](./lifecycle.md#about-syntax-errors).
 
 ## Syntactic features
 
@@ -323,7 +323,7 @@ See the [full reference](./dsl-full.md#iterate-over) to learn more about `Iterat
 
 ## Subflows
 
-A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in agama. Example:
+A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in Agama. Example:
 
 ```
 outcome = Trigger jo.jo.PersonalInfoGathering null false 
@@ -338,6 +338,6 @@ See the [full reference](./dsl-full.md#subflows) to learn more about `Trigger`.
 
 Agama interfaces seemlessly with Java or Groovy by means of the `Call` instruction. 
 
-Recall the DSL is designed to force developers use Java when the task at hand cannot be implemented by simple data manipulation or comparison of values. This way a flow written in agama DSL serves fundamentally as a depiction of the flow itself, hiding most of the internal details and low-level computations.
+Recall the DSL is designed to force developers use Java when the task at hand cannot be implemented by simple data manipulation or comparison of values. This way a flow written in Agama DSL serves fundamentally as a depiction of the flow itself, hiding most of the internal details and low-level computations.
 
 See the [full reference](./dsl-full.md#java-interaction) to learn more about `Call`.

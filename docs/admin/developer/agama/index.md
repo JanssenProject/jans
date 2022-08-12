@@ -28,7 +28,7 @@ As expected, the more sophisticated the flow, the more specialized knowlege is d
 
 ## Jython flows vs. Agama 
 
-With respect to jython-based flows, agama differs radically in two aspects:
+With respect to jython-based flows, Agama differs radically in two aspects:
 
 - A DSL is used to structure flows where business logic and computations are delegated to Java
 - Flow execution proceeds in a traditional, sequential manner. With jython scripts, an inversion of control (IoC) mechanism is employed where control jumps from one method to another in a script
@@ -47,10 +47,10 @@ The Agama engine (a.k.a the "_engine_") is the piece of software in charge of re
 
 Note the engine itself does not implement an authentication protocol. It only offers a safe way for short-lived web journeys to materialize. Hence, another piece is required to put flows in the context of a standard authorization framework like OpenId Connect. This where the "_bridge_" pitches in. 
 
-The "bridge" is a regular jython script that temporarily hands control to the engine and receives control back once the agama flow has finished. This script is in charge of doing the actual user authentication and leads to the completion of the process by taking the user's browser to a predetermined URL - the so-called `redirect_uri` where an access token or a code can be obtained.
+The "bridge" is a regular jython script that temporarily hands control to the engine and receives control back once the Agama flow has finished. This script is in charge of doing the actual user authentication and leads to the completion of the process by taking the user's browser to a predetermined URL - the so-called `redirect_uri` where an access token or a code can be obtained.
 
 Account that by default, the engine is disabled in the authentication server. The [quick start](./quick-start.md) page explains how to enable it. 
 
 ## Where to start?
 
-Readers are encouraged to begin at the [quick start](./quick-start.md) guide to learn the basics of agama. The [FAQ](./faq.md) page provides useful information for beginners as well.
+Readers are encouraged to begin at the [quick start](./quick-start.md) guide to learn the basics of Agama. The [FAQ](./faq.md) page provides useful information for beginners as well.

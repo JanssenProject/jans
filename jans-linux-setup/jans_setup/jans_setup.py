@@ -184,12 +184,10 @@ jansInstaller.initialize()
 
 if not Config.installed_instance:
     print()
-    detected_os = '{} {}'.format(base.os_type, base.os_version)
-    if base.snap:
-        detected_os = 'snap ' + detected_os
+
     print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
     print("Profile         :  {}".format(Config.profile))
-    print("Detected OS     :  {}".format(detected_os))
+    print("Detected OS     :  {}".format(base.get_os_description()))
     print("Janssen Version :  {}".format(base.current_app.app_info['ox_version']))
     print("Detected init   :  {}".format(base.os_initdaemon))
     print("Detected Apache :  {}".format(base.determineApacheVersion()))
