@@ -1,6 +1,6 @@
 # Development lifecycle
 
-In this page an overview of the flow development process is presented. In short the following are the steps required to run a flow:
+In this page an overview of the flow development process is presented. In short, the following are the steps required to build a flow:
 
 - Design and code the flow
 - Add the flow to the server
@@ -150,7 +150,7 @@ You may like to make modifications and enhancements to your flow. There are two 
 - Ensure the tokens used have scope `https://jans.io/oauth/config/agama.write`
 - Altering the source code of a flow via PATCH is possible but requires transforming the code into a (one liner) JSON string; this will be a repetitive burden. The PUT version is clearly more straightforward. If you still want to use PATCH, ensure to also modify the integer property `revision` increasing it by one. This will ensure the source changes are effectively picked.
 - The response of a successful operation returns a 200 status code and a JSON representation of the updated flow - source code not included
-- A 400 response (i.e. bad request) is generally obtained if the source code was modified and has [syntax problems](#about-syntax-errors)
+- A 400 response (i.e. bad request) is generally obtained if the supplied source code was has [syntax problems](#about-syntax-errors)
 
 **Examples:**
 
@@ -231,7 +231,7 @@ There is one endpoint to remove a flow:
 **Notes**:
 
 - Ensure the tokens used have scope `https://jans.io/oauth/config/agama.delete`
-- The output of a successful removal is 204 (no content).
+- The output of a successful removal is 204 (no content)
 
 Example:
 
