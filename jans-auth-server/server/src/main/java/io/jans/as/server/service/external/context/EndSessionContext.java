@@ -7,7 +7,7 @@
 package io.jans.as.server.service.external.context;
 
 import com.google.common.collect.Sets;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
 import jakarta.servlet.http.HttpServletRequest;

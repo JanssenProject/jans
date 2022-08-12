@@ -31,7 +31,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.persistence.model.Scope;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.ldap.ClientAuthorization;

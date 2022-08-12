@@ -7,6 +7,7 @@
 package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
