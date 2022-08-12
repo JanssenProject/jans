@@ -15,7 +15,6 @@ jansIdTknSignedRespAlg: RS256
 jansInclClaimsInIdTkn: false
 jansLogoutSessRequired: false
 jansPersistClntAuthzs: true
-jansRequireAuthTime: false
 jansRespTyp: code
 jansRptAsJwt: false
 jansScope: inum=1800.4F4C08,ou=scopes,o=jans

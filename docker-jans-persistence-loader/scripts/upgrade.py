@@ -114,14 +114,20 @@ def _transform_auth_dynamic_config(conf):
                 "finishedFlowPage": "finished.ftl",
                 "bridgeScriptPage": "agama.xhtml",
                 "defaultResponseHeaders": {
-                    "Content-Type": "text/html",
-                    "Expires": "0",
+                    "Cache-Control": "max-age=0, no-store",
                 },
             }
             should_update = True
 
         if "interruptionTime" in conf["agamaConfiguration"]:
             conf["agamaConfiguration"].pop("interruptionTime", None)
+            should_update = True
+
+        # add Cache-Control and remove Expires, Content-Type
+        if "Cache-Control" not in conf["agamaConfiguration"]["defaultResponseHeaders"]:
+            conf["agamaConfiguration"]["defaultResponseHeaders"]["Cache-Control"] = "max-age=0, no-store"
+            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Expires", None)
+            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
             should_update = True
 
     if "forceSignedRequestObject" not in conf:
@@ -816,5 +822,18 @@ def _transform_api_dynamic_config(conf):
             "userPassword",
             "givenName",
         ]
+        should_update = True
+
+    if "agamaConfiguration" not in conf:
+        conf["agamaConfiguration"] = {
+            "mandatoryAttributes": [
+                "qname",
+                "source",
+            ],
+            "optionalAttributes": [
+                "serialVersionUID",
+                "enabled",
+            ],
+        }
         should_update = True
     return conf, should_update
