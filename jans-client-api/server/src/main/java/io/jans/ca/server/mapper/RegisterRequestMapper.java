@@ -115,7 +115,6 @@ public class RegisterRequestMapper {
         rp.setRequestObjectEncryptionAlg(safeToString(request.getRequestObjectEncryptionAlg()));
         rp.setRequestObjectEncryptionEnc(safeToString(request.getRequestObjectEncryptionEnc()));
         rp.setDefaultMaxAge(safeToNumber(request.getDefaultMaxAge()));
-        rp.setRequireAuthTime(request.getRequireAuthTime());
 
         if (!Strings.isNullOrEmpty(request.getInitiateLoginUri())) {
             rp.setInitiateLoginUri(request.getInitiateLoginUri());
@@ -261,7 +260,6 @@ public class RegisterRequestMapper {
         request.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(rp.getRequestObjectEncryptionEnc()));
 
         request.setDefaultMaxAge(safeToNumber(rp.getDefaultMaxAge()));
-        request.setRequireAuthTime(rp.getRequireAuthTime());
 
         if (!Strings.isNullOrEmpty(rp.getInitiateLoginUri())) {
             request.setInitiateLoginUri(rp.getInitiateLoginUri());
