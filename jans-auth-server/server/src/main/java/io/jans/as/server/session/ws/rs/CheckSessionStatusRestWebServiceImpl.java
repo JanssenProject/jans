@@ -9,7 +9,7 @@ package io.jans.as.server.session.ws.rs;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.util.ServerUtil;

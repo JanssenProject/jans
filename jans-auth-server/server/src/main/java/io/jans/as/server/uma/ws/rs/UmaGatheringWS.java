@@ -13,7 +13,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.as.server.uma.authorization.UmaWebException;

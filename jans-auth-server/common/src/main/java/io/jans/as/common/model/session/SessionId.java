@@ -4,28 +4,21 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.model.common;
+package io.jans.as.common.model.session;
 
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.JsonObject;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.Deletable;
+import jakarta.inject.Named;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import jakarta.inject.Named;
-import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
-
-import static io.jans.as.server.service.SessionIdService.OP_BROWSER_STATE;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,6 +31,7 @@ import static io.jans.as.server.service.SessionIdService.OP_BROWSER_STATE;
 public class SessionId implements Deletable, Serializable {
 
     public static final String OLD_SESSION_ID_ATTR_KEY = "old_session_id";
+    public static final String OP_BROWSER_STATE = "opbs";
 
     private static final long serialVersionUID = -237476411915686378L;
 

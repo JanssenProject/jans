@@ -12,7 +12,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.as.server.uma.service.RedirectParameters;
 import io.jans.as.server.uma.service.UmaPctService;
