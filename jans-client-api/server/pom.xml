@@ -96,6 +96,19 @@
             <artifactId>jans-client-api-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-client-api-common</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>io.jans</groupId>
@@ -203,14 +216,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.sourceforge.htmlunit</groupId>
-            <artifactId>htmlunit</artifactId>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
             <artifactId>htmlunit-cssparser</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <!-- Others -->
@@ -818,30 +834,6 @@
                     <groupId>org.jboss.resteasy</groupId>
                     <artifactId>resteasy-servlet-initializer</artifactId>
                     <version>3.0.21.Final</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>test-dependencies</id>
-            <activation>
-                <property>
-                    <name>maven.test.skip</name>
-                    <value>false</value>
-                </property>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>io.jans</groupId>
-                    <artifactId>jans-client-api-common</artifactId>
-                    <version>${project.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-log4j12</artifactId>
-                        </exclusion>
-                    </exclusions>
-                    <type>test-jar</type>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
