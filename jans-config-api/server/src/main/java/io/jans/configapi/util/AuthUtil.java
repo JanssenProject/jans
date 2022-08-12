@@ -1,6 +1,7 @@
 package io.jans.configapi.util;
 
 import com.unboundid.ldap.sdk.DN;
+import io.jans.as.client.RevokeSessionResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
@@ -69,6 +70,11 @@ public class AuthUtil {
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
     }
+    
+    public String getEndSessionEndpoint() {
+        return this.configurationService.find().getEndSessionEndpoint();
+    }
+
 
     public String getServiceUrl(String url) {
         return this.getIssuer() + url;
@@ -409,5 +415,20 @@ public class AuthUtil {
      }
 
    
+     public RevokeSessionResponse revokeSession(final String url, final String header, final String token, final String userId) {
+         log.debug("Revoke session Request - url:{}, header:{}, token:{}, userId:{}", url, header, token, userId);
+
+        
+
+         RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, header, token,userId);
+         log.debug("revokeSessionResponse:{}",revokeSessionResponse);
+         if (revokeSessionResponse != null) {
+
+             log.debug("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ", revokeSessionResponse.getEntity(), revokeSessionResponse.getStatus());
+           
+            
+         }
+         return revokeSessionResponse;
+     }
 
 }

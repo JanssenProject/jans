@@ -6,7 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-//import io.jans.as.server.model.common.SessionId;
+import io.jans.configapi.model.common.SessionId;
 import io.jans.configapi.core.rest.ProtectedApi;
 
 import io.jans.configapi.service.auth.SessionService;
@@ -18,6 +18,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.List;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -34,11 +36,22 @@ public class SessionResource extends ConfigBaseResource {
     SessionService sessionService;
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
-    public Response getAppConfiguration() {
+    //@ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
+    public Response getAllSessions() {
      
-        return Response.ok("OK").build();
+        final List<SessionId> sessions = sessionService.getAllSessions();
+        logger.error("sessions:{}", sessions);
+        return Response.ok(sessions).build(); 
     }
 
+    
+    @POST
+    //@ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
+    public Response getAppConfiguration(@NotNull SessionId sessionId) {
+        logger.error("sessionId:{}", sessionId);
+        sessionService.revokeSession(sessionId);
+        
+        return Response.ok("OK").build(); 
+    }
     
 }
