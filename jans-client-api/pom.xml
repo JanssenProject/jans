@@ -53,7 +53,7 @@
         <arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
 
         <shrinkwrap.version>2.1.0</shrinkwrap.version>
-        <selenium.version>3.141.59</selenium.version>
+        <selenium.version>4.4.0</selenium.version>
         <argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
 
         <sonar.projectKey>JanssenProject_jans-client-api</sonar.projectKey>
@@ -261,12 +261,6 @@
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>9.11.1</version>
             </dependency>
-            <dependency>
-                <groupId>net.sourceforge.htmlunit</groupId>
-                <artifactId>htmlunit-cssparser</artifactId>
-                <version>1.9.0</version>
-                <scope>test</scope>
-            </dependency>
 
             <!-- selenium dependencies-->
             <dependency>
@@ -283,19 +277,32 @@
             <dependency>
                 <groupId>org.seleniumhq.selenium</groupId>
                 <artifactId>selenium-support</artifactId>
-                <version>3.141.59</version>
+                <version>${selenium.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-api</artifactId>
+                <version>${selenium.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>htmlunit-driver</artifactId>
+                <version>3.63.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>net.sourceforge.htmlunit</groupId>
                 <artifactId>htmlunit-cssparser</artifactId>
-                <version>1.9.0</version>
+                <version>1.12.0</version>
                 <scope>test</scope>
             </dependency>
+
             <dependency>
                 <groupId>net.sourceforge.htmlunit</groupId>
                 <artifactId>htmlunit</artifactId>
-                <version>2.52.0</version>
+                <version>2.63.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
