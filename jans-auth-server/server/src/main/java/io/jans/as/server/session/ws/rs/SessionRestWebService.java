@@ -10,7 +10,7 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.DefaultScope;
 import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.token.TokenService;
