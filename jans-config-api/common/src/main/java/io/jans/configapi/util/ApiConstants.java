@@ -25,7 +25,6 @@ public class ApiConstants {
     public static final String REQUEST_OBJECT = "/request_object";
     public static final String UMA = "/uma";
     public static final String DYN_REGISTRATION = "/dyn_registration";
-    //public static final String SESSIONID = "/sessionid";
     public static final String SESSION = "/session";
     public static final String CLIENTS = "/clients";
     public static final String OPENID = "/openid";
@@ -78,6 +77,7 @@ public class ApiConstants {
     public static final String CLIENTID_PATH = "/{clientId}";
     public static final String CREATORID_PATH = "/{creatorId}";
     public static final String SESSIONID_PATH = "/{sessionId}";
+    public static final String USERID_PATH = "/{userId}";
     public static final String AGAMA = "/agama";
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
@@ -101,6 +101,7 @@ public class ApiConstants {
     public static final String CREATOR = "creator";
     public static final String CREATORID = "creatorId";
     public static final String SESSIONID = "sessionId";
+    public static final String USERID = "userId";
     
 
     public static final String ALL = "all";

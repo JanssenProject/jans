@@ -6,7 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import io.jans.configapi.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.configapi.core.rest.ProtectedApi;
 
 import io.jans.configapi.service.auth.SessionService;
@@ -21,7 +21,6 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.SESSION)
@@ -36,7 +35,7 @@ public class SessionResource extends ConfigBaseResource {
     SessionService sessionService;
 
     @GET
-    //@ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS })
     public Response getAllSessions() {
      
         final List<SessionId> sessions = sessionService.getAllSessions();
@@ -46,12 +45,11 @@ public class SessionResource extends ConfigBaseResource {
 
     
     @POST
-    //@ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
-    @Path(ApiConstants.SESSIONID_PATH)
-    public Response getAppConfiguration(@PathParam(ApiConstants.SESSIONID) @NotNull String sessionId) {
-        logger.error("sessionId:{}", sessionId);
-        sessionService.revokeSession(sessionId);
-        
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION })
+    @Path(ApiConstants.USERID_PATH)
+    public Response getAppConfiguration(@PathParam(ApiConstants.USERID) @NotNull String userId) {
+        logger.error("userId:{}", userId);
+        sessionService.revokeSession(userId);        
         return Response.ok("OK").build(); 
     }
     

@@ -9,7 +9,7 @@ package io.jans.configapi.service.auth;
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.configapi.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
@@ -68,29 +68,30 @@ public class SessionService {
         return persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null);
     }
     
-    public void revokeSession(String sid) {
-        logger.error("Revoke session sid:{}, authUtil:{}", sid, authUtil);
+    public void revokeSession(String userId) {
+        logger.error("Revoke session sid:{}, authUtil:{}", userId, authUtil);
         logger.error("authUtil.getEndSessionEndpoint():{}",  authUtil.getEndSessionEndpoint());
         
-        //Get Session details
-        SessionId session = this.getSessionById(sid);
-        logger.error("session():{}",session);
-        if(session==null) {
-            throw new NoSuchElementException(sid);
+        //Get User details
+        String userDn = this.getDnForUser(userId);
+        logger.error("Fetch user details - userDn:{}",userDn);
+        User user = getUserBasedOnInum(userDn);
+        if(user==null) {
+            throw new NoSuchElementException("User  -'"+userId+"'  does not exists!!");
         }
         
-        //Get Username
-        logger.error("Fetch session user details - session.getUserDn():{}",session.getUserDn());
-        User user = getUserBasedOnInum(session.getUserDn());
-        if(session==null) {
-            throw new NoSuchElementException(session.getUserDn());
-        }
-        
-        logger.error("Session user detail - user:{}",user);
+        logger.error("User detail - user:{}",user);
         authUtil.revokeSession(authUtil.getEndSessionEndpoint(),requestAccessToken(user.getUserId()), user.getUserId());
     }
     
-    public User getUserBasedOnInum(String inum) {
+    private String getDnForUser(String userId) {
+        if (StringHelper.isEmpty(userId)) {
+            return staticConfiguration.getBaseDn().getPeople();
+        }
+        return String.format("jansId=%s,%s", userId, staticConfiguration.getBaseDn().getPeople());
+    }
+    
+    private User getUserBasedOnInum(String inum) {
         logger.error("Fetch user inum:{}",inum);
         User result = null;
         try {
@@ -110,7 +111,7 @@ public class SessionService {
     }
 
     
-    public String requestAccessToken(final String clientId) {
+    private String requestAccessToken(final String clientId) {
         final List<String> scopes = Arrays.asList("revoke_session");
         String accessToken = authUtil.requestAccessToken(clientId,scopes);
         
