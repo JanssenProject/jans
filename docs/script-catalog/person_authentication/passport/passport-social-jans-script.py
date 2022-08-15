@@ -243,19 +243,25 @@ class PersonAuthentication(PersonAuthenticationType):
         file = attrs.get("key_store_file")
         password = attrs.get("key_store_password")
         providersJsonFile = attrs.get("providers_json_file")
-        passportTokenEndpoint = attrs.get("passport_token_endpoint")
+        passportFQDN = attrs.get("passport_fqdn")
+        passportTokenEndpointPath = attrs.get("passport_token_endpoint_path")
+        passportAuthEndpointPath = attrs.get("passport_auth_endpoint_path")
 
         if file != None and password != None:
             file = file.getValue2()
             password = password.getValue2()
             providersJsonFile = providersJsonFile.getValue2()
-            passportTokenEndpoint = passportTokenEndpoint.getValue2()
+            passportFQDN = passportFQDN.getValue2()
+            passportTokenEndpointPath = passportTokenEndpointPath.getValue2()
+            passportAuthEndpointPath = passportAuthEndpointPath.getValue2()
 
             if StringHelper.isNotEmpty(file) and StringHelper.isNotEmpty(password):
                 self.keyStoreFile = file
                 self.keyStorePassword = password
                 self.providersJsonFile = providersJsonFile
-                self.passportTokenEndpoint = passportTokenEndpoint
+                self.passportFQDN = passportFQDN
+                self.passportTokenEndpointPath = passportTokenEndpointPath
+                self.passportAuthEndpointPath = passportAuthEndpointPath
                 return True
 
         print "Passport. readKeyStoreProperties. Properties key_store_file or key_store_password not found or empty"
@@ -345,7 +351,7 @@ class PersonAuthentication(PersonAuthenticationType):
         url = None
         try:
             facesContext = CdiUtil.bean(FacesContext)
-            tokenEndpoint = self.passportTokenEndpoint
+            tokenEndpoint = "%s%s" % (self.passportFQDN, self.passportTokenEndpointPath)
 
             httpService = CdiUtil.bean(HttpService)
             httpclient = httpService.getHttpsClient()
@@ -359,7 +365,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. getPassportRedirectUrl. Response was %s" % httpResponse.getStatusLine().getStatusCode()
 
             tokenObj = json.loads(response)
-            url = "/passport/auth/%s/%s" % (provider, tokenObj["token_"])
+            url = "%s%s/%s/%s" % (self.passportFQDN, self.passportAuthEndpointPath, provider, tokenObj["token_"])
         except:
             print "Passport. getPassportRedirectUrl. Error building redirect URL: ", sys.exc_info()[1]
 
