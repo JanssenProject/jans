@@ -243,16 +243,19 @@ class PersonAuthentication(PersonAuthenticationType):
         file = attrs.get("key_store_file")
         password = attrs.get("key_store_password")
         providersJsonFile = attrs.get("providers_json_file")
+        passportTokenEndpoint = attrs.get("passport_token_endpoint")
 
         if file != None and password != None:
             file = file.getValue2()
             password = password.getValue2()
             providersJsonFile = providersJsonFile.getValue2()
+            passportTokenEndpoint = passportTokenEndpoint.getValue2()
 
             if StringHelper.isNotEmpty(file) and StringHelper.isNotEmpty(password):
                 self.keyStoreFile = file
                 self.keyStorePassword = password
                 self.providersJsonFile = providersJsonFile
+                self.passportTokenEndpoint = passportTokenEndpoint
                 return True
 
         print "Passport. readKeyStoreProperties. Properties key_store_file or key_store_password not found or empty"
@@ -287,7 +290,7 @@ class PersonAuthentication(PersonAuthenticationType):
           registeredProviders[provider["id"]] = {
             "emailLinkingSafe": provider["emailLinkingSafe"],
             "requestForEmail": provider["requestForEmail"],
-            "logo_img": "",
+            "logo_img": provider["logoImg"],
             "displayName": provider["displayName"],
             "type": provider["type"]
           }
@@ -342,7 +345,8 @@ class PersonAuthentication(PersonAuthenticationType):
         url = None
         try:
             facesContext = CdiUtil.bean(FacesContext)
-            tokenEndpoint = "https://%s/passport/token" % facesContext.getExternalContext().getRequest().getServerName()
+            # tokenEndpoint = "https://%s/passport/token" % facesContext.getExternalContext().getRequest().getServerName()
+            tokenEndpoint = self.passportTokenEndpoint
 
             httpService = CdiUtil.bean(HttpService)
             httpclient = httpService.getHttpsClient()
