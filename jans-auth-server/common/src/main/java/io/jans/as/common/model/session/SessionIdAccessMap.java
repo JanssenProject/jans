@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.model.common;
+package io.jans.as.common.model.session;
 
 import com.google.common.collect.Sets;
 

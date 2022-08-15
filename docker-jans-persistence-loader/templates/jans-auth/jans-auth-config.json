@@ -463,8 +463,7 @@
         "finishedFlowPage": "finished.ftl",
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
-            "Content-Type": "text/html",
-            "Expires": "0"
+            "Cache-Control": "max-age=0, no-store"
         }
     }
 }

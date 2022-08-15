@@ -21,7 +21,6 @@ import java.net.URLDecoder;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.fail;
@@ -161,7 +160,7 @@ public class SeleniumTestUtils {
 
     private static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
         Holder<String> currentUrl = new Holder<>();
-        WebDriverWait wait = new WebDriverWait(currentDriver, WAIT_OPERATION_TIMEOUT);
+        WebDriverWait wait = new WebDriverWait(currentDriver, Duration.ofSeconds(WAIT_OPERATION_TIMEOUT));
         wait.until(d -> {
             currentUrl.setT(d.getCurrentUrl());
             return !currentUrl.getT().equals(previousURL);

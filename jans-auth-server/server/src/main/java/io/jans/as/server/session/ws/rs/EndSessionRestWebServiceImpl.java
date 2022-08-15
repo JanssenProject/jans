@@ -28,7 +28,7 @@ import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.CookieService;
