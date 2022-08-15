@@ -165,7 +165,7 @@ The custom script has the following properties:
 | key_store_file | Keystore file path. Use [these instructions](#generate-keystore) to create a keystore. |
 | key_store_password | Keystore file secret password |
 | providers_json_file | Provider JSON file which you are also using for passport config. |
-| passport_token_endpoint | Passport token endpoint which request by Jans to get token for next auth request. Check [Step-1](#setup-passport-js-project) in Setup Passport section. |
+| passport_token_endpoint | Passport token endpoint which request by Jans to get token for next auth request. [Script code here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py#L348). Check [Step-1](#setup-passport-js-project) in Setup Passport section. |
 
 > Note: After adding and enabling successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://your-jans-server.com/.well-known/openid-configuration. Find `"acr_values_supported"` and you should see `passport-social`. 
 

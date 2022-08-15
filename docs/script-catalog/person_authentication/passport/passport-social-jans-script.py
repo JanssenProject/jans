@@ -345,7 +345,6 @@ class PersonAuthentication(PersonAuthenticationType):
         url = None
         try:
             facesContext = CdiUtil.bean(FacesContext)
-            # tokenEndpoint = "https://%s/passport/token" % facesContext.getExternalContext().getRequest().getServerName()
             tokenEndpoint = self.passportTokenEndpoint
 
             httpService = CdiUtil.bean(HttpService)
