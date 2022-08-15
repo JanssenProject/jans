@@ -176,7 +176,7 @@ class JansCliApp(Application, JansAuthServer):
             self.show_message("Error getting Connection Config Api", status, buttons=buttons)
         else:
             if not test_client and not self.cli_object.access_token:
-                try:
+
                     response = self.cli_object.get_device_verification_code()
                     result = response.json()
 
@@ -184,11 +184,22 @@ class JansCliApp(Application, JansAuthServer):
                         result['verification_uri'], result['user_code'], result['expires_in']
                         )
 
-                    self.show_message("Waiting Response", msg)
-                    self.cli_object.get_jwt_access_token(result)
+                    body = HSplit([Label(msg)])
+                    dialog = JansGDialog(title="Waiting Response", body=body)
 
-                except Exception as e:
-                    self.show_message("ERROR", "An Error ocurred while getting device authorization code: " + str(e))
+                    async def coroutine():
+                        app = get_app()
+                        focused_before = app.layout.current_window
+                        self.layout.focus(dialog)
+                        await self.show_dialog_as_float(dialog)
+                        try:
+                            app.layout.focus(focused_before)
+                        except:
+                            app.layout.focus(self.center_frame)
+
+                        self.cli_object.get_jwt_access_token(result)
+
+                    ensure_future(coroutine())
 
 
     def check_jans_cli_ini(self):
@@ -291,16 +302,22 @@ class JansCliApp(Application, JansAuthServer):
     async def show_dialog_as_float(self, dialog):
         "Coroutine."
         float_ = Float(content=dialog)
-        self.root_layout.floats.insert(0, float_)
+        self.root_layout.floats.append(float_)
 
         result = await dialog.future
 
         if float_ in self.root_layout.floats:
             self.root_layout.floats.remove(float_)
 
+        if self.root_layout.floats:
+            self.layout.focus(self.root_layout.floats[-1].content)
+        else:
+            self.layout.focus(self.center_frame)
+
         return result
 
     def show_jans_dialog(self, dialog):
+
         async def coroutine():
             app = get_app()
             focused_before = app.layout.current_window
@@ -310,8 +327,13 @@ class JansCliApp(Application, JansAuthServer):
                 app.layout.focus(focused_before)
             except:
                 app.layout.focus(self.center_frame)
+
+
             return result
+
         ensure_future(coroutine())
+        
+
 
     def data_display_dialog(self, **params):
 
@@ -342,8 +364,6 @@ class JansCliApp(Application, JansAuthServer):
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
         config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
 
-        self.create_cli()
-
 
     def jans_creds_dialog(self, *params):
 
@@ -356,8 +376,21 @@ class JansCliApp(Application, JansAuthServer):
         buttons = [Button("Save", handler=self.save_creds)]
         dialog = JansGDialog(title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
 
-        self.show_jans_dialog(dialog)
-  
+        async def coroutine():
+            app = get_app()
+            focused_before = app.layout.current_window
+            self.layout.focus(dialog)
+            result = await self.show_dialog_as_float(dialog)
+            try:
+                app.layout.focus(focused_before)
+            except:
+                app.layout.focus(self.center_frame)
+            
+            self.create_cli()
+
+        ensure_future(coroutine())
+
+
 
     def edit_client_dialog(self, **params):
         dialog = EditClientDialog(self,**params)
