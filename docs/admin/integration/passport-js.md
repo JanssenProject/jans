@@ -34,7 +34,7 @@ Check [Passport-JS](https://github.com/GluuFederation/tutorials/blob/master/oidc
 
 Below things need to add in Passport JS Project to setup complete auth flow with Jans.
 
-1. Make a token endpoint which expose token with unique id. Jans will use this endpoint to get token and use this token for secur auth request. Passport Project has to validate this token in Jans request. Code sample:
+1. Make a token endpoint which expose token with unique id. Jans will use this endpoint to get token and use this token for secur auth request. Passport Project has to validate this token in Jans request. This is just a simple strategy to protect passport endpoint from spam requests and only allow jans to request it. Code sample:
 
    ```js
    // Encryption compatible with Jans EncryptionService
@@ -49,7 +49,7 @@ Below things need to add in Passport JS Project to setup complete auth flow with
    )
    ```
 
-   You need to use Salt File `/etc/jans/conf/salt` as a secret key. Jans [interception script](https://github.com/JanssenProject/jans/blob/4e276579ed733dcdc1fbfb7540fd08b586684762/docs/script-catalog/person_authentication/passport/passport-social-jans-script.py#L408) uses this same file for decryption.
+   You need to use Salt File `/etc/jans/conf/salt` as a secret key. You will get this salt file after Jans intallation. Jans [interception script](https://github.com/JanssenProject/jans/blob/4e276579ed733dcdc1fbfb7540fd08b586684762/docs/script-catalog/person_authentication/passport/passport-social-jans-script.py#L408) uses this same file for decryption.
 
 1. Create auth request endpoints which will be request by User on Jans auth login page. For Example: Suppose you have added google strategy in your passport project. In that case you can make a endpoint like `/google/:token`. `google` is provider id in [providers_json_file](#add-passport-social-script). `token` is the same token which we created in above step.
 
