@@ -89,6 +89,7 @@ public class AppConfiguration implements Configuration {
     private int statTimerIntervalInSeconds;
     private String statAuthorizationScope;
 
+    private Boolean allowSpontaneousScopes;
     private int spontaneousScopeLifetime;
     private String openidSubAttribute;
     private Boolean publicSubjectIdentifierPerClientEnabled = false;
@@ -1487,6 +1488,15 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaPctLifetime(int umaPctLifetime) {
         this.umaPctLifetime = umaPctLifetime;
+    }
+
+    public Boolean getAllowSpontaneousScopes() {
+        if (allowSpontaneousScopes == null) allowSpontaneousScopes = false;
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
     }
 
     public int getSpontaneousScopeLifetime() {

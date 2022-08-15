@@ -76,6 +76,10 @@ public class UmaScopeService {
             return fromLdap;
         }
 
+        if (isFalse(appConfiguration.getAllowSpontaneousScopes())) {
+            return null;
+        }
+
         if (isFalse(client.getAttributes().getAllowSpontaneousScopes())) {
             return null;
         }
