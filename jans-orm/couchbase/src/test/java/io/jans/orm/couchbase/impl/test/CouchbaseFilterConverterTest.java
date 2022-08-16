@@ -526,8 +526,8 @@ public class CouchbaseFilterConverterTest {
         
 		ConvertedExpression expression = simpleConverter.convertToCouchbaseFilter(filter, null, null);
 		String query = toSelectSQL(expression);
-		assertEquals(expression.expression(), "( ( LOWER( description ) LIKE %$description_any% OR LOWER( displayName ) LIKE %$displayName_any% ) AND ( ( gluuScrTyp = $gluuScrTyp ) OR ( $gluuScrTyp IN gluuScrTyp ) ) )");
-		assertEquals(query, "SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE ( ( LOWER( description ) LIKE \"%test_value%\" OR LOWER( displayName ) LIKE \"%test_value%\" ) AND ( ( gluuScrTyp = \"person_authentication\" ) OR ( \"person_authentication\" IN gluuScrTyp ) ) )");
+		assertEquals(expression.expression(), "( ( LOWER( description ) LIKE %$description_any% OR LOWER( displayName ) LIKE %$displayName_any% ) AND ( ( jansScrTyp = $jansScrTyp ) OR ( $jansScrTyp IN jansScrTyp ) ) )");
+		assertEquals(query, "SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE ( ( LOWER( description ) LIKE \"%test_value%\" OR LOWER( displayName ) LIKE \"%test_value%\" ) AND ( ( jansScrTyp = \"person_authentication\" ) OR ( \"person_authentication\" IN jansScrTyp ) ) )");
 	}
 
 	private String toSelectSQL(ConvertedExpression convertedExpression) {

@@ -13,13 +13,18 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skipTests>false</skipTests>
-                </configuration>
-            </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+<!--                        <argLine>@{argLine}</argLine> -->
+                        <failIfNoTests>false</failIfNoTests>
+                        <trimStackTrace>false</trimStackTrace>
+                        <suiteXmlFiles>
+                            <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+                        </suiteXmlFiles>
+                    </configuration>
+               </plugin>
         </plugins>
     </build>
 
