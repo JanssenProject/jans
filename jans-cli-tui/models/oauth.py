@@ -57,57 +57,205 @@ class JansAuthServer:
         self.oauth_tabs = {}
         self.oauth_tabs['clients'] = OrderedDict()
 
-        self.oauth_tabs['clients']['Person Authentication'] = HSplit([
+        self.oauth_tabs['clients']['Basic'] = HSplit([
                         VSplit([
-                            # Label(text=str('Client_ID')),
-                            #TextArea(text='', name='Client_ID'),
-                            self.getTitledText("Client_ID", name='Client_ID'),
+                            self.getTitledText("Client_ID", name='Client_ID',style='green'),
                             Window(width=1, char=" ",),
-                            self.getTitledCheckBox("Active:", name='active', values=['active']),
+                            self.getTitledCheckBox("Active:", name='active', values=['active'],style='green'),
                             ]) ,
-                        self.getTitledText("Client Name:", name='displayName'),
-                        self.getTitledText("Client Secret:", name='clientSecret'),
-                        self.getTitledText("Description:", name='Description'),
-                        self.getTitledRadioButton("Id_token Subject Type:", name='Id_token', values=['Pairwise','Public'],),
-                        self.getTitledCheckBox("Grant:", name='Grant', values=['Authorizatuin Code', 'Refresh Token', 'UMA Ticket','Client Credential','Password','Implicit']),
-                        self.getTitledCheckBox("Response Types:", name='responseTypes', values=['code', 'token', 'id_token']),
-                        self.getTitledCheckBox("Supress Authorization:", name='Supress', values=['True']),
-                        self.getTitledRadioButton("Application Type:", name='applicationType', values=['web', 'native']),
-                        self.getTitledText("Redirect Uris:", name='redirectUris', height=3),
-                        self.getTitledText("Redirect Regex:", name='redirectregex'),
-                        self.getTitledText("Scopes:", name='scopes', height=3),
+                        self.getTitledText("Client Name", name='displayName',style='green'),
+                        self.getTitledText("Client Secret", name='clientSecret',style='green'),
+                        self.getTitledText("Description", name='Description',style='green'),
+                        self.getTitledRadioButton("Id_token Subject Type:", name='Id_token', values=['Pairwise','Public'],style='green'),
+                        self.getTitledCheckBox("Grant:", name='Grant', values=['Authorizatuin Code', 'Refresh Token', 'UMA Ticket','Client Credential','Password','Implicit'],style='green'),
+                        self.getTitledCheckBox("Response Types:", name='responseTypes', values=['code', 'token', 'id_token'],style='green'),
+                        self.getTitledCheckBox("Supress Authorization:", name='Supress', values=['True'],style='green'),
+                        self.getTitledRadioButton("Application Type:", name='applicationType', values=['web', 'native'],style='green'),
+                        self.getTitledText("Redirect Uris", name='redirectUris', height=3,style='green'),
+                        self.getTitledText("Redirect Regex", name='redirectregex',style='green'),
+                        self.getTitledText("Scopes", name='scopes', height=3,style='green'),
+                        # HSplit([Box(body=VSplit([self.yes_button, self.no_button], align="CENTER", padding=3), style="class:button-bar", height=1)],
+                        #     height=D(),
+                        #     align = VerticalAlign.BOTTOM,
+                        #     )
+                        ],width=D(),
+                    )
+        
+        self.oauth_tabs['clients']['Tokens'] = HSplit([
+            self.getTitledRadioButton("Access Token Type", name='access_token_type', values=['JWT','Reference'],style='green'),
+            self.getTitledCheckBox("Incliude Claims in id_token", name='id_token_claims', values=['True'],style='green'),
+            self.getTitledCheckBox("Run introspection script before JWT access token creation", name='Supress_JWT', values=['True'],style='green'),
+            self.getTitledText("Token binding confirmation  method for id_token", name='id_token_binding_confirmation',style='green'),
+            self.getTitledText("Access token additional audiences", name='access_token_audiences',style='green'),
+            VSplit([
+                            Button("+", handler=self.show_again,left_symbol='[',right_symbol=']',width=3)
+            ]),
+            self.getTitledText("Access token lifetime", name='access_token_lifetime',style='green'),
+            self.getTitledText("Refresh token lifetime", name='refresh_token_lifetime',style='green'),
+            self.getTitledText("Defult max authn age", name='max_authn_age',style='green'),
+
+        ],width=D())
+
+        self.oauth_tabs['clients']['Logout'] = HSplit([
+
+                        self.getTitledText("Front channel logout URI", name='f_channel_logout_URI',style='green'),
+                        self.getTitledText("Post logout redirect URI", name='p_channel_logout_redirect_URI',style='green'),
+                        self.getTitledText("Back channel logout URI", name='b_channel_logout_URI',style='green'),
+                        self.getTitledCheckBox("Back channel logout session required", name='b_channel_session_required', values=['True'],style='green'),
+                        self.getTitledCheckBox("Front channel logout session required", name='f_channel_session_required', values=['True'],style='green'),
+
+                        ],width=D()
+                    )
+        
+        self.oauth_tabs['clients']['Software Info'] =  HSplit([
+            self.getTitledText("Client URI", name='client_URI',style='green'),
+            self.getTitledText("Policy URI", name='policy_URI',style='green'),
+            self.getTitledText("Logo URI", name='logo_URI',style='green'),
+            self.getTitledText("Term of service URI", name='term_of_service_URI',style='green'),
+            self.getTitledText("Contacts", name='contacts',style='green'),
+            VSplit([
+                            Button("+", handler=self.show_again,left_symbol='[',right_symbol=']',width=3,)
+            ]),
+            self.getTitledText("Authorized JS origins", name='authorized_JS_origins',style='green'),
+            VSplit([
+                            Button("+", handler=self.show_again,left_symbol='[',right_symbol=']',width=3)
+            ]),
+            self.getTitledText("Software id", name='software_id',style='green'),
+            self.getTitledText("Software version", name='software_version',style='green'),
+            self.getTitledText("Software statement", name='software_statement',style='green'),
+            
+        ],width=D())
+
+        self.oauth_tabs['clients']['CIBA/PAR/UMA'] = HSplit([
+                        Label(text="CIBA",style='bold'),
+                        self.getTitledRadioButton("Token delivery method", name='applicationType', values=['poll','push', 'ping'],style='green'),
+                        self.getTitledText("Client notification endpoint", name='displayName',style='green'),
+                        self.getTitledCheckBox("Require user code param", name='Supress', values=['True'],style='green'),
+                        
+                        Label(text="PAR",style='bold'),
+                        self.getTitledText("Request lifetime", name='displayName',style='green'),
+                        self.getTitledCheckBox("Request PAR", name='Supress', values=['True'],style='green'),
+                        
+                        Label("UMA",style='bold'),
+                        self.getTitledRadioButton("PRT token type", name='applicationType', values=['JWT', 'Reference'],style='green'),
+                        self.getTitledText("Claims redirect URI", name='displayName',style='green'),
+                        
+                        Label(text="Dropdown 1",style='blue'),
+                        Label(text="Dropdown 2",style='blue'),   
+                        Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
+
+                        # JansVerticalNav(
+                        #     myparent=self,
+                        #     headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
+                        #     preferred_size= [0,0,30,0],
+                        #     data=[['1','2','3','4'],['1','2','3','4'],['1','2','3','4'],['1','2','3','4'],],
+                        #     on_enter=self.edit_client_dialog,
+                        #     on_display=self.data_display_dialog,
+                        #     # selection_changed=self.data_selection_changed,
+                        #     selectes=0,
+                        #     headerColor='green',
+                        #     entriesColor='white',
+                        #     all_data=[['1','2','3','4'],['1','2','3','4'],['1','2','3','4'],['1','2','3','4'],]
+                        # )                
+                        ]
+                            )
+        
+        self.oauth_tabs['clients']['Encryption/Signing'] = HSplit([
+                        self.getTitledText("Client JWKS URI", name='displayName',style='green'),
+                        self.getTitledText("Client JWKS", name='displayName',style='green'),
+                        VSplit([
+                            Label(text="id_token"), 
+                            Label(text="a, b, c",style='red'),
+                        ]),
+                        VSplit([
+                            Label(text="Access token"), 
+                            Label(text="a",style='red'),
+                        ]),
+                        VSplit([
+                            Label(text="Userinfo"), 
+                            Label(text="a, b, c",style='red'),
+                        ]),
+                        VSplit([
+                            Label(text="JARM"), 
+                            Label(text="a, b, c",style='red'),
+                        ]),
+                        VSplit([
+                            Label(text="Request Object"), 
+                            Label(text="a, b, c",style='red'),
+                        ]),
+                 
+                        ]
+                            )
+        
+        self.oauth_tabs['clients']['Advanced Client Properties'] = HSplit([
+
+                        self.getTitledCheckBox("Default Prompt=login", name='Supress', values=['True'],style='green'),
+                        VSplit([
+                                self.getTitledCheckBox("Persist Authorizations", name='Supress', values=['True'],style='green'),
+                                self.getTitledCheckBox("Keep expired?", name='Supress', values=['True'],style='green'),
+                            ]) ,                       
+                        self.getTitledCheckBox("Allow spontaneos scopes", name='Supress', values=['True'],style='green'),
+
+                        self.getTitledText("spontaneos scopes validation regex", name='displayName',style='green'),
+                        VSplit([
+                                Label(text="Spontaneous Scopes",style='green'),
+                                Button("view current", handler=self.show_again,left_symbol='',right_symbol='',)
+                            
+                            ]) ,  
+                        self.getTitledText("Initial Login URI", name='displayName',style='green'),
+
+                        VSplit([
+                                self.getTitledText("Request URIs", name='clientSecret',style='green'),
+                                Button("+", handler=self.show_again,left_symbol='[',right_symbol=']',width=3,)
+                            ]) ,  
+
+                            Label(text="Dropdown 3",style='blue'),
+
+                        VSplit([
+                                self.getTitledText("Allowed ACRs", name='clientSecret',style='green'),
+                                Button("+", handler=self.show_again,left_symbol='[',right_symbol=']',width=3,)
+                            ]) , 
+                        self.getTitledText("TLS Subject DN", name='clientSecret',style='green'),
+
+                        VSplit([
+                        self.getTitledCheckBox("Client Experiation Date", name='id_token_claims', values=['True'],style='green'),
+                            Label(text="Pick Date",style='blue'),
+                            ]) , 
+                        
 
                         
-                        HSplit([Box(body=VSplit([self.yes_button, self.no_button], align="CENTER", padding=3), style="class:button-bar", height=1)],
-                            height=D(),
-                            align = VerticalAlign.BOTTOM,
-                            )
-                        ],
+                        ],width=D()
                     )
-        self.oauth_tabs['clients']['Consent Gathering'] = Label(text=str('Consent Gathering')) 
-        self.oauth_tabs['clients']['Post Authentication'] = Label(text=str('Post Authentication')) 
-        self.oauth_tabs['clients']['id_token'] = Label(text=str('id_token')) 
-        self.oauth_tabs['clients']['Password Grant'] = Label(text=str('Password Grant')) 
-        self.oauth_tabs['clients']['CIBA End User Notification'] = Label(text=str('CIBA End User Notification')) 
-        self.oauth_tabs['clients']['OpenId Configuration'] = Label(text=str('OpenId Configuration')) 
-        self.oauth_tabs['clients']['Dynamic Scope'] = Label(text=str('Dynamic Scope')) 
-        self.oauth_tabs['clients']['Spontaneous Scope'] = Label(text=str('Spontaneous Scope')) 
-        self.oauth_tabs['clients']['End Session'] = Label(text=str('End Session')) 
-        self.oauth_tabs['clients']['Client Registation'] = Label(text=str('Client Registation')) 
-        self.oauth_tabs['clients']['Introseption'] = Label(text=str('Introseption')) 
-        self.oauth_tabs['clients']['Update Token'] = Label(text=str('Update Token')) 
+        
+        self.oauth_tabs['clients']['Client Scripts'] = HSplit([
+                Label(text="Dropdown 4",style='blue'),
+                Label(text="Dropdown 5",style='blue'),
+                Label(text="Dropdown 6",style='blue'),
+                Label(text="Dropdown 7",style='blue'),
+                Label(text="Dropdown 8",style='blue'),
+                        ]
+                        )
+        
+        
+        self.oauth_tabs['clients']['Save'] = HSplit([
+                        Button("Save", handler=self.show_again,left_symbol='(',right_symbol=')',)
+   
+                        ],width=D()
+                    )
+        
+
 
         self.oauth_dialog_nav = list(self.oauth_tabs['clients'].keys())[0]
 
     def client_dialog_nav_selection_changed(self, selection):
         self.oauth_dialog_nav = selection
 
-    def edit_client(self, selected,event,size): ## enter 
-        self.edit_client_dialog()
-        # self.active_dialog_select = 'enter'
-        # self.show_dialog = True
+    # def edit_client(self, selected,event,size): ## enter 
+    #     self.edit_client_dialog()
+    #     # self.active_dialog_select = 'enter'
+    #     # self.show_dialog = True
 
-        # event.app.layout.focus(self.my_dialogs())
+    #     # event.app.layout.focus(self.my_dialogs())
 
     def oauth_prepare_containers(self):
 
@@ -207,7 +355,7 @@ class JansAuthServer:
                 headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
                 preferred_size= [0,0,30,0],
                 data=data,
-                on_enter=self.edit_client,
+                on_enter=self.edit_client_dialog,
                 on_display=self.data_display_dialog,
                 # selection_changed=self.data_selection_changed,
                 selectes=0,
