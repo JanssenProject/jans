@@ -3,52 +3,54 @@
 This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that  are **input-constrained** or **browser-less** . The authorization flow defined by this [RFC 8628](https://tools.ietf.org/html/rfc8628), sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.
 
 ### Sequence Diagram
+![](https://github.com/JanssenProject/jans/raw/main/docs/assets/device_auth_flow.png)
 
-Oauth2.0 Device Authorization Flow
+Paste the following source text of the sequence diagram on [sequencediagram.org](https://sequencediagram.org/) 
+```
+title Oauth2.0 Device Authorization flow
 
-``` mermaid
-sequenceDiagram
-  participant User
-  participant Browser on Computer / Smartphone
-  participant Device App
-  participant Jans AS
-  participant Third Party App
-  User->>Device App:Opens an app on device
-  Device App->>Jans AS:Sends authorization request \n"jans-server.com/jans-auth/restv1/device_authorization"
-  Jans AS->>Device App:Response - \nuser_code, device_code, verification_url, interval, expiration
-  Device App ->>User: Instructs the user to access Verification URL \nand enter user_code
-  note over Device App:Device App will keep polling AS for Access Token \nuntil device authorization is completed
-  loop till Device App recieves Access Token:
-      Device App->>Jans AS:request Access Token
-      Jans AS->>Device App:Response - \naccess_denied \nOR expired_token \nOR authorization_pending \nOR Access token
-  end 
-  User->>Browser on Computer / Smartphone:Opens a browser \nand access verification URL
-  Browser on Computer / Smartphone->>Jans AS:send user_code to verification URL
-  Jans AS->>Browser on Computer / Smartphone:Login and authorization prompt
-  Browser on Computer / Smartphone->>Jans AS:Authentication and consent
-  Jans AS->>Jans AS: Mark device as Authorized
-  note over Jans AS:Subsequent polling by the Device App \nwill return an Access Token as indicated \nby the loop above
-  Device App->>Third Party App:Invoke API with Access Token
-  Third Party App->>Device App: return Response
+participant User
+participant Browser on Computer / Smartphone
+participant Device App
+participant Jans AS
+participant Third Party App
+
+User->Device App:Opens an app on device
+Device App->Jans AS:Sends authorization request \n"jans-server.com/jans-auth/restv1/device_authorization"
+Jans AS->Device App:Response - \nuser_code, device_code, verification_url, interval, expiration
+Device App ->User: Instructs the user to access Verification URL \nand enter user_code
+note over Device App:Device App will keep polling AS for Access Token \nuntil device authorization is completed
+loop till Device App recieves Access Token:
+Device App->Jans AS:request Access Token
+Jans AS->Device App:Response - \naccess_denied \nOR expired_token \nOR authorization_pending \nOR Access token
+end 
+User->Browser on Computer / Smartphone:Opens a browser \nand access verification URL
+Browser on Computer / Smartphone->Jans AS:send user_code to verification URL
+Browser on Computer / Smartphone <-Jans AS:Login and authorization prompt
+Browser on Computer / Smartphone->Jans AS:Authentication and consent
+Jans AS->Jans AS: Mark device as Authorized
+note over Jans AS:Subsequent polling by the Device App \nwill return an Access Token as indicated \nby the loop above
+Device App->Third Party App:Invoke API with Access Token
+Third Party App->Device App: return Response
 ```
 
 ## User Experience
 
 1. First, the user requests authorization from the device:
 
-![DeviceFlow1](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-1.png)
+![DeviceFlow1](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-1.png)
 
 2. At the URL displayed on the screen, the user can input the displayed code in the device.
 
-![DeviceFlow2](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-2.png)
+![DeviceFlow2](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-2.png)
 
 3. After that, user could need to authenticate, then decide whether permissions will be granted.
 
-![DeviceFlow3](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-3.png)
+![DeviceFlow3](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-3.png)
 
 4. Finally, the confirmation screen will be shown.
 
-![DeviceFlow4](https://github.com/JanssenProject/jans/blob/main/docs/assets/device-flow-4.png)
+![DeviceFlow4](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-4.png)
 
 
 ## Request user and device codes
