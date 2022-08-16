@@ -14,7 +14,7 @@ After users authenticate at the external social identity provider, the control f
 
 [Diagram source file](../../admin/assets/sequence-source-passport-js-auth-flow.txt)
 
-![jans-passport-inbound-identity](../../admin/assets/image-pasport-js-auth-flow.png)
+![jans-passport-inbound-identity](../../assets/image-pasport-js-auth-flow.png)
 
 ## Role of Passport-JS project and Janssen's Authentication server
 
@@ -24,7 +24,7 @@ Check [Passport-JS](https://github.com/GluuFederation/tutorials/blob/master/oidc
 
 [Diagram source file](../../admin/assets/sequence-source-passport-js-data-flow.txt)
 
-![jans-passport-data](../../admin/assets/image-pasport-js-data-flow.png)
+![jans-passport-data](../../assets/image-pasport-js-data-flow.png)
 
 ## Setup and configurations
 
@@ -44,7 +44,7 @@ Below things need to add in Passport JS Project to setup complete auth flow with
        const t = jwt.sign(
          { jwt: uuidv4() }, '<saltfilevalue>', { expiresIn: 120 } // 2 min expiration
        )
-       res.status(200).send({ token_: t })
+       res.status(200).send({ token_: t }) // key should be token_
      }
    )
    ```
@@ -93,7 +93,8 @@ Below things need to add in Passport JS Project to setup complete auth flow with
        cn: profile.displayName,
        displayName: profile.displayName,
        givenName: profile.name.givenName,
-       sn: profile.name.familyName
+       sn: profile.name.familyName,
+       provider: "<your-social-provider-name>", // e.g. google
    }
    
    jwt.sign({
@@ -191,7 +192,7 @@ Below is the `providers_json_file` format:
 |--------|-----------|
 |id|Unique string for your provider|
 |displayName|This name will be shown on auth page|
-|logoImg|This logo image will be shown on auth page|
+|logoImg|This logo image will be shown on auth page e.g. `/jans-auth/img/glu_icon.png` |
 |requestForEmail|It is not required to be `true`. If you set it to true then it will prompt a user to enter an email.|
 |emailLinkingSafe|It is not required to be `true`. If you want to link to existing users then set it to true|
 
@@ -214,7 +215,7 @@ keytool -genkey -keyalg RSA -keysize 2048 -v -keystore keystore.jks -alias kid-2
 
 This command will prompt you to enter a password. Whichever password you have entered, this same password you need to configure `key_store_password` at Janssen custom script configuration.
 
-`<kid-unique-string>` is your kid which you need for passport  `keyId` config. `keystore.jks` need it to configure `key_store_file` property at Janssen custom script configuration.
+`<kid-unique-string>` is your kid which you need for passport  JWT `keyId` config. `keystore.jks` need it to configure `key_store_file` property at Janssen custom script configuration.
 
 ```
 # JKS to PKCS#12

@@ -297,8 +297,7 @@ class PersonAuthentication(PersonAuthenticationType):
             "emailLinkingSafe": provider["emailLinkingSafe"],
             "requestForEmail": provider["requestForEmail"],
             "logo_img": provider["logoImg"],
-            "displayName": provider["displayName"],
-            "type": provider["type"]
+            "displayName": provider["displayName"]
           }
 
         print(registeredProviders)
@@ -311,17 +310,7 @@ class PersonAuthentication(PersonAuthenticationType):
         registeredProviders = {}
         try:
             registeredProviders = self.parseAllProviders()
-            toRemove = []
-
-            for provider in registeredProviders:
-                if registeredProviders[provider]["type"] == "saml":
-                    toRemove.append(provider)
-                else:
-                    registeredProviders[provider]["saml"] = False
-
-            for provider in toRemove:
-                registeredProviders.pop(provider)
-
+            
             if len(registeredProviders.keys()) > 0:
                 print "Passport. parseProviderConfigs. Configured providers:", registeredProviders
             else:
