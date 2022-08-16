@@ -27,7 +27,7 @@ end
 
 Jans AS->User agent: 10. write Jans session cookie
 ```
-![Social Sign-In](https://github.com/maduvena/jans-docs/raw/main/images/SocialSignIn.png)
+![Social Sign-In](https://github.com/JanssenProject/jans/raw/main/docs/assets/SocialSignIn.png)
 
 ### How user provisioning works
 
