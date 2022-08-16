@@ -137,7 +137,7 @@ Below things need to add in Passport JS Project to setup complete auth flow with
 
    Follow Steps in [Generate Keystore section](#generate-keystore) to generate private key.
 
-1. You can add as many as possible passport strategies in your passport project. Above steps are little complex, use [this sample code file](../../assets/sample-code-passport-js.js) to build your passport application.
+1. You can add as many as possible passport strategies in your passport project. Above steps are little complex, use [this sample code file](https://github.com/JanssenProject/jans/blob/main/docs/assets/sample-code-passport-js.js) to build your passport application.
 
 ### Apache proxy setup
 
