@@ -162,7 +162,13 @@ class JansCliApp(Application, JansAuthServer):
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
 
+
+    def press_tab(self):
+        self.keyboard.press(Key.tab)
+        self.keyboard.release(Key.tab)
+
     def create_cli(self):
+        conn_ok = False
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
                 host=config_cli.host, 
@@ -174,15 +180,14 @@ class JansCliApp(Application, JansAuthServer):
 
         status = self.cli_object.check_connection()
 
-        self.keyboard.press(Key.tab)
-        self.keyboard.release(Key.tab)
+        self.press_tab()
 
         if status is not True:
             buttons = [Button("OK", handler=self.jans_creds_dialog)]
             self.show_message("Error getting Connection Config Api", status, buttons=buttons)
         else:
             if not test_client and not self.cli_object.access_token:
-
+                
                     response = self.cli_object.get_device_verification_code()
                     result = response.json()
 
@@ -202,11 +207,17 @@ class JansCliApp(Application, JansAuthServer):
                             app.layout.focus(focused_before)
                         except:
                             app.layout.focus(self.center_frame)
-
-                        self.cli_object.get_jwt_access_token(result)
+                        try:
+                            self.cli_object.get_jwt_access_token(result)
+                        except Exception as e:
+                            err_dialog = JansGDialog(title="Error!", body=HSplit([Label(str(e))]))
+                            await self.show_dialog_as_float(err_dialog)
+                            self.create_cli()
 
                     ensure_future(coroutine())
 
+        #if not conn_ok:
+        #    self.create_cli()
 
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):

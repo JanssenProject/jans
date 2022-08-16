@@ -655,6 +655,12 @@ class JCA_CLI:
         return response
 
 
+    def raise_error(self, msg):
+        if not self.wrapped:
+            msg = self.colored_text(msg, error_color)
+        raise ValueError(msg)
+
+
     def get_jwt_access_token(self, device_verified=None):
 
 
@@ -667,8 +673,7 @@ class JCA_CLI:
             response = self.get_device_verification_code()
             if response.status_code != 200:
                 msg = "Unable to get device authorization user code: {}".format(response.reason)
-                raise ValueError(
-                    self.colored_text(msg, error_color))
+                self.raise_error(msg)
 
             result = response.json()
 
@@ -684,7 +689,7 @@ class JCA_CLI:
 
             else:
                 msg = "Unable to get device authorization user code"
-                raise ValueError(self.colored_text(msg))
+                self.raise_error(msg)
 
         else:
             result = device_verified
@@ -708,8 +713,7 @@ class JCA_CLI:
             )
         self.log_response(response)
         if response.status_code != 200:
-            raise ValueError(
-                self.colored_text("Unable to get access token"))
+            self.raise_error("Unable to get access token")
 
         result = response.json()
 
@@ -728,8 +732,7 @@ class JCA_CLI:
             )
         self.log_response(response)
         if response.status_code != 200:
-            raise ValueError(
-                self.colored_text("Unable to get access token"))
+            self.raise_error("Unable to get access token")
 
         result = response.text
 
@@ -748,8 +751,7 @@ class JCA_CLI:
             )
         self.log_response(response)
         if response.status_code != 200:
-            raise ValueError(
-                self.colored_text("Unable to get access token"))
+            self.raise_error("Unable to get access token")
 
         result = response.json()
 
