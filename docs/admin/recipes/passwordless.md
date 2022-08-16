@@ -45,7 +45,7 @@ Follow [these instructions](https://gluu.org/docs/casa/plugins/duo/#add-the-plug
 
 ## Test
 - After installing Casa Duo plugin, option to enable Duo as an authentication method would become available on Casa administration console under `Enabled Authentication Methods`.
-- Adminstrator can enable Duo Security as authentication method by checking the box and clicking on `Save`
+- Administrator can enable Duo Security as authentication method by checking the box and clicking on `Save`
 - At this point, any user can log into Casa and configure Duo as authentication method for individual's account with [these steps](https://gluu.org/docs/casa/plugins/duo/#testing)  
 
 
