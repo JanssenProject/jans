@@ -6,6 +6,7 @@ import os
 from shutil import get_terminal_size
 import time
 from asyncio import Future, ensure_future
+from pynput.keyboard import Key, Controller
 
 import prompt_toolkit
 from prompt_toolkit.application import Application
@@ -97,10 +98,7 @@ class JansCliApp(Application, JansAuthServer):
         self.active_dialog_select = ''
         self.Auth_clients_tabs = {}
 
-        # ----------------------------------------------------------------------------- #
-        self.check_jans_cli_ini()
-        # ----------------------------------------------------------------------------- #
-
+        self.keyboard = Controller()
 
         self.yes_button = Button(text="Yes", handler=accept_yes)
         self.no_button = Button(text="No", handler=accept_no)
@@ -159,6 +157,11 @@ class JansCliApp(Application, JansAuthServer):
         # Since first module is oauth, set center frame to my oauth main container.
         self.oauth_set_center_frame()
 
+
+        # ----------------------------------------------------------------------------- #
+        self.check_jans_cli_ini()
+        # ----------------------------------------------------------------------------- #
+
     def create_cli(self):
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
@@ -170,6 +173,9 @@ class JansCliApp(Application, JansAuthServer):
             )
 
         status = self.cli_object.check_connection()
+
+        self.keyboard.press(Key.tab)
+        self.keyboard.release(Key.tab)
 
         if status is not True:
             buttons = [Button("OK", handler=self.jans_creds_dialog)]
