@@ -1,23 +1,24 @@
 # Integrate Duo Security with Janssen
 
-Duo Security is a SaaS authentication provider. This document will explain how to use Gluu's Duo interception script to configure the Gluu Server for a two-step authentication process with username and password as the first step, and Duo as the second step.
+This document will explain how to use Janssen Server Duo interception script to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. 
 
-In order to use this authentication mechanism your organization will need a Duo account and users will need to download the Duo mobile app.
+[Duo Security](https://duo.com/) is a SaaS authentication provider that supports multifactor authetication including push-approvals, SMS-OTP etc. 
 
 ## Prerequisites
-- Have a Duo Security account
-- Casa installed on Janssen Server
+- An account with Duo Security  
+- User being authenticated will need to download the Duo mobile app
+- Janssen Server with [Casa integrated](../integration/casa.md) 
 
 
-## Enable Janssen Custom Script for Duo
-- go to janssen installation
+## Enable Janssen Server Custom Script for Duo
+- Go to Janssen Server installation
 - Get `duo_web` python library using commands below
 ```shell
 cd /opt/jans/python/libs
 wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/auth/lib/duo_web.py
 sudo systemctl restart jans-auth
 ```
-- Now use `jans-cli` to enable duo script using instructions [here](../../../admin/config-guide/jans-cli/im/im-custom-scripts.md#update-custom-scripts). Set the `enabled` property for duo script to `true`
+- Now use `jans-cli` to enable Duo script using instructions [here](../../../admin/config-guide/jans-cli/im/im-custom-scripts.md#update-custom-scripts). Set the `enabled` property for duo script to `true`
 - confirm that the script is enabled in [cli script listing](../../../admin/config-guide/jans-cli/im/im-custom-scripts.md#get-list-of-custom-scripts)
 
 ## Configuring Duo credentials
