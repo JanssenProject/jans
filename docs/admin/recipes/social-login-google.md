@@ -1,4 +1,4 @@
-## Overview 
+## Social Login with Google 
 
 An out-of-the-box feature, the Google Authentication script is a `PersonAuthenticationType` script which enables a user to sign-in using Google credentials. Google's OAuth 2.0 APIs are used for this. After users authenticate using their Google credentials, their Google credentials are provisioned into the Jans-auth server.
 
@@ -56,7 +56,7 @@ The custom script has the following properties:
 
 To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) 
 
-# Enable Sign-in with Google Authentication script
+### Enable Sign-in with Google Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
 
 Obtain the json contents of `google` custom script by using a jans-cli command like get-config-scripts-by-type, get-config-scripts-by-inum etc.
