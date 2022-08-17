@@ -77,7 +77,7 @@ public class ApiConstants {
     public static final String CLIENTID_PATH = "/{clientId}";
     public static final String CREATORID_PATH = "/{creatorId}";
     public static final String SESSIONID_PATH = "/{sessionId}";
-    public static final String USERID_PATH = "/{userId}";
+    public static final String USERDN_PATH = "/{userDn}";
     public static final String AGAMA = "/agama";
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
@@ -101,7 +101,7 @@ public class ApiConstants {
     public static final String CREATOR = "creator";
     public static final String CREATORID = "creatorId";
     public static final String SESSIONID = "sessionId";
-    public static final String USERID = "userId";
+    public static final String USERDN = "userDn";
     
 
     public static final String ALL = "all";

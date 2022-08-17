@@ -2841,10 +2841,18 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           description: Internal Server Error
-  /jans-config-api/api/v1/jans-auth-server/session/{userId}:
+		  
+  /jans-config-api/api/v1/jans-auth-server/session/{userDn}:
+    parameters:
+      - name: userDn
+        in: path
+        description: User domain name.
+        required: true
+        schema:
+          type: string
     post:
-      summary: Revoke all sessions by userId.
-      description: Revoke all sessions by userId.
+      summary: Revoke all sessions by userDn.
+      description: Revoke all sessions by userDn.
       operationId: revoke-user-session
       security:
         - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete]
@@ -2852,15 +2860,11 @@ paths:
         - Auth -Session Management
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Success
-
+          description: Ok
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Unauthorized
+        '404':
+          description: Not Found
         '500':
           description: Internal Server Error
   

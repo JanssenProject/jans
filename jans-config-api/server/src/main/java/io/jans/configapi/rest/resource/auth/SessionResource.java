@@ -36,21 +36,19 @@ public class SessionResource extends ConfigBaseResource {
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS })
-    public Response getAllSessions() {
-     
-        final List<SessionId> sessions = sessionService.getAllSessions();
-        logger.error("sessions:{}", sessions);
+    public Response getAllSessions() {     
+        final List<SessionId> sessions = sessionService.getSessions();
+        logger.debug("sessions:{}", sessions);
         return Response.ok(sessions).build(); 
     }
-
     
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION })
-    @Path(ApiConstants.USERID_PATH)
-    public Response getAppConfiguration(@PathParam(ApiConstants.USERID) @NotNull String userId) {
-        logger.error("userId:{}", userId);
-        sessionService.revokeSession(userId);        
-        return Response.ok("OK").build(); 
+    @Path(ApiConstants.USERDN_PATH)
+    public Response getAppConfiguration(@PathParam(ApiConstants.USERDN) @NotNull String userDn) {
+        logger.debug("userDn:{}", userDn);
+        sessionService.revokeSession(userDn);        
+        return Response.ok().build();
     }
     
 }

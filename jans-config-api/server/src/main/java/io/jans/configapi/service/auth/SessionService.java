@@ -6,41 +6,36 @@
 
 package io.jans.configapi.service.auth;
 
-import io.jans.as.common.model.common.User;
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.service.CacheService;
 import io.jans.as.common.model.session.SessionId;
-import io.jans.configapi.util.AuthUtil;
+import io.jans.as.common.model.session.SessionIdState;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import java.util.Arrays;
+import jakarta.ws.rs.NotFoundException;
 import java.util.List;
-import java.util.NoSuchElementException;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-
 
 @ApplicationScoped
 public class SessionService {
 
     @Inject
     PersistenceEntryManager persistenceEntryManager;
-    
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
-    private StaticConfiguration staticConfiguration;
-    
+    StaticConfiguration staticConfiguration;
+
     @Inject
-    AuthUtil authUtil;
-    
+    CacheService cacheService;
+
     @Inject
     private Logger logger;
-    
+
     private String getDnForSession(String sessionId) {
         if (StringHelper.isEmpty(sessionId)) {
             return staticConfiguration.getBaseDn().getSessions();
@@ -58,65 +53,48 @@ public class SessionService {
         }
         return sessionId;
     }
-    
+
     public List<SessionId> getAllSessions(int sizeLimit) {
         logger.debug("Get All Session sizeLimit:{}", sizeLimit);
         return persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null, sizeLimit);
     }
-    
+
     public List<SessionId> getAllSessions() {
         return persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null);
     }
-    
-    public void revokeSession(String userId) {
-        logger.error("Revoke session sid:{}, authUtil:{}", userId, authUtil);
-        logger.error("authUtil.getEndSessionEndpoint():{}",  authUtil.getEndSessionEndpoint());
-        
-        //Get User details
-        String userDn = this.getDnForUser(userId);
-        logger.error("Fetch user details - userDn:{}",userDn);
-        User user = getUserBasedOnInum(userDn);
-        if(user==null) {
-            throw new NoSuchElementException("User  -'"+userId+"'  does not exists!!");
-        }
-        
-        logger.error("User detail - user:{}",user);
-        authUtil.revokeSession(authUtil.getEndSessionEndpoint(),requestAccessToken(user.getUserId()), user.getUserId());
-    }
-    
-    private String getDnForUser(String userId) {
-        if (StringHelper.isEmpty(userId)) {
-            return staticConfiguration.getBaseDn().getPeople();
-        }
-        return String.format("jansId=%s,%s", userId, staticConfiguration.getBaseDn().getPeople());
-    }
-    
-    private User getUserBasedOnInum(String inum) {
-        logger.error("Fetch user inum:{}",inum);
-        User result = null;
-        try {
-            result = getUserByDn(inum);
-        } catch (Exception ex) {
-            logger.error("Failed to load user entry", ex);
-        }
-        return result;
-    }
-    
-    private User getUserByDn(String dn, String... returnAttributes) {
-        logger.error("Fetch user - dn:{}",dn);
-        if (StringHelper.isEmpty(dn)) {
-            return null;
-        }
-        return persistenceEntryManager.find(dn, User.class, returnAttributes);
+
+    public List<SessionId> getSessions() {
+        List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null,
+                0);
+        logger.debug("All sessionList:{}", sessionList);
+
+        sessionList.sort((SessionId s1, SessionId s2) -> s2.getCreationDate().compareTo(s1.getCreationDate()));
+        logger.debug("Sorted Session sessionList:{}", sessionList);
+        return sessionList;
     }
 
-    
-    private String requestAccessToken(final String clientId) {
-        final List<String> scopes = Arrays.asList("revoke_session");
-        String accessToken = authUtil.requestAccessToken(clientId,scopes);
-        
-        logger.info("oAuth AccessToken response - accessToken:{}", accessToken);      
-        return accessToken;
+    public void revokeSession(String userDn) {
+        logger.debug("Revoke session userDn:{}, cacheService:{}", userDn, cacheService);
+
+        if (StringUtils.isNotBlank(userDn)) {
+            Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("jansUsrDN", userDn),
+                    Filter.createEqualityFilter("jansState", SessionIdState.AUTHENTICATED));
+
+            List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class,
+                    filter);
+            logger.debug("User sessionList:{}", sessionList);
+
+            if (sessionList == null || sessionList.isEmpty()) {
+                throw new NotFoundException(
+                        "No " + SessionIdState.AUTHENTICATED + " session exists for the user '" + userDn + "'!!!");
+            }
+
+            sessionList.stream().forEach(session -> {
+                persistenceEntryManager.remove(session.getDn(), SessionId.class);
+                cacheService.remove(session.getDn());
+            });
+        }
+
     }
 
 }
