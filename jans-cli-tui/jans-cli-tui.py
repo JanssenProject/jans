@@ -196,7 +196,7 @@ class JansCliApp(Application, JansAuthServer):
                         )
 
                     body = HSplit([Label(msg)])
-                    dialog = JansGDialog(title="Waiting Response", body=body)
+                    dialog = JansGDialog(self, title="Waiting Response", body=body)
 
                     async def coroutine():
                         app = get_app()
@@ -210,7 +210,7 @@ class JansCliApp(Application, JansAuthServer):
                         try:
                             self.cli_object.get_jwt_access_token(result)
                         except Exception as e:
-                            err_dialog = JansGDialog(title="Error!", body=HSplit([Label(str(e))]))
+                            err_dialog = JansGDialog(self, title="Error!", body=HSplit([Label(str(e))]))
                             await self.show_dialog_as_float(err_dialog)
                             self.create_cli()
 
@@ -365,7 +365,7 @@ class JansCliApp(Application, JansAuthServer):
                 )
             ])
 
-        dialog = JansGDialog(title=params['selected'][0], body=body)
+        dialog = JansGDialog(self, title=params['selected'][0], body=body)
 
         self.show_jans_dialog(dialog)
 
@@ -391,7 +391,7 @@ class JansCliApp(Application, JansAuthServer):
             ])
 
         buttons = [Button("Save", handler=self.save_creds)]
-        dialog = JansGDialog(title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
+        dialog = JansGDialog(self, title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
 
         async def coroutine():
             app = get_app()
@@ -419,7 +419,7 @@ class JansCliApp(Application, JansAuthServer):
 
     def show_message(self, title, message, buttons=[]):
         body = HSplit([Label(message)])
-        dialog = JansGDialog(title=title, body=body, buttons=buttons)
+        dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
         self.show_jans_dialog(dialog)
 
   

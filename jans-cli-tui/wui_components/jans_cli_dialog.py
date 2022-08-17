@@ -8,9 +8,10 @@ from prompt_toolkit.layout.dimension import D
 from static import DialogResult
 from functools import partial
 class JansGDialog:
-    def __init__(self, title, body, buttons=[]):
+    def __init__(self, parent, title, body, buttons=[]):
         self.future = Future()
         self.body = body
+        self.myparent = parent
 
         if not buttons:
             buttons = [Button(text="OK")]
