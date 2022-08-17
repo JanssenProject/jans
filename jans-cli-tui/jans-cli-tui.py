@@ -160,56 +160,6 @@ class JansCliApp(Application, JansAuthServer):
         # Since first module is oauth, set center frame to my oauth main container.
         self.oauth_set_center_frame()
 
-    # ------------------------------------------------------ #
-
-    def check_jans_cli_ini(self):
-        if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
-            self.jans_creds_dialog()
-        else :
-            self.create_cli()
-
-    def save_creds(self, dialog):
-
-        for child in dialog.body.children:
-            prop_name = child.children[1].jans_name
-            prop_val = child.children[1].content.buffer.text
-            config_cli.config['DEFAULT'][prop_name] = prop_val
-            config_cli.write_config()
-
-        config_cli.host = config_cli.config['DEFAULT']['jans_host']
-        config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
-        config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
-        self.create_cli()
-
-    def jans_creds_dialog(self, *params):
-
-        # body=HSplit([
-        #     self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server",),
-        #     self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
-        #     self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
-        #     ])
-        body=HSplit([
-            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or 'c1.gluu.org', jans_help="FQN name of Jannsen Config Api Server",),
-            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '2000.2efa2c06-f711-42d6-a02c-4dcb5191669c', jans_help="Jannsen Config Api Client ID"),
-            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or 'd6yHY6lUJMgl', jans_help="Jannsen Config Api Client Secret")
-            ])
-        buttons = [Button("Save", handler=self.save_creds)]
-        dialog = JansGDialog(parent=self,title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
-
-        async def coroutine():
-            app = get_app()
-            focused_before = app.layout.current_window
-            self.layout.focus(dialog)
-            result = await self.show_dialog_as_float(dialog)  
-            try:
-                app.layout.focus(focused_before)
-            except:
-                app.layout.focus(self.center_frame)
-            
-            
-
-        ensure_future(coroutine())
-
     def create_cli(self):
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
@@ -252,17 +202,25 @@ class JansCliApp(Application, JansAuthServer):
 
                     ensure_future(coroutine())
 
-    # ------------------------------------------------------ #
+
+    def check_jans_cli_ini(self):
+        if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
+            self.jans_creds_dialog()
+        else :
+            self.create_cli()
+
 
     def dialog_back_but(self): ## BACK
         self.active_dialog_select = ''
         self.show_dialog = False
         self.layout.focus(self.center_frame) 
 
+
     def prapare_dialogs(self):
         self.data_show_client_dialog = Label(text='Selected Line Data as Json') 
         self.dialog_width = int(self.width*0.9) #  120  ## to be dynamic
         self.dialog_height = int(self.height*0.8) ## to be dynamic
+
 
     def focus_next(self, ev):
         focus_next(ev)
@@ -440,6 +398,46 @@ class JansCliApp(Application, JansAuthServer):
 
         self.show_jans_dialog(dialog)
 
+    def save_creds(self, dialog):
+
+        for child in dialog.body.children:
+            prop_name = child.children[1].jans_name
+            prop_val = child.children[1].content.buffer.text
+            config_cli.config['DEFAULT'][prop_name] = prop_val
+            config_cli.write_config()
+
+        config_cli.host = config_cli.config['DEFAULT']['jans_host']
+        config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
+        config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
+
+    def jans_creds_dialog(self, *params):
+
+        # body=HSplit([
+        #     self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server",),
+        #     self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
+        #     self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
+        #     ])
+        body=HSplit([
+            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or 'c1.gluu.org', jans_help="FQN name of Jannsen Config Api Server",),
+            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '2000.2efa2c06-f711-42d6-a02c-4dcb5191669c', jans_help="Jannsen Config Api Client ID"),
+            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or 'd6yHY6lUJMgl', jans_help="Jannsen Config Api Client Secret")
+            ])
+        buttons = [Button("Save", handler=self.save_creds)]
+        dialog = JansGDialog(parent=self,title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
+
+        async def coroutine():
+            app = get_app()
+            focused_before = app.layout.current_window
+            self.layout.focus(dialog)
+            result = await self.show_dialog_as_float(dialog)  
+            try:
+                app.layout.focus(focused_before)
+            except:
+                app.layout.focus(self.center_frame)
+            
+            self.create_cli()
+
+        ensure_future(coroutine())
 
     def edit_client_dialog(self, **params):
 
