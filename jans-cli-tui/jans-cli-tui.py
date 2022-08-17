@@ -22,6 +22,7 @@ from prompt_toolkit.layout.containers import (
     VerticalAlign,
     DynamicContainer,
     FloatContainer,
+    Window
 )
 from prompt_toolkit.layout.containers import VerticalAlign
 from prompt_toolkit.layout.dimension import D
@@ -221,6 +222,33 @@ class JansCliApp(Application, JansAuthServer):
         else :
             self.create_cli()
 
+
+    def jans_creds_dialog(self, *params):
+
+        body=HSplit([
+            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server"),
+            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
+            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
+            ])
+
+        buttons = [Button("Save", handler=self.save_creds)]
+        dialog = JansGDialog(self, title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
+
+        async def coroutine():
+            app = get_app()
+            focused_before = app.layout.current_window
+            self.layout.focus(dialog)
+            result = await self.show_dialog_as_float(dialog)
+            try:
+                app.layout.focus(focused_before)
+            except:
+                app.layout.focus(self.center_frame)
+            
+            self.create_cli()
+
+        ensure_future(coroutine())
+
+
     def dialog_back_but(self): ## BACK
         self.active_dialog_select = ''
         self.show_dialog = False
@@ -311,19 +339,19 @@ class JansCliApp(Application, JansAuthServer):
 
         return VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
  
-    def getTitledCheckBox(self, title, name, values,style=''):
-        cb = CheckboxList(values=[(o,o) for o in values])
-        cb.window.jans_name = name
-        li,cd,width = self.handle_long_string(title,values,cb)
+    # def getTitledCheckBox(self, title, name, values,style=''):
+    #     cb = CheckboxList(values=[(o,o) for o in values])
+    #     cb.window.jans_name = name
+    #     li,cd,width = self.handle_long_string(title,values,cb)
 
-        return VSplit([Label(text=li, width=width,style=style,wrap_lines=False), cd])
+    #     return VSplit([Label(text=li, width=width,style=style,wrap_lines=False), cd])
 
-    def getTitledRadioButton(self, title, name, values,style=''):
-        rl = RadioList(values=[(option, option) for option in values])
-        rl.window.jans_name = name
-        li,rl2,width = self.handle_long_string(title,values,rl)
+    # def getTitledRadioButton(self, title, name, values,style=''):
+    #     rl = RadioList(values=[(option, option) for option in values])
+    #     rl.window.jans_name = name
+    #     li,rl2,width = self.handle_long_string(title,values,rl)
         
-        return VSplit([Label(text=li, width=width,style=style), rl2],)
+    #     return VSplit([Label(text=li, width=width,style=style), rl2],)
 
     # ----------------------------------------------------------------- #
     def getButton(self, text, name, jans_help, handler=None):
@@ -420,34 +448,14 @@ class JansCliApp(Application, JansAuthServer):
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
         config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
 
-    def jans_creds_dialog(self, *params):
-
-        body=HSplit([
-            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server"),
-            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
-            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
-            ])
-
-        buttons = [Button("Save", handler=self.save_creds)]
-        dialog = JansGDialog(self, title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
-
-        async def coroutine():
-            app = get_app()
-            focused_before = app.layout.current_window
-            self.layout.focus(dialog)
-            result = await self.show_dialog_as_float(dialog)
-            try:
-                app.layout.focus(focused_before)
-            except:
-                app.layout.focus(self.center_frame)
-            
-            self.create_cli()
-
-        ensure_future(coroutine())
-
     def edit_client_dialog(self, **params):
-        dialog = EditClientDialog(self,**params)
+
+        selected_line_data = params['data']  
+        title = "Edit user Data (Clients)"
+ 
+        dialog = EditClientDialog(self,title=title,data=selected_line_data)
         self.show_jans_dialog(dialog)
+
 
     def edit_scope_dialog(self, **params):
         dialog = EditScopeDialog(self,**params)

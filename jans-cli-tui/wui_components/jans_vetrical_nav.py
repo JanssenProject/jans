@@ -173,7 +173,7 @@ class JansVerticalNav():
         def _(event):
             passed = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
-            self.on_enter(passed,event,size)
+            self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
 
 
         @kb.add("d")

@@ -1,0 +1,10 @@
+Name : subjectTypesSupported , value = 
+**********
+Name : applicationType , value = web
+**********
+Name : accessTokenAsJwt , value = False
+**********
+Name : backchannelTokenDeliveryMode , value = 
+**********
+Name : applicationType! , value = 
+**********
