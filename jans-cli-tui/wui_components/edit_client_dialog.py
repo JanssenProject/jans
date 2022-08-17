@@ -299,10 +299,6 @@ class EditClientDialog(JansGDialog):
             if type(self.data[name]) is not list :
                 value= str(self.data[name])
 
-        # if value == 'False' :
-        #     value = ''
-        # elif  value == 'True':
-
         with open('./radio.txt', 'a') as f:
             f.write("Name : {} , value = {}".format(name,value))
             f.write("\n**********\n")
