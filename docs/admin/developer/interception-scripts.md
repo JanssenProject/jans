@@ -1,15 +1,15 @@
-# Overview
+# Interception Scripts (or custom scripts)
 
-Interception scripts (or custom scripts)  allow you to define custom business logic for various features offered by the OpenID Provider (Jans-auth server). Some examples are - implementing a 2FA authentication method, consent gathering, client registration, adding business specific claims to ID token or Access token etc.
+Interception scripts (or custom scripts)  allow you to define custom business logic for various features offered by the OpenID Provider (Jans-auth server). Some examples of features which can be customized are - implementing a 2FA authentication method, consent gathering, client registration, adding business specific claims to ID token or Access token etc.
 Scripts can easily be upgraded and doesn't require forking the Jans Server code or re-building it. 
 
 # Types of Interception scripts in Jans server
 Listed below, are custom scripts classified into various types, each of which represents a feature of the Jans server that can be extended as per the business need. Each script type is described by a java interface whose methods should be overridden to implement your business case. 
-1. [Person Authentication]() : Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.
-1. Consent Gathering : Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.
-1. User Registration
+1. [Person Authentication](https://jans.io/docs/admin/developer/scripts/person-authentication/) : Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.
+1. [Consent Gathering](https://jans.io/docs/admin/developer/scripts/consent-gathering/) : Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.
+1. [User Registration]()
 1. Update User
-1. Client Registration
+1. [Client Registration](https://jans.io/docs/admin/developer/scripts/client-registration/)
 1. Dynamic scopes : Enables admin to generate scopes on the fly, for example by calling external APIs
 1. ID Generator
 1. Cache Refresh
@@ -20,50 +20,24 @@ Listed below, are custom scripts classified into various types, each of which re
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
 
-# An example
-The example below is only meant to convey the concept, we will cover the details in later parts of the documentation.
-Suppose, we are implementing an Openbanking Identity platform and we have to add business specific claims say `openbanking_intent_id` to the ID token. The custom script which will help us accomplish our goal is of the type `UpdateTokenType` where the `modifyIdToken` method has to be implemented. A sample custom script with this business logic will be as stated below :
-```
-class UpdateToken(UpdateTokenType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
 
-    def init(self, customScript, configurationAttributes):
-        < initialization code comes here > 
-        return True
-
-    def destroy(self, configurationAttributes):
-        < clean up code comes here>
-        return True
-
-    def getApiVersion(self):
-        return <version number>
-
-   def modifyIdToken(self, jsonWebResponse, context):
-
-       # Step1: <get openbanking_intent_id from session >
-              sessionId = context.getSession()
-              openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id ")   
-    
-       # Step2: <add custom claims to ID token here>
-              jsonWebResponse.getClaims().setClaim("openbanking_intent_id ", openbanking_intent_id )
-                
-```
 # Implementation languages - Jython or pure Java
 
-Interception scripts are written in [Jython](http://www.jython.org/) or in Java, enabling Java or Python libraries to be imported. While the syntax of the script requires Python for Jython, most of the functionality can be written in Java.
+Interception scripts are written in **[Jython](http://www.jython.org/)** or in **pure Java**, enabling Java or Python libraries to be imported. 
 
-## Using pure Java scripts
+***
 
-Under script in this case means java source file (e.g. `Discovery.java`) which is compiled by AS and executed at runtime. 
+## Implementation in Pure Java 
 
-Notes:
-* there not package set in pure java scripts
-* name of the class must match to the name set in [CustomScriptType source code](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java) (e.g. for discovery script it is "Discovery") 
-* scripts must implement predefined interface which can be found in [CustomScriptType source code](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java)
-* all libraries available at runtime to server are available also to pure java script
-* to log to `jans-auth_script.log` use `scriptLogger`
-* normal log will log in to `jans-auth.log`
+A script in Java refers to a java source file (e.g. `Discovery.java`) which is compiled by AS and executed at runtime. 
+
+Some rules:
+* The java class file containing the script should not have a package set.
+* The name of the class must match to the name set in [CustomScriptType source code](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java) (e.g. for discovery script it is "Discovery") 
+* Scripts must implement predefined interface which can be found against the [CustomScriptType](https://github.com/JanssenProject/jans/tree/main/jans-core/script/src/main/java/io/jans/model/custom/script/type). For e.g. if you are writing a Person authentication script then your class should implement the [following interface](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java)
+* All libraries available at runtime to server are available also to pure java script
+* To log to `jans-auth_script.log` use `scriptLogger`
+* Normal log will log in to `jans-auth.log`
 
 **Example pure java script**
 ```
@@ -119,14 +93,64 @@ public class Discovery implements DiscoveryType {
 }
 
 ```
+### Using Java libraries in a script:
+<br> **Steps:**
+1. Add library jars to `/opt/jans/jetty/jans-auth/custom/libs/`
+2. Edit /opt/jans/jetty/jans-auth/webapps/jans-auth.xml and add the following line replacing the word `library-name` with the actual name of the library:
+```
+<Set name="extraClasspath">/opt/jans/jetty/jans-auth/custom/libs/library-name.jar</Set>
+```
+3. Restart jans-auth service
+`systemctl restart jans-auth` 
 
-## Using Python libraries in a script:
-### Caution:
+***
+
+## Implementation in Jython 
+The example below is only meant to convey the concept, we will cover the details in later parts of the documentation.
+Suppose, we are implementing an Openbanking Identity platform and we have to add business specific claims say `openbanking_intent_id` to the ID token. The custom script which will help us accomplish our goal is of the type `UpdateTokenType` where the `modifyIdToken` method has to be implemented. A sample custom script with this business logic will be as stated below :
+```
+class UpdateToken(UpdateTokenType):
+    def __init__(self, currentTimeMillis):
+        self.currentTimeMillis = currentTimeMillis
+
+    def init(self, customScript, configurationAttributes):
+        < initialization code comes here > 
+        return True
+
+    def destroy(self, configurationAttributes):
+        < clean up code comes here>
+        return True
+
+    def getApiVersion(self):
+        return <version number>
+
+   def modifyIdToken(self, jsonWebResponse, context):
+
+       # Step1: <get openbanking_intent_id from session >
+              sessionId = context.getSession()
+              openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id ")   
+    
+       # Step2: <add custom claims to ID token here>
+              jsonWebResponse.getClaims().setClaim("openbanking_intent_id ", openbanking_intent_id )
+                
+```
+### Using Java libraries in a Jython script:
+<br> **Steps:**
+1. Add library jars to `/opt/jans/jetty/jans-auth/custom/libs/`
+2. Edit /opt/jans/jetty/jans-auth/webapps/jans-auth.xml and add the following line replacing the word `library-name` with the actual name of the library:
+```
+<Set name="extraClasspath">/opt/jans/jetty/jans-auth/custom/libs/library-name.jar</Set>
+```
+3. Restart jans-auth service
+`systemctl restart jans-auth` 
+
+### Using Python libraries in a script:
+
 1. You can only use libraries (packages and modules) that are written in **Pure Python**. Importing a Python class which is a wrapper around a library written in C is not supported by the Jans server. As an example, the psycopg2 library used to connect to PostgreSQL from Python. Since it is a C wrapper around libpq, it won't work with Jython.  
 
 1. Python 3 packages / modules are not supported.
 
-### Steps:
+<br> **Steps:**
 1. Pure Python libraries should be added to `/opt/jans/python/libs`
 
 2. Using pip to install additional Python packages: 
@@ -137,29 +161,24 @@ Run the following command ` /opt/jython-<version>/bin/jython -m ensurepip `
 Install your library with `/opt/jython-<version>/bin/pip install <library_name> ` where <library_name> is the name of the library to install.
 * Restart the jans-auth service : `systemctl restart jans-auth`
 
-## Using Java libraries in a script:
-### Steps:
-1. Add library jars to `/opt/jans/jetty/jans-auth/custom/libs/`
-2. Edit /opt/jans/jetty/jans-auth/webapps/jans-auth.xml and add the following line replacing the word `library-name` with the actual name of the library:
-```
-<Set name="extraClasspath">/opt/jans/jetty/jans-auth/custom/libs/library-name.jar</Set>
-```
-3. Restart jans-auth service
-`systemctl restart jans-auth` 
+### Debugging a Jython script
+This [article](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/interception-scripts-debug.md) covers the details.
 
+***
 
-
-
-# Mandatory methods in any Custom script
+### Mandatory methods to be overridden 
+This is the [base class of all custom script types](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/BaseExternalType.java) and all custom scripts should implement the following methods.
 * `init(self, customScript, configurationAttributes)` :	This method is only called once during the script initialization (or jans-auth service restarts). It can be used for global script initialization, initiate objects etc
 
 * `destroy(self, configurationAttributes)`:	This method is called when a custom script fails to initialize or upon jans-auth service restarts. It can be used to free resource and objects created in the init() method
 
 * `getApiVersion(self, configurationAttributes, customScript)` : The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10
 
-# Configurable properties of a custom script
+***
+
+### Configurable properties of a custom script
 <table>
-<tr><td> Name </td><td>unique identifier for the custom script e.g. update_user</td></tr>
+<tr><td> Name </td><td>unique identifier(name) for the custom script e.g. person_authentication_google</td></tr>
 <tr><td> Description </td><td>Description text</td></tr>
 <tr><td> Programming Languages </td><td>Python </td></tr>
 <tr><td> Level </td><td>Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated.</td></tr>
@@ -173,7 +192,13 @@ Install your library with `/opt/jython-<version>/bin/pip install <library_name> 
 <tr><td> Custom properties</td><td>Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc </td></tr>
  </table>
 
-#  Operations on custom scripts using jans-cli
+***
+### Building business logic in a custom script 
+Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. This [article](https://jans.io/docs/admin/developer/managed-beans.md) presents many ready-to-use beans which can be used to build a script.
+
+***
+
+###  Operations on custom scripts using jans-cli
 
 Jans-cli supports the following six operations on custom scripts: 
 
@@ -186,7 +211,7 @@ Jans-cli supports the following six operations on custom scripts:
 6. `delete-config-scripts-by-inum`, requires an argument `--url-suffix inum: _____`
 
 The post-config-scripts and put-config-scripts require various details about the scripts. The following command gives the basic schema of the custom scripts to pass to these operations. 
-## Basic schema of a custom script
+### Basic schema of a custom script
 Command:
 
 `/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript `
@@ -251,7 +276,10 @@ To add or modify a script first, we need to create the script's python file (e.g
   "internal": false
 }
 ```
-## Add, Modify and Delete a script
+
+***
+
+### Add, Modify and Delete a script
 
 The following command will add a new script with details given in /tmp/sample.json file. __The jans-cli will generate a unique inum of this new script if we skip inum in the json file.__ 
 ``` 
@@ -294,10 +322,7 @@ E.g:
  ``` 
 
 
-# Client specific implementations
+## Client specific implementations
 
-
-###
-# FAQs and troubleshooting
-# Useful links
+## Useful links
 1. [Custom scripts and jans-cli](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#find-list-of-custom-scripts)
