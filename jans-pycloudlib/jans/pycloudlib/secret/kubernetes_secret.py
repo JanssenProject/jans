@@ -15,13 +15,13 @@ from jans.pycloudlib.utils import safe_value
 class KubernetesSecret(BaseSecret):
     """This class interacts with Kubernetes Secret backend.
 
-    .. important:: The instance of this class is configured via environment variables.
+    The instance of this class is configured via environment variables.
 
-        Supported environment variables:
+    Supported environment variables:
 
-        - ``CN_SECRET_KUBERNETES_NAMESPACE``: Kubernetes namespace (default to ``default``).
-        - ``CN_SECRET_KUBERNETES_SECRET``: Kubernetes secrets name (default to ``jans``).
-        - ``CN_SECRET_KUBERNETES_USE_KUBE_CONFIG``: Load credentials from ``$HOME/.kube/config``, only useful for non-container environment (default to ``false``).
+    - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
+    - `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
+    - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
     """
 
     def __init__(self) -> None:
@@ -56,9 +56,12 @@ class KubernetesSecret(BaseSecret):
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
-        :param key: Key name.
-        :param default: Default value if key is not exist.
-        :returns: Value based on given key or default one.
+        Args:
+            key: Key name.
+            default: Default value if key is not exist.
+
+        Returns:
+            Value based on given key or default one.
         """
         result = self.get_all()
         return result.get(key) or default
@@ -94,9 +97,12 @@ class KubernetesSecret(BaseSecret):
     def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
-        :param key: Key name.
-        :param value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            key: Key name.
+            value: Value of the key.
+
+        Returns:
+            A boolean to mark whether config is set or not.
         """
         self._prepare_secret()
         body = {
@@ -115,7 +121,8 @@ class KubernetesSecret(BaseSecret):
     def get_all(self) -> dict[str, _t.Any]:
         """Get all key-value pairs.
 
-        :returns: A ``dict`` of key-value pairs (if any).
+        Returns:
+            A mapping of secrets (if any).
         """
         self._prepare_secret()
         result = self.client.read_namespaced_secret(
@@ -129,9 +136,11 @@ class KubernetesSecret(BaseSecret):
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set all key-value pairs.
 
-        :param key: Key name.
-        :param value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            data: Key-value pairs.
+
+        Returns:
+            A boolean to mark whether config is set or not.
         """
         self._prepare_secret()
         body = {

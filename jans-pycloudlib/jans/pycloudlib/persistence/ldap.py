@@ -34,9 +34,10 @@ logger = logging.getLogger(__name__)
 def render_ldap_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to LDAP server.
 
-    :param manager: An instance of manager class.
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        manager: An instance of manager class.
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     ldap_url = os.environ.get("CN_LDAP_URL", "localhost:1636")
     ldap_hostname = extract_ldap_host(ldap_url)
@@ -65,8 +66,9 @@ def render_ldap_properties(manager: Manager, src: str, dest: str) -> None:
 def sync_ldap_truststore(manager: Manager, dest: str = "") -> None:
     """Pull secret contains base64-string contents of LDAP truststore and save it as a JKS file.
 
-    :param manager: An instance of manager class.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        manager: An instance of manager class.
+        dest: Absolute path where generated file is located.
     """
     dest = dest or manager.config.get("ldapTrustStoreFn")
     manager.secret.to_file(
@@ -77,7 +79,8 @@ def sync_ldap_truststore(manager: Manager, dest: str = "") -> None:
 def extract_ldap_host(url: str) -> str:
     """Extract host part from a URL.
 
-    :param url: URL of LDAP server, i.e. ``localhost:1636``.
+    Args:
+        url: URL of LDAP server, i.e. ``localhost:1636``.
     """
     return url.split(":", 1)[0]
 
@@ -93,11 +96,12 @@ def resolve_ldap_port() -> int:
 
 
 class LdapClient:
-    r"""Thin client to interact with LDAP server.
+    """Thin client to interact with LDAP server.
 
-    :param manager: An instance of manager class.
-    :param \*args: Positional arguments (if any).
-    :param \**kwargs: Keyword arguments (if any).
+    Args:
+        manager: An instance of manager class.
+        *args: Positional arguments (if any).
+        **kwargs: Keyword arguments (if any).
     """
 
     # shortcut to ldap3.MODIFY_REPLACE
@@ -133,11 +137,12 @@ class LdapClient:
         filter_: str = "(objectClass=*)",
         attributes: _t.Union[list[str], None] = None,
     ) -> _t.Union[None, _t.Any]:
-        r"""Get a single entry.
+        """Get a single entry.
 
-        :param dn: Base DN.
-        :param filter\_: Search filter.
-        :param attributes: List of returning attributes.
+        Args:
+            dn: Base DN.
+            filter_: Search filter.
+            attributes: List of returning attributes.
         """
         entries = self.search(dn, filter_=filter_, attributes=attributes, limit=1, scope=BASE)
         if not entries:
@@ -152,13 +157,14 @@ class LdapClient:
         limit: int = 0,
         scope: str = "",
     ) -> _t.Any:
-        r"""Search for entries.
+        """Search for entries.
 
-        :param dn: Base DN to start with.
-        :param filter\_: Search filter.
-        :param attributes: List of returning attributes.
-        :param limit: Number of returned entry.
-        :param scope: Search scope.
+        Args:
+            dn: Base DN to start with.
+            filter_: Search filter.
+            attributes: List of returning attributes.
+            limit: Number of returned entry.
+            scope: Search scope.
         """
         attributes = attributes or ["*"]
         scope = scope or SUBTREE
@@ -178,7 +184,8 @@ class LdapClient:
     def delete(self, dn: str) -> tuple[bool, str]:
         """Delete entry.
 
-        :param dn: Base DN to modify.
+        Args:
+            dn: Base DN to modify.
         """
         with self.conn as conn:
             conn.delete(dn)
@@ -189,8 +196,9 @@ class LdapClient:
     def add(self, dn: str, attributes: dict[str, _t.Any]) -> tuple[bool, str]:
         """Add new entry.
 
-        :param dn: New DN.
-        :param attributes: Entry attributes.
+        Args:
+            dn: New DN.
+            attributes: Entry attributes.
         """
         with self.conn as conn:
             conn.add(dn, attributes=attributes)
@@ -199,11 +207,11 @@ class LdapClient:
             return added, message
 
     def modify(self, dn: str, changes: dict[str, _t.Any]) -> tuple[bool, str]:
-        """
-        Modify entry.
+        """Modify entry.
 
-        :param dn: Base DN to modify.
-        :param changes: Mapping of attributes.
+        Args:
+            dn: Base DN to modify.
+            changes: Mapping of attributes.
         """
         with self.conn as conn:
             conn.modify(dn, changes)
@@ -214,8 +222,9 @@ class LdapClient:
     def _add_entry(self, dn: str, attrs: dict[str, _t.Any]) -> None:
         """Create new entry.
 
-        :param dn: Base DN to add.
-        :param attrs: Mapping of attributes to be added.
+        Args:
+            dn: Base DN to add.
+            attrs: Mapping of attributes to be added.
         """
         max_wait_time = 300
         sleep_duration = 10
@@ -233,8 +242,9 @@ class LdapClient:
     def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
         """Create entry with data loaded from an LDIF template file.
 
-        :param filepath: Path to LDIF template file.
-        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        Args:
+            filepath: Path to LDIF template file.
+            ctx: Key-value pairs of context that rendered into LDIF template file.
         """
         with open(filepath) as src, NamedTemporaryFile("w+") as dst:
             dst.write(safe_render(src.read(), ctx))

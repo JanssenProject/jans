@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class SpannerClient(SqlSchemaMixin):
-    r"""Class to interact with Spanner database.
+    """Class to interact with Spanner database.
 
     The following envvars are required:
 
@@ -44,9 +44,10 @@ class SpannerClient(SqlSchemaMixin):
     - ``CN_GOOGLE_SPANNER_INSTANCE_ID``: Spanner instance ID
     - ``CN_GOOGLE_SPANNER_DATABASE_ID``: Spanner database ID
 
-    :param manager: An instance of manager class.
-    :param \*args: Positional arguments (if any).
-    :param \**kwargs: Keyword arguments (if any).
+    Args:
+        manager: An instance of manager class.
+        *args: Positional arguments.
+        **kwargs: Keyword arguments.
     """
 
     def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
@@ -263,8 +264,9 @@ class SpannerClient(SqlSchemaMixin):
     def insert_into_subtable(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         """Add new entry into subtable.
 
-        :param table_name: Subtable name.
-        :param column_mapping: Key-value pairs of column name and its value.
+        Args:
+            table_name: Subtable name.
+            column_mapping: Key-value pairs of column name and its value.
         """
         for column, value in column_mapping.items():
             if not self.column_in_subtable(table_name, column):
@@ -287,8 +289,9 @@ class SpannerClient(SqlSchemaMixin):
     def _transform_value(self, key: str, values: _t.Any) -> _t.Any:
         """Transform value from one to another based on its data type.
 
-        :param key: Attribute name.
-        :param values: Pre-transformed values.
+        Args:
+            key: Attribute name.
+            values: Pre-transformed values.
         """
         type_ = self.sql_data_types.get(key, {})
 
@@ -335,7 +338,8 @@ class SpannerClient(SqlSchemaMixin):
     def _data_from_ldif(self, filename: str) -> _t.Iterator[tuple[str, dict[str, _t.Any]]]:
         """Get data from parsed LDIF file.
 
-        :param filename: LDIF filename.
+        Args:
+            filename: LDIF filename.
         """
         with open(filename, "rb") as fd:
             parser = LDIFParser(fd)
@@ -372,8 +376,9 @@ class SpannerClient(SqlSchemaMixin):
     def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
         """Create entry with data loaded from an LDIF template file.
 
-        :param filepath: Path to LDIF template file.
-        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        Args:
+            filepath: Path to LDIF template file.
+            ctx: Key-value pairs of context that rendered into LDIF template file.
         """
         with open(filepath) as src, NamedTemporaryFile("w+") as dst:
             dst.write(safe_render(src.read(), ctx))
@@ -387,8 +392,9 @@ class SpannerClient(SqlSchemaMixin):
     def column_in_subtable(self, table_name: str, column: str) -> bool:
         """Check whether a subtable has certain column.
 
-        :param table_name: Name of the subtable.
-        :param column: Name of the column.
+        Args:
+            table_name: Name of the subtable.
+            column: Name of the column.
         """
         exists = False
 
@@ -404,9 +410,10 @@ class SpannerClient(SqlSchemaMixin):
 def render_spanner_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to Spanner database.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     with open(src) as f:
         txt = f.read()

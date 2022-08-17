@@ -37,10 +37,13 @@ logger = logging.getLogger(__name__)
 def as_boolean(val: _t.Any) -> bool:
     """Convert value as boolean.
 
-    If the value cannot be converted as boolean, return ``False`` instead.
+    If the value cannot be converted as boolean, return `False` instead.
 
-    :param val: Given value with any type, though only a subset of types that supported.
-    :returns: ``True`` or ``False``.
+    Args:
+        val: Given value with any type, though only a subset of types that supported.
+
+    Returns:
+        `True` or `False`.
     """
     default = False
     truthy = {"t", "T", "true", "True", "TRUE", "1", 1, True}
@@ -56,10 +59,13 @@ def as_boolean(val: _t.Any) -> bool:
 def safe_value(value: _t.Any) -> str:
     """Convert given value as JSON-friendly value.
 
-    :param value: Given value with any type.
-    :return: JSON string.
+    Args:
+        value: Given value with any type.
+
+    Returns:
+        JSON string.
     """
-    # ``bytes`` must be converted to ``str`` first, otherwise it will throws ``TypeError``
+    # `bytes` must be converted to `str` first, otherwise it will throws `TypeError`
     if isinstance(value, bytes):
         value = value.decode()
 
@@ -75,15 +81,19 @@ def get_random_chars(size: int = 12, chars: str = "") -> str:
     """Generate random characters.
 
     If character set is not provided, the default set (consists of digits and ASCII letters)
-    will be used instead, for example:
+    will be used instead.
 
-    .. code-block:: python
+    Args:
+        size: The number of generated character.
+        chars: Character set to lookup to.
 
+    Returns:
+        A random string.
+
+    Examples:
+        ```py
         get_random_chars(5, chars="abcde12345")
-
-    :param size: The number of generated character.
-    :param chars: Character set to lookup to.
-    :return: A random string.
+        ```
     """
     chars = chars or _DEFAULT_CHARS
     # ignore bandit rule due to compatibility with CE
@@ -93,9 +103,12 @@ def get_random_chars(size: int = 12, chars: str = "") -> str:
 def get_sys_random_chars(size: int = 12, chars: str = "") -> str:
     """Generate random characters based on OS.
 
-    :param size: The number of generated character.
-    :param chars: Character set to lookup to.
-    :return: A random string.
+    Args:
+        size: The number of generated character.
+        chars: Character set to lookup to.
+
+    Returns:
+        A random string.
     """
     chars = chars or _DEFAULT_CHARS
     return "".join(random.SystemRandom().choices(chars, k=size))
@@ -104,11 +117,14 @@ def get_sys_random_chars(size: int = 12, chars: str = "") -> str:
 def exec_cmd(cmd: str) -> tuple[bytes, bytes, int]:
     """Execute shell command.
 
-    :param cmd: Shell command to be executed.
-    :return: A ``tuple`` consists of stdout, stderr, and return code from executed shell command.
+    Args:
+        cmd: Shell command to be executed.
+
+    Returns:
+        A sequence consists of stdout, stderr, and return code from executed shell command.
     """
     args = shlex.split(cmd)
-    # ignore bandit rule as input is escaped via ``shlex.split``
+    # ignore bandit rule as input is escaped via `shlex.split`
     popen = subprocess.Popen(  # nosec: B603
         args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
@@ -120,11 +136,14 @@ def exec_cmd(cmd: str) -> tuple[bytes, bytes, int]:
 def safe_render(text: str, ctx: dict[str, _t.Any]) -> str:
     """Safely render formatted text.
 
-    Common usecase is to escape ``%`` character when using string formatting.
+    Common usecase is to escape `%` character when using string formatting.
 
-    :param text: A text string.
-    :param ctx: A ``dict`` of context passed to string formatting.
-    :return: Rendered text.
+    Args:
+        text: A text string.
+        ctx: A `dict` of context passed to string formatting.
+
+    Returns:
+        Rendered text.
     """
     text = re.sub(r"%([^\(])", r"%%\1", text)
     # There was a % at the end?
@@ -135,9 +154,12 @@ def safe_render(text: str, ctx: dict[str, _t.Any]) -> str:
 def reindent(text: str, num_spaces: int = 1) -> str:
     """Reindent given text with indentation per line.
 
-    :param text: A ``str`` or ``bytes`` of text.
-    :param num_spaces: The size of indentation per line.
-    :return: Reindented string.
+    Args:
+        text: A `str` or `bytes` of text.
+        num_spaces: The size of indentation per line.
+
+    Returns:
+        Reindented string.
     """
     text_seq = [
         "{0}{1}".format(num_spaces * " ", line.lstrip())
@@ -150,9 +172,12 @@ def reindent(text: str, num_spaces: int = 1) -> str:
 def generate_base64_contents(text: _t.AnyStr, num_spaces: int = 1) -> str:
     """Generate base64 string.
 
-    :param text: A ``str`` or ``bytes`` of text.
-    :param num_spaces: The size of indentation per line.
-    :return: base64 string.
+    Args:
+        text: A `str` or `bytes` of text.
+        num_spaces: The size of indentation per line.
+
+    Returns:
+        base64 string.
     """
     text_bytes = base64.b64encode(anystr_to_bytes(text))
     return reindent(text_bytes.decode(), num_spaces)
@@ -161,13 +186,16 @@ def generate_base64_contents(text: _t.AnyStr, num_spaces: int = 1) -> str:
 def cert_to_truststore(
     alias: str, cert_file: str, keystore_file: str, store_pass: str
 ) -> tuple[bytes, bytes, int]:
-    """Import certificate into a Java Truststore using ``keytool`` executable.
+    """Import certificate into a Java Truststore using `keytool` executable.
 
-    :param alias: Alias name.
-    :param cert_file: Path to certificate file.
-    :param keystore_file: Path to Java Keystore/Truststore file.
-    :param store_pass: Password of the Java Keystore/Truststore file.
-    :return: A ``tuple`` consists of stdout, stderr, and return code from executed shell command.
+    Args:
+        alias: Alias name.
+        cert_file: Path to certificate file.
+        keystore_file: Path to Java Keystore/Truststore file.
+        store_pass: Password of the Java Keystore/Truststore file.
+
+    Returns:
+        A sequence consists of stdout, stderr, and return code from executed shell command.
     """
     cmd = (
         "keytool -importcert -trustcacerts -alias {0} "
@@ -185,24 +213,27 @@ def get_server_certificate(
 ) -> str:
     """Get PEM-formatted certificate of a given address.
 
-    :param host: Hostname of a server.
-    :param port: Port of SSL-secured server.
-    :param filepath: Path to save the downloaded certificate.
-    :param server_hostname: Optional hostname of the server.
-    :return: Certificate text.
+    Args:
+        host: Hostname of a server.
+        port: Port of SSL-secured server.
+        filepath: Path to save the downloaded certificate.
+        server_hostname: Optional hostname of the server.
+
+    Returns:
+        Certificate text.
     """
     server_hostname = server_hostname or host
 
     with socket.create_connection((host, port)) as conn:
-        # use the default ``PROTOCOL_TLS`` constant
+        # use the default `PROTOCOL_TLS` constant
         context = ssl.SSLContext(ssl.PROTOCOL_TLS)
 
-        # by default, ``SSLContext.options`` only excludes insecure protocols
+        # by default, `SSLContext.options` only excludes insecure protocols
         # SSLv2 and SSLv3; hence we need to exclude TLSv1 as well
         context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
 
         with context.wrap_socket(conn, server_hostname=server_hostname) as sock:
-            # getpeercert may returns ``None`` if there's no certificate
+            # getpeercert may returns `None` if there's no certificate
             der = sock.getpeercert(True)
             if der:
                 cert = ssl.DER_cert_to_PEM_cert(der)
@@ -215,19 +246,25 @@ def get_server_certificate(
 def ldap_encode(password: _t.AnyStr) -> _t.Any:
     """Encode the password string to comply to LDAP specification.
 
-    :param password: A password with ``str`` or ``bytes`` type.
-    :return: A string of encoded password.
+    Args:
+        password: A password with `str` or `bytes` type.
+
+    Returns:
+        A string of encoded password.
     """
     return hashed.hashed(hashed.HASHED_SALTED_SHA, password)
 
 
 def anystr_to_bytes(val: _t.AnyStr) -> bytes:
-    """Convert ``str`` or ``bytes`` as ``bytes``.
+    """Convert `str` or `bytes` as `bytes`.
 
-    If given value is a ``str``, encode it into ``bytes``.
+    If given value is a `str`, encode it into `bytes`.
 
-    :param val: A ``str`` or ``bytes`` that need to be converted (if necessary).
-    :return: A ``bytes`` type of given value.
+    Args:
+        val: A `str` or `bytes` that need to be converted (if necessary).
+
+    Returns:
+        A `bytes` type of given value.
     """
     if isinstance(val, str):
         val_bytes = val.encode()
@@ -239,14 +276,18 @@ def anystr_to_bytes(val: _t.AnyStr) -> bytes:
 def encode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
     """Encode text using triple DES and ECB mode.
 
-    .. code-block:: python
+    Args:
+        text: Plain text (`str` or `bytes`) need to be encoded.
+        key: Key used for encoding salt.
 
+    Returns:
+        Encoded `bytes` text.
+
+    Examples:
+        ```py
         # output: b'OdiOLVWUv7f8OzfNsuB5Fg=='
         encode_text("secret text", "a" * 24)
-
-    :param text: Plain text (``str`` or ``bytes``) need to be encoded.
-    :param key: Key used for encoding salt.
-    :returns: Encoded ``bytes`` text.
+        ```
     """
     if isinstance(key, str):
         key_bytes = key.encode()
@@ -274,14 +315,18 @@ def encode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
 def decode_text(text: _t.AnyStr, key: _t.AnyStr) -> bytes:
     """Decode text using triple DES and ECB mode.
 
-    .. code-block:: python
+    Args:
+        text: Encoded text (`str` or `bytes`) need to be decoded.
+        key: Key used for decoding salt.
 
+    Returns:
+        Decoded `bytes` text.
+
+    Examples:
+        ```py
         # output: b'secret text'
         decode_text(b'OdiOLVWUv7f8OzfNsuB5Fg==', "a" * 24)
-
-    :param text: Encoded text (``str`` or ``bytes``) need to be decoded.
-    :param key: Key used for decoding salt.
-    :returns: Decoded ``bytes`` text.
+        ```
     """
     encoded_text = base64.b64decode(text)
 
@@ -322,18 +367,21 @@ def generate_ssl_certkey(
 ) -> tuple[str, str]:
     """Generate SSL public and private keys.
 
-    :param suffix: Suffix as basename (i.e. ``auth-server``)
-    :param email: Email address for subject/issuer.
-    :param hostname: Hostname (common name) for subject/issuer.
-    :param org_name: Organization name for subject/issuer.
-    :param country_code: Country name in ISO format for subject/issuer.
-    :param state: State/province name for subject/issuer.
-    :param city: City/locality name for subject/issuer.
-    :param base_dir: Directory to store generated public and private keys.
-    :param extra_dns: Additional DNS names.
-    :param extra_ips: Additional IP addresses.
-    :param valid_to: Validity length in days.
-    :returns: A pair of path to generated public and private keys.
+    Args:
+        suffix: Suffix as basename (i.e. `auth-server`)
+        email: Email address for subject/issuer.
+        hostname: Hostname (common name) for subject/issuer.
+        org_name: Organization name for subject/issuer.
+        country_code: Country name in ISO format for subject/issuer.
+        state: State/province name for subject/issuer.
+        city: City/locality name for subject/issuer.
+        base_dir: Directory to store generated public and private keys.
+        extra_dns: Additional DNS names.
+        extra_ips: Additional IP addresses.
+        valid_to: Validity length in days.
+
+    Returns:
+        A pair of path to generated public and private keys.
     """
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
@@ -367,14 +415,15 @@ def generate_keystore(  # nosec: B107
 ) -> None:
     """Generate Java keystore (JKS).
 
-    :param suffix: Suffix as basename (i.e. ``auth-server``)
-    :param hostname: Hostname
-    :param keypasswd: Password for generated JKS file
-    :param jks_fn: Path to generated JKS file
-    :param in_key: Path to key file
-    :param in_cert: Path to certificate file
-    :param alias: Alias used in generated JKS file
-    :param in_passwd: Password/passphrase for key file (if any)
+    Args:
+        suffix: Suffix as basename (i.e. `auth-server`)
+        hostname: Hostname
+        keypasswd: Password for generated JKS file
+        jks_fn: Path to generated JKS file
+        in_key: Path to key file
+        in_cert: Path to certificate file
+        alias: Alias used in generated JKS file
+        in_passwd: Password/passphrase for key file (if any)
     """
     in_key = in_key or f"/etc/certs/{suffix}.key"
     in_cert = in_cert or f"/etc/certs/{suffix}.crt"
@@ -438,16 +487,19 @@ def generate_ssl_ca_certkey(
 ) -> tuple[str, str]:
     """Generate SSL public and private keys for CA.
 
-    :param suffix: Suffix as basename (i.e. ``auth-server``)
-    :param email: Email address for subject/issuer.
-    :param hostname: Hostname (common name) for subject/issuer.
-    :param org_name: Organization name for subject/issuer.
-    :param country_code: Country name in ISO format for subject/issuer.
-    :param state: State/province name for subject/issuer.
-    :param city: City/locality name for subject/issuer.
-    :param base_dir: Directory to store generated public and private keys.
-    :param valid_to: Validity length in days.
-    :returns: A pair of path to generated public and private keys.
+    Args:
+        suffix: Suffix as basename (i.e. `auth-server`)
+        email: Email address for subject/issuer.
+        hostname: Hostname (common name) for subject/issuer.
+        org_name: Organization name for subject/issuer.
+        country_code: Country name in ISO format for subject/issuer.
+        state: State/province name for subject/issuer.
+        city: City/locality name for subject/issuer.
+        base_dir: Directory to store generated public and private keys.
+        valid_to: Validity length in days.
+
+    Returns:
+        A pair of path to generated public and private keys.
     """
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
@@ -483,20 +535,23 @@ def generate_signed_ssl_certkey(
 ) -> tuple[str, str]:
     """Generate SSL public and private keys signed by CA.
 
-    :param suffix: Suffix as basename (i.e. ``auth-server``)
-    :param ca_key_fn: Path to CA private key.
-    :param ca_cert_fn: Path to CA public key.
-    :param email: Email address for subject/issuer.
-    :param hostname: Hostname (common name) for subject/issuer.
-    :param org_name: Organization name for subject/issuer.
-    :param country_code: Country name in ISO format for subject/issuer.
-    :param state: State/province name for subject/issuer.
-    :param city: City/locality name for subject/issuer.
-    :param base_dir: Directory to store generated public and private keys.
-    :param extra_dns: Additional DNS names.
-    :param extra_ips: Additional IP addresses.
-    :param valid_to: Validity length in days.
-    :returns: A pair of path to generated public and private keys.
+    Args:
+        suffix: Suffix as basename (i.e. `auth-server`)
+        ca_key_fn: Path to CA private key.
+        ca_cert_fn: Path to CA public key.
+        email: Email address for subject/issuer.
+        hostname: Hostname (common name) for subject/issuer.
+        org_name: Organization name for subject/issuer.
+        country_code: Country name in ISO format for subject/issuer.
+        state: State/province name for subject/issuer.
+        city: City/locality name for subject/issuer.
+        base_dir: Directory to store generated public and private keys.
+        extra_dns: Additional DNS names.
+        extra_ips: Additional IP addresses.
+        valid_to: Validity length in days.
+
+    Returns:
+        A pair of path to generated public and private keys.
     """
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
@@ -523,17 +578,17 @@ def generate_signed_ssl_certkey(
             default_backend(),
         )
 
-        # The generated ``ca_key`` object has the following type:
+        # The generated `ca_key` object has the following type:
         #
-        # ``Union[DHPrivateKey, Ed25519PrivateKey, Ed448PrivateKey,
+        # `Union[DHPrivateKey, Ed25519PrivateKey, Ed448PrivateKey,
         #         RSAPrivateKey, DSAPrivateKey, EllipticCurvePrivateKey,
-        #         X25519PrivateKey, X448PrivateKey]``
+        #         X25519PrivateKey, X448PrivateKey]`
         #
-        # Passing the ``ca_key`` to ``sign_csr`` function will produces
-        # incompatible type error as reported by ``mypy``, hence we're casting
-        # the type as ``RSAPrivateKey`` for type-checking only.
+        # Passing the `ca_key` to `sign_csr` function will produces
+        # incompatible type error as reported by `mypy`, hence we're casting
+        # the type as `RSAPrivateKey` for type-checking only.
         #
-        # Note that the actual type and value of ``ca_key`` are left intact.
+        # Note that the actual type and value of `ca_key` are left intact.
         ca_key = _t.cast(RSAPrivateKey, ca_key)
 
     with open(ca_cert_fn, "rb") as f:

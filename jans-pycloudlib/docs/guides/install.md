@@ -1,17 +1,10 @@
-Installation
-~~~~~~~~~~~~
-
-Python version
-==============
+## Python version
 
 `jans-pycloudlib` only supports Python 3.9 and above.
 
-Install jans-pycloudlib
-===========================
+## Install jans-pycloudlib
 
 Preferred installation method is using `pip3`:
-
-.. code-block:: sh
 
     pip3 git+https://github.com/JanssenProject/jans@$VERSION#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
 

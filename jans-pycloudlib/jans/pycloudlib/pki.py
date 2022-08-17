@@ -17,7 +17,8 @@ from cryptography.x509.oid import NameOID
 def generate_private_key(filename: str) -> rsa.RSAPrivateKeyWithSerialization:
     """Generate private key.
 
-    :param filename: Path to generated private key.
+    Args:
+        filename: Path to generated private key.
     """
     private_key = rsa.generate_private_key(
         public_exponent=65537, key_size=2048, backend=default_backend(),
@@ -41,27 +42,27 @@ def generate_public_key(
     add_san: bool = False,
     add_key_usage: bool = False,
     **kwargs: _t.Any
-) -> x509.Certificate:  # noqa: D412
-    r"""Generate public key (cert).
+) -> x509.Certificate:
+    """Generate public key (cert).
 
-    :param filename: Path to generated public key.
-    :param private_key: An instance of PrivateKey object.
-    :param is_ca: Whether add constraint extension as CA.
-    :param add_san: Whether to add SubjectAlternativeName extension.
-    :param add_key_usage: Whether to add KeyUsage extension.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        filename: Path to generated public key.
+        private_key: An instance of PrivateKey object.
+        is_ca: Whether add constraint extension as CA.
+        add_san: Whether to add SubjectAlternativeName extension.
+        add_key_usage: Whether to add KeyUsage extension.
+        **kwargs: Keyword arguments.
 
-    Keyword arguments:
-
-    - ``email``: Email address for subject/issuer.
-    - ``hostname``: Hostname (common name) for subject/issuer.
-    - ``org_name``: Organization name for subject/issuer.
-    - ``country_code``: Country name in ISO format for subject/issuer.
-    - ``state``: State/province name for subject/issuer.
-    - ``city``: City/locality name for subject/issuer.
-    - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
-    - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
-    - ``valid_to``: Validity length in days.
+    Keyword Arguments:
+        email (str): Email address for subject/issuer.
+        hostname (str): Hostname (common name) for subject/issuer.
+        org_name (str): Organization name for subject/issuer.
+        country_code (str): Country name in ISO format for subject/issuer.
+        state (str): State/province name for subject/issuer.
+        city (str): City/locality name for subject/issuer.
+        extra_dns (list[str]): Additional DNS names (added if `add_san` argument is set to `True`).
+        extra_ips (list[str]): Additional IP addresses (added if `add_san` argument is set to `True`).
+        valid_to (int): Validity length in days.
     """
     valid_from = datetime.utcnow()
     validity = kwargs.get("valid_to", 365)
@@ -156,25 +157,25 @@ def generate_csr(
     add_san: bool = False,
     add_key_usage: bool = False,
     **kwargs: _t.Any
-) -> x509.CertificateSigningRequest:  # noqa: D412
-    r"""Generate a certificate signing request (CSR).
+) -> x509.CertificateSigningRequest:
+    """Generate a certificate signing request (CSR).
 
-    :param filename: Path to generate CSR.
-    :param private_key: An instance of PrivateKey object.
-    :param add_san: Whether to add SubjectAlternativeName extension.
-    :param add_key_usage: Whether to add KeyUsage extension.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        filename: Path to generate CSR.
+        private_key: An instance of PrivateKey object.
+        add_san: Whether to add SubjectAlternativeName extension.
+        add_key_usage: Whether to add KeyUsage extension.
+        **kwargs: Keyword arguments.
 
-    Keyword arguments:
-
-    - ``email``: Email address for subject/issuer.
-    - ``hostname``: Hostname (common name) for subject/issuer.
-    - ``org_name``: Organization name for subject/issuer.
-    - ``country_code``: Country name in ISO format for subject/issuer.
-    - ``state``: State/province name for subject/issuer.
-    - ``city``: City/locality name for subject/issuer.
-    - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
-    - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
+    Keyword Arguments:
+        email (str): Email address for subject/issuer.
+        hostname (str): Hostname (common name) for subject/issuer.
+        org_name (str): Organization name for subject/issuer.
+        country_code (str): Country name in ISO format for subject/issuer.
+        state (str): State/province name for subject/issuer.
+        city (str): City/locality name for subject/issuer.
+        extra_dns (list[str]): Additional DNS names (added if `add_san` argument is set to `True`).
+        extra_ips (list[str]): Additional IP addresses (added if `add_san` argument is set to `True`).
     """
     country_code = kwargs.get("country_code", "")
     state = kwargs.get("state", "")
@@ -254,13 +255,17 @@ def sign_csr(
     ca_public_key: x509.Certificate,
     **kwargs: _t.Any
 ) -> x509.Certificate:
-    r"""Sign a certificate signing request (CSR).
+    """Sign a certificate signing request (CSR).
 
-    :param filename: Path to signed certificate.
-    :param csr: An instance of CertificateSigningRequest object.
-    :param ca_private_key: An instance of CA PrivateKey object.
-    :param ca_public_key: An instance of CA Certificate object.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        filename: Path to signed certificate.
+        csr: An instance of CertificateSigningRequest object.
+        ca_private_key: An instance of CA PrivateKey object.
+        ca_public_key: An instance of CA Certificate object.
+        **kwargs: Keyword arguments.
+
+    Keyword Arguments:
+        valid_to (int): Validity length in days.
     """
     valid_from = datetime.utcnow()
     validity = kwargs.get("valid_to", 365)
