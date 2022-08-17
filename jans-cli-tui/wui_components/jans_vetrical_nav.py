@@ -90,7 +90,7 @@ class JansVerticalNav():
                     cursorline=True,
                     right_margins=[ScrollbarMargin(display_arrows=True), ],
                 ),
-                Window(height=10),
+                Window(height=2),
             ]
             ),
 

@@ -14,6 +14,7 @@ from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     VerticalAlign,
+    HorizontalAlign,
     DynamicContainer,
     FloatContainer,
     Window
@@ -159,7 +160,7 @@ class JansAuthServer:
         t = threading.Thread(target=self.oauth_update_clients, daemon=True)
         t.start()
 
-    def update_oauth_scopes(self):
+    def update_oauth_scopes(self, start_index=0):
         try :
             result = self.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
 
@@ -188,9 +189,16 @@ class JansAuthServer:
                 all_data=result
             )
 
+            buttons = []
+            if start_index > 0:
+                buttons.append(Button("Prev"))
+            if len(result) >= 10:
+                buttons.append(Button("Next"))
+
             self.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
             self.oauth_data_container['scopes'] = HSplit([
-                clients
+                clients,
+                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
             ])
 
             get_app().invalidate()
@@ -206,3 +214,8 @@ class JansAuthServer:
 
     def display_scope(self):
         pass
+<<<<<<< HEAD
+=======
+
+    def edit_scope(self, selected,event,size): ## enter 
+        self.edit_scope_dialog()
