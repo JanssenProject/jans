@@ -72,7 +72,7 @@ if not (os_type and os_version):
     sys.exit()
 
 os_name = os_type + os_version
-deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'ubuntu22', 'debian9', 'debian10', 'debian11')
+deb_sysd_clone = os_name.startswith(('ubuntu', 'debian'))
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
