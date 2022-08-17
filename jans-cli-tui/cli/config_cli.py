@@ -42,16 +42,6 @@ try:
 except ModuleNotFoundError:
     from pylib import jwt
 
-tabulate_endpoints = {
-    'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
-    'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
-    'jca.get-attributes': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
-    'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
-    'jca.get-oauth-scopes': ['dn', 'id', 'scopeType'],
-    'scim.get-users': ['id', 'userName', 'displayName', 'active']
-}
-
-tabular_dataset = {'scim.get-users': 'Resources'}
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 plugins = []
@@ -201,15 +191,13 @@ if not(host and (client_id and client_secret or access_token)):
             client_secret_enc = config['DEFAULT'][secret_enc_key_str]
             client_secret = encode_decode(client_secret_enc, decode=True)
 
+        if 'access_token' in config['DEFAULT']:
+            access_token = config['DEFAULT']['access_token']
+        elif 'access_token_enc' in config['DEFAULT']:
+            access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
+
         debug = config['DEFAULT'].get('debug')
         log_dir = config['DEFAULT'].get('log_dir', log_dir)
-
-    else:
-        config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net',
-                             'jca_client_id': 'your jans config api client id',
-                             'jca_client_secret': 'client secret for your jans config api client',
-                             'scim_client_id': 'your jans scim client id',
-                             'scim_client_secret': 'client secret for your jans scim client'}
 
 
 def get_bool(val):
@@ -224,71 +212,6 @@ def write_config():
 debug = get_bool(debug)
 
 
-class Menu(object):
-
-    def __init__(self, name, method='', info={}, path=''):
-        self.name = name
-        self.display_name = name
-        self.method = method
-        self.info = info
-        self.path = path
-        self.children = []
-        self.parent = None
-        self.ignore = False
-
-    def __iter__(self):
-        self.current_index = 0
-        return self
-
-    def __repr__(self):
-        return self.display_name
-        self.__print_child(self)
-
-    def tree(self):
-        print(self.name)
-        self.__print_child(self)
-
-    def __get_parent_number(self, child):
-        n = 0
-        while True:
-            if not child.parent:
-                break
-            n += 1
-            child = child.parent
-
-        return n
-
-    def __print_child(self, menu):
-        if menu.children:
-            for child in menu.children:
-                print(' ' * self.__get_parent_number(child) * 2, child)
-                self.__print_child(child)
-
-    def add_child(self, node):
-        assert isinstance(node, Menu)
-        node.parent = self
-        self.children.append(node)
-
-    def get_child(self, n):
-        if len(self.children) > n:
-            return self.children[n]
-
-    def __next__(self):
-        if self.current_index < len(self.children):
-            retVal = self.children[self.current_index]
-            self.current_index += 1
-            return retVal
-
-        else:
-            raise StopIteration
-
-    def __contains__(self, child):
-        for child_ in self.children:
-            if child_.name == child:
-                return True
-        return False
-
-
 class JCA_CLI:
 
     def __init__(self, host, client_id, client_secret, access_token, test_client=False):
@@ -296,26 +219,20 @@ class JCA_CLI:
         self.client_id = client_id
         self.client_secret = client_secret
         self.use_test_client = test_client
-        self.getCredintials()
+        self.getCredentials()
         self.wrapped = __name__ != "__main__"
         self.access_token = access_token or config['DEFAULT'].get('access_token')
         self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.idp_host)
         self.set_user()
         self.plugins()
 
-        if not self.access_token and config['DEFAULT'].get('access_token_enc'):
-            self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
-
         if my_op_mode == 'scim':
             self.host += '/jans-scim/restv1/v2'
 
         self.set_logging()
         self.ssl_settings()
-        self.make_menu()
-        self.current_menu = self.menu
-        self.enums()
 
-    def getCredintials(self): 
+    def getCredentials(self): 
         if self.host == '' or self.client_id == '' or self.client_secret == '' :
             if config_ini_fn.exists():
                 config.read_string(config_ini_fn.read_text())
@@ -359,15 +276,6 @@ class JCA_CLI:
             self.cli_logger.debug('requests response status: %s', str(response.status_code))
             self.cli_logger.debug('requests response headers: %s', str(response.headers))
             self.cli_logger.debug('requests response text: %s', str(response.text))
-
-    def enums(self):
-        self.enum_dict = {
-                            "CustomAttribute": {
-                              "properties.name": {
-                                "f": "get_attrib_list"
-                              }
-                            }
-                          }
 
     def set_user(self):
         self.auth_username = None
@@ -488,105 +396,6 @@ class JCA_CLI:
         except Exception as e:
             self.log_response('invalid date-time format: %s'.format(str(e)))
             return False
-
-
-    def make_menu(self):
-
-        menu_groups = []
-
-        def get_sep_pos(s):
-            for i, c in enumerate(s):
-                if c in ('-', '–'):
-                    return i
-            return -1
-
-        def get_group_obj(mname):
-            for grp in menu_groups:
-                if grp.mname == mname:
-                    return grp
-
-
-        for tag in cfg_yml['tags']:
-            tname = tag['name'].strip()
-            if tname == 'developers':
-                continue
-            n = get_sep_pos(tname)
-            mname = tname[:n].strip() if n > -1 else tname
-            grp = get_group_obj(mname)
-            if not grp:
-                grp = SimpleNamespace()
-                grp.tag = None if n > -1 else tname
-                grp.mname = mname
-                grp.submenu = []
-                menu_groups.append(grp)
-
-            if n > -1:
-                sname = tname[n+1:].strip()
-                sub = SimpleNamespace()
-                sub.tag = tname
-                sub.mname = sname
-                grp.submenu.append(sub)
-
-
-        def get_methods_of_tag(tag):
-            methods = []
-            if tag:
-                for path_name in cfg_yml['paths']:
-                    path = cfg_yml['paths'][path_name]
-                    for method_name in path:
-                        method = path[method_name]
-                        if 'tags' in method and tag in method['tags'] and 'operationId' in method:
-                            if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
-                                continue
-                            method['__method_name__'] = method_name
-                            method['__path_name__'] = path_name
-                            methods.append(method)
-
-            return methods
-
-        menu = Menu('Main Menu')
-
-        
-        for grp in menu_groups:
-            methods = get_methods_of_tag(grp.tag)
-            m = Menu(name=grp.mname)
-            m.display_name = m.name + ' ˅'
-            menu.add_child(m)
-
-            for method in methods:
-                for tag in method['tags']:
-                    menu_name = method.get('summary') or method.get('description')
-                    sm = Menu(
-                        name=menu_name.strip('.'),
-                        method=method['__method_name__'],
-                        info=method,
-                        path=method['__path_name__'],
-                    )
-                    m.add_child(sm)
-
-            if grp.submenu:
-                m.display_name = m.name + ' ˅'
-                for sub in grp.submenu:
-                    methods = get_methods_of_tag(sub.tag)
-                    if not methods:
-                        continue
-                    smenu = Menu(name=sub.mname)
-                    smenu.display_name = smenu.name + ' ˅'
-                    m.add_child(smenu)
-                    
-                    for method in methods:
-                        for tag in method['tags']:
-
-                            sub_menu_name = method.get('summary') or method.get('description')
-                            ssm = Menu(
-                                    name=sub_menu_name.strip('.'),
-                                    method=method['__method_name__'],
-                                    info=method,
-                                    path=method['__path_name__'],
-                                )
-                            smenu.add_child(ssm)
-
-        self.menu = menu
 
 
     def get_scoped_access_token(self, scope):
@@ -1101,17 +910,6 @@ class JCA_CLI:
         return ' '.join(scope)
 
 
-    def tabular_data(self, data, ome):
-        tab_data = []
-        headers = tabulate_endpoints[ome]
-        for i, entry in enumerate(data):
-            row_ = [i + 1]
-            for header in headers:
-                row_.append(str(entry.get(header, '')))
-            tab_data.append(row_)
-
-        print(tabulate(tab_data, ['#']+headers, tablefmt="grid"))
-
 
     def get_requests(self, endpoint, params={}):
         if not self.wrapped:
@@ -1137,8 +935,8 @@ class JCA_CLI:
             cert=self.mtls_client_cert
         )
         self.log_response(response)
-        if response.status_code == 404:
-            print(self.colored_text("Server returned 404", error_color))
+        if response.status_code in (404, 401):
+            print(self.colored_text("Server returned {}".format(response.status_code), error_color))
             print(self.colored_text(response.text, error_color))
             return None
 
@@ -1148,87 +946,6 @@ class JCA_CLI:
         except Exception as e:
             print("An error ocurred while retreiving data")
             self.print_exception(e)
-
-    def process_get(self, endpoint, return_value=False, parameters=None, noprompt=False, update=False):
-        clear()
-        if not return_value:
-            title = endpoint.name
-            if endpoint.name != endpoint.info['description'].strip('.'):
-                title += '\n' + endpoint.info['description']
-
-            self.print_underlined(title)
-
-        if not parameters and not noprompt:
-            parameters = self.obtain_parameters(endpoint, single=return_value)
-
-            for param in parameters.copy():
-                if not parameters[param]:
-                    del parameters[param]
-
-        if parameters and not return_value:
-            print("Calling Api with parameters:", parameters)
-
-        data = self.get_requests(endpoint, parameters)
-
-        if return_value:
-            return data
-
-        selections = ['q', 'x', 'b']
-        item_counters = []
-        tabulated = False
-
-        if data:
-            try:
-                if 'response' in data:
-                    data = data['response']
-            except:
-                pass
-
-            op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
-            import copy
-            if op_mode_endpoint in tabulate_endpoints:
-                try:
-                    data_ext = copy.deepcopy(data)
-                    if endpoint.info['operationId'] == 'get-user':
-                        for entry in data_ext:
-                            if entry.get('customAttributes'):
-                                for attrib in entry['customAttributes']:
-                                    if attrib['name'] == 'mail':
-                                        entry['mail'] = ', '.join(attrib['values'])
-                                    elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
-                                        entry[attrib['name']] = attrib['values'][0]
-
-                    tab_data = data_ext
-                    if op_mode_endpoint in tabular_dataset:
-                        tab_data = data_ext[tabular_dataset[op_mode_endpoint]]
-                    self.tabular_data(tab_data, op_mode_endpoint)
-                    item_counters = [str(i + 1) for i in range(len(data))]
-                    tabulated = True
-                except:
-                    self.pretty_print(data)
-            else:
-                self.pretty_print(data)
-
-        if update:
-            return item_counters, data
-
-        selections += item_counters
-        while True:
-            selection = self.get_input(selections)
-            if selection == 'b':
-                self.display_menu(endpoint.parent)
-                break
-            elif selection == 'w':
-                fn = input('File name: ')
-                try:
-                    with open(fn, 'w') as w:
-                        json.dump(data, w, indent=2)
-                        print("Output was written to", fn)
-                except Exception as e:
-                    print("An error ocurred while saving data")
-                    self.print_exception(e)
-            elif selection in item_counters:
-                self.pretty_print(data[int(selection) - 1])
 
     def get_schema_from_reference(self, ref):
         schema_path_list = ref.strip('/#').split('/')
@@ -1272,140 +989,6 @@ class JCA_CLI:
 
         return schema_
 
-    def get_schema_for_endpoint(self, endpoint):
-        schema_ = {}
-        for content_type in endpoint.info.get('requestBody', {}).get('content', {}):
-            if 'schema' in endpoint.info['requestBody']['content'][content_type]:
-                schema = endpoint.info['requestBody']['content'][content_type]['schema']
-                break
-        else:
-            return schema_
-
-        schema_ = schema.copy()
-
-        if schema_.get('type') == 'array':
-            schma_ref = schema_.get('items', {}).pop('$ref')
-        else:
-            schma_ref = schema_.pop('$ref')
-
-        if schma_ref:
-            schema_ref_ = self.get_schema_from_reference(schma_ref)
-            schema_.update(schema_ref_)
-
-        return schema_
-
-
-    def get_attrib_list(self):
-        for parent in self.menu:
-            for children in parent:
-                if children.info['operationId'] == 'get-attributes':
-                    attributes = self.process_get(children, return_value=True, parameters={'limit': 1000} )
-                    attrib_names = []
-                    for a in attributes:
-                        attrib_names.append(a['name'])
-                    attrib_names.sort()
-                    return attrib_names
-
-    def get_enum(self, schema):
-        if schema['__schema_name__'] in self.enum_dict:
-            enum_obj = schema
-            
-            for path in self.enum_dict[schema['__schema_name__']].copy():
-                for p in path.split('.'):
-                    enum_obj = enum_obj[p]
-
-                if not 'enum' in self.enum_dict[schema['__schema_name__']][path]:
-                    self.enum_dict[schema['__schema_name__']][path]['enum'] = getattr(self, self.enum_dict[schema['__schema_name__']][path]['f'])()
-
-                enum_obj['enum'] = self.enum_dict[schema['__schema_name__']][path]['enum']
-
-
-    def get_input_for_schema_(self, schema, data={}, spacing=0, getitem=None, required_only=False):
-
-        self.get_enum(schema)
-
-        for prop in schema['properties']:
-            item = schema['properties'][prop]
-            if getitem and prop != getitem['__name__'] or prop in ('dn', 'inum'):
-                continue
-
-            if (required_only and schema.get('required')) and not prop in schema.get('required'):
-                continue
-
-            
-            if item['type'] == 'object' and 'properties' in item:
-
-                print()
-                data_obj = {}
-                print("Data for object {}. {}".format(prop, item.get('description', '')))
-                result = self.get_input_for_schema_(item, data_obj)
-                data[prop] = result
-                #model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
-                #model_name = self.get_name_from_string(model_name_str)
-
-                #if initialised and getattr(model, prop_):
-                #    sub_model = getattr(model, prop_)
-                #    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
-                #elif isinstance(model, type) and hasattr(swagger_client.models, model_name):
-                #    sub_model_class = getattr(swagger_client.models, model_name)
-                #    result = self.get_input_for_schema_(item, sub_model_class, spacing=3, initialised=initialised)
-                #    setattr(model, prop_, result)
-                #elif hasattr(swagger_client.models, model.swagger_types[prop_]):
-                #    sub_model = getattr(swagger_client.models, model.swagger_types[prop_])
-                #    result = self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
-                #    setattr(model, prop_, result)
-                #else:
-                #    sub_model = getattr(model, prop_)
-                #    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
-                #    # print(self.colored_text("Fix me: can't find model", error_color))
-
-            elif item['type'] == 'array' and '__schema_name__' in item:
-
-                sub_data_list = []
-                sub_data_list_title_text = item.get('title') or item.get('description') or prop
-                sub_data_list_selection = 'y'
-                print(sub_data_list_title_text)
-                while sub_data_list_selection == 'y':
-                    sub_data = {}
-                    self.get_input_for_schema_(item, sub_data, spacing=spacing + 3)
-                    sub_data_list.append(sub_data)
-                    sub_data_list_selection = self.get_input(
-                        text="Add another {}?".format(sub_data_list_title_text), values=['y', 'n'])
-                data[prop] = sub_data_list
-
-            else:
-
-                default = data.get(prop) or item.get('default')
-                values_ = item.get('enum',[])
-
-                if isinstance(default, property):
-                    default = None
-                enforce = True if item['type'] == 'boolean' else False
-
-                if prop in schema.get('required', []):
-                    enforce = True
-                if not values_ and item['type'] == 'array' and 'enum' in item['items']:
-                    values_ = item['items']['enum']
-                if item['type'] == 'object' and not default:
-                    default = {}
-
-                val = self.get_input(
-                    values=values_,
-                    text=prop,
-                    default=default,
-                    itype=item['type'],
-                    help_text=item.get('description'),
-                    sitype=item.get('items', {}).get('type'),
-                    enforce=enforce,
-                    example=item.get('example'),
-                    spacing=spacing,
-                    iformat=item.get('format')
-                )
-
-                data[prop] = val
-
-        return data
-
 
     def post_requests(self, endpoint, data):
         url = 'https://{}{}'.format(self.host, endpoint.path)
@@ -1428,70 +1011,6 @@ class JCA_CLI:
         except:
             self.print_exception(response.text)
 
-    def process_post(self, endpoint):
-        schema = self.get_schema_for_endpoint(endpoint)
-
-        if schema:
-
-            title = schema.get('description') or schema['title']
-            data_dict = {}
-
-            if my_op_mode == 'scim':
-                if endpoint.path == '/jans-scim/restv1/v2/Groups':
-                    schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:Group']
-                elif endpoint.path == '/jans-scim/restv1/v2/Users':
-                    schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:User']
-                if endpoint.info['operationId'] == 'create-user':
-                    schema['required'] = ['userName', 'name', 'displayName', 'emails', 'password']
-
-            data = self.get_input_for_schema_(schema, data_dict, required_only=True)
-
-            optional_fields = []
-            required_fields = schema.get('required', []) + ['dn', 'inum']
-            for field in schema['properties']:
-                if not field in required_fields:
-                    optional_fields.append(field)
-
-            if optional_fields:
-                fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
-                fields_numbers = []
-                if fill_optional == 'y':
-                    print("Optional Fields:")
-                    for i, field in enumerate(optional_fields):
-                        print(i + 1, field)
-                        fields_numbers.append(str(i + 1))
-
-                    while True:
-                        optional_selection = self.get_input(values=['q', 'x', 'c'] + fields_numbers,
-                                                            help_text="c: continue, #: populate field")
-                        if optional_selection == 'c':
-                            break
-                        if optional_selection in fields_numbers:
-                            item_name = optional_fields[int(optional_selection) - 1]
-                            schema_item = schema['properties'][item_name].copy()
-                            schema_item['__name__'] = item_name
-                            item_data = self.get_input_for_schema_(schema, getitem=schema_item)
-                            data[item_name] = item_data[item_name]
-
-            print("Obtained Data:")
-            self.pretty_print(data)
-
-            selection = self.get_input(values=['q', 'x', 'b', 'y', 'n'], text='Continue?')
-
-        else:
-            selection = 'y'
-            model = None
-
-        if selection == 'y':
-            print("Please wait while posting data ...\n")
-            response = self.post_requests(endpoint, data)
-            if response:
-                self.pretty_print(response)
-
-        selection = self.get_input(values=['q', 'x', 'b'])
-        if selection in ('b', 'n'):
-            self.display_menu(endpoint.parent)
-
 
     def delete_requests(self, endpoint, url_param_dict):
         security = self.get_scope_for_endpoint(endpoint)
@@ -1509,33 +1028,6 @@ class JCA_CLI:
 
         return response.text.strip()
 
-
-    def process_delete(self, endpoint):
-        url_param = self.get_endpiont_url_param(endpoint)
-        if url_param:
-            url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be deleted')
-        else:
-            url_param_val = ''
-        selection = self.get_input(text="Are you sure want to delete {} ?".format(url_param_val),
-                                   values=['b', 'y', 'n', 'q', 'x'])
-        if selection in ('b', 'n'):
-            self.display_menu(endpoint.parent)
-        elif selection == 'y':
-            print("Please wait while deleting {} ...\n".format(url_param_val))
-            
-            url_param_dict = {url_param['name']: url_param_val}
-
-            response = self.delete_requests(endpoint, url_param_dict)
-
-            if response is None:
-                print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), success_color))
-            else:
-                print(self.colored_text("An error ocurred while deleting entry:", error_color))
-                print(self.colored_text(response, error_color))
-
-        selection = self.get_input(['b', 'q', 'x'])
-        if selection == 'b':
-            self.display_menu(endpoint.parent)
 
     def patch_requests(self, endpoint, url_param_dict, data):
         url = 'https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict))
@@ -1556,73 +1048,6 @@ class JCA_CLI:
             return response.json()
         except:
             self.print_exception(response.text)
-
-
-    def process_patch(self, endpoint):
-
-        schema = self.get_schema_for_endpoint(endpoint)
-
-        if 'PatchOperation' in cfg_yml['components']['schemas']:
-            schema = cfg_yml['components']['schemas']['PatchOperation'].copy()
-            schema['__schema_name__'] = 'PatchOperation'
-        else:
-            schema = cfg_yml['components']['schemas']['PatchRequest'].copy()
-            schema['__schema_name__'] = 'PatchRequest'
-
-
-        for item in schema['properties']:
-            print("d-checking", item)
-            if not 'type' in schema['properties'][item] or schema['properties'][item]['type']=='object':
-                schema['properties'][item]['type'] = 'string'
-
-        url_param_dict = {}
-        url_param_val = None
-        url_param = self.get_endpiont_url_param(endpoint)
-        if 'name' in url_param:
-            url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
-            url_param_dict = {url_param['name']: url_param_val}
-    
-        body = []
-
-        while True:
-            data = self.get_input_for_schema_(schema)
-            #guessed_val = self.guess_bool(data.value)
-            #if not guessed_val is None:
-            #    data.value = guessed_val
-            if my_op_mode != 'scim' and not data['path'].startswith('/'):
-                data['path'] = '/' + data['path']
-
-            if my_op_mode == 'scim':
-                data['path'] = data['path'].replace('/', '.')
-
-            body.append(data)
-            selection = self.get_input(text='Another patch operation?', values=['y', 'n'])
-            if selection == 'n':
-                break
-
-        if endpoint.info['operationId'] == 'patch-oauth-uma-resources-by-id':
-            for patch_item in body:
-                if patch_item['path'] == '/clients':
-                    patch_item['value'] = patch_item['value'].split('_,')
-
-        self.pretty_print(body)
-
-        selection = self.get_input(values=['y', 'n'], text='Continue?')
-
-        if selection == 'y':
-
-            if my_op_mode == 'scim':
-                body = {'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'], 'Operations': body}
-
-            self.patch_requests(endpoint, url_param_dict, body)
-
-        selection = self.get_input(['b'])
-        if selection == 'b':
-            self.display_menu(endpoint.parent)
-
-    def get_mime_for_endpoint(self, endpoint, req='requestBody'):
-        for key in endpoint.info[req]['content']:
-            return key
 
 
     def put_requests(self, endpoint, data):
@@ -1647,219 +1072,6 @@ class JCA_CLI:
 
         return result
 
-
-    def process_put(self, endpoint):
-
-        schema = self.get_schema_for_endpoint(endpoint)
-
-        cur_data = None
-        go_back = False
-
-        if endpoint.info.get('x-cli-getdata') != '_file':
-            if 'x-cli-getdata' in endpoint.info and endpoint.info['x-cli-getdata'] != None:
-                for m in endpoint.parent:
-                    if m.info['operationId'] == endpoint.info['x-cli-getdata']:
-                        while True:
-                            try:
-                                print("cur_data-1")
-                                cur_data = self.process_get(m, return_value=True)
-                                break
-                            except ValueError as e:
-                                retry = self.get_input(values=['y', 'n'], text='Retry?')
-                                if retry == 'n':
-                                    self.display_menu(endpoint.parent)
-                                    break
-                        get_endpoint = m
-                        break
-
-            else:
-                for mi in endpoint.parent :
-                    if mi.method == 'get' and not mi.path.endswith('}'):
-                        cur_data = self.process_get(mi, noprompt=True, update=True)
-                        values = ['b', 'q', 'x'] + cur_data[0]
-                        item_number = self.get_input(text="Enter item # to update", values=values)
-
-                        cur_data = cur_data[1][int(item_number) -1]
-                """
-                for m in endpoint.parent:
-                    if m.method == 'get' and m.path.endswith('}'):
-                        while True:
-                            while True:
-                                try:
-                                    
-                                    key_name_desc = self.get_endpiont_url_param(m)
-                                    if key_name_desc and 'name' in key_name_desc:
-                                        key_name = key_name_desc['name']
-                                    print("P-X", m)
-                                    cur_data = self.process_get(m, return_value=True)
-                                    break
-                                except ValueError as e:
-                                    retry = self.get_input(values=['y', 'n'], text='Retry?')
-                                    if retry == 'n':
-                                        self.display_menu(endpoint.parent)
-                                        break
-
-                            if cur_data is not None:
-                                break
-
-                        get_endpoint = m
-                        break
-                """
-            if not cur_data:
-                for m in endpoint.parent:
-                    if m.method == 'get' and not m.path.endswith('}'):
-                        cur_data = self.process_get(m, return_value=True)
-                        get_endpoint = m
-
-        end_point_param = self.get_endpiont_url_param(endpoint)
-
-        if endpoint.info.get('x-cli-getdata') == '_file':
-
-            # TODO: To be implemented
-            schema_desc = schema.get('description') or schema['__schema_name__']
-            text = 'Enter filename to load data for «{}»: '.format(schema_desc)
-            data_fn = input(self.colored_text(text, 244))
-            if data_fn == 'b':
-                go_back = True
-            elif data_fn == 'q':
-                sys.exit()
-            else:
-                data_org = self.get_json_from_file(data_fn)
-
-            data = {}
-            for k in data_org:
-                if k in cur_model.attribute_map:
-                    mapped_key = cur_model.attribute_map[k]
-                    data[mapped_key] = data_org[k]
-                else:
-                    data[k] = data_org[k]
-
-            print("Please wait while posting data ...\n")
-
-            response = self.put_requests(endpoint, cur_data)
-
-            if response:
-                self.pretty_print(response)
-
-            selection = self.get_input(values=['q', 'x', 'b'])
-            if selection == 'b':
-                self.display_menu(endpoint.parent)
-
-        else:
-
-            end_point_param_val = None
-            if end_point_param and end_point_param['name'] in cur_data:
-                end_point_param_val = cur_data[end_point_param['name']]
-
-            schema = self.get_schema_for_endpoint(endpoint)
-            if schema['properties'].get('keys', {}).get('properties'):
-                schema = schema['properties']['keys']
-
-
-            attr_name_list = list(schema['properties'].keys())
-            if 'dn' in attr_name_list:
-                attr_name_list.remove('dn')
-
-            attr_name_list.sort()
-            item_numbers = []
-
-            def print_fields():
-                print("Fields:")
-                for i, attr_name in enumerate(attr_name_list):
-                    print(str(i + 1).rjust(2), attr_name)
-                    item_numbers.append(str(i + 1))
-
-            print_fields()
-            changed_items = []
-            selection_list = ['q', 'x', 'b', 'v', 's', 'l'] + item_numbers
-            help_text = 'q: quit, v: view, s: save, l: list fields #: update field'
-
-            while True:
-                selection = self.get_input(values=selection_list, help_text=help_text)
-                if selection == 'v':
-                    self.pretty_print(cur_data)
-                elif selection == 'l':
-                    print_fields()
-                elif selection in item_numbers:
-                    item = attr_name_list[int(selection) - 1]
-
-                    schema_item = schema['properties'][item]
-                    schema_item['__name__'] = item
-                    self.get_input_for_schema_(schema, data=cur_data, getitem=schema_item)
-                    changed_items.append(item)
-
-                if selection == 'b':
-                    self.display_menu(endpoint.parent)
-                    break
-                elif selection == 's':
-                    print('Changes:')
-                    for ci in changed_items:
-                        str_val = str(cur_data[ci])
-                        print(self.colored_text(ci, bold_color) + ':', self.colored_text(str_val, success_color))
-
-                    selection = self.get_input(values=['y', 'n'], text='Continue?')
-
-                    if selection == 'y':
-                        print("Please wait while posting data ...\n")
-                        put_pname = self.get_url_param(endpoint.path)
-
-                        response = self.put_requests(endpoint, cur_data)
-
-                        if response:
-                            self.pretty_print(response)
-                            go_back = True
-                            break
-
-            if go_back:
-                selection = self.get_input(values=['q', 'x', 'b'])
-                if selection == 'b':
-                    self.display_menu(endpoint.parent)
-            else:
-                self.get_input_for_schema_(schema, data=cur_data)
-
-    def display_menu(self, menu):
-        clear()
-        self.current_menu = menu
-
-        name_list = [menu.name]
-        par = menu
-        while True:
-            par = par.parent
-            if not par:
-                break
-            name_list.insert(0, par.name)
-
-        if len(name_list) > 1:
-            del name_list[0]
-
-        self.print_underlined(': '.join(name_list))
-
-        selection_values = ['q', 'x', 'b']
-
-        menu_numbering = {}
-
-        c = 0
-        for i, item in enumerate(menu):
-            if item.info.get('x-cli-ignore') or (item.parent.name == 'Main Menu' and not item.children):
-                continue
-
-            print(c + 1, item)
-            selection_values.append(str(c + 1))
-            menu_numbering[c + 1] = i
-            c += 1
-
-        selection = self.get_input(selection_values)
-
-        if selection == 'b' and not menu.parent:
-            print("Quiting...")
-            sys.exit()
-        elif selection == 'b':
-            self.display_menu(menu.parent)
-        elif int(selection) in menu_numbering and menu.get_child(menu_numbering[int(selection)]).children:
-            self.display_menu(menu.get_child(menu_numbering[int(selection)]))
-        else:
-            m = menu.get_child(menu_numbering[int(selection)])
-            getattr(self, 'process_' + m.method)(m)
 
     def parse_command_args(self, args):
         args_dict = {}
@@ -2073,9 +1285,6 @@ class JCA_CLI:
         if path.get('__urlsuffix__') and not path['__urlsuffix__'] in suffix_param:
             self.exit_with_error("This operation requires a value for url-suffix {}".format(path['__urlsuffix__']))
 
-        endpoint = Menu('', info=path)
-        schema = self.get_schema_for_endpoint(endpoint)
-
         if not data:
             op_path = self.get_path_by_id(operation_id)
             if op_path['__method__'] == 'patch' and not data_fn:
@@ -2099,9 +1308,6 @@ class JCA_CLI:
                         data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
                     else:
                         data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
-
-        if (schema and not data_fn) and not data:
-            self.exit_with_error("Please provide schema with --data argument")
 
         caller_function = getattr(self, 'process_command_' + path['__method__'])
         return caller_function(path, suffix_param, endpoint_params, data_fn, data=data)
@@ -2137,29 +1343,22 @@ class JCA_CLI:
 
         print(json.dumps(sample_schema, indent=2))
 
-    def runApp(self):
-        clear()
-        self.display_menu(self.menu)
 
 
 def main():
 
-
+    
     error_log_file = os.path.join(log_dir, 'cli_eorror.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    try:
+    if 1:
+    #try:
         if not access_token:
             cli_object.check_connection()
-        if not (args.operation_id or args.info or args.schema):
-            # reset previous color
-            print('\033[0m', end='')
-            cli_object.runApp()
         else:
-            print()
             if args.info:
                 cli_object.help_for(args.info)
             elif args.schema:
@@ -2167,13 +1366,12 @@ def main():
             elif args.operation_id:
                 cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
             print()
-    except Exception as e:
-        if os.environ.get('errstdout'):
-            print(traceback.print_exc())
-        print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
-        with open(error_log_file, 'a') as w:
-            traceback.print_exc(file=w)
-        print("Error is logged to {}".format(error_log_file))
+
+    #except Exception as e:
+    #    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
+    #    with open(error_log_file, 'a') as w:
+    #        traceback.print_exc(file=w)
+    #    print("Error is logged to {}".format(error_log_file))
 
 
 if __name__ == "__main__":
