@@ -3,6 +3,8 @@
 """
 import json
 import os
+import logging
+
 from shutil import get_terminal_size
 import time
 from asyncio import Future, ensure_future
@@ -68,6 +70,9 @@ help_text_dict = {
     'helper': ("To guide you through the fields"),
 }
 
+
+
+
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
@@ -87,6 +92,7 @@ def do_exit(*c):
 class JansCliApp(Application, JansAuthServer):
 
     def __init__(self):
+        self.init_logger()
         self.app_started = False
         self.width, self.height = get_terminal_size()
         self.app = get_app()
@@ -162,6 +168,17 @@ class JansCliApp(Application, JansAuthServer):
         # ----------------------------------------------------------------------------- #
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
+
+    def init_logger(self):
+        self.logger = logging.getLogger('JansCli')
+        self.logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        cur_dir = os.path.dirname(os.path.realpath(__file__))
+        file_handler = logging.FileHandler(os.path.join(cur_dir, 'dev.log'))
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
+        self.logger.debug("JANS CLI Started")
 
     def press_tab(self):
         self.keyboard.press(Key.tab)
