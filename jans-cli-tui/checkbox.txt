@@ -28,3 +28,33 @@ Name : allowSpontaneousScopes , value =
 **********
 Name : id_token_claims , value = 
 **********
+Name : disabled , value = False
+**********
+Name : grantTypes , value = 
+**********
+Name : responseTypes , value = 
+**********
+Name : dynamicRegistrationPersistClientAuthorizations , value = 
+**********
+Name : includeClaimsInIdToken , value = False
+**********
+Name : runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims , value = 
+**********
+Name : backchannelLogoutSessionRequired , value = 
+**********
+Name : frontChannelLogoutSessionRequired , value = False
+**********
+Name : backchannelUserCodeParameterSupported , value = 
+**********
+Name : sessionIdRequestParameterEnabled , value = 
+**********
+Name : defaultPromptLogin , value = 
+**********
+Name : persistClientAuthorizations , value = False
+**********
+Name : Supress , value = 
+**********
+Name : allowSpontaneousScopes , value = 
+**********
+Name : id_token_claims , value = 
+**********

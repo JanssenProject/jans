@@ -8,3 +8,13 @@ Name : backchannelTokenDeliveryMode , value =
 **********
 Name : applicationType! , value = 
 **********
+Name : subjectTypesSupported , value = 
+**********
+Name : applicationType , value = native
+**********
+Name : accessTokenAsJwt , value = False
+**********
+Name : backchannelTokenDeliveryMode , value = 
+**********
+Name : applicationType! , value = 
+**********

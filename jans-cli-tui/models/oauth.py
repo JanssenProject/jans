@@ -214,8 +214,6 @@ class JansAuthServer:
 
     def display_scope(self):
         pass
-<<<<<<< HEAD
-=======
 
     def edit_scope(self, selected,event,size): ## enter 
         self.edit_scope_dialog()
