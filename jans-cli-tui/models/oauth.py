@@ -4,7 +4,7 @@ import threading
 from collections import OrderedDict
 import json
 from asyncio import Future, ensure_future
-
+import prompt_toolkit
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
@@ -41,6 +41,7 @@ from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
+from wui_components.edit_client_dialog import EditClientDialog
 
 
 class JansAuthServer:
@@ -77,8 +78,8 @@ class JansAuthServer:
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
                         self.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
-                        self.getTitledText('Search: ', name='oauth:clients:search', jans_help='Press enter to perform search'),
-                        self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button")
+                        self.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search'),
+                        self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client)
                         ],
                         padding=3,
                         width=D(),
@@ -217,3 +218,39 @@ class JansAuthServer:
 
     def edit_scope(self, selected,event,size): ## enter 
         self.edit_scope_dialog()
+
+    def edit_client_dialog(self, **params):
+
+        selected_line_data = params['data']  
+        title = "Edit user Data (Clients)"
+ 
+        dialog = EditClientDialog(self, title=title, data=selected_line_data)
+        self.show_jans_dialog(dialog)
+
+    def save_client(self, dialog):
+        data = {}
+        for tab in dialog.oauth_tabs:
+            for item in dialog.oauth_tabs[tab].children:
+                if hasattr(item, 'children') and hasattr(item.children[1], 'jans_name'):
+                    key_ = item.children[1].jans_name
+                    if isinstance(item.children[1].me, prompt_toolkit.widgets.base.TextArea):
+                        value_ = item.children[1].me.text
+                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.CheckboxList):
+                        value_ = item.children[1].me.current_values
+                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.RadioList):
+                        value_ = item.children[1].me.current_value
+                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.Checkbox):
+                        value_ = item.children[1].me.checked
+                    data[key_] = value_
+
+        for list_key in ('redirectUris', 'scopes'):
+            if data[list_key]:
+                data[list_key] = data[list_key].splitlines()
+
+        self.logger.debug(str(data))
+
+    def add_client(self):
+        dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)
+        result = self.show_jans_dialog(dialog)
+
+

@@ -39,12 +39,12 @@ from prompt_toolkit.widgets import (
     TextArea,
     CheckboxList,
     Shadow,
+    Checkbox,
 )
 from prompt_toolkit.filters import Condition
 
 # -------------------------------------------------------------------------- #
 from cli import config_cli
-from wui_components.edit_client_dialog import EditClientDialog
 from wui_components.edit_scope_dialog import EditScopeDialog
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
@@ -348,27 +348,54 @@ class JansCliApp(Application, JansAuthServer):
         return  new_title , cd , width
     
     def getTitledText(self, title, name, value='', height=1, jans_help='', width=None,style=''):
+        title += ': '
         multiline = height > 1
         ta = TextArea(text=value, multiline=multiline,style="class:titledtext")
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
-        li,cd,width = self.handle_long_string(title,[1]*height,ta)
+        ta.window.me = ta
+        li, cd, width = self.handle_long_string(title,[1]*height,ta)
 
         return VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
  
-    # def getTitledCheckBox(self, title, name, values,style=''):
-    #     cb = CheckboxList(values=[(o,o) for o in values])
-    #     cb.window.jans_name = name
-    #     li,cd,width = self.handle_long_string(title,values,cb)
+    def getTitledCheckBoxList(self, title, name, values, current_values=[], jans_help='', style=''):
+        title += ': '
+        if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
+            values = [(o,o) for o in values]
+        cbl = CheckboxList(values=values)
+        cbl.current_values = current_values
+        cbl.window.jans_name = name
+        cbl.window.jans_help = jans_help
+        cbl.window.me = cbl
+        li, cd, width = self.handle_long_string(title, values, cbl)
 
-    #     return VSplit([Label(text=li, width=width,style=style,wrap_lines=False), cd])
+        return VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
 
-    # def getTitledRadioButton(self, title, name, values,style=''):
-    #     rl = RadioList(values=[(option, option) for option in values])
-    #     rl.window.jans_name = name
-    #     li,rl2,width = self.handle_long_string(title,values,rl)
-        
-    #     return VSplit([Label(text=li, width=width,style=style), rl2],)
+
+    def getTitledCheckBox(self, title, name, text='', checked=False, jans_help='', style=''):
+        title += ': '
+        cb = Checkbox(text)
+        cb.checked = checked
+        cb.window.jans_name = name
+        cb.window.jans_help = jans_help
+        cb.window.me = cb
+        li, cd, width = self.handle_long_string(title, text, cb)
+
+        return VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
+
+    def getTitledRadioButton(self, title, name, values, current_value=None, jans_help='', style=''):
+        title += ': '
+        if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
+            values = [(o,o) for o in values]
+        rl = RadioList(values=values)
+        if current_value:
+            rl.current_value = current_value
+        rl.window.jans_name = name
+        rl.window.jans_help = jans_help
+        rl.window.me = rl
+        li, rl2, width = self.handle_long_string(title,values,rl)
+
+        return VSplit([Label(text=li, width=width,style=style), rl2],)
 
     # ----------------------------------------------------------------- #
     def getButton(self, text, name, jans_help, handler=None):
@@ -464,14 +491,6 @@ class JansCliApp(Application, JansAuthServer):
         config_cli.host = config_cli.config['DEFAULT']['jans_host']
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
         config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
-
-    def edit_client_dialog(self, **params):
-
-        selected_line_data = params['data']  
-        title = "Edit user Data (Clients)"
- 
-        dialog = EditClientDialog(self,title=title,data=selected_line_data)
-        self.show_jans_dialog(dialog)
 
 
     def edit_scope_dialog(self, **params):
