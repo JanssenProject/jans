@@ -247,6 +247,7 @@ class JansCliApp(Application, JansAuthServer):
         self.bindings.add("c-c")(do_exit)
 
     # ----------------------------------------------------------------- #
+    
     def handle_long_string (self,text,values,cb):
         lines = []
         if len(text) > 20 :

@@ -388,7 +388,6 @@ class JansAuthServer:
 
             data =[]
             
-
             for d in result: 
                 data.append(
                     [

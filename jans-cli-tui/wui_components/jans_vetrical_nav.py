@@ -19,8 +19,7 @@ class JansVerticalNav():
         self.myparent = myparent            # ListBox parent class
         self.headers = headers              # ListBox headers
         self.selectes = selectes            # ListBox initial selection
-        # ListBox Data (Can be renderable ?!!! #TODO )
-        self.data = data
+        self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
         self.preferred_size = preferred_size
         self.headerColor = headerColor
         self.entriesColor = entriesColor
