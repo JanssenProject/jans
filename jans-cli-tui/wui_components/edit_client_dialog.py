@@ -282,11 +282,6 @@ class EditClientDialog(JansGDialog):
             if type(self.data[name]) is not list :
                 value= str(self.data[name])
     
-        with open('./checkbox.txt', 'a') as f:
-            f.write("Name : {} , value = {}".format(name,value))
-            f.write("\n**********\n")
-
-
         cb = CheckboxList(values=[(o,o) for o in values],default_values=value)
         cb.window.jans_name = name
         li,cd,width = self.myparent.handle_long_string(title,values,cb)
@@ -298,10 +293,6 @@ class EditClientDialog(JansGDialog):
         if name in self.data.keys() :
             if type(self.data[name]) is not list :
                 value= str(self.data[name])
-
-        with open('./radio.txt', 'a') as f:
-            f.write("Name : {} , value = {}".format(name,value))
-            f.write("\n**********\n")
 
         rl = RadioList(values=[(option, option) for option in values],default=value)
         rl.window.jans_name = name
