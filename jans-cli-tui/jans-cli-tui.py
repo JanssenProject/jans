@@ -6,6 +6,7 @@ import os
 from shutil import get_terminal_size
 import time
 from asyncio import Future, ensure_future
+from pynput.keyboard import Key, Controller
 
 import prompt_toolkit
 from prompt_toolkit.application import Application
@@ -21,7 +22,6 @@ from prompt_toolkit.layout.containers import (
     VerticalAlign,
     DynamicContainer,
     FloatContainer,
-    Window
 )
 from prompt_toolkit.layout.containers import VerticalAlign
 from prompt_toolkit.layout.dimension import D
@@ -89,7 +89,7 @@ class JansCliApp(Application, JansAuthServer):
         self.app_started = False
         self.width, self.height = get_terminal_size()
         self.app = get_app()
-        self.show_dialog = False   ## ## ## ##
+        self.show_dialog = False   
         self.set_keybindings()
         self.containers = {}
         # -------------------------------------------------------------------------------- #
@@ -98,10 +98,7 @@ class JansCliApp(Application, JansAuthServer):
         self.active_dialog_select = ''
         self.Auth_clients_tabs = {}
 
-        # ----------------------------------------------------------------------------- #
-        self.check_jans_cli_ini()
-        # ----------------------------------------------------------------------------- #
-
+        self.keyboard = Controller()
 
         self.yes_button = Button(text="Yes", handler=accept_yes)
         self.no_button = Button(text="No", handler=accept_no)
@@ -160,7 +157,18 @@ class JansCliApp(Application, JansAuthServer):
         # Since first module is oauth, set center frame to my oauth main container.
         self.oauth_set_center_frame()
 
+
+        # ----------------------------------------------------------------------------- #
+        self.check_jans_cli_ini()
+        # ----------------------------------------------------------------------------- #
+
+
+    def press_tab(self):
+        self.keyboard.press(Key.tab)
+        self.keyboard.release(Key.tab)
+
     def create_cli(self):
+        conn_ok = False
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
                 host=config_cli.host, 
@@ -172,12 +180,14 @@ class JansCliApp(Application, JansAuthServer):
 
         status = self.cli_object.check_connection()
 
+        self.press_tab()
+
         if status is not True:
             buttons = [Button("OK", handler=self.jans_creds_dialog)]
             self.show_message("Error getting Connection Config Api", status, buttons=buttons)
         else:
             if not test_client and not self.cli_object.access_token:
-
+                
                     response = self.cli_object.get_device_verification_code()
                     result = response.json()
 
@@ -186,7 +196,7 @@ class JansCliApp(Application, JansAuthServer):
                         )
 
                     body = HSplit([Label(msg)])
-                    dialog = JansGDialog(parent=self,title="Waiting Response", body=body)
+                    dialog = JansGDialog(title="Waiting Response", body=body)
 
                     async def coroutine():
                         app = get_app()
@@ -197,11 +207,17 @@ class JansCliApp(Application, JansAuthServer):
                             app.layout.focus(focused_before)
                         except:
                             app.layout.focus(self.center_frame)
-
-                        self.cli_object.get_jwt_access_token(result)
+                        try:
+                            self.cli_object.get_jwt_access_token(result)
+                        except Exception as e:
+                            err_dialog = JansGDialog(title="Error!", body=HSplit([Label(str(e))]))
+                            await self.show_dialog_as_float(err_dialog)
+                            self.create_cli()
 
                     ensure_future(coroutine())
 
+        #if not conn_ok:
+        #    self.create_cli()
 
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
@@ -218,7 +234,7 @@ class JansCliApp(Application, JansAuthServer):
 
     def prapare_dialogs(self):
         self.data_show_client_dialog = Label(text='Selected Line Data as Json') 
-        self.dialog_width = int(self.width*0.9) #  120  ## to be dynamic
+        self.dialog_width = int(self.width*0.9) # 120 ## to be dynamic
         self.dialog_height = int(self.height*0.8) ## to be dynamic
 
 
@@ -236,85 +252,38 @@ class JansCliApp(Application, JansAuthServer):
         self.bindings.add("tab")(self.focus_next)
         self.bindings.add("s-tab")(self.focus_previous)
         self.bindings.add("c-c")(do_exit)
-    # ----------------------------------------------------------------- #
-    def handel_long_string (self,text,values,cb):
-        lines = []
-        if len(text) > 20 :
-            title_list=text.split(' ')
-            dum = ''
-            for i in range(len(title_list)):
-                if len(dum) < 20 :
-                    if len(title_list[i] + dum) < 30 :
-                        dum+=title_list[i] +' '
-                    else :
-                        lines.append(dum.strip())
-                        dum = title_list[i] + ' '
-                else :
-                    lines.append(dum.strip())
-                    dum = title_list[i]  + ' '
-            lines.append(dum)
-            num_lines = len(lines)
-            width = len(max(lines, key=len))
-        else:
-            width = len(text)
-            lines.append(text)
-            num_lines = len(lines)
 
-
-        new_title,title_lines = '\n'.join(lines) , num_lines 
-
-
-        if title_lines <= len(values) :  ### if num of values (value lines) < = title_lines
-            lines_under_value = 0   
-        else :
-            lines_under_value = abs(title_lines-len(values))
-        
-        if lines_under_value !=0 :
-            cd = HSplit([   
-                cb,
-                Label(text=('\n')*(lines_under_value-1)) 
-            ])
-        else :
-            cd = cb     
-
-        if title_lines <= len(values) :  ### if num of values (value lines) < = title_lines
-            lines_under_title = abs(len(values) - title_lines)
-        else :
-            lines_under_title = 0   
-
-        # first one >> solved >> title
-        if lines_under_title >=1 :
-            for i in range(lines_under_title):
-                new_title +='\n' 
-        else :
-            pass
-
-        return  new_title , cd , width
-    
-    def getTitledText(self, title, name, value='', height=1, jans_help='', width=None,style=''):
+    def getTitledText(self, title, name, value='', height=1, jans_help='', width=None):
         multiline = height > 1
-        ta = TextArea(text=value, multiline=multiline,style="class:titledtext")
+        ta = TextArea(text=value, multiline=multiline, style='class:textarea')
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
-        li,cd,width = self.handel_long_string(title,[1]*height,ta)
+        if width:
+            ta.window.width = width
+        li = title
+        for i in range(height-1):
+            li +='\n'
 
-        return VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
- 
-    def getTitledCheckBox(self, title, name, values,style=''):
-        cb = CheckboxList(values=[(o,o) for o in values])
+        return VSplit([Label(text=li + ':', width=len(title)+1), ta], height=height, padding=1)
+
+    def getTitledCheckBox(self, title, name, values):
+        cb = CheckboxList(values=[(o,o) for o in values],)
         cb.window.jans_name = name
-        li,cd,width = self.handel_long_string(title,values,cb)
+        li = title
+        for i in range(len(values)-1):
+            li +='\n'
+        return VSplit([Label(text=li, width=len(title)+1), cb] )
 
-        return VSplit([Label(text=li, width=width,style=style,wrap_lines=False), cd])
-
-    def getTitledRadioButton(self, title, name, values,style=''):
+    def getTitledRadioButton(self, title, name, values):
         rl = RadioList(values=[(option, option) for option in values])
         rl.window.jans_name = name
-        li,rl2,width = self.handel_long_string(title,values,rl)
-        
-        return VSplit([Label(text=li, width=width,style=style), rl2],)
+        li = title
+        for i in range(len(values)-1):
+            li +='\n'
 
-    # ----------------------------------------------------------------- #
+        return VSplit([Label(text=li, width=len(title)+1), rl],
+                height=len(values)
+            )
 
     def getButton(self, text, name, jans_help, handler=None):
         b = Button(text=text, width=len(text)+2)
@@ -381,6 +350,8 @@ class JansCliApp(Application, JansAuthServer):
 
         ensure_future(coroutine())
         
+
+
     def data_display_dialog(self, **params):
 
         body = HSplit([
@@ -394,7 +365,7 @@ class JansCliApp(Application, JansAuthServer):
                 )
             ])
 
-        dialog = JansGDialog(parent=self,title=params['selected'][0], body=body)
+        dialog = JansGDialog(title=params['selected'][0], body=body)
 
         self.show_jans_dialog(dialog)
 
@@ -410,26 +381,23 @@ class JansCliApp(Application, JansAuthServer):
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
         config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
 
+
     def jans_creds_dialog(self, *params):
 
-        # body=HSplit([
-        #     self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server",),
-        #     self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
-        #     self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
-        #     ])
         body=HSplit([
-            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or 'c1.gluu.org', jans_help="FQN name of Jannsen Config Api Server",),
-            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '2000.2efa2c06-f711-42d6-a02c-4dcb5191669c', jans_help="Jannsen Config Api Client ID"),
-            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or 'd6yHY6lUJMgl', jans_help="Jannsen Config Api Client Secret")
+            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server"),
+            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
+            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
             ])
+
         buttons = [Button("Save", handler=self.save_creds)]
-        dialog = JansGDialog(parent=self,title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
+        dialog = JansGDialog(title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
 
         async def coroutine():
             app = get_app()
             focused_before = app.layout.current_window
             self.layout.focus(dialog)
-            result = await self.show_dialog_as_float(dialog)  
+            result = await self.show_dialog_as_float(dialog)
             try:
                 app.layout.focus(focused_before)
             except:
@@ -439,72 +407,22 @@ class JansCliApp(Application, JansAuthServer):
 
         ensure_future(coroutine())
 
-    def edit_client_dialog(self, **params):
 
-        navBar = JansSideNavBar(myparent=self,
-                                entries=list(
-                                    self.oauth_tabs['clients'].keys()),
-                                selection_changed=(
-                                    self.client_dialog_nav_selection_changed),
-                                select=0,
-                                entries_color='#2600ff')
-        selected_line_data = params['data']  ## if we want to makeuse of it
-        body = VSplit([
-            HSplit(
-                [
-                    navBar
-                ],
-                width=30
-            ),
-            Window(width=1, char="|",),
-            HSplit(
-                [
-                    DynamicContainer(
-                        lambda: self.oauth_tabs['clients'][self.oauth_dialog_nav])
-                ],width=D()),
-        ], height=32)
-        dialog = JansGDialog(parent=self,title="Edit user Data (Clients)", body=body)
+
+    def edit_client_dialog(self, **params):
+        dialog = EditClientDialog(self,**params)
         self.show_jans_dialog(dialog)
 
     def edit_scope_dialog(self, **params):
-
-        navBar = JansSideNavBar(myparent=self,
-                                entries=list(
-                                    self.oauth_tabs['clients'].keys()),
-                                selection_changed=(
-                                    self.client_dialog_nav_selection_changed),
-                                select=0,
-                                entries_color='#2600ff')
-
-        selected_line_data = params['data']  ## if we want to makeuse of it
-
-        body = VSplit([
-            HSplit(
-                [
-                    navBar
-                ],
-                width=30
-            ),
-            Window(width=1, char="|",),
-            HSplit(
-                [
-                    DynamicContainer(
-                        lambda: self.oauth_tabs['clients'][self.oauth_dialog_nav])
-                ]),
-        ], height=32)
-
-        dialog = JansGDialog(self,title="Edit Scope Data (Clients)", body=body)
+        dialog = EditScopeDialog(self,**params)
         self.show_jans_dialog(dialog)
 
     def show_message(self, title, message, buttons=[]):
         body = HSplit([Label(message)])
-        dialog = JansGDialog(parent=self,title=title, body=body, buttons=buttons)
+        dialog = JansGDialog(title=title, body=body, buttons=buttons)
         self.show_jans_dialog(dialog)
 
-    def show_again(self): ## nasted dialog Button
-        self.show_message("Again", "Nasted Dialogs",)
-
-
+  
 application = JansCliApp()
 
 def run():

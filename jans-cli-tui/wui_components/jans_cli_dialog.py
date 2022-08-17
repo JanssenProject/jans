@@ -8,35 +8,24 @@ from prompt_toolkit.layout.dimension import D
 from static import DialogResult
 from functools import partial
 class JansGDialog:
-    def __init__(self, parent, title, body, buttons=[]):
-
-        self.result = None
+    def __init__(self, title, body, buttons=[]):
         self.future = Future()
         self.body = body
+
+        if not buttons:
+            buttons = [Button(text="OK")]
 
         def do_handler(button_text, handler):
             if handler:
                 handler(self)
             self.future.set_result(button_text)
 
-        def exit_me(button):
-            if not getattr(button, 'keep_me', False):
-                parent.root_layout.floats.pop()
-            if parent.root_layout.floats:
-                parent.layout.focus(parent.root_layout.floats[-1].content)
-            else:
-                parent.layout.focus(parent.center_frame)
-
-        if not buttons:
-            buttons = [Button(text="OK")]
-
         for button in buttons:
-            button.handler = partial(do_handler, button, button.handler)
-
+            button.handler = partial(do_handler, button.text, button.handler)
 
         self.dialog = Dialog(
             title=title,
-            body=self.body,
+            body=body,
             buttons=buttons,
             width=D(preferred=80),
             modal=True,

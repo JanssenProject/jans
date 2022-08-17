@@ -106,16 +106,16 @@ class JansVerticalNav():
             for i in self.mod_data[dataline]:
                 line.append(len(i))
             datalen.append(line)
-        sp_dict  = {}
+        dict = {}
         for num in range(len(datalen[0])):
-            sp_dict [num] = []
+            dict[num] = []
 
         for k in range(len(datalen)):
             for i in range(len(datalen[k])):
-                sp_dict [i].append(datalen[k][i])
+                dict[i].append(datalen[k][i])
 
-        for i in sp_dict :
-            self.spaces.append(max(sp_dict [i]))
+        for i in dict:
+            self.spaces.append(max(dict[i]))
 
         for i in range(len(self.spaces)):                                                                               ## handel header collesion (when the headers length is greater that the tallest data index length)
 
@@ -174,7 +174,8 @@ class JansVerticalNav():
         def _(event):
             passed = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
-            self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
+            self.on_enter(passed,event,size)
+
 
         @kb.add("d")
         def _(event):
