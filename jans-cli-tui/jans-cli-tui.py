@@ -162,7 +162,6 @@ class JansCliApp(Application, JansAuthServer):
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
 
-
     def press_tab(self):
         self.keyboard.press(Key.tab)
         self.keyboard.release(Key.tab)
@@ -216,27 +215,21 @@ class JansCliApp(Application, JansAuthServer):
 
                     ensure_future(coroutine())
 
-        #if not conn_ok:
-        #    self.create_cli()
-
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
             self.jans_creds_dialog()
         else :
             self.create_cli()
 
-
     def dialog_back_but(self): ## BACK
         self.active_dialog_select = ''
         self.show_dialog = False
         self.layout.focus(self.center_frame) 
 
-
     def prapare_dialogs(self):
         self.data_show_client_dialog = Label(text='Selected Line Data as Json') 
         self.dialog_width = int(self.width*0.9) # 120 ## to be dynamic
         self.dialog_height = int(self.height*0.8) ## to be dynamic
-
 
     def focus_next(self, ev):
         focus_next(ev)
@@ -253,38 +246,85 @@ class JansCliApp(Application, JansAuthServer):
         self.bindings.add("s-tab")(self.focus_previous)
         self.bindings.add("c-c")(do_exit)
 
-    def getTitledText(self, title, name, value='', height=1, jans_help='', width=None):
+    # ----------------------------------------------------------------- #
+    def handle_long_string (self,text,values,cb):
+        lines = []
+        if len(text) > 20 :
+            title_list=text.split(' ')
+            dum = ''
+            for i in range(len(title_list)):
+                if len(dum) < 20 :
+                    if len(title_list[i] + dum) < 30 :
+                        dum+=title_list[i] +' '
+                    else :
+                        lines.append(dum.strip())
+                        dum = title_list[i] + ' '
+                else :
+                    lines.append(dum.strip())
+                    dum = title_list[i]  + ' '
+            lines.append(dum)
+            num_lines = len(lines)
+            width = len(max(lines, key=len))
+        else:
+            width = len(text)
+            lines.append(text)
+            num_lines = len(lines)
+
+
+        new_title,title_lines = '\n'.join(lines) , num_lines 
+
+
+        if title_lines <= len(values) :  ### if num of values (value lines) < = title_lines
+            lines_under_value = 0   
+        else :
+            lines_under_value = abs(title_lines-len(values))
+        
+        if lines_under_value !=0 :
+            cd = HSplit([   
+                cb,
+                Label(text=('\n')*(lines_under_value-1)) 
+            ])
+        else :
+            cd = cb     
+
+        if title_lines <= len(values) :  ### if num of values (value lines) < = title_lines
+            lines_under_title = abs(len(values) - title_lines)
+        else :
+            lines_under_title = 0   
+
+        # first one >> solved >> title
+        if lines_under_title >=1 :
+            for i in range(lines_under_title):
+                new_title +='\n' 
+        else :
+            pass
+
+        return  new_title , cd , width
+    
+    def getTitledText(self, title, name, value='', height=1, jans_help='', width=None,style=''):
         multiline = height > 1
-        ta = TextArea(text=value, multiline=multiline, style='class:textarea')
+        ta = TextArea(text=value, multiline=multiline,style="class:titledtext")
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
-        if width:
-            ta.window.width = width
-        li = title
-        for i in range(height-1):
-            li +='\n'
+        li,cd,width = self.handle_long_string(title,[1]*height,ta)
 
-        return VSplit([Label(text=li + ':', width=len(title)+1), ta], height=height, padding=1)
-
-    def getTitledCheckBox(self, title, name, values):
-        cb = CheckboxList(values=[(o,o) for o in values],)
+        return VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
+ 
+    def getTitledCheckBox(self, title, name, values,style=''):
+        cb = CheckboxList(values=[(o,o) for o in values])
         cb.window.jans_name = name
-        li = title
-        for i in range(len(values)-1):
-            li +='\n'
-        return VSplit([Label(text=li, width=len(title)+1), cb] )
+        li,cd,width = self.handle_long_string(title,values,cb)
 
-    def getTitledRadioButton(self, title, name, values):
+        return VSplit([Label(text=li, width=width,style=style,wrap_lines=False), cd])
+
+    def getTitledRadioButton(self, title, name, values,style=''):
         rl = RadioList(values=[(option, option) for option in values])
         rl.window.jans_name = name
-        li = title
-        for i in range(len(values)-1):
-            li +='\n'
+        li,rl2,width = self.handle_long_string(title,values,rl)
+        
+        return VSplit([Label(text=li, width=width,style=style), rl2],)
 
-        return VSplit([Label(text=li, width=len(title)+1), rl],
-                height=len(values)
-            )
-
+    # ----------------------------------------------------------------- #
     def getButton(self, text, name, jans_help, handler=None):
         b = Button(text=text, width=len(text)+2)
         b.window.jans_name = name
@@ -350,8 +390,6 @@ class JansCliApp(Application, JansAuthServer):
 
         ensure_future(coroutine())
         
-
-
     def data_display_dialog(self, **params):
 
         body = HSplit([
@@ -381,7 +419,6 @@ class JansCliApp(Application, JansAuthServer):
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
         config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
 
-
     def jans_creds_dialog(self, *params):
 
         body=HSplit([
@@ -407,8 +444,6 @@ class JansCliApp(Application, JansAuthServer):
 
         ensure_future(coroutine())
 
-
-
     def edit_client_dialog(self, **params):
         dialog = EditClientDialog(self,**params)
         self.show_jans_dialog(dialog)
@@ -422,7 +457,12 @@ class JansCliApp(Application, JansAuthServer):
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
         self.show_jans_dialog(dialog)
 
-  
+
+    def show_again(self): ## nasted dialog Button
+        self.show_message("Again", "Nasted Dialogs",)
+
+
+
 application = JansCliApp()
 
 def run():

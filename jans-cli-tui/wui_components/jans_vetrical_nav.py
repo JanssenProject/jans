@@ -30,8 +30,8 @@ class JansVerticalNav():
         self.mod_data = data
         self.all_data=all_data
         self.view_data()
-        self.handel_Header_spaces()
-        self.handel_Data_spaces()
+        self.handle_Header_spaces()
+        self.handle_Data_spaces()
         self.create_window()
 
     def view_data(self):
@@ -99,7 +99,7 @@ class JansVerticalNav():
             ],
         )
 
-    def handel_Header_spaces(self):
+    def handle_Header_spaces(self):
         datalen = []
         for dataline in range(len(self.mod_data )):
             line = []
@@ -117,16 +117,16 @@ class JansVerticalNav():
         for i in dict:
             self.spaces.append(max(dict[i]))
 
-        for i in range(len(self.spaces)):                                                                               ## handel header collesion (when the headers length is greater that the tallest data index length)
+        for i in range(len(self.spaces)):                                                                               ## handle header collesion (when the headers length is greater that the tallest data index length)
 
             if self.spaces[i] < len(self.headers[i]):
                 self.spaces[i] = self.spaces[i] + \
                     (len(self.headers[i]) - self.spaces[i])
 
-        self.spaces[-1] =  self.myparent.output.get_size()[1] - sum(self.spaces) + sum(len(s) for s in self.headers)    ## handel last head spaces (add space to the end of ter. width to remove the white line)
+        self.spaces[-1] =  self.myparent.output.get_size()[1] - sum(self.spaces) + sum(len(s) for s in self.headers)    ## handle last head spaces (add space to the end of ter. width to remove the white line)
     # -------------------------------------------------------------------------------- #
     # -------------------------------------------------------------------------------- #
-    def handel_Data_spaces(self):
+    def handle_Data_spaces(self):
         for i in range(len(self.mod_data)):
             for k in range(len(self.spaces)):
                 if len(self.mod_data[i][k]) != self.spaces[k]:
