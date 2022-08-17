@@ -52,7 +52,7 @@ Scenario: Fetch agama flow by name
 	Then status 200 
 	And print response
 
-	
+@ignore	
 @CreateUpdateDelete 
 Scenario: Create, update and delete agama flow
     #Create agama flow
@@ -124,7 +124,7 @@ Scenario: Create, update and delete agama flow
 	Then status 204
 	And print response
 
-
+@ignore
 @CreateFlowWithDataInRequestBodyUpdateDelete
 Scenario: Create agama flow with source data in request body
     #Create agama flow
@@ -188,7 +188,7 @@ Scenario: Create agama flow with source data in request body
 	Then status 204
 	And print response
 
-
+@ignore
 @CreateAndUpdateFlowWithDataInRequestBodyUpdateDelete
 Scenario: Create agama flow with source data in request body
     #Create agama flow
@@ -253,7 +253,7 @@ Scenario: Create agama flow with source data in request body
 	Then status 204
 	And print response
 
-	
+@ignore	
 @CreateAndPatchFlowAndDelete
 Scenario: Create and Patch agama flow
     #Create agama flow
