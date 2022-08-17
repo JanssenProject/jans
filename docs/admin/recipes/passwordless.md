@@ -1,16 +1,17 @@
-# Implement passwordless authentication using Janssen Server and Duo Security
+# Implement Two-Step Authentication Using Janssen Server and Duo Security
 
 This document will explain how to use Janssen Server Duo interception script to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. 
 
-[Duo Security](https://duo.com/) is a SaaS authentication provider that supports multifactor authetication including push-approvals, SMS-OTP etc. 
+[Duo Security](https://duo.com/) is a SaaS authentication provider that supports multifactor authetication including push-approvals, SMS-OTP etc. Duo provides web SDK via which clients like Janssen Server can integrate with Duo Security services. 
+
+![](../../assets/image-duo-integration-diagram.png)
 
 ## Prerequisites
 - An account with Duo Security  
 - User being authenticated will need to download the Duo mobile app
 - Janssen Server with [Casa integrated](../integration/casa.md) 
 
-
-## Enable Janssen Server Custom Script for Duo
+## Enable Janssen Server Interception Script for Duo
 - Go to Janssen Server installation
 - Get `duo_web` python library using commands below
 ```shell
@@ -19,7 +20,10 @@ wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/ma
 sudo systemctl restart jans-auth
 ```
 - Use `jans-cli` to enable Duo script using instructions [here](../../admin/config-guide/jans-cli/im/im-custom-scripts.md#update-custom-scripts). Set the `enabled` property for Duo script to `true`
-- Confirm that the script has been marked enabled in [CLI script listing](../../admin/config-guide/jans-cli/im/im-custom-scripts.md#get-list-of-custom-scripts)
+- Confirm that the script has been marked enabled in [CLI script listing](../../admin/config-guide/jans-cli/im/im-custom-scripts.md#get-list-of-custom-scripts). Alternatively, access Janssen Server's OpenID Connect configuration endpoint at URL below. In the response JSON, find `duo` listed under `acr_values_supported`
+  ```
+  https://jans-server-name/jans-auth/.well-known/openid-configuration
+  ```
 
 ## Configuring Duo credentials
 - In order to connect to Duo Security via web SDK, Janssen Server Duo interception script needs to be provided with credentials as below:
@@ -41,11 +45,11 @@ sudo systemctl restart jans-auth
       [Update the custom script](https://jans.io/docs/admin/config-guide/jans-cli/cli-custom-scripts/#update-an-existing-custom-script) using `jans-cli` to set values for these two properties. There are other optional properties that you can set as per the requirements. Find complete list [here](TODO)
 
 ## Install Casa Duo plugin
-Follow [these instructions](https://gluu.org/docs/casa/plugins/duo/#add-the-plugin-to-casa) to install Casa plugin 
+Follow [these instructions](https://gluu.org/docs/casa/plugins/duo/#add-the-plugin-to-casa) to install Casa Duo plugin 
 
 ## Test
 - After installing Casa Duo plugin, option to enable Duo as an authentication method would become available on Casa administration console under `Enabled Authentication Methods`.
 - Administrator can enable Duo Security as authentication method by checking the box and clicking on `Save`
-- At this point, any user can log into Casa and configure Duo as authentication method for individual's account with [these steps](https://gluu.org/docs/casa/plugins/duo/#testing)  
+- At this point, any user can log into Casa and configure Duo as authentication method for individual's account using [these steps](https://gluu.org/docs/casa/plugins/duo/#testing)  
 
 
