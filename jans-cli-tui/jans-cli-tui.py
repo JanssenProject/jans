@@ -89,7 +89,7 @@ class JansCliApp(Application, JansAuthServer):
         self.app_started = False
         self.width, self.height = get_terminal_size()
         self.app = get_app()
-        self.show_dialog = False   
+        self.show_dialog = False   ## ## ## ##
         self.set_keybindings()
         self.containers = {}
         # -------------------------------------------------------------------------------- #
