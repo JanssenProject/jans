@@ -35,7 +35,7 @@ tags:
   - name: Statistics - User
   - name: Health - Check
   - name: Server Stats
-  - name: Auth -Session Management
+  - name: Auth - Session Management
   - name: Configuration – User Management
   - name: SCIM - Config Management
   - name: Organization Configuration
@@ -2825,7 +2825,7 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/jans-auth-server/session.readonly revoke_session]
       tags:
-        - Auth -Session Management
+        - Auth - Session Management
       responses:
         '200':
           description: OK
@@ -2857,12 +2857,12 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete]
       tags:
-        - Auth -Session Management
+        - Auth - Session Management
       responses:
         '200':
           description: Ok
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
         '404':
           description: Not Found
         '500':
@@ -7524,9 +7524,8 @@ components:
         codeError:
           type: string
           description: Errors in the flow source detected by Agama transpiler
-
 		  
-  SessionId:
+    SessionId:
       title: Session details
       description: Session details
       type: object
