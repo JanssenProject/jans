@@ -45,18 +45,10 @@ public class OpenIdService implements Serializable {
         return introspectionService;
     }
 
-    public String getIntrospectionEndpoint() {
-        return configurationService.find().getIntrospectionEndpoint();
-    }
-
-    public String getTokenEndpoint() {
-        return configurationService.find().getTokenEndpoint();
-    }
-
     public IntrospectionResponse getIntrospectionResponse(String header, String token, String issuer) throws JsonProcessingException {
         log.debug("oAuth Introspection request , header:{}, token:{}, issuer:{}", header, token, issuer);
 
-        String introspectionUrl = getIntrospectionEndpoint();
+        String introspectionUrl = authUtil.getIntrospectionEndpoint();
         if (StringUtils.isNotBlank(issuer)) {
             introspectionUrl = AuthClientFactory.getIntrospectionEndpoint(issuer);
             log.trace("oAuth Issuer's introspectionUrl:{}", introspectionUrl);
@@ -67,13 +59,8 @@ public class OpenIdService implements Serializable {
     }
 
     public String requestAccessToken(final String clientId, final List<String> scope) {
-        log.info("oAuth request AccessToken - clientId:{}, scope:{} ", clientId, scope);
-        String tokenUrl = getTokenEndpoint();
-        Token token = authUtil.requestAccessToken(tokenUrl, clientId, scope);
-        log.info("oAuth AccessToken response - token:{}", token);
-        if (token != null) {
-            return token.getAccessToken();
-        }
-        return null;
+        String accessToken = authUtil.requestAccessToken(clientId, scope);
+        log.info("oAuth AccessToken response - accessToken:{}", accessToken);      
+        return accessToken;
     }
 }
