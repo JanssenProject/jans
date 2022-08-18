@@ -48,6 +48,7 @@ public class ApiApplication extends Application {
         classes.add(OrganizationResource.class);
         classes.add(SqlConfigurationResource.class);
         classes.add(AgamaResource.class);
+        classes.add(SessionResource.class);
 
         return classes;
     }

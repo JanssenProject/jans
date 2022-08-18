@@ -35,6 +35,7 @@ tags:
   - name: Statistics - User
   - name: Health - Check
   - name: Server Stats
+  - name: Auth - Session Management
   - name: Configuration – User Management
   - name: SCIM - Config Management
   - name: Organization Configuration
@@ -2815,6 +2816,57 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         '500':
           description: Internal Server Error
+		  
+  /jans-config-api/api/v1/jans-auth-server/session:
+    get:
+      summary: Returns current session.
+      description: Returns current session.
+      operationId: get-sessions
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.readonly revoke_session]
+      tags:
+        - Auth - Session Management
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Auth session
+                description: List of auth session.
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessionId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+		  
+  /jans-config-api/api/v1/jans-auth-server/session/{userDn}:
+    parameters:
+      - name: userDn
+        in: path
+        description: User domain name.
+        required: true
+        schema:
+          type: string
+    post:
+      summary: Revoke all sessions by userDn.
+      description: Revoke all sessions by userDn.
+      operationId: revoke-user-session
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete]
+      tags:
+        - Auth - Session Management
+      responses:
+        '200':
+          description: Ok
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
   
   /jans-config-api/mgt/configuser:
     get:
@@ -3698,7 +3750,8 @@ components:
             https://jans.io/oauth/config/agama.readonly: View Agama Flow related information
             https://jans.io/oauth/config/agama.write: Manage Agama Flow related information
             https://jans.io/oauth/config/agama.delete: Delete Agama Flow related information
-            
+            https://jans.io/oauth/jans-auth-server/session.readonly: View Session related information
+            https://jans.io/oauth/jans-auth-server/session.delete: Delete Session information
 
   responses:
     Found:
@@ -7471,3 +7524,69 @@ components:
         codeError:
           type: string
           description: Errors in the flow source detected by Agama transpiler
+		  
+    SessionId:
+      title: Session details
+      description: Session details
+      type: object
+      properties:
+        dn:
+          type: string
+          description: Domain name.
+        id:
+          type: string
+          description: Unique session id
+        outsideSid:
+          type: string
+          description: User session id
+        lastUsedAt:
+          description: Timestamp of session used last time.
+          type: string
+          format: date
+        userDn:
+          description: Session user domain name.
+          type: string
+        authenticationTime:
+          description: Session authentication time.
+          type: string
+          format: date
+        state:
+          description: Session status
+          type: string
+          enum:
+            - authenticated
+            - unauthenticated
+        sessionState:
+          description: state of session.
+          type: string
+        permissionGranted:
+          type: boolean
+          description: Boolean flag indicated if permission granted
+        isJwt:
+          type: boolean
+          description: Boolean flag indicated if jwt
+        jwt:
+          type: string
+          description: Jwt
+        permissionGrantedMap:
+          description: Map containing permission.
+          type: object
+          additionalProperties:
+            type: boolean	  
+        sessionAttributes:
+          description: Session attributes
+          type: object
+          additionalProperties:
+            type: string
+        expirationDate:
+          description: Expiration date.
+          type: string
+          format: date
+        deletable:
+          type: boolean
+          description: If permission is deletable
+        creationDate:
+          description: Session creation date.
+          type: string
+          format: date
+		  

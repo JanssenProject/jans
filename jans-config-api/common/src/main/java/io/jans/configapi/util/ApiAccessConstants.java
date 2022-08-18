@@ -73,5 +73,8 @@ public class ApiAccessConstants {
     public static final String AGAMA_WRITE_ACCESS = "https://jans.io/oauth/config/agama.write";
     public static final String AGAMA_DELETE_ACCESS = "https://jans.io/oauth/config/agama.delete";
 
+    public static final String JANS_AUTH_SESSION_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/session.readonly";
+    public static final String JANS_AUTH_SESSION_DELETE_ACCESS = "https://jans.io/oauth/jans-auth-server/session.delete";
+    public static final String JANS_AUTH_REVOKE_SESSION  = "revoke_session";
 
 }
