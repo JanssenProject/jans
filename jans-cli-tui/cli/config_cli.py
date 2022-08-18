@@ -36,7 +36,6 @@ config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
-from pylib.tabulate.tabulate import tabulate
 try:
     import jwt
 except ModuleNotFoundError:
