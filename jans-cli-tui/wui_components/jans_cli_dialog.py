@@ -7,6 +7,8 @@ from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
 from static import DialogResult
 from functools import partial
+
+
 class JansGDialog:
     def __init__(self, parent, title, body, buttons=[]):
         self.future = Future()

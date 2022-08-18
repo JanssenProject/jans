@@ -22,14 +22,15 @@ from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     VerticalAlign,
+    HorizontalAlign,
     DynamicContainer,
     FloatContainer,
-    Window
+    Window,
+    FormattedTextControl
 )
-from prompt_toolkit.layout.containers import VerticalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.layout import Layout
-from prompt_toolkit.lexers import PygmentsLexer ,DynamicLexer
+from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.widgets import (
     Box,
     Button,
@@ -507,6 +508,11 @@ class JansCliApp(Application, JansAuthServer):
         self.show_message("Again", "Nasted Dialogs",)
 
 
+    def get_confirm_dialog(self, message):
+        body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
+        buttons = [Button("No"), Button("Yes")]
+        dialog = JansGDialog(self, title="Confirmation", body=body, buttons=buttons)
+        return dialog
 
 application = JansCliApp()
 

@@ -152,6 +152,7 @@ class JansAuthServer:
             data=data,
             on_enter=self.edit_client_dialog,
             on_display=self.data_display_dialog,
+            on_delete=self.delete_client,
             # selection_changed=self.data_selection_changed,
             selectes=0,
             headerColor='green',
@@ -272,4 +273,29 @@ class JansAuthServer:
         dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)
         result = self.show_jans_dialog(dialog)
 
+    def delete_client(self, selected, event):
 
+        dialog = self.get_confirm_dialog("Are you sure want to delete client inum:\n {} ?".format(selected[0]))
+
+        async def coroutine():
+            app = get_app()
+            focused_before = app.layout.current_window
+            self.layout.focus(dialog)
+            result = await self.show_dialog_as_float(dialog)
+            try:
+                app.layout.focus(focused_before)
+            except:
+                app.layout.focus(self.center_frame)
+
+            if result.lower() == 'yes':
+                result = self.cli_object.process_command_by_id(
+                    operation_id='delete-oauth-openid-clients-by-inum',
+                    url_suffix='inum:{}'.format(selected[0]),
+                    endpoint_args='',
+                    data_fn='',
+                    data={}
+                )
+                self.oauth_get_clients()
+            return result
+
+        ensure_future(coroutine())
