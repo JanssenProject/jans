@@ -23,9 +23,11 @@ from prompt_toolkit.layout.containers import (
     VSplit,
     VerticalAlign,
     DynamicContainer,
+    HorizontalAlign,
     FloatContainer,
-    Window
-)
+    Window,
+    FormattedTextControl
+    )
 from prompt_toolkit.layout.containers import VerticalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.layout import Layout
@@ -87,6 +89,7 @@ def accept_no():
 
 def do_exit(*c):
     get_app().exit(result=False)
+
 
 
 class JansCliApp(Application, JansAuthServer):
@@ -290,9 +293,12 @@ class JansCliApp(Application, JansAuthServer):
         self.bindings.add("tab")(self.focus_next)
         self.bindings.add("s-tab")(self.focus_previous)
         self.bindings.add("c-c")(do_exit)
+        self.bindings.add("f1")(self.help)
 
     # ----------------------------------------------------------------- #
-    
+    def help(self,ev):
+        self.show_message("Help",'''<Enter> Edit current selection\n<j> Display current item in JSON format\n<d> Delete current selection''')
+
     def handle_long_string (self,text,values,cb):
         lines = []
         if len(text) > 20 :
@@ -350,7 +356,9 @@ class JansCliApp(Application, JansAuthServer):
     def getTitledText(self, title, name, value='', height=1, jans_help='', width=None,style=''):
         title += ': '
         multiline = height > 1
-        ta = TextArea(text=value, multiline=multiline,style="class:titledtext")
+        ## I added Str() because the value sometime is int like > Acess token life time
+        ## Error is raised
+        ta = TextArea(text=str(value), multiline=multiline,style="class:titledtext")
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
         ta.window.me = ta
@@ -506,7 +514,11 @@ class JansCliApp(Application, JansAuthServer):
     def show_again(self): ## nasted dialog Button
         self.show_message("Again", "Nasted Dialogs",)
 
-
+    def get_confirm_dialog(self, message):
+        body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
+        buttons = [Button("No"), Button("Yes")]
+        dialog = JansGDialog(self, title="Confirmation", body=body, buttons=buttons)
+        return dialog
 
 application = JansCliApp()
 

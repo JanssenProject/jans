@@ -13,8 +13,8 @@ from prompt_toolkit.layout.dimension import D
 
 class JansVerticalNav():
 
-    def __init__(self, myparent, headers, selectes, on_enter, on_display, 
-                all_data=None, preferred_size=[],data=None, headerColor='green', entriesColor='white'):
+    def __init__(self, myparent, headers, selectes, on_enter, on_display, on_delete=None,
+                all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white'):
 
         self.myparent = myparent            # ListBox parent class
         self.headers = headers              # ListBox headers
@@ -25,6 +25,7 @@ class JansVerticalNav():
         self.entriesColor = entriesColor
         self.spaces = []
         self.on_enter = on_enter
+        self.on_delete = on_delete
         self.on_display = on_display
         self.mod_data = data
         self.all_data=all_data
@@ -176,7 +177,7 @@ class JansVerticalNav():
             self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
 
 
-        @kb.add("d")
+        @kb.add("j")
         def _(event):
             selected_line = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
@@ -187,8 +188,16 @@ class JansVerticalNav():
                 size=size, 
                 data=self.all_data[self.selectes])
 
-        return kb
 
+        @kb.add("d")
+        def _(event):
+            if self.on_delete:
+                selected_line = [i.strip() for i in self.data[self.selectes]]
+                self.on_delete(
+                    selected=selected_line, 
+                    event=event)
+
+        return kb
     # -------------------------------------------------------------------------------- #
     # -------------------------------------------------------------------------------- #
 
