@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.as.client.service.StatService;
 import io.jans.as.client.JwkResponse;
+import io.jans.as.client.RevokeSessionResponse;
+import io.jans.as.client.RevokeSessionRequest;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.service.IntrospectionService;
@@ -45,7 +47,6 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class AuthClientFactory {
 
-
     private static final String CONTENT_TYPE = "Content-Type";
 
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
@@ -55,7 +56,7 @@ public class AuthClientFactory {
     }
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
-                                                                 boolean followRedirects) {
+            boolean followRedirects) {
         log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
                 followRedirects);
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient()
@@ -64,13 +65,14 @@ public class AuthClientFactory {
         return proxy.introspectToken(header, token);
     }
 
-    public static JsonNode getStatResponse(String url, String token, String month, String startMonth, String endMonth, String format) {
+    public static JsonNode getStatResponse(String url, String token, String month, String startMonth, String endMonth,
+            String format) {
         if (log.isDebugEnabled()) {
-            log.debug("Stat Response Token - url:{}, token:{}, month:{}, startMonth:{}, endMonth:{}, format:{} ", escapeLog(url), escapeLog(token),
-                    escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
+            log.debug("Stat Response Token - url:{}, token:{}, month:{}, startMonth:{}, endMonth:{}, format:{} ",
+                    escapeLog(url), escapeLog(token), escapeLog(month), escapeLog(startMonth), escapeLog(endMonth),
+                    escapeLog(format));
         }
-        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient()
-                .target(url);
+        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient().target(url);
         StatService statService = webTarget.proxy(StatService.class);
         return statService.stat(token, month, startMonth, endMonth, format);
     }
@@ -89,7 +91,7 @@ public class AuthClientFactory {
     }
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
-                                                   final String clientSecret, final String scope) {
+            final String clientSecret, final String scope) {
         log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
@@ -140,8 +142,7 @@ public class AuthClientFactory {
         ApacheHttpClient43Engine engine = null;
         try {
             engine = ClientFactoryUtil.createEngine(followRedirects);
-            ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder
-                    .newClient().target(url);
+            ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder.newClient().target(url);
             return resteasyWebTarget.proxy(IntrospectionService.class);
         } finally {
             if (engine != null) {
@@ -189,6 +190,35 @@ public class AuthClientFactory {
         return null;
     }
 
+    public static RevokeSessionResponse revokeSession(String url, String token, String userId) {
+        log.debug("Request for Access Token -  url:{}, token:{}, userId:{} ", url,
+                token, userId);
+        Response response = null;
+        try {
+            RevokeSessionRequest revokeSessionRequest = new RevokeSessionRequest("uid", "test");
+         
+            Builder request = getClientBuilder(url);
+            request.header("Authorization", "Basic " + token);
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
+                    revokeSessionRequest.getParameters());
+            response = request.post(Entity.form(multivaluedHashMap));
+            log.trace("Response for Access Token -  response:{}", response);
+            if (response.getStatus() == 200) {
+                String entity = response.readEntity(String.class);
+                RevokeSessionResponse revokeSessionResponse = new RevokeSessionResponse();
+                revokeSessionResponse.setEntity(entity);
+                revokeSessionResponse.injectDataFromJson(entity);
+                return revokeSessionResponse;
+            }
+        } finally {
+
+            if (response != null) {
+                response.close();
+            }
+        }
+        return null;
+    }
 
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
