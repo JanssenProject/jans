@@ -583,22 +583,23 @@ class JCA_CLI:
         if hasattr(e, 'body'):
             try:
                 jsdata = json.loads(e.body.decode())
-                print(self.colored_text(e.body.decode(), error_color))
+                self.raise_error(e.body.decode())
                 error_printed = True
             except:
                 pass
         if not error_printed:
-            print(self.colored_text("Error retreiving data", warning_color))
-            print('\u001b[38;5;196m')
+            msg = "Error retreiving data: "
+            err = 'None'
             if isinstance(e, str):
-                print(e)
+                err = e
             if hasattr(e, 'reason'):
-                print(e.reason)
+                err = e.reason
             if hasattr(e, 'body'):
-                print(e.body)
+                err = e.body
             if hasattr(e, 'args'):
-                print(', '.join(e.args))
-            print('\u001b[0m')
+                err = ', '.join(e.args)
+
+            self.raise_error(msg + str(err))
 
     def colored_text(self, text, color=255):
         return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
@@ -934,6 +935,10 @@ class JCA_CLI:
             cert=self.mtls_client_cert
         )
         self.log_response(response)
+        
+        if self.wrapped:
+            return response
+        
         if response.status_code in (404, 401):
             print(self.colored_text("Server returned {}".format(response.status_code), error_color))
             print(self.colored_text(response.text, error_color))
@@ -988,6 +993,9 @@ class JCA_CLI:
 
         return schema_
 
+    def get_mime_for_endpoint(self, endpoint, req='requestBody'):
+        for key in endpoint.info[req]['content']:
+            return key
 
     def post_requests(self, endpoint, data):
         url = 'https://{}{}'.format(self.host, endpoint.path)
@@ -1003,12 +1011,16 @@ class JCA_CLI:
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
             )
+
         self.log_response(response)
+
+        if self.wrapped:
+            return response
 
         try:
             return response.json()
         except:
-            self.print_exception(response.text)
+            print(response.text)
 
 
     def delete_requests(self, endpoint, url_param_dict):
@@ -1230,6 +1242,9 @@ class JCA_CLI:
             response = self.post_requests(endpoint, data)
         elif path['__method__'] == 'put':
             response = self.put_requests(endpoint, data)
+
+        if self.wrapped:
+            return response
 
         self.print_response(response)
 

@@ -115,46 +115,57 @@ class JansAuthServer:
         self.center_container = self.oauth_main_container
 
     def oauth_update_clients(self):
+
         try :
-            result = self.cli_object.process_command_by_id('get-oauth-openid-clients', '', 'limit:10', {})
+            rsponse = self.cli_object.process_command_by_id('get-oauth-openid-clients', '', 'limit:10', {})
+        except Exception as e:
+            self.show_message("Error getting clients", str(e))
+            return
+
+        if rsponse.status_code not in (200, 201):
+            self.show_message("Error getting clients", str(rsponse.text))
+            return
+
+        try:
+            result = rsponse.json()
+        except Exception:
+            self.show_message("Error getting clients", str(rsponse.text))
+            return
 
 
-            data =[]
+        data =[]
 
-            for d in result: 
-                data.append(
-                    [
-                    d['inum'],
-                    d['clientName']['values'][''],
-                    ','.join(d['grantTypes']),
-                    d['subjectType'] 
-                    ]
-                )
-
-            clients = JansVerticalNav(
-                myparent=self,
-                headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
-                preferred_size= [0,0,30,0],
-                data=data,
-                on_enter=self.edit_client_dialog,
-                on_display=self.data_display_dialog,
-                # selection_changed=self.data_selection_changed,
-                selectes=0,
-                headerColor='green',
-                entriesColor='white',
-                all_data=result
+        for d in result:
+            data.append(
+                [
+                d['inum'],
+                d.get('clientName', {}).get('values', {}).get('', ''),
+                ','.join(d.get('grantTypes', [])),
+                d.get('subjectType', '') 
+                ]
             )
 
-            self.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
-            self.oauth_data_container['clients'] = HSplit([
-                clients
-            ])
+        clients = JansVerticalNav(
+            myparent=self,
+            headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
+            preferred_size= [0,0,30,0],
+            data=data,
+            on_enter=self.edit_client_dialog,
+            on_display=self.data_display_dialog,
+            # selection_changed=self.data_selection_changed,
+            selectes=0,
+            headerColor='green',
+            entriesColor='white',
+            all_data=result
+        )
 
-            get_app().invalidate()
+        self.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
+        self.oauth_data_container['clients'] = HSplit([
+            clients
+        ])
 
-        except Exception as e:
-            self.oauth_data_container['clients'] = HSplit([Label("Faild to Fitch client Data.. Reason: " + str(e))], width=D())
-            get_app().invalidate()
+        get_app().invalidate()
+
 
     def oauth_get_clients(self):
         self.oauth_data_container['clients'] = HSplit([Label("Please wait while getting clients")], width=D())
@@ -164,9 +175,7 @@ class JansAuthServer:
     def update_oauth_scopes(self, start_index=0):
         try :
             result = self.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
-
             data =[]
-            
             for d in result: 
                 data.append(
                     [
@@ -248,8 +257,16 @@ class JansAuthServer:
                 data[list_key] = data[list_key].splitlines()
 
         self.logger.debug(str(data))
-
-        return False
+        response = self.cli_object.process_command_by_id(
+            operation_id='post-oauth-openid-clients',
+            url_suffix='',
+            endpoint_args='',
+            data_fn='',
+            data=data
+        )
+        if response.status_code in (200, 201):
+            self.oauth_get_clients()
+            return True
 
     def add_client(self):
         dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)
