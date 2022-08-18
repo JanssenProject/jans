@@ -24,6 +24,7 @@ import io.jans.orm.service.BaseFactoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.couchbase.client.core.env.SecurityConfig;
 import com.couchbase.client.java.env.ClusterEnvironment;
 
 import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
@@ -69,7 +70,14 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
             String sslTrustStorePin = couchbaseConnectionProperties.getProperty("ssl.trustStore.pin");
             Optional<String> sslTrustStoreType = Optional.ofNullable(couchbaseConnectionProperties.getProperty("ssl.trustStore.type"));
 
-            clusterEnvironmentBuilder.securityConfig().enableTls(true).trustStore(FileSystems.getDefault().getPath(sslTrustStoreFile), sslTrustStorePin, sslTrustStoreType);
+            SecurityConfig.Builder securityConfigBuilder = clusterEnvironmentBuilder.securityConfig();
+
+            boolean enableTLS = Boolean.valueOf(couchbaseConnectionProperties.getProperty("tls.enable")).booleanValue();
+            if (enableTLS) {
+            	securityConfigBuilder.enableTls(enableTLS);
+            }
+
+            securityConfigBuilder.trustStore(FileSystems.getDefault().getPath(sslTrustStoreFile), sslTrustStorePin, sslTrustStoreType);
         	LOG.info("Configuring builder to enable SSL support");
         } else {
         	clusterEnvironmentBuilder.securityConfig().enableTls(false);
