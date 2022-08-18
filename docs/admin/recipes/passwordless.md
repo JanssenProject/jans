@@ -1,8 +1,8 @@
 # Implement Two-Step Authentication Using Janssen Server and Duo Security
 
-This document will explain how to use Janssen Server Duo interception script to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. 
+This document explains how to use Janssen Server Duo interception script to configure a two-step authentication process with username and password as the first step, and Duo as the second step. 
 
-[Duo Security](https://duo.com/) is a SaaS authentication provider that supports multi-factor authentication including push-approvals, SMS-OTP etc. Duo provides web SDK via which clients like Janssen Server can integrate with Duo Security services. 
+[Duo Security](https://duo.com/) is a SaaS authentication provider that supports multi-factor authentication including push-approvals, passcode, SMS-OTP etc. Duo provides web SDK via which clients like Janssen Server can integrate with Duo Security services. 
 
 ![](../../assets/image-duo-integration-diagram.png)
 
@@ -53,6 +53,7 @@ Change the default authentication method to `duo` using Jans-CLI by following [t
 ## Test
 - After installing Casa Duo plugin, option to enable Duo as an authentication method would become available on Casa administration console under `Enabled Authentication Methods`.
 - Administrator can enable Duo Security as authentication method by checking the box and clicking on `Save`
-- At this point, any user can log into Casa and configure Duo as authentication method for individual's account using [these steps](https://gluu.org/docs/casa/plugins/duo/#testing)  
+- At this point, any user can log into Casa and configure Duo as authentication method for individual's account using [these steps](https://gluu.org/docs/casa/plugins/duo/#testing)
+- During the next login attempt, user will be first presented with login/password authentication, if successful, Duo authentication screen will be presented.
 
 
