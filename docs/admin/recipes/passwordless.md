@@ -47,6 +47,9 @@ sudo systemctl restart jans-auth
 ## Install Casa Duo plugin
 Follow [these instructions](https://gluu.org/docs/casa/plugins/duo/#add-the-plugin-to-casa) to install Casa Duo plugin 
 
+## Make Duo Default Authentication Method
+Change the default authentication method to `duo` using Jans-CLI by following [these](../config-guide/jans-cli/cli-default-authentication-method.md#update-default-authentication-method) steps.   
+
 ## Test
 - After installing Casa Duo plugin, option to enable Duo as an authentication method would become available on Casa administration console under `Enabled Authentication Methods`.
 - Administrator can enable Duo Security as authentication method by checking the box and clicking on `Save`
