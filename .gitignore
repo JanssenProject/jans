@@ -148,3 +148,7 @@ PyCharm
 .DS_STORE
 tmp
 /.metadata/
+
+# DBeaver
+credentials-config.json
+data-sources.json
