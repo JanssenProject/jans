@@ -229,8 +229,8 @@ class JansAuthServer:
 
     def save_client(self, dialog):
         data = {}
-        for tab in dialog.oauth_tabs:
-            for item in dialog.oauth_tabs[tab].children:
+        for tab in dialog.tabs:
+            for item in dialog.tabs[tab].children:
                 if hasattr(item, 'children') and hasattr(item.children[1], 'jans_name'):
                     key_ = item.children[1].jans_name
                     if isinstance(item.children[1].me, prompt_toolkit.widgets.base.TextArea):
@@ -248,6 +248,8 @@ class JansAuthServer:
                 data[list_key] = data[list_key].splitlines()
 
         self.logger.debug(str(data))
+
+        return False
 
     def add_client(self):
         dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)

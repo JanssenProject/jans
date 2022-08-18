@@ -53,23 +53,25 @@ class EditClientDialog(JansGDialog):
         self.prepare_tabs()
 
         def save():
+            close_me = True
             if save_handler:
-                self.save_handler(self)
-            self.future.set_result(DialogResult.ACCEPT)
+                close_me = self.save_handler(self)
+            if close_me:
+                self.future.set_result(DialogResult.ACCEPT)
 
         def cancel():
             self.future.set_result(DialogResult.CANCEL)
 
-        self.side_NavBar = JansSideNavBar(myparent=self.myparent,
-            entries=list(self.oauth_tabs.keys()),
+        self.side_nav_bar = JansSideNavBar(myparent=self.myparent,
+            entries=list(self.tabs.keys()),
             selection_changed=(self.client_dialog_nav_selection_changed) ,
             select=0,
             entries_color='#2600ff')
 
         self.dialog = JansDialogWithNav(
             title=title,
-            navbar=DynamicContainer(lambda:self.side_NavBar),
-            content=DynamicContainer(lambda: self.oauth_tabs[self.oauth_dialog_nav]),
+            navbar=DynamicContainer(lambda:self.side_nav_bar),
+            content=DynamicContainer(lambda: self.tabs[self.left_nav]),
              button_functions=[
                 (save, "Save"),
                 (cancel, "Cancel")
@@ -79,10 +81,10 @@ class EditClientDialog(JansGDialog):
                    )
 
     def prepare_tabs(self):
-        self.oauth_tabs = {}
-        self.oauth_tabs = OrderedDict()
 
-        self.oauth_tabs['Basic'] = HSplit([
+        self.tabs = OrderedDict()
+
+        self.tabs['Basic'] = HSplit([
                         self.myparent.getTitledText(title ="Client_ID", name='inum', value=self.data.get('inum',''), style='green'),
                         self.myparent.getTitledCheckBox("Active", name='disabled', checked= not self.data.get('disabled'), style='green'),
                         self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), style='green'),
@@ -102,11 +104,11 @@ class EditClientDialog(JansGDialog):
                     )
 
 
-        self.oauth_dialog_nav = list(self.oauth_tabs.keys())[0]
+        self.left_nav = list(self.tabs.keys())[0]
 
 
     def client_dialog_nav_selection_changed(self, selection):
-        self.oauth_dialog_nav = selection
+        self.left_nav = selection
 
     def __pt_container__(self):
         return self.dialog
