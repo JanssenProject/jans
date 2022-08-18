@@ -518,7 +518,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 	
 	            StringBuilder query = null;
 	            int currentLimit;
-	            int lastResultCount = 0;
+	            int lastCountRows = 0;
 	            try {
 	                List<JsonObject> lastSearchResultList;
 					do {
@@ -539,26 +539,26 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 	    	            }
 	
 	                    lastSearchResultList = lastResult.rowsAsObject();
-		                lastResultCount = lastSearchResultList.size();
+		                lastCountRows = lastSearchResultList.size();
 
 	                    if (batchOperation != null) {
-	                        collectSearchResult = batchOperation.collectSearchResult(lastResultCount);
+	                        collectSearchResult = batchOperation.collectSearchResult(lastCountRows);
 	                    }
 	                    if (collectSearchResult) {
 	                        searchResultList.addAll(lastSearchResultList);
 	                    }
 	
-	                    if ((batchOperation != null) && (lastResultCount > 0)) {
+	                    if ((batchOperation != null) && (lastCountRows > 0)) {
 	                        List<O> entries = batchOperationWraper.createEntities(lastSearchResultList);
 	                        batchOperation.performAction(entries);
 	                    }
 	
-	                    totalEntriesCount += lastResultCount;
+	                    totalEntriesCount += lastCountRows;
 	
-	                    if ((count > 0) && (totalEntriesCount >= count)) {
+	                    if ((count > 0) && (totalEntriesCount >= count) || (lastCountRows < currentLimit)) {
 	                        break;
 	                    }
-	                } while (lastResultCount > 0);
+	                } while (lastCountRows > 0);
 	            } catch (CouchbaseException ex) {
 	                throw new SearchException("Failed to search entries. Query: '" + query + "'", ex);
 	            }
