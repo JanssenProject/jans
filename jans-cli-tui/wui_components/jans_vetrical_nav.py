@@ -1,9 +1,5 @@
 from prompt_toolkit.widgets import TextArea
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    Window,
-    FloatContainer,
-)
+from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.formatted_text import merge_formatted_text
@@ -30,16 +26,14 @@ class JansVerticalNav():
         self.mod_data = data
         self.all_data=all_data
         self.view_data()
-        self.handle_Header_spaces()
-        self.handle_Data_spaces()
+        self.handle_header_spaces()
+        self.handle_data_spaces()
         self.create_window()
 
     def view_data(self):
         result = []
-        # mod_data = []
         for i, entry in enumerate(self.mod_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
             mod_entry = []
-                   
             for col in range(len(entry)) :
                 if self.preferred_size[col] == 0:
                     mod_entry.append(entry[col])
@@ -54,16 +48,6 @@ class JansVerticalNav():
         self.mod_data = result
 
     def create_window(self):
-        self.ClientID = TextArea(height=1, multiline=False)
-        self.ClientName = TextArea(height=1, multiline=False)
-        self.GrantType = TextArea(height=1, multiline=False)
-        self.AccessToken = TextArea(height=1, multiline=False)
-        self.Helper = TextArea(height=1, multiline=False, focusable=False)
-
-        if self.data == None:
-            self.data = [['No Cliend ID', 'No Client Name',
-                          'No Grant Type', 'No Access Token']]
-
 
         self.container = FloatContainer(
             content=HSplit([
@@ -99,23 +83,23 @@ class JansVerticalNav():
             ],
         )
 
-    def handle_Header_spaces(self):
+    def handle_header_spaces(self):
         datalen = []
         for dataline in range(len(self.mod_data )):
             line = []
             for i in self.mod_data[dataline]:
                 line.append(len(i))
             datalen.append(line)
-        dict = {}
+        tmp_dict = {}
         for num in range(len(datalen[0])):
-            dict[num] = []
+            tmp_dict[num] = []
 
         for k in range(len(datalen)):
             for i in range(len(datalen[k])):
-                dict[i].append(datalen[k][i])
+                tmp_dict[i].append(datalen[k][i])
 
-        for i in dict:
-            self.spaces.append(max(dict[i]))
+        for i in tmp_dict:
+            self.spaces.append(max(tmp_dict[i]))
 
         for i in range(len(self.spaces)):                                                                               ## handle header collesion (when the headers length is greater that the tallest data index length)
 
@@ -126,7 +110,7 @@ class JansVerticalNav():
         self.spaces[-1] =  self.myparent.output.get_size()[1] - sum(self.spaces) + sum(len(s) for s in self.headers)    ## handle last head spaces (add space to the end of ter. width to remove the white line)
     # -------------------------------------------------------------------------------- #
     # -------------------------------------------------------------------------------- #
-    def handle_Data_spaces(self):
+    def handle_data_spaces(self):
         for i in range(len(self.mod_data)):
             for k in range(len(self.spaces)):
                 if len(self.mod_data[i][k]) != self.spaces[k]:
@@ -153,7 +137,7 @@ class JansVerticalNav():
                 result.append([("[SetCursorPosition]", "")])
             
             result.append('     '.join(entry))
-            result.append("\n")             
+            result.append("\n")
 
         return merge_formatted_text(result)
     
@@ -198,6 +182,7 @@ class JansVerticalNav():
                     event=event)
 
         return kb
+
     # -------------------------------------------------------------------------------- #
     # -------------------------------------------------------------------------------- #
 

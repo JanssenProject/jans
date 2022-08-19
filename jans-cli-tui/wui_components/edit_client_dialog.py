@@ -42,8 +42,7 @@ from prompt_toolkit.widgets import (
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
-import yaml
-
+from wui_components.jans_drop_down import DropDownWidget
 
 class EditClientDialog(JansGDialog):
     def __init__(self, parent, title, data, buttons=[], save_handler=None):
@@ -163,8 +162,10 @@ class EditClientDialog(JansGDialog):
                         self.myparent.getTitledRadioButton("PRT token type", name='applicationType!', values=['JWT', 'Reference'], current_value=self.data.get('applicationType!'),style='green'),
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
                         
-                        Label(text="dropdown1",style='blue'),  ## TODO with Jans VerticalNav  
-                        Label(text="dropdown2",style='blue'),  ## TODO with Jans VerticalNav  
+                        DropDownWidget(entries=['Item1','Item2','Item3','Item4']),
+                        DropDownWidget(entries=['Item11','Item22','Item33','Item44']),
+                        # Label(text="dropdown1",style='blue'),  ## TODO with Jans VerticalNav  
+                        # Label(text="dropdown2",style='blue'),  ## TODO with Jans VerticalNav  
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
               
                         ]

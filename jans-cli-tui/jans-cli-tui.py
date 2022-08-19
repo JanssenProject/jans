@@ -11,27 +11,29 @@ from asyncio import Future, ensure_future
 from pynput.keyboard import Key, Controller
 
 import prompt_toolkit
+from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.application import Application
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import Float, HSplit, VSplit
+from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+
 from prompt_toolkit.layout.containers import (
     ConditionalContainer,
     Float,
     HSplit,
     VSplit,
     VerticalAlign,
-    DynamicContainer,
     HorizontalAlign,
+    DynamicContainer,
     FloatContainer,
     Window,
     FormattedTextControl
-    )
-from prompt_toolkit.layout.containers import VerticalAlign
+)
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.layout import Layout
-from prompt_toolkit.lexers import PygmentsLexer ,DynamicLexer
+from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.widgets import (
     Box,
     Button,
@@ -91,7 +93,6 @@ def do_exit(*c):
     get_app().exit(result=False)
 
 
-
 class JansCliApp(Application, JansAuthServer):
 
     def __init__(self):
@@ -145,7 +146,7 @@ class JansCliApp(Application, JansAuthServer):
                         HSplit([
                                 Frame(self.nav_bar.nav_window),
                                 self.center_frame,
-                                self.status_bar
+                                self.status_bar,
                                     ],
                                 ),
                         floats=[]
@@ -293,12 +294,9 @@ class JansCliApp(Application, JansAuthServer):
         self.bindings.add("tab")(self.focus_next)
         self.bindings.add("s-tab")(self.focus_previous)
         self.bindings.add("c-c")(do_exit)
-        self.bindings.add("f1")(self.help)
 
     # ----------------------------------------------------------------- #
-    def help(self,ev):
-        self.show_message("Help",'''<Enter> Edit current selection\n<j> Display current item in JSON format\n<d> Delete current selection''')
-
+    
     def handle_long_string (self,text,values,cb):
         lines = []
         if len(text) > 20 :
@@ -356,8 +354,6 @@ class JansCliApp(Application, JansAuthServer):
     def getTitledText(self, title, name, value='', height=1, jans_help='', width=None,style=''):
         title += ': '
         multiline = height > 1
-        ## I added Str() because the value sometime is int like > Acess token life time
-        ## Error is raised
         ta = TextArea(text=str(value), multiline=multiline,style="class:titledtext")
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
@@ -513,6 +509,7 @@ class JansCliApp(Application, JansAuthServer):
 
     def show_again(self): ## nasted dialog Button
         self.show_message("Again", "Nasted Dialogs",)
+
 
     def get_confirm_dialog(self, message):
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)

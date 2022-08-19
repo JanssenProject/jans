@@ -42,10 +42,10 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.edit_client_dialog import EditClientDialog
+from wui_components.jans_drop_down import DropDownWidget
 
 
 class JansAuthServer:
-
 
     def initialize(self):
         self.oauth_containers = {}
@@ -79,7 +79,7 @@ class JansAuthServer:
                     VSplit([
                         self.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
                         self.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search'),
-                        self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client)
+                        self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client),
                         ],
                         padding=3,
                         width=D(),
@@ -153,6 +153,7 @@ class JansAuthServer:
             on_enter=self.edit_client_dialog,
             on_display=self.data_display_dialog,
             on_delete=self.delete_client,
+            # selection_changed=self.data_selection_changed,
             selectes=0,
             headerColor='green',
             entriesColor='white',

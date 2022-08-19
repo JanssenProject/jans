@@ -43,7 +43,7 @@ result = cli_object.process_command_by_id(
         data_fn='',
         data=client_data
         )
-"""
+
 
 result = cli_object.process_command_by_id(
         operation_id='delete-oauth-openid-clients-by-inum',
@@ -52,7 +52,14 @@ result = cli_object.process_command_by_id(
         data_fn='',
         data={}
         )
-
+"""
+result = cli_object.process_command_by_id(
+        operation_id='get-oauth-openid-clients',
+        url_suffix='',
+        endpoint_args='',
+        data_fn='',
+        data={}
+        )
 
 
 
