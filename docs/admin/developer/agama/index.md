@@ -1,6 +1,11 @@
 # Agama introduction
 
+
+## Overview
+
 Agama is a component of the Janssen authentication server that offers an alternative way to build web-based authentication flows. Typically, person authentication flows are defined in the server by means of jython scripts that adhere to a predefined API. With Agama, flows are coded using a DSL (domain specific language) designed for the sole purpose of writing web flows. 
+
+![image of agama token](../../../assets/agama-token.png)
 
 !!! Important
     Here, a web flow is understood as a process composed by one or more stages, where at each stage an actor - normally a person - provides some kind of data or response by using a web browser or similar client. Throughout the process only a single actor is involved
@@ -11,7 +16,7 @@ Some of the advantages of using Agama include:
 1. Flow composition is supported out-of-the-box: reuse of an existing flow in another requires no effort
 1. Reasoning about flows behavior is straightforward (as consequence of points 1 and 2). This makes flow modifications easy
 1. Small cognitive load. Agama DSL is a very small language with simple, non-distracting syntax
-1. Fiendly UI templating engine. No complexities when authoring web pages - stay focused on writing HTML markup
+1. Friendly UI templating engine. No complexities when authoring web pages - stay focused on writing HTML markup
 
 ## Scope and intended audience
 
