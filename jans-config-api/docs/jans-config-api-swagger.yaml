@@ -2367,6 +2367,7 @@ paths:
         name: inum
         in: path
         required: true
+        
     get:
       tags:
         - OAuth - Scopes
