@@ -294,7 +294,11 @@ class JansCliApp(Application, JansAuthServer):
         self.bindings.add("tab")(self.focus_next)
         self.bindings.add("s-tab")(self.focus_previous)
         self.bindings.add("c-c")(do_exit)
+        self.bindings.add("f1")(self.help)
 
+    # ----------------------------------------------------------------- #
+    def help(self,ev):
+        self.show_message("Help",'''<Enter> Edit current selection\n<j> Display current item in JSON format\n<d> Delete current selection''')
     # ----------------------------------------------------------------- #
     
     def handle_long_string (self,text,values,cb):
