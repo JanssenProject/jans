@@ -319,7 +319,12 @@ It looks like this:
 |1       |2      |3     |4        |
 |Word    |Code   |Text  |Table    |
 
+### Help On Technical Writing
 
+It is essential for everyone in the community to actively participate in the documentation. At the same time, not everyone is formally trained or experienced in writing technical documents. To help everyone understand the basics of good technical writing, we have listed a few resources below. Going through these resources will not take a lot of time and will help in writing better technical documents.
+
+- [Introduction to Technical Writing (part-1)](https://developers.google.com/tech-writing/one)
+- [Introduction to Technical Writing (part-2)](https://developers.google.com/tech-writing/two)
 
 # Contribution Workflow
 
