@@ -137,7 +137,7 @@ class JansVerticalNav():
                 result.append([("[SetCursorPosition]", "")])
             
             result.append('     '.join(entry))
-            result.append("\n")             
+            result.append("\n")
 
         return merge_formatted_text(result)
     

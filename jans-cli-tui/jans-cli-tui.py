@@ -11,11 +11,14 @@ from asyncio import Future, ensure_future
 from pynput.keyboard import Key, Controller
 
 import prompt_toolkit
+from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.application import Application
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import Float, HSplit, VSplit
+from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+
 from prompt_toolkit.layout.containers import (
     ConditionalContainer,
     Float,
@@ -143,7 +146,7 @@ class JansCliApp(Application, JansAuthServer):
                         HSplit([
                                 Frame(self.nav_bar.nav_window),
                                 self.center_frame,
-                                self.status_bar
+                                self.status_bar,
                                     ],
                                 ),
                         floats=[]
