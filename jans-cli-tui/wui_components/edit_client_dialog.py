@@ -89,7 +89,7 @@ class EditClientDialog(JansGDialog):
                         self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), style='green'),
                         self.myparent.getTitledText("Client Secret", name='clientSecret', value=self.data.get('clientSecret',''), style='green'),
                         self.myparent.getTitledText("Description", name='description', value=self.data.get('description',''), style='green'),
-                        Label(text="dropdown1",style='blue'),
+                        DropDownWidget(entries=[('client_secret_basic','client_secret_basic'),('client_secret_post','client_secret_post'),('client_secret_jwt','client_secret_jwt'),('private_key_jwt','private_key_jwt')]),
                         self.myparent.getTitledRadioButton("Subject Type", name='subjectType', values=[('public', 'Public'),('pairwise', 'Pairwise')], current_value=self.data.get('subjectType'), style='green'),
                         self.myparent.getTitledCheckBoxList("Grant", name='grantTypes', values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')], current_values=self.data.get('grantTypes', []), style='green'),
                         self.myparent.getTitledCheckBoxList("Response Types", name='responseTypes', values=['code', 'token', 'id_token'], current_values=self.data.get('responseTypes', []), style='green'),
@@ -162,10 +162,9 @@ class EditClientDialog(JansGDialog):
                         self.myparent.getTitledRadioButton("PRT token type", name='applicationType!', values=['JWT', 'Reference'], current_value=self.data.get('applicationType!'),style='green'),
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
                         
-                        DropDownWidget(entries=['Item1','Item2','Item3','Item4']),
-                        DropDownWidget(entries=['Item11','Item22','Item33','Item44']),
-                        # Label(text="dropdown1",style='blue'),  ## TODO with Jans VerticalNav  
-                        # Label(text="dropdown2",style='blue'),  ## TODO with Jans VerticalNav  
+                        DropDownWidget(entries=[('rptClaimsScripts','rptClaimsScripts')]),
+                        DropDownWidget(entries=[('claimRedirectUris','claimRedirectUris')]),
+
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
               
                         ]
@@ -233,22 +232,21 @@ class EditClientDialog(JansGDialog):
                         # attached to date
                             Label(text="Pick Date",style='blue'),
                             ]) , 
-                        
-
-                        
+   
                         ],width=D()
         )
         
         self.tabs['Client Scripts'] = HSplit([
-                Label(text="Dropdown 4",style='blue'),
-                Label(text="Dropdown 5",style='blue'),
-                Label(text="Dropdown 6",style='blue'),
-                Label(text="Dropdown 7",style='blue'),
-                Label(text="Dropdown 8",style='blue'),
+            DropDownWidget(entries=[('spontaneousScopes','spontaneousScopes')]),
+            DropDownWidget(entries=[('updateTokenScriptDns','updateTokenScriptDns')]),
+            DropDownWidget(entries=[('postAuthnScripts','postAuthnScripts')]),
+            DropDownWidget(entries=[('introspectionScripts','introspectionScripts')]),
+            DropDownWidget(entries=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
+            DropDownWidget(entries=[('consentGatheringScripts','consentGatheringScripts')]),
+
                         ]
                         )
     
-        self.myparent.logger.debug("***************************************")
         self.left_nav = list(self.tabs.keys())[0]
 
 
