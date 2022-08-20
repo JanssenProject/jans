@@ -9,21 +9,31 @@ from prompt_toolkit.key_binding.bindings.focus import focus_next
 from prompt_toolkit.layout.dimension import D
 
 class JansSelectBox:
-    def __init__(self, entries=[]):
+    def __init__(self, entries=[],height=4,rotatable_up=True,rotatable_down=True):
         self.entries = entries
         self.selected_line = 0
+        # --------------------------------------------------- #
+        self.height=min(len(self.entries),height)
+        self.rotatable_up = rotatable_up
+        self.rotatable_down = rotatable_down
+        self.firstValue = self.entries[0]   
+        self.lastValue = self.entries[-1]
+        # --------------------------------------------------- #
+
         self.container =HSplit(children=[  Window(
             content=FormattedTextControl(
                 text=self._get_formatted_text,
                 focusable=True,
-
             ),
-            height=len(entries),
+            height=self.height,
             cursorline=False,
             width=D(),  #15,
             style="bg:#4D4D4D",
             right_margins=[ScrollbarMargin(display_arrows=True),],
-            wrap_lines=True
+            wrap_lines=True,
+            allow_scroll_beyond_bottom=True,
+            
+            
         )])
 
     def _get_formatted_text(self):
@@ -38,12 +48,35 @@ class JansSelectBox:
         return merge_formatted_text(result)
 
 
+    def shift(self,seq, n):
+        return seq[n:]+seq[:n]  
+
     def up(self):
-        self.selected_line = (self.selected_line - 1) % len(self.entries)
+        if self.selected_line  == 0 :
+            if self.rotatable_up and  self.entries[self.selected_line] == self.firstValue:
+                pass
+            else :
+                self.entries = self.shift(self.entries,-1) 
+        else :
+            self.selected_line = (self.selected_line - 1)  % (self.height)
 
 
     def down(self):
-        self.selected_line = (self.selected_line + 1) % len(self.entries)
+
+        if self.selected_line +1 == (self.height) :
+            if self.rotatable_down and  self.entries[self.selected_line] == self.lastValue:
+                pass
+            else:
+                self.entries = self.shift(self.entries,1)  
+        else :
+            self.selected_line = (self.selected_line + 1)  % (self.height)
+
+        ### to jump the holl height
+        # if self.selected_line +1 < (self.height) :            
+        #     self.selected_line = (self.selected_line + 1)  % (self.height)
+        # elif self.selected_line +1 == (self.height) :
+        #     self.entries = self.shift(self.entries,self.height)
+        #     self.selected_line = (self.selected_line + 1)  % (self.height)
 
     def __pt_container__(self):
         return self.container
@@ -66,7 +99,7 @@ class DropDownWidget:
                  key_bindings=self._get_key_bindings(),
             ), height=D()) #5  ## large sized enties get >> (window too small)
 
-        self.select_box = JansSelectBox(self.entries)
+        self.select_box = JansSelectBox(entries=self.entries,rotatable_down=True,rotatable_up=True,height=4)
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
 
 
@@ -87,7 +120,7 @@ class DropDownWidget:
         def _enter(event) -> None:
 
             if self.select_box_float not in get_app().layout.container.floats:
-                get_app().layout.container.floats.insert(0, self.select_box_float)
+                get_app().layout.container.floats.append(self.select_box_float)
             else:
                 self.text = self.select_box.entries[self.select_box.selected_line][1]
                 get_app().layout.container.floats.remove(self.select_box_float)
