@@ -18,15 +18,15 @@ The sourcecode of `jans.pycloudlib` are heavily documented internally using docs
 To check whether they are missing docstrings, run the following steps:
 
 1. Install [pydocstyle](http://www.pydocstyle.org/en/stable/) by running `pip install pydocstyle[toml]`
-1. Check docstrings by running `pydocstyle`
+1. Check docstrings by running `pydocstyle jans`
 1. Adjust docstrings if any error is reported by `pydocstyle`
 
 ### Check Python types
 
 We are adding more typehints into the `jans.pycloudlib` sourcecode, gradually.
 
-1. Install [mypy](https://mypy.readthedocs.io/en/stable/index.html) by running `pip install mypy`
-1. Check typehints by running `mypy --install-types /path/to/python/file`
+1. Run `pip install -r requirements-dev.txt` to install required libraries.
+1. Check typehints by running `mypy --install-types jans`
 1. Fix errors reported by `mypy`
 
 ### Building internal docs
@@ -34,8 +34,8 @@ We are adding more typehints into the `jans.pycloudlib` sourcecode, gradually.
 Internal docs are generated from sphinx-based docs at `docs` directory.
 To generate/preview docs, run the following steps:
 
-1. Install [sphinx-autobuild](https://github.com/executablebooks/sphinx-autobuild) by running `pip install sphinx-autobuild`
-1. Generate docs by running `sphinx-autobuild --watch=jans docs docs/_build/html`
+1. Run `pip install -r requirements-dev.txt` to install required libraries.
+1. Preview docs by running `mkdocs serve -w jans`
 1. Visit http://localhost:8000 to see the generated docs (they are reloaded automatically when sourcecode is modified)
 
 ## Refs
