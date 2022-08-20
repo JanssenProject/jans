@@ -1,5 +1,5 @@
 [tool.pydocstyle]
-convention = "pep257"
+convention = "google"
 inherit = false
 match = '(?!test_|setup|conf).*\.py'
 # match_dir = '[^\.].*'
@@ -18,10 +18,10 @@ show_error_codes = true
 module = [
     "consul",
     "hvac",
-    "kubernetes.*",
-    "urllib3",
-    "docker.*",
-    "google.cloud",
+    # "kubernetes.*",
+    # "urllib3",
+    # "docker.*",
+    # "google.cloud",
     "ldap3.*",
     "ldif",
     "sqlalchemy.*",

@@ -29,18 +29,21 @@ logger = logging.getLogger(__name__)
 
 
 class WaitError(Exception):  # noqa: D204
-    """Class to mark error while running ``wait_for_*`` functions."""
+    """Class to mark error while running `wait_for_*` functions."""
     pass
 
 
 def get_wait_max_time() -> int:
-    """Get maximum time accepted by ``wait_for`` function.
+    """Get maximum time accepted by `wait_for` function.
 
     Default maximum time is 300 seconds. To change the value, pass
     `CN_WAIT_MAX_TIME` environment variable.
 
-    .. code-block:: python
+    Returns:
+        Wait maximum time (in seconds).
 
+    Examples:
+        ```py
         import os
 
         from jans.pycloudlib import get_manager
@@ -50,8 +53,7 @@ def get_wait_max_time() -> int:
 
         manager = get_manager()
         wait_for_config(manager)
-
-    :returns: Wait maximum time (in seconds).
+        ```
     """
     default = 60 * 5
     try:
@@ -62,13 +64,16 @@ def get_wait_max_time() -> int:
 
 
 def get_wait_interval() -> int:
-    """Get interval time between each execution of ``wait_for`` function.
+    """Get interval time between each execution of `wait_for` function.
 
     Default interval time is 10 seconds. To change the value, pass
     `CN_WAIT_SLEEP_DURATION` environment variable.
 
-    .. code-block:: python
+    Returns:
+        Wait interval (in seconds).
 
+    Examples:
+        ```py
         import os
 
         from jans.pycloudlib import get_manager
@@ -78,8 +83,7 @@ def get_wait_interval() -> int:
 
         manager = get_manager()
         wait_for_config(manager)
-
-    :returns: Wait interval (in seconds).
+        ```
     """
     default = 10
     try:
@@ -108,12 +112,6 @@ def on_giveup(details: Details) -> None:
     logger.error(f"{label} is not ready after {details['elapsed']:0.1f}")
 
 
-#: A pre-configured alias of ``backoff.on_exception`` decorator.
-#:
-#: This decorator implies following setup:
-#:
-#: - each retry is executed with constant time
-#: - catch all ``Exception``
 retry_on_exception = backoff.on_exception(
     backoff.constant,
     Exception,
@@ -124,22 +122,27 @@ retry_on_exception = backoff.on_exception(
     jitter=None,
     interval=get_wait_interval,
 )
+"""Pre-configured alias of `backoff.on_exception` decorator.
+
+This decorator implies following setup:
+
+- each retry is executed with constant time
+- catch all `Exception`
+"""
 
 
 @retry_on_exception
-def wait_for_config(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:  # noqa: D412
-    r"""Wait for readiness/availability of config backend.
+def wait_for_config(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/availability of config backend.
 
-    Keyword arguments:
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
 
-    - ``conn_only``: Determine whether to check for connection only.
-
-    If ``conn_only`` keyword argument is set to ``True``,
-    this function only checks its connection status; if set
-    to ``False`` or omitted, this function will check config entry.
-
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Keyword Arguments:
+        conn_only (bool): Determine whether to check for connection only.
+            If set to `True`, this function only checks its connection status.
+            If set to `False` or omitted, this function will check config entry.
     """
     conn_only = as_boolean(kwargs.get("conn_only", False))
     hostname = manager.config.get("hostname")
@@ -149,19 +152,17 @@ def wait_for_config(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:  # n
 
 
 @retry_on_exception
-def wait_for_secret(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:  # noqa: D412
-    r"""Wait for readiness/availability of secret backend.
+def wait_for_secret(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/availability of secret backend.
 
-    Keyword arguments:
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
 
-    - ``conn_only``: Determine whether to check for connection only.
-
-    If ``conn_only`` keyword argument is set to ``True``,
-    this function only checks its connection status; if set
-    to ``False`` or omitted, this function will check secret entry.
-
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Other Parameters:
+        conn_only (bool): Determine whether to check for connection only.
+            If set to `True`, this function only checks its connection status.
+            If set to `False` or omitted, this function will check secret entry.
     """
     conn_only = as_boolean(kwargs.get("conn_only", False))
     ssl_cert = manager.secret.get("ssl_cert")
@@ -175,11 +176,12 @@ _ADMIN_GROUP_DN = "inum=60B7,ou=groups,o=jans"
 
 
 @retry_on_exception
-def wait_for_ldap(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/availability of LDAP server based on existing entry.
+def wait_for_ldap(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/availability of LDAP server based on existing entry.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
@@ -205,11 +207,12 @@ def wait_for_ldap(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_ldap_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/availability of LDAP server based on connection status.
+def wait_for_ldap_conn(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/availability of LDAP server based on connection status.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     connected = LdapClient(manager).is_connected()
     if not connected:
@@ -217,11 +220,12 @@ def wait_for_ldap_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_couchbase(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/availability of Couchbase server based on existing entry.
+def wait_for_couchbase(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/availability of Couchbase server based on existing entry.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
     jca_client_id = manager.config.get("jca_client_id")
@@ -244,11 +248,12 @@ def wait_for_couchbase(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_couchbase_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/availability of Couchbase server based on connection status.
+def wait_for_couchbase_conn(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/availability of Couchbase server based on connection status.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     cb_client = CouchbaseClient(manager)
     req = cb_client.get_buckets()
@@ -258,11 +263,12 @@ def wait_for_couchbase_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> No
 
 
 @retry_on_exception
-def wait_for_sql_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/liveness of an SQL database connection.
+def wait_for_sql_conn(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/liveness of an SQL database connection.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     # checking connection
     init = SqlClient(manager).connected()
@@ -271,11 +277,12 @@ def wait_for_sql_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_sql(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/liveness of an SQL database.
+def wait_for_sql(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/liveness of an SQL database.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
@@ -297,11 +304,12 @@ def wait_for_sql(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
 
 
 @retry_on_exception
-def wait_for_spanner_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/liveness of an Spanner database connection.
+def wait_for_spanner_conn(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/liveness of an Spanner database connection.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     # checking connection
     init = SpannerClient(manager).connected()
@@ -310,11 +318,12 @@ def wait_for_spanner_conn(manager: Manager, **kwargs: dict[str, _t.Any]) -> None
 
 
 @retry_on_exception
-def wait_for_spanner(manager: Manager, **kwargs: dict[str, _t.Any]) -> None:
-    r"""Wait for readiness/liveness of an Spanner database.
+def wait_for_spanner(manager: Manager, **kwargs: _t.Any) -> None:
+    """Wait for readiness/liveness of an Spanner database.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param \**kwargs: Keyword arguments.
+    Args:
+        manager: An instance of manager class.
+        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
@@ -342,7 +351,7 @@ WaitCallback = _t.TypedDict("WaitCallback", {
 
 
 def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
-    """Dispatch appropriate ``wait_for_*`` functions (if any).
+    """Dispatch appropriate `wait_for_*` functions (if any).
 
     The following dependencies are supported:
 
@@ -359,17 +368,19 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
     - `spanner`
     - `spanner_conn`
 
-    .. code-block:: python
+    Args:
+        manager: An instance of manager class.
+        deps: An iterable of dependencies to check.
 
+    Examples:
+        ```py
         from jans.pycloudlib import get_manager
         from jans.pycloudlib.wait import wait_for
 
         manager = get_manager()
         deps = ["config", "secret", "ldap"]
         wait_for(manager, deps)
-
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param deps: An iterable of dependencies to check.
+        ```
     """
     callbacks: dict[str, WaitCallback] = {
         "config": {"func": wait_for_config, "kwargs": {"label": "Config"}},
@@ -407,10 +418,11 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
 def wait_for_persistence(manager: Manager) -> None:
     """Wait for defined persistence(s).
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
+    Args:
+        manager: An instance of manager class.
     """
     mapper = PersistenceMapper()
-    # cast ``dict_keys`` to ``list``
+    # cast `dict_keys` to `list`
     deps = list(mapper.groups().keys())
     wait_for(manager, deps)
 
@@ -418,7 +430,8 @@ def wait_for_persistence(manager: Manager) -> None:
 def wait_for_persistence_conn(manager: Manager) -> None:
     """Wait for defined persistence(s) connection.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
+    Args:
+        manager: An instance of manager class.
     """
     mapper = PersistenceMapper()
     deps = [f"{type_}_conn" for type_ in mapper.groups().keys()]

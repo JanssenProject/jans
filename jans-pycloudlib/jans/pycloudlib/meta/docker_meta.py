@@ -20,7 +20,8 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 class DockerMeta(BaseMeta):
     """This class interacts with a subset of Docker APIs.
 
-    :param base_url: Base URL to docker daemon API.
+    Args:
+        base_url: Base URL to docker daemon API.
     """
 
     def __init__(self, base_url: str = "unix://var/run/docker.sock") -> None:
@@ -30,8 +31,11 @@ class DockerMeta(BaseMeta):
     def get_containers(self, label: str) -> list[Container]:
         """Get list of containers based on label.
 
-        :param label: Label name, i.e. ``APP_NAME=jans-auth``.
-        :returns: List of container objects.
+        Args:
+            label: Label name, i.e. `APP_NAME=jans-auth`.
+
+        Returns:
+            List of container objects.
         """
         containers: list[Container] = self.client.containers.list(filters={'label': label})
         return containers
@@ -39,8 +43,11 @@ class DockerMeta(BaseMeta):
     def get_container_ip(self, container: Container) -> str:
         """Get container's IP address.
 
-        :param container: Container object.
-        :returns: IP address associated with the container.
+        Args:
+            container: Container object.
+
+        Returns:
+            IP address associated with the container.
         """
         ip = ""
         for _, network in container.attrs["NetworkSettings"]["Networks"].items():
@@ -51,8 +58,11 @@ class DockerMeta(BaseMeta):
     def get_container_name(self, container: Container) -> str:
         """Get container's name.
 
-        :param container: Container object.
-        :returns: Container name.
+        Args:
+            container: Container object.
+
+        Returns:
+            Container name.
         """
         name: str = container.name
         return name
@@ -60,8 +70,9 @@ class DockerMeta(BaseMeta):
     def copy_to_container(self, container: Container, path: str) -> None:
         """Copy path to container.
 
-        :param container: Container object.
-        :param path: Path to file or directory.
+        Args:
+            container: Container object.
+            path: Path to file or directory.
         """
         src = os.path.basename(path)
         dirname = os.path.dirname(path)
@@ -86,7 +97,8 @@ class DockerMeta(BaseMeta):
     def exec_cmd(self, container: Container, cmd: str) -> _t.Any:
         """Run command inside container.
 
-        :param container: Container object.
-        :param cmd: String of command.
+        Args:
+            container: Container object.
+            cmd: String of command.
         """
         return container.exec_run(cmd)
