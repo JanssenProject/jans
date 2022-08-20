@@ -43,7 +43,7 @@ from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.edit_client_dialog import EditClientDialog
 from wui_components.jans_drop_down import DropDownWidget
-
+from wui_components.jans_data_picker import DateSelectWidget
 
 class JansAuthServer:
 
@@ -67,7 +67,7 @@ class JansAuthServer:
                     VSplit([
                         self.getButton(text="Get Scopes", name='oauth:scopes:get', jans_help="Retreive first 10 Scopes", handler=self.oauth_get_scopes),
                         self.getTitledText('Search: ', name='oauth:scopes:search', jans_help='Press enter to perform search'),
-                        self.getButton(text="Add Scope", name='oauth:scopes:add', jans_help="To add a new scope press this button")
+                        self.getButton(text="Add Scope", name='oauth:scopes:add', jans_help="To add a new scope press this button"),
                         ],
                         padding=3,
                         width=D(),
