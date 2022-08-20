@@ -38,7 +38,8 @@ def get_sql_password(manager: Manager) -> str:
     1. get from password file
     2. get from secrets
 
-    :returns: Plaintext password.
+    Returns:
+        Plaintext password.
     """
     # ignore bandit rule as secret_name refers to attribute name of secrets
     secret_name = "sql_password"  # nosec: B105
@@ -76,7 +77,8 @@ class PostgresqlAdapter:
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
 
-        :param exc: Exception instance.
+        Args:
+            exc: Exception instance.
         """
         # re-raise exception UNLESS error code is in the following list
         # - 42P07: relation exists
@@ -86,7 +88,8 @@ class PostgresqlAdapter:
     def on_create_index_error(self, exc: DatabaseError) -> None:
         """Handle index creation error.
 
-        :param exc: Exception instance.
+        Args:
+            exc: Exception instance.
         """
         # re-raise exception UNLESS error code is in the following list
         # - 42P07: relation exists
@@ -96,7 +99,8 @@ class PostgresqlAdapter:
     def on_insert_into_error(self, exc: DatabaseError) -> None:
         """Handle row insertion error.
 
-        :param exc: Exception instance.
+        Args:
+            exc: Exception instance.
         """
         # re-raise exception UNLESS error code is in the following list
         # - 23505: unique violation
@@ -122,7 +126,8 @@ class MysqlAdapter:
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
 
-        :param exc: Exception instance.
+        Args:
+            exc: Exception instance.
         """
         # re-raise exception UNLESS error code is in the following list
         # - 1050: table exists
@@ -132,7 +137,8 @@ class MysqlAdapter:
     def on_create_index_error(self, exc: DatabaseError) -> None:
         """Handle index creation error.
 
-        :param exc: Exception instance.
+        Args:
+            exc: Exception instance.
         """
         # re-raise exception UNLESS error code is in the following list
         # - 1061: duplicate key name (index)
@@ -142,7 +148,8 @@ class MysqlAdapter:
     def on_insert_into_error(self, exc: DatabaseError) -> None:
         """Handle row insertion error.
 
-        :param exc: Exception instance.
+        Args:
+            exc: Exception instance.
         """
         # re-raise exception UNLESS error code is in the following list
         # - 1062: duplicate entry
@@ -153,7 +160,8 @@ class MysqlAdapter:
 def doc_id_from_dn(dn: str) -> str:
     """Determine document ID based on LDAP's DN.
 
-    :param dn: LDAP's DN string.
+    Args:
+        dn: LDAP's DN string.
     """
     parsed_dn = dnutils.parse_dn(dn)
     doc_id: str = parsed_dn[0][1]
@@ -206,7 +214,8 @@ class SqlSchemaMixin:
     def get_attr_syntax(self, attr: str) -> str:
         """Get attribute syntax.
 
-        :param attr: Attribute name.
+        Args:
+            attr: Attribute name.
         """
         syntax = ""
         for attr_type in self.attr_types:
@@ -226,14 +235,15 @@ class SqlSchemaMixin:
 
 
 class SqlClient(SqlSchemaMixin):
-    r"""This class interacts with SQL database.
+    """This class interacts with SQL database.
 
-    :param manager: An instance of manager class.
-    :param \*args: Positional arguments (if any).
-    :param \**kwargs: Keyword arguments (if any).
+    Args:
+        manager: An instance of manager class.
+        *args: Positional arguments.
+        **kwargs: Keyword arguments.
     """
 
-    def __init__(self, manager: Manager, *args: list[_t.Any], **kwargs: dict[str, _t.Any]) -> None:
+    def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
         self.manager = manager
 
         dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
@@ -404,8 +414,9 @@ class SqlClient(SqlSchemaMixin):
     def _transform_value(self, key: str, values: _t.Any) -> _t.Any:
         """Transform value from one to another based on its data type.
 
-        :param key: Attribute name.
-        :param values: Pre-transformed values.
+        Args:
+            key: Attribute name.
+            values: Pre-transformed values.
         """
         type_ = self.sql_data_types.get(key, {})
 
@@ -449,7 +460,8 @@ class SqlClient(SqlSchemaMixin):
     def _data_from_ldif(self, filename: str) -> _t.Iterator[tuple[str, dict[str, _t.Any]]]:
         """Get data from parsed LDIF file.
 
-        :param filename: LDIF filename.
+        Args:
+            filename: LDIF filename.
         """
         with open(filename, "rb") as fd:
             parser = LDIFParser(fd)
@@ -484,8 +496,9 @@ class SqlClient(SqlSchemaMixin):
     def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
         """Create entry with data loaded from an LDIF template file.
 
-        :param filepath: Path to LDIF template file.
-        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        Args:
+            filepath: Path to LDIF template file.
+            ctx: Key-value pairs of context that rendered into LDIF template file.
         """
         with open(filepath) as src, NamedTemporaryFile("w+") as dst:
             dst.write(safe_render(src.read(), ctx))
@@ -499,9 +512,10 @@ class SqlClient(SqlSchemaMixin):
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to SQL database server.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     with open(src) as f:
         txt = f.read()

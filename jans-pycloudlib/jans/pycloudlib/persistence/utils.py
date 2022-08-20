@@ -18,13 +18,14 @@ def render_salt(manager: Manager, src: str, dest: str) -> None:
 
     The generated file has the following contents:
 
-    .. code-block:: text
+    ```py
+    encode_salt = random-salt-string
+    ```
 
-        encode_salt = random-salt-string
-
-    :param manager: An instance of manager class.
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        manager: An instance of manager class.
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     encode_salt = manager.secret.get("encoded_salt")
 
@@ -39,8 +40,9 @@ def render_salt(manager: Manager, src: str, dest: str) -> None:
 def render_base_properties(src: str, dest: str) -> None:
     """Render file contains properties for Janssen Server.
 
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     with open(src) as f:
         txt = f.read()
@@ -60,8 +62,8 @@ PERSISTENCE_TYPES = (
     "spanner",
     "hybrid",
 )
+"""Supported persistence types."""
 
-#: Data mapping of persistence, ordered by priority.
 PERSISTENCE_DATA_KEYS = (
     "default",
     "user",
@@ -70,14 +72,18 @@ PERSISTENCE_DATA_KEYS = (
     "token",
     "session",
 )
+"""Data mapping of persistence, ordered by priority."""
 
-#: Supported SQL dialects.
 PERSISTENCE_SQL_DIALECTS = (
     "mysql",
     "pgsql",
 )
+"""SQL dialects.
 
-#: Mapping of RDN.
+!!! warning
+    The `pgsql` dialect is in experimental phase and may introduce bugs
+    hence it is not recommended at the moment."""
+
 RDN_MAPPING = {
     "default": "",
     "user": "people, groups, authorizations",
@@ -86,6 +92,7 @@ RDN_MAPPING = {
     "token": "tokens",
     "session": "sessions",
 }
+"""Mapping of RDN (Relative Distinguished Name)."""
 
 
 class PersistenceMapper:
@@ -93,53 +100,58 @@ class PersistenceMapper:
 
     Example of data mapping when using ``sql`` persistence type:
 
-    .. code-block:: python
-
-        os.environ["CN_PERSISTENCE_TYPE"] = "sql"
-        mapper = PersistenceMapper()
-        mapper.validate_hybrid_mapping()
-        print(mapper.mapping)
+    ```py
+    os.environ["CN_PERSISTENCE_TYPE"] = "sql"
+    mapper = PersistenceMapper()
+    mapper.validate_hybrid_mapping()
+    print(mapper.mapping)
+    ```
 
     The output will be:
 
-    .. code-block:: python
-
-        {
-            "default": "sql",
-            "user": "sql",
-            "site": "sql",
-            "cache": "sql",
-            "token": "sql",
-            "session": "sql",
-        }
+    ```py
+    {
+        "default": "sql",
+        "user": "sql",
+        "site": "sql",
+        "cache": "sql",
+        "token": "sql",
+        "session": "sql",
+    }
+    ```
 
     The same rule applies to any supported persistence types, except for ``hybrid``
     where each key can have different value. To customize the mapping, additional environment
     variable is required.
 
-    .. code-block:: python
+    ```py
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_HYBRID_MAPPING"] = json.loads({
+        "default": "sql",
+        "user": "spanner",
+        "site": "sql",
+        "cache": "sql",
+        "token": "sql",
+        "session": "sql",
+    })
 
-        os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
-        os.environ["CN_HYBRID_MAPPING"] = json.loads({
-            "default": "sql", "user": "spanner", "site": "sql", "cache": "sql", "token": "sql", "session": "sql"
-        })
-
-        mapper = PersistenceMapper()
-        mapper.validate_hybrid_mapping()
-        print(mapper.mapping)
+    mapper = PersistenceMapper()
+    mapper.validate_hybrid_mapping()
+    print(mapper.mapping)
+    ```
 
     The output will be:
 
-    .. code-block:: python
-
-        {
-            "default": "sql",
-            "user": "spanner",
-            "site": "sql",
-            "cache": "sql",
-            "token": "sql",
-            "session": "sql",
-        }
+    ```py
+    {
+        "default": "sql",
+        "user": "spanner",
+        "site": "sql",
+        "cache": "sql",
+        "token": "sql",
+        "session": "sql",
+    }
+    ```
 
     Note that when using ``hybrid``, all mapping must be defined explicitly.
     """
@@ -154,16 +166,16 @@ class PersistenceMapper:
 
         Example of pre-populated mapping:
 
-        .. code-block:: python
-
-            {
-                "default": "sql",
-                "user": "spanner",
-                "site": "sql",
-                "cache": "sql",
-                "token": "sql",
-                "session": "sql",
-            }
+        ```py
+        {
+            "default": "sql",
+            "user": "spanner",
+            "site": "sql",
+            "cache": "sql",
+            "token": "sql",
+            "session": "sql",
+        }
+        ```
         """
         if not self._mapping:
             if self.type != "hybrid":
@@ -177,14 +189,14 @@ class PersistenceMapper:
 
         Example of pre-populated groupped mapping:
 
-        .. code-block:: python
-
-            {
-                "sql": ["cache", "default", "session"],
-                "couchbase": ["user"],
-                "spanner": ["token"],
-                "ldap": ["site"],
-            }
+        ```py
+        {
+            "sql": ["cache", "default", "session"],
+            "couchbase": ["user"],
+            "spanner": ["token"],
+            "ldap": ["site"],
+        }
+        ```
         """
         mapper = defaultdict(list)
 
@@ -197,14 +209,14 @@ class PersistenceMapper:
 
         Example of pre-populated groupped mapping:
 
-        .. code-block:: python
-
-            {
-                "sql": ["cache", "", "sessions"],
-                "couchbase": ["people, groups, authorizations"],
-                "spanner": ["tokens"],
-                "ldap": ["cache-refresh"],
-            }
+        ```py
+        {
+            "sql": ["cache", "", "sessions"],
+            "couchbase": ["people, groups, authorizations"],
+            "spanner": ["tokens"],
+            "ldap": ["cache-refresh"],
+        }
+        ```
         """
         mapper = defaultdict(list)
         for k, v in self.mapping.items():
