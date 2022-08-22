@@ -10,7 +10,6 @@ from prompt_toolkit.layout.dimension import D
 
 class JansSelectBox:
     def __init__(self, values=[], value=None, height=4, rotatable_up=True, rotatable_down=True):
-        open("/tmp/aaa.txt", "a").write(str(value)+'\n')
         self.values = values
         self.value = value
 
@@ -42,8 +41,6 @@ class JansSelectBox:
         )])
 
     def _get_formatted_text(self):
-        open("/tmp/aaa.txt", "a").write(str(self.selected_line)+'\n')
-
         result = []
         for i, entry in enumerate(self.values):
             if i == self.selected_line:

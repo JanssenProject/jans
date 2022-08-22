@@ -49,7 +49,6 @@ from prompt_toolkit.filters import Condition
 
 # -------------------------------------------------------------------------- #
 from cli import config_cli
-from wui_components.edit_scope_dialog import EditScopeDialog
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_side_nav_bar import JansSideNavBar
@@ -59,7 +58,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 
 from cli_style import style
 
-from models.oauth import JansAuthServer
+from models.oauth.oauth import JansAuthServer
 from pathlib import Path
 
 # -------------------------------------------------------------------------- #

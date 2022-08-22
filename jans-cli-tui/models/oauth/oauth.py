@@ -41,8 +41,10 @@ from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
-from wui_components.edit_client_dialog import EditClientDialog
 from wui_components.jans_drop_down import DropDownWidget
+from models.oauth.edit_client_dialog import EditClientDialog
+from models.oauth.edit_scope_dialog import EditScopeDialog
+
 
 class JansAuthServer:
 
