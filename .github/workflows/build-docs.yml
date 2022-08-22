@@ -93,6 +93,7 @@ jobs:
   release-helm-chart:
     # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
     # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
+    needs: build
     permissions:
       contents: write
     runs-on: ubuntu-latest
