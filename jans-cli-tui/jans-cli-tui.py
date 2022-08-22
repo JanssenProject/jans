@@ -202,9 +202,10 @@ class JansCliApp(Application, JansAuthServer):
 
         self.press_tab()
 
-        if status is not True:
+        if status not in (True, 'ID Token is expired'):
             buttons = [Button("OK", handler=self.jans_creds_dialog)]
             self.show_message("Error getting Connection Config Api", status, buttons=buttons)
+
         else:
             if not test_client and not self.cli_object.access_token:
                 
