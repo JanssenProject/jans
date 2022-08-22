@@ -63,19 +63,6 @@ from pathlib import Path
 
 # -------------------------------------------------------------------------- #
 
-
-help_text_dict = {
-    'displayName': ("Name of the user suitable for display to end-users"),
-    'clientSecret': ("The client secret. The client MAY omit the parameter if the client secret is an empty string"),
-    'redirectUris': ("Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request"),
-    'responseTypes': ("A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token"),
-    'applicationType': ("Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname"),
-    'helper': ("To guide you through the fields"),
-}
-
-
-
-
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
@@ -97,12 +84,14 @@ class JansCliApp(Application, JansAuthServer):
     def __init__(self):
         self.init_logger()
         self.app_started = False
+        self.status_bar_text = ''
         self.width, self.height = get_terminal_size()
         self.app = get_app()
         self.show_dialog = False   ## ## ## ##
         self.set_keybindings()
         self.containers = {}
         # -------------------------------------------------------------------------------- #
+
         self.dialogs = {}
         self.tabs = {}
         self.active_dialog_select = ''
@@ -173,6 +162,7 @@ class JansCliApp(Application, JansAuthServer):
         # ----------------------------------------------------------------------------- #
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
+
 
     def init_logger(self):
         self.logger = logging.getLogger('JansCli')
@@ -300,7 +290,12 @@ class JansCliApp(Application, JansAuthServer):
     def help(self,ev):
         self.show_message("Help",'''<Enter> Edit current selection\n<j> Display current item in JSON format\n<d> Delete current selection''')
     # ----------------------------------------------------------------- #
-    
+
+    def get_help_from_schema(self, schema, jans_name):
+        for prop in schema.get('properties', {}):
+            if prop == jans_name:
+                return schema['properties'][jans_name].get('description', '')
+
     def handle_long_string (self,text,values,cb):
         lines = []
         if len(text) > 20 :
@@ -339,12 +334,12 @@ class JansCliApp(Application, JansAuthServer):
                 Label(text=('\n')*(lines_under_value-1)) 
             ])
         else :
-            cd = cb     
+            cd = cb
 
         if title_lines <= len(values) :  ### if num of values (value lines) < = title_lines
             lines_under_title = abs(len(values) - title_lines)
         else :
-            lines_under_title = 0   
+            lines_under_title = 0
 
         # first one >> solved >> title
         if lines_under_title >=1 :
@@ -354,7 +349,7 @@ class JansCliApp(Application, JansAuthServer):
             pass
 
         return  new_title , cd , width
-    
+
     def getTitledText(self, title, name, value='', height=1, jans_help='', width=None,style=''):
         title += ': '
         multiline = height > 1
@@ -406,9 +401,10 @@ class JansCliApp(Application, JansAuthServer):
         return VSplit([Label(text=li, width=width, style=style), rl2],)
 
 
-    def getTitledWidget(self, title, name, widget, style=''):
+    def getTitledWidget(self, title, name, widget, jans_help='', style=''):
         widget.window.me = widget
         widget.window.jans_name = name
+        widget.window.jans_help = jans_help
         li, w2, width = self.handle_long_string(title, widget.values, widget)
 
         return VSplit([Label(text=li, width=width, style=style), widget])
@@ -422,19 +418,15 @@ class JansCliApp(Application, JansAuthServer):
             b.handler = handler
         return b
 
-    def get_statusbar_text(self):
-        wname = getattr(self.layout.current_window, 'jans_name', 'NA')
-        return help_text_dict.get(wname, '')
 
-    def update_status_bar(self, text=None):
-        if text:
-            self.status_bar.text = text
+    def update_status_bar(self):
+        text = ''
+        if self.status_bar_text:
+            text = self.status_bar_text
+            self.status_bar_text = ''
         else:
             if hasattr(self.layout.current_window, 'jans_help') and self.layout.current_window.jans_help:
                 text = self.layout.current_window.jans_help
-            else:
-                wname = getattr(self.layout.current_window, 'jans_name', 'NA')
-                text = help_text_dict.get(wname, '')
 
         return text
 

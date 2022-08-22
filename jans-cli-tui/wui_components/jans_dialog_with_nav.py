@@ -8,8 +8,12 @@ from prompt_toolkit.widgets import (
     Dialog,
 )
 
+
+from prompt_toolkit.layout import ScrollablePane
+
+
 class JansDialogWithNav():
-    def __init__(self,content,height=None,width=None,title=None, button_functions=[], navbar=None):
+    def __init__(self,content, height=None, width=None, title=None, button_functions=[], navbar=None):
         self.navbar = navbar
         self.button_functions = button_functions
         self.title = title
@@ -25,7 +29,7 @@ class JansDialogWithNav():
 
         self.dialog = Dialog(
             title=self.title,
-            body=VSplit([
+            body=ScrollablePane(content=VSplit([
                  HSplit(
                             [
                                 self.navbar
@@ -36,13 +40,9 @@ class JansDialogWithNav():
                          Window(width=1, char="|",),
                         HSplit([
                             self.content
-                        
-
                         ]),
-                        
-                    
+                ], width=120, height=30)),
 
-            ],width=120,height=32),
             buttons=[
                 Button(
                     text=str(self.button_functions[k][1]),
@@ -50,7 +50,8 @@ class JansDialogWithNav():
                 ) for k in range(len(self.button_functions))
             ],
             with_background=False,
-        ) 
+
+        )
 #--------------------------------------------------------------------------------------#
     def __pt_container__(self):
         return self.dialog
