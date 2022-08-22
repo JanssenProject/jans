@@ -2111,6 +2111,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/script-catalog/agama/inboundID/</loc>
+         <lastmod>2022-08-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/script-catalog/application_session/sample-script/</loc>
          <lastmod>2022-08-22</lastmod>
          <changefreq>daily</changefreq>
