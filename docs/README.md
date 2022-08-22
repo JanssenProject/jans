@@ -7,7 +7,7 @@
 - [Triage](governance/triage.md)
 - [Copyright Notice](governance/copyright-notices.md)
 
-## User
+## User 
 
 ### Deployment and Planning Guide
   - Platform Goal
