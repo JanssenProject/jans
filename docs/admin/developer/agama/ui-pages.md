@@ -158,7 +158,7 @@ To start, use [`Trigger`](./dsl.md#subflows) to play around with the existing fl
 
 1. Remove the `https://.../fl/` portion of the URL
 1. Split the URL obtained into two pieces: a *folder* name and a *remainder*. The remainder starts after the last slash found in the URL, and usually ends in `.fls`
-1. In your Janssen server, locate the directory `/opt/jans/jetty/jans-auth/agama/fl`
+1. In your Janssen server, locate the directory `/opt/jans/jetty/jans-auth/agama/ftl`
 1. `cd` to the directory specified by the *folder*
 1. List the contents of the directory and pick the *filename* that best matches the *remainder*
 
