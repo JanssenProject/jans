@@ -41,9 +41,10 @@ from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
-from wui_components.edit_client_dialog import EditClientDialog
 from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_data_picker import DateSelectWidget
+from models.oauth.edit_client_dialog import EditClientDialog
+from models.oauth.edit_scope_dialog import EditScopeDialog
+
 
 class JansAuthServer:
 
@@ -242,8 +243,9 @@ class JansAuthServer:
         data = {}
         for tab in dialog.tabs:
             for item in dialog.tabs[tab].children:
-                if hasattr(item, 'children') and hasattr(item.children[1], 'jans_name'):
+                if hasattr(item, 'children') and len(item.children)>1 and hasattr(item.children[1], 'jans_name'):
                     key_ = item.children[1].jans_name
+                    self.logger.debug(key_ + ':' + str(type(item.children[1].me)))
                     if isinstance(item.children[1].me, prompt_toolkit.widgets.base.TextArea):
                         value_ = item.children[1].me.text
                     elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.CheckboxList):
@@ -252,6 +254,9 @@ class JansAuthServer:
                         value_ = item.children[1].me.current_value
                     elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.Checkbox):
                         value_ = item.children[1].me.checked
+                    elif isinstance(item.children[1].me, DropDownWidget):
+                        value_ = item.children[1].me.value
+                    
                     data[key_] = value_
 
         for list_key in ('redirectUris', 'scopes'):
@@ -259,6 +264,8 @@ class JansAuthServer:
                 data[list_key] = data[list_key].splitlines()
 
         self.logger.debug(str(data))
+
+
         response = self.cli_object.process_command_by_id(
             operation_id='post-oauth-openid-clients',
             url_suffix='',
@@ -271,7 +278,7 @@ class JansAuthServer:
             return True
 
     def add_client(self):
-        dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)
+        dialog = EditClientDialog(self, title="Add Client", data={'tokenEndpointAuthMethodsSupported':'private_key_jwt'}, save_handler=self.save_client)
         result = self.show_jans_dialog(dialog)
 
     def delete_client(self, selected, event):

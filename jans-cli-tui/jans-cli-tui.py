@@ -49,7 +49,6 @@ from prompt_toolkit.filters import Condition
 
 # -------------------------------------------------------------------------- #
 from cli import config_cli
-from wui_components.edit_scope_dialog import EditScopeDialog
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_side_nav_bar import JansSideNavBar
@@ -59,7 +58,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 
 from cli_style import style
 
-from models.oauth import JansAuthServer
+from models.oauth.oauth import JansAuthServer
 from pathlib import Path
 
 # -------------------------------------------------------------------------- #
@@ -113,7 +112,9 @@ class JansCliApp(Application, JansAuthServer):
 
         self.yes_button = Button(text="Yes", handler=accept_yes)
         self.no_button = Button(text="No", handler=accept_no)
-        self.status_bar = TextArea(style="class:status", height=1, focusable=False)
+        self.status_bar = Window(
+                        FormattedTextControl(self.update_status_bar), style="class:status", height=1
+                    )
 
         self.prapare_dialogs()
 
@@ -203,12 +204,13 @@ class JansCliApp(Application, JansAuthServer):
 
         self.press_tab()
 
-        if status is not True:
+        if status not in (True, 'ID Token is expired'):
             buttons = [Button("OK", handler=self.jans_creds_dialog)]
             self.show_message("Error getting Connection Config Api", status, buttons=buttons)
+
         else:
             if not test_client and not self.cli_object.access_token:
-                
+
                     response = self.cli_object.get_device_verification_code()
                     result = response.json()
 
@@ -282,11 +284,9 @@ class JansCliApp(Application, JansAuthServer):
 
     def focus_next(self, ev):
         focus_next(ev)
-        self.update_status_bar()
 
     def focus_previous(self, ev):
         focus_previous(ev)
-        self.update_status_bar()
 
     def set_keybindings(self):
         # Global key bindings.
@@ -401,9 +401,17 @@ class JansCliApp(Application, JansAuthServer):
         rl.window.jans_name = name
         rl.window.jans_help = jans_help
         rl.window.me = rl
-        li, rl2, width = self.handle_long_string(title,values,rl)
+        li, rl2, width = self.handle_long_string(title, values, rl)
 
-        return VSplit([Label(text=li, width=width,style=style), rl2],)
+        return VSplit([Label(text=li, width=width, style=style), rl2],)
+
+
+    def getTitledWidget(self, title, name, widget, style=''):
+        widget.window.me = widget
+        widget.window.jans_name = name
+        li, w2, width = self.handle_long_string(title, widget.values, widget)
+
+        return VSplit([Label(text=li, width=width, style=style), widget])
 
     # ----------------------------------------------------------------- #
     def getButton(self, text, name, jans_help, handler=None):
@@ -428,7 +436,7 @@ class JansCliApp(Application, JansAuthServer):
                 wname = getattr(self.layout.current_window, 'jans_name', 'NA')
                 text = help_text_dict.get(wname, '')
 
-        self.status_bar.text = text
+        return text
 
     def main_nav_selection_changed(self, selection):
         if hasattr(self, selection+'_set_center_frame'):
