@@ -45,7 +45,9 @@ sudo systemctl restart jans-auth
     - `duo_creds_file` : Path to the file where values for ikey, skey and akey are stored. For example, `/etc/certs/duo_creds.json`
     - `duo_host` : Name of the host supplied by the Duo Security for your web-sdk to connect. For example: `api-random.duosecurity.com`
   
-      [Update the custom script](https://jans.io/docs/admin/config-guide/jans-cli/cli-custom-scripts/#update-an-existing-custom-script) using `jans-cli` to set values for these two properties. There are other optional properties that you can set as per the requirements. Find complete list [here](TODO)
+      [Update the custom script](https://jans.io/docs/admin/config-guide/jans-cli/cli-custom-scripts/#update-an-existing-custom-script) using `jans-cli` to set values for these two properties. 
+      
+<!--       There are other optional properties that you can set as per the requirements. Find complete list [here](TODO) -->
 
 ## Install Casa Duo plugin
 Follow [these instructions](https://gluu.org/docs/casa/plugins/duo/#add-the-plugin-to-casa) to install Casa Duo plugin 
