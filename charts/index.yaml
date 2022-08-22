@@ -3,7 +3,7 @@ entries:
   janssen:
   - annotations:
       artifacthub.io/changes: |
-        - Update always
+        - testing
       artifacthub.io/containsSecurityUpdates: "true"
       artifacthub.io/images: |
         - name: auth-server
