@@ -6,7 +6,12 @@ on:
   release:
     types:
       - published
-
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g."v1.0.0")'
+        default: "v1.0.0"
+        required: false
 jobs:
   build:
     env:
@@ -29,19 +34,40 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --require-hashes -r docs/requirements.txt
+          cp mkdocs.yml ../
+
+      - name: Checkout jans ${{ github.event.inputs.version }}
+        if: >-
+          github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v3
+        with:
+          ref: '${{ github.event.inputs.version }}'
+          fetch-depth: 0
+
+      - name: Copy files from main to ${{ github.event.inputs.version }}
+        if: >-
+          github.event_name == 'workflow_dispatch'
+        run: |
+          mv ../mkdocs.yml mkdocs.yml
 
       - name: Generate docs
-        run: echo "Something should happen here"
+        run: echo "Custom work on generating docs can go here."
 
       - name: git config
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
+      - name: mike deploy ${{ github.event.inputs.version }}
+        if: >-
+          github.event_name == 'workflow_dispatch'
+        run: |
+          mike deploy --push --force ${{ github.event.inputs.version }}
+
       # This deploys the current docs into gh-pages/head on merges to main
       # The old "main" gets deleted if it exists, head is more descriptive
       - name: mike deploy head
-        if: contains(github.ref, 'refs/heads/main')
+        if: contains(github.ref, 'refs/heads/main') && github.event_name != 'workflow_dispatch'
         run: |
           mike deploy --push head
 
@@ -58,6 +84,8 @@ jobs:
           mike deploy --push "$VERSION"
 
       - name: Update mike version aliases
+        if: >-
+          github.event_name != 'workflow_dispatch'
         id: set_versions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,6 +104,8 @@ jobs:
       # Commits if the files were changed
       # Finally pushes if there are unpushed commits
       - name: Create version files
+        if: >-
+          github.event_name != 'workflow_dispatch'
         run: |
           LATEST=${{ steps.set_versions.outputs.LATEST }}
           STABLE=${{ steps.set_versions.outputs.STABLE }}
@@ -91,6 +121,11 @@ jobs:
   # Because the output of the index.yaml is also in gh-pages we want to ensure the jobs run after each other
   # This releases the helm chart
   release-helm-chart:
+    if: >-
+      github.event_name == 'release' &&
+      github.event.action == 'published' &&
+      !github.event.release.draft &&
+      !github.event.release.prerelease
     # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
     # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
     needs: build
