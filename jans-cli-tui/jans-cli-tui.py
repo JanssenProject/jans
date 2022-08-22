@@ -112,7 +112,9 @@ class JansCliApp(Application, JansAuthServer):
 
         self.yes_button = Button(text="Yes", handler=accept_yes)
         self.no_button = Button(text="No", handler=accept_no)
-        self.status_bar = TextArea(style="class:status", height=1, focusable=False)
+        self.status_bar = Window(
+                        FormattedTextControl(self.update_status_bar), style="class:status", height=1
+                    )
 
         self.prapare_dialogs()
 
@@ -208,7 +210,7 @@ class JansCliApp(Application, JansAuthServer):
 
         else:
             if not test_client and not self.cli_object.access_token:
-                
+
                     response = self.cli_object.get_device_verification_code()
                     result = response.json()
 
@@ -282,11 +284,9 @@ class JansCliApp(Application, JansAuthServer):
 
     def focus_next(self, ev):
         focus_next(ev)
-        self.update_status_bar()
 
     def focus_previous(self, ev):
         focus_previous(ev)
-        self.update_status_bar()
 
     def set_keybindings(self):
         # Global key bindings.
@@ -436,7 +436,7 @@ class JansCliApp(Application, JansAuthServer):
                 wname = getattr(self.layout.current_window, 'jans_name', 'NA')
                 text = help_text_dict.get(wname, '')
 
-        self.status_bar.text = text
+        return text
 
     def main_nav_selection_changed(self, selection):
         if hasattr(self, selection+'_set_center_frame'):
