@@ -9,18 +9,25 @@ from prompt_toolkit.key_binding.bindings.focus import focus_next
 from prompt_toolkit.layout.dimension import D
 
 class JansSelectBox:
-    def __init__(self, entries=[],height=4,rotatable_up=True,rotatable_down=True):
-        self.entries = entries
-        self.selected_line = 0
+    def __init__(self, values=[], value=None, height=4, rotatable_up=True, rotatable_down=True):
+        open("/tmp/aaa.txt", "a").write(str(value)+'\n')
+        self.values = values
+        self.value = value
+
+        for i, val in enumerate(values):
+            if val[0] == value:
+                self.selected_line = i
+                break
+        else:
+            self.selected_line = 0
+
         # --------------------------------------------------- #
-        self.height=min(len(self.entries),height)
+        self.height=min(len(self.values), height)
         self.rotatable_up = rotatable_up
         self.rotatable_down = rotatable_down
-        self.firstValue = self.entries[0]   
-        self.lastValue = self.entries[-1]
         # --------------------------------------------------- #
 
-        self.container =HSplit(children=[  Window(
+        self.container =HSplit(children=[ Window(
             content=FormattedTextControl(
                 text=self._get_formatted_text,
                 focusable=True,
@@ -32,13 +39,13 @@ class JansSelectBox:
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True,
             allow_scroll_beyond_bottom=True,
-            
-            
         )])
 
     def _get_formatted_text(self):
+        open("/tmp/aaa.txt", "a").write(str(self.selected_line)+'\n')
+
         result = []
-        for i, entry in enumerate(self.entries):
+        for i, entry in enumerate(self.values):
             if i == self.selected_line:
                 result.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#ADD8E6', entry[1])))
             else:
@@ -49,47 +56,42 @@ class JansSelectBox:
 
 
     def shift(self,seq, n):
-        return seq[n:]+seq[:n]  
+        return seq[n:]+seq[:n]
 
     def up(self):
-        if self.selected_line  == 0 :
-            if self.rotatable_up and  self.entries[self.selected_line] == self.firstValue:
+        if self.selected_line == 0 :
+            if self.rotatable_up and  self.values[self.selected_line] == self.values[0]:
                 pass
             else :
-                self.entries = self.shift(self.entries,-1) 
+                self.values = self.shift(self.values,-1) 
         else :
-            self.selected_line = (self.selected_line - 1)  % (self.height)
+            self.selected_line = (self.selected_line - 1) % (self.height)
 
 
     def down(self):
 
-        if self.selected_line +1 == (self.height) :
-            if self.rotatable_down and  self.entries[self.selected_line] == self.lastValue:
+        if self.selected_line +1 == (self.height):
+            if self.rotatable_down and  self.values[self.selected_line] == self.values[-1]:
                 pass
             else:
-                self.entries = self.shift(self.entries,1)  
+                self.values = self.shift(self.values, 1)
         else :
-            self.selected_line = (self.selected_line + 1)  % (self.height)
+            self.selected_line = (self.selected_line + 1) % (self.height)
 
-        ### to jump the holl height
-        # if self.selected_line +1 < (self.height) :            
-        #     self.selected_line = (self.selected_line + 1)  % (self.height)
-        # elif self.selected_line +1 == (self.height) :
-        #     self.entries = self.shift(self.entries,self.height)
-        #     self.selected_line = (self.selected_line + 1)  % (self.height)
 
     def __pt_container__(self):
         return self.container
 
 
 class DropDownWidget:
-    def __init__(self, entries=[]):
-        self.entries = entries
-        if self.entries:  ## should be replaced with the selected from data.
-            self.text = self.entries[0][1]
+    def __init__(self, values=[], value=None):
+        self.values = values
+        for val in values:
+            if val[0] == value:
+                self.text = val[1]
+                break
         else:
-            self.text = "Enter to Select"
-
+            self.text = self.values[0][1] if self.values else "Enter to Select"
 
         self.dropdown = True
         self.window = Window(
@@ -99,7 +101,7 @@ class DropDownWidget:
                  key_bindings=self._get_key_bindings(),
             ), height=D()) #5  ## large sized enties get >> (window too small)
 
-        self.select_box = JansSelectBox(entries=self.entries,rotatable_down=True,rotatable_up=True,height=4)
+        self.select_box = JansSelectBox(values=self.values, value=value, rotatable_down=True, rotatable_up=True, height=4)
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
 
 
@@ -122,8 +124,10 @@ class DropDownWidget:
             if self.select_box_float not in get_app().layout.container.floats:
                 get_app().layout.container.floats.append(self.select_box_float)
             else:
-                self.text = self.select_box.entries[self.select_box.selected_line][1]
+                self.text = self.select_box.values[self.select_box.selected_line][1]
                 get_app().layout.container.floats.remove(self.select_box_float)
+
+            self.value = self.select_box.value
 
         @kb.add("up")
         def _up(event):

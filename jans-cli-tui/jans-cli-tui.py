@@ -401,9 +401,17 @@ class JansCliApp(Application, JansAuthServer):
         rl.window.jans_name = name
         rl.window.jans_help = jans_help
         rl.window.me = rl
-        li, rl2, width = self.handle_long_string(title,values,rl)
+        li, rl2, width = self.handle_long_string(title, values, rl)
 
-        return VSplit([Label(text=li, width=width,style=style), rl2],)
+        return VSplit([Label(text=li, width=width, style=style), rl2],)
+
+
+    def getTitledWidget(self, title, name, widget, style=''):
+        widget.window.me = widget
+        widget.window.jans_name = name
+        li, w2, width = self.handle_long_string(title, widget.values, widget)
+
+        return VSplit([Label(text=li, width=width, style=style), widget])
 
     # ----------------------------------------------------------------- #
     def getButton(self, text, name, jans_help, handler=None):

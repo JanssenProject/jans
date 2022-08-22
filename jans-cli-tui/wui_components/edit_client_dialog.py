@@ -89,7 +89,15 @@ class EditClientDialog(JansGDialog):
                         self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), style='green'),
                         self.myparent.getTitledText("Client Secret", name='clientSecret', value=self.data.get('clientSecret',''), style='green'),
                         self.myparent.getTitledText("Description", name='description', value=self.data.get('description',''), style='green'),
-                        DropDownWidget(entries=[('client_secret_basic','client_secret_basic'),('client_secret_post','client_secret_post'),('client_secret_jwt','client_secret_jwt'),('private_key_jwt','private_key_jwt')]),
+                        self.myparent.getTitledWidget(
+                            "Authn Method token endpoint",
+                            name='tokenEndpointAuthMethodsSupported',
+                            widget=DropDownWidget(
+                                values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
+                                value=self.data.get('tokenEndpointAuthMethodsSupported')
+                                ),
+                            style='green'
+                            ),
                         self.myparent.getTitledRadioButton("Subject Type", name='subjectType', values=[('public', 'Public'),('pairwise', 'Pairwise')], current_value=self.data.get('subjectType'), style='green'),
                         self.myparent.getTitledCheckBoxList("Grant", name='grantTypes', values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')], current_values=self.data.get('grantTypes', []), style='green'),
                         self.myparent.getTitledCheckBoxList("Response Types", name='responseTypes', values=['code', 'token', 'id_token'], current_values=self.data.get('responseTypes', []), style='green'),
@@ -162,8 +170,8 @@ class EditClientDialog(JansGDialog):
                         self.myparent.getTitledRadioButton("PRT token type", name='applicationType!', values=['JWT', 'Reference'], current_value=self.data.get('applicationType!'),style='green'),
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
                         
-                        DropDownWidget(entries=[('rptClaimsScripts','rptClaimsScripts')]),
-                        DropDownWidget(entries=[('claimRedirectUris','claimRedirectUris')]),
+                        DropDownWidget(values=[('rptClaimsScripts','rptClaimsScripts')]),
+                        DropDownWidget(values=[('claimRedirectUris','claimRedirectUris')]),
 
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
               
@@ -237,13 +245,12 @@ class EditClientDialog(JansGDialog):
         )
         
         self.tabs['Client Scripts'] = HSplit([
-            DropDownWidget(entries=[('spontaneousScopes','spontaneousScopes')]),
-            DropDownWidget(entries=[('updateTokenScriptDns','updateTokenScriptDns')]),
-            DropDownWidget(entries=[('postAuthnScripts','postAuthnScripts')]),
-            DropDownWidget(entries=[('introspectionScripts','introspectionScripts')]),
-            DropDownWidget(entries=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
-            DropDownWidget(entries=[('consentGatheringScripts','consentGatheringScripts')]),
-
+            DropDownWidget(values=[('spontaneousScopes','spontaneousScopes')]),
+            DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
+            DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
+            DropDownWidget(values=[('introspectionScripts','introspectionScripts')]),
+            DropDownWidget(values=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
+            DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
                         ]
                         )
     

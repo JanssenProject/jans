@@ -43,7 +43,6 @@ from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.edit_client_dialog import EditClientDialog
 from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_data_picker import DateSelectWidget
 
 class JansAuthServer:
 
@@ -270,7 +269,7 @@ class JansAuthServer:
             return True
 
     def add_client(self):
-        dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)
+        dialog = EditClientDialog(self, title="Add Client", data={'tokenEndpointAuthMethodsSupported':'private_key_jwt'}, save_handler=self.save_client)
         result = self.show_jans_dialog(dialog)
 
     def delete_client(self, selected, event):
