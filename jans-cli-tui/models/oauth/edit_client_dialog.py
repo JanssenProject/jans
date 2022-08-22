@@ -43,6 +43,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
+from wui_components.jans_data_picker import DateSelectWidget
 
 class EditClientDialog(JansGDialog):
     def __init__(self, parent, title, data, buttons=[], save_handler=None):
@@ -169,19 +170,19 @@ class EditClientDialog(JansGDialog):
                         Label("UMA",style='bold'),
                         self.myparent.getTitledRadioButton("PRT token type", name='applicationType!', values=['JWT', 'Reference'], current_value=self.data.get('applicationType!'),style='green'),
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
-                        
-                        #self.myparent.getTitledWidget(
-                        #    "RPT Mofification Script",
-                        #    name='',
-                        #    widget=DropDownWidget(values=[('rptClaimsScripts','rptClaimsScripts')]),
-                        #    value='',
-                        #    ),
-                        #self.myparent.getTitledWidget(
-                        #    title="title here",
-                        #    name='',
-                        #    widget=DropDownWidget(values=[('claimRedirectUris','claimRedirectUris')]),
-                        #    value='',
-                        #    ),
+                       
+                        self.myparent.getTitledWidget(
+                           "RPT Mofification Script",
+                           name='rptClaimsScripts',
+                           widget=DropDownWidget(
+                            values=[('rptClaimsScripts','rptClaimsScripts')]),
+                           ),
+                        self.myparent.getTitledWidget(
+                           title="title here",
+                           name='claimRedirectUris',
+                           widget=DropDownWidget(
+                            values=[('claimRedirectUris','claimRedirectUris')]),
+                           ),
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
               
                         ]
@@ -235,8 +236,13 @@ class EditClientDialog(JansGDialog):
                                 self.myparent.getTitledText("Request URIs", name='requestUris', value=self.data.get('requestUris',''),style='green'),
                                 Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3,)
                             ]) ,  
+                        self.myparent.getTitledWidget(
+                           title="Defult ACR",
+                           name='authorizedAcrValues',
+                           widget=DropDownWidget(
+                            values=[('authorizedAcrValues','authorizedAcrValues')]),
+                           ),
 
-                            Label(text="Dropdown 3",style='blue'),
 
                         VSplit([
                                 # self.myparent.getTitledText("Allowed ACRs", name='clientSecret', value=self.data.get('clientSecret',''),style='green'),
@@ -247,7 +253,12 @@ class EditClientDialog(JansGDialog):
                         VSplit([
                         # self.myparent.getTitledCheckBox("Client Experiation Date", name='id_token_claims', checked=self.data.get('id_token_claims'),style='green'),
                         # attached to date
-                            Label(text="Pick Date",style='blue'),
+                        VSplit([Label(text="Client Experiation Date",
+                         width=len("Client Experiation Date"),),
+                           DateSelectWidget(data="20/2/1997")]),
+                          
+
+
                             ]) , 
    
                         ],width=D()
@@ -255,24 +266,24 @@ class EditClientDialog(JansGDialog):
         
         self.tabs['Client Scripts'] = HSplit([
             
-            #self.myparent.getTitledWidget(
+            # self.myparent.getTitledWidget(
             #    widget=DropDownWidget(values=[('spontaneousScopes','spontaneousScopes')]),
-            #),
-            #self.myparent.getTitledWidget(
+            # ),
+            # self.myparent.getTitledWidget(
             #    widget=DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
-            #),
-            #self.myparent.getTitledWidget(
+            # ),
+            # self.myparent.getTitledWidget(
             #    widget=DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
-            #),
-            #self.myparent.getTitledWidget(
+            # ),
+            # self.myparent.getTitledWidget(
             #    widget=DropDownWidget(values=[('introspectionScripts','introspectionScripts')]),
-            #),
-            #self.myparent.getTitledWidget(
+            # ),
+            # self.myparent.getTitledWidget(
             #    widget=DropDownWidget(values=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
-            #),
-            #self.myparent.getTitledWidget(
+            # ),
+            # self.myparent.getTitledWidget(
             #    widget=DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
-            #),
+            # ),
 
                         ]
                         )

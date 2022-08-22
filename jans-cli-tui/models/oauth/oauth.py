@@ -44,6 +44,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_drop_down import DropDownWidget
 from models.oauth.edit_client_dialog import EditClientDialog
 from models.oauth.edit_scope_dialog import EditScopeDialog
+from wui_components.jans_data_picker import DateSelectWidget
 
 
 class JansAuthServer:
@@ -81,7 +82,7 @@ class JansAuthServer:
                         self.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
                         self.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search'),
                         self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client),
-                        DateSelectWidget(),
+                        
                         ],
                         padding=3,
                         width=D(),
