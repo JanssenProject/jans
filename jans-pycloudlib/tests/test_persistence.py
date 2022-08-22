@@ -382,8 +382,6 @@ def test_render_couchbase_properties(monkeypatch, tmpdir, gmanager, bucket_prefi
 connection.connect-timeout: %(couchbase_conn_timeout)s
 connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.scan-consistency: %(couchbase_scan_consistency)s
-connection.keep-alive-interval: %(couchbase_keepalive_interval)s
-connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
 buckets: %(couchbase_buckets)s
 bucket.default: %(default_bucket)s
 %(couchbase_mappings)s
@@ -393,8 +391,6 @@ bucket.default: %(default_bucket)s
 connection.connect-timeout: 10000
 connection.connection-max-wait-time: 20000
 connection.scan-consistency: not_bounded
-connection.keep-alive-interval: 30000
-connection.keep-alive-timeout: 2500
 buckets: {bucket_prefix}, {bucket_prefix}_user, {bucket_prefix}_cache, {bucket_prefix}_site, {bucket_prefix}_token, {bucket_prefix}_session
 bucket.default: {bucket_prefix}
 bucket.{bucket_prefix}_user.mapping: people, groups, authorizations
@@ -433,8 +429,6 @@ def test_render_couchbase_properties_hybrid(monkeypatch, tmpdir, gmanager):
 connection.connect-timeout: %(couchbase_conn_timeout)s
 connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.scan-consistency: %(couchbase_scan_consistency)s
-connection.keep-alive-interval: %(couchbase_keepalive_interval)s
-connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
 buckets: %(couchbase_buckets)s
 bucket.default: %(default_bucket)s
 %(couchbase_mappings)s
@@ -444,8 +438,6 @@ bucket.default: %(default_bucket)s
 connection.connect-timeout: 10000
 connection.connection-max-wait-time: 20000
 connection.scan-consistency: not_bounded
-connection.keep-alive-interval: 30000
-connection.keep-alive-timeout: 2500
 buckets: jans, jans_user, jans_token
 bucket.default: jans
 bucket.jans_user.mapping: people, groups, authorizations

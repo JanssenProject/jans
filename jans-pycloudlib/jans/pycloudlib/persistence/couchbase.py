@@ -251,8 +251,6 @@ def render_couchbase_properties(manager: Manager, src: str, dest: str) -> None:
             "couchbase_conn_timeout": get_couchbase_conn_timeout(),
             "couchbase_conn_max_wait": get_couchbase_conn_max_wait(),
             "couchbase_scan_consistency": get_couchbase_scan_consistency(),
-            "couchbase_keepalive_interval": get_couchbase_keepalive_interval(),
-            "couchbase_keepalive_timeout": get_couchbase_keepalive_timeout(),
         }
         fw.write(rendered_txt)
 

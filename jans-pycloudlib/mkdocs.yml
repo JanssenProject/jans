@@ -7,11 +7,17 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          # Finding modules using `paths` or `PYTHONPATH` probably will throw ModuleNotFoundError
+          # errors in resolving `jans` and other 3rd-party packages.
+          # A workaround is to run `mkdocs serve` or `mkdocs build` inside environment where
+          # all packages are installed.
+          #
+          # ref: https://mkdocstrings.github.io/python/usage/#finding-modules
+          # paths: ["."]
           import:
             - https://docs.python.org/3/objects.inv
             - https://cryptography.io/en/latest/objects.inv
             - https://requests.readthedocs.io/en/latest/objects.inv
-          paths: ["/home/iromli/work/janssen/jans/jans-pycloudlib"]
           options:
             show_root_heading: true
             show_source: false
@@ -29,7 +35,6 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.details
   - mkdocs-click
-
 
 nav:
   - "Introduction": index.md
