@@ -69,7 +69,7 @@ try {
 
     <#if catch>
 } catch (_e) {
-     var ${.node.preassign_catch.short_var} = _e
+     var ${.node.preassign_catch.short_var} = _e.javaException
 }
     </#if>
 </#macro>
