@@ -38,35 +38,35 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management
 name: janssen
-version: 1.0.3
+version: 1.0.2-dev
 dependencies:
   - name: config
     condition: global.config.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: config-api
     condition: global.config-api.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: opendj
     condition: global.opendj.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: auth-server
     condition: global.auth-server.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: fido2
     condition: global.fido2.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: scim
     condition: global.scim.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: nginx-ingress
     condition: global.nginx-ingress.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: auth-server-key-rotation
     condition: global.auth-server-key-rotation.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: client-api
     condition: global.client-api.enabled
-    version: 1.0.3
+    version: 1.0.2-dev
   - name: persistence
     condition: global.persistence.enabled
-    version: 1.0.3
+    version: 1.0.2-dev

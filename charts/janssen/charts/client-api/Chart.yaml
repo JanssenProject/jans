@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: client-api
-version: 1.0.3
+version: 1.0.2-dev
 kubeVersion: ">=v1.21.0-0"
 description: Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
 type: application
@@ -18,4 +18,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "1.0.3"
+appVersion: "1.0.2-dev"
