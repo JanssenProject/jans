@@ -1,0 +1,521 @@
+apiVersion: v1
+entries:
+  janssen:
+  - annotations:
+      artifacthub.io/changes: |
+        - Update always
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.2_dev
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.2_dev
+        - name: configuration-manager
+          image: janssenproject/configurator:1.0.2_dev
+        - name:  config-api
+          image: janssenproject/config-api:1.0.2_dev
+        - name: fido2
+          image: janssenproject/fido2:1.0.2_dev
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.2_dev
+        - name: scim
+          image: janssenproject/scim:1.0.2_dev
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    created: "2022-07-13T09:57:05.4511404Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.2-dev
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.2-dev
+    description: Janssen Access and Identity Management
+    digest: d6f9afe111c180085e33e9b71c1cebbfab2455415d3525ef66d1cc0bc980ca2d
+    home: https://jans.io
+    icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.21.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/charts/janssen
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/janssen-1.0.2-dev/janssen-1.0.2-dev.tgz
+    version: 1.0.2-dev
+  - annotations:
+      artifacthub.io/changes: |
+        - Update always
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.1-1
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.1-1
+        - name: configuration-manager
+          image: janssenproject/configurator:1.0.1-1
+        - name:  config-api
+          image: janssenproject/config-api:1.0.1-1
+        - name: fido2
+          image: janssenproject/fido2:1.0.1-1
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.1-1
+        - name: scim
+          image: janssenproject/scim:1.0.1-1
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    appVersion: 1.0.1-dev
+    created: "2022-07-13T09:57:05.4401404Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.1
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.1
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.1
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.1
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.1
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.1
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.1
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.1
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.1
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.1
+    description: Janssen Access and Identity Management
+    digest: 466aa0823c784924e2d5caaa43221dc1a04ed2ba7955ef3731625a4372ba3ea4
+    home: https://jans.io
+    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.21.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/charts/janssen
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/janssen-1.0.1/janssen-1.0.1.tgz
+    version: 1.0.1
+  - annotations:
+      artifacthub.io/changes: |
+        - Update always
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.0-1
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.0-1
+        - name:  client-api
+          image: janssenproject/client-api:1.0.0-1
+        - name: configuration-manager
+          image: janssenproject/configurator:1.0.0-1
+        - name:  config-api
+          image: janssenproject/config-api:1.0.0-1
+        - name: fido2
+          image: janssenproject/fido2:1.0.0-1
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.0-1
+        - name: scim
+          image: janssenproject/scim:1.0.0-1
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-07-13T09:57:05.4186276Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.0
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.0
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.0
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.0
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.0
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.0
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.0
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.0
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.0
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.0
+    description: Janssen Access and Identity Management
+    digest: e93f3be1d0a63ee63442bc1160073abd46d18ca0b086ebfd258ac92288d44fb1
+    home: https://jans.io
+    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.21.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/charts/janssen
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/janssen-1.0.0/janssen-1.0.0.tgz
+    version: 1.0.0
+  - annotations:
+      artifacthub.io/changes: |
+        - Update always
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.0-beta.16
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.0-beta.16
+        - name:  client-api
+          image: janssenproject/client-api:1.0.0-beta.16
+        - name: configuration-manager
+          image: janssenproject/configurator:1.0.0-beta.16
+        - name:  config-api
+          image: janssenproject/config-api:1.0.0-beta.16
+        - name: fido2
+          image: janssenproject/fido2:1.0.0-beta.16
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.0-beta.16
+        - name: scim
+          image: janssenproject/scim:1.0.0-beta.16
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-07-13T09:57:05.4076252Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.0-beta.16
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.0-beta.16
+    description: Janssen Access and Identity Management
+    digest: a78e34cb0ffc779ac5108632acec52d8adb708dc0d14ce210b39814236920673
+    home: https://jans.io
+    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.21.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/charts/janssen
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/janssen-1.0.0-beta.16/janssen-1.0.0-beta.16.tgz
+    version: 1.0.0-beta.16
+  - annotations:
+      artifacthub.io/changes: |
+        - Update always
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.0-beta.15
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.0-beta.15
+        - name:  client-api
+          image: janssenproject/client-api:1.0.0-beta.15
+        - name: configuration-manager
+          image: janssenproject/configurator:1.0.0-beta.15
+        - name:  config-api
+          image: janssenproject/config-api:1.0.0-beta.15
+        - name: fido2
+          image: janssenproject/fido2:1.0.0-beta.15
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.0-beta.15
+        - name: scim
+          image: janssenproject/scim:1.0.0-beta.15
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-07-13T09:57:05.3956246Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.0-beta.15
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.0-beta.15
+    description: Janssen Access and Identity Management
+    digest: c2505f6a003df19f3c449382db7b327c764ae2d94df8e04e73d6444b27745208
+    home: https://jans.io
+    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.21.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/charts/janssen
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/janssen-1.0.0-beta.15/janssen-1.0.0-beta.15.tgz
+    version: 1.0.0-beta.15
+  - annotations:
+      artifacthub.io/changes: |
+        - Update always
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.0-beta.14
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.0-beta.14
+        - name:  client-api
+          image: janssenproject/client-api:1.0.0-beta.14
+        - name: configuration-manager
+          image: janssenproject/configurator:1.0.0-beta.14
+        - name:  config-api
+          image: janssenproject/config-api:1.0.0-beta.14
+        - name: fido2
+          image: janssenproject/fido2:1.0.0-beta.14
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.0-beta.14
+        - name: scim
+          image: janssenproject/scim:1.0.0-beta.14
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-07-13T09:57:05.383612Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.0-beta.14
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.0-beta.14
+    description: Janssen Access and Identity Management
+    digest: 19e4af126d7b62435439749d1d0ca7c31f84fc4bfceef4adc1c63912cc9176d3
+    home: https://jans.io
+    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.21.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/charts/janssen
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/janssen-1.0.0-beta.14/janssen-1.0.0-beta.14.tgz
+    version: 1.0.0-beta.14
+generated: "2022-07-13T09:57:05.3716135Z"
