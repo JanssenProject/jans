@@ -84,8 +84,8 @@ jobs:
           mike deploy --push "$VERSION"
 
       - name: Update mike version aliases
-        if: >-
-          github.event_name != 'workflow_dispatch'
+        #if: >-
+        # github.event_name != 'workflow_dispatch'
         id: set_versions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -93,6 +93,9 @@ jobs:
           TAGS=$(gh release list -L 1000 -R ${{ github.repository }} | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
           LATEST=$(echo "${TAGS}" | tail -1)
           STABLE=$(echo "${TAGS}" | grep -v -- "-" | tail -1)
+          # remove below two lines after first rrlease
+          LATEST="head"
+          STABLE="head"
           mike alias -u head main
           mike alias -u "${STABLE}" stable
           mike set-default --push stable
@@ -104,8 +107,8 @@ jobs:
       # Commits if the files were changed
       # Finally pushes if there are unpushed commits
       - name: Create version files
-        if: >-
-          github.event_name != 'workflow_dispatch'
+        #if: >-
+        #  github.event_name != 'workflow_dispatch'
         run: |
           LATEST=${{ steps.set_versions.outputs.LATEST }}
           STABLE=${{ steps.set_versions.outputs.STABLE }}
