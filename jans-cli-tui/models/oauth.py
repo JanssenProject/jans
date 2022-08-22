@@ -80,6 +80,7 @@ class JansAuthServer:
                         self.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
                         self.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search'),
                         self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client),
+                        DateSelectWidget(),
                         ],
                         padding=3,
                         width=D(),
