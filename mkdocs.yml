@@ -1,25 +1,75 @@
 # Project information
 site_name: Janssen Documentation
 site_description: Janssen Project Deployment and Operation References
+site_author: Janssen, Inc.
+site_url: https://jans.io/docs
 
 # Copyright
 copyright: Copyright &copy; 2022, The Janssen Project
 
 # Repository
 docs_dir: ./docs
-repo_name: JanssenProject/jans
+repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 edit_uri: edit/main/docs/
 
+# Plugins
+plugins:
+    - search
+    - git-revision-date-localized:
+        type: timeago
+        enable_creation_date: true
+    - git-committers:
+        repository: JanssenProject/jans
+        token: !ENV GH_TOKEN
 # Configuration
 theme:
     name: material
+    highlightjs: true
+    hljs_languages:
+        - yaml
+        - java
+        - bash
+        - python
+    shortcuts:
+        help: 191    # ?
+        next: 78     # n
+        previous: 80 # p
+        search: 83   # s
+    language: 'en'
+    font:
+        text: Roboto
+        code: Roboto Mono
     palette:
-        primary: 'green'
-        accent: 'green'
-    logo: 'assets/janssen_project.png'
+        # Palette toggle for automatic mode
+        - media: "(prefers-color-scheme)"
+          primary: green
+          accent: green
+          toggle:
+            icon: material/brightness-auto
+            name: Switch to light mode
+        # Palette toggle for light mode
+        - media: "(prefers-color-scheme: light)"
+          primary: green
+          accent: green
+          scheme: default
+          toggle:
+            icon: material/brightness-7
+            name: Switch to dark mode
+        # Palette toggle for dark mode
+        - media: "(prefers-color-scheme: dark)"
+          primary: green
+          accent: green
+          scheme: slate
+          toggle:
+            icon: material/brightness-4
+            name: Switch to system preference
+    logo: 'assets/janssen_project.svg'
     favicon: 'assets/janssen_project_favicon_transparent_50px_50px.ico'
     features:
+        - toc.autohide
+          - search.suggest
+          - search.highlight
         - navigation.tracking
         - navigation.tabs
         - navigation.tabs.sticky
@@ -41,7 +91,19 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 - pymdownx.tabbed
-    
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/JanssenProject/jans
+      name: Janssen on GitHub
+    - icon: fontawesome/solid/link
+      link: https://jans.io/docs
+      name: Janssen Website
+  version:
+    provider: mike
+    default: stable
 # Navigation
 nav:
 - 'Administration':
@@ -86,6 +148,7 @@ nav:
             - 'Local Kubernetes Cluster': 'admin/install/helm-install/local.md'
             - 'Amazon EKS': 'admin/install/helm-install/amazon-eks.md'
             - 'Google GKE': 'admin/install/helm-install/google-gke.md'
+            - 'Digital Ocean DOK': 'admin/install/helm-install/digitalocean-dok.md'
             - 'Microsoft Azure AKS': 'admin/install/helm-install/microsoft-azure.md'
             - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
             - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
@@ -327,16 +390,17 @@ nav:
             - 'Config API': 'admin/reference/json/config-api.md'
         - 'Javadocs': 'admin/reference/javadocs.md'
         - 'Kubernetes':
+            - 'Helm Chart': 'admin/reference/kubernetes/helm-chart.md'
             - 'Config and Secret Keys': 'admin/reference/kubernetes/config-secret-keys.md'
             - 'Image Config Properties':
-                - 'Config Init': 'admin/reference/kubernetes/image-config-init.md'
+                - 'Configurator': 'admin/reference/kubernetes/image-configurator.md'
                 - 'Auth Server': 'admin/reference/kubernetes/image-auth-server.md'
                 - 'Config API': 'admin/reference/kubernetes/image-config-api.md'
                 - 'FIDO': 'admin/reference/kubernetes/image-fido.md'
                 - 'SCIM': 'admin/reference/kubernetes/image-scim.md'
                 - 'Client API': 'admin/reference/kubernetes/image-client-api.md'
                 - 'Persistence': 'admin/reference/kubernetes/image-persistence.md'
-                - 'Gluu Cert Manager': 'admin/reference/kubernetes/image-cert-mgr.md'
+                - 'Cert Manager': 'admin/reference/kubernetes/image-cert-mgr.md'
                 - 'Gluu OpenDJ': 'admin/reference/kubernetes/image-opendj.md'
     - 'Jans Eleven Admin Guide':
         - 'Overview': 'admin/eleven/index.md'

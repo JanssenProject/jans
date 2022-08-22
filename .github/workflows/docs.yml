@@ -96,3 +96,21 @@ jobs:
             exit 1
           fi
           
+
+  lint_docs:
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Markdown linter
+        continue-on-error: true
+        run: |
+          sudo apt-get install rubygems -y
+          sudo gem install mdl
+          mdl docs/
+
