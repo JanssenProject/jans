@@ -142,6 +142,12 @@ Branch name should have component name as prefix, eg `jans-core-mybranch`
 ### Issues 
 - Issue titles should follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 
+### Backport changes to a different version
+
+Backport changes are now supported through a [workflow](https://github.com/zeebe-io/backport-action#backport-action) through labels prefixed with `backport/`.
+For-example to backport changes in a certain PR to version `v1.0.0` a label to that PR matching the version must be added i.e `backport/v1.0.0`.
+The flow consists of creating a new branch, cherry-picking the changes of the original PR and creating a new PR to merge them.
+
 # Contributing to the documentation
 Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. 
 
