@@ -26,7 +26,7 @@ public class LogUtils {
     //MUST be a single character string
     private static final String PLACEHOLDER = "%";
 
-    private static int MAX_ITERABLE_ITEMS = 1;
+    private static int maxIterableItems = 1;
     
     private enum LogLevel {
         ERROR, WARN, INFO, DEBUG, TRACE;
@@ -48,7 +48,7 @@ public class LogUtils {
         String sfirst;
         int nargs = rest.length - 1;
         
-        MAX_ITERABLE_ITEMS = CdiUtil.bean(EngineConfig.class).getMaxItemsLoggedInCollections();
+        maxIterableItems = CdiUtil.bean(EngineConfig.class).getMaxItemsLoggedInCollections();
 
         Object first = rest[0];
         if (first != null && first instanceof String) {
@@ -163,8 +163,8 @@ public class LogUtils {
         StringBuilder sb = new StringBuilder("[");
         list.forEach(item -> sb.append(asString(item)).append(", "));
 
-        if (originalSize > MAX_ITERABLE_ITEMS) {
-            sb.append("...").append(originalSize - MAX_ITERABLE_ITEMS).append(" more");
+        if (originalSize > maxIterableItems) {
+            sb.append("...").append(originalSize - maxIterableItems).append(" more");
         } else {
             sb.deleteCharAt(sb.length() - 1);
             sb.deleteCharAt(sb.length() - 1);
@@ -191,20 +191,20 @@ public class LogUtils {
             List<Object> list = new ArrayList<>();
             int len = Array.getLength(obj);
 
-            for (int i = 0; i < Math.min(len, MAX_ITERABLE_ITEMS); i++) {
+            for (int i = 0; i < Math.min(len, maxIterableItems); i++) {
                 list.add(Array.get(obj, i));
             }
             return subListAsString(list, len);
             
         } else if (Collection.class.isInstance(obj)) {
 
-            Collection col = (Collection) obj;
+            Collection<?> col = (Collection<?>) obj;
             Iterator iterator = col.iterator();
             
             List<Object> list = new ArrayList<>();
             int len = col.size();
             
-            for (int i = 0; i < Math.min(len, MAX_ITERABLE_ITEMS); i++) {
+            for (int i = 0; i < Math.min(len, maxIterableItems); i++) {
                 list.add(iterator.next());
             }            
             return subListAsString(list, len);  
@@ -217,7 +217,7 @@ public class LogUtils {
 
             for (Object key : map.keySet()) {                
                 entries.add(new AbstractMap.SimpleImmutableEntry(key, map.get(key)));
-                if (++i == MAX_ITERABLE_ITEMS) break;
+                if (++i == maxIterableItems) break;
             }
             return subListAsString(entries, map.size());
             

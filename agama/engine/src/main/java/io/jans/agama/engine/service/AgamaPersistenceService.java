@@ -137,8 +137,8 @@ public class AgamaPersistenceService {
             List<Flow> fls = entryManager.findEntries(AGAMA_FLOWS_BASE, Flow.class, 
                Filter.createEqualityFilter(Flow.ATTR_NAMES.QNAME, flowName), attrs, 1);
             
-            if (fls.size() == 0) {
-                logger.warn("Flow '{}' does not exist!");
+            if (fls.isEmpty()) {
+                logger.warn("Flow '{}' does not exist!", flowName);
             }
             
             return fls.get(0);
