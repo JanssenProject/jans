@@ -31,12 +31,12 @@ We are adding more typehints into the `jans.pycloudlib` sourcecode, gradually.
 
 ### Building internal docs
 
-Internal docs are generated from sphinx-based docs at `docs` directory.
+Internal docs are generated from mkdocs-based docs at `docs` directory.
 To generate/preview docs, run the following steps:
 
 1. Run `pip install -r requirements-dev.txt` to install required libraries.
 1. Preview docs by running `mkdocs serve -w jans`
-1. Visit http://localhost:8000 to see the generated docs (they are reloaded automatically when sourcecode is modified)
+1. Visit http://localhost:8000 to see the generated docs (they are reloaded automatically when source code is modified)
 
 ## Refs
 
