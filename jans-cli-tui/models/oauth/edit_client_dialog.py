@@ -111,11 +111,11 @@ class EditClientDialog(JansGDialog):
                     )
         
         self.tabs['Tokens'] = HSplit([
-                        self.myparent.getTitledRadioButton("Access Token Type", name='accessTokenAsJwt', values=['JWT','Reference'], current_value=self.data.get('accessTokenAsJwt'),style='green'),
-                        self.myparent.getTitledCheckBox("Incliude Claims in id_token", name='includeClaimsInIdToken',  checked=self.data.get('includeClaimsInIdToken'),style='green'),
-                        self.myparent.getTitledCheckBox("Run introspection script before JWT access token creation", name='runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims', checked=self.data.get('runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims'),style='green'),
-                        self.myparent.getTitledText(title="Token binding confirmation  method for id_token", name='idTokenTokenBindingCnf',value=self.data.get('idTokenTokenBindingCnf',''),style='green'),
-                        self.myparent.getTitledText(title="Access token additional audiences", name='additionalAudience',value=self.data.get('additionalAudience',''),style='green'),
+                        self.myparent.getTitledRadioButton("Access Token Type", name='accessTokenAsJwt', values=['JWT','Reference'], current_value=self.data.get('accessTokenAsJwt'), style='green'),
+                        self.myparent.getTitledCheckBox("Incliude Claims in id_token", name='includeClaimsInIdToken',  checked=self.data.get('includeClaimsInIdToken'), style='green'),
+                        self.myparent.getTitledCheckBox("Run introspection script before JWT access token creation", name='runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims', checked=self.data.get('runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims'), style='green'),
+                        self.myparent.getTitledText(title="Token binding confirmation  method for id_token", name='idTokenTokenBindingCnf',value=self.data.get('idTokenTokenBindingCnf',''), style='green'),
+                        self.myparent.getTitledText(title="Access token additional audiences", name='additionalAudience',value=self.data.get('additionalAudience',''), style='green'),
                         VSplit([
                                         Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3)
                         ]),
@@ -170,9 +170,18 @@ class EditClientDialog(JansGDialog):
                         self.myparent.getTitledRadioButton("PRT token type", name='applicationType!', values=['JWT', 'Reference'], current_value=self.data.get('applicationType!'),style='green'),
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
                         
-                        DropDownWidget(values=[('rptClaimsScripts','rptClaimsScripts')]),
-                        DropDownWidget(values=[('claimRedirectUris','claimRedirectUris')]),
-
+                        #self.myparent.getTitledWidget(
+                        #    "RPT Mofification Script",
+                        #    name='',
+                        #    widget=DropDownWidget(values=[('rptClaimsScripts','rptClaimsScripts')]),
+                        #    value='',
+                        #    ),
+                        #self.myparent.getTitledWidget(
+                        #    title="title here",
+                        #    name='',
+                        #    widget=DropDownWidget(values=[('claimRedirectUris','claimRedirectUris')]),
+                        #    value='',
+                        #    ),
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
               
                         ]
@@ -245,12 +254,26 @@ class EditClientDialog(JansGDialog):
         )
         
         self.tabs['Client Scripts'] = HSplit([
-            DropDownWidget(values=[('spontaneousScopes','spontaneousScopes')]),
-            DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
-            DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
-            DropDownWidget(values=[('introspectionScripts','introspectionScripts')]),
-            DropDownWidget(values=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
-            DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
+            
+            #self.myparent.getTitledWidget(
+            #    widget=DropDownWidget(values=[('spontaneousScopes','spontaneousScopes')]),
+            #),
+            #self.myparent.getTitledWidget(
+            #    widget=DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
+            #),
+            #self.myparent.getTitledWidget(
+            #    widget=DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
+            #),
+            #self.myparent.getTitledWidget(
+            #    widget=DropDownWidget(values=[('introspectionScripts','introspectionScripts')]),
+            #),
+            #self.myparent.getTitledWidget(
+            #    widget=DropDownWidget(values=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
+            #),
+            #self.myparent.getTitledWidget(
+            #    widget=DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
+            #),
+
                         ]
                         )
     

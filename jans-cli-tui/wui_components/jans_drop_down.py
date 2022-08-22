@@ -11,14 +11,7 @@ from prompt_toolkit.layout.dimension import D
 class JansSelectBox:
     def __init__(self, values=[], value=None, height=4, rotatable_up=True, rotatable_down=True):
         self.values = values
-        self.value = value
-
-        for i, val in enumerate(values):
-            if val[0] == value:
-                self.selected_line = i
-                break
-        else:
-            self.selected_line = 0
+        self.set_value(value)
 
         # --------------------------------------------------- #
         self.height=min(len(self.values), height)
@@ -39,6 +32,18 @@ class JansSelectBox:
             wrap_lines=True,
             allow_scroll_beyond_bottom=True,
         )])
+
+    def set_value(self, value):
+        self.value = value
+
+        for i, val in enumerate(self.values):
+            if val[0] == value:
+                self.selected_line = i
+                break
+        else:
+            self.selected_line = 0
+
+
 
     def _get_formatted_text(self):
         result = []
@@ -100,6 +105,15 @@ class DropDownWidget:
 
         self.select_box = JansSelectBox(values=self.values, value=value, rotatable_down=True, rotatable_up=True, height=4)
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
+
+    @property
+    def value(self):
+        return self.select_box.value
+
+
+    @value.setter
+    def value(self, value):
+        self.select_box.set_value(value)
 
 
     def _get_text(self):

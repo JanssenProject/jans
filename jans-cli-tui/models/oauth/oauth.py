@@ -242,8 +242,9 @@ class JansAuthServer:
         data = {}
         for tab in dialog.tabs:
             for item in dialog.tabs[tab].children:
-                if hasattr(item, 'children') and hasattr(item.children[1], 'jans_name'):
+                if hasattr(item, 'children') and len(item.children)>1 and hasattr(item.children[1], 'jans_name'):
                     key_ = item.children[1].jans_name
+                    self.logger.debug(key_ + ':' + str(type(item.children[1].me)))
                     if isinstance(item.children[1].me, prompt_toolkit.widgets.base.TextArea):
                         value_ = item.children[1].me.text
                     elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.CheckboxList):
@@ -252,6 +253,9 @@ class JansAuthServer:
                         value_ = item.children[1].me.current_value
                     elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.Checkbox):
                         value_ = item.children[1].me.checked
+                    elif isinstance(item.children[1].me, DropDownWidget):
+                        value_ = item.children[1].me.value
+                    
                     data[key_] = value_
 
         for list_key in ('redirectUris', 'scopes'):
@@ -259,6 +263,8 @@ class JansAuthServer:
                 data[list_key] = data[list_key].splitlines()
 
         self.logger.debug(str(data))
+
+
         response = self.cli_object.process_command_by_id(
             operation_id='post-oauth-openid-clients',
             url_suffix='',
