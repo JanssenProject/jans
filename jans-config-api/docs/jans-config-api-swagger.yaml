@@ -2367,12 +2367,7 @@ paths:
         name: inum
         in: path
         required: true
-      - schema:
-          type: boolean
-          default: false
-        in: query
-        name: withAssociatedClients
-        description: Also fetch associated clients with scopes.
+        
     get:
       tags:
         - OAuth - Scopes
@@ -2394,6 +2389,13 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
+      parameters:
+      - schema:
+          type: boolean
+          default: false
+        in: query
+        name: withAssociatedClients
+        description: Also fetch associated clients with scopes.
     delete:
       tags:
         - OAuth - Scopes
