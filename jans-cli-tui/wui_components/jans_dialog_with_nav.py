@@ -1,3 +1,6 @@
+from shutil import get_terminal_size
+
+
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
@@ -9,7 +12,7 @@ from prompt_toolkit.widgets import (
 )
 
 
-from prompt_toolkit.layout import ScrollablePane
+from prompt_toolkit.layout import ScrollablePane, Layout
 
 
 class JansDialogWithNav():
@@ -25,23 +28,19 @@ class JansDialogWithNav():
     def create_window(self):
 
         max_data_str = 30 ## TODO TO BE Dynamic
+        wwidth, wheight = get_terminal_size()
 
+        height = 19 if wheight <= 30 else wheight - 11
 
         self.dialog = Dialog(
             title=self.title,
-            body=ScrollablePane(content=VSplit([
-                 HSplit(
-                            [
-                                self.navbar
-                            ],
-
-                            width= (max_data_str )  #self.width 
-                        ),
-                         Window(width=1, char="|",),
-                        HSplit([
-                            self.content
-                        ]),
-                ], width=120, height=30)),
+            body=VSplit([
+                    HSplit([
+                        self.navbar
+                        ], width= (max_data_str )),
+                    Window(width=1, char="|",),
+                    ScrollablePane(content=self.content, height=height),
+                ], width=120),
 
             buttons=[
                 Button(
