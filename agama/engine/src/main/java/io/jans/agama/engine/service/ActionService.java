@@ -162,6 +162,7 @@ public class ActionService {
                 continue;
             }
             
+            //argClass does not carry type information due to Java type erasure
             Class<?> argClass = arg.getClass();
 
             //Try to apply cheaper conversions first (in comparison to mapper-based conversion)
@@ -204,21 +205,18 @@ public class ActionService {
             } else {
                 //argClass should be NativeArray or NativeObject if the value was not created/derived
                 //from a Java call
-                String argClassName = argClass.getCanonicalName();
                 Type parameterizedType = p.getParameterizedType();
                 String ptypeName = parameterizedType.getTypeName();
                 
-                if (ptypeName.equals(argClassName)) {
-                    //This branch will be taken mostly when there is no type information in the parameter
-                    //(method signature). For instance: String[], List, MyBean (no parameterized type info). 
-                    //Due to type erasure argClassName won't contain any type information. As an example, 
-                    //if arg is a List<String>, argClassName will just be like java.util.ArrayList 
+                //ptypeName and typeName are equal when there is no type information in the parameter
+                //(method signature). For instance: String[], List, MyBean (no parameterized types)
+                if (ptypeName.equals(typeName) && paramType.isInstance(arg)) { 
                     javaArgs[i] = arg;
                 } else {
-                    logger.warn("Trying to parse argument of class {} to {}", argClassName, ptypeName);
+                    logger.warn("Trying to parse argument of class {} to {}", argClass.getCanonicalName(), ptypeName);
 
                     JavaType javaType = mapper.getTypeFactory().constructType(parameterizedType);
-                    javaArgs[i] = mapper.convertValue(arguments[i], javaType);
+                    javaArgs[i] = mapper.convertValue(arg, javaType);
                 }
                 logger.trace("Parameter is a {}", ptypeName);
             }
