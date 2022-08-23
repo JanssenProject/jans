@@ -49,7 +49,7 @@ public class IdentityProcessor {
         
     }
     
-    public String process(Map<String, List<?>> profile) throws Exception {
+    public String process(Map<String, List<?>> profile) {//throws Exception {
         //Provisions the user and returns its local id (inum)
         //reject if there are null values
         if (profile.isEmpty() && provider == null) return null;
