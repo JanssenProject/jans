@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/admin/developer/scripts/person-authentication/">
+        <link rel="canonical" href="https://jans.io/docs/head/admin/developer/scripts/person-authentication-fido2/">
       
       <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.0">
     
     
       
-        <title>Person Authentication - Janssen Documentation</title>
+        <title>FIDO2 - Janssen Documentation</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#adaptive-authentication-scripts-person-authentication-scripts" class="md-skip">
+        <a href="#fido2" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Person Authentication
+              FIDO2
             
           </span>
         </div>
@@ -211,8 +211,6 @@
         
   
   
-    
-  
 
 
   
@@ -224,7 +222,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../deployment/platform-goal/" class="md-tabs__link md-tabs__link--active">
+      <a href="../../../deployment/platform-goal/" class="md-tabs__link">
         Administration
       </a>
     </li>
@@ -320,14 +318,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
       
       
       
@@ -4201,14 +4197,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7" type="checkbox" id="__nav_1_7" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7" type="checkbox" id="__nav_1_7" >
       
       
       
@@ -4623,14 +4617,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7_8" type="checkbox" id="__nav_1_7_8" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7_8" type="checkbox" id="__nav_1_7_8" >
       
       
       
@@ -4697,189 +4689,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Person Authentication
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../person-authentication/" class="md-nav__link">
         Person Authentication
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#default-authentication-method" class="md-nav__link">
-    Default authentication method:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#multiple-authentication-mechanisms" class="md-nav__link">
-    Multiple Authentication Mechanisms
-  </a>
-  
-    <nav class="md-nav" aria-label="Multiple Authentication Mechanisms">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#enabling-an-authentication-mechanism" class="md-nav__link">
-    Enabling an authentication mechanism
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#level-rank-of-an-authentication-mechanism" class="md-nav__link">
-    Level (rank) of an Authentication mechanism :
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#building-blocks-of-an-authentication-workflow" class="md-nav__link">
-    Building blocks of an authentication workflow
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-a-custom-script" class="md-nav__link">
-    Writing a custom script
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-ui-pages" class="md-nav__link">
-    Writing UI pages:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#building-business-logic-in-custom-script" class="md-nav__link">
-    Building business logic in Custom script:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-libraries-for-use-in-the-custom-script" class="md-nav__link">
-    Adding libraries for use in the custom script
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uses-of-person-authentication-script" class="md-nav__link">
-    Uses of Person Authentication script
-  </a>
-  
-    <nav class="md-nav" aria-label="Uses of Person Authentication script">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-implementing-2fa-authentication-mechanisms" class="md-nav__link">
-    A. Implementing 2FA authentication mechanisms
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-implementing-multistep-authentication" class="md-nav__link">
-    B. Implementing Multistep authentication
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#c-implementing-social-logins" class="md-nav__link">
-    C. Implementing Social logins
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#d-proactively-perform-fraud-detection" class="md-nav__link">
-    D. Proactively perform fraud detection
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-an-authentication-flow" class="md-nav__link">
-    Testing an authentication flow
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#faqs" class="md-nav__link">
-    FAQs
-  </a>
-  
-    <nav class="md-nav" aria-label="FAQs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-how-can-error-messages-be-displayed-on-a-web-page" class="md-nav__link">
-    1. How can error messages be displayed on a web page?
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-how-is-redirection-to-a-third-party-application-for-authentication-handled-in-a-script" class="md-nav__link">
-    2. How is redirection to a third party application for authentication handled in a script?
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -9242,30 +9056,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#default-authentication-method" class="md-nav__link">
-    Default authentication method:
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#multiple-authentication-mechanisms" class="md-nav__link">
-    Multiple Authentication Mechanisms
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
   
-    <nav class="md-nav" aria-label="Multiple Authentication Mechanisms">
+    <nav class="md-nav" aria-label="Prerequisites">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#enabling-an-authentication-mechanism" class="md-nav__link">
-    Enabling an authentication mechanism
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#level-rank-of-an-authentication-mechanism" class="md-nav__link">
-    Level (rank) of an Authentication mechanism :
+  <a href="#fido2-devices" class="md-nav__link">
+    FIDO2 devices
   </a>
   
 </li>
@@ -9276,106 +9083,65 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#building-blocks-of-an-authentication-workflow" class="md-nav__link">
-    Building blocks of an authentication workflow
+  <a href="#properties" class="md-nav__link">
+    Properties
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#writing-a-custom-script" class="md-nav__link">
-    Writing a custom script
+  <a href="#enable-fido2-script" class="md-nav__link">
+    Enable FIDO2 script
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#writing-ui-pages" class="md-nav__link">
-    Writing UI pages:
+  <a href="#enable-fido2-script-as-default-authentication-script" class="md-nav__link">
+    Enable FIDO2 Script as default authentication script:
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#building-business-logic-in-custom-script" class="md-nav__link">
-    Building business logic in Custom script:
+  <a href="#fido2-login-page" class="md-nav__link">
+    FIDO2 login page
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#adding-libraries-for-use-in-the-custom-script" class="md-nav__link">
-    Adding libraries for use in the custom script
+  <a href="#using-fido2-tokens" class="md-nav__link">
+    Using FIDO2 tokens
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uses-of-person-authentication-script" class="md-nav__link">
-    Uses of Person Authentication script
-  </a>
-  
-    <nav class="md-nav" aria-label="Uses of Person Authentication script">
+    <nav class="md-nav" aria-label="Using FIDO2 tokens">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#a-implementing-2fa-authentication-mechanisms" class="md-nav__link">
-    A. Implementing 2FA authentication mechanisms
+  <a href="#credential-enrollment" class="md-nav__link">
+    Credential enrollment
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#b-implementing-multistep-authentication" class="md-nav__link">
-    B. Implementing Multistep authentication
+  <a href="#subsequent-authentications" class="md-nav__link">
+    Subsequent authentications
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#c-implementing-social-logins" class="md-nav__link">
-    C. Implementing Social logins
+  <a href="#fido2-credential-management" class="md-nav__link">
+    FIDO2 credential management
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#d-proactively-perform-fraud-detection" class="md-nav__link">
-    D. Proactively perform fraud detection
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-an-authentication-flow" class="md-nav__link">
-    Testing an authentication flow
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#faqs" class="md-nav__link">
-    FAQs
-  </a>
-  
-    <nav class="md-nav" aria-label="FAQs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-how-can-error-messages-be-displayed-on-a-web-page" class="md-nav__link">
-    1. How can error messages be displayed on a web page?
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-how-is-redirection-to-a-third-party-application-for-authentication-handled-in-a-script" class="md-nav__link">
-    2. How is redirection to a third party application for authentication handled in a script?
+  <a href="#fido2-discovery-endpoint" class="md-nav__link">
+    FIDO2 discovery endpoint
   </a>
   
 </li>
@@ -9397,156 +9163,136 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/developer/scripts/person-authentication.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/developer/scripts/person-authentication-fido2.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="adaptive-authentication-scripts-person-authentication-scripts">Adaptive Authentication scripts (Person Authentication scripts)<a class="headerlink" href="#adaptive-authentication-scripts-person-authentication-scripts" title="Permanent link">#</a></h1>
-<p>The Jans-Auth Server leverages interception scripts of <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java">PersonAuthenticationType</a> which when implemented can facilitate complex multi-step, multi-factor authentication workflows. The authentication flow in the Jans Server is driven by the openID spec. The authorization request to the OP (Jans server) contains an optional query parameter called <code>acr_values</code> which is used by the OP to pick an interception script which will be run when <code>/authorize</code> endpoint (Authentication flow) is invoked. The name of each script corresponds with its <code>acr</code> value in the Jans-Auth Server.</p>
-<p>Typically, a <code>PersonAuthenticationType</code> script can be used to:
-* introduce a new 2FA authentication mechanism
-* customise multistep authentication
-* offer Social logins
-* proactively perform fraud detection and block the user.</p>
-<h2 id="default-authentication-method">Default authentication method:<a class="headerlink" href="#default-authentication-method" title="Permanent link">#</a></h2>
-<p>In an OpenID Connect authentication request, one of the optional parameters defined is <code>acr_values</code>. This is the primary way for a client to signal to the OpenID Provider (OP) the preferred way to authenticate the subject. 
-A client may also specify <code>default_acr_values</code> during registration (and omit the parameter while making an authentication request). <strong>In the Jansssen Server configuration, <code>acr</code> is used to name the authentication workflow.</strong></p>
-<p><code>default_acr</code>: This is the default authentication mechanism exposed to all applications that send users to the Janssen Server for sign-in. Unless an app specifically requests a different form of authentication using the OpenID Connect acr_values parameter (as specified below), users will receive the form of authentication specified in this field.</p>
-<p>If a default ACR is not specified, Janssen will determine it based on enabled scripts and the internal user/password ACR. This internal ACR, <code>simple_password_auth</code>, is set to level -1. This means that it has lower priority than any scripts, so Janssen server will use it only if no other authentication method is set.</p>
-<p>Use the jans-cli to <a href="https://github.com/JanssenProject/jans-cli/edit/main/docs/cli/cli-default-authentication-method.md">update / look-up the default authentication method</a>.</p>
-<h2 id="multiple-authentication-mechanisms">Multiple Authentication Mechanisms<a class="headerlink" href="#multiple-authentication-mechanisms" title="Permanent link">#</a></h2>
-<p>The Jans Server can concurrently support multiple authentication mechanisms, enabling Web and mobile apps (clients) to request a specific type of authentication using the standard OpenID Connect request parameter: acr_value.</p>
-<h3 id="enabling-an-authentication-mechanism">Enabling an authentication mechanism<a class="headerlink" href="#enabling-an-authentication-mechanism" title="Permanent link">#</a></h3>
+<h1 id="fido2">FIDO2<a class="headerlink" href="#fido2" title="Permanent link">#</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p><a href="https://fidoalliance.org/fido2/">FIDO 2.0 (FIDO2)</a> , an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments. The Janssen server includes a FIDO2 server implementation. This enables authentications by using  platform authenticators embedded into a person's device or  physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer.</p>
+<p>FIDO2 is comprised of the <a href="https://www.w3.org/TR/webauthn/">W3C’s Web Authentication specification (WebAuthn)</a> and FIDO’s corresponding <a href="https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html">Client-to-Authenticator Protocol (CTAP)</a>. WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.</p>
+<p>This document explains how to use the Janssen Auth Server's built-in 
+<a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/Fido2ExternalAuthenticator.py">FIDO2 interception script</a> 
+to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step. </p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<ul>
+<li>A Janssen Server (<a href="https://github.com/JanssenProject/jans#installation">installation instructions</a>)      </li>
+<li><a href="https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/fido2/Fido2ExternalAuthenticator.py">FIDO2 interception script</a> (included in the default Gluu Server distribution);     </li>
+<li>At least one FIDO2 device for testing, like one of the devices <a href="#fido2-devices">listed below</a>. </li>
+</ul>
+<h3 id="fido2-devices">FIDO2 devices<a class="headerlink" href="#fido2-devices" title="Permanent link">#</a></h3>
+<p>Some well known FIDO2 devices and manufacturers include:           </p>
+<ul>
+<li><a href="https://www.yubico.com/">Yubico</a>      </li>
+<li><a href="https://www.vasco.com/products/two-factor-authenticators/hardware/one-button/digipass-secureclick.html">Vasco DIGIPASS SecureClick</a>   </li>
+<li><a href="http://hyperfido.com/">HyperFIDO</a>       </li>
+<li><a href="http://www.ftsafe.com/">Feitian Technologies</a>   </li>
+<li><a href="https://authentrend.com/">AuthenTrend</a></li>
+<li><a href="https://support.apple.com/en-in/guide/mac-help/mchl16fbf90a/mac">Apple's built-in Touch ID</a></li>
+</ul>
+<p><a href="https://www.amazon.com/s/ref=nb_sb_noss/146-0120855-4781335?url=search-alias%3Daps&amp;field-keywords=fido2">Purchase FIDO2 devices on Amazon</a>. Or, check <a href="https://fidoalliance.org/certification/fido-certified-products/">FIDO's certified products</a> for a comprehensive list of FIDO2 devices (sort by <code>Specification</code> == <code>FIDO2</code>). </p>
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">#</a></h2>
+<p>The script has the following properties</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fido2_server_uri</td>
+<td>URL of the Janssen's FIDO2 server</td>
+<td><code>https://idp.mycompany.com</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="enable-fido2-script">Enable FIDO2 script<a class="headerlink" href="#enable-fido2-script" title="Permanent link">#</a></h2>
 <p>By default, users will get the default authentication mechanism as specified above. However, <strong>using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism</strong>.</p>
 <ol>
-<li>
-<p>Obtain the json contents of a custom script by using a jans-cli command like <code>get-config-scripts-by-type</code>, <code>get-config-scripts-by-inum</code> etc. 
-    Example : </p>
-<ul>
-<li><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION</code></li>
-<li><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7</code></li>
-</ul>
-</li>
-<li>
-<p><a href="https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">Update the custom script</a> and change the <code>enabled</code> attribute to <code>true</code>  </p>
-</li>
+<li>Obtain the json contents of <code>fido2</code> custom script by using a jans-cli command like <code>get-config-scripts-by-type</code>, <code>get-config-scripts-by-inum</code> etc. </li>
 </ol>
-<h3 id="level-rank-of-an-authentication-mechanism">Level (rank) of an Authentication mechanism :<a class="headerlink" href="#level-rank-of-an-authentication-mechanism" title="Permanent link">#</a></h3>
-<p>Each authentication mechanism has a "Level" assigned to it which describes how secure and strict it is. <strong>The higher the "Level", the more reliable mechanism represented by the script is.</strong> Though several mechanisms can be enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be set as the current one (and will be returned as <code>acr</code> claim of id_token for them). If after initial session is created a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves to continue. If they succeed, a new session becomes associated with that requested mechanism instead.</p>
-<p>Enabled scripts can be confirmed by checking  the Janssen OP configuration URL, <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>, and finding the "<strong>acr_values_supported</strong>".</p>
-<p>Learn more about acr_values in the <a href="http://openid.net/specs/openid-connect-core-1_0.html#acrSemantics">OpenID Connect core spec</a>.</p>
-<h2 id="building-blocks-of-an-authentication-workflow">Building blocks of an authentication workflow<a class="headerlink" href="#building-blocks-of-an-authentication-workflow" title="Permanent link">#</a></h2>
-<p>A. Custom script
-B. UI pages, stylesheets, javascript files, image files and resource bundles
-C. Managed Beans
-D. Third party libraries.</p>
-<p>Jans-auth comprises of a number of beans, configuration files and Facelets (JSF) views, packaged as a WAR module. That means custom scripts and custom pages (JSF facelets) can make use of business logic already encapsulated in the Weld managed beans. The following sections explain how authentication flow can be built using a custom script. </p>
-<h2 id="writing-a-custom-script">Writing a custom script<a class="headerlink" href="#writing-a-custom-script" title="Permanent link">#</a></h2>
-<p>The <strong>PersonAuthenticationType</strong> script is described by a java interface whose methods should be overridden to implement an authentication workflow.
-The <a href="https://jans.io/docs/admin/developer/scripts/person-authentication-interface">article</a> talks about these methods in detail and the psuedo code in each method will help drive home the point.</p>
-<h2 id="writing-ui-pages">Writing UI pages:<a class="headerlink" href="#writing-ui-pages" title="Permanent link">#</a></h2>
-<p>All pages are <strong>xhtml</strong> files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages. </p>
-<p>This <a href="https://github.com/maduvena/jans-docs/wiki/Writing-UI-pages">article</a> covers all the details you need to write your own web page. </p>
-<h2 id="building-business-logic-in-custom-script">Building business logic in Custom script:<a class="headerlink" href="#building-business-logic-in-custom-script" title="Permanent link">#</a></h2>
-<p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this <a href="https://jans.io/docs/admin/developer/managed-beans">article</a></p>
-<h2 id="adding-libraries-for-use-in-the-custom-script">Adding libraries for use in the custom script<a class="headerlink" href="#adding-libraries-for-use-in-the-custom-script" title="Permanent link">#</a></h2>
-<p>Java or Python libraries to be imported and used very easily. Remember incase you opt for a python library, it should be written in "pure python" only.
-More details of this mentioned <a href="https://jans.io/docs/admin/developer/interception-scripts/#using-python-libraries-in-a-script">here</a></p>
-<h2 id="uses-of-person-authentication-script">Uses of Person Authentication script<a class="headerlink" href="#uses-of-person-authentication-script" title="Permanent link">#</a></h2>
-<h3 id="a-implementing-2fa-authentication-mechanisms">A. Implementing 2FA authentication mechanisms<a class="headerlink" href="#a-implementing-2fa-authentication-mechanisms" title="Permanent link">#</a></h3>
+<p>e.g : <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION</code> , <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7</code></p>
 <ol>
-<li><a href="https://jans.io/docs/admin/developer/scripts/person-authentication-fido2">FIDO2</a> : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer</li>
-<li>SMS OTP :  </li>
-<li>Email OTP </li>
+<li><a href="https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">Update the custom script</a> and change the <code>enabled</code> attribute to <code>true</code>  </li>
 </ol>
-<h3 id="b-implementing-multistep-authentication">B. Implementing Multistep authentication<a class="headerlink" href="#b-implementing-multistep-authentication" title="Permanent link">#</a></h3>
-<ol>
-<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py">Redirect to previous step</a>: The script here an example of how the number of steps can be varied depending on the context or business requirement. </li>
-</ol>
-<h3 id="c-implementing-social-logins">C. Implementing Social logins<a class="headerlink" href="#c-implementing-social-logins" title="Permanent link">#</a></h3>
-<p>You can use a <code>PersonAuthenticationType</code> script to allow users to sign using credentials from popular <strong>Social Identity providers</strong> or <strong>Inbound Identity Providers</strong> like Facebook, Google and Apple. After users authenticate, thier Social Identity Provider credentials are provisioned into the Jans-auth server. More on this topic in this <a href="https://jans.io/docs/admin/recipes/social-login/">article</a></p>
-<h3 id="d-proactively-perform-fraud-detection">D. Proactively perform fraud detection<a class="headerlink" href="#d-proactively-perform-fraud-detection" title="Permanent link">#</a></h3>
-<ol>
-<li>Impossible travel</li>
-</ol>
-<h2 id="testing-an-authentication-flow">Testing an authentication flow<a class="headerlink" href="#testing-an-authentication-flow" title="Permanent link">#</a></h2>
-<p>An example of a complete URL looks like this - 
-        <code>https://&lt;your.jans.server&gt;/jans-auth/authorize.htm? \
-        response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin \
-        &amp;client_id=17b8b82e-b3ec-42a2-bd90-097028a37f3 \
-        &amp;scope=openid+profile+email+user_name \
-        &amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff</code>
-To test , enter the complete URL for authorization in a browser or create a simple webmapage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>
-<h2 id="faqs">FAQs<a class="headerlink" href="#faqs" title="Permanent link">#</a></h2>
-<h3 id="1-how-can-error-messages-be-displayed-on-a-web-page">1. How can error messages be displayed on a web page?<a class="headerlink" href="#1-how-can-error-messages-be-displayed-on-a-web-page" title="Permanent link">#</a></h3>
-<ol>
-<li>FacesMessage bean is used for this purpose. 
-    <div class="highlight"><pre><span></span><code>from org.jans.jsf2.message import FacesMessages
-from org.jans.service.cdi.util import CdiUtil
-from javax.faces.application import FacesMessage
-...
-
-facesMessages = CdiUtil.bean(FacesMessages) 
-facesMessages.setKeepMessages()
-facesMessages.add(FacesMessage.SEVERITY_ERROR, &quot;Please enter a valid username&quot;)
-</code></pre></div></li>
-<li>The error will appear in the associated template using the following markup:
-    <div class="highlight"><pre><span></span><code>...
-&lt;h:messages /&gt;
-...
+<p>Now FIDO2 is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request FIDO2 authentication for users. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To make sure FIDO2 has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect 
+configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. 
+Find <code>"acr_values_supported":</code> and you should see <code>"fido2"</code>. </p>
+</div>
+<h2 id="enable-fido2-script-as-default-authentication-script">Enable FIDO2 Script as default authentication script:<a class="headerlink" href="#enable-fido2-script-as-default-authentication-script" title="Permanent link">#</a></h2>
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-default-authentication-method.md">link</a> as a reference.
+Follow the steps below to enable FIDO2 authentication:
+1. Create a file say <code>fido2-auth-default.json</code> with the following contents
+<div class="highlight"><pre><span></span><code>{
+  &quot;defaultAcr&quot;: &quot;fido2&quot;
+}
 </code></pre></div>
-    See an example <a href="https://github.com/JanssenProject/jans/blob/685a1593fb53e2310cfa38fcd49db94f3453042f/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml#L41">here</a></li>
-</ol>
-<h3 id="2-how-is-redirection-to-a-third-party-application-for-authentication-handled-in-a-script">2. How is redirection to a third party application for authentication handled in a script?<a class="headerlink" href="#2-how-is-redirection-to-a-third-party-application-for-authentication-handled-in-a-script" title="Permanent link">#</a></h3>
-<p>For user authentication or consent gathering, there might be a need to redirect to a third party application to perform some operation and return the control back to authentication steps of the custom script. Please apply these steps to a person authentication script in such a scenario:</p>
-<ul>
-<li>Return from def getPageForStep(self, step, context), a page /auth/method_name/redirect.html ; with content similar to the code snippet below -
-    <div class="highlight"><pre><span></span><code>def getPageForStep(self, step, context):
-    return &quot;/auth/method_name/redirect.html&quot;
-</code></pre></div></li>
-<li>Contents of redirect.xhtml should take the flow to prepareForStep method
-    <div class="highlight"><pre><span></span><code>...
-    &lt;f:metadata&gt;
-        &lt;f:viewAction action=&quot;#{authenticator.prepareForStep}&quot; if=&quot;#{not identity.loggedIn}&quot; /&gt;
-    &lt;/f:metadata&gt;
-</code></pre></div></li>
-<li>In method prepareForStep prepare data needed for redirect and perform the redirection to the external service.
-    <div class="highlight"><pre><span></span><code>def prepareForStep(self, step, context):
-        .....
-    facesService = CdiUtil.bean(FacesService)
-    facesService.redirectToExternalURL(third_party_URL )
+2.Update the default authentication method to <code>fido2</code>
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/fido2-auth-default.json
+</code></pre></div></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If FIDO2 is set as a default authentication mechanism users will <strong>not</strong> be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).  </p>
+</div>
+<h2 id="fido2-login-page">FIDO2 login page<a class="headerlink" href="#fido2-login-page" title="Permanent link">#</a></h2>
+<p>Below is an illustration of the Janssen Server's default FIDO2 login page:</p>
+<p><img alt="fido2" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/image_fido2.png" /></p>
+<p>The design is being rendered from the <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml">FIDO2 xhtml page</a>. To customize the look and feel of this page, follow the <a href="https://jans.io/docs/admin/developer/customization/customize-web-pages/">customization guide</a>. </p>
+<h2 id="using-fido2-tokens">Using FIDO2 tokens<a class="headerlink" href="#using-fido2-tokens" title="Permanent link">#</a></h2>
+<h3 id="credential-enrollment">Credential enrollment<a class="headerlink" href="#credential-enrollment" title="Permanent link">#</a></h3>
+<p>FIDO2 device enrollment happens during the first authentication attempt. </p>
+<h3 id="subsequent-authentications">Subsequent authentications<a class="headerlink" href="#subsequent-authentications" title="Permanent link">#</a></h3>
+<p>All subsequent FIDO2 authentications for that user account will require the enrolled FIDO2 key. </p>
+<h3 id="fido2-credential-management">FIDO2 credential management<a class="headerlink" href="#fido2-credential-management" title="Permanent link">#</a></h3>
+<p>A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot. </p>
+<p><img alt="fido2" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/image-fido2-ldap-structure.png" />
+Diagram source in mermaid.live
+<div class="highlight"><pre><span></span><code>graph TD
 
-    return True
-</code></pre></div></li>
-<li>In order to resume flow after the redirection, invoke a similar URL to https://my.gluu.server/postlogin.htm?param=123 from the third party app which takes the flow back to the authenticate method of the custom script.
-So create an xhtml page postlogin.xhtml which will look like this :
-    <div class="highlight"><pre><span></span><code>&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
-   &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;
+    A[ou=jans] --&gt; K(ou=people)
+    K --&gt; K1[inum=....]
+    K1 --&gt; K11[ou=fido2_register]
+    K11 --&gt; K111[oxId=....]
+    K11 --&gt; K112[oxId=....]
+    K11 --&gt; K112[oxId=....]
 
-&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;
-      xmlns:f=&quot;http://xmlns.jcp.org/jsf/core&quot;&gt;
+    K1 --&gt; K12[ou=fido2_auth]
+    K12 --&gt; K121[oxId=....]
+    K12 --&gt; K122[oxId=....]
+    K12 --&gt; K123[oxId=....]
 
-&lt;f:view transient=&quot;true&quot; contentType=&quot;text/html&quot;&gt;
-    &lt;f:metadata&gt;
-        &lt;f:viewAction action=&quot;#{authenticator.authenticateWithOutcome}&quot; /&gt;
-    &lt;/f:metadata&gt;
-&lt;/f:view&gt;
+    K --&gt; K2[inum=....]
+    K2 --&gt; K21[ou=fido2_register]
+    K21 --&gt; K211[oxId=....]
+    K21 --&gt; K212[oxId=....]
+    K21 --&gt; K212[oxId=....]
 
-&lt;/html&gt;
-</code></pre></div>
-The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&gt;</code> in step 4 takes us to the authenticate method inside the custom script <code>def authenticate(self, configurationAttributes, requestParameters, step):</code>. Here you can </li>
-<li>use parameters from request
-    <div class="highlight"><pre><span></span><code>param = ServerUtil.getFirstValue(requestParameters, &quot;param-name&quot;)) 
-</code></pre></div></li>
-<li>
-<p>perform the <code>state</code> check (state : Opaque value used to maintain state between the request and the callback.)</p>
-</li>
-<li>
-<p>finally, return true or false from this method.</p>
-</li>
-</ul>
+    K2 --&gt; K22[ou=fido2_auth]
+    K22 --&gt; K221[oxId=....]
+    K22 --&gt; K222[oxId=....]
+    K22 --&gt; K223[oxId=....]
+
+    K --&gt; K3[inum=....]
+    K3 --&gt; K31[ou=fido2_register]
+    K31 --&gt; K311[oxId=....]
+    K31 --&gt; K312[oxId=....]
+    K31 --&gt; K312[oxId=....]
+
+    K3 --&gt; K32[ou=fido2_auth]
+    K32 --&gt; K321[oxId=....]
+    K32 --&gt; K322[oxId=....]
+    K32 --&gt; K323[oxId=....]
+</code></pre></div></p>
+<h3 id="fido2-discovery-endpoint">FIDO2 discovery endpoint<a class="headerlink" href="#fido2-discovery-endpoint" title="Permanent link">#</a></h3>
+<p>A discovery document for FIDO2 is published by the Janssen Server at: https://your.hostname/.well-known/fido2-configuration This document specifies the URL of the registration and authentication endpoints.</p>
 
   <hr>
 <div class="md-source-file">
@@ -9557,7 +9303,7 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-05-18T19:22:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-05-18</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-23T13:33:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-23</span>
       
     
   </small>
@@ -9575,42 +9321,6 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../../customization/custom-client-logs/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Custom client logs" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Custom client logs
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../consent-gathering/" class="md-footer__link md-footer__link--next" aria-label="Next: Consent Gathering" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Consent Gathering
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
