@@ -12,10 +12,11 @@ style = Style.from_dict(
         "focused  button": "bg:#880000 #ffffff noinherit",
         # Styling for Dialog widgets.
         "button-bar": "bg:#4D4D4D",
-        "text-area focused": "bg:#ff0000",
+        "textarea-readonly": "bg:#ffffff fg:#4D4D4D",
+        "required-field": "#8b000a",
+        "textarea":"bg:#ffffff fg:#0000ff",
         "status": "reverse",
         "select-box cursor-line": "nounderline bg:ansired fg:ansiwhite",
-        "textarea":"nounderline bg:#ffffff fg:#d1c0c0 #ff0000",
         "checkbox":"nounderline bg:#ffffff fg:#d1c0c0 #ff0000",
     }
 )

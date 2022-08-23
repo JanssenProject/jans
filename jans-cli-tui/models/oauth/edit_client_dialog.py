@@ -43,8 +43,9 @@ from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
+from utils import DialogUtils
 
-class EditClientDialog(JansGDialog):
+class EditClientDialog(JansGDialog, DialogUtils):
     def __init__(self, parent, title, data, buttons=[], save_handler=None):
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
@@ -52,6 +53,19 @@ class EditClientDialog(JansGDialog):
         self.prepare_tabs()
 
         def save():
+
+            self.data = self.make_data_from_dialog()
+
+            for list_key in ('redirectUris', 'scopes'):
+                if self.data[list_key]:
+                    self.data[list_key] = self.data[list_key].splitlines()
+
+            cfr = self.check_required_fields()
+            self.myparent.logger.debug("CFR: "+str(cfr))
+            if not cfr:
+                return
+
+            self.myparent.logger.debug("handler: "+str(save_handler))
             close_me = True
             if save_handler:
                 close_me = self.save_handler(self)
@@ -124,13 +138,13 @@ class EditClientDialog(JansGDialog):
                                 style='green'),
                         self.myparent.getTitledCheckBox("Supress Authorization", name='dynamicRegistrationPersistClientAuthorizations', checked=self.data.get('dynamicRegistrationPersistClientAuthorizations'), style='green'),
                         self.myparent.getTitledRadioButton("Application Type", name='applicationType', values=['native','web'], current_value=self.data.get('applicationType'), style='green'),
-                        self.myparent.getTitledText("Redirect Uris", name='redirectUris', value='\n'.join(self.data.get('redirectUris', [])), height=3, style='green'),
+                        self.myparent.getTitledText("Redirect Uris", name='redirectUris', value='\n'.join(self.data.get('redirectUris', [])), height=3, style='class:required-field'),
                         self.myparent.getTitledText("Redirect Regex", name='redirectUrisRegex', value=self.data.get('redirectUrisRegex', ''), style='green'), 
                         self.myparent.getTitledText("Scopes", name='scopes', value='\n'.join(self.data.get('scopes', [])), height=3, style='green'),
 
                         ],width=D(),
                     )
-        
+        """
         self.tabs['Tokens'] = HSplit([
                         self.myparent.getTitledRadioButton("Access Token Type", name='accessTokenAsJwt', values=['JWT','Reference'], current_value=self.data.get('accessTokenAsJwt'), style='green'),
                         self.myparent.getTitledCheckBox("Incliude Claims in id_token", name='includeClaimsInIdToken',  checked=self.data.get('includeClaimsInIdToken'), style='green'),
@@ -293,12 +307,12 @@ class EditClientDialog(JansGDialog):
             ),
             self.myparent.getTitledWidget(
             title="Update Token",
-            name='updateTokenScriptDns',            
+            name='updateTokenScriptDns',
                widget=DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
             ),
             self.myparent.getTitledWidget(
             title="Post Authn",
-            name='postAuthnScripts',         
+            name='postAuthnScripts',
                widget=DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
             ),
             self.myparent.getTitledWidget(
@@ -319,7 +333,7 @@ class EditClientDialog(JansGDialog):
 
                         ]
                         )
-
+        """
         self.left_nav = list(self.tabs.keys())[0]
 
 

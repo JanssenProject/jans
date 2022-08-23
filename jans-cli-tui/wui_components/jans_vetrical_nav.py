@@ -161,7 +161,7 @@ class JansVerticalNav():
             self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
 
 
-        @kb.add("j")
+        @kb.add("d")
         def _(event):
             selected_line = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
@@ -173,7 +173,7 @@ class JansVerticalNav():
                 data=self.all_data[self.selectes])
 
 
-        @kb.add("d")
+        @kb.add("delete")
         def _(event):
             if self.on_delete:
                 selected_line = [i.strip() for i in self.data[self.selectes]]

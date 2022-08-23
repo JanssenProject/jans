@@ -1075,7 +1075,12 @@ class JCA_CLI:
                 verify=self.verify_ssl,
                 cert=self.mtls_client_cert
             )
+
         self.log_response(response)
+
+        if self.wrapped:
+            return response
+
         try:
             result = response.json()
         except Exception:
@@ -1249,7 +1254,7 @@ class JCA_CLI:
         self.print_response(response)
 
     def process_command_put(self, path, suffix_param, endpoint_params, data_fn, data=None):
-        self.process_command_post(path, suffix_param, endpoint_params, data_fn, data=None)
+        return self.process_command_post(path, suffix_param, endpoint_params, data_fn, data)
 
     def process_command_patch(self, path, suffix_param, endpoint_params, data_fn, data=None):
         # TODO: suffix_param, endpoint_params

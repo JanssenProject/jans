@@ -220,49 +220,32 @@ class JansAuthServer:
         selected_line_data = params['data']  
         title = "Edit user Data (Clients)"
  
-        dialog = EditClientDialog(self, title=title, data=selected_line_data)
+        dialog = EditClientDialog(self, title=title, data=selected_line_data, save_handler=self.save_client)
         self.show_jans_dialog(dialog)
 
     def save_client(self, dialog):
-        data = {}
-        for tab in dialog.tabs:
-            for item in dialog.tabs[tab].children:
-                if hasattr(item, 'children') and len(item.children)>1 and hasattr(item.children[1], 'jans_name'):
-                    key_ = item.children[1].jans_name
-                    self.logger.debug(key_ + ':' + str(type(item.children[1].me)))
-                    if isinstance(item.children[1].me, prompt_toolkit.widgets.base.TextArea):
-                        value_ = item.children[1].me.text
-                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.CheckboxList):
-                        value_ = item.children[1].me.current_values
-                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.RadioList):
-                        value_ = item.children[1].me.current_value
-                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.Checkbox):
-                        value_ = item.children[1].me.checked
-                    elif isinstance(item.children[1].me, DropDownWidget):
-                        value_ = item.children[1].me.value
-                    
-                    data[key_] = value_
+        
 
-        for list_key in ('redirectUris', 'scopes'):
-            if data[list_key]:
-                data[list_key] = data[list_key].splitlines()
-
-        self.logger.debug(str(data))
-
+        self.logger.debug(dialog.data)
 
         response = self.cli_object.process_command_by_id(
-            operation_id='post-oauth-openid-clients',
+            operation_id='put-oauth-openid-clients' if dialog.data.get('inum') else 'post-oauth-openid-clients',
             url_suffix='',
             endpoint_args='',
             data_fn='',
-            data=data
+            data=dialog.data
         )
+
+        self.logger.debug(response.text)
+
         if response.status_code in (200, 201):
             self.oauth_get_clients()
             return True
 
+        self.show_message("Error!", "An error ocurred while saving client:\n" + str(response.text))
+
     def add_client(self):
-        dialog = EditClientDialog(self, title="Add Client", data={'tokenEndpointAuthMethodsSupported':'private_key_jwt'}, save_handler=self.save_client)
+        dialog = EditClientDialog(self, title="Add Client", save_handler=self.save_client)
         result = self.show_jans_dialog(dialog)
 
     def delete_client(self, selected, event):

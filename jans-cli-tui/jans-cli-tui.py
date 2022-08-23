@@ -6,7 +6,8 @@ import os
 import logging
 
 from shutil import get_terminal_size
-from asyncio import ensure_future
+import time
+from asyncio import Future, ensure_future
 from pynput.keyboard import Key, Controller
 
 import prompt_toolkit
@@ -342,7 +343,13 @@ class JansCliApp(Application, JansAuthServer):
     def getTitledText(self, title, name, value='', height=1, jans_help='', read_only=False, width=None, style=''):
         title += ': '
         multiline = height > 1
-        ta = TextArea(text=str(value), multiline=multiline, read_only=read_only, style="class:titledtext")
+        ta = TextArea(
+            text=str(value),
+            multiline=multiline,
+            read_only=read_only,
+            style="class:textarea-readonly" if read_only else "class:textarea",
+            focusable=not read_only,
+            )
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
         ta.window.me = ta
