@@ -15,7 +15,6 @@ from prompt_toolkit.widgets import (
     Button,
     Label,
     TextArea,
-
 )
 
 from cli import config_cli
@@ -81,38 +80,48 @@ class EditClientDialog(JansGDialog):
                    )
 
     def prepare_tabs(self):
-        with open('./hopa.log', 'a') as f:
-            f.write(str(self.data.get('tokenEndpointAuthMethodsSupported'))+'\n')
-            f.write(str(self.data.get('rptClaimsScripts'))+'\n')
-            f.write(str(self.data.get('claimRedirectUris')) +'\n')
-            f.write(str(self.data.get('authorizedAcrValues'))+'\n' )
-            f.write(str(self.data.get('postAuthnScripts'))+'\n' )
-            f.write(str(self.data.get('authorizedAcrValues'))+'\n' )
-            f.write(str(self.data.get('updateTokenScriptDns'))+'\n' )
-            f.write(str(self.data.get('introspectionScripts'))+'\n' )
-            f.write(str(self.data.get('consentGatheringScripts'))+'\n' )
-            f.write(str(self.data.get('dynamicRegistrationAllowedPasswordGrantScopes'))+'\n' )
-                  
+
+
+        schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Client')
+
         self.tabs = OrderedDict()
 
         self.tabs['Basic'] = HSplit([
-                        self.myparent.getTitledText(title ="Client_ID", name='inum', value=self.data.get('inum',''), style='green'),
-                        self.myparent.getTitledCheckBox("Active", name='disabled', checked= not self.data.get('disabled'), style='green'),
-                        self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), style='green'),
-                        self.myparent.getTitledText("Client Secret", name='clientSecret', value=self.data.get('clientSecret',''), style='green'),
+                        self.myparent.getTitledText(title ="Client_ID", name='inum', value=self.data.get('inum',''), jans_help=self.myparent.get_help_from_schema(schema, 'inum'), read_only=True, style='green'),
+                        self.myparent.getTitledCheckBox("Active", name='disabled', checked= not self.data.get('disabled'), jans_help=self.myparent.get_help_from_schema(schema, 'disabled'), style='green'),
+                        self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), style='green'),
+                        self.myparent.getTitledText("Client Secret", name='clientSecret', value=self.data.get('clientSecret',''), jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), style='green'),
                         self.myparent.getTitledText("Description", name='description', value=self.data.get('description',''), style='green'),
                         self.myparent.getTitledWidget(
-                            "Authn Method token endpoint",
-                            name='tokenEndpointAuthMethodsSupported',
-                            widget=DropDownWidget(
-                                values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
-                                value=self.data.get('tokenEndpointAuthMethodsSupported')
+                                "Authn Method token endpoint",
+                                name='tokenEndpointAuthMethodsSupported',
+                                widget=DropDownWidget(
+                                    values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
+                                    value=self.data.get('tokenEndpointAuthMethodsSupported')
+                                    ),
+                                jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethodsSupported'),
+                                style='green'
                                 ),
-                            style='green'
-                            ),
-                        self.myparent.getTitledRadioButton("Subject Type", name='subjectType', values=[('public', 'Public'),('pairwise', 'Pairwise')], current_value=self.data.get('subjectType'), style='green'),
-                        self.myparent.getTitledCheckBoxList("Grant", name='grantTypes', values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')], current_values=self.data.get('grantTypes', []), style='green'),
-                        self.myparent.getTitledCheckBoxList("Response Types", name='responseTypes', values=['code', 'token', 'id_token'], current_values=self.data.get('responseTypes', []), style='green'),
+                        self.myparent.getTitledRadioButton(
+                                "Subject Type", 
+                                name='subjectType', 
+                                values=[('public', 'Public'),('pairwise', 'Pairwise')], 
+                                current_value=self.data.get('subjectType'), 
+                                jans_help=self.myparent.get_help_from_schema(schema, 'subjectType'),
+                                style='green'),
+                        self.myparent.getTitledCheckBoxList(
+                                "Grant", 
+                                name='grantTypes', 
+                                values=[('authorization_code', 'Authorization Code'), ('refresh_token', 'Refresh Token'), ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'), ('client_credentials', 'Client Credentials'), ('password', 'Password'), ('implicit', 'Implicit')], current_values=self.data.get('grantTypes', []), 
+                                jans_help=self.myparent.get_help_from_schema(schema, 'grantTypes'),
+                                style='green'),
+                        self.myparent.getTitledCheckBoxList(
+                                "Response Types", 
+                                name='responseTypes', 
+                                values=['code', 'token', 'id_token'], 
+                                current_values=self.data.get('responseTypes', []), 
+                                jans_help=self.myparent.get_help_from_schema(schema, 'responseTypes'),
+                                style='green'),
                         self.myparent.getTitledCheckBox("Supress Authorization", name='dynamicRegistrationPersistClientAuthorizations', checked=self.data.get('dynamicRegistrationPersistClientAuthorizations'), style='green'),
                         self.myparent.getTitledRadioButton("Application Type", name='applicationType', values=['native','web'], current_value=self.data.get('applicationType'), style='green'),
                         self.myparent.getTitledText("Redirect Uris", name='redirectUris', value='\n'.join(self.data.get('redirectUris', [])), height=3, style='green'),
@@ -274,7 +283,7 @@ class EditClientDialog(JansGDialog):
    
                         ],width=D()
         )
-        
+
         self.tabs['Client Scripts'] = HSplit([
 
             self.myparent.getTitledWidget(
@@ -310,7 +319,7 @@ class EditClientDialog(JansGDialog):
 
                         ]
                         )
-    
+
         self.left_nav = list(self.tabs.keys())[0]
 
 

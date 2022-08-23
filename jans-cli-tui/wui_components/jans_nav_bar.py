@@ -13,7 +13,6 @@ class JansNavBar():
         self.selection_changed = selection_changed
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.create_window()
-        self.update_status_bar()
 
 
     def create_window(self):
@@ -40,24 +39,15 @@ class JansNavBar():
         return merge_formatted_text(result)
 
 
-    def update_status_bar(self):
-        self.cur_tab = self.navbar_entries[self.cur_navbar_selection][0]
-        self.myparent.update_status_bar("Container for " + self.navbar_entries[self.cur_navbar_selection][1])
-        if self.myparent.app_started:
-            self.selection_changed(self.cur_tab)
-
-
     def get_nav_bar_key_bindings(self):
         kb = KeyBindings()
 
         @kb.add("left")
         def _go_up(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection - 1) % len(self.navbar_entries)
-            self.update_status_bar()
 
         @kb.add("right")
         def _go_up(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection + 1) % len(self.navbar_entries)
-            self.update_status_bar()
 
         return kb

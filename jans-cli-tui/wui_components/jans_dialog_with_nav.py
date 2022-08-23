@@ -1,3 +1,6 @@
+from shutil import get_terminal_size
+
+
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
@@ -8,8 +11,12 @@ from prompt_toolkit.widgets import (
     Dialog,
 )
 
+
+from prompt_toolkit.layout import ScrollablePane, Layout
+
+
 class JansDialogWithNav():
-    def __init__(self,content,height=None,width=None,title=None, button_functions=[], navbar=None):
+    def __init__(self,content, height=None, width=None, title=None, button_functions=[], navbar=None):
         self.navbar = navbar
         self.button_functions = button_functions
         self.title = title
@@ -21,28 +28,20 @@ class JansDialogWithNav():
     def create_window(self):
 
         max_data_str = 30 ## TODO TO BE Dynamic
+        wwidth, wheight = get_terminal_size()
 
+        height = 19 if wheight <= 30 else wheight - 11
 
         self.dialog = Dialog(
             title=self.title,
             body=VSplit([
-                 HSplit(
-                            [
-                                self.navbar
-                            ],
+                    HSplit([
+                        self.navbar
+                        ], width= (max_data_str )),
+                    Window(width=1, char="|",),
+                    ScrollablePane(content=self.content, height=height),
+                ], width=120),
 
-                            width= (max_data_str )  #self.width 
-                        ),
-                         Window(width=1, char="|",),
-                        HSplit([
-                            self.content
-                        
-
-                        ]),
-                        
-                    
-
-            ],width=120,height=32),
             buttons=[
                 Button(
                     text=str(self.button_functions[k][1]),
@@ -50,7 +49,8 @@ class JansDialogWithNav():
                 ) for k in range(len(self.button_functions))
             ],
             with_background=False,
-        ) 
+
+        )
 #--------------------------------------------------------------------------------------#
     def __pt_container__(self):
         return self.dialog

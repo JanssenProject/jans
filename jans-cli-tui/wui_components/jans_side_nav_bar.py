@@ -10,7 +10,7 @@ from prompt_toolkit.key_binding import KeyBindings
 
 
 class JansSideNavBar():
-    def __init__(self, myparent, entries,selection_changed, select=0, entries_color='#00ff44'):
+    def __init__(self, myparent, entries, selection_changed, select=0, entries_color='#00ff44'):
         self.myparent = myparent  # ListBox parent class
         self.navbar_entries = entries  # ListBox entries
         self.cur_navbar_selection = select  # ListBox initial selection
@@ -18,7 +18,6 @@ class JansSideNavBar():
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.selection_changed = selection_changed
         self.create_window()
-        self.update_status_bar()
 
     def create_window(self):
         self.side_Nav = FloatContainer(
@@ -54,13 +53,12 @@ class JansSideNavBar():
             result.append("\n")
             result.append("\n")
         return merge_formatted_text(result)
-#--------------------------------------------------------------------------------------#
-    def update_status_bar(self):
+
+
+    def update_selection(self):
         self.cur_tab = self.navbar_entries[self.cur_navbar_selection]
-        self.myparent.update_status_bar(
-            "Container for " + self.navbar_entries[self.cur_navbar_selection])
         self.selection_changed(self.cur_tab)
-#--------------------------------------------------------------------------------------#
+
 
     def get_nav_bar_key_bindings(self):
         kb = KeyBindings()
@@ -69,13 +67,13 @@ class JansSideNavBar():
         def _go_up(event) -> None:
             self.cur_navbar_selection = (
                 self.cur_navbar_selection - 1) % len(self.navbar_entries)
-            self.update_status_bar()
+            self.update_selection()
 
         @kb.add("down")
         def _go_up(event) -> None:
             self.cur_navbar_selection = (
                 self.cur_navbar_selection + 1) % len(self.navbar_entries)
-            self.update_status_bar()
+            self.update_selection()
 
         @kb.add("enter")
         def _(event):
