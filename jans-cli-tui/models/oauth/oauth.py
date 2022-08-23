@@ -126,6 +126,7 @@ class JansAuthServer:
             result = rsponse.json()
         except Exception:
             self.show_message("Error getting clients", str(rsponse.text))
+            press_tab
             return
 
 

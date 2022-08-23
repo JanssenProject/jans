@@ -45,6 +45,7 @@ from prompt_toolkit.widgets import (
 from cli import config_cli
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
+from wui_components.jans_message_dialog import JansMessageDialog
 
 from cli_style import style
 
@@ -504,9 +505,16 @@ class JansCliApp(Application, JansAuthServer):
 
     def show_message(self, title, message, buttons=[]):
         body = HSplit([Label(message)])
-        dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
-        self.show_jans_dialog(dialog)
+        dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
 
+        app = get_app()
+        focused_before = app.layout.current_window
+        float_ = Float(content=dialog)
+        self.root_layout.floats.insert(0, float_)
+        dialog.me = float_
+        dialog.focus_on_exit = focused_before
+        app.layout.focus(dialog)
+        self.press_tab()
 
     def show_again(self): ## nasted dialog Button
         self.show_message("Again", "Nasted Dialogs",)
@@ -517,6 +525,9 @@ class JansCliApp(Application, JansAuthServer):
         buttons = [Button("No"), Button("Yes")]
         dialog = JansGDialog(self, title="Confirmation", body=body, buttons=buttons)
         return dialog
+
+
+
 
 application = JansCliApp()
 
