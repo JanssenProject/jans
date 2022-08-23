@@ -1,37 +1,22 @@
 from curses import window
 import threading
-
-from collections import OrderedDict
-import json
-from asyncio import Future, ensure_future
+from asyncio import ensure_future
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import (
-    ConditionalContainer,
-    Float,
     HSplit,
     VSplit,
-    VerticalAlign,
     HorizontalAlign,
     DynamicContainer,
-    FloatContainer,
-    Window
 )
 from prompt_toolkit.layout.containers import VerticalAlign
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.layout import Layout
-from prompt_toolkit.lexers import PygmentsLexer ,DynamicLexer
 from prompt_toolkit.widgets import (
     Box,
     Button,
-    Frame,
     Label,
-    RadioList,
-    TextArea,
-    CheckboxList,
-    Shadow,
 )
 from prompt_toolkit.filters import Condition
 
@@ -54,7 +39,6 @@ class JansAuthServer:
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
         self.oauth_nav_selection_changed(self.oauth_navbar.navbar_entries[0][0])
-
 
     def oauth_prepare_containers(self):
 
@@ -97,7 +81,6 @@ class JansAuthServer:
                                         ],
                                     height=D(),
                                     )
-
 
     def oauth_prepare_navbar(self):
          self.oauth_navbar = JansNavBar(

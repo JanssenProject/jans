@@ -81,7 +81,18 @@ class EditClientDialog(JansGDialog):
                    )
 
     def prepare_tabs(self):
-
+        with open('./hopa.log', 'a') as f:
+            f.write(str(self.data.get('tokenEndpointAuthMethodsSupported'))+'\n')
+            f.write(str(self.data.get('rptClaimsScripts'))+'\n')
+            f.write(str(self.data.get('claimRedirectUris')) +'\n')
+            f.write(str(self.data.get('authorizedAcrValues'))+'\n' )
+            f.write(str(self.data.get('postAuthnScripts'))+'\n' )
+            f.write(str(self.data.get('authorizedAcrValues'))+'\n' )
+            f.write(str(self.data.get('updateTokenScriptDns'))+'\n' )
+            f.write(str(self.data.get('introspectionScripts'))+'\n' )
+            f.write(str(self.data.get('consentGatheringScripts'))+'\n' )
+            f.write(str(self.data.get('dynamicRegistrationAllowedPasswordGrantScopes'))+'\n' )
+                  
         self.tabs = OrderedDict()
 
         self.tabs['Basic'] = HSplit([
@@ -265,25 +276,37 @@ class EditClientDialog(JansGDialog):
         )
         
         self.tabs['Client Scripts'] = HSplit([
-            
-            # self.myparent.getTitledWidget(
-            #    widget=DropDownWidget(values=[('spontaneousScopes','spontaneousScopes')]),
-            # ),
-            # self.myparent.getTitledWidget(
-            #    widget=DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
-            # ),
-            # self.myparent.getTitledWidget(
-            #    widget=DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
-            # ),
-            # self.myparent.getTitledWidget(
-            #    widget=DropDownWidget(values=[('introspectionScripts','introspectionScripts')]),
-            # ),
-            # self.myparent.getTitledWidget(
-            #    widget=DropDownWidget(values=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
-            # ),
-            # self.myparent.getTitledWidget(
-            #    widget=DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
-            # ),
+
+            self.myparent.getTitledWidget(
+            title="Spontaneous Scopes",
+            name='authorizedAcrValues',
+               widget=DropDownWidget(values=[('spontaneousScopes','spontaneousScopes')]),
+            ),
+            self.myparent.getTitledWidget(
+            title="Update Token",
+            name='updateTokenScriptDns',            
+               widget=DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
+            ),
+            self.myparent.getTitledWidget(
+            title="Post Authn",
+            name='postAuthnScripts',         
+               widget=DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
+            ),
+            self.myparent.getTitledWidget(
+            title="Introspection",
+            name='introspectionScripts',         
+               widget=DropDownWidget(values=[('introspectionScripts','introspectionScripts')]),
+            ),
+            self.myparent.getTitledWidget(
+            title="Password Grant",
+            name='dynamicRegistrationAllowedPasswordGrantScopes',                
+               widget=DropDownWidget(values=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
+            ),
+            self.myparent.getTitledWidget(
+            title="OAuth Consent",
+            name='consentGatheringScripts',                
+               widget=DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
+            ),
 
                         ]
                         )
