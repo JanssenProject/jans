@@ -175,6 +175,12 @@ This glossary helps to keep terms and their meanings consistent across documenta
 
 ## Documentation Style Guide
 
+Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents. 
+
+!!! Testing
+
+    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](developer/testing.md#documentation-local-testing) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
+
 ### General Text
  - Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line
  - Keep explanations short and clear
@@ -191,6 +197,7 @@ This glossary helps to keep terms and their meanings consistent across documenta
  - Organize the information in the document from least technical to most technical if possible. Start conceptual, then get detailed
  
 ### Lists
+ - Leave a blank line between text and first item in the list
  - Only use a numbered list if the order of the list matters
  - A line of a list should not end with a period. If it's multiple sentences, like this one, drop the last period
  - Start each item in the list with a capital letter
@@ -204,10 +211,13 @@ This glossary helps to keep terms and their meanings consistent across documenta
     1. This is the third item
     ```
  
-It will look like this:
-1. This is the first item
-1. This is the second item
-1. This is the third item
+    It will look like this:
+
+    ```
+    1. This is the first item
+    2. This is the second item
+    3. This is the third item
+    ```
  
  - To include additional lines in a list item, start the sub-line with four spaces. For example:
  
