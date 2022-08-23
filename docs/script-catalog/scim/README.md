@@ -136,7 +136,7 @@ With that said, save your modifications. You may like the idea of adding some pr
   
     print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
     for user in results.getEntries():
-        print "Flushing addresses for user %s" % getUid() 
+        print "Flushing addresses for user %s" % user.getUid() 
         user.setAttribute("jansAddres", None)
   
 Ensure no addresses are returned anymore in your SCIM user searches. Happy testing!
@@ -219,14 +219,13 @@ In the `init` method this properties should be parsed. To start, let's add some 
   
     from io.jans.scim.ws.rs.scim2 import BaseScimWebService
     import json
-    import sys
   
 Here is how `init` would look like:
   
     def init(self, configurationAttributes):
         self.custom_header = configurationAttributes.get("custom_header").getValue2()
-        json = configurationAttributes.get("access_map").getValue2()    
-        self.access_map = json.loads(json)
+        access_map_json = configurationAttributes.get("access_map").getValue2()    
+        self.access_map = json.loads(access_map_json)
         print "ScimEventHandler (init): Initialized successfully"
         return True
   
@@ -297,9 +296,25 @@ You may have already noticed that it is possible to have several scripts under t
 The applicable method is called in the first script. If the return value was `True`, the method is called again but this time in the subsequent script. If at any point a `False` return value is encountered, the SCIM operation is aborted with error 500. This means that a normal operation execution requires all involved methods across different scripts to be successful.
 
 There is an important exception to the above and is related to the `manage*` methods. In this case, only one script takes effect (the first script found). Note that in most cases having a single SCIM script suffices for all needs. 
-  
-  
-  
+
 ## Common Use Cases
 
-Descriptions of common use cases for this script, including a code snippet for each
+## Script Type: Python
+
+### [Custom SCIM Event Handler](sample-script/custom_scim_handler.py)
+
+The sample code snippet shows how to -
+1. Modify Search Results
+2. Segment the user base
+3. Allow/Deny resource operations
+4. Allow/Deny searches
+
+## Script Type: Java
+
+### Custom SCIM Event Handler
+
+The sample code snippet shows how to -
+1. Modify Search Results
+2. Segment the user base
+3. Allow/Deny resource operations
+4. Allow/Deny searches
