@@ -350,10 +350,10 @@ class JansCliApp(Application, JansAuthServer):
 
         return  new_title , cd , width
 
-    def getTitledText(self, title, name, value='', height=1, jans_help='', width=None,style=''):
+    def getTitledText(self, title, name, value='', height=1, jans_help='', read_only=False, width=None, style=''):
         title += ': '
         multiline = height > 1
-        ta = TextArea(text=str(value), multiline=multiline,style="class:titledtext")
+        ta = TextArea(text=str(value), multiline=multiline, read_only=read_only, style="class:titledtext")
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
         ta.window.me = ta

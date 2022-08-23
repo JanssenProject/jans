@@ -85,7 +85,7 @@ class EditClientDialog(JansGDialog):
         self.tabs = OrderedDict()
 
         self.tabs['Basic'] = HSplit([
-                        self.myparent.getTitledText(title ="Client_ID", name='inum', value=self.data.get('inum',''), jans_help=self.myparent.get_help_from_schema(schema, 'inum'), style='green'),
+                        self.myparent.getTitledText(title ="Client_ID", name='inum', value=self.data.get('inum',''), jans_help=self.myparent.get_help_from_schema(schema, 'inum'), read_only=True, style='green'),
                         self.myparent.getTitledCheckBox("Active", name='disabled', checked= not self.data.get('disabled'), jans_help=self.myparent.get_help_from_schema(schema, 'disabled'), style='green'),
                         self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), style='green'),
                         self.myparent.getTitledText("Client Secret", name='clientSecret', value=self.data.get('clientSecret',''), jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), style='green'),
