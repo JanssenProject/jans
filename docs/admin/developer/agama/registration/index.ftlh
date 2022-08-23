@@ -7,7 +7,7 @@
 		    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">        
 		<style>
 			#logo {
-				max-height: 3.25rem;
+				max-height: 3rem;
 				margin: 0.5rem;
 			}
 		</style>
