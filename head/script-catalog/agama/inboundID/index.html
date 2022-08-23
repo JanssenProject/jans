@@ -19,7 +19,7 @@
     
     
       
-        <title>Index - Janssen Documentation</title>
+        <title>Inbound identity using Agama - Janssen Documentation</title>
       
     
     
@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#inbound-identity-using-agama" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -109,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Index
+              Inbound identity using Agama
             
           </span>
         </div>
@@ -9041,6 +9046,64 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    Terminology
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requisites" class="md-nav__link">
+    Requisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    Scope
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flows" class="md-nav__link">
+    Flows
+  </a>
+  
+    <nav class="md-nav" aria-label="Flows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider" class="md-nav__link">
+    Provider
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utility-flows" class="md-nav__link">
+    Utility flows
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -9058,16 +9121,70 @@
 
 
 
-  <h1>Index</h1>
+<h1 id="inbound-identity-using-agama">Inbound identity using Agama<a class="headerlink" href="#inbound-identity-using-agama" title="Permanent link">#</a></h1>
+<p>With Agama administrators can delegate authorization to external services like social sites. In a typical scenario users click on a "Sign in with..." button for authentication to take place at a given 3rd party. Finally, users get access to a target application.</p>
+<p>This kind of solution is usually referred to as "inbound identity". In this document the steps required to setup inbound identity in your Janssen server are presented.</p>
+<h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Provider: An external identity provider, often a social site. Every provider is associated with a unique identifier</p>
+</li>
+<li>
+<p>Provider preselection: A process that designates the provider to employ for authentication without the end-user  making a explicit decision, i.e. without a "Sign in with" button. Here the provider may be inferred from contextual data elicited in earlier stages, for instance. </p>
+</li>
+</ul>
+<h2 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h2>
+<ul>
+<li>A Janssen server with config-api installed</li>
+<li>Agama engine <a href="https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine">enabled</a></li>
+<li>Understanding of how to <a href="https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server">add and modify Agama flows</a> in your server</li>
+<li>Starter knowledge of <a href="https://www.ietf.org/rfc/rfc6749">OAuth2</a>
+)/<a href="http://openid.net/specs/openid-connect-core-1_0.html">OIDC</a></li>
+</ul>
+<h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">#</a></h2>
+<p>Inbound identity is a broad topic in the sense that there is a great amount of different mechanisms providers may employ to materialize the authentication process. The current offering in Agama is focused on OAuth2-compliant providers, more specifically those supporting the <code>code</code> authorization grant. This does not mean other grants or even different protocols such as SAML cannot be supported, however this would entail a considerable development effort.</p>
+<p>If the provider of interest already supports the <code>code</code> authorization grant, the amount of work is minimal.</p>
+<h2 id="flows">Flows<a class="headerlink" href="#flows" title="Permanent link">#</a></h2>
+<h3 id="provider">Provider<a class="headerlink" href="#provider" title="Permanent link">#</a></h3>
+<p>Every provider to support must have an associated Agama flow which has to:</p>
+<ul>
+<li>Redirect the browser to the provider's site for the user to enter his login credentials</li>
+<li>Return the associated profile data of given user</li>
+</ul>
+<p>Note the scope here is limited: no login process takes place in the Janssen server; this occurs later in a parent flow.</p>
+<p>To facilitate administrators' work, the following flows are already implemented:</p>
+<ul>
+<li>Apple</li>
+<li>Facebook</li>
+<li>Github</li>
+<li>Google</li>
+</ul>
+<p>Later, we'll see how to deploy one of these.</p>
+<h3 id="utility-flows">Utility flows<a class="headerlink" href="#utility-flows" title="Permanent link">#</a></h3>
+<p>A couple of utility flows are available for developers writing new flows:</p>
+<ul>
+<li>
+<p>Authorization Code flow: This flow implements the OAuth 2.0 authorization code grant where client authentication at the token endpoint occurs as described in section 2.3.1 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 6749</a> (HTTP basic authentication scheme). In summary, this flow redirects the browser to the external provider's site where the user will enter his credentials, then back at the Janssen redirect URL a <code>code</code> is obtained which is employed to issue an access token request. The flow returns the token response as received by the provider  </p>
+</li>
+<li>
+<p>Authorization Code flow with userInfo request: This flow reuses the previous flow and additionally issues a request to a given userInfo URL passing the access token in the HTTP Authorization header. The response obtained (the profile data of the user) is returned in conjuction with the token response of the authorization code flow</p>
+</li>
+</ul>
+<p>The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and retrieving the profile data only</p>
+<!--
+Default inbound identity flow
 
-<p>TODO</p>
+The Agama flow `io.jans.inbound.ExternalSiteLogin` implements a generic inbound identity flow. This is a summary of the steps involved:
+
+1. If the flow was passed a provider identifier as input, the given provider's data is looked up and its corresponding flow .  wi
+-->
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-22T21:20:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-23T14:43:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-23</span>
       
         <br>
         Created:

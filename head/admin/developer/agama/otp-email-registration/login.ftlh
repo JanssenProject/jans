@@ -7,7 +7,7 @@
             integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">        
         <style>
             #logo {
-                max-height: 3.25rem;
+                max-height: 3rem;
                 margin: 0.5rem;
             }
         </style>
@@ -19,9 +19,9 @@
         <img id="logo" src="https://gluu.org/wp-content/uploads/2021/02/janssen-project-transparent-630px-182px-300x86.png" />
     </header>
     
-    <div class="row col-sm-10 col-md-5 mb-5 pb-5">
+    <div class="row col-sm-10 col-md-5 mb-5 pb-3">
 
-        <div class="border border-1 rounded mb-5 p-5">
+        <div class="border border-1 rounded mb-3 p-5">
             <p class="fs-4 mb-5">Welcome</p>
             
             <#if !(success!true)>
