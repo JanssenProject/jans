@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class Visitor {
     
-    public static final String FLOWCALL_XPATH_EXPR = "//flow_call/call/call_subject/qname/text()";
+    public static final String FLOWCALL_XPATH_EXPR = "//flow_call/qname/text()";
     public static final String INPUTS_XPATH_EXPR = "/flow/header/inputs/short_var/text()";
     public static final String CONFIG_XPATH_EXPR = "/flow/header/configs/short_var/text()";
     public static final String TIMEOUT_XPATH_EXPR = "/flow/header/timeout/UINT/text()";
