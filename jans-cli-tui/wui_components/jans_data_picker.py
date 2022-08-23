@@ -23,7 +23,7 @@ from prompt_toolkit.layout.containers import (
 
 import calendar
 
-#### not finished yet
+#### not finished yet >> data
 
 class JansSelectDate:
    
@@ -35,7 +35,7 @@ class JansSelectDate:
         self.cord_x = 0
         self.extract_date(self.date)
 
-        #self.depug=Label(text="Cord_y = "+str(self.cord_y) +": current_month = "+ str(self.current_month),)
+        #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
         self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
         self.year_label =  Label(text=str(self.current_year),width=len(str(self.current_year)))
         
@@ -117,62 +117,62 @@ class JansSelectDate:
 
         return merge_formatted_text(result)
 
-    def inc_month(self):
+    def inc_month(self,day):
         if self.current_month != 12:
             self.current_month+=1
             self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
-            current_date = '20/'+str(self.current_month) + '/'+str(self.current_year)
+            current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
             self.extract_date(current_date)
 
-    def dec_month(self):
+    def dec_month(self,day):
         if self.current_month > 1:
             self.current_month-=1
             self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
-            current_date = '20/'+str(self.current_month) + '/'+str(self.current_year)
+            current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
             self.extract_date(current_date)
 
-    def inc_year(self):
+    def inc_year(self,day):
         
         self.current_year+=1
         self.year_label =  Label(text=str(self.current_year),width=len(str(self.current_year)))
-        current_date = '20/'+str(self.current_month) + '/'+str(self.current_year)
+        current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
         self.extract_date(current_date)# 20/2/1997        
 
-    def dec_year(self):
+    def dec_year(self,day):
         
         self.current_year-=1
         self.year_label =  Label(text=str(self.current_year),width=len(str(self.current_year)))
-        current_date = '20/'+str(self.current_month) + '/'+str(self.current_year)
+        current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
         self.extract_date(current_date)# 20/2/1997
 
     def up(self): 
-        if self.cord_y == 0:
-            self.dec_month()
+        if self.cord_y == 0 or int(self.entries[self.cord_y-1][self.cord_x]) == 0:
+            self.dec_month(day=1)
         else:
             self.cord_y = (self.cord_y - 1)# % 5
-            #self.depug=Label(text="Cord_y = "+str(self.cord_y) +": current_month = "+ str(self.current_month),)
+            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
 
     def down(self):
         
-        if self.cord_y == 4:
-            self.inc_month()
+        if self.cord_y == 4 or int(self.entries[self.cord_y+1][self.cord_x]) == 0:
+            self.inc_month(day=28)
         else:
             self.cord_y = (self.cord_y + 1)# % 5
-            #self.depug=Label(text="Cord_y = "+str(self.cord_y) +": current_month = "+ str(self.current_month),)
+            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
 
     def right(self):
-        if self.cord_x == 6:
-            self.inc_year()
+        if self.cord_x == 6 or int(self.entries[self.cord_y][self.cord_x+1]) == 0:
+            self.inc_year(day=7)
         else :
             self.cord_x = (self.cord_x + 1) #% 7
-            #self.depug=Label(text="Cord_y = "+str(self.cord_y) +": current_month = "+ str(self.current_month) ,)
+            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
 
     def left(self):
-        if self.cord_x == 0:
-            self.dec_year()
+        if self.cord_x == 0 or int(self.entries[self.cord_y][self.cord_x-1]) == 0:
+            self.dec_year(day=1)
         else:
             self.cord_x = (self.cord_x - 1)# % 7
-            #self.depug=Label(text="Cord_y = "+str(self.cord_y) +": current_month = "+ str(self.current_month),)
+            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
 
 
     def __pt_container__(self):
@@ -215,7 +215,7 @@ class DateSelectWidget:
         def _enter(event) -> None:
 
             if self.select_box_float not in get_app().layout.container.floats:
-                get_app().layout.container.floats.append( self.select_box_float)
+                get_app().layout.container.floats.append(   self.select_box_float)
             else:
                 self.text = str(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )+'/'+ str(self.select_box.months[self.select_box.current_month-1] ) +'/'+str(self.select_box.current_year) 
 
