@@ -46,7 +46,7 @@ public class CodeGrantUtil {
             .endpointURI(authzEndpoint);
         
         if (p.getCustParamsAuthReq() != null) {
-            p.getCustParamsAuthReq().forEach((k, v) -> builder.customParameter(k, v));
+            p.getCustParamsAuthReq().forEach(builder::customParameter);
         }
         return new Pair<>(builder.build().toURI().toString(), state.getValue());
         
@@ -111,7 +111,7 @@ public class CodeGrantUtil {
                     m.putSingle(key, val.toString());
 
                 } else if (Collection.class.isAssignableFrom(val.getClass())) {
-                    Collection col = (Collection) val;
+                    Collection<?> col = (Collection<?>) val;
                     col.forEach(v -> m.add(key, v.toString()));
                 }
             }

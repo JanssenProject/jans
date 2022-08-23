@@ -24,7 +24,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class NetworkUtils {
 
     public static HTTPResponse sendGet(String url, MultivaluedMap<String, String> headers,
-            MultivaluedMap<String, String> parameters) throws MalformedURLException, IOException {
+            MultivaluedMap<String, String> parameters) throws IOException {
         
         HTTPRequest request = new HTTPRequest(HTTPRequest.Method.GET, new URL(url));
         if (headers != null) {
@@ -32,18 +32,19 @@ public class NetworkUtils {
         }
         if (parameters != null && !parameters.isEmpty()) {
             
-            String query = "";
+            StringBuilder query = new StringBuilder("");
             for (String key : parameters.keySet()) {
                 
                 List<String> values = parameters.get(key);
                 if (values != null && !values.isEmpty()) {
                     
                     String delim = "&" + URLEncoder.encode(key, UTF_8) + "=";
-                    query += delim.substring(1) + values.stream().map(s -> URLEncoder.encode(s, UTF_8))
-                                .collect(Collectors.joining(delim));
+                    query.append(delim.substring(1));
+                    query.append(values.stream().map(s -> URLEncoder.encode(s, UTF_8))
+                                .collect(Collectors.joining(delim)));
                 }
             }
-            request.setQuery(query);
+            request.setQuery(query.toString());
         }        
         return request.send();
         
@@ -51,7 +52,7 @@ public class NetworkUtils {
     
     public static Map<String, Object> mapFromGetRequest(String url, MultivaluedMap<String, String> headers,
             MultivaluedMap<String, String> parameters, boolean ensureOKStatus)
-            throws MalformedURLException, IOException, ParseException {
+            throws IOException, ParseException {
         
         HTTPResponse response = sendGet(url, headers, parameters);
         if (ensureOKStatus) {
@@ -62,7 +63,7 @@ public class NetworkUtils {
     }
     
     public static Map<String, Object> mapFromGetRequestWithToken(String url, String bearerToken)
-            throws MalformedURLException, IOException, ParseException {
+            throws IOException, ParseException {
 
         MultivaluedHashMap<String, String> headers = new MultivaluedHashMap<>(
                 Collections.singletonMap("Authorization", "Bearer " + bearerToken));
@@ -74,5 +75,7 @@ public class NetworkUtils {
         HttpServletRequest req = CdiUtil.bean(HttpServletRequest.class);
         return req.getScheme() + "://" + req.getServerName();
     }
+    
+    private NetworkUtils() { }
 
 }
