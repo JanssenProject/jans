@@ -340,7 +340,7 @@ class JansCliApp(Application, JansAuthServer):
 
         return  new_title , cd , width
 
-    def getTitledText(self, title, name, value='', height=1, jans_help='', read_only=False, width=None, style=''):
+    def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, width=None, style=''):
         title += ': '
         multiline = height > 1
         ta = TextArea(
@@ -349,6 +349,7 @@ class JansCliApp(Application, JansAuthServer):
             read_only=read_only,
             style="class:textarea-readonly" if read_only else "class:textarea",
             focusable=not read_only,
+            accept_handler=accept_handler,
             )
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
@@ -466,7 +467,7 @@ class JansCliApp(Application, JansAuthServer):
             return result
 
         ensure_future(coroutine())
-        
+
     def data_display_dialog(self, **params):
 
         body = HSplit([

@@ -64,7 +64,7 @@ class JansAuthServer:
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
                         self.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
-                        self.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search'),
+                        self.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search', accept_handler=self.search_clients),
                         self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client),
                         
                         ],
@@ -100,10 +100,20 @@ class JansAuthServer:
     def oauth_set_center_frame(self):
         self.center_container = self.oauth_main_container
 
-    def oauth_update_clients(self):
+    def oauth_update_clients(self, pattern=''):
+        endpoint_args='limit:10'
+        if pattern:
+            endpoint_args='limit:10,pattern:'+pattern
 
         try :
-            rsponse = self.cli_object.process_command_by_id('get-oauth-openid-clients', '', 'limit:10', {})
+            rsponse = self.cli_object.process_command_by_id(
+                        operation_id='get-oauth-openid-clients',
+                        url_suffix='',
+                        endpoint_args=endpoint_args,
+                        data_fn=None,
+                        data={}
+                        )
+
         except Exception as e:
             self.show_message("Error getting clients", str(e))
             return
@@ -131,27 +141,30 @@ class JansAuthServer:
                 ]
             )
 
-        clients = JansVerticalNav(
-            myparent=self,
-            headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
-            preferred_size= [0,0,30,0],
-            data=data,
-            on_enter=self.edit_client_dialog,
-            on_display=self.data_display_dialog,
-            on_delete=self.delete_client,
-            # selection_changed=self.data_selection_changed,
-            selectes=0,
-            headerColor='green',
-            entriesColor='white',
-            all_data=result
-        )
+        if data:
+            clients = JansVerticalNav(
+                myparent=self,
+                headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
+                preferred_size= [0,0,30,0],
+                data=data,
+                on_enter=self.edit_client_dialog,
+                on_display=self.data_display_dialog,
+                on_delete=self.delete_client,
+                # selection_changed=self.data_selection_changed,
+                selectes=0,
+                headerColor='green',
+                entriesColor='white',
+                all_data=result
+            )
 
-        self.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
-        self.oauth_data_container['clients'] = HSplit([
-            clients
-        ])
+            self.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
+            self.oauth_data_container['clients'] = HSplit([
+                clients
+            ])
+            get_app().invalidate()
 
-        get_app().invalidate()
+        else:
+            self.show_message("Oops", "No matching result")
 
 
     def oauth_get_clients(self):
@@ -224,7 +237,6 @@ class JansAuthServer:
         self.show_jans_dialog(dialog)
 
     def save_client(self, dialog):
-        
 
         self.logger.debug(dialog.data)
 
@@ -244,8 +256,18 @@ class JansAuthServer:
 
         self.show_message("Error!", "An error ocurred while saving client:\n" + str(response.text))
 
+    def search_clients(self, tbuffer):
+        if not len(tbuffer.text) > 2:
+            self.show_message("Error!", "Search string should be at least three characters")
+            return
+
+        t = threading.Thread(target=self.oauth_update_clients, args=(tbuffer.text,), daemon=True)
+        t.start()
+
+
+
     def add_client(self):
-        dialog = EditClientDialog(self, title="Add Client", save_handler=self.save_client)
+        dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)
         result = self.show_jans_dialog(dialog)
 
     def delete_client(self, selected, event):
