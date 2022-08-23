@@ -9231,6 +9231,11 @@ The flow consists of creating a new branch, cherry-picking the changes of the or
 </ul>
 <p>For correct naming of other modules of the Janssen Server, please refer to <a href="https://github.com/JanssenProject/jans#janssen-modules">README</a></p>
 <h2 id="documentation-style-guide">Documentation Style Guide<a class="headerlink" href="#documentation-style-guide" title="Permanent link">#</a></h2>
+<p>Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents. </p>
+<div class="admonition testing">
+<p class="admonition-title">Testing</p>
+<p><a href="https://docs.jans.io">Janssen Project documentation site</a> is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and <a href="https://docs.jans.io">Janssen Project documentation site</a>. Hence it is critical to <a href="../developer/testing/#documentation-local-testing">test documentation</a> changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.</p>
+</div>
 <h3 id="general-text">General Text<a class="headerlink" href="#general-text" title="Permanent link">#</a></h3>
 <ul>
 <li>Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line</li>
@@ -9250,6 +9255,7 @@ The flow consists of creating a new branch, cherry-picking the changes of the or
 </ul>
 <h3 id="lists">Lists<a class="headerlink" href="#lists" title="Permanent link">#</a></h3>
 <ul>
+<li>Leave a blank line between text and first item in the list</li>
 <li>Only use a numbered list if the order of the list matters</li>
 <li>A line of a list should not end with a period. If it's multiple sentences, like this one, drop the last period</li>
 <li>Start each item in the list with a capital letter</li>
@@ -9261,13 +9267,12 @@ The flow consists of creating a new branch, cherry-picking the changes of the or
 1. This is the second item
 1. This is the third item
 </code></pre></div>
+<p>It will look like this:</p>
+<div class="highlight"><pre><span></span><code>1. This is the first item
+2. This is the second item
+3. This is the third item
+</code></pre></div>
 </li>
-</ul>
-<p>It will look like this:
-1. This is the first item
-1. This is the second item
-1. This is the third item</p>
-<ul>
 <li>
 <p>To include additional lines in a list item, start the sub-line with four spaces. For example:</p>
 <div class="highlight"><pre><span></span><code>1. This is the first item in a list   
@@ -9470,7 +9475,7 @@ docs: no docs modification
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-22T10:28:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-23T16:55:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-23</span>
       
         <br>
         Created:
