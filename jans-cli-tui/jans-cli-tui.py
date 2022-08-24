@@ -512,7 +512,7 @@ class JansCliApp(Application, JansAuthServer):
         app = get_app()
         focused_before = app.layout.current_window
         float_ = Float(content=dialog)
-        self.root_layout.floats.insert(0, float_)
+        self.root_layout.floats.append(float_)
         dialog.me = float_
         dialog.focus_on_exit = focused_before
         app.layout.focus(dialog)
