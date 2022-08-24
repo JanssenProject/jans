@@ -20,7 +20,7 @@ class JansSideNavBar():
         self.create_window()
 
     def create_window(self):
-        self.side_Nav = FloatContainer(
+        self.side_nav = FloatContainer(
             content=HSplit([
                 Window(
                     content=FormattedTextControl(
@@ -82,4 +82,4 @@ class JansSideNavBar():
         return kb
 
     def __pt_container__(self):
-        return self.side_Nav
+        return self.side_nav
