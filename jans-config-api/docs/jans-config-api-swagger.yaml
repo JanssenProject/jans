@@ -4884,9 +4884,6 @@ components:
         sessionIdUnauthenticatedUnusedLifetime:
           type: integer
           description: The lifetime for unused unauthenticated session states.
-        sessionIdEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable authentication by session_id.
         sessionIdPersistOnPromptNone:
           type: boolean
           description: Boolean value specifying whether to persist session ID on prompt none.
@@ -5299,7 +5296,7 @@ components:
           type: integer
           description: Demonstration of Proof-of-Possession (DPoP) cache time.
           default: 3600
-        allowIdTokenWithoutImplicitGrantTypes:
+        allowIdTokenWithoutImplicitGrantType:
           type: boolean
           description: Specifies if a token without implicit grant types is allowed.
         discoveryCacheLifetimeInMinutes:
