@@ -2046,11 +2046,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/developer/implementation-design/fidowallet/</loc>
-         <lastmod>2022-08-24</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-auth-server/</loc>
          <lastmod>2022-08-24</lastmod>
          <changefreq>daily</changefreq>
