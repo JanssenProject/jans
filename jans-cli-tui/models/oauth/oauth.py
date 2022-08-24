@@ -238,7 +238,7 @@ class JansAuthServer:
     def save_client(self, dialog):
 
         self.logger.debug(dialog.data)
-
+        return
         response = self.cli_object.process_command_by_id(
             operation_id='put-oauth-openid-clients' if dialog.data.get('inum') else 'post-oauth-openid-clients',
             url_suffix='',

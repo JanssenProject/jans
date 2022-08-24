@@ -355,10 +355,13 @@ class JansCliApp(Application, JansAuthServer):
             )
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
-        ta.window.me = ta
+
         li, cd, width = self.handle_long_string(title,[1]*num_lines,ta)
 
-        return VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
+        v = VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
+        v.me = ta
+
+        return v
  
     def getTitledCheckBoxList(self, title, name, values, current_values=[], jans_help='', style=''):
         title += ': '
@@ -368,10 +371,12 @@ class JansCliApp(Application, JansAuthServer):
         cbl.current_values = current_values
         cbl.window.jans_name = name
         cbl.window.jans_help = jans_help
-        cbl.window.me = cbl
         li, cd, width = self.handle_long_string(title, values, cbl)
 
-        return VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
+        v = VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
+        v.me = cbl
+
+        return v
 
 
     def getTitledCheckBox(self, title, name, text='', checked=False, jans_help='', style=''):
@@ -380,10 +385,12 @@ class JansCliApp(Application, JansAuthServer):
         cb.checked = checked
         cb.window.jans_name = name
         cb.window.jans_help = jans_help
-        cb.window.me = cb
         li, cd, width = self.handle_long_string(title, text, cb)
 
-        return VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
+        v = VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
+        v.me = cb
+
+        return v
 
     def getTitledRadioButton(self, title, name, values, current_value=None, jans_help='', style=''):
         title += ': '
@@ -401,12 +408,14 @@ class JansCliApp(Application, JansAuthServer):
 
 
     def getTitledWidget(self, title, name, widget, jans_help='', style=''):
-        widget.window.me = widget
         widget.window.jans_name = name
         widget.window.jans_help = jans_help
         li, w2, width = self.handle_long_string(title, widget.values, widget)
 
-        return VSplit([Label(text=li, width=width, style=style), widget])
+        v = VSplit([Label(text=li, width=width, style=style), widget])
+        v.me = widget
+
+        return v
 
     # ----------------------------------------------------------------- #
     def getButton(self, text, name, jans_help, handler=None):

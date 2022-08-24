@@ -13,18 +13,19 @@ class DialogUtils:
         data = {}
         for tab in self.tabs:
             for item in self.tabs[tab].children:
-                if hasattr(item, 'children') and len(item.children)>1 and hasattr(item.children[1], 'jans_name'):
-                    key_ = item.children[1].jans_name
-                    if isinstance(item.children[1].me, prompt_toolkit.widgets.base.TextArea):
-                        value_ = item.children[1].me.text
-                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.CheckboxList):
-                        value_ = item.children[1].me.current_values
-                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.RadioList):
-                        value_ = item.children[1].me.current_value
-                    elif isinstance(item.children[1].me, prompt_toolkit.widgets.base.Checkbox):
-                        value_ = item.children[1].me.checked
-                    elif isinstance(item.children[1].me, DropDownWidget):
-                        value_ = item.children[1].me.value
+                if hasattr(item, 'me'):
+                    me = item.me
+                    key_ = me.window.jans_name
+                    if isinstance(me, prompt_toolkit.widgets.base.TextArea):
+                        value_ = me.text
+                    elif isinstance(me, prompt_toolkit.widgets.base.CheckboxList):
+                        value_ = me.current_values
+                    elif isinstance(me, prompt_toolkit.widgets.base.RadioList):
+                        value_ = me.current_value
+                    elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
+                        value_ = me.checked
+                    elif isinstance(me, DropDownWidget):
+                        value_ = me.value
                     data[key_] = value_
 
         return data
