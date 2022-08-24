@@ -375,7 +375,6 @@
       - Config API
   - Implementation Design
       - agama
-      - fidowallet
       - jans-auth-server
       - jans-cli
       - jans-client-api
