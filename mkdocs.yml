@@ -332,6 +332,7 @@ nav:
         - 'External Libraries': 'admin/developer/external-libraries.md'
         - 'Front Channel Scripts': 'admin/developer/front-channel-scripts.md'
         - 'Back Channel Scripts': 'admin/developer/back-channel-scripts.md'
+        - 'Managed Beans': 'admin/developer/managed-beans.md'
         - 'Customization':
             - 'Customize Web pages': 'admin/developer/customization/customize-web-pages.md'
             - 'Custom client logs': 'admin/developer/customization/custom-client-logs.md'
@@ -395,6 +396,7 @@ nav:
             - 'Image Config Properties':
                 - 'Configurator': 'admin/reference/kubernetes/image-configurator.md'
                 - 'Auth Server': 'admin/reference/kubernetes/image-auth-server.md'
+                - 'Config Initialization': 'admin/reference/kubernetes/image-config-init.md'
                 - 'Config API': 'admin/reference/kubernetes/image-config-api.md'
                 - 'FIDO': 'admin/reference/kubernetes/image-fido.md'
                 - 'SCIM': 'admin/reference/kubernetes/image-scim.md'
