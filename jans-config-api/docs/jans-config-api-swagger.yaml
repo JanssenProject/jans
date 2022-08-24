@@ -222,7 +222,6 @@ paths:
       parameters:
         - schema:
             type: integer
-            default: 50
           in: query
           name: limit
           description: Search size - max size of the results to return.
@@ -237,6 +236,30 @@ paths:
           in: query
           name: status
           description: Status of the attribute
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+		  
+
+
     post:
       summary: Adds a new attribute.
       description: Adds a new attribute.

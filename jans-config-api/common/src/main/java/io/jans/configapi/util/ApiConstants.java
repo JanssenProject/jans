@@ -127,5 +127,7 @@ public class ApiConstants {
     public static final int DEFAULT_MAX_COUNT = 200;  
     public static final String SORT_BY = "sortBy";
     public static final String SORT_ORDER = "sortOrder";
+    public static final String ASCENDING = "ascending";
+    public static final String DESCENDING = "descending";
 
 }
