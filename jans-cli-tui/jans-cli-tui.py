@@ -343,6 +343,7 @@ class JansCliApp(Application, JansAuthServer):
 
     def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, width=None, style=''):
         title += ': '
+        num_lines = min(len(str(value).split("\n")),height)
         multiline = height > 1
         ta = TextArea(
             text=str(value),
@@ -355,7 +356,7 @@ class JansCliApp(Application, JansAuthServer):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
         ta.window.me = ta
-        li, cd, width = self.handle_long_string(title,[1]*height,ta)
+        li, cd, width = self.handle_long_string(title,[1]*num_lines,ta)
 
         return VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
  
@@ -500,8 +501,9 @@ class JansCliApp(Application, JansAuthServer):
 
 
     def edit_scope_dialog(self, **params):
-        dialog = EditScopeDialog(self,**params)
-        self.show_jans_dialog(dialog)
+        # dialog = EditScopeDialog(self,**params)
+        # self.show_jans_dialog(dialog)
+        pass
 
     def show_message(self, title, message, buttons=[]):
         body = HSplit([Label(message)])
