@@ -18,7 +18,7 @@ public final class CustomMappings {
 
         profile -> {
             Map<String, Object> map = new HashMap<>();
-            //Fill your map as desired with data from input profile. See examples in io.jans.inbound.Mappings
+            //Fill your map as desired with data from input profile. See examples in class io.jans.inbound.Mappings
             //value = profile.get("...") 
             //map.put(Attrs.UID, ... );
             return map; 

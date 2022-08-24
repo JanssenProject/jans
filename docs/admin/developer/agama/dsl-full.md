@@ -58,7 +58,7 @@ The “special” value `null` can be used (responsibly) to represent the absenc
 
 - They are in essence associative arrays (a.k.a. dictionaries): unordered collections of key/value pairs 
 
-- Example: `{ brand: "Ford", color: null, model: 1963, overhaulsIn: [ 1979, 1999 ] }`. This map keys are brand, color, model, and overhaulsIn 
+- Example: `{ brand: "Ford", color: null, model: 1963, overhaulsIn: [ 1979, 1999 ] }`. This map keys are `brand`, `color`, `model`, and `overhaulsIn` 
 
 - In literal notation, keys names must follow the pattern `[a-zA-Z]( _ | [a-zA-Z] | [0-9] )*` so these are all valid key names: `a`, `Agama`, `b_a`, `a0_0`; on the contrary, `_a`, `9`, `-a`, and `"aha"` are invalid key names 
 
