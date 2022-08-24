@@ -9,6 +9,7 @@ from prompt_toolkit.layout.containers import (
 from prompt_toolkit.widgets import (
     Button,
     Dialog,
+    VerticalLine,
 )
 
 
@@ -38,9 +39,9 @@ class JansDialogWithNav():
                     HSplit([
                         self.navbar
                         ], width= (max_data_str )),
-                    Window(width=1, char="|",),
+                    VerticalLine(),
                     ScrollablePane(content=self.content, height=height),
-                ], width=120),
+                ], width=120, padding=1),
 
             buttons=[
                 Button(
