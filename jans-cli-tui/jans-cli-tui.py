@@ -287,7 +287,9 @@ class JansCliApp(Application, JansAuthServer):
             if prop == jans_name:
                 return schema['properties'][jans_name].get('description', '')
 
-    def handle_long_string (self,text,values,cb):
+    def handle_long_string (self, text, values, widget):
+        return text, values, widget
+        #Abdulwehab NEVER do any change for widget. I renamed cb as widget
         lines = []
         if len(text) > 20 :
             title_list=text.split(' ')
@@ -315,12 +317,12 @@ class JansCliApp(Application, JansAuthServer):
 
 
         if title_lines <= len(values) :  ### if num of values (value lines) < = title_lines
-            lines_under_value = 0   
+            lines_under_value = 0
         else :
             lines_under_value = abs(title_lines-len(values))
         
         if lines_under_value !=0 :
-            cd = HSplit([   
+            cd = HSplit([
                 cb,
                 Label(text=('\n')*(lines_under_value-1)) 
             ])
@@ -343,11 +345,10 @@ class JansCliApp(Application, JansAuthServer):
 
     def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, width=None, style=''):
         title += ': '
-        num_lines = min(len(str(value).split("\n")),height)
-        multiline = height > 1
         ta = TextArea(
             text=str(value),
-            multiline=multiline,
+            multiline=height > 1,
+            height=height,
             read_only=read_only,
             style="class:textarea-readonly" if read_only else "class:textarea",
             focusable=not read_only,
@@ -356,9 +357,9 @@ class JansCliApp(Application, JansAuthServer):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
-        li, cd, width = self.handle_long_string(title,[1]*num_lines,ta)
+        #li, cd, width = self.handle_long_string(title,[1]*num_lines,ta)
 
-        v = VSplit([Label(text=li, width=width,style=style), cd],  padding=1)
+        v = VSplit([Label(text=title, width=len(title), style=style), ta], padding=1)
         v.me = ta
 
         return v
@@ -371,9 +372,9 @@ class JansCliApp(Application, JansAuthServer):
         cbl.current_values = current_values
         cbl.window.jans_name = name
         cbl.window.jans_help = jans_help
-        li, cd, width = self.handle_long_string(title, values, cbl)
+        #li, cd, width = self.handle_long_string(title, values, cbl)
 
-        v = VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
+        v = VSplit([Label(text=title, width=len(title), style=style, wrap_lines=False), cbl])
         v.me = cbl
 
         return v
@@ -385,9 +386,9 @@ class JansCliApp(Application, JansAuthServer):
         cb.checked = checked
         cb.window.jans_name = name
         cb.window.jans_help = jans_help
-        li, cd, width = self.handle_long_string(title, text, cb)
+        #li, cd, width = self.handle_long_string(title, text, cb)
 
-        v = VSplit([Label(text=li, width=width, style=style, wrap_lines=False), cd])
+        v = VSplit([Label(text=title, width=len(title), style=style, wrap_lines=False), cb])
         v.me = cb
 
         return v
@@ -402,17 +403,17 @@ class JansCliApp(Application, JansAuthServer):
         rl.window.jans_name = name
         rl.window.jans_help = jans_help
         rl.window.me = rl
-        li, rl2, width = self.handle_long_string(title, values, rl)
+        #li, rl2, width = self.handle_long_string(title, values, rl)
 
-        return VSplit([Label(text=li, width=width, style=style), rl2],)
+        return VSplit([Label(text=title, width=len(title), style=style), rl])
 
 
     def getTitledWidget(self, title, name, widget, jans_help='', style=''):
         widget.window.jans_name = name
         widget.window.jans_help = jans_help
-        li, w2, width = self.handle_long_string(title, widget.values, widget)
+        #li, w2, width = self.handle_long_string(title, widget.values, widget)
 
-        v = VSplit([Label(text=li, width=width, style=style), widget])
+        v = VSplit([Label(text=title, width=len(title), style=style), widget])
         v.me = widget
 
         return v

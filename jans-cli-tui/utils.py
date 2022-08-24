@@ -18,12 +18,12 @@ class DialogUtils:
                     key_ = me.window.jans_name
                     if isinstance(me, prompt_toolkit.widgets.base.TextArea):
                         value_ = me.text
+                    elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
+                        value_ = me.checked
                     elif isinstance(me, prompt_toolkit.widgets.base.CheckboxList):
                         value_ = me.current_values
                     elif isinstance(me, prompt_toolkit.widgets.base.RadioList):
                         value_ = me.current_value
-                    elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
-                        value_ = me.checked
                     elif isinstance(me, DropDownWidget):
                         value_ = me.value
                     data[key_] = value_

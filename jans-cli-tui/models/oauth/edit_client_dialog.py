@@ -32,8 +32,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         def save():
 
             self.data = self.make_data_from_dialog()
-
-            for list_key in ('redirectUris', 'scopes'):
+            self.data['disabled'] = not self.data['disabled']
+            for list_key in ('redirectUris', 'scopes', 'postLogoutRedirectUris'):
                 if self.data[list_key]:
                     self.data[list_key] = self.data[list_key].splitlines()
 
@@ -182,8 +182,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         
         self.tabs['Logout'] = HSplit([
             
-                        self.myparent.getTitledText("Front channel logout URI", name='frontChannelLogoutUri', value=self.data.get('frontChannelLogoutUri',''),style='green'),
-                        self.myparent.getTitledText("Post logout redirect URI", name='postLogoutRedirectUris', value=self.data.get('postLogoutRedirectUris',''),style='green'),
+                        self.myparent.getTitledText("Front channel logout URI", name='frontChannelLogoutUri', value=self.data.get('frontChannelLogoutUri',''), style='green'),
+                        self.myparent.getTitledText("Post logout redirect URIs", name='postLogoutRedirectUris', value='\n'.join(self.data.get('postLogoutRedirectUris',[])), height=3, style='green'),
                         self.myparent.getTitledText("Back channel logout URI", name='backchannelLogoutUri', value=self.data.get('backchannelLogoutUri',''),style='green'),
                         self.myparent.getTitledCheckBox("Back channel logout session required", name='backchannelLogoutSessionRequired', checked=self.data.get('backchannelLogoutSessionRequired'),style='green'),
                         self.myparent.getTitledCheckBox("Front channel logout session required", name='frontChannelLogoutSessionRequired', checked=self.data.get('frontChannelLogoutSessionRequired'),style='green'),
