@@ -1,4 +1,3 @@
-from prompt_toolkit.widgets import TextArea
 from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.margins import ScrollbarMargin

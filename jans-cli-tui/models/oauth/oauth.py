@@ -1,6 +1,6 @@
-from curses import window
 import threading
 from asyncio import ensure_future
+
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
@@ -11,14 +11,12 @@ from prompt_toolkit.layout.containers import (
     HorizontalAlign,
     DynamicContainer,
 )
-from prompt_toolkit.layout.containers import VerticalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import (
     Box,
     Button,
     Label,
 )
-from prompt_toolkit.filters import Condition
 
 from cli import config_cli
 from wui_components.jans_nav_bar import JansNavBar

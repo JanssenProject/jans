@@ -1,43 +1,20 @@
-import json
-from asyncio import Future
 from typing import OrderedDict
 
-from prompt_toolkit.widgets import Button, TextArea
-from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
-from static import DialogResult
-from wui_components.jans_dialog import JansDialog
 from prompt_toolkit.layout.containers import (
-    VSplit,
-    DynamicContainer,
-)
-from prompt_toolkit.widgets import (
-    Button,
-    Label,
-    TextArea,
-)
-
-from cli import config_cli
-from prompt_toolkit.layout.containers import (
-    ConditionalContainer,
-    Float,
     HSplit,
     VSplit,
-    VerticalAlign,
     DynamicContainer,
-    FloatContainer,
     Window
 )
 from prompt_toolkit.widgets import (
     Box,
     Button,
-    Frame,
     Label,
-    RadioList,
-    TextArea,
-    CheckboxList,
-    Shadow,
 )
+
+from cli import config_cli
+from static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
@@ -327,7 +304,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             ),
             self.myparent.getTitledWidget(
             title="OAuth Consent",
-            name='consentGatheringScripts',                
+            name='consentGatheringScripts',
                widget=DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
             ),
 
