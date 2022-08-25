@@ -269,15 +269,6 @@
       "title-prefixes": []
     }
   },
-  "comp-fidowallet": {
-    "color": "0052CC",
-    "description": "Touching folder /fidowallet",
-    "auto-label": {
-      "branch": "",
-      "paths": ["fidowallet"],
-      "title-prefixes": []
-    }
-  },
   "effort-1": {
     "color": "FEF2C0",
     "description": "Relative effort required for completion of issue or PR",

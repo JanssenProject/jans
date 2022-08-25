@@ -23,7 +23,6 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli/**'
       - 'jans-pycloudlib/**'
-      - 'fidowallet/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -47,7 +46,6 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli/**'
       - 'jans-pycloudlib/**'
-      - 'fidowallet/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -60,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-client-api, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, fidowallet]
+        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-client-api, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
     env:
       JVM_PROJECTS: |
         jans-auth-server
@@ -77,7 +75,6 @@ jobs:
         jans-linux-setup
         jans-cli
         jans-pycloudlib
-        fidowallet
 
     steps:
       - name: check out code

@@ -4286,13 +4286,81 @@ components:
           type: string
           description: URL for the Introspection Endpoint.
           example: 'https://server.example.com/restv1/introspection'
+        parEndpoint:
+          type: string
+          description: URL for Pushed Authorisation Request (PAR) Endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/par'
+        requirePar:
+          description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
+          type: boolean		  
         deviceAuthzEndpoint:
           type: string
           description: URL for the Device Authorization.
           example: 'https://server.example.com/restv1/device_authorization'
+        mtlsAuthorizationEndpoint:
+          type: string
+          description: URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls'
+        mtlsTokenEndpoint:
+          type: string
+          description: URL for MTLS Authorization token Endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/token'
+        mtlsTokenRevocationEndpoint:
+          type: string
+          description: URL for MTLS Authorization token revocation endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/revoke'
+        mtlsUserInfoEndpoint:
+          type: string
+          description: URL for MTLS User Info endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/userinfo'
+        mtlsClientInfoEndpoint:
+          type: string
+          description: URL for MTLS Client Info endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/clientinfo'
+        mtlsCheckSessionIFrame:
+          type: string
+          description: URL for MTLS IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API..
+          example: 'https://server.example.com/jans-auth/restv1/mtls/opiframe.htm'
+        mtlsEndSessionEndpoint:
+          type: string
+          description: URL for MTLS to which an RP can perform a redirect to request that the end user be logged out at the OP.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/end_session'	
+        mtlsJwksUri:
+          type: string
+          description: URL for MTLS of the OP\'s JSON Web Key Set (JWK) document.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/jwks'		
+        mtlsRegistrationEndpoint:
+          type: string
+          description: URL for MTLS Registration endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/register'
+        mtlsIdGenerationEndpoint:
+          type: string
+          description: URL for MTLS Id generation endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/id'
+        mtlsIntrospectionEndpoint:
+          type: string
+          description: URL for MTLS Introspection endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/introspection'
+        mtlsParEndpoint:
+          type: string
+          description: URL for MTLS Pushed Authorisation Request (PAR) endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/par'
+        mtlsDeviceAuthzEndpoint:
+          type: string
+          description: URL for MTLS Device Authorization endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/device_authorization'	  
         sessionAsJwt:
           type: boolean
           description: Boolean value true saves session data as a JWT.
+        requireRequestObjectEncryption:
+          type: boolean
+          description: Boolean value true encrypts request object.
+        requirePkce:
+          type: boolean
+          description: Boolean value true check for Proof Key for Code Exchange (PKCE).
+        allowAllValueForRevokeEndpoint:
+          type: boolean
+          description: Boolean value true allow all value for revoke endpoint.
         sectorIdentifierCacheLifetimeInMinutes:
           type: integer
           description:  Sector Identifier cache lifetime in minutes.
@@ -4327,9 +4395,15 @@ components:
         umaRestrictResourceToAssociatedClient:
           type: boolean
           description: Restrict access to resource by associated client.
+        statTimerIntervalInSeconds:
+          type: integer
+          description: Statistical data capture time interval.
+        statAuthorizationScope:
+          type: string
+          description: Scope required for Statistical Authorization. 
         allowSpontaneousScopes:
           type: boolean
-          description: Specifies whether to allow spontaneous scopes
+          description: Specifies whether to allow spontaneous scopes.
         spontaneousScopeLifetime:
           type: integer
           description: The lifetime of spontaneous scope in seconds.
@@ -4337,6 +4411,17 @@ components:
           type: string
           description: Specifies which LDAP attribute is used for the subject identifier claim.
           example: inum
+        publicSubjectIdentifierPerClientEnabled:
+          type: boolean
+          description: Specifies whether public subject identifier is allowed per client.
+        subjectIdentifiersPerClientSupported:
+          type: array
+          description: A list of the subject identifiers supported per client.
+          items:
+            type: string
+          enum:
+            - mail
+            - uid			
         responseTypesSupported:
           type: array
           description: A list of the OAuth 2.0 response_type values that this OP supports.
@@ -4381,7 +4466,46 @@ components:
           description: Default Subject Type used for Dynamic Client Registration.
           enum:
             - public
-            - pairwise
+            - pairwise			
+        authorizationSigningAlgValuesSupported:
+          type: array
+          description: A list of the authorization signing algorithms supported.
+          items:
+            type: string
+          enum:
+            - HS256
+            - HS384
+            - HS512
+            - RS256
+            - RS384
+            - RS512
+            - ES256
+            - ES384
+            - ES512
+            - ES512
+            - PS256
+            - PS384
+            - PS512
+        authorizationEncryptionAlgValuesSupported:
+          type: array
+          description: A list of the authorization encryption algorithms supported.
+          items:
+            type: string
+          enum:
+            - RSA1_5
+            - RSA-OAEP			
+            - A128KW			
+            - A256KW	
+        authorizationEncryptionEncValuesSupported:
+          type: array
+          description: A list of the authorization encryption algorithms supported.
+          items:
+            type: string
+          enum:
+            - A128CBC+HS256
+            - A256CBC+HS512
+            - A128GCM
+            - A256GCM
         userInfoSigningAlgValuesSupported:
           type: array
           description: A list of the JWS signing algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
@@ -4459,6 +4583,9 @@ components:
             - A256CBC+HS512
             - A128GCM
             - A256GCM
+        forceSignedRequestObject:
+          type: boolean
+          description: Boolean value true indicates that signed request object is mandatory.
         requestObjectSigningAlgValuesSupported:
           type: array
           description: A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects.
@@ -4601,17 +4728,17 @@ components:
         requestUriParameterSupported:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request_uri parameter.
-        requestUriBlockList:
-          type: array
-          description: Block list for requestUri that can come to Authorization Endpoint (e.g. "localhost")
-          items:
-            type: string
         requestUriHashVerificationEnabled:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request_uri hash verification.
         requireRequestUriRegistration:
           type: boolean
           description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter.
+        requestUriBlockList:
+          type: array
+          description: Block list for requestUri that can come to Authorization Endpoint (e.g. "localhost")
+          items:
+            type: string
         opPolicyUri:
           type: string
           description: URL that the OpenID Provider provides to the person registering the Client to read about the OP\'s requirements on how the Relying Party can use the data provided by the OP.
@@ -4741,6 +4868,12 @@ components:
           type: integer
           description: The expiration notificator interval in seconds.
           example: 600
+        redirectUrisRegexEnabled:
+          type: boolean
+          description: Enable/Disable redirect uris validation using regular expression.
+        useHighestLevelScriptIfAcrScriptNotFound:
+          type: boolean
+          description: Enable/Disable usage of highest level script in case ACR script does not exist.
         authenticationFiltersEnabled:
           type: boolean
           description: Boolean value specifying whether to enable user authentication filters.
@@ -4750,6 +4883,9 @@ components:
         clientRegDefaultToCodeFlowWithRefresh:
           type: boolean
           description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.
+        grantTypesAndResponseTypesAutofixEnabled:
+          type: boolean
+          description: Boolean value specifying whether to Grant types and Response types can be auto fixed.
         authenticationFilters:
           type: array
           description: List of authentication filters.
@@ -4771,9 +4907,6 @@ components:
         sessionIdUnauthenticatedUnusedLifetime:
           type: integer
           description: The lifetime for unused unauthenticated session states.
-        sessionIdEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable authentication by session_id.
         sessionIdPersistOnPromptNone:
           type: boolean
           description: Boolean value specifying whether to persist session ID on prompt none.
@@ -4786,12 +4919,18 @@ components:
         sessionIdPersistInCache:
           type: boolean
           description: Boolean value specifying whether to persist session_id in cache.
+        includeSidInResponse:
+          type: boolean
+          description: Boolean value specifying whether to include sessionId in response.
         sessionIdLifetime:
           type: integer
           description: The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.
         serverSessionIdLifetime:
           type: integer
           description: The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.
+        activeSessionAuthorizationScope:
+          type: string
+          description: Authorization Scope for active session
         configurationUpdateInterval:
           type: integer
           description: The interval for configuration update in seconds.
@@ -4863,11 +5002,21 @@ components:
             - OLDER
             - NEWER
             - FIRST
-        checkUserPresenceOnRefreshToken:
+        keyAlgsAllowedForGeneration:
+          type: array
+          description: List of algorithm allowed to be used for key generation.
+          items:
+            type: string
+          example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
+        keySignWithSameKeyButDiffAlg:
           type: boolean
-          description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.)
-          example: false
-          default: false
+          description: Specifies if signing to be done with same key but apply different algorithms.
+        staticKid:
+          type: string
+          description: Specifies static Kid
+        staticDecryptionKid:
+          type: string
+          description: Specifies static decryption Kid.
         oxElevenTestModeToken:
           type: string
           description: oxEleven Test Mode Token.
@@ -4890,6 +5039,9 @@ components:
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
           description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
+        introspectionSkipAuthorization:
+          type: boolean
+          description: Specifies if authorization to be skipped for introspection.
         endSessionWithAccessToken:
           type: boolean
           description: Accept access token to call end_session endpoint.
@@ -4966,15 +5118,41 @@ components:
           description: Authorization Request Custom Allowed Parameters.
           items:
             type: string
-        legacyDynamicRegistrationScopeParam:
-          type: boolean
-          description: Legacy Dynamic Registration Scopes JSON Array Param.
         openidScopeBackwardCompatibility:
           type: boolean
           description: Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
         disableU2fEndpoint:
           type: boolean
           description: Enable/Disable U2F endpoints.
+        dcrSignatureValidationEnabled:
+          type: boolean
+          description: Boolean value enables DCR signature validation. Default is false.
+        dcrSignatureValidationSharedSecret:
+          type: string
+          description: Specifies shared secret for Dynamic Client Registration.
+        dcrSignatureValidationSoftwareStatementJwksURIClaim:
+          type: string
+          description: Specifies claim name inside software statement. Value of claim should point to JWKS URI.
+        dcrSignatureValidationSoftwareStatementJwksClaim:
+          type: string
+          description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
+        dcrSignatureValidationJwks:
+          type: string
+          description: Specifies JWKS for all DCR's validations.
+        dcrSignatureValidationJwksUri:
+          type: string
+          description: Specifies JWKS URI for all DCR's validations.
+        dcrAuthorizationWithClientCredentials:
+          type: boolean
+          description: Boolean value indicating if DCR authorization to be performed using client credentials.
+        dcrAuthorizationWithMTLS:
+          type: boolean
+          description: Boolean value indicating if DCR authorization allowed with MTLS.
+        dcrIssuers:
+          type: array
+          description: List of DCR issuers.
+          items:
+            type: string
         useLocalCache:
           type: boolean
           description: Boolean value specifying whether to enable local in-memory cache.
@@ -4999,6 +5177,11 @@ components:
         refreshTokenExtendLifetimeOnRotation:
           type: boolean
           description: Boolean value specifying whether to extend refresh tokens on rotation.
+        checkUserPresenceOnRefreshToken:
+          type: boolean
+          description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.)
+          example: false
+          default: false
         consentGatheringScriptBackwardCompatibility:
           type: boolean
           description: Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false AS will pick up script based on client configuration.
@@ -5113,9 +5296,53 @@ components:
         cibaMaxExpirationTimeAllowedSec:
           type: integer
           description: Specifies the CIBA token expiration time in seconds.
+        dpopSigningAlgValuesSupported:
+          type: array
+          description: Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported.
+          items:
+            type: string
+            enum:
+              - RS256
+              - RS384
+              - RS512
+              - ES256
+              - ES384
+              - ES512
+              - PS256
+              - PS384
+              - PS512
+        dpopTimeframe:
+          type: integer
+          description: Demonstration of Proof-of-Possession (DPoP) timeout.
+          default: 5
+        dpopJtiCacheTime:
+          type: integer
+          description: Demonstration of Proof-of-Possession (DPoP) cache time.
+          default: 3600
+        allowIdTokenWithoutImplicitGrantType:
+          type: boolean
+          description: Specifies if a token without implicit grant types is allowed.
         discoveryCacheLifetimeInMinutes:
           type: integer
           description: Lifetime of discovery cache.
+        discoveryAllowedKeys:
+          type: array
+          description: List of configuration response claim allowed to be displayed in discovery endpoint.
+          items:
+            type: string
+          example: 'authorization_endpoint, token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..'
+        discoveryDenyKeys:
+          type: array
+          description: List of configuration response claims which must not be displayed in discovery endpoint response.
+          items:
+            type: string
+          example: 'id_generation_endpoint, auth_level_mapping, etc.'
+        enabledComponents:
+          type: array
+          description: List of auth components enabled
+          items:
+            type: string
+          example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'
         httpLoggingEnabled:
           type: boolean
           description: Enable/Disable request/response logging filter.
@@ -5129,76 +5356,11 @@ components:
           type: string
           description: Path to external log4j2 logging configuration.
           example: /identity/logviewer/configure
-        dcrSignatureValidationEnabled:
-          type: boolean
-          description: Boolean value enables DCR signature validation. Default is false.
-        dcrSignatureValidationSharedSecret:
-          type: string
-          description: Specifies shared secret for Dynamic Client Registration.
-        dcrSignatureValidationSoftwareStatementJwksURIClaim:
-          type: string
-          description: Specifies claim name inside software statement. Value of claim should point to JWKS URI.
-        dcrSignatureValidationSoftwareStatementJwksClaim:
-          type: string
-          description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
-        dcrSignatureValidationJwks:
-          type: string
-          description: Specifies JWKS for all DCR's validations.
-        dcrSignatureValidationJwksUri:
-          type: string
-          description: Specifies JWKS URI for all DCR's validations.
-        dcrAuthorizationWithClientCredentials:
-          type: boolean
-          description: Boolean value indicating if DCR authorization to be performed using client credentials.
-        statTimerIntervalInSeconds:
-          type: integer
-          description: Statistical data capture time interval.
-        statWebServiceIntervalLimitInSeconds:
-          type: integer
-          description: Statistical data capture time interval limit.
-        keyAlgsAllowedForGeneration:
-          type: array
-          description: List of algorithm allowed to be used for key generation.
-          items:
-            type: string
-          example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
-        discoveryDenyKeys:
-          type: array
-          description: List of configuration response claims which must not be displayed in discovery endpoint response.
-          items:
-            type: string
-          example: 'id_generation_endpoint, auth_level_mapping, etc.'
-        discoveryAllowedKeys:
-          type: array
-          description: List of configuration response claim allowed to be displayed in discovery endpoint.
-          items:
-            type: string
-          example: 'authorization_endpoint, token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..'
-        allowIdTokenWithoutImplicitGrantTypes:
-          type: boolean
-          description: Specifies if a token without implicit grant types is allowed.
-        keySignWithSameKeyButDiffAlg:
-          type: boolean
-          description: Specifies if signing to be done with same key but apply different algorithms.
-        enabledComponents:
-          type: array
-          description: List of auth components enabled
-          items:
-            type: string
-          example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'
-        staticKid:
-          type: string
-          description: Specifies static Kid
-        redirectUrisRegexEnabled:
-          type: boolean
-          description: Enable/Disable redirect uris validation using regular expression.
-        useHighestLevelScriptIfAcrScriptNotFound:
-          type: boolean
-          description: Enable/Disable usage of highest level script in case ACR script does not exist.
         agamaConfiguration:
           type: object
           description: Engine Config which offers an alternative way to build authentication flows in Janssen server
           $ref: '#/components/schemas/EngineConfig'
+
 
     GluuAttribute:
       title: GluuAttribute
