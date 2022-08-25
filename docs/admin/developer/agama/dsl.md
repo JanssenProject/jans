@@ -92,7 +92,7 @@ Next, in an indented block several aspects can be provided (in this specific ord
 
 Except for the base directory, all of these are optional. 
 
-The following is an example of a flow header, where the folder `mydir` should hold the assets of the flow (more info on assets [here](./quick-start.md#upload-required-assets)). The flow may receive three parameters: `salutation`, `askGender`, and `promptRealName` from their callers (when used as [subflow](#subflows)) or from the [authentication request](./quick-start.md#craft-an-authentication-request) when the flow is launched directly from a web browser.
+The following is an example of a flow header, where the folder `mydir` should hold the assets of the flow (more info on assets [here](../../../admin/developer/agama/quick-start.md)). The flow may receive three parameters: `salutation`, `askGender`, and `promptRealName` from their callers (when used as [subflow](#subflows)) or from the [authentication request](./quick-start.md#craft-an-authentication-request) when the flow is launched directly from a web browser.
 
 ```
 Flow com.acme.FoodSurvey
