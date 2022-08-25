@@ -12,7 +12,7 @@ This is a guide for user authentication at any external Social Providers(Google,
 
 After users authenticate at the external social identity provider, the control flows back to Janssen Authentication server where the user is verified and the user-id is provisioned into the Janssen server.
 
-[Diagram source file](../../admin/assets/sequence-source-passport-js-auth-flow.txt)
+[Diagram source file](../../assets/sequence-source-passport-js-auth-flow.txt)
 
 ![jans-passport-inbound-identity](../../assets/image-pasport-js-auth-flow.png)
 
@@ -22,7 +22,7 @@ After users authenticate at the external social identity provider, the control f
 2. Janssen Auth server verifies the received JWT, decrypts data, add/update user into LDAP, and marks the user as authenticated. 
 Check [Script](../../script-catalog/person_authentication/passport/passport-social-jans-script.py#L415) Code For details.
 
-[Diagram source file](../../admin/assets/sequence-source-passport-js-data-flow.txt)
+[Diagram source file](../../assets/sequence-source-passport-js-data-flow.txt)
 
 ![jans-passport-data](../../assets/image-pasport-js-data-flow.png)
 
