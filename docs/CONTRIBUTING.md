@@ -241,7 +241,7 @@ It will look like this:
 
 #### Other formatting considerations
 
- - [Admonitions](#admonitions) cannot be nested inside a list. They must be aligned all the way left. Inserting them within a list will break the list sequence (starting back over from 1).
+ - Admonitions cannot be nested inside a list. They must be aligned all the way left. Inserting them within a list will break the list sequence (starting back over from 1).
     
  - Nesting a [fenced block of code](#code-formatting) in a numbered list is more challenging, as the list and code block syntaxes clash. To nest a code block into a list, insert four spaces to the left of all lines of the formatting. For example:
 
@@ -297,7 +297,7 @@ Navigate to `Configuration` > `Authentication` and click the `Passport` tab
 
 We recommend using relative linking syntax when linking to other artifacts in repository. Linking to a page within the same repo use this format: `[text for the link](../where/the/link/goes.md)`
  - You must link to the `.md` file on GitHub for it to work properly
- - As an example, to make [this link](./example.md) to an example page, you'd type it as `[this link](./example.md)`
+ - As an example, to make text `this link` link to a Markdown document named `example.md` in the same directory, you'd type it as `[this link](./example.md)`
  
 #### Service Commands 
 

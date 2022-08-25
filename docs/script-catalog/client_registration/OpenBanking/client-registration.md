@@ -12,8 +12,8 @@ The Janssen Authorization Server uses **interception scripts** to enable you to 
 ## Adding the custom script
 
 1. To add or update custom scripts, you can use either jans-cli or curl. jans-cli in interactive mode, option 13 enables you manage custom scripts. For more info, see the [docs](https://github.com/JanssenProject/home/wiki/Custom-Scripts-using-jans-cli).
-1. jans-cli in command line argument mode is more conducive to scripting and automation. To display the available operations for custom scripts, use config-cli.py --info CustomScripts. See the [docs](../jans-cli.md) for more info.
-1. To use `curl` see these [docs](../curl.md)
+1. jans-cli in command line argument mode is more conducive to scripting and automation. To display the available operations for custom scripts, use config-cli.py --info CustomScripts. See the [docs](../../../admin/config-guide/jans-cli/index.md) for more info.
+1. To use `curl` see these [docs](../../../admin/config-guide/curl.md)
 
 !!! Note
     You can normally find `jans-cli.py` in the `/opt/jans/jans-cli/` folder. 
