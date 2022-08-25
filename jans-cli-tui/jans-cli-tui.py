@@ -80,13 +80,10 @@ class JansCliApp(Application, JansAuthServer):
         self.app = get_app()
         self.show_dialog = False   ## ## ## ##
         self.set_keybindings()
-        self.containers = {}
         # -------------------------------------------------------------------------------- #
 
-        self.dialogs = {}
-        self.tabs = {}
-        self.active_dialog_select = ''
-        self.Auth_clients_tabs = {}
+        self.dialog_width = int(self.width*0.9) # 120 ## to be dynamic
+        self.dialog_height = int(self.height*0.8) ## to be dynamic
 
         self.keyboard = Controller()
 
@@ -96,7 +93,6 @@ class JansCliApp(Application, JansAuthServer):
                         FormattedTextControl(self.update_status_bar), style="class:status", height=1
                     )
 
-        self.prapare_dialogs()
 
         JansAuthServer.initialize(self)
 
@@ -252,16 +248,6 @@ class JansCliApp(Application, JansAuthServer):
 
         ensure_future(coroutine())
 
-
-    def dialog_back_but(self): ## BACK
-        self.active_dialog_select = ''
-        self.show_dialog = False
-        self.layout.focus(self.center_frame) 
-
-    def prapare_dialogs(self):
-        self.data_show_client_dialog = Label(text='Selected Line Data as Json') 
-        self.dialog_width = int(self.width*0.9) # 120 ## to be dynamic
-        self.dialog_height = int(self.height*0.8) ## to be dynamic
 
     def focus_next(self, ev):
         focus_next(ev)
