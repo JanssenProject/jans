@@ -454,7 +454,6 @@ nav:
             - 'Amazon AWS': 'admin/integration/saas/aws.md'
             - 'Jira': 'admin/integration/saas/jira.md'
             - 'Docusign': 'admin/integration/saas/docusign.md'
-        - 'Passport-JS': 'admin/integration/passport-js.md'
         - 'Gluu Casa': 'admin/integration/casa.md'
         - 'FAQ': 'admin/integration/integration-faq.md'
     - 'Client API Admin Guide':
