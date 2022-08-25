@@ -311,7 +311,7 @@ The sample code snippet shows how to -
 
 ## Script Type: Java
 
-### Custom SCIM Event Handler
+### [Custom SCIM Event Handler](sample-script/custom_scim_handler.java)
 
 The sample code snippet shows how to -
 1. Modify Search Results
