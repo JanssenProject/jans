@@ -212,7 +212,7 @@ paths:
                 description: List of all attribute.
                 type: array
                 items:
-                  $ref: '#/components/schemas/GluuAttribute'
+                  $ref: '#/components/schemas/PagedResponse<GluuAttribute>'
         '401':
           description: Unauthorized
         '500':
@@ -7776,4 +7776,22 @@ components:
           description: Session creation date.
           type: string
           format: date
+		  
+    PagedResponse<T>:
+      title: Paged Response
+      description: Object that represents an paginated response
+      type: object
+      properties:
+        start:
+          description: Start count
+          type: integer
+        totalEntriesCount:
+          description: Total number of entries
+          type: integer
+        entriesCount:
+          description: Current paged number of entries
+          type: integer
+        entries:
+          description: Current paged number of entries
+          type: object
 		  
