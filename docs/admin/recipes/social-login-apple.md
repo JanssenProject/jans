@@ -6,7 +6,7 @@ An out-of-the-box feature, the Sign-in with Apple Authentication script is a `Pe
 
 - A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))    
 - The [Sign-in with Apple authentication script](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/jans_setup/static/extension/person_authentication/AppleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
-- An [Apple developer account](developer.apple.com).     
+- An [Apple developer account](https://developer.apple.com/).     
 
 ## Configurations at Apple Identity Provider:
 You will need to configure a service id, linked to your App identifier. For each website that uses Sign In with Apple, register a services identifier (Services ID) and configure your domain and return URL. 

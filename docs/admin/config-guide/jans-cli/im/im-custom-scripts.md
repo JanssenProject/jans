@@ -114,7 +114,7 @@ Programming Language: [PYTHON, JAVA]
 Let update `Person Authentication basic` by its inum. Select option 3 from **custom scripts** menu
 and enter its inum, in my case it's `A51E-76DA`
 
-![](../../../assets/image-im-update-custom-script-03042021.png)
+![](../../../../assets/image-im-update-custom-script-03042021.png)
 
 selecting the field we are gonna update: 4
 
