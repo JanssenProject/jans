@@ -13,18 +13,26 @@ class JansMessageDialog:
         if not buttons:
             buttons = ["OK"]
 
-        def exit_me(result):
+        def exit_me(result, handler):
+            if handler:
+                handler()
             self.result = result
             app = get_app()
-            app.layout.focus(self.focus_on_exit)
+            
             if self.me in app.root_layout.floats:
                 app.root_layout.floats.remove(self.me)
 
+            try:
+                app.layout.focus(self.focus_on_exit)
+            except:
+                pass
+
         blist = []
 
-        for b in buttons:
-            handler = partial(exit_me, b)
-            button = Button(text=b, handler=handler)
+        for button in buttons:
+            if isinstance(button, str):
+                button = Button(text=button)
+            button.handler = partial(exit_me, button.text, button.handler)
             blist.append(button)
 
         self.dialog = Dialog(
@@ -34,6 +42,9 @@ class JansMessageDialog:
             width=D(preferred=80),
             modal=True,
         )
+
+        app = get_app()
+        app.layout.focus(self.dialog)
 
     def __pt_container__(self):
         return self.dialog
