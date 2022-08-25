@@ -59,9 +59,8 @@ public class AttributesResource extends ConfigBaseResource {
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount());
 
-        PagedResult pagedResult = this.doSearch(searchReq, status);
-        log.error(" GluuAttribute search pagedResult:{}", pagedResult);
-        return Response.ok(pagedResult).build();
+        
+        return Response.ok(doSearch(searchReq, status)).build();
     }
 
     @GET
@@ -132,25 +131,34 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private PagedResult doSearch(SearchRequest searchReq, String status) {
+    private HashMap doSearch(SearchRequest searchReq, String status) {
 
         logger.error("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
         PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
 
         logger.error("PagedResult  - pagedResult:{}", pagedResult);
-
+        HashMap<String,Object> dataMap = new HashMap<>();
+        
         if (pagedResult != null) {
             logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             logger.error(
                     "GluuAttributes fetched  - pagedResult.getEntriesCount():{} , pagedResult.getTotalEntriesCount():{}",
                     pagedResult.getEntriesCount(), pagedResult.getTotalEntriesCount());
 
-            logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
 
+            logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            dataMap.put(ApiConstants.DATA, pagedResult.getEntries());
+            dataMap.put(ApiConstants.TOTALITEMS, pagedResult.getTotalEntriesCount());
+        }
+        else {
+            logger.error("pagedResult is null  - dataMap:{}", dataMap);
+            dataMap.put(ApiConstants.DATA, null);
+            dataMap.put(ApiConstants.TOTALITEMS, 0); 
         }
 
-        return pagedResult;
-    }
+        logger.error("GluuAttributes fetched  - dataMap:{}", dataMap);
+        return dataMap;
+     }
 
 }

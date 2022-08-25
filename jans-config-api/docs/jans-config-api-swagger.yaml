@@ -208,11 +208,18 @@ paths:
           content:
             application/json:
               schema:
-                title: Gluu Attributes
-                description: List of all attribute.
-                type: array
-                items:
-                  $ref: '#/components/schemas/PagedResponse<GluuAttribute>'
+                title: Gluu Attributes paginated result
+                description: Gluu Attributes paginated result
+                type: object
+                properties:
+                  data:
+                    description: List of all attribute.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GluuAttribute'
+                  totalItems:
+                    type: integer
+                    description: Total number of records in the database.
         '401':
           description: Unauthorized
         '500':
@@ -222,6 +229,7 @@ paths:
       parameters:
         - schema:
             type: integer
+            default: 50
           in: query
           name: limit
           description: Search size - max size of the results to return.
@@ -257,7 +265,7 @@ paths:
           in: query
           name: sortOrder
           description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
-		  
+  
 
 
     post:
@@ -1041,7 +1049,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.write]
-		
+
   /jans-config-api/api/v1/config/scripts/name/{name}:
     parameters:
       - name: name
@@ -2077,7 +2085,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/openid/clients.write]
-		
+
   /jans-config-api/api/v1/uma/resources:
     get:
       tags:
@@ -2194,7 +2202,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
-		
+
     delete:
       tags:
         - OAuth - UMA Resources
@@ -2212,7 +2220,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.delete]
-		
+
     patch:
       tags:
         - OAuth - UMA Resources
@@ -2244,8 +2252,8 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.write]
-		
-		
+
+
   /jans-config-api/api/v1/uma/resources/clientId/{clientId}:
     parameters:
       - name: clientId
@@ -2466,7 +2474,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/scopes.write]
-		
+
   /jans-config-api/api/v1/scopes/creator/{creatorId}:
     parameters:
       - schema:
@@ -2499,7 +2507,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
-		
+
   /jans-config-api/api/v1/scopes/type/{type}:
     parameters:
       - schema:
@@ -2584,7 +2592,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.write]
-		
+
   /jans-config-api/api/v1/agama/{qname}:
     parameters:
       - schema:
@@ -2613,7 +2621,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.readonly]
-	    
+    
     post:
       summary: Create a new agama flow from source.
       description: Create a new agama flow from source.
@@ -2670,7 +2678,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.write]
-		
+
     delete:
       summary: Deletes an agama flow based on Qname.
       description: Deletes an agama flow based on Qname.
@@ -2688,7 +2696,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/agama.delete]
-		
+
   /jans-config-api/api/v1/agama/source/{qname}:
     parameters:
       - schema:
@@ -2697,7 +2705,7 @@ paths:
         in: path
         description: flow qname.
         required: true
-		
+
     put:
       summary: Update agama flow from source file.
       description: Update agama flow from source file.
@@ -2723,7 +2731,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.write]
-		
+
   /jans-config-api/api/v1/stat:
     get:
       summary: Provides server with basic statistic.
@@ -2841,7 +2849,7 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         '500':
           description: Internal Server Error
-		  
+  
   /jans-config-api/api/v1/jans-auth-server/session:
     get:
       summary: Returns current session.
@@ -2866,7 +2874,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           description: Internal Server Error
-		  
+  
   /jans-config-api/api/v1/jans-auth-server/session/{userDn}:
     parameters:
       - name: userDn
@@ -4292,7 +4300,7 @@ components:
           example: 'https://server.example.com/jans-auth/restv1/par'
         requirePar:
           description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
-          type: boolean		  
+          type: boolean  
         deviceAuthzEndpoint:
           type: string
           description: URL for the Device Authorization.
@@ -4324,11 +4332,11 @@ components:
         mtlsEndSessionEndpoint:
           type: string
           description: URL for MTLS to which an RP can perform a redirect to request that the end user be logged out at the OP.
-          example: 'https://server.example.com/jans-auth/restv1/mtls/end_session'	
+          example: 'https://server.example.com/jans-auth/restv1/mtls/end_session'
         mtlsJwksUri:
           type: string
           description: URL for MTLS of the OP\'s JSON Web Key Set (JWK) document.
-          example: 'https://server.example.com/jans-auth/restv1/mtls/jwks'		
+          example: 'https://server.example.com/jans-auth/restv1/mtls/jwks'
         mtlsRegistrationEndpoint:
           type: string
           description: URL for MTLS Registration endpoint.
@@ -4348,7 +4356,7 @@ components:
         mtlsDeviceAuthzEndpoint:
           type: string
           description: URL for MTLS Device Authorization endpoint.
-          example: 'https://server.example.com/jans-auth/restv1/mtls/device_authorization'	  
+          example: 'https://server.example.com/jans-auth/restv1/mtls/device_authorization'  
         sessionAsJwt:
           type: boolean
           description: Boolean value true saves session data as a JWT.
@@ -4421,7 +4429,7 @@ components:
             type: string
           enum:
             - mail
-            - uid			
+            - uid
         responseTypesSupported:
           type: array
           description: A list of the OAuth 2.0 response_type values that this OP supports.
@@ -4466,7 +4474,7 @@ components:
           description: Default Subject Type used for Dynamic Client Registration.
           enum:
             - public
-            - pairwise			
+            - pairwise
         authorizationSigningAlgValuesSupported:
           type: array
           description: A list of the authorization signing algorithms supported.
@@ -4493,9 +4501,9 @@ components:
             type: string
           enum:
             - RSA1_5
-            - RSA-OAEP			
-            - A128KW			
-            - A256KW	
+            - RSA-OAEP
+            - A128KW
+            - A256KW
         authorizationEncryptionEncValuesSupported:
           type: array
           description: A list of the authorization encryption algorithms supported.
@@ -5599,9 +5607,9 @@ components:
           description: Expiry date of the Scope.
           type: string
           format: date
-		  
+  
 
-		  
+  
     ExtendedScope:
       allOf: # Combines the Scope and the inline model
         - $ref: '#/components/schemas/Scope'
@@ -5613,7 +5621,7 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Client'
-				
+
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
@@ -5734,8 +5742,8 @@ components:
         jansDefaultPromptLogin:
           description: sets prompt=login to the authorization request, which causes the authorization server to force the user to sign in again before it will show the authorization prompt.
           type: boolean
-			
-			
+
+
     Client:
       title: Client object
       description: Client.
@@ -7711,7 +7719,7 @@ components:
         codeError:
           type: string
           description: Errors in the flow source detected by Agama transpiler
-		  
+  
     SessionId:
       title: Session details
       description: Session details
@@ -7759,7 +7767,7 @@ components:
           description: Map containing permission.
           type: object
           additionalProperties:
-            type: boolean	  
+            type: boolean  
         sessionAttributes:
           description: Session attributes
           type: object
@@ -7776,22 +7784,6 @@ components:
           description: Session creation date.
           type: string
           format: date
-		  
-    PagedResponse<T>:
-      title: Paged Response
-      description: Object that represents an paginated response
-      type: object
-      properties:
-        start:
-          description: Start count
-          type: integer
-        totalEntriesCount:
-          description: Total number of entries
-          type: integer
-        entriesCount:
-          description: Current paged number of entries
-          type: integer
-        entries:
-          description: Current paged number of entries
-          type: object
-		  
+  
+
+  
