@@ -112,5 +112,5 @@ jobs:
         run: |
           sudo apt-get install rubygems -y
           sudo gem install mdl
-          mdl docs/
+          mdl --style automation/markdown/.mdl_style.rb docs/
 
