@@ -9040,15 +9040,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#terminology" class="md-nav__link">
-    Terminology
+  <a href="#requisites" class="md-nav__link">
+    Requisites
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#requisites" class="md-nav__link">
-    Requisites
+  <a href="#terminology" class="md-nav__link">
+    Terminology
   </a>
   
 </li>
@@ -9114,12 +9114,18 @@
     Add a provider flow
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Add a provider flow">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#set-the-configuration-parameters" class="md-nav__link">
-    Set the configuration parameters
+  <a href="#set-configuration-parameters" class="md-nav__link">
+    Set configuration parameters
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -9202,34 +9208,34 @@
 
 
 <h1 id="inbound-identity-with-agama">Inbound identity with Agama<a class="headerlink" href="#inbound-identity-with-agama" title="Permanent link">#</a></h1>
-<p>Using Agama administrators can delegate authorization to external services like social sites. A typical scenario is users clicking on a "Sign in with..." button for authentication to take place at a given 3rd party and finally getting access to a target application.</p>
+<p>Using Agama administrators can delegate authorization to external services like social sites. In a typical setting users are shown a login form with a "Sign in with..." button for authentication to take place at a given 3rd party in order to get access to a target application.</p>
 <p>This process is usually referred to as "inbound identity". In this document the steps required to setup inbound identity in your Janssen server are presented.</p>
-<h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>Provider: An external identity provider, often a social site. Every provider is associated with a unique identifier</p>
-</li>
-<li>
-<p>Provider preselection: A process that designates the provider to employ for authentication without the end-user  making a explicit decision, i.e. without a "Sign in with" button. Here the provider may be inferred from contextual data elicited at earlier stages, for instance. </p>
-</li>
-</ul>
 <h2 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Janssen server with config-api installed</li>
 <li>Understanding of how to <a href="https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server">add and modify Agama flows</a> in your server</li>
 <li>Starter knowledge of <a href="https://www.ietf.org/rfc/rfc6749">OAuth2</a> and the Java programming language</li>
 </ul>
+<h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Provider: An external identity provider, often a social site. Every provider is associated with a unique identifier</p>
+</li>
+<li>
+<p>Provider preselection: A process that designates the provider to employ for authentication without the end-user  making a explicit decision, i.e. without a "Sign in with" button. Here the provider may be inferred from contextual data elicited at earlier stages, for instance.</p>
+</li>
+</ul>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">#</a></h2>
-<p>Inbound identity is a broad topic in the sense that there is a great amount of different mechanisms providers may employ to materialize the authentication process. The current offering in Agama is focused on OAuth2-compliant providers, more specifically those supporting the <code>code</code> authorization grant. This does not mean other grants or even different protocols such as SAML cannot be supported, however organizations would have to engage in extra development efforts in this case.</p>
+<p>There is a great amount of different mechanisms providers may employ to materialize the authentication process. The current offering in Agama is focused on OAuth2-compliant providers, more specifically those supporting the <code>code</code> authorization grant. This does not mean other grants or even different protocols such as SAML cannot be supported, however organizations would have to engage in extra development efforts in this case.</p>
 <p>If the providers of interest already support the <code>code</code> authorization grant, the amount of work is significantly reduced.</p>
 <h2 id="flows-involved">Flows involved<a class="headerlink" href="#flows-involved" title="Permanent link">#</a></h2>
 <h3 id="provider">Provider<a class="headerlink" href="#provider" title="Permanent link">#</a></h3>
 <p>For every provider to support there has to be an Agama flow that must:</p>
 <ul>
 <li>Redirect the browser to the provider's site for the user to enter his login credentials</li>
-<li>Return the associated profile data of given user</li>
+<li>Return profile data of the given user</li>
 </ul>
-<p>Note the scope here is limited: no session is created in the Janssen server for the user - this occurs later in a <a href="#main-flow">main</a> parent flow.</p>
+<p>Note the scope here is limited: no session is created in the Janssen server for the user - this occurs later in the <a href="#main-flow">main</a> parent flow.</p>
 <p>To facilitate administrators' work, the following flows are already implemented:</p>
 <ul>
 <li>Apple</li>
@@ -9238,22 +9244,22 @@
 <li><a href="https://github.com/JanssenProject/jans/tree/main/docs/script-catalog/agama/inboundID/google">Google</a></li>
 </ul>
 <h3 id="main-flow">Main flow<a class="headerlink" href="#main-flow" title="Permanent link">#</a></h3>
-<p>This is where the actual process of inbound identity occurs. This flow is already <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">implemented</a> and ready to use. The following is a summary of the steps involved:</p>
+<p>The actual process of inbound identity occurs here. This flow is already <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">implemented</a> and ready to use. The following is a summary of the steps involved:</p>
 <ol>
 <li>
 <p>A provider selection page is displayed. The list includes all (<em>enabled</em>) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)</p>
 </li>
 <li>
-<p>The flow associated to the selected provider is launched. Actually, if the main flow was passed a provider identifier as parameter, step 1 is skipped and the associated flow is launched directly  </p>
+<p>The flow associated to the selected provider is launched. Actually, if the main flow was passed a provider identifier as parameter, step 1 is skipped and the given flow is launched directly  </p>
 </li>
 <li>
-<p>If the flow triggered in step 2 did not finish successfully, the main flow finishes likewise. Else, the profile data returned is transformed using the applicable attribute mapping for the provider. More on attribute mappings <a href="#attribute-mappings">here</a></p>
+<p>If the flow triggered at step 2 did not finish successfully, the main flow finishes likewise. Else, the profile data returned is transformed using the applicable attribute mapping for the provider. More on attribute mappings <a href="#attribute-mappings">here</a></p>
 </li>
 <li>
-<p>If the resulting profile data lacks a value for e-mail, and the provider was configured to require it, a form is displayed where the user is can enter his e-mail address</p>
+<p>If the resulting profile data lacks a value for e-mail, and the provider was configured to require it, a form is displayed where the user can enter his e-mail address</p>
 </li>
 <li>
-<p>User provisioning takes place, in other words, a local user entry is created in the database of the Janssen server. If an entry already exists, it is updated as long as the provider is configured to allow so</p>
+<p>User provisioning takes place, in other words, a local user entry is created in the Janssen server database. If an entry already exists, it is updated as long as the provider is configured to allow so</p>
 </li>
 <li>
 <p>The flow finishes successfully and the user gets access to the target application</p>
@@ -9273,7 +9279,7 @@
 <h3 id="add-the-main-inbound-flow">Add the main inbound flow<a class="headerlink" href="#add-the-main-inbound-flow" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Ensure Agama engine is <a href="https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine">enabled</a> and download the flow <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">source</a> file</p>
+<p>Ensure Agama engine is <a href="https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine">enabled</a>. Download the flow <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">source</a> file</p>
 </li>
 <li>
 <p>Use the API for adding flows as explained <a href="https://jans.io/docs/admin/developer/agama/quick-start/#getting-an-access-token">here</a> and <a href="https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server">here</a>. A sample <code>curl</code> command would look like this: </p>
@@ -9289,7 +9295,7 @@
 <p>Download the default <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/none.png">logo</a> and place it inside <code>/opt/jans/jetty/jans-auth/agama/fl/inboundID</code> folder</p>
 </li>
 <li>
-<p>Download the provider selector <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/login-chooser.ftlh">template</a> and place it inside <code>/opt/jans/jetty/jans-auth/agama/ftl/inboundID</code> folder. Note templates go under <em>ftl</em>, <strong>not fl</strong>. Do the same with the e-mail prompt <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/email-prompt.ftlh">template</a></p>
+<p>Download the provider selector <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/login-chooser.ftlh">template</a> and place it inside <code>/opt/jans/jetty/jans-auth/agama/ftl/inboundID</code> folder. Note templates go under <strong>ftl</strong>, not <strong>fl</strong>. Do the same with the e-mail prompt <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/email-prompt.ftlh">template</a></p>
 </li>
 </ul>
 <h3 id="add-a-provider-flow">Add a provider flow<a class="headerlink" href="#add-a-provider-flow" title="Permanent link">#</a></h3>
@@ -9305,10 +9311,10 @@
 <p>Download the <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/facebook/facebook.png">logo</a> image and place it in <code>/opt/jans/jetty/jans-auth/agama/fl/inboundID</code></p>
 </li>
 <li>
-<p>Login to Facebook and <a href="https://developers.facebook.com/docs/development/register">register</a> as developer. Create an application and enable OAuth2 capabilities. Add the url <code>https://&lt;your-host&gt;/jans-auth/fl/callback</code> as a valid redirect URI for your app. Finally grab the app Id and secret</p>
+<p>Login to Facebook and <a href="https://developers.facebook.com/docs/development/register">register</a> as developer. Create an application with <em>Facebook login</em> capabilities. In the <em>Facebook login</em> settings add  <code>https://&lt;your-host&gt;/jans-auth/fl/callback</code> as a valid OAuth redirect URI. Finally grab the app Id and secret from the app settings page</p>
 </li>
 </ul>
-<h3 id="set-the-configuration-parameters">Set the configuration parameters<a class="headerlink" href="#set-the-configuration-parameters" title="Permanent link">#</a></h3>
+<h4 id="set-configuration-parameters">Set configuration parameters<a class="headerlink" href="#set-configuration-parameters" title="Permanent link">#</a></h4>
 <ul>
 <li>
 <p>Create a json file like the below. Replace data in the placeholders appropriately:</p>
@@ -9334,7 +9340,7 @@
 </code></pre></div>
 </li>
 </ul>
-<p>Later, we'll dive into the meaning of the <a href="#provider-flow-configurations">configuration parameters</a> set in the json file.</p>
+<p>Later, we'll dive into the meaning of the <a href="#provider-flow-configurations">configuration parameters</a> set in this json file.</p>
 <h3 id="parameterize-the-main-flow">Parameterize the main flow<a class="headerlink" href="#parameterize-the-main-flow" title="Permanent link">#</a></h3>
 <p>So far, if the main flow is launched (learn about this topic <a href="https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>) a screen with an empty "Sign in with" list will be shown. Adding information about the known providers is required.</p>
 <ul>
@@ -9362,7 +9368,7 @@
 </code></pre></div>
 </li>
 </ul>
-<p>Later, we'll dive into the meaning of the <a href="#main-flow-configurations">configuration parameters</a> set in the json file.</p>
+<p>Later, we'll dive into the meaning of the <a href="#main-flow-configurations">configuration parameters</a> set in this json file.</p>
 <h3 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h3>
 <p>Launch the main flow (learn about this topic <a href="https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>). If everything was setup correctly, a screen with a "Sign in with" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described <a href="#main-flow">here</a>. </p>
 <h2 id="configuration-parameters-of-flows">Configuration parameters of flows<a class="headerlink" href="#configuration-parameters-of-flows" title="Permanent link">#</a></h2>
@@ -9414,8 +9420,8 @@
 </tr>
 <tr>
 <td><code>logoImg</code></td>
-<td>(Relative) path to the logo image (will be shown in the selector page)</td>
-<td>Yes</td>
+<td>Relative path to the logo image (will be shown in the selector page)</td>
+<td>No</td>
 </tr>
 <tr>
 <td><code>enabled</code></td>
@@ -9424,7 +9430,7 @@
 </tr>
 <tr>
 <td><code>skipProfileUpdate</code></td>
-<td>Determines if profile data should be updated for a user if an entry already exists locally for him. Default value is <code>false</code></td>
+<td>Determines if profile data should not be updated for a user if an entry already exists locally for him. Default value is <code>false</code></td>
 <td>No</td>
 </tr>
 <tr>
@@ -9445,24 +9451,55 @@
 <li>Set <code>emailLinkingSafe</code> to true only if you trust the provider, i.e. the incoming e-mail data is securely verified. For security, never set it to <code>true</code> when <code>requestForEmail</code> is also <code>true</code> </li>
 </ul>
 <h3 id="provider-flow-configurations">Provider flow configurations<a class="headerlink" href="#provider-flow-configurations" title="Permanent link">#</a></h3>
-<p>Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows <strong>must not</strong> receive any inputs: the main flow won't pass any arguments when triggering them.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>Design your flows so there is no use of <code>Inputs</code> but <code>Configs</code> directive in the <a href="https://jans.io/docs/admin/developer/agama/dsl-full/#header-basics">header</a> </p>
-</div>
-<p>In practice many identity providers adhere to the OAuth2 <code>code</code> grant, so you can use the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java">this</a> Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.</p>
+<p>Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows <strong>must not</strong> receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of <code>Inputs</code> but <code>Configs</code> directive in the <a href="https://jans.io/docs/admin/developer/agama/dsl-full/#header-basics">header</a> .</p>
+<p>In practice many identity providers adhere to the OAuth2 <code>code</code> grant, so you can re-use the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java">this</a> Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.</p>
 <p>The table below explains the meaning of its properties:</p>
-<p>|Name|Description|
-|-|-|-|
-|<code>authzEndpoint</code>|The authorization endpoint as in section 3.1 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a>| 
-|<code>tokenEndpoint</code>|The token endpoint as in section 3.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a>|
-|<code>userInfoEndpoint</code>|The endpoint where profile data can be retrieved. This is not part of the OAuth2 specification|
-|<code>clientId</code>|The identifier of the client to use, see section 1.1 and 2.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a>. This client is assumed to be <em>confidential</em> as in section 2.1|
-|<code>clientSecret</code>|Secret associated to the client|
-|<code>scopes</code>|A JSON array of strings that represent the scopes of the access tokens to retrieve|
-|<code>redirectUri</code>|Redirect URI as in section 3.1.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a>|
-|<code>custParamsAuthReq</code>|A JSON object (keys and values expected to be strings) with extra parameters to pass to the authorization endpoint if desired|
-|<code>custParamsTokenReq</code>|A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired|</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authzEndpoint</code></td>
+<td>The authorization endpoint as in section 3.1 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a></td>
+</tr>
+<tr>
+<td><code>tokenEndpoint</code></td>
+<td>The token endpoint as in section 3.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a></td>
+</tr>
+<tr>
+<td><code>userInfoEndpoint</code></td>
+<td>The endpoint where profile data can be retrieved. This is not part of the OAuth2 specification</td>
+</tr>
+<tr>
+<td><code>clientId</code></td>
+<td>The identifier of the client to use, see section 1.1 and 2.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a>. This client is assumed to be <em>confidential</em> as in section 2.1</td>
+</tr>
+<tr>
+<td><code>clientSecret</code></td>
+<td>Secret associated to the client</td>
+</tr>
+<tr>
+<td><code>scopes</code></td>
+<td>A JSON array of strings that represent the scopes of the access tokens to retrieve</td>
+</tr>
+<tr>
+<td><code>redirectUri</code></td>
+<td>Redirect URI as in section 3.1.2 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 7649</a></td>
+</tr>
+<tr>
+<td><code>custParamsAuthReq</code></td>
+<td>A JSON object (keys and values expected to be strings) with extra parameters to pass to the authorization endpoint if desired</td>
+</tr>
+<tr>
+<td><code>custParamsTokenReq</code></td>
+<td>A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired</td>
+</tr>
+</tbody>
+</table>
 <p>Here is an example:</p>
 <div class="highlight"><pre><span></span><code>{
   &quot;authzEndpoint&quot;: &quot;https://www.facebook.com/v14.0/dialog/oauth&quot;,
@@ -9474,7 +9511,7 @@
 }
 </code></pre></div>
 <h3 id="attribute-mappings">Attribute mappings<a class="headerlink" href="#attribute-mappings" title="Permanent link">#</a></h3>
-<p>This is the process through which the raw user profile data received by an identity provider is transformed into an object suitable for being stored in the Janssen user database. Here, developers have the opportunity to "map" or "transform" the incoming data to one compatible with the data types, formats, and names required by the database.</p>
+<p>This is the process through which the raw user profile data received by an identity provider is transformed into an object suitable for being stored in the Janssen's user database. Here, developers have the opportunity to "map" or "transform" the incoming data to one compatible with the data types, formats, and names required by the database.</p>
 <p>As an example suppose a provider returned the following:</p>
 <div class="highlight"><pre><span></span><code>{
   &quot;id&quot;: dfsg2-3bui2.2.5+ld1,
@@ -9483,31 +9520,23 @@
   &quot;first_name&quot;: &quot;Moe&quot;
 }
 </code></pre></div>
-<p>None of this attributes exist in Janssen. The database adheres to LDAP naming - conformant names would be <code>uid</code>, <code>mail</code>, <code>sn</code>, <code>givenName</code>. Also, let's assume you want to set <code>displayName</code> to a string composed by the first and last name separated by a white space. Writing a mapping is required.</p>
+<p>None of this attributes exist in Janssen, database adheres to LDAP naming. Conformant names would be <code>uid</code>, <code>mail</code>, <code>sn</code>, and <code>givenName</code>. Also, let's assume you want to set <code>displayName</code> to a string composed by the first and last names separated by a white space. Writing a mapping is required.</p>
 <p>A mapping is implemented in Java in the form of a <code>java.util.function.UnaryOperator&lt;Map&lt;String, Object&gt;&gt;</code>, in other words, a function that takes a <code>Map&lt;String, Object&gt;</code> as input and returns a <code>Map&lt;String, Object&gt;</code> as result. Several examples are provided <a href="https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java">here</a>. </p>
-<p>Note property <code>mappingClassField</code> of every provider defined in the <a href="#main-flow">main flow</a> points to the fully qualified name of a mapping. Some important considerations:</p>
+<p>Note property <code>mappingClassField</code> of every provider defined in the <a href="#main-flow-configurations">main flow</a> points to the fully qualified name of a mapping. Some important considerations:</p>
 <ul>
 <li>A mapping has to be declared as a public field in a public class</li>
 <li>Not all mappings have to belong to the same class</li>
 <li>Several providers can use the same mapping</li>
 </ul>
-<p>While working on a mapping, having to pack the class in a jar file and restarting the server every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined <a href="https://jans.io/docs/admin/developer/agama/java-classpath/">here</a>. A "template" for quickly start writing a mapping is provided <a href="https://github.com/JanssenProject/jans/raw/main/agama/inboundID/CustomMappings.java.txt">here</a>. Save with <code>.java</code> extension only, edit the body of the lambda expression, upload to the server, and update the main flow as follows:   </p>
+<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined <a href="https://jans.io/docs/admin/developer/agama/java-classpath/">here</a>. A "template" for quickly start writing a mapping is already <a href="https://github.com/JanssenProject/jans/raw/main/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   </p>
 <ul>
-<li>Set <code>mappingClassField</code> to <code>io.jans.inbound.CustomMappings.SAMPLE_MAPPING</code> for the provider of interest</li>
 <li>Add an instruction like <code>Call io.jans.inbound.CustomMappings#class</code> at the beginning of the flow body for the class to be effectively reloaded when the file is modified</li>
+<li>Set <code>mappingClassField</code> to <code>io.jans.inbound.CustomMappings.SAMPLE_MAPPING</code> for the provider of interest</li>
 </ul>
+<p>From there onwards, you only need to re-upload the file as many times as needed.</p>
 <p>If you use <code>DEBUG</code> <a href="https://jans.io/docs/admin/developer/agama/">logging</a> level in your server, you will see in the log the result of the mapping every time it is applied. Check for a message like "Mapped profile is".</p>
 <h2 id="utility-flows">Utility flows<a class="headerlink" href="#utility-flows" title="Permanent link">#</a></h2>
-<p>A couple of utility flows are available for developers writing new flows:</p>
-<ul>
-<li>
-<p>Authorization Code flow: This flow implements the OAuth 2.0 authorization code grant where client authentication at the token endpoint occurs as described in section 2.3.1 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 6749</a> (HTTP basic authentication scheme). In summary, this flow redirects the browser to the external provider's site where the user will enter his credentials, then back at the Janssen redirect URL a <code>code</code> is obtained which is employed to issue an access token request. The flow returns the token response as received by the provider</p>
-</li>
-<li>
-<p>Authorization Code flow with userInfo request: This flow reuses the previous flow and additionally issues a request to a given userInfo URL passing the access token in the HTTP Authorization header. The response obtained (the profile data of the user) is returned in conjuction with the token response of the authorization code flow</p>
-</li>
-</ul>
-<p>The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and returning profile data only.</p>
+<p>A couple of utility flows are available for developers writing flows:</p>
 <table>
 <thead>
 <tr>
@@ -9526,13 +9555,22 @@
 </tr>
 </tbody>
 </table>
+<ul>
+<li>
+<p>AuthzCode - <em>Authorization Code flow</em>: This flow implements the OAuth 2.0 authorization code grant where client authentication at the token endpoint occurs as described in section 2.3.1 of <a href="https://www.ietf.org/rfc/rfc6749">RFC 6749</a> (HTTP basic authentication scheme). In summary, this flow redirects the browser to the external provider's site where the user will enter his credentials, then back at the Janssen redirect URL a <code>code</code> is obtained which is employed to issue an access token request. The flow returns the token response as received by the provider</p>
+</li>
+<li>
+<p>AuthzCodeWithUserInfo - <em>Authorization Code flow with userInfo request</em>: This flow reuses the previous flow and additionally issues a request to a given userInfo URL passing the access token in the HTTP Authorization header. The response obtained (the profile data of the user) is returned in conjuction with the token response of the authorization code flow</p>
+</li>
+</ul>
+<p>The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and returning profile data only.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-24T21:44:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-25T14:09:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-25</span>
       
         <br>
         Created:
