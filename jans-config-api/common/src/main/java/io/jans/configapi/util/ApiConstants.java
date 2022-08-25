@@ -107,6 +107,8 @@ public class ApiConstants {
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
+    public static final String DATA = "data";
+    public static final String TOTALITEMS = "totalItems";
 
 
 

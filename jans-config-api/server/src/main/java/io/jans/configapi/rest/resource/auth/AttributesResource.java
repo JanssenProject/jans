@@ -24,11 +24,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import static io.jans.as.model.util.Util.escapeLog;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 
@@ -62,10 +59,10 @@ public class AttributesResource extends ConfigBaseResource {
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount());
 
-        final List<GluuAttribute> attributes = this.doSearch(searchReq, status);
-        logger.trace("Client serach result:{}", attributes);
-
-        return Response.ok(attributes).build();
+        
+        return this.doSearch(searchReq, status);    
+        //log.error(" GluuAttribute search response:{}", response);
+        //return response;
     }
 
     @GET
@@ -136,24 +133,34 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private List<GluuAttribute> doSearch(SearchRequest searchReq, String status) {
+    private Response doSearch(SearchRequest searchReq, String status) {
 
-        logger.debug("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
+        logger.error("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
         PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
-        if (logger.isTraceEnabled()) {
-            logger.trace("PagedResult  - pagedResult:{}", pagedResult);
+
+        logger.error("PagedResult  - pagedResult:{}", pagedResult);
+        HashMap<String,Object> dataMap = new HashMap<>();
+        
+        if (pagedResult != null) {
+            logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            logger.error(
+                    "GluuAttributes fetched  - pagedResult.getEntriesCount():{} , pagedResult.getTotalEntriesCount():{}",
+                    pagedResult.getEntriesCount(), pagedResult.getTotalEntriesCount());
+
+
+            logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            dataMap.put(ApiConstants.DATA, pagedResult.getEntries());
+            dataMap.put(ApiConstants.TOTALITEMS, pagedResult.getTotalEntriesCount());
+        }
+        else {
+            logger.error("pagedResult is null  - dataMap:{}", dataMap);
+            dataMap.put(ApiConstants.DATA, null);
+            dataMap.put(ApiConstants.TOTALITEMS, 0); 
         }
 
-        List<GluuAttribute> gluuAttributes = new ArrayList<>();
-        if (pagedResult != null) {
-            logger.trace("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-            gluuAttributes = pagedResult.getEntries();
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("GluuAttributes fetched  - gluuAttributes:{}", gluuAttributes);
-        }
-        return gluuAttributes;
-    }
+        logger.error("GluuAttributes fetched  - dataMap:{}", dataMap);
+        return generateResponse(dataMap);
+     }
 
 }
