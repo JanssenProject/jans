@@ -4229,6 +4229,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_7">
@@ -4656,11 +4658,25 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../managed-beans/" class="md-nav__link">
+        Managed Beans
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7_7" type="checkbox" id="__nav_1_7_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7_8" type="checkbox" id="__nav_1_7_8" >
       
       
       
@@ -4671,13 +4687,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_1_7_7">
+        <label class="md-nav__link" for="__nav_1_7_8">
           Customization
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Customization" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_7_7">
+        <label class="md-nav__title" for="__nav_1_7_8">
           <span class="md-nav__icon md-icon"></span>
           Customization
         </label>
@@ -4727,7 +4743,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7_8" type="checkbox" id="__nav_1_7_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_7_9" type="checkbox" id="__nav_1_7_9" >
       
       
       
@@ -4778,13 +4794,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_1_7_8">
+        <label class="md-nav__link" for="__nav_1_7_9">
           Scripts
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Scripts" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_7_8">
+        <label class="md-nav__title" for="__nav_1_7_9">
           <span class="md-nav__icon md-icon"></span>
           Scripts
         </label>
@@ -5690,6 +5706,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_8_5_3">
@@ -5726,6 +5744,20 @@
     <li class="md-nav__item">
       <a href="../../reference/kubernetes/image-auth-server/" class="md-nav__link">
         Auth Server
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes/image-config-init/" class="md-nav__link">
+        Config Initialization
       </a>
     </li>
   
@@ -6394,8 +6426,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_12">
@@ -6759,20 +6789,6 @@
           
         </ul>
       </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../integration/passport-js.md" class="md-nav__link">
-        Passport-JS
-      </a>
     </li>
   
 
@@ -9588,7 +9604,7 @@ if REMOTE_DEBUG:
 1. Create a connection to the ldap browser. The default password will be <code>Test1234#</code> if not changed in the helm install command.</p>
 </li>
 </ol>
-<p><img alt="LDAP browser connection" src="../assets/ldap_browser_connection.png" /></p>
+<p><img alt="LDAP browser connection" src="../../../assets/ldap_browser_connection.png" /></p>
 <ol>
 <li>
 <p>Inside the browser navigate to <code>o=jans, ou=scripts</code>. Right click on <code>ou=scripts</code> and click on <code>Quick Search</code>. Inside the pop up box that appears fill <code>Returning Attributes</code> with <code>displayName</code>, and press <code>Apply and Close</code></p>
@@ -9597,7 +9613,7 @@ if REMOTE_DEBUG:
 <p>In the results that appear click on the <code>Dn</code> that has a <code>displayName</code> of <code>basic</code>.</p>
 </li>
 </ol>
-<p><img alt="LDAP basic script " src="../assets/basic_script.png" /></p>
+<p><img alt="LDAP basic script " src="../../../assets/basic_script.png" /></p>
 <ol>
 <li>
 <p>Choose to load the script from file instead of ldap. Inside the browser change <code>jansModuleProperty</code> with value <code>{"value1":"location_type","value2":"ldap","description":""}</code> to <code>{"value1":"location_type","value2":"file","description":""}</code></p>
@@ -9609,7 +9625,7 @@ if REMOTE_DEBUG:
 <p>Enable the script by settings <code>jansEnabled</code> to <code>true</code>. The following is an example of how the basic script entry should look.  </p>
 </li>
 </ol>
-<p><img alt="LDAP basic script " src="../assets/basic_script_enabled.png" /></p>
+<p><img alt="LDAP basic script " src="../../../assets/basic_script_enabled.png" /></p>
 <ol>
 <li>
 <p>Check the following log inside the the auth-server container to verify that auth server loaded the script properly: <code>/opt/jans/jetty/jans-auth/logs/jans-auth_script.log</code>. It should look like this:    </p>
@@ -9690,7 +9706,7 @@ if REMOTE_DEBUG:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-07-27T18:24:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-07-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-25T16:42:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-25</span>
       
         <br>
         Created:
