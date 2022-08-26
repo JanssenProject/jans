@@ -11,7 +11,7 @@ to implement a two-step, two-factor authentication (2FA) with username / passwor
 
 ## Prerequisites
 - A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))      
-- [FIDO2 interception script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/fido2/Fido2ExternalAuthenticator.py) (included in the default Gluu Server distribution);     
+- [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) (included in the default Janssen Server distribution);     
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices). 
 
 ### FIDO2 devices
@@ -94,36 +94,36 @@ graph TD
     A[ou=jans] --> K(ou=people)
     K --> K1[inum=....]
     K1 --> K11[ou=fido2_register]
-    K11 --> K111[oxId=....]
-    K11 --> K112[oxId=....]
-    K11 --> K112[oxId=....]
+    K11 --> K111[jansId=....]
+    K11 --> K112[jansId=....]
+    K11 --> K112[jansId=....]
 
     K1 --> K12[ou=fido2_auth]
-    K12 --> K121[oxId=....]
-    K12 --> K122[oxId=....]
-    K12 --> K123[oxId=....]
+    K12 --> K121[jansId=....]
+    K12 --> K122[jansId=....]
+    K12 --> K123[jansId=....]
 
     K --> K2[inum=....]
     K2 --> K21[ou=fido2_register]
-    K21 --> K211[oxId=....]
-    K21 --> K212[oxId=....]
-    K21 --> K212[oxId=....]
+    K21 --> K211[jansId=....]
+    K21 --> K212[jansId=....]
+    K21 --> K212[jansId=....]
 
     K2 --> K22[ou=fido2_auth]
-    K22 --> K221[oxId=....]
-    K22 --> K222[oxId=....]
+    K22 --> K221[jansId=....]
+    K22 --> K222[jansId=....]
     K22 --> K223[oxId=....]
 
     K --> K3[inum=....]
     K3 --> K31[ou=fido2_register]
-    K31 --> K311[oxId=....]
-    K31 --> K312[oxId=....]
-    K31 --> K312[oxId=....]
+    K31 --> K311[jansId=....]
+    K31 --> K312[jansId=....]
+    K31 --> K312[jansId=....]
 
     K3 --> K32[ou=fido2_auth]
-    K32 --> K321[oxId=....]
-    K32 --> K322[oxId=....]
-    K32 --> K323[oxId=....]
+    K32 --> K321[jansId=....]
+    K32 --> K322[jansId=....]
+    K32 --> K323[jansId=....]
     
 ```
 
