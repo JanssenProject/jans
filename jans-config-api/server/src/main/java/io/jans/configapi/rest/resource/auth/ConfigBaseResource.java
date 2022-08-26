@@ -26,19 +26,12 @@ public class ConfigBaseResource extends BaseResource {
     @Inject
     ConfigurationFactory configurationFactory;
 
-    protected static final String READ_ACCESS = "config-api-read";
-    protected static final String WRITE_ACCESS = "config-api-write";
-    protected static final String DEFAULT_LIST_SIZE = ApiConstants.DEFAULT_LIST_SIZE;
-    // Pagination
-    protected static final String DEFAULT_LIST_START_INDEX = ApiConstants.DEFAULT_LIST_START_INDEX;
-    protected static final int DEFAULT_MAX_COUNT = ApiConstants.DEFAULT_MAX_COUNT;
-
     protected int getMaxCount() {
-        logger.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
-                configurationFactory.getApiAppConfiguration().getMaxCount(), DEFAULT_MAX_COUNT);
+        logger.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, ApiConstants.DEFAULT_MAX_COUNT:{} ",
+                configurationFactory.getApiAppConfiguration().getMaxCount(), ApiConstants.DEFAULT_MAX_COUNT);
         return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
                 ? configurationFactory.getApiAppConfiguration().getMaxCount()
-                : DEFAULT_MAX_COUNT);
+                : ApiConstants.DEFAULT_MAX_COUNT);
     }
 
 }

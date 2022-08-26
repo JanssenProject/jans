@@ -52,7 +52,7 @@ public class AttributesResource extends ConfigBaseResource {
     public Response getAttributes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
-            @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
 
@@ -131,7 +131,7 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private HashMap doSearch(SearchRequest searchReq, String status) {
+    private Response doSearch(SearchRequest searchReq, String status) {
 
         logger.error("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
@@ -158,7 +158,7 @@ public class AttributesResource extends ConfigBaseResource {
         }
 
         logger.error("GluuAttributes fetched  - dataMap:{}", dataMap);
-        return dataMap;
+        return generateResponse(dataMap);
      }
 
 }
