@@ -72,25 +72,25 @@ casa_client_pw=MyCasaClientSecret
 
 2. [Enable authentication mechanisms](https://github.com/maduvena/jans-docs/wiki/Enabling-an-authentication-mechanism-(or-custom-script)) in Jan-auth server like `otp`, `fido2`, `email_otp`.
 
-  ```shell
-  python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
-  ```
+    ```shell
+    python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
+    ```
 
-  | Inum | displayName |
-  |---|---|
-  | 09A0-93D7 | smpp  |
-  | 5018-D4BF | otp |
-  | 5018-F9CF | duo |
-  | 8BAF-80D7 | fido2 |
-  | 92F0-BF9E | super_gluu |
-  | 09A0-93D6 | twilio_sms |
+    | Inum | displayName |
+    |---|---|
+    | 09A0-93D7 | smpp  |
+    | 5018-D4BF | otp |
+    | 5018-F9CF | duo |
+    | 8BAF-80D7 | fido2 |
+    | 92F0-BF9E | super_gluu |
+    | 09A0-93D6 | twilio_sms |
 
-  When successfully enabled, you should see a confirmation message similar to the one below on console:
+    When successfully enabled, you should see a confirmation message similar to the one below on console:
 
-  ```text
-  Please wait while collecting properties...
-  Enabling scripts 5018-D4BF
-  ```
+    ```text
+    Please wait while collecting properties...
+    Enabling scripts 5018-D4BF
+    ```
 
 3. Login to the Casa portal as an administrator
 
