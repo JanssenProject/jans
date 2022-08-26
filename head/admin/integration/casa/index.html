@@ -9225,11 +9225,8 @@
 
 <h1 id="casa-self-service-mfa-portal">Casa - Self-service MFA portal<a class="headerlink" href="#casa-self-service-mfa-portal" title="Permanent link">#</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p><strong>Casa</strong> is a self-service web portal that allows end users to view, enroll, and remove MFA credentials, including hardware tokens, software tokens, commercial services (like Duo), social login, biometric, and mobile.  Casa is also extensible. As new authentication technologies arise, you can download plugins to leverage them in your organization through Casa</p>
-<p align="center">
-<img src="../../assets/image-casa-module-diagram.png">
-</p>
-
+<p><strong>Casa</strong> is a self-service web portal that allows end users to view, enroll, and remove MFA credentials, including hardware tokens, software tokens, commercial services (like Duo), social login, biometric, and mobile.  Casa is also extensible. As new authentication technologies arise, you can download plugins to leverage them in your organization through Casa.</p>
+<p><img alt="casa diagram" src="../../../assets/image-casa-module-diagram.png" /></p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>Installed Janssen Server  </li>
@@ -9238,87 +9235,121 @@
 <p>Casa gets installed as an add-on to Janssen Server and integrates with <code>jans-auth-server</code> module as an OpenID connect Relying Party.
 Casa can be installed using the command below.  </p>
 <p>Currently, Casa installation is supported on CentOS 8 and Ubuntu 20.</p>
-<p>The following steps will install Casa as an add-on. </p>
+<p>The following steps will install Casa as an add-on.</p>
 <ul>
-<li>Download installer 
-  <div class="highlight"><pre><span></span><code>  wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py
-</code></pre></div></li>
-<li>Run the installer
-  <div class="highlight"><pre><span></span><code>  python3 flex_setup.py
-</code></pre></div></li>
+<li>Download installer</li>
 </ul>
-<h3 id="automate-install">Automate install<a class="headerlink" href="#automate-install" title="Permanent link">#</a></h3>
-<p><br/>If you have <code>setup.properties</code> file and want to automate installation, you can pass properties file as
-    <div class="highlight"><pre><span></span><code>python3 flex_setup.py -f /path/to/setup.properties -n -c
-</code></pre></div></p>
-<div class="codehilite"><pre><span></span><code><span class="n">Minimal</span><span class="w"> </span><span class="n">example</span><span class="w"> </span><span class="n">setup</span><span class="p">.</span><span class="n">properties</span><span class="w"> </span><span class="k">file</span><span class="err">:</span><span class="w"></span>
-
-<span class="err">```</span><span class="w"></span>
-<span class="n">ip</span><span class="o">=</span><span class="mf">10.146.197.201</span><span class="w"></span>
-<span class="n">hostname</span><span class="o">=</span><span class="n">flex</span><span class="p">.</span><span class="n">gluu</span><span class="p">.</span><span class="n">org</span><span class="w"></span>
-<span class="n">orgName</span><span class="o">=</span><span class="n">Gluu</span><span class="w"></span>
-<span class="n">admin_email</span><span class="o">=</span><span class="n">flex</span><span class="nv">@gluu</span><span class="p">.</span><span class="n">org</span><span class="w"></span>
-<span class="n">city</span><span class="o">=</span><span class="n">Austing</span><span class="w"></span>
-<span class="k">state</span><span class="o">=</span><span class="n">Texas</span><span class="w"></span>
-<span class="n">countryCode</span><span class="o">=</span><span class="n">US</span><span class="w"></span>
-<span class="n">installLdap</span><span class="o">=</span><span class="k">True</span><span class="w"></span>
-<span class="n">admin_password</span><span class="o">=</span><span class="n">MyAdminPassword</span><span class="w"></span>
-<span class="n">ldapPass</span><span class="o">=</span><span class="n">MyLdapPassword</span><span class="w"></span>
-<span class="n">casa_client_id</span><span class="o">=</span><span class="mf">3000.7986</span><span class="n">c837</span><span class="o">-</span><span class="mi">2</span><span class="n">a8f</span><span class="o">-</span><span class="mi">4</span><span class="n">c31</span><span class="o">-</span><span class="mi">9</span><span class="n">c63</span><span class="o">-</span><span class="mi">1</span><span class="n">bd2f6abce77</span><span class="w"></span>
-<span class="n">casa_client_pw</span><span class="o">=</span><span class="n">MyCasaClientSecret</span><span class="w"></span>
-<span class="err">```</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code>  wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py
 </code></pre></div>
-
-<ol>
+<ul>
+<li>Run the installer</li>
+</ul>
+<div class="highlight"><pre><span></span><code>python3 flex_setup.py
+</code></pre></div>
+<h3 id="automate-install">Automate install<a class="headerlink" href="#automate-install" title="Permanent link">#</a></h3>
+<p>If you have <code>setup.properties</code> file and want to automate installation, you can pass properties file as</p>
+<div class="highlight"><pre><span></span><code>python3 flex_setup.py -f /path/to/setup.properties -n -c
+</code></pre></div>
+<p>Minimal example setup.properties file:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">ip</span><span class="o">=</span><span class="m">10</span>.146.197.201
+<span class="nv">hostname</span><span class="o">=</span>flex.gluu.org
+<span class="nv">orgName</span><span class="o">=</span>Gluu
+<span class="nv">admin_email</span><span class="o">=</span>flex@gluu.org
+<span class="nv">city</span><span class="o">=</span>Austin
+<span class="nv">state</span><span class="o">=</span>Texas
+<span class="nv">countryCode</span><span class="o">=</span>US
+<span class="nv">installLdap</span><span class="o">=</span>True
+<span class="nv">admin_password</span><span class="o">=</span>MyAdminPassword
+<span class="nv">ldapPass</span><span class="o">=</span>MyLdapPassword
+<span class="nv">casa_client_id</span><span class="o">=</span><span class="m">3000</span>.7986c837-2a8f-4c31-9c63-1bd2f6abce77
+<span class="nv">casa_client_pw</span><span class="o">=</span>MyCasaClientSecret
+</code></pre></div>
+<ul>
 <li>
-<p>You will be prompted: 
+<p>You will be prompted:<br />
 <code>Install Admin UI [Y/n]:</code>. Select <code>n</code></p>
 </li>
 <li>
-<p>You will be prompted: 
+<p>You will be prompted:<br />
 <code>Install Casa [Y/n]:</code>. Select <code>y</code></p>
 </li>
 <li>
-<p>At the end of the installation you will be presented with a URL to access the Casa portal. </p>
+<p>At the end of the installation you will be presented with a URL to access the Casa portal.</p>
 </li>
-<li>You can use this URL and log into the portal using the administrator credentials that you created during the Janssen Server installation. </li>
-</ol>
+<li>
+<p>You can use this URL and log into the portal using the administrator credentials that you created during the Janssen Server installation.</p>
+</li>
+</ul>
 <h2 id="enabling-authentication-methods">Enabling Authentication methods<a class="headerlink" href="#enabling-authentication-methods" title="Permanent link">#</a></h2>
 <ol>
-<li>Goto <code>/opt/jans/jetty/casa</code> folder and execute <code>touch .administrable</code>. <a href="">Further reading</a></li>
-<li><a href="https://github.com/maduvena/jans-docs/wiki/Enabling-an-authentication-mechanism-(or-custom-script)">Enable authentication mechanisms</a> in Jan-auth server like <code>otp</code>, <code>fido2</code>, <code>email_otp</code>.
-<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py -enable-script=&quot;&lt;inum_of_script&gt;&quot;
-</code></pre></div>
-| Inum | displayName |
-|---|---|
-| 09A0-93D7 | smpp  |
-| 5018-D4BF | otp |
-| 5018-F9CF | duo |
-| 8BAF-80D7 | fido2 |
-| 92F0-BF9E | super_gluu |
-| 09A0-93D6 | twilio_sms |</li>
+<li>
+<p>Go to <code>/opt/jans/jetty/casa</code> folder and execute <code>touch .administrable</code>. <a href="">Further reading</a></p>
+</li>
+<li>
+<p><a href="https://github.com/maduvena/jans-docs/wiki/Enabling-an-authentication-mechanism-(or-custom-script)">Enable authentication mechanisms</a> in Jan-auth server like <code>otp</code>, <code>fido2</code>, <code>email_otp</code>.</p>
+</li>
 </ol>
-<p>When successfully enabled, you should see a confirmation message similar to the one below on console: </p>
+<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py -enable-script<span class="o">=</span><span class="s2">&quot;&lt;inum_of_script&gt;&quot;</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Inum</th>
+<th>displayName</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>09A0-93D7</td>
+<td>smpp</td>
+</tr>
+<tr>
+<td>5018-D4BF</td>
+<td>otp</td>
+</tr>
+<tr>
+<td>5018-F9CF</td>
+<td>duo</td>
+</tr>
+<tr>
+<td>8BAF-80D7</td>
+<td>fido2</td>
+</tr>
+<tr>
+<td>92F0-BF9E</td>
+<td>super_gluu</td>
+</tr>
+<tr>
+<td>09A0-93D6</td>
+<td>twilio_sms</td>
+</tr>
+</tbody>
+</table>
+<p>When successfully enabled, you should see a confirmation message similar to the one below on console:</p>
 <div class="highlight"><pre><span></span><code>Please wait while collecting properties...
 Enabling scripts 5018-D4BF
 </code></pre></div>
 <ol>
-<li>Login to the Casa portal as an administrator </li>
-<li>Enable authentication methods by navigating to <code>Administration console</code> -&gt; <code>Enabled Authentication methods</code>. Details about enabling authentication methods are available in <a href="https://gluu.org/docs/casa/4.4/administration/admin-console/#configure-casa">Casa documentation</a></li>
+<li>
+<p>Login to the Casa portal as an administrator</p>
+</li>
+<li>
+<p>Enable authentication methods by navigating to <code>Administration console</code> -&gt; <code>Enabled Authentication methods</code>. Details about enabling authentication methods are available in <a href="https://gluu.org/docs/casa/4.4/administration/admin-console/#configure-casa">Casa documentation</a></p>
+</li>
 </ol>
 <h2 id="configuring-authentication-methods">Configuring authentication methods<a class="headerlink" href="#configuring-authentication-methods" title="Permanent link">#</a></h2>
 <p>At this point, users (<a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/jans-cli/cli-user.md#creating-an-user-resources">How to create users</a>) can log in to the Casa portal and <a href="https://gluu.org/docs/casa/4.4/user-guide/">enable/configure one or more authentication methods</a> for their account.</p>
 <h2 id="uninstalling-casa-from-janssen-server">Uninstalling Casa from Janssen Server<a class="headerlink" href="#uninstalling-casa-from-janssen-server" title="Permanent link">#</a></h2>
-<p>Execute following command to uninstall Casa from Janssen Server
+<p>Execute following command to uninstall Casa from Janssen Server</p>
 <div class="highlight"><pre><span></span><code>python3 flex_setup.py -remove casa
-</code></pre></div></p>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-16T08:52:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-16</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-26T14:52:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-26</span>
       
         <br>
         Created:
