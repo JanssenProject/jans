@@ -37,6 +37,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 if self.data[list_key]:
                     self.data[list_key] = self.data[list_key].splitlines()
 
+            if 'accessTokenAsJwt' in self.data:
+                self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
+
             cfr = self.check_required_fields()
             self.myparent.logger.debug("CFR: "+str(cfr))
             if not cfr:
@@ -139,18 +142,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     )
         
         self.tabs['Tokens'] = HSplit([
-                        # self.myparent.getTitledRadioButton(
-                        #     "Access Token Type",
-                        #      name='accessTokenAsJwt',
-                        #       values=['JWT','Reference'],
-                        #        current_value=self.data.get('accessTokenAsJwt'),
-                        #        jans_help=self.myparent.get_help_from_schema(schema, 'accessTokenAsJwt'),
-                        #         style='green'),
-
-                        self.myparent.getTitledCheckBox(
+                        self.myparent.getTitledRadioButton(
                             "Access Token Type",
                             name='accessTokenAsJwt',
-                            checked=self.data.get('accessTokenAsJwt'),
+                            values=[('jwt', 'JWT'), ('reference', 'Reference')],
+                            current_value= 'jwt' if self.data.get('accessTokenAsJwt') else 'reference',
+                            jans_help=self.myparent.get_help_from_schema(schema, 'accessTokenAsJwt'),
                             style='green'),
 
                         self.myparent.getTitledCheckBox(

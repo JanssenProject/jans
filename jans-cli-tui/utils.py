@@ -18,6 +18,7 @@ class DialogUtils:
                 if hasattr(item, 'me'):
                     me = item.me
                     key_ = me.window.jans_name
+                    #self.myparent.logger.debug(key_ + ': ' + str(type(me)))
                     if isinstance(me, prompt_toolkit.widgets.base.TextArea):
                         value_ = me.text
                     elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):

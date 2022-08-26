@@ -388,10 +388,12 @@ class JansCliApp(Application, JansAuthServer):
             rl.current_value = current_value
         rl.window.jans_name = name
         rl.window.jans_help = jans_help
-        rl.window.me = rl
         #li, rl2, width = self.handle_long_string(title, values, rl)
 
-        return VSplit([Label(text=title, width=len(title), style=style), rl])
+        v = VSplit([Label(text=title, width=len(title), style=style), rl])
+        v.me = rl
+
+        return v
 
 
     def getTitledWidget(self, title, name, widget, jans_help='', style=''):
