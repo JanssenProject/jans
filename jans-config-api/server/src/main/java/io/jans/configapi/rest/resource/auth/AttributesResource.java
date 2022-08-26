@@ -49,7 +49,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS })
-    public Response getAttributes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+    public Response getAttributes(@DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
             @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
