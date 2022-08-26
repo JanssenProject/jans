@@ -11,6 +11,7 @@ import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
