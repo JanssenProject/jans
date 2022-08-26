@@ -194,10 +194,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     )
         
         self.tabs['SoftwareInfo'] =  HSplit([
-            self.myparent.getTitledText(title ="Client URI", name='clientUri', value=self.data.get('clientUri',''),style='green'),
-            self.myparent.getTitledText(title ="Policy URI", name='policyUri', value=self.data.get('policyUri',''),style='green'),
-            self.myparent.getTitledText(title ="Logo URI", name='logoUri', value=self.data.get('logoUri',''),style='green'),
-            self.myparent.getTitledText(title ="Term of service URI", name='tosUri', value=self.data.get('tosUri',''),style='green'),
+            #self.myparent.getTitledText(title ="Client URI", name='clientUri', value=self.data.get('clientUri',''),style='green'),
+            #self.myparent.getTitledText(title ="Policy URI", name='policyUri', value=self.data.get('policyUri',''),style='green'),
+            #self.myparent.getTitledText(title ="Logo URI", name='logoUri', value=self.data.get('logoUri',''),style='green'),
+            #self.myparent.getTitledText(title ="Term of service URI", name='tosUri', value=self.data.get('tosUri',''),style='green'),
             self.myparent.getTitledText(title ="Contacts", name='contacts', value=self.data.get('contacts',''),style='green'),
             VSplit([
                             Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3,)
@@ -307,7 +307,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             ]) , 
                         self.myparent.getTitledText("TLS Subject DN", name='x5c', value=self.data.get('x5c',''),style='green'),
 
-                       
                         self.myparent.getTitledWidget(
                                 "Client Experiation Date",
                                 name='expirationDate',
@@ -317,9 +316,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 jans_help=self.myparent.get_help_from_schema(schema, 'expirationDate'),
                                 style='green'
                                 ),
-                                
-                        
-                      
+
    
                         ],width=D()
         )
