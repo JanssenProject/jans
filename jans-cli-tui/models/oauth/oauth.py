@@ -124,7 +124,7 @@ class JansAuthServer:
             result = rsponse.json()
         except Exception:
             self.show_message("Error getting clients", str(rsponse.text))
-            press_tab
+            #press_tab
             return
 
 
@@ -237,7 +237,7 @@ class JansAuthServer:
 
     def save_client(self, dialog):
 
-        self.logger.debug(dialog.data)
+        # self.logger.debug(dialog.data)
 
         response = self.cli_object.process_command_by_id(
             operation_id='put-oauth-openid-clients' if dialog.data.get('inum') else 'post-oauth-openid-clients',

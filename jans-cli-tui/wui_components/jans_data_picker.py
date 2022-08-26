@@ -22,17 +22,28 @@ from prompt_toolkit.layout.containers import (
 )
 
 import calendar
-
+import time
+# ts = time.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
+# time.strftime("%m/%d/%Y", ts)
+# '11/27/2023'
 #### not finished yet >> data
+import datetime
 
 class JansSelectDate:
    
-    def __init__(self, date=''):
-        self.date = date
-        self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    def __init__(self, date='',months=[]):  
 
+        if date != '':
+            self.date = date  #"11/27/2023"
+        else:
+            today = datetime.date.today()
+            self.date =  str(today.month) +'/' +str(today.day) +'/'+str(today.year)    ## '11/27/2023' ## 
+        
+        self.months = months 
+    
         self.cord_y = 0
         self.cord_x = 0
+        
         self.extract_date(self.date)
 
         #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
@@ -65,10 +76,14 @@ class JansSelectDate:
         ),                  
         ])
 
-    def extract_date(self,date):
-        ### this function is for the init date >> passed date from data
-        day = int(date.split('/')[0])
-        self.current_month = int(date.split('/')[1])
+    # def set_value(self, value):
+    #     self.value = self.date
+
+    def extract_date(self,date):  #"11/27/2023"
+        ### this function is for the init date >> passed date from `data`
+        
+        day = int(date.split('/')[1])
+        self.current_month = int(date.split('/')[0])
         self.current_year = int(date.split('/')[-1])
 
         month_week_list = calendar.monthcalendar(int(self.current_year),int(self.current_month))
@@ -121,14 +136,14 @@ class JansSelectDate:
         if self.current_month != 12:
             self.current_month+=1
             self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
-            current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
+            current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
             self.extract_date(current_date)
 
     def dec_month(self,day):
         if self.current_month > 1:
             self.current_month-=1
             self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
-            current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
+            current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
             self.extract_date(current_date)
 
     def inc_year(self,day):
@@ -179,13 +194,22 @@ class JansSelectDate:
         return self.container
 
 
-class DateSelectWidget:
+class DateSelectWidget:  # ex: data = "2023-11-27T14:05:35"
     def __init__(self,data):
-        self.date = data #"20/2/1997"
+        
+        self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-        self.text = "Enter to Select"
+        if data != '':
+            ts = time.strptime(data[:19], "%Y-%m-%dT%H:%M:%S")  # "2023-11-27"
+            self.value  = data
+            self.date = time.strftime("%m/%d/%Y", ts)           # "11/27/2023"
 
+            self.text = self.date.split('/')[1] + '/' +self.months[int(self.date.split('/')[0])-1] + '/' +self.date.split('/')[2]
+        else:
+            self.date=''
+            self.text = "Enter to Select"
 
+    
         self.dropdown = True
         self.window = Window(
             content=FormattedTextControl(
@@ -194,9 +218,24 @@ class DateSelectWidget:
                  key_bindings=self._get_key_bindings(),
             ), height= 10) #D()) #5  ## large sized enties get >> (window too small)
 
-        self.select_box = JansSelectDate(self.date)
+        self.select_box = JansSelectDate(date=self.date,months=self.months )
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
 
+
+    @property
+    def value(self):
+        # with open('./hopa2.log', 'a') as f:
+        #     f.write("_value: "+str("2022-11-05T14:45:26"))
+        # do some conversion staff and set to date_string in format YYYY-MM-DDTHH:mm:ss
+        return "2022-11-05T14:45:26"
+
+    @value.setter
+    def value(self, value):
+        # with open('./hopa.log', 'a') as f:
+        #     f.write("_value: "+str(value))
+        # do some conversion staff convert value to internal date format and set to _value
+        self._vallue = "2022-11-05T14:45:26"
+    
 
     def _get_text(self):
         if get_app().layout.current_window is self.window:
@@ -218,8 +257,8 @@ class DateSelectWidget:
                 get_app().layout.container.floats.append(   self.select_box_float)
             else:
                 self.text = str(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )+'/'+ str(self.select_box.months[self.select_box.current_month-1] ) +'/'+str(self.select_box.current_year) 
-
                 get_app().layout.container.floats.remove(self.select_box_float)
+            self.value  = str(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )+'/'+ str(self.select_box.current_month) +'/'+str(self.select_box.current_year)  +"T23:59:59"
 
         @kb.add("up")
         def _up(event):

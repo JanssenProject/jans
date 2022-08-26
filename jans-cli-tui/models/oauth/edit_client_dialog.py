@@ -72,8 +72,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
     def prepare_tabs(self):
 
-        self.myparent.logger.debug("Data: "+str(self.data))
+        
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Client')
+
+        # self.data['expirationDate'] = 1331856000000  ## to test widget
 
         self.tabs = OrderedDict()
 
@@ -190,7 +192,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         ],width=D()
                     )
-        """
+        
         self.tabs['SoftwareInfo'] =  HSplit([
             self.myparent.getTitledText(title ="Client URI", name='clientUri', value=self.data.get('clientUri',''),style='green'),
             self.myparent.getTitledText(title ="Policy URI", name='policyUri', value=self.data.get('policyUri',''),style='green'),
@@ -224,19 +226,21 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         Label("UMA",style='bold'),
                         self.myparent.getTitledRadioButton("PRT token type", name='applicationType!', values=['JWT', 'Reference'], current_value=self.data.get('applicationType!'),style='green'),
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
-                       
-                        self.myparent.getTitledWidget(
-                           "RPT Mofification Script",
-                           name='rptClaimsScripts',
-                           widget=DropDownWidget(
-                            values=[('rptClaimsScripts','rptClaimsScripts')]),
-                           ),
-                        self.myparent.getTitledWidget(
-                           title="title here",
-                           name='claimRedirectUris',
-                           widget=DropDownWidget(
-                            values=[('claimRedirectUris','claimRedirectUris')]),
-                           ),
+
+
+                        self.myparent.getTitledText("RPT Mofification Script",
+                         name='rptClaimsScripts',
+                          value='\n'.join(self.data.get('rptClaimsScripts', [])), 
+                          height=3,
+                           style='green'),
+         
+                        self.myparent.getTitledText("Claims Gathering Script",
+                         name='claimRedirectUris',
+                          value='\n'.join(self.data.get('claimRedirectUris', [])), 
+                          height=3,
+                           style='green'),
+
+                     
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
               
                         ]
@@ -290,13 +294,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 self.myparent.getTitledText("Request URIs", name='requestUris', value=self.data.get('requestUris',''),style='green'),
                                 Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3,)
                             ]) ,  
-                        self.myparent.getTitledWidget(
-                           title="Defult ACR",
-                           name='authorizedAcrValues',
-                           widget=DropDownWidget(
-                            values=[('authorizedAcrValues','authorizedAcrValues')]),
-                           ),
 
+                        self.myparent.getTitledText("Default  ACR",
+                         name='authorizedAcrValues',
+                          value='\n'.join(self.data.get('authorizedAcrValues', [])), 
+                          height=3,
+                           style='green'),
 
                         VSplit([
                                 # self.myparent.getTitledText("Allowed ACRs", name='clientSecret', value=self.data.get('clientSecret',''),style='green'),
@@ -308,52 +311,67 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         # self.myparent.getTitledCheckBox("Client Experiation Date", name='id_token_claims', checked=self.data.get('id_token_claims'),style='green'),
                         # attached to date
                         VSplit([Label(text="Client Experiation Date",
-                         width=len("Client Experiation Date"),),
-                           DateSelectWidget(data="20/2/1997")]),
-                          
-
+                         width=len("Client Experiation Date"),),          
+                            # DateSelectWidget(data=self.data.get('expirationDate','')),
+                           DateSelectWidget(data="2022-11-05T14:45:26"),
+                           ]
+                           ),
 
                             ]) , 
    
                         ],width=D()
         )
 
+
+
         self.tabs['Client Scripts'] = HSplit([
 
-            self.myparent.getTitledWidget(
-            title="Spontaneous Scopes",
-            name='authorizedAcrValues',
-               widget=DropDownWidget(values=[('spontaneousScopes','spontaneousScopes')]),
-            ),
-            self.myparent.getTitledWidget(
-            title="Update Token",
-            name='updateTokenScriptDns',
-               widget=DropDownWidget(values=[('updateTokenScriptDns','updateTokenScriptDns')]),
-            ),
-            self.myparent.getTitledWidget(
-            title="Post Authn",
-            name='postAuthnScripts',
-               widget=DropDownWidget(values=[('postAuthnScripts','postAuthnScripts')]),
-            ),
-            self.myparent.getTitledWidget(
-            title="Introspection",
-            name='introspectionScripts',         
-               widget=DropDownWidget(values=[('introspectionScripts','introspectionScripts')]),
-            ),
-            self.myparent.getTitledWidget(
-            title="Password Grant",
-            name='dynamicRegistrationAllowedPasswordGrantScopes',                
-               widget=DropDownWidget(values=[('dynamicRegistrationAllowedPasswordGrantScopes','dynamicRegistrationAllowedPasswordGrantScopes')]),
-            ),
-            self.myparent.getTitledWidget(
-            title="OAuth Consent",
-            name='consentGatheringScripts',                
-               widget=DropDownWidget(values=[('consentGatheringScripts','consentGatheringScripts')]),
-            ),
+
+            self.myparent.getTitledText("Spontaneous Scopes",
+                name='spontaneousScopes',
+                value='\n'.join(self.data.get('spontaneousScopes', [])), 
+                height=3,
+                style='green'),
+
+            # --------------------------------------------------------------------------------------# 
+            self.myparent.getTitledText("Update Token",
+                name='updateTokenScriptDns',
+                value='\n'.join(self.data.get('updateTokenScriptDns', [])), 
+                height=3,
+                style='green'),
+
+            # --------------------------------------------------------------------------------------# 
+            self.myparent.getTitledText("Post Authn",
+                name='postAuthnScripts',
+                value='\n'.join(self.data.get('postAuthnScripts', [])), 
+                height=3,
+                style='green'),
+
+            # --------------------------------------------------------------------------------------# 
+            self.myparent.getTitledText("Introspection",
+                name='introspectionScripts',
+                value='\n'.join(self.data.get('introspectionScripts', [])), 
+                height=3,
+                style='green'),
+
+            # --------------------------------------------------------------------------------------# 
+            self.myparent.getTitledText("Password Grant",
+                name='dynamicRegistrationAllowedPasswordGrantScopes',
+                value='\n'.join(self.data.get('dynamicRegistrationAllowedPasswordGrantScopes', [])), 
+                height=3,
+                style='green'),
+                
+            # --------------------------------------------------------------------------------------# 
+            self.myparent.getTitledText("OAuth Consent",
+                name='consentGatheringScripts',
+                value='\n'.join(self.data.get('consentGatheringScripts', [])), 
+                height=3,
+                style='green'),
+
 
                         ]
                         )
-        """
+
         self.left_nav = list(self.tabs.keys())[0]
 
 

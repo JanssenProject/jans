@@ -12,6 +12,8 @@ class DialogUtils:
     def make_data_from_dialog(self):
         data = {}
         for tab in self.tabs:
+            self.myparent.logger.debug("********** {} ***********".format(str(tab)))
+
             for item in self.tabs[tab].children:
                 if hasattr(item, 'me'):
                     me = item.me
@@ -26,6 +28,10 @@ class DialogUtils:
                         value_ = me.current_value
                     elif isinstance(me, DropDownWidget):
                         value_ = me.value
+                    elif isinstance(me,DateSelectWidget):
+                        self.myparent.logger.debug("********** DateSelectWidget ***********")
+                        value_ = me.value
+
                     data[key_] = value_
 
         return data
