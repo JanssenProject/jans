@@ -9405,11 +9405,11 @@
 
 <h1 id="adaptive-authentication-scripts-person-authentication-scripts">Adaptive Authentication scripts (Person Authentication scripts)<a class="headerlink" href="#adaptive-authentication-scripts-person-authentication-scripts" title="Permanent link">#</a></h1>
 <p>The Jans-Auth Server leverages interception scripts of <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java">PersonAuthenticationType</a> which when implemented can facilitate complex multi-step, multi-factor authentication workflows. The authentication flow in the Jans Server is driven by the openID spec. The authorization request to the OP (Jans server) contains an optional query parameter called <code>acr_values</code> which is used by the OP to pick an interception script which will be run when <code>/authorize</code> endpoint (Authentication flow) is invoked. The name of each script corresponds with its <code>acr</code> value in the Jans-Auth Server.</p>
-<p>Typically, a <code>PersonAuthenticationType</code> script can be used to:
-* introduce a new 2FA authentication mechanism
-* customise multistep authentication
-* offer Social logins
-* proactively perform fraud detection and block the user.</p>
+<p>Typically, a <code>PersonAuthenticationType</code> script can be used to:<br />
+ 1. introduce a new 2FA authentication mechanism<br />
+ 2. customise multistep authentication<br />
+ 3. offer Social logins<br />
+ 4. proactively perform fraud detection and block the user.</p>
 <h2 id="default-authentication-method">Default authentication method:<a class="headerlink" href="#default-authentication-method" title="Permanent link">#</a></h2>
 <p>In an OpenID Connect authentication request, one of the optional parameters defined is <code>acr_values</code>. This is the primary way for a client to signal to the OpenID Provider (OP) the preferred way to authenticate the subject. 
 A client may also specify <code>default_acr_values</code> during registration (and omit the parameter while making an authentication request). <strong>In the Jansssen Server configuration, <code>acr</code> is used to name the authentication workflow.</strong></p>
@@ -9473,12 +9473,16 @@ More details of this mentioned <a href="https://jans.io/docs/admin/developer/int
 </ol>
 <h2 id="testing-an-authentication-flow">Testing an authentication flow<a class="headerlink" href="#testing-an-authentication-flow" title="Permanent link">#</a></h2>
 <p>An example of a complete URL looks like this - 
-        <code>https://&lt;your.jans.server&gt;/jans-auth/authorize.htm? \
-        response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin \
-        &amp;client_id=17b8b82e-b3ec-42a2-bd90-097028a37f3 \
-        &amp;scope=openid+profile+email+user_name \
-        &amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff</code>
-To test , enter the complete URL for authorization in a browser or create a simple webmapage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>
+        ```</p>
+<div class="codehilite"><pre><span></span><code>    https://&lt;your.jans.server&gt;/jans-auth/authorize.htm? \
+    response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin \
+    &amp;client_id=17b8b82e-b3ec-42a2-bd90-097028a37f3 \
+    &amp;scope=openid+profile+email+user_name \
+    &amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff
+```
+</code></pre></div>
+
+<p>To test , enter the complete URL for authorization in a browser or create a simple webmapage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>
 <h2 id="faqs">FAQs<a class="headerlink" href="#faqs" title="Permanent link">#</a></h2>
 <h3 id="1-how-can-error-messages-be-displayed-on-a-web-page">1. How can error messages be displayed on a web page?<a class="headerlink" href="#1-how-can-error-messages-be-displayed-on-a-web-page" title="Permanent link">#</a></h3>
 <ol>
@@ -9553,7 +9557,7 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-23T13:33:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-26T09:03:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-26</span>
       
         <br>
         Created:

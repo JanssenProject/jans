@@ -9179,7 +9179,7 @@ to implement a two-step, two-factor authentication (2FA) with username / passwor
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Janssen Server (<a href="https://github.com/JanssenProject/jans#installation">installation instructions</a>)      </li>
-<li><a href="https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/fido2/Fido2ExternalAuthenticator.py">FIDO2 interception script</a> (included in the default Gluu Server distribution);     </li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">FIDO2 interception script</a> (included in the default Janssen Server distribution);     </li>
 <li>At least one FIDO2 device for testing, like one of the devices <a href="#fido2-devices">listed below</a>. </li>
 </ul>
 <h3 id="fido2-devices">FIDO2 devices<a class="headerlink" href="#fido2-devices" title="Permanent link">#</a></h3>
@@ -9260,36 +9260,36 @@ Diagram source in mermaid.live
     A[ou=jans] --&gt; K(ou=people)
     K --&gt; K1[inum=....]
     K1 --&gt; K11[ou=fido2_register]
-    K11 --&gt; K111[oxId=....]
-    K11 --&gt; K112[oxId=....]
-    K11 --&gt; K112[oxId=....]
+    K11 --&gt; K111[jansId=....]
+    K11 --&gt; K112[jansId=....]
+    K11 --&gt; K112[jansId=....]
 
     K1 --&gt; K12[ou=fido2_auth]
-    K12 --&gt; K121[oxId=....]
-    K12 --&gt; K122[oxId=....]
-    K12 --&gt; K123[oxId=....]
+    K12 --&gt; K121[jansId=....]
+    K12 --&gt; K122[jansId=....]
+    K12 --&gt; K123[jansId=....]
 
     K --&gt; K2[inum=....]
     K2 --&gt; K21[ou=fido2_register]
-    K21 --&gt; K211[oxId=....]
-    K21 --&gt; K212[oxId=....]
-    K21 --&gt; K212[oxId=....]
+    K21 --&gt; K211[jansId=....]
+    K21 --&gt; K212[jansId=....]
+    K21 --&gt; K212[jansId=....]
 
     K2 --&gt; K22[ou=fido2_auth]
-    K22 --&gt; K221[oxId=....]
-    K22 --&gt; K222[oxId=....]
+    K22 --&gt; K221[jansId=....]
+    K22 --&gt; K222[jansId=....]
     K22 --&gt; K223[oxId=....]
 
     K --&gt; K3[inum=....]
     K3 --&gt; K31[ou=fido2_register]
-    K31 --&gt; K311[oxId=....]
-    K31 --&gt; K312[oxId=....]
-    K31 --&gt; K312[oxId=....]
+    K31 --&gt; K311[jansId=....]
+    K31 --&gt; K312[jansId=....]
+    K31 --&gt; K312[jansId=....]
 
     K3 --&gt; K32[ou=fido2_auth]
-    K32 --&gt; K321[oxId=....]
-    K32 --&gt; K322[oxId=....]
-    K32 --&gt; K323[oxId=....]
+    K32 --&gt; K321[jansId=....]
+    K32 --&gt; K322[jansId=....]
+    K32 --&gt; K323[jansId=....]
 </code></pre></div></p>
 <h3 id="fido2-discovery-endpoint">FIDO2 discovery endpoint<a class="headerlink" href="#fido2-discovery-endpoint" title="Permanent link">#</a></h3>
 <p>A discovery document for FIDO2 is published by the Janssen Server at: https://your.hostname/.well-known/fido2-configuration This document specifies the URL of the registration and authentication endpoints.</p>
@@ -9299,7 +9299,7 @@ Diagram source in mermaid.live
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-23T13:33:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-26T09:03:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-26</span>
       
         <br>
         Created:
