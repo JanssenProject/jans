@@ -195,11 +195,10 @@ class JansSelectDate:
 
 
 class DateSelectWidget:  # ex: data = "2023-11-27T14:05:35"
-    def __init__(self,data):
-        
+    def __init__(self, value):
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-        if data != '':
+        if not value:
             ts = time.strptime(data[:19], "%Y-%m-%dT%H:%M:%S")  # "2023-11-27"
             self.value  = data
             self.date = time.strftime("%m/%d/%Y", ts)           # "11/27/2023"

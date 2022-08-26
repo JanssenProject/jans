@@ -307,17 +307,19 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             ]) , 
                         self.myparent.getTitledText("TLS Subject DN", name='x5c', value=self.data.get('x5c',''),style='green'),
 
-                        VSplit([
-                        # self.myparent.getTitledCheckBox("Client Experiation Date", name='id_token_claims', checked=self.data.get('id_token_claims'),style='green'),
-                        # attached to date
-                        VSplit([Label(text="Client Experiation Date",
-                         width=len("Client Experiation Date"),),          
-                            # DateSelectWidget(data=self.data.get('expirationDate','')),
-                           DateSelectWidget(data="2022-11-05T14:45:26"),
-                           ]
-                           ),
-
-                            ]) , 
+                       
+                        self.myparent.getTitledWidget(
+                                "Client Experiation Date",
+                                name='expirationDate',
+                                widget=DateSelectWidget(
+                                    value=self.data.get('expirationDate', "2022-11-05T14:45:26")
+                                   ),
+                                jans_help=self.myparent.get_help_from_schema(schema, 'expirationDate'),
+                                style='green'
+                                ),
+                                
+                        
+                      
    
                         ],width=D()
         )
