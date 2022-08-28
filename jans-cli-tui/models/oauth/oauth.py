@@ -228,10 +228,14 @@ class JansAuthServer:
         self.edit_scope_dialog()
 
     def edit_client_dialog(self, **params):
-
+        
         selected_line_data = params['data']  
         title = "Edit user Data (Clients)"
- 
+
+        self.logger.debug("START")
+        self.logger.debug(selected_line_data)
+        self.logger.debug("END")
+
         dialog = EditClientDialog(self, title=title, data=selected_line_data, save_handler=self.save_client)
         self.show_jans_dialog(dialog)
 

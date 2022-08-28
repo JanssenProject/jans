@@ -194,20 +194,20 @@ class JansSelectDate:
         return self.container
 
 
-class DateSelectWidget:  # ex: data = "2023-11-27T14:05:35"
-    def __init__(self, value):
+class DateSelectWidget:  
+    def __init__(self, value):  # ex: value = "2023-11-27T14:05:35"
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        self.text = value       # text >> showed in the widget           #[:19]+ "T23:59:59"
 
-        if not value:
-            ts = time.strptime(data[:19], "%Y-%m-%dT%H:%M:%S")  # "2023-11-27"
-            self.value  = data
+        if  value:
+            ts = time.strptime(value[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
             self.date = time.strftime("%m/%d/%Y", ts)           # "11/27/2023"
-
-            self.text = self.date.split('/')[1] + '/' +self.months[int(self.date.split('/')[0])-1] + '/' +self.date.split('/')[2]
-        else:
+        else:  
+            ### maybe here we can select today date!!
             self.date=''
             self.text = "Enter to Select"
 
+        self.value  = str(value)   
     
         self.dropdown = True
         self.window = Window(
@@ -220,44 +220,34 @@ class DateSelectWidget:  # ex: data = "2023-11-27T14:05:35"
         self.select_box = JansSelectDate(date=self.date,months=self.months )
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
 
-
     @property
     def value(self):
-        # with open('./hopa2.log', 'a') as f:
-        #     f.write("_value: "+str("2022-11-05T14:45:26"))
-        # do some conversion staff and set to date_string in format YYYY-MM-DDTHH:mm:ss
-        return "2022-11-05T14:45:26"
+        return self.text
 
     @value.setter
     def value(self, value):
-        # with open('./hopa.log', 'a') as f:
-        #     f.write("_value: "+str(value))
-        # do some conversion staff convert value to internal date format and set to _value
-        self._vallue = "2022-11-05T14:45:26"
+        passed_value = self.value  
     
-
+        self._value = passed_value
+    
     def _get_text(self):
         if get_app().layout.current_window is self.window:
             return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format('#00FF00', self.text))
         return '> {} <'.format(self.text)
 
-
     def _get_key_bindings(self):
         kb = KeyBindings()  
-
 
         def _focus_next(event):
             focus_next(event)
 
         @kb.add("enter")
         def _enter(event) -> None:
-
             if self.select_box_float not in get_app().layout.container.floats:
                 get_app().layout.container.floats.append(   self.select_box_float)
             else:
-                self.text = str(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )+'/'+ str(self.select_box.months[self.select_box.current_month-1] ) +'/'+str(self.select_box.current_year) 
+                self.text = str(self.select_box.current_year) +'-'+str(self.select_box.current_month-1) +'-'+str(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )+'T23:59:59'
                 get_app().layout.container.floats.remove(self.select_box_float)
-            self.value  = str(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )+'/'+ str(self.select_box.current_month) +'/'+str(self.select_box.current_year)  +"T23:59:59"
 
         @kb.add("up")
         def _up(event):
@@ -274,8 +264,6 @@ class DateSelectWidget:  # ex: data = "2023-11-27T14:05:35"
         @kb.add("left")
         def _up(event):
             self.select_box.left()
-
-
 
         @kb.add("w")
         def _up(event):

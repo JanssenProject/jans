@@ -308,7 +308,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 "Client Experiation Date",
                                 name='expirationDate',
                                 widget=DateSelectWidget(
-                                    value=self.data.get('expirationDate', "2022-11-05T14:45:26")
+                                    value=self.data.get('expirationDate', "2000-02-20T19:19:19")
                                    ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'expirationDate'),
                                 style='green'

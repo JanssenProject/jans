@@ -12,13 +12,11 @@ class DialogUtils:
     def make_data_from_dialog(self):
         data = {}
         for tab in self.tabs:
-            self.myparent.logger.debug("********** {} ***********".format(str(tab)))
 
             for item in self.tabs[tab].children:
                 if hasattr(item, 'me'):
                     me = item.me
                     key_ = me.window.jans_name
-                    #self.myparent.logger.debug(key_ + ': ' + str(type(me)))
                     if isinstance(me, prompt_toolkit.widgets.base.TextArea):
                         value_ = me.text
                     elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
@@ -30,7 +28,6 @@ class DialogUtils:
                     elif isinstance(me, DropDownWidget):
                         value_ = me.value
                     elif isinstance(me,DateSelectWidget):
-                        self.myparent.logger.debug("********** DateSelectWidget ***********")
                         value_ = me.value
 
                     data[key_] = value_
