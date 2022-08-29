@@ -26,9 +26,11 @@ import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 /**
@@ -61,9 +63,9 @@ public class AttributesResource extends ConfigBaseResource {
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount());
 
-        HashMap<String,Object> data = doSearch(searchReq, status);
-        log.error("\n\n GluuAttribute details to fetched - data:{}", data);
-        return Response.ok(data).build();
+        JSONObject data = doSearch(searchReq, status);
+        log.error("GluuAttribute details fetched - data:{}, data.toMap:{}", data, data.toMap());
+        return Response.ok(data.toMap()).build();
     }
 
     @GET
@@ -134,15 +136,14 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private HashMap<String,Object> doSearch(SearchRequest searchReq, String status) {
+    private JSONObject doSearch(SearchRequest searchReq, String status) {
 
         logger.error("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
         PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
 
         logger.error("PagedResult  - pagedResult:{}", pagedResult);
-        HashMap<String,Object> dataMap = new HashMap<>();
-        List<GluuAttribute> attributes = new ArrayList<>();
+        JSONObject dataJsonObject = new JSONObject();
         if (pagedResult != null) {
             logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             logger.error(
@@ -151,19 +152,19 @@ public class AttributesResource extends ConfigBaseResource {
 
             
             logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-            attributes = pagedResult.getEntries();
-            dataMap.put(ApiConstants.DATA, attributes);
-            dataMap.put(ApiConstants.TOTALITEMS, pagedResult.getTotalEntriesCount());
+
+            dataJsonObject.put(ApiConstants.DATA, pagedResult.getEntries());
+            dataJsonObject.put(ApiConstants.TOTALITEMS, pagedResult.getTotalEntriesCount());
         }
         else {
-            logger.error("pagedResult is null  - dataMap:{}", dataMap);
-            dataMap.put(ApiConstants.DATA, null);
-            dataMap.put(ApiConstants.TOTALITEMS, 0); 
+
+            dataJsonObject.put(ApiConstants.DATA, Collections.emptyList());
+            dataJsonObject.put(ApiConstants.TOTALITEMS, 0); 
         }
 
-        logger.error("GluuAttributes fetched new  - dataMap:{}", dataMap);
+        logger.error("GluuAttributes fetched new  - dataJsonObject:{}", dataJsonObject);
         //return generateResponse(dataMap);
-        return dataMap;
+        return dataJsonObject;
      }
 
 }

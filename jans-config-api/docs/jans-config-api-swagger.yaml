@@ -199,7 +199,7 @@ paths:
     get:
       summary: Gets a list of Gluu attributes.
       description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
-      operationId: get-attributes
+      operationId: get-all-attribute
       tags:
         - Attribute
       responses:
@@ -208,18 +208,9 @@ paths:
           content:
             application/json:
               schema:
-                title: Gluu Attributes paginated result
-                description: Gluu Attributes paginated result
-                type: object
-                properties:
-                  data:
-                    description: List of all attribute.
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/GluuAttribute'
-                  totalItems:
-                    type: integer
-                    description: Total number of records in the database.
+                title: Attribute.
+                description: List of Attribute.
+                $ref: '#/components/schemas/PaginatedGluuAttribute'
         '401':
           description: Unauthorized
         '500':
@@ -7785,5 +7776,16 @@ components:
           type: string
           format: date
   
-
-  
+    PaginatedGluuAttribute:
+      title: Gluu Attributes paginated result
+      description: Gluu Attributes paginated result
+      type: object
+      properties:
+        data:
+          description: List of all attribute.
+          type: array
+          items:
+            $ref: '#/components/schemas/GluuAttribute'
+        totalItems:
+          type: integer
+          description: Total number of records in the database.
