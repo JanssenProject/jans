@@ -18,10 +18,12 @@ public final class CustomMappings {
 
         profile -> {
             Map<String, Object> map = new HashMap<>();
-            //Fill your map as desired with data from input profile. See examples in class io.jans.inbound.Mappings
+            //Fill your map as desired with data from input profile. See examples in class io.jans.inbound.Mappings:
+            //https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java
+
             //value = profile.get("...") 
             //map.put(Attrs.UID, ... );
-            return map; 
+            return map;
         };
 
     private CustomMappings() { }
