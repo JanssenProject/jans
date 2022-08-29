@@ -33,12 +33,7 @@ class JansSelectDate:
    
     def __init__(self, date='',months=[]):  
 
-        if date != '':
-            self.date = date  #"11/27/2023"
-        else:
-            today = datetime.date.today()
-            self.date =  str(today.month) +'/' +str(today.day) +'/'+str(today.year)    ## '11/27/2023' ## 
-        
+        self.date = date  #"11/27/2023"
         self.months = months 
     
         self.cord_y = 0
@@ -197,15 +192,23 @@ class JansSelectDate:
 class DateSelectWidget:  
     def __init__(self, value):  # ex: value = "2023-11-27T14:05:35"
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        self.text = value       # text >> showed in the widget           #[:19]+ "T23:59:59"
+               # text >> showed in the widget         
 
         if  value:
-            ts = time.strptime(value[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
-            self.date = time.strftime("%m/%d/%Y", ts)           # "11/27/2023"
+            self.text = value
+            ts = time.strptime(value[:19], "%Y-%m-%dT%H:%M:%S")     # "2023-11-27"
+            self.date = time.strftime("%m/%d/%Y", ts)               # "11/27/2023"
+            self.houres = int(time.strftime("%H",ts)) 
+            self.minutes =int(time.strftime("%M",ts))
+            self.seconds = int(time.strftime("%S",ts)) 
         else:  
-            ### maybe here we can select today date!!
-            self.date=''
+            today = datetime.date.today()
+            self.date =  str(today.month) +'/' +str(today.day) +'/'+str(today.year)    ## '11/27/2023' ## 
             self.text = "Enter to Select"
+            now = datetime.datetime.now()
+            self.houres = int(now.strftime("%H") )   
+            self.minutes =int(now.strftime("%M"))
+            self.seconds = int(now.strftime("%S"))
 
         self.value  = str(value)   
     
@@ -222,13 +225,13 @@ class DateSelectWidget:
 
     @property
     def value(self):
-        return self.text
+        if self.text != "Enter to Select":
+            return self.text
 
     @value.setter
     def value(self, value):
-        passed_value = self.value  
-    
-        self._value = passed_value
+        #passed_value = self.value  
+        self._value = self.value  
     
     def _get_text(self):
         if get_app().layout.current_window is self.window:
@@ -246,24 +249,118 @@ class DateSelectWidget:
             if self.select_box_float not in get_app().layout.container.floats:
                 get_app().layout.container.floats.append(   self.select_box_float)
             else:
-                self.text = str(self.select_box.current_year) +'-'+str(self.select_box.current_month-1) +'-'+str(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )+'T23:59:59'
+                years = int(self.select_box.current_year)
+                months =int(self.select_box.current_month)
+                days = int(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )
+                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+                t = time.mktime(t)  
+                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
                 get_app().layout.container.floats.remove(self.select_box_float)
 
         @kb.add("up")
         def _up(event):
-            self.select_box.up()
+            if self.select_box_float not in get_app().layout.container.floats:
+                ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+                years =int(time.strftime("%Y",ts))
+                months = int(time.strftime("%m",ts))
+                days =  int(time.strftime("%d",ts))
+                self.houres = int(time.strftime("%H",ts)) -7 ## it start from 0 to 23
+                self.minutes =int(time.strftime("%M",ts))
+                self.seconds = int(time.strftime("%S",ts)) 
+                    
+                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+                t = time.mktime(t)  
+                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+
+            else :
+                self.select_box.up()
+
 
         @kb.add("down")
         def _up(event):
-            self.select_box.down()
+            if self.select_box_float not in get_app().layout.container.floats:
+                ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+                years =int(time.strftime("%Y",ts))
+                months = int(time.strftime("%m",ts))
+                days =  int(time.strftime("%d",ts))
+                self.houres = int(time.strftime("%H",ts))-9   ## it start from 0 to 23
+                self.minutes =int(time.strftime("%M",ts))
+                self.seconds = int(time.strftime("%S",ts)) 
+                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the down increment
+                t = time.mktime(t)
+                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+
+            else :
+                self.select_box.down()
 
         @kb.add("right")
         def _up(event):
-            self.select_box.right()
+            if self.select_box_float not in get_app().layout.container.floats:
+                ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+                years =int(time.strftime("%Y",ts))
+                months = int(time.strftime("%m",ts))
+                days =  int(time.strftime("%d",ts))
+                self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
+                self.minutes =int(time.strftime("%M",ts)) -1
+                self.seconds = int(time.strftime("%S",ts)) 
+                    
+                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+                t = time.mktime(t)  
+                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
 
+            else :
+                self.select_box.right()
+ 
         @kb.add("left")
         def _up(event):
-            self.select_box.left()
+            if self.select_box_float not in get_app().layout.container.floats:
+                ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+                years =int(time.strftime("%Y",ts))
+                months = int(time.strftime("%m",ts))
+                days =  int(time.strftime("%d",ts))
+                self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
+                self.minutes =int(time.strftime("%M",ts)) +1
+                self.seconds = int(time.strftime("%S",ts)) 
+                    
+                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+                t = time.mktime(t)  
+                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+
+            else :
+                self.select_box.left()
+
+
+        @kb.add("+")
+        def _up(event):
+            ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+            years =int(time.strftime("%Y",ts))
+            months = int(time.strftime("%m",ts))
+            days =  int(time.strftime("%d",ts))
+            self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
+            self.minutes =int(time.strftime("%M",ts)) 
+            self.seconds = int(time.strftime("%S",ts)) +1
+                
+            t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+            t = time.mktime(t)  
+            self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+
+        @kb.add("-")
+        def _up(event):
+            ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+            years =int(time.strftime("%Y",ts))
+            months = int(time.strftime("%m",ts))
+            days =  int(time.strftime("%d",ts))
+            self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
+            self.minutes =int(time.strftime("%M",ts)) 
+            self.seconds = int(time.strftime("%S",ts)) -1
+                
+            t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+            t = time.mktime(t)  
+            self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+
+      
+
+                      
 
         @kb.add("w")
         def _up(event):
