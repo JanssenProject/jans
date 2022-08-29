@@ -24,7 +24,7 @@ If the providers of interest already support the `code` authorization grant, the
 
 ## Flows involved
 
-### Provider 
+### Provider
 
 For every provider to support there has to be an Agama flow that must:
 
@@ -91,7 +91,7 @@ To start, let's add the required libraries to the authentication server:
 
 ### Add a provider flow
 
-For simplicity, we'll illustrate here how to add one of the already implemented demo flows, namely, Facebook.
+For simplicity, we'll illustrate here how to add one of the already implemented demo flows, namely, Facebook. Some guidelines on how to create a provider flow your own are given [here](#creating-a-provider-flow).
 
 - Download the [utility flows](#utility-flows). Add them to the server as you did with the main flow
 
@@ -120,7 +120,7 @@ For simplicity, we'll illustrate here how to add one of the already implemented 
     }]
     ```
 
-- Patch the flow using the API. A sample `curl` command would look like the above (assuming the json file is named `fb.json`):
+- Patch the flow using the API. A sample `curl` command would look like this (assuming the json file is named `fb.json`):
 
     ```
     curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
@@ -151,7 +151,7 @@ So far, if the main flow is launched (learn about this topic [here](https://jans
     }]
     ```
 
-- Patch the main flow using the API. A sample `curl` command would look like the above (assuming the json file is named `main.json`):
+- Patch the main flow using the API. A sample `curl` command would look like this (assuming the json file is named `main.json`):
 
     ```
     curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
@@ -295,3 +295,7 @@ A couple of utility flows are available for developers writing flows:
 - Authorization Code flow with userInfo request (`io.jans.inbound.oauth2.AuthzCodeWithUserInfo`): This flow reuses the previous flow and additionally issues a request to a given userInfo URL passing the access token in the HTTP Authorization header. The response obtained (the profile data of the user) is returned in conjuction with the token response of the authorization code flow
 
 The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and returning profile data only.
+
+## Creating a provider flow
+
+A provider flow must fulfil the conditions as summarized [earlier](#provider). Developers have to figure out if the OAuth2 `code` authorization grant is supported, where the task is simplified to get the required [configurations](#provider-flow-configurations). Here, the source code flow of a flow like [Facebook](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook) can be re-used - probably without modification other than in the header.
