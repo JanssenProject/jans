@@ -25,11 +25,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -143,7 +140,6 @@ public class AttributesResource extends ConfigBaseResource {
 
         logger.error("PagedResult  - pagedResult:{}", pagedResult);
         JSONObject dataJsonObject = new JSONObject();
-        Map<String, Object> data = new HashMap<>();
         if (pagedResult != null) {
             logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             logger.error(
@@ -161,9 +157,9 @@ public class AttributesResource extends ConfigBaseResource {
             dataJsonObject.put(ApiConstants.DATA, Collections.emptyList());
             dataJsonObject.put(ApiConstants.TOTALITEMS, 0); 
         }
-        data = dataJsonObject.toMap();
-        logger.error("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, data);
-        return data;
+       
+        logger.error("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, dataJsonObject.toMap());
+        return dataJsonObject.toMap();
      }
 
 }
