@@ -9205,6 +9205,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#creating-a-provider-flow" class="md-nav__link">
+    Creating a provider flow
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -9315,7 +9322,7 @@
 </li>
 </ul>
 <h3 id="add-a-provider-flow">Add a provider flow<a class="headerlink" href="#add-a-provider-flow" title="Permanent link">#</a></h3>
-<p>For simplicity, we'll illustrate here how to add one of the already implemented demo flows, namely, Facebook.</p>
+<p>For simplicity, we'll illustrate here how to add one of the already implemented demo flows, namely, Facebook. Some guidelines on how to create a provider flow your own are given <a href="#creating-a-provider-flow">here</a>.</p>
 <ul>
 <li>
 <p>Download the <a href="#utility-flows">utility flows</a>. Add them to the server as you did with the main flow</p>
@@ -9349,7 +9356,7 @@
 </code></pre></div>
 </li>
 <li>
-<p>Patch the flow using the API. A sample <code>curl</code> command would look like the above (assuming the json file is named <code>fb.json</code>):</p>
+<p>Patch the flow using the API. A sample <code>curl</code> command would look like this (assuming the json file is named <code>fb.json</code>):</p>
 <div class="highlight"><pre><span></span><code>curl -k -i -H &#39;Authorization: Bearer &lt;token&gt;&#39; -H &#39;Content-Type: application/json-patch+json&#39;
      -X PATCH -d@fb.json
      https://&lt;your-host&gt;/jans-config-api/api/v1/agama/io.jans.inbound.Facebook
@@ -9377,7 +9384,7 @@
 </code></pre></div>
 </li>
 <li>
-<p>Patch the main flow using the API. A sample <code>curl</code> command would look like the above (assuming the json file is named <code>main.json</code>):</p>
+<p>Patch the main flow using the API. A sample <code>curl</code> command would look like this (assuming the json file is named <code>main.json</code>):</p>
 <div class="highlight"><pre><span></span><code>curl -k -i -H &#39;Authorization: Bearer &lt;token&gt;&#39; -H &#39;Content-Type: application/json-patch+json&#39;
      -X PATCH -d@main.json
      https://&lt;your-host&gt;/jans-config-api/api/v1/agama/io.jans.inbound.ExternalSiteLogin
@@ -9586,13 +9593,15 @@
 </li>
 </ul>
 <p>The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and returning profile data only.</p>
+<h2 id="creating-a-provider-flow">Creating a provider flow<a class="headerlink" href="#creating-a-provider-flow" title="Permanent link">#</a></h2>
+<p>A provider flow must fulfil the conditions as summarized <a href="#provider">earlier</a>. Developers have to figure out if the OAuth2 <code>code</code> authorization grant is supported, where the task is simplified to get the required <a href="#provider-flow-configurations">configurations</a>. Here, the source code flow of a flow like <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook">Facebook</a> can be re-used - probably without modification other than in the header.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-29T12:56:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-29T20:12:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-29</span>
       
         <br>
         Created:
