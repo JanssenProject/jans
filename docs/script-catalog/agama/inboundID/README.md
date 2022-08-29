@@ -107,8 +107,8 @@ For simplicity, we'll illustrate here how to add one of the already implemented 
 
     ```
     [{
-      "op":"replace",
-      "path":"/metadata/properties",
+      "op": "replace",
+      "path": "/metadata/properties",
       "value": {
         "authzEndpoint": "https://www.facebook.com/v14.0/dialog/oauth",
         "tokenEndpoint": "https://graph.facebook.com/v14.0/oauth/access_token",
@@ -138,8 +138,8 @@ So far, if the main flow is launched (learn about this topic [here](https://jans
 
     ```
     [{
-      "op":"add",
-      "path":"/metadata/properties",
+      "op": "replace",
+      "path": "/metadata/properties",
       "value": {
         "facebook": {
           "flowQname": "io.jans.inbound.Facebook",
@@ -160,6 +160,8 @@ So far, if the main flow is launched (learn about this topic [here](https://jans
     ```
 
 Later, we'll dive into the meaning of the [configuration parameters](#main-flow-configurations) set in this json file.
+
+**Note**: for limitations in PATCH API do not use `"op": "add"` to add another provider. Use `"op": "replace"` and pass the whole JSON configuration (all providers) for `value`.
 
 ### Test
 
@@ -203,6 +205,7 @@ The table below explains the meaning of properties:
 |`logoImg`|Relative path to the logo image (will be shown in the selector page)|No|
 |`enabled`|A boolean value indicating whether this provider can be shown (and triggered) from the main flow or not. Default value is `true`|No|
 |`skipProfileUpdate`|Determines if profile data should not be updated for a user if an entry already exists locally for him. Default value is `false`|No|
+|`cumulativeUpdate`|When `true`, existing value(s) of an attribute are preserved when the incoming profile data already contains value(s) for such attribute, otherwise its values are replaced by the incoming ones entirely. Default value is `false`|No|
 |`requestForEmail`|Whether to prompt the user to enter his e-mail if the data supplied by the identity provider does not contain one. Default value is `false`|No|
 |`emailLinkingSafe`|Determines if an existing account with the same e-mail of the user about to be provisioned can be treated as the same person|No|
 
@@ -261,7 +264,7 @@ As an example suppose a provider returned the following:
 
 None of this attributes exist in Janssen, database adheres to LDAP naming. Conformant names would be `uid`, `mail`, `sn`, and `givenName`. Also, let's assume you want to set `displayName` to a string composed by the first and last names separated by a white space. Writing a mapping is required.
 
-A mapping is implemented in Java in the form of a `java.util.function.UnaryOperator<Map<String, Object>>`, in other words, a function that takes a `Map<String, Object>` as input and returns a `Map<String, Object>` as result. Several examples are provided [here](https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java). 
+A mapping is implemented in Java in the form of a `java.util.function.UnaryOperator<Map<String, Object>>`, that is, a function that takes a `Map<String, Object>` as input and returns a `Map<String, Object>` as result. Several examples are provided [here](https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java). 
 
 Note property `mappingClassField` of every provider defined in the [main flow](#main-flow-configurations) points to the fully qualified name of a mapping. Some important considerations:
 
@@ -272,7 +275,7 @@ Note property `mappingClassField` of every provider defined in the [main flow](#
 While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://jans.io/docs/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/raw/main/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
 
 - Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the flow body for the class to be effectively reloaded when the file is modified
-- Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest
+- Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly
 
 From there onwards, you only need to re-upload the file as many times as needed.
 
@@ -287,8 +290,8 @@ A couple of utility flows are available for developers writing flows:
 |`io.jans.inbound.oauth2.AuthzCode`|[link](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.oauth2.AuthzCode)|
 |`io.jans.inbound.oauth2.AuthzCodeWithUserInfo`|[link](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.oauth2.AuthzCodeWithUserInfo)|
 
-- AuthzCode - *Authorization Code flow*: This flow implements the OAuth 2.0 authorization code grant where client authentication at the token endpoint occurs as described in section 2.3.1 of [RFC 6749](https://www.ietf.org/rfc/rfc6749) (HTTP basic authentication scheme). In summary, this flow redirects the browser to the external provider's site where the user will enter his credentials, then back at the Janssen redirect URL a `code` is obtained which is employed to issue an access token request. The flow returns the token response as received by the provider
+- Authorization Code flow (`io.jans.inbound.oauth2.AuthzCode`): This flow implements the OAuth 2.0 authorization code grant where client authentication at the token endpoint occurs as described in section 2.3.1 of [RFC 6749](https://www.ietf.org/rfc/rfc6749) (HTTP basic authentication scheme). In summary, this flow redirects the browser to the external provider's site where the user will enter his credentials, then back at the Janssen redirect URL a `code` is obtained which is employed to issue an access token request. The flow returns the token response as received by the provider
 
-- AuthzCodeWithUserInfo - *Authorization Code flow with userInfo request*: This flow reuses the previous flow and additionally issues a request to a given userInfo URL passing the access token in the HTTP Authorization header. The response obtained (the profile data of the user) is returned in conjuction with the token response of the authorization code flow
+- Authorization Code flow with userInfo request (`io.jans.inbound.oauth2.AuthzCodeWithUserInfo`): This flow reuses the previous flow and additionally issues a request to a given userInfo URL passing the access token in the HTTP Authorization header. The response obtained (the profile data of the user) is returned in conjuction with the token response of the authorization code flow
 
 The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and returning profile data only.
