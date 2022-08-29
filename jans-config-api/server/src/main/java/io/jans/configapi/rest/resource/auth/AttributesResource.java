@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.HashMap;
 
 import org.json.JSONObject;
@@ -63,9 +64,7 @@ public class AttributesResource extends ConfigBaseResource {
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount());
 
-        JSONObject data = doSearch(searchReq, status);
-        log.error("GluuAttribute details fetched - data:{}, data.toMap:{}", data, data.toMap());
-        return Response.ok(data.toMap()).build();
+        return Response.ok(doSearch(searchReq, status)).build();
     }
 
     @GET
@@ -136,7 +135,7 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private JSONObject doSearch(SearchRequest searchReq, String status) {
+    private Map<String, Object> doSearch(SearchRequest searchReq, String status) {
 
         logger.error("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
@@ -144,6 +143,7 @@ public class AttributesResource extends ConfigBaseResource {
 
         logger.error("PagedResult  - pagedResult:{}", pagedResult);
         JSONObject dataJsonObject = new JSONObject();
+        Map<String, Object> data = new HashMap<>();
         if (pagedResult != null) {
             logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             logger.error(
@@ -161,10 +161,9 @@ public class AttributesResource extends ConfigBaseResource {
             dataJsonObject.put(ApiConstants.DATA, Collections.emptyList());
             dataJsonObject.put(ApiConstants.TOTALITEMS, 0); 
         }
-
-        logger.error("GluuAttributes fetched new  - dataJsonObject:{}", dataJsonObject);
-        //return generateResponse(dataMap);
-        return dataJsonObject;
+        data = dataJsonObject.toMap();
+        logger.error("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, data);
+        return data;
      }
 
 }

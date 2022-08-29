@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,20 +93,6 @@ public class BaseResource {
 
     public static void thorwInternalServerException(String msg) {
         throw new InternalServerErrorException(getInternalServerException(msg));
-    }
-    
-    public static Response generateResponse(Map<String, Object> dataMap) {
-        log.error(" dataMap:{}", dataMap);
-        JSONObject jsonObject = new JSONObject();
-        if(dataMap==null || dataMap.isEmpty()) {
-            return Response.status(Response.Status.OK).build();
-        }
-        
-        for(Entry<String, Object> entry : dataMap.entrySet()) {
-            jsonObject.put(entry.getKey(), entry.getValue());
-        }
-        log.error(" dataMap:{}, jsonObject:{}", dataMap, jsonObject);
-        return Response.status(Response.Status.OK).entity(dataMap).build();
     }
 
     /**
