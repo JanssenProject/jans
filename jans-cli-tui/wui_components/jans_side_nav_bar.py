@@ -60,6 +60,16 @@ class JansSideNavBar():
         self.selection_changed(self.cur_tab)
 
 
+    def go_up(self):
+        self.cur_navbar_selection = (
+            self.cur_navbar_selection - 1) % len(self.navbar_entries)
+        self.update_selection()
+
+    def go_down(self):
+        self.cur_navbar_selection = (
+            self.cur_navbar_selection + 1) % len(self.navbar_entries)
+        self.update_selection()
+
     def get_nav_bar_key_bindings(self):
         kb = KeyBindings()
 
@@ -74,6 +84,8 @@ class JansSideNavBar():
             self.cur_navbar_selection = (
                 self.cur_navbar_selection + 1) % len(self.navbar_entries)
             self.update_selection()
+
+
 
         @kb.add("enter")
         def _(event):

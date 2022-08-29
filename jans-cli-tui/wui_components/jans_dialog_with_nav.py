@@ -11,9 +11,11 @@ from prompt_toolkit.widgets import (
     Dialog,
     VerticalLine,
 )
+from prompt_toolkit.key_binding import KeyBindings
 
 
 from prompt_toolkit.layout import ScrollablePane
+from prompt_toolkit.application.current import get_app
 
 
 class JansDialogWithNav():
@@ -41,7 +43,7 @@ class JansDialogWithNav():
                         ], width= (max_data_str )),
                     VerticalLine(),
                     ScrollablePane(content=self.content, height=height),
-                ], width=120, padding=1),
+                ], width=120, padding=1,key_bindings=self.get_nav_bar_key_bindings()),
 
             buttons=[
                 Button(
@@ -53,6 +55,31 @@ class JansDialogWithNav():
 
         )
 #--------------------------------------------------------------------------------------#
+
+    def get_nav_bar_key_bindings(self):
+        kb = KeyBindings()
+
+        @kb.add("pageup")
+        def _go_up(event) -> None:
+            app = get_app()
+            self.navbar.go_up()
+            app.layout.focus(self.navbar)
+
+        @kb.add("pagedown")
+        def _go_up(event) -> None:
+            app = get_app()
+            self.navbar.go_down()
+            app.layout.focus(self.navbar)
+    
+
+
+
+        @kb.add("enter")
+        def _(event):
+            pass
+
+        return kb
+
     def __pt_container__(self):
         return self.dialog
 
