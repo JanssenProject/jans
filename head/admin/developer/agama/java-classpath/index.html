@@ -9091,14 +9091,15 @@
 <li><code>/opt/jans/jetty/jans-auth/custom/libs/*.jar</code> (may require edition of <code>jans-auth.xml</code>)   </li>
 </ul>
 <p>Additionally, it is possible to upload source code on the fly to augment the classpath. Any valid Java or Groovy file is accepted and must be located under <code>/opt/jans/jetty/jans-auth/agama/scripts</code>. A class named <code>com.acme.Person</code> for instance, must reside in <code>com/acme/Person</code> under the <code>scripts</code> directory.</p>
-<p>This "hot" reloading feature is a big time saver while developing flows because there is no need to restart the jans-auth webapp. Also, only the files that get modified are effectively compiled in the background.</p>
+<p>Specifically, classes in <code>scripts</code> directory can only be accessed through <code>Call</code> directives. As an example suppose you added classes <code>A</code> and <code>B</code> to <code>scripts</code>, and <code>A</code> depends on <code>B</code>. <code>Call</code>s using class <code>A</code> will work and any change to files <code>A</code> and/or <code>B</code> will be picked automatically. On the contrary, trying to load this kind of classes using <code>Class.forName</code> either from a jar file in <code>custom/libs</code> or from Agama itself will degenerate in <code>ClassNotFoundException</code>. Note <code>A</code> and <code>B</code> can also depend on classes found in any of the three locations listed above.</p>
+<p>This "hot" reloading feature can be a big time saver while developing flows because there is no need to restart the jans-auth webapp. Also, only the files that get modified are effectively re-compiled.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-06-30T19:36:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-06-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-29T12:56:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-29</span>
       
         <br>
         Created:

@@ -29,16 +29,15 @@ obj = Trigger $provider.flowQname
 When obj.success is false
     Finish obj
 
-actSrv = Call io.jans.agama.engine.service.ActionService#class
-actSrv = Call io.jans.service.cdi.util.CdiUtil#bean actSrv
-clsLoader = Call actSrv getClassLoader
+idProc = Call io.jans.inbound.IdentityProcessor#new provider
+temp = Call io.jans.agama.engine.service.ActionService#class
+temp = Call io.jans.service.cdi.util.CdiUtil#bean temp
+temp = Call temp getClassLoader
 
-idProc = Call io.jans.inbound.IdentityProcessor#new provider clsLoader
-clsLoader = null
-
-profile = Call idProc applyMapping obj.data
-//In profile, every key is associated to a non-empty list
+profile = Call idProc applyMapping obj.data temp
+//In profile, every key is associated to a list
 Log "@d Mapped profile is\n" profile
+temp = null
 
 When profile.uid is null or profile.uid.empty is true
     obj = { success: false, error: "Mapped profile misses attribute value for 'uid'" }
@@ -52,7 +51,7 @@ When profile.mail is null or profile.mail.empty is true
         obj = RRF "email-prompt.ftlh"
         mail = obj.email
         
-        When mail is ""
+        When mail is null
             obj = { success: false, error: "Unable to complete profile data: e-mail not provided" }
             Finish obj
         Otherwise
