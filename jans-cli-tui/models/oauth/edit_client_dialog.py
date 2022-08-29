@@ -63,7 +63,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.dialog = JansDialogWithNav(
             title=title,
-            navbar=DynamicContainer(lambda:self.side_nav_bar),
+            navbar=self.side_nav_bar,
             content=DynamicContainer(lambda: self.tabs[self.left_nav]),
              button_functions=[
                 (save, "Save"),
@@ -77,8 +77,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Client')
-
-        # self.data['expirationDate'] = 1331856000000  ## to test widget
 
         self.tabs = OrderedDict()
 
@@ -308,7 +306,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 "Client Experiation Date",
                                 name='expirationDate',
                                 widget=DateSelectWidget(
-                                    value=self.data.get('expirationDate', "2000-02-20T19:19:19")
+                                    value=self.data.get('expirationDate', "")
                                    ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'expirationDate'),
                                 style='green'
@@ -317,8 +315,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
    
                         ],width=D()
         )
-
-
 
         self.tabs['Client Scripts'] = HSplit([
 
