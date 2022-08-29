@@ -4,10 +4,8 @@ This document explains how to use Janssen Server Duo interception script to conf
 
 [Duo Security](https://duo.com/) is a SaaS authentication provider that supports multi-factor authentication including push-approvals, passcode, SMS-OTP etc. Duo provides web SDK via which clients like Janssen Server can integrate with Duo Security services. 
 
-</br>
-<p align="center">
-<img src="../../assets/image-duo-integration-diagram.png"/> 
-</p>
+
+![Duo integration diagram](../../assets/image-duo-integration-diagram.png)
   
 ## Prerequisites
 - An account with Duo Security  
