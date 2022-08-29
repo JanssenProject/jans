@@ -67,19 +67,42 @@
             <artifactId>jboss-jaxrs-api_3.0_spec</artifactId>
             <scope>provided</scope>
         </dependency>
+        
+        <!-- LOGGING -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
+        <!-- JANSSEN -->
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-util</artifactId>
             <scope>provided</scope>
         </dependency>
-        
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-service</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-model</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
+        <!-- NIMBUS -->
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
