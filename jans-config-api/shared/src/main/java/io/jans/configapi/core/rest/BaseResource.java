@@ -106,8 +106,8 @@ public class BaseResource {
         for(Entry<String, Object> entry : dataMap.entrySet()) {
             jsonObject.put(entry.getKey(), entry.getValue());
         }
-        log.error(" jsonObject:{}", jsonObject);
-        return Response.ok(jsonObject).build();
+        log.error(" dataMap:{}, jsonObject:{}", dataMap, jsonObject);
+        return Response.status(Response.Status.OK).entity(dataMap).build();
     }
 
     /**

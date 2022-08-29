@@ -25,6 +25,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
@@ -59,8 +61,9 @@ public class AttributesResource extends ConfigBaseResource {
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount());
 
-        
-        return Response.ok(doSearch(searchReq, status)).build();
+        HashMap<String,Object> data = doSearch(searchReq, status);
+        log.error("\n\n GluuAttribute details to fetched - data:{}", data);
+        return Response.ok(data).build();
     }
 
     @GET
@@ -131,7 +134,7 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private Response doSearch(SearchRequest searchReq, String status) {
+    private HashMap<String,Object> doSearch(SearchRequest searchReq, String status) {
 
         logger.error("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
@@ -139,16 +142,17 @@ public class AttributesResource extends ConfigBaseResource {
 
         logger.error("PagedResult  - pagedResult:{}", pagedResult);
         HashMap<String,Object> dataMap = new HashMap<>();
-        
+        List<GluuAttribute> attributes = new ArrayList<>();
         if (pagedResult != null) {
             logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             logger.error(
                     "GluuAttributes fetched  - pagedResult.getEntriesCount():{} , pagedResult.getTotalEntriesCount():{}",
                     pagedResult.getEntriesCount(), pagedResult.getTotalEntriesCount());
 
-
+            
             logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-            dataMap.put(ApiConstants.DATA, pagedResult.getEntries());
+            attributes = pagedResult.getEntries();
+            dataMap.put(ApiConstants.DATA, attributes);
             dataMap.put(ApiConstants.TOTALITEMS, pagedResult.getTotalEntriesCount());
         }
         else {
@@ -157,8 +161,9 @@ public class AttributesResource extends ConfigBaseResource {
             dataMap.put(ApiConstants.TOTALITEMS, 0); 
         }
 
-        logger.error("GluuAttributes fetched  - dataMap:{}", dataMap);
-        return generateResponse(dataMap);
+        logger.error("GluuAttributes fetched new  - dataMap:{}", dataMap);
+        //return generateResponse(dataMap);
+        return dataMap;
      }
 
 }
