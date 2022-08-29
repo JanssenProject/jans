@@ -24,7 +24,7 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
 
 ## Component Setup
 
-![Component Diagram](../../assets/image-howto-mod-auth-comp-04222022.png)
+![Component Diagram](../../../assets/image-howto-mod-auth-comp-04222022.png)
 
 In this setup, we have four important components.
 - **Protected resource** is a resource that we need to protect using authentication. A web application for example. 
@@ -43,7 +43,7 @@ In this section, we will register a new OpenID Connect client on Janssen server.
 
 Here we will use manual client registration.
 
-To register a new OpenID connect client on the Janssen server, we will use `jans-cli` tool provided by the Janssen server. `jans-cli` has a menu-driven interface that makes it easy to configure the Janssen server. Here we will use the menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../../jans-cli#command-line-interface).
+To register a new OpenID connect client on the Janssen server, we will use `jans-cli` tool provided by the Janssen server. `jans-cli` has a menu-driven interface that makes it easy to configure the Janssen server. Here we will use the menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../../../admin/config-guide/jans-cli/cli-index.md).
 
   - Run the command below on Janssen server to enter interactive mode.
 

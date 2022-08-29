@@ -1,12 +1,13 @@
 
+
 # Adaptive Authentication scripts (Person Authentication scripts)
 The Jans-Auth Server leverages interception scripts of [PersonAuthenticationType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java) which when implemented can facilitate complex multi-step, multi-factor authentication workflows. The authentication flow in the Jans Server is driven by the openID spec. The authorization request to the OP (Jans server) contains an optional query parameter called `acr_values` which is used by the OP to pick an interception script which will be run when `/authorize` endpoint (Authentication flow) is invoked. The name of each script corresponds with its `acr` value in the Jans-Auth Server.
 
-Typically, a `PersonAuthenticationType` script can be used to:
-* introduce a new 2FA authentication mechanism
-* customise multistep authentication
-* offer Social logins
-* proactively perform fraud detection and block the user.
+Typically, a `PersonAuthenticationType` script can be used to:  
+ 1. introduce a new 2FA authentication mechanism  
+ 2. customise multistep authentication  
+ 3. offer Social logins  
+ 4. proactively perform fraud detection and block the user.
 
 ## Default authentication method: 
 In an OpenID Connect authentication request, one of the optional parameters defined is `acr_values`. This is the primary way for a client to signal to the OpenID Provider (OP) the preferred way to authenticate the subject. 
@@ -27,7 +28,7 @@ By default, users will get the default authentication mechanism as specified abo
 1. Obtain the json contents of a custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc. 
 	Example : 
 	 - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION`
-	 -  `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
+	 - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
 2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
@@ -83,6 +84,7 @@ You can use a `PersonAuthenticationType` script to allow users to sign using cre
 
 An example of a complete URL looks like this - 
 		```
+		
 		https://<your.jans.server>/jans-auth/authorize.htm? \
 		response_type=code&redirect_uri=https://<your.jans.server>/admin \
 		&client_id=17b8b82e-b3ec-42a2-bd90-097028a37f3 \
