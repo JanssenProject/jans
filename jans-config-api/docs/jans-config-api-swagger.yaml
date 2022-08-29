@@ -213,14 +213,17 @@ paths:
                 description: Gluu Attributes paginated result
                 type: object
                 properties:
+                  totalItems:
+                    type: integer
+                    description: Total number of records in the database.
+                  entriesCount:
+                    type: integer
+                    description: Total number of records in the response.
                   data:
                     description: List of all attribute.
                     type: array
                     items:
                       $ref: '#/components/schemas/GluuAttribute'
-                  totalItems:
-                    type: integer
-                    description: Total number of records in the database.		
         '401':
           description: Unauthorized
         '500':

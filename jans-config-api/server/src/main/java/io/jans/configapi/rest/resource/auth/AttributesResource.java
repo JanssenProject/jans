@@ -134,31 +134,25 @@ public class AttributesResource extends ConfigBaseResource {
 
     private Map<String, Object> doSearch(SearchRequest searchReq, String status) {
 
-        logger.error("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
+        logger.debug("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
         PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
 
-        logger.error("PagedResult  - pagedResult:{}", pagedResult);
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         JSONObject dataJsonObject = new JSONObject();
         if (pagedResult != null) {
-            logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-            logger.error(
-                    "GluuAttributes fetched  - pagedResult.getEntriesCount():{} , pagedResult.getTotalEntriesCount():{}",
-                    pagedResult.getEntriesCount(), pagedResult.getTotalEntriesCount());
-
-            
-            logger.error("GluuAttributes fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-
+            logger.debug("GluuAttributes fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, pagedResult.getTotalEntriesCount());
+            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, pagedResult.getEntriesCount());
             dataJsonObject.put(ApiConstants.DATA, pagedResult.getEntries());
-            dataJsonObject.put(ApiConstants.TOTALITEMS, pagedResult.getTotalEntriesCount());
         }
         else {
-
+            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, 0);
+            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, 0);
             dataJsonObject.put(ApiConstants.DATA, Collections.emptyList());
-            dataJsonObject.put(ApiConstants.TOTALITEMS, 0); 
         }
        
-        logger.error("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, dataJsonObject.toMap());
+        logger.debug("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, dataJsonObject.toMap());
         return dataJsonObject.toMap();
      }
 

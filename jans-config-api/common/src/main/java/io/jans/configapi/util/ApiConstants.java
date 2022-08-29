@@ -107,10 +107,6 @@ public class ApiConstants {
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
-    public static final String DATA = "data";
-    public static final String TOTALITEMS = "totalItems";
-
-
 
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
@@ -131,5 +127,10 @@ public class ApiConstants {
     public static final String SORT_ORDER = "sortOrder";
     public static final String ASCENDING = "ascending";
     public static final String DESCENDING = "descending";
+    public static final String TOTAL_ITEMS = "totalItems";
+    public static final String ENTRIES_COUNT = "entriesCount";
+    public static final String DATA = "data";
+    
+    
 
 }
