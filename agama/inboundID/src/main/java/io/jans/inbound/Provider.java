@@ -9,6 +9,7 @@ public class Provider {
 
     private boolean enabled = true;
     private boolean skipProfileUpdate;
+    private boolean cumulativeUpdate;
     private boolean requestForEmail;
     private boolean emailLinkingSafe;
 
@@ -50,6 +51,14 @@ public class Provider {
     
     public void setSkipProfileUpdate(boolean skipProfileUpdate) {
         this.skipProfileUpdate = skipProfileUpdate;
+    }
+
+    public boolean isCumulativeUpdate() {
+        return cumulativeUpdate;
+    }
+    
+    public void setCumulativeUpdate(boolean cumulativeUpdate) {
+        this.cumulativeUpdate = cumulativeUpdate;
     }
     
     public String getLogoImg() {
