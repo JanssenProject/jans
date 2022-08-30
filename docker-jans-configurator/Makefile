@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.2
+CN_VERSION?=1.0.3
 IMAGE_NAME=janssenproject/configurator
 UNSTABLE_VERSION?=dev
 
