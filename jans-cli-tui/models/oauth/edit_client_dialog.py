@@ -48,6 +48,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if 'accessTokenAsJwt' in self.data:
                 self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
 
+            if 'rptAsJwt' in self.data:
+                self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
+
             cfr = self.check_required_fields()
             self.myparent.logger.debug("CFR: "+str(cfr))
             if not cfr:
@@ -236,9 +239,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         self.myparent.getTitledRadioButton(
                             "PRT token type",
-                            name='applicationType!', 
-                            values=['JWT', 'Reference'], 
-                            current_value=self.data.get('applicationType!'), style='green'),
+                            name='rptAsJwt!', 
+                            values=[('jwt', 'JWT'), ('reference', 'Reference')], 
+                            current_value='jwt' if self.data.get('rptAsJwt') else 'reference',
+                            style='green'),
 
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
 
