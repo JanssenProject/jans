@@ -33,12 +33,23 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
             self.data = self.make_data_from_dialog()
             self.data['disabled'] = not self.data['disabled']
-            for list_key in ('redirectUris', 'scopes', 'postLogoutRedirectUris'):
+            for list_key in (
+                            'redirectUris',
+                            'scopes',
+                            'postLogoutRedirectUris',
+                            'contacts',
+                            'authorizedOrigins',
+                            'rptClaimsScripts',
+                            'claimRedirectUris',
+                             ):
                 if self.data[list_key]:
                     self.data[list_key] = self.data[list_key].splitlines()
 
             if 'accessTokenAsJwt' in self.data:
                 self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
+
+            if 'rptAsJwt' in self.data:
+                self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
 
             cfr = self.check_required_fields()
             self.myparent.logger.debug("CFR: "+str(cfr))
@@ -73,21 +84,23 @@ class EditClientDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
                    )
 
+
     def prepare_tabs(self):
 
-        
+
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Client')
 
         self.tabs = OrderedDict()
 
         self.tabs['Basic'] = HSplit([
                         self.myparent.getTitledText(
-                            title ="Client_ID",
-                             name='inum',
-                              value=self.data.get('inum',''),
-                               jans_help=self.myparent.get_help_from_schema(schema, 'inum'),
+                                "Client_ID",
+                                name='inum',
+                                value=self.data.get('inum',''),
+                                jans_help=self.myparent.get_help_from_schema(schema, 'inum'),
                                 read_only=True,
-                                 style='green'),
+                                style='green'),
+
                         self.myparent.getTitledCheckBox("Active", name='disabled', checked= not self.data.get('disabled'), jans_help=self.myparent.get_help_from_schema(schema, 'disabled'), style='green'),
                         self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), style='green'),
                         self.myparent.getTitledText("Client Secret", name='clientSecret', value=self.data.get('clientSecret',''), jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), style='green'),
@@ -105,8 +118,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledRadioButton(
                                 "Subject Type", 
                                 name='subjectType', 
-                                values=[('public', 'Public'),('pairwise', 'Pairwise')], 
-                                current_value=self.data.get('subjectType'), 
+                                values=[('public', 'Public'),('pairwise', 'Pairwise')],
+                                current_value=self.data.get('subjectType'),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'subjectType'),
                                 style='green'),
                         self.myparent.getTitledCheckBoxList(
@@ -131,14 +144,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText("Redirect Uris", name='redirectUris', value='\n'.join(self.data.get('redirectUris', [])), height=3, style='class:required-field'),
                         self.myparent.getTitledText("Redirect Regex", name='redirectUrisRegex', value=self.data.get('redirectUrisRegex', ''), style='green'), 
                         self.myparent.getTitledText("Scopes",
-                         name='scopes',
-                          value='\n'.join(self.data.get('scopes', [])),
-                           height=3, 
-                           style='green'),
+                            name='scopes',
+                            value='\n'.join(self.data.get('scopes', [])),
+                            height=3, 
+                            style='green'),
 
                         ],width=D(),
                     )
-        
+
         self.tabs['Tokens'] = HSplit([
                         self.myparent.getTitledRadioButton(
                             "Access Token Type",
@@ -176,7 +189,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText("Defult max authn age", name='defaultMaxAge', value=self.data.get('defaultMaxAge',''),style='green'),
 
                     ],width=D())
-        
+
         self.tabs['Logout'] = HSplit([
             
                         self.myparent.getTitledText("Front channel logout URI", name='frontChannelLogoutUri', value=self.data.get('frontChannelLogoutUri',''), style='green'),
@@ -187,20 +200,25 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         ],width=D()
                     )
-        
+
         self.tabs['SoftwareInfo'] =  HSplit([
             #self.myparent.getTitledText(title ="Client URI", name='clientUri', value=self.data.get('clientUri',''),style='green'),
             #self.myparent.getTitledText(title ="Policy URI", name='policyUri', value=self.data.get('policyUri',''),style='green'),
             #self.myparent.getTitledText(title ="Logo URI", name='logoUri', value=self.data.get('logoUri',''),style='green'),
             #self.myparent.getTitledText(title ="Term of service URI", name='tosUri', value=self.data.get('tosUri',''),style='green'),
-            self.myparent.getTitledText(title ="Contacts", name='contacts', value=self.data.get('contacts',''),style='green'),
-            VSplit([
-                            Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3,)
-            ]),
-            self.myparent.getTitledText(title ="Authorized JS origins", name='authorizedOrigins', value=self.data.get('authorizedOrigins',''),style='green'),
-            VSplit([
-                            Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3)
-            ]),
+
+            self.myparent.getTitledText("Contacts",
+                            name='contacts',
+                            value='\n'.join(self.data.get('contacts', [])), 
+                            height=3,
+                            style='green'),
+
+            self.myparent.getTitledText("Authorized JS origins",
+                            name='authorizedOrigins',
+                            value='\n'.join(self.data.get('authorizedOrigins', [])), 
+                            height=3,
+                            style='green'),
+
             self.myparent.getTitledText(title ="Software id", name='softwareId', value=self.data.get('softwareId',''),style='green'),
             self.myparent.getTitledText(title ="Software version", name='softwareVersion', value=self.data.get('softwareVersion',''), style='green'),
             self.myparent.getTitledText(title ="Software statement", name='softwareStatement', value=self.data.get('softwareStatement',''), style='green'),
@@ -214,33 +232,39 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledCheckBox("Require user code param", name='backchannelUserCodeParameterSupported', checked=self.data.get('backchannelUserCodeParameterSupported'),style='green'),
                         
                         Label(text="PAR",style='bold'),
-                         
+
                         self.myparent.getTitledText(title ="Request lifetime", name='parLifetime', value=self.data.get('parLifetime',''),style='green'),
                         self.myparent.getTitledCheckBox("Request PAR", name='sessionIdRequestParameterEnabled', checked=self.data.get('sessionIdRequestParameterEnabled'),style='green'),
-                        
-                        Label("UMA",style='bold'),
-                        self.myparent.getTitledRadioButton("PRT token type", name='applicationType!', values=['JWT', 'Reference'], current_value=self.data.get('applicationType!'),style='green'),
+
+                        Label("UMA", style='bold'),
+
+                        self.myparent.getTitledRadioButton(
+                            "PRT token type",
+                            name='rptAsJwt!', 
+                            values=[('jwt', 'JWT'), ('reference', 'Reference')], 
+                            current_value='jwt' if self.data.get('rptAsJwt') else 'reference',
+                            style='green'),
+
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
 
-
                         self.myparent.getTitledText("RPT Mofification Script",
-                         name='rptClaimsScripts',
-                          value='\n'.join(self.data.get('rptClaimsScripts', [])), 
-                          height=3,
-                           style='green'),
-         
-                        self.myparent.getTitledText("Claims Gathering Script",
-                         name='claimRedirectUris',
-                          value='\n'.join(self.data.get('claimRedirectUris', [])), 
-                          height=3,
-                           style='green'),
+                            name='rptClaimsScripts',
+                            value='\n'.join(self.data.get('rptClaimsScripts', [])), 
+                            height=3,
+                            style='green'),
 
-                     
+                        self.myparent.getTitledText("Claims Gathering Script",
+                            name='claimRedirectUris',
+                            value='\n'.join(self.data.get('claimRedirectUris', [])), 
+                            height=3,
+                            style='green'),
+
+
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
-              
+
                         ]
                             )
-        
+
         self.tabs['Encryption/Signing'] = HSplit([
                         self.myparent.getTitledText(title ="Client JWKS URI", name='jwksUri', value=self.data.get('jwksUri',''),style='green'),
                         self.myparent.getTitledText(title ="Client JWKS", name='jwks', value=self.data.get('jwks',''),style='green'),
@@ -264,42 +288,52 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             Label(text="Request Object"), 
                             Label(text="a, b, c",style='red'),
                         ]),
-                
+
                         ]
                             )
-        
+
+        def allow_spontaneous_changed(cb):
+            self.spontaneous_scopes.me.window.style = 'underline ' + (self.myparent.styles['textarea'] if cb.checked else self.myparent.styles['textarea-readonly'])
+            self.spontaneous_scopes.me.text = ''
+            self.spontaneous_scopes.me.read_only = not cb.checked
+
+        self.spontaneous_scopes = self.myparent.getTitledText(
+                    "Spontaneos scopes validation regex",
+                    name='spontaneousScopes',
+                    value=self.data.get('spontaneousScopes',''),
+                    read_only=False if 'allowSpontaneousScopes' in self.data and self.data['allowSpontaneousScopes'] else True,
+                    focusable=True,
+                    style='green')
+
+
         self.tabs['Advanced Client Properties'] = HSplit([
 
-                        self.myparent.getTitledCheckBox("Default Prompt login", name='defaultPromptLogin', checked=self.data.get('defaultPromptLogin'),style='green'),
-                        VSplit([
-                                self.myparent.getTitledCheckBox("Persist Authorizations", name='persistClientAuthorizations', checked=self.data.get('persistClientAuthorizations'),style='green'),
-                                # self.myparent.getTitledCheckBox("Keep expired", name='Supress', checked=self.data.get('Supress'),style='green'),
-                            ]) ,                       
-                        self.myparent.getTitledCheckBox("Allow spontaneos scopes", name='allowSpontaneousScopes', checked=self.data.get('allowSpontaneousScopes'),style='green'),
+                        self.myparent.getTitledCheckBox("Default Prompt login", name='defaultPromptLogin', checked=self.data.get('defaultPromptLogin'), style='green'),
+                        self.myparent.getTitledCheckBox("Persist Authorizations", name='persistClientAuthorizations', checked=self.data.get('persistClientAuthorizations'), style='green'),
+                        self.myparent.getTitledCheckBox("Allow spontaneos scopes", name='allowSpontaneousScopes', checked=self.data.get('allowSpontaneousScopes'), on_selection_changed=allow_spontaneous_changed, style='green'),
 
-                        self.myparent.getTitledText("spontaneos scopes validation regex", name='spontaneousScopes', value=self.data.get('spontaneousScopes',''),style='green'),
-                        VSplit([
-                                Label(text="Spontaneous Scopes",style='green'),
-                                Button("view current", handler=self.myparent.show_again,left_symbol='',right_symbol='',)
-                            
-                            ]) ,  
+                        self.spontaneous_scopes,
+
+                        #self.myparent.getTitledText("Spontaneous Scopes",
+                        #    name='spontaneousScopes',
+                        #    value='\n'.join(self.data.get('spontaneousScopes', [])),
+                        #    height=3,
+                        #    style='green'),
+
                         self.myparent.getTitledText("Initial Login URI", name='initiateLoginUri', value=self.data.get('initiateLoginUri',''),style='green'),
 
-                        VSplit([
-                                self.myparent.getTitledText("Request URIs", name='requestUris', value=self.data.get('requestUris',''),style='green'),
-                                Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3,)
-                            ]) ,  
+                        self.myparent.getTitledText("Request URIs",
+                            name='requestUris',
+                            value='\n'.join(self.data.get('requestUris', [])),
+                            height=3,
+                            style='green'),
 
                         self.myparent.getTitledText("Default  ACR",
-                         name='authorizedAcrValues',
-                          value='\n'.join(self.data.get('authorizedAcrValues', [])), 
-                          height=3,
-                           style='green'),
-
-                        VSplit([
-                                # self.myparent.getTitledText("Allowed ACRs", name='clientSecret', value=self.data.get('clientSecret',''),style='green'),
-                                Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3,)
-                            ]) , 
+                            name='authorizedAcrValues',
+                            value='\n'.join(self.data.get('authorizedAcrValues', [])), 
+                            height=3,
+                            style='green'),
+ 
                         self.myparent.getTitledText("TLS Subject DN", name='x5c', value=self.data.get('x5c',''),style='green'),
 
                         self.myparent.getTitledWidget(
@@ -312,7 +346,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 style='green'
                                 ),
 
-   
                         ],width=D()
         )
 

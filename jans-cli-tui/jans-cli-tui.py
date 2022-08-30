@@ -5,7 +5,6 @@ import json
 import os
 import logging
 
-from shutil import get_terminal_size
 import time
 from asyncio import Future, ensure_future
 from pynput.keyboard import Key, Controller
@@ -35,12 +34,13 @@ from prompt_toolkit.widgets import (
     Button,
     Frame,
     Label,
+    RadioList,
     TextArea,
-    CheckboxList,  
-    Checkbox,     
-    RadioList,     
+    CheckboxList,
+    Checkbox,
 )
 
+# -------------------------------------------------------------------------- #
 from cli import config_cli
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
@@ -52,9 +52,6 @@ from models.oauth.oauth import JansAuthServer
 from pathlib import Path
 
 # -------------------------------------------------------------------------- #
-from prompt_toolkit.key_binding.key_processor import KeyPressEvent
-
-
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -76,16 +73,11 @@ class JansCliApp(Application, JansAuthServer):
 
     def __init__(self):
         self.init_logger()
-        self.app_started = False
         self.status_bar_text = ''
-        self.width, self.height = get_terminal_size()
-        self.app = get_app()
-        self.show_dialog = False   ## ## ## ##
+        self.styles = dict(style.style_rules)
+
         self.set_keybindings()
         # -------------------------------------------------------------------------------- #
-
-        self.dialog_width = int(self.width*0.9) # 120 ## to be dynamic
-        self.dialog_height = int(self.height*0.8) ## to be dynamic
 
         self.keyboard = Controller()
 
@@ -94,7 +86,6 @@ class JansCliApp(Application, JansAuthServer):
         self.status_bar = Window(
                         FormattedTextControl(self.update_status_bar), style="class:status", height=1
                     )
-
 
         JansAuthServer.initialize(self)
 
@@ -139,9 +130,6 @@ class JansCliApp(Application, JansAuthServer):
                 mouse_support=True, ## added
             )
 
-
-
-        self.app_started = True
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
         # Since first module is oauth, set center frame to my oauth main container.
@@ -152,6 +140,13 @@ class JansCliApp(Application, JansAuthServer):
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
 
+    @property
+    def dialog_width(self):
+        return int(self.output.get_size().rows*0.8)
+
+    @property
+    def dialog_height(self):
+        return int(self.output.get_size().columns*0.9)
 
     def init_logger(self):
         self.logger = logging.getLogger('JansCli')
@@ -330,18 +325,19 @@ class JansCliApp(Application, JansAuthServer):
             pass
 
         return  new_title , cd , width
-    
-    def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, width=None, style=''):
+
+    def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, focusable=None, width=None, style=''):
         title += ': '
         ta = TextArea(
             text=str(value),
             multiline=height > 1,
             height=height,
             read_only=read_only,
-            style="class:textarea-readonly" if read_only else "class:textarea",
-            focusable=not read_only,
+            style=self.styles['textarea-readonly'] if read_only else self.styles['textarea'],
             accept_handler=accept_handler,
+            focusable=not read_only if focusable is None else focusable,
             )
+
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
@@ -367,12 +363,22 @@ class JansCliApp(Application, JansAuthServer):
 
         return v
 
-    def getTitledCheckBox(self, title, name, text='', checked=False, jans_help='', style=''):
+
+    def getTitledCheckBox(self, title, name, text='', checked=False, on_selection_changed=None, jans_help='', style=''):
         title += ': '
         cb = Checkbox(text)
         cb.checked = checked
         cb.window.jans_name = name
         cb.window.jans_help = jans_help
+
+        handler_org = cb._handle_enter
+        def custom_handler():
+            handler_org()
+            on_selection_changed(cb)
+
+        if on_selection_changed:
+            cb._handle_enter = custom_handler
+
         #li, cd, width = self.handle_long_string(title, text, cb)
 
         v = VSplit([Label(text=title, width=len(title), style=style, wrap_lines=False), cb])
@@ -395,6 +401,7 @@ class JansCliApp(Application, JansAuthServer):
         v.me = rl
 
         return v
+
 
     def getTitledWidget(self, title, name, widget, jans_help='', style=''):
         widget.window.jans_name = name
@@ -454,15 +461,13 @@ class JansCliApp(Application, JansAuthServer):
     def show_jans_dialog(self, dialog):
 
         async def coroutine():
-            app = get_app()
-            focused_before = app.layout.current_window
+            focused_before = self.layout.current_window
             self.layout.focus(dialog)
             result = await self.show_dialog_as_float(dialog)
             try:
-                app.layout.focus(focused_before)
+                self.layout.focus(focused_before)
             except:
-                app.layout.focus(self.center_frame)
-
+                self.layout.focus(self.center_frame)
 
             return result
 
@@ -507,13 +512,12 @@ class JansCliApp(Application, JansAuthServer):
         body = HSplit([Label(message)])
         dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
 
-        app = get_app()
-        focused_before = app.layout.current_window
+        focused_before = self.layout.current_window
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         dialog.me = float_
         dialog.focus_on_exit = focused_before
-        app.layout.focus(dialog)
+        self.layout.focus(dialog)
         self.press_tab()
 
     def show_again(self): ## nasted dialog Button
