@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* **jans-scim:** make max no. of operations and payload size of bulks operations parameterizable ([#1872](https://github.com/JanssenProject/jans/issues/1872)) ([c27a45b](https://github.com/JanssenProject/jans/commit/c27a45bb0a19257c824c4e195f203e9b9b45ec88))
+
+
+### Bug Fixes
+
+* remove jans-auth-common dependency [#1459](https://github.com/JanssenProject/jans/issues/1459) ([75f4fb5](https://github.com/JanssenProject/jans/commit/75f4fb5487b8adc6300c939ea9a0a3302b235d0e))
+* test data for login ([#1757](https://github.com/JanssenProject/jans/issues/1757)) ([e043949](https://github.com/JanssenProject/jans/commit/e0439497d08d09080d7ebd161cd24bcdadfee10f))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.0...jans-scim-v1.0.1) (2022-07-06)
 
 
