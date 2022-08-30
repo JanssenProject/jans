@@ -33,7 +33,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
             self.data = self.make_data_from_dialog()
             self.data['disabled'] = not self.data['disabled']
-            for list_key in ('redirectUris', 'scopes', 'postLogoutRedirectUris', 'requestUris', 'spontaneousScopes', 'contacts'):
+            for list_key in (
+                            'redirectUris',
+                            'scopes',
+                            'postLogoutRedirectUris',
+                            'contacts',
+                            'authorizedOrigins',
+                            'rptClaimsScripts',
+                            'claimRedirectUris',
+                             ):
                 if self.data[list_key]:
                     self.data[list_key] = self.data[list_key].splitlines()
 
@@ -82,12 +90,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.tabs['Basic'] = HSplit([
                         self.myparent.getTitledText(
-                            title ="Client_ID",
-                             name='inum',
-                              value=self.data.get('inum',''),
-                               jans_help=self.myparent.get_help_from_schema(schema, 'inum'),
+                                "Client_ID",
+                                name='inum',
+                                value=self.data.get('inum',''),
+                                jans_help=self.myparent.get_help_from_schema(schema, 'inum'),
                                 read_only=True,
-                                 style='green'),
+                                style='green'),
+
                         self.myparent.getTitledCheckBox("Active", name='disabled', checked= not self.data.get('disabled'), jans_help=self.myparent.get_help_from_schema(schema, 'disabled'), style='green'),
                         self.myparent.getTitledText("Client Name", name='displayName', value=self.data.get('displayName',''), jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), style='green'),
                         self.myparent.getTitledText("Client Secret", name='clientSecret', value=self.data.get('clientSecret',''), jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), style='green'),
@@ -105,8 +114,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledRadioButton(
                                 "Subject Type", 
                                 name='subjectType', 
-                                values=[('public', 'Public'),('pairwise', 'Pairwise')], 
-                                current_value=self.data.get('subjectType'), 
+                                values=[('public', 'Public'),('pairwise', 'Pairwise')],
+                                current_value=self.data.get('subjectType'),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'subjectType'),
                                 style='green'),
                         self.myparent.getTitledCheckBoxList(
@@ -131,10 +140,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText("Redirect Uris", name='redirectUris', value='\n'.join(self.data.get('redirectUris', [])), height=3, style='class:required-field'),
                         self.myparent.getTitledText("Redirect Regex", name='redirectUrisRegex', value=self.data.get('redirectUrisRegex', ''), style='green'), 
                         self.myparent.getTitledText("Scopes",
-                         name='scopes',
-                          value='\n'.join(self.data.get('scopes', [])),
-                           height=3, 
-                           style='green'),
+                            name='scopes',
+                            value='\n'.join(self.data.get('scopes', [])),
+                            height=3, 
+                            style='green'),
 
                         ],width=D(),
                     )
@@ -234,16 +243,16 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText(title ="Claims redirect URI", name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
 
                         self.myparent.getTitledText("RPT Mofification Script",
-                         name='rptClaimsScripts',
-                          value='\n'.join(self.data.get('rptClaimsScripts', [])), 
-                          height=3,
-                           style='green'),
+                            name='rptClaimsScripts',
+                            value='\n'.join(self.data.get('rptClaimsScripts', [])), 
+                            height=3,
+                            style='green'),
          
                         self.myparent.getTitledText("Claims Gathering Script",
-                         name='claimRedirectUris',
-                          value='\n'.join(self.data.get('claimRedirectUris', [])), 
-                          height=3,
-                           style='green'),
+                            name='claimRedirectUris',
+                            value='\n'.join(self.data.get('claimRedirectUris', [])), 
+                            height=3,
+                            style='green'),
 
                      
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
