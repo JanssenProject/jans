@@ -35,13 +35,12 @@ from prompt_toolkit.widgets import (
     Button,
     Frame,
     Label,
-    RadioList,
     TextArea,
-    CheckboxList,
-    Checkbox,
+    CheckboxList,  
+    Checkbox,     
+    RadioList,     
 )
 
-# -------------------------------------------------------------------------- #
 from cli import config_cli
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
@@ -53,6 +52,9 @@ from models.oauth.oauth import JansAuthServer
 from pathlib import Path
 
 # -------------------------------------------------------------------------- #
+from prompt_toolkit.key_binding.key_processor import KeyPressEvent
+
+
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -328,7 +330,7 @@ class JansCliApp(Application, JansAuthServer):
             pass
 
         return  new_title , cd , width
-
+    
     def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, width=None, style=''):
         title += ': '
         ta = TextArea(
@@ -365,7 +367,6 @@ class JansCliApp(Application, JansAuthServer):
 
         return v
 
-
     def getTitledCheckBox(self, title, name, text='', checked=False, jans_help='', style=''):
         title += ': '
         cb = Checkbox(text)
@@ -394,7 +395,6 @@ class JansCliApp(Application, JansAuthServer):
         v.me = rl
 
         return v
-
 
     def getTitledWidget(self, title, name, widget, jans_help='', style=''):
         widget.window.jans_name = name
