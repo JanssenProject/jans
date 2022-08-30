@@ -6,6 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.config.Conf;
@@ -17,12 +18,13 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
@@ -48,13 +50,14 @@ public class ConfigResource extends ConfigBaseResource {
     ConfigurationService configurationService;
 
     
-    @Operation(summary = "Gets a list of Gluu attributes.",
+    @Operation(summary = "Gets all Jans authorization server configuration properties.",
     description= "Gets all Jans authorization server configuration properties.",
-    tags = {"Configuration – Properties"}
-    )
+    operationId = "get-properties",
+    tags = {"Configuration – Properties"},
+    security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.readonly"}))    
     @ApiResponses(value = { 
-    @ApiResponse(responseCode = "200", description = "Gluu Attributes",
-            content = @Content(mediaType = "application/json",
+    @ApiResponse(responseCode = "200", description = "Jans Authorization Server config properties",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
             schema = @Schema(implementation = AppConfiguration.class))),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -66,10 +69,24 @@ public class ConfigResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    @Operation(summary = "Partially modifies Jans authorization server Application configuration properties.",
+            description= "Partially modifies Jans authorization server AppConfiguration properties.",
+            operationId = "patch-properties",
+            tags = {"Configuration – Properties"},
+            security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.write"})) 
+            @RequestBody( description="String representing patch-document.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON,
+                            array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))                    
+            @ApiResponses(value = { 
+            @ApiResponse(responseCode = "200", description = "Jans Authorization Server config properties",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                           schema = @Schema(implementation = AppConfiguration.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
-    public Response patchAppConfigurationProperty(@NotNull String requestString) throws JsonPatchException, IOException {
+    public Response patchAppConfigurationProperty (@NotNull String requestString) throws JsonPatchException, IOException {
         log.debug("AUTH CONF details to patch - requestString:{} ", requestString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = configurationService.find();
