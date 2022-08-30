@@ -4,9 +4,9 @@
 Table of Contents
 =================
 
-   * [<em>Janssen Command Line Interface</em>](#janssen-command-line-interface)
-   * [<em>Installation</em>](#installation)
-   * [<em>Quick Start</em>](#quick-start)
+   * [<em>Janssen Command Line Interface</em>](#_janssen-command-line-interface_)
+   * [<em>Installation</em>](#_installation_)
+   * [<em>Quick Start</em>](#_quick-start_)
 
 # _Installation_
 
@@ -30,9 +30,9 @@ If you would like to build `jans-cli` manually, you can go through the following
 
 ## Prerequisites
 1. wget
-1. unzip
-1. Python 3.6+.
-1. Python `pip3` package.
+2. unzip
+3. Python 3.6+.
+4. Python `pip3` package.
 
 ### Building 
 
@@ -75,14 +75,14 @@ python3 config-cli.pyz -h
     pip3 install virtualenv
     ```
 
-1.  Create virtual environment and activate:
+2. Create virtual environment and activate:
 
     ```sh
     python3 -m virtualenv .venv
     source .venv/bin/activate
     ```
 
-1.  Download and install the package:
+3. Download and install the package:
 
     ```
     wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
@@ -137,7 +137,7 @@ That returns another two options as below:
 
 ![option-2-option.png](../docs/assets/image-im-default-auth-02-03042021.png)
 
-Now selecting 1 and it returns our desired result as below image:
+Now by selecting 1 it returns our desired result as below image:
 
 ![default-authentication-method.png](../docs/assets/image-im-cur-default-auth-03042021.png)
 
