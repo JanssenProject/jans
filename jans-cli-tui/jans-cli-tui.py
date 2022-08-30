@@ -74,11 +74,8 @@ class JansCliApp(Application, JansAuthServer):
 
     def __init__(self):
         self.init_logger()
-        self.app_started = False
         self.status_bar_text = ''
         self.width, self.height = get_terminal_size()
-        self.app = get_app()
-        self.show_dialog = False   ## ## ## ##
         self.set_keybindings()
         # -------------------------------------------------------------------------------- #
 
@@ -92,7 +89,6 @@ class JansCliApp(Application, JansAuthServer):
         self.status_bar = Window(
                         FormattedTextControl(self.update_status_bar), style="class:status", height=1
                     )
-
 
         JansAuthServer.initialize(self)
 
@@ -137,9 +133,6 @@ class JansCliApp(Application, JansAuthServer):
                 mouse_support=True, ## added
             )
 
-
-
-        self.app_started = True
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
         # Since first module is oauth, set center frame to my oauth main container.
@@ -479,7 +472,7 @@ class JansCliApp(Application, JansAuthServer):
                 )
             ])
 
-        dialog = JansGDialog(self, title=params['selected'][0], body=body, width=int(self.width*0.9))
+        dialog = JansGDialog(self, title=params['selected'][0], body=body, width=self.dialog_width)
 
         self.show_jans_dialog(dialog)
 
