@@ -1,5 +1,67 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* add support for date ranges in statistic client [#1575](https://github.com/JanssenProject/jans/issues/1575) ([#1653](https://github.com/JanssenProject/jans/issues/1653)) ([8048cd9](https://github.com/JanssenProject/jans/commit/8048cd9b6ab393b8a3e4a1aaf36e09abe20f605b))
+* disable TLS in CB client by default ([#2167](https://github.com/JanssenProject/jans/issues/2167)) ([8ec5dd3](https://github.com/JanssenProject/jans/commit/8ec5dd3dc9818a53949468389a1918ed385c28a9))
+* **jans-auth-server:** add support for ranges in statistic endpoint (UI team request) ([fd66720](https://github.com/JanssenProject/jans/commit/fd667203564951ba4fc450bf9fb77ba0e70a75ec))
+* **jans-auth-server:** added allowSpontaneousScopes AS json config [#2074](https://github.com/JanssenProject/jans/issues/2074) ([#2111](https://github.com/JanssenProject/jans/issues/2111)) ([3083a3f](https://github.com/JanssenProject/jans/commit/3083a3f28f6d6c6a9de319f23fd745ac69477249))
+* **jans-auth-server:** added convenient method for up-scoping or down-scoping AT scopes [#1218](https://github.com/JanssenProject/jans/issues/1218) ([5d71655](https://github.com/JanssenProject/jans/commit/5d716553c6eb409c2f264864da8b65c0a0bcbe81))
+* **jans-auth-server:** added creator info to scope (time/id/type) [#1934](https://github.com/JanssenProject/jans/issues/1934) ([#2023](https://github.com/JanssenProject/jans/issues/2023)) ([ca65b24](https://github.com/JanssenProject/jans/commit/ca65b246808d30a9f8965806c4ce963cc6dea8db))
+* **jans-auth-server:** added restriction for request_uri parameter (blocklist and allowed client.request_uri) [#1503](https://github.com/JanssenProject/jans/issues/1503) ([0696d92](https://github.com/JanssenProject/jans/commit/0696d92094eeb2ed36f6b0075680634acbf8992f))
+* **jans-auth-server:** added sid and authn_time for active sessions response ([bf9b572](https://github.com/JanssenProject/jans/commit/bf9b572b835d37cc23b2c57437a3830a8ebf55f0))
+* **jans-auth-server:** if applicationType is not set during client registration AS should default to 'web' [#1687](https://github.com/JanssenProject/jans/issues/1687) ([f9695e1](https://github.com/JanssenProject/jans/commit/f9695e1c11389c6f3c0614199b0774f491de8030))
+* **jans-auth-server:** improve client assertion creation code (ClientAuthnRequest) [#1182](https://github.com/JanssenProject/jans/issues/1182) ([81946b2](https://github.com/JanssenProject/jans/commit/81946b22023e9eade94b9202adc6fb32b21652cf))
+* **jans-auth-server:** improved TokenRestWebServiceValidator and added test for it [#1591](https://github.com/JanssenProject/jans/issues/1591) ([929048e](https://github.com/JanssenProject/jans/commit/929048eb41e3c79b25c7474c0a2596b013a3e91c))
+* **jans-auth-server:** jwt "exp" must consider "keyRegenerationInterval" [#1233](https://github.com/JanssenProject/jans/issues/1233) ([023cf8a](https://github.com/JanssenProject/jans/commit/023cf8a1a1cf5ece4e0780fccd62b3acbefa768c))
+* **jans-auth-server:** make check whether user is active case insensitive [#1550](https://github.com/JanssenProject/jans/issues/1550) ([d141837](https://github.com/JanssenProject/jans/commit/d14183708a04cdc6406167acc3126f253f212efa))
+* **jans-auth-server:** persist org_id from software statement into client's "o" attribute ([021d3bd](https://github.com/JanssenProject/jans/commit/021d3bd17f8a9814e5a0d59b4f28b0c19da88ced))
+* **jans-auth-server:** removed dcrSkipSignatureValidation configuration property [#1623](https://github.com/JanssenProject/jans/issues/1623) ([6550247](https://github.com/JanssenProject/jans/commit/6550247ca727d9437ffceec3fa12b9fef93b81e4))
+* **jans-auth-server:** removed id_generation_endpoint and other claims from discovery response [#1827](https://github.com/JanssenProject/jans/issues/1827) ([4068197](https://github.com/JanssenProject/jans/commit/40681972a84d691b5d138bc603f32ec80de84fa2))
+* **jans-auth-server:** split grant validation logic into TokenRestWebServiceValidator  [#1591](https://github.com/JanssenProject/jans/issues/1591) ([812e605](https://github.com/JanssenProject/jans/commit/812e605bf1c0d9041db008fba81515455ab38fab))
+* **jans-auth-server:** split validation logic to TokenRestWebServiceValidator  [#1591](https://github.com/JanssenProject/jans/issues/1591) ([f9f6f49](https://github.com/JanssenProject/jans/commit/f9f6f49c8874cb0a1c71ff0bc0a75e244077feb9))
+* **jans-auth-server:** updating arquillian tests 1247 ([#2017](https://github.com/JanssenProject/jans/issues/2017)) ([ee200a7](https://github.com/JanssenProject/jans/commit/ee200a7dce5d750f3c4a9d536aa8d92a89926711))
+* update Coucbase ORM to conform SDK 3.x (config updates) [#1851](https://github.com/JanssenProject/jans/issues/1851) ([#2118](https://github.com/JanssenProject/jans/issues/2118)) ([fceec83](https://github.com/JanssenProject/jans/commit/fceec8332fb36826e5dccb797ee79b769859e126))
+
+
+### Bug Fixes
+
+* include idtoken with dynamic scopes for ciba ([#2108](https://github.com/JanssenProject/jans/issues/2108)) ([d9b5341](https://github.com/JanssenProject/jans/commit/d9b5341d50de972c910883c12785ce6d2758588f))
+* **jans-auth-server:** client tests expects "scope to claim" mapping which are disabled by default [#1873](https://github.com/JanssenProject/jans/issues/1873) ([958cc92](https://github.com/JanssenProject/jans/commit/958cc9232fafa618cb326c7251486f0add7a15c1))
+* **jans-auth-server:** corrected npe in JwtAuthorizationRequest ([9c9e7bf](https://github.com/JanssenProject/jans/commit/9c9e7bf6442637e9f98e9b7765eb373714130d1d))
+* **jans-auth-server:** disable surefire for jans-auth-static ([7869efa](https://github.com/JanssenProject/jans/commit/7869efabd5bc4b32fd8bf8347093fa87ab774957))
+* **jans-auth-server:** fix missing jsonobject annotation ([#1651](https://github.com/JanssenProject/jans/issues/1651)) ([be5b82a](https://github.com/JanssenProject/jans/commit/be5b82a3ccbc7a0fe9f4ebbb97fa8054657227dc))
+* **jans-auth-server:** fixed NPE during getting AT lifetime [#1233](https://github.com/JanssenProject/jans/issues/1233) ([f8be086](https://github.com/JanssenProject/jans/commit/f8be08658c1478acd59fbbfcd609d78179cb00e9))
+* **jans-auth-server:** fixing client tests effected by "scope to claim" mapping which is disabled by default [#1873](https://github.com/JanssenProject/jans/issues/1873) ([#1910](https://github.com/JanssenProject/jans/issues/1910)) ([6d81792](https://github.com/JanssenProject/jans/commit/6d81792a141ca725004c23f1bdd0a42314ffcb5f))
+* **jans-auth-server:** generate description during built-in key rotation [#1790](https://github.com/JanssenProject/jans/issues/1790) ([#2068](https://github.com/JanssenProject/jans/issues/2068)) ([cd1a77d](https://github.com/JanssenProject/jans/commit/cd1a77dd36a59b19e975c013c8081610a23106ba))
+* **jans-auth-server:** increased period of session authn time check ([#1918](https://github.com/JanssenProject/jans/issues/1918)) ([a41905a](https://github.com/JanssenProject/jans/commit/a41905abba38c051acc7e7d57131da4b7c3a1616))
+* **login.xhtml:** add google client js ([#1666](https://github.com/JanssenProject/jans/issues/1666)) ([daf9849](https://github.com/JanssenProject/jans/commit/daf9849da1f92707b05517f73bfede1a69103365))
+
+
+### Documentation
+
+* no docs ([3083a3f](https://github.com/JanssenProject/jans/commit/3083a3f28f6d6c6a9de319f23fd745ac69477249))
+* no docs ([e488d10](https://github.com/JanssenProject/jans/commit/e488d10d2cf40a368a0ef9c90d019fb128bbb688))
+* no docs ([685be30](https://github.com/JanssenProject/jans/commit/685be30f555af5f8844eb47eb7df77f23552cefb))
+* no docs ([cd1a77d](https://github.com/JanssenProject/jans/commit/cd1a77dd36a59b19e975c013c8081610a23106ba))
+* no docs ([ca65b24](https://github.com/JanssenProject/jans/commit/ca65b246808d30a9f8965806c4ce963cc6dea8db))
+* no docs ([9b54357](https://github.com/JanssenProject/jans/commit/9b543572bcb893683b4d425ebe2b36f5ccfc0ee9))
+* no docs required ([a41905a](https://github.com/JanssenProject/jans/commit/a41905abba38c051acc7e7d57131da4b7c3a1616))
+* no docs required ([958cc92](https://github.com/JanssenProject/jans/commit/958cc9232fafa618cb326c7251486f0add7a15c1))
+* no docs required ([4068197](https://github.com/JanssenProject/jans/commit/40681972a84d691b5d138bc603f32ec80de84fa2))
+* no docs required ([812e605](https://github.com/JanssenProject/jans/commit/812e605bf1c0d9041db008fba81515455ab38fab))
+* no docs required ([f9f6f49](https://github.com/JanssenProject/jans/commit/f9f6f49c8874cb0a1c71ff0bc0a75e244077feb9))
+* no docs required ([929048e](https://github.com/JanssenProject/jans/commit/929048eb41e3c79b25c7474c0a2596b013a3e91c))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.0...jans-auth-server-v1.0.1) (2022-07-06)
 
 
