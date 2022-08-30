@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* added config to disable attempt to update before insert in cache ([#1787](https://github.com/JanssenProject/jans/issues/1787)) ([d9a07ff](https://github.com/JanssenProject/jans/commit/d9a07ffb8dc1af290be6bc9b4978ad21c6797a3f))
+* **jans-client-api:** migration to Weld/Resteasy and Jetty 11 - Issue 260 ([#1319](https://github.com/JanssenProject/jans/issues/1319)) ([420ffc3](https://github.com/JanssenProject/jans/commit/420ffc3329b91c52d5c9996d7c1e600d9b6fead2))
+* **jans-core:** added StandaloneJavaCustomScriptManagerTest ([48ba08b](https://github.com/JanssenProject/jans/commit/48ba08b2f336c2cef1f244d1411c71859fe337a4))
+* **jans-orm:** update Couchbase ORM to use SDK 3.x [#1851](https://github.com/JanssenProject/jans/issues/1851) ([#1852](https://github.com/JanssenProject/jans/issues/1852)) ([d9d5157](https://github.com/JanssenProject/jans/commit/d9d5157c3421f4995ee4abd6918c106f9a78dd5f))
+
+
+### Bug Fixes
+
+* **jans-core:** removed redundant reference [#1927](https://github.com/JanssenProject/jans/issues/1927) ([#1928](https://github.com/JanssenProject/jans/issues/1928)) ([064cbb8](https://github.com/JanssenProject/jans/commit/064cbb8040f4d7b21ff13e5f48c7f923c38f67b1))
+* **jans-core:** switch to 1.0.1-SNAPSHOT ([dbe9355](https://github.com/JanssenProject/jans/commit/dbe9355d97618a267df1ab7aa5c0780e125a3420))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.0...jans-core-v1.0.1) (2022-07-06)
 
 
