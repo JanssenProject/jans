@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.0.2-1 (2022-08-30)
+
+
+### Features
+
+* **docker-jans-scim:** allow creating initial persistence entry ([#2035](https://github.com/JanssenProject/jans/issues/2035)) ([e485618](https://github.com/JanssenProject/jans/commit/e4856186d566f9ac7b08395b59cd75e389e5c161))
+* expose prometheus metrics via jmx exporter ([#1573](https://github.com/JanssenProject/jans/issues/1573)) ([205e320](https://github.com/JanssenProject/jans/commit/205e3206cf87bdb7cf0908bfdd7ee777d1ab955d))
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+
+
+### Bug Fixes
+
+* **images:** conform to new couchbase persistence configuration ([#2188](https://github.com/JanssenProject/jans/issues/2188)) ([c708542](https://github.com/JanssenProject/jans/commit/c7085427fd298f74e8809ef4d6c39f780fa83776))
+* **pycloudlib:** handle type mismatch for iterable ([#2004](https://github.com/JanssenProject/jans/issues/2004)) ([46e0b2e](https://github.com/JanssenProject/jans/commit/46e0b2e4aff70a97cdcdcd0102dc83d294e45fdc))
+
+
+### Miscellaneous Chores
+
+* prepare docker images release 1.0.1-1 ([12660a8](https://github.com/JanssenProject/jans/commit/12660a800bacb210bd3fb4b35c9156e9c5445343))
+* release 1.0.2-1 ([d01b51a](https://github.com/JanssenProject/jans/commit/d01b51a847bb2f67b52da433ebd1c5e4a66b7c1a))
+
 ## [1.0.1-1](https://github.com/JanssenProject/jans/compare/docker-jans-scim-v1.0.0-1...docker-jans-scim-v1.0.1-1) (2022-07-06)
 
 
