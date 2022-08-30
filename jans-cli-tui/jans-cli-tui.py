@@ -137,7 +137,6 @@ class JansCliApp(Application, JansAuthServer):
         # ----------------------------------------------------------------------------- #
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
-        self.logger.debug(str(self.output.get_size()))
 
     @property
     def dialog_width(self):
