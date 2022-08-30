@@ -84,9 +84,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
                    )
 
+
     def prepare_tabs(self):
 
-        
+
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Client')
 
         self.tabs = OrderedDict()
@@ -150,7 +151,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         ],width=D(),
                     )
-        
+
         self.tabs['Tokens'] = HSplit([
                         self.myparent.getTitledRadioButton(
                             "Access Token Type",
@@ -188,7 +189,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText("Defult max authn age", name='defaultMaxAge', value=self.data.get('defaultMaxAge',''),style='green'),
 
                     ],width=D())
-        
+
         self.tabs['Logout'] = HSplit([
             
                         self.myparent.getTitledText("Front channel logout URI", name='frontChannelLogoutUri', value=self.data.get('frontChannelLogoutUri',''), style='green'),
@@ -199,7 +200,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         ],width=D()
                     )
-        
+
         self.tabs['SoftwareInfo'] =  HSplit([
             #self.myparent.getTitledText(title ="Client URI", name='clientUri', value=self.data.get('clientUri',''),style='green'),
             #self.myparent.getTitledText(title ="Policy URI", name='policyUri', value=self.data.get('policyUri',''),style='green'),
@@ -251,19 +252,19 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value='\n'.join(self.data.get('rptClaimsScripts', [])), 
                             height=3,
                             style='green'),
-         
+
                         self.myparent.getTitledText("Claims Gathering Script",
                             name='claimRedirectUris',
                             value='\n'.join(self.data.get('claimRedirectUris', [])), 
                             height=3,
                             style='green'),
 
-                     
+
                         Label(text="tabel",style='blue'),  ## TODO with Jans VerticalNav  
-              
+
                         ]
                             )
-        
+
         self.tabs['Encryption/Signing'] = HSplit([
                         self.myparent.getTitledText(title ="Client JWKS URI", name='jwksUri', value=self.data.get('jwksUri',''),style='green'),
                         self.myparent.getTitledText(title ="Client JWKS", name='jwks', value=self.data.get('jwks',''),style='green'),
@@ -287,23 +288,37 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             Label(text="Request Object"), 
                             Label(text="a, b, c",style='red'),
                         ]),
-                
+
                         ]
                             )
-        
+
+        def allow_spontaneous_changed(cb):
+            self.spontaneous_scopes.me.read_only = not cb.checked
+            self.spontaneous_scopes.me.focusable = cb.checked
+            self.myparent.logger.debug("CB-allow-spontaneous: " + str(cb.checked) )
+            self.myparent.invalidate()
+
+        self.spontaneous_scopes = self.myparent.getTitledText(
+                    "Spontaneos scopes validation regex",
+                    name='spontaneousScopes',
+                    value=self.data.get('spontaneousScopes',''),
+                    read_only=False if 'allowSpontaneousScopes' in self.data and self.data['allowSpontaneousScopes'] else True,
+                    style='green')
+
+
         self.tabs['Advanced Client Properties'] = HSplit([
 
-                        self.myparent.getTitledCheckBox("Default Prompt login", name='defaultPromptLogin', checked=self.data.get('defaultPromptLogin'),style='green'),
-                        self.myparent.getTitledCheckBox("Persist Authorizations", name='persistClientAuthorizations', checked=self.data.get('persistClientAuthorizations'),style='green'),
-                        self.myparent.getTitledCheckBox("Allow spontaneos scopes", name='allowSpontaneousScopes', checked=self.data.get('allowSpontaneousScopes'),style='green'),
+                        self.myparent.getTitledCheckBox("Default Prompt login", name='defaultPromptLogin', checked=self.data.get('defaultPromptLogin'), style='green'),
+                        self.myparent.getTitledCheckBox("Persist Authorizations", name='persistClientAuthorizations', checked=self.data.get('persistClientAuthorizations'), style='green'),
+                        self.myparent.getTitledCheckBox("Allow spontaneos scopes", name='allowSpontaneousScopes', checked=self.data.get('allowSpontaneousScopes'), on_selection_changed=allow_spontaneous_changed, style='green'),
 
-                        self.myparent.getTitledText("spontaneos scopes validation regex", name='spontaneousScopes', value=self.data.get('spontaneousScopes',''),style='green'),
+                        self.spontaneous_scopes,
 
-                        self.myparent.getTitledText("Spontaneous Scopes",
-                            name='spontaneousScopes',
-                            value='\n'.join(self.data.get('spontaneousScopes', [])), 
-                            height=3,
-                            style='green'),
+                        #self.myparent.getTitledText("Spontaneous Scopes",
+                        #    name='spontaneousScopes',
+                        #    value='\n'.join(self.data.get('spontaneousScopes', [])),
+                        #    height=3,
+                        #    style='green'),
 
                         self.myparent.getTitledText("Initial Login URI", name='initiateLoginUri', value=self.data.get('initiateLoginUri',''),style='green'),
 

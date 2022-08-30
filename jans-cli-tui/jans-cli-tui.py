@@ -361,12 +361,21 @@ class JansCliApp(Application, JansAuthServer):
         return v
 
 
-    def getTitledCheckBox(self, title, name, text='', checked=False, jans_help='', style=''):
+    def getTitledCheckBox(self, title, name, text='', checked=False, on_selection_changed=None, jans_help='', style=''):
         title += ': '
         cb = Checkbox(text)
         cb.checked = checked
         cb.window.jans_name = name
         cb.window.jans_help = jans_help
+
+        handler_org = cb._handle_enter
+        def custom_handler():
+            handler_org()
+            on_selection_changed(cb)
+
+        if on_selection_changed:
+            cb._handle_enter = custom_handler
+
         #li, cd, width = self.handle_long_string(title, text, cb)
 
         v = VSplit([Label(text=title, width=len(title), style=style, wrap_lines=False), cb])
