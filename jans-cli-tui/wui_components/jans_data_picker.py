@@ -29,22 +29,38 @@ import time
 #### not finished yet >> data
 import datetime
 
+
 class JansSelectDate:
    
-    def __init__(self, date='',months=[]):  
-
+    def __init__(self, date='',months=[],mytime=[]):  
+        self.hours , self.minutes , self.seconds = mytime
+        self.change_date = True
         self.date = date  #"11/27/2023"
         self.months = months 
     
         self.cord_y = 0
         self.cord_x = 0
         
+
+
         self.extract_date(self.date)
 
         #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
-        self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
+        # -----------------------------------------------------------------------------------------------# 
+        # ------------------------------------ handle month names ---------------------------------------# 
+        # -----------------------------------------------------------------------------------------------# 
+        if len(self.months[self.current_month-1] ) < 9 :   ### 9 == the tallest month letters
+            mon_text = self.months[self.current_month-1] + ' '* (9-len(self.months[self.current_month-1] ))
+        else :
+            mon_text = self.months[self.current_month-1]
+        # -----------------------------------------------------------------------------------------------# 
+        # -----------------------------------------------------------------------------------------------# 
+        # -----------------------------------------------------------------------------------------------# 
+
+        self.month_label = Label(text=mon_text,width=len(mon_text))
         self.year_label =  Label(text=str(self.current_year),width=len(str(self.current_year)))
-        
+
+
         self.container =HSplit(children=[ 
             VSplit([
                 Button(text='<',left_symbol='',right_symbol='',width=1),
@@ -54,25 +70,91 @@ class JansSelectDate:
                 Button(text='<',left_symbol='',right_symbol='',width=1),
                DynamicContainer(lambda: self.year_label),
                 Button(text='>',left_symbol='',right_symbol='',width=1  )
-            ],style="bg:#4D4D4D",padding=1),
+            ],style="bg:#1e51fa",padding=1),
             #DynamicContainer(lambda: self.depug),
             
-            Window(
+        Window(
             content=FormattedTextControl(
-                text=self._get_formatted_text,
-                focusable=True,
+                text=self._get_calender_text,
+                
+                
             ),
             height=5,
             cursorline=False,
             # width=D(),  #15,
-            style="bg:#4D4D4D",
+            style="bg:#ffffff",
+            right_margins=[ScrollbarMargin(display_arrows=True),],
+            wrap_lines=True,
+            
+        ),   
+        Window(height=1,char=' ',style="bg:#ffffff"),
+        Window(
+            content=FormattedTextControl(
+                text=self._get_time_text,
+                focusable=True,
+            ),
+            height=2,
+            cursorline=False,
+            # width=D(),  #15,
+            style="bg:#bab1b1",
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True
-        ),                  
+        ),               
         ])
 
-    # def set_value(self, value):
-    #     self.value = self.date
+
+    def digitalize (self,number) :
+        if len(str(number)) == 1 :
+            return '0'+ str(number)
+        else :
+            return str(number)
+
+    def _get_time_text(self):
+
+        result = []
+        time_line = []
+
+        hours = self.digitalize(self.hours)
+        minutes = self.digitalize(self.minutes)
+        seconds = self.digitalize(self.seconds)
+
+        hours_list = [hours,minutes,seconds]
+
+        time_line.append(HTML('<b><blue>        H : M : S </blue></b>'))
+        time_line.append("\n")
+
+        for i, time_element in enumerate(hours_list): 
+            if i == self.cord_x:
+                if self.change_date == False: 
+                    if i >= 2: 
+                        time_line.append(HTML('<style fg="ansired" bg="#002cbf"><blue>{}</blue></style>'.format(self.adjust_sizes(time_element))))          
+                    
+                    elif i == 0 :
+                        time_line.append(HTML('       <style fg="ansired" bg="#002cbf"><blue>{}</blue>:</style>'.format(self.adjust_sizes(time_element))))          
+
+                    else :
+                        time_line.append(HTML('<style fg="ansired" bg="#002cbf"><blue>{}</blue>:</style>'.format(self.adjust_sizes(time_element))))          
+                
+                
+                else :
+                    if i >= 2: 
+                        time_line.append(HTML('<b><blue>{}</blue></b>'.format(self.adjust_sizes(time_element))))        
+                    elif i == 0 :
+                        time_line.append(HTML('       <b><blue>{}</blue>:</b>'.format(self.adjust_sizes(time_element)))) 
+                    else :
+                        time_line.append(HTML('<b><blue>{}</blue>:</b>'.format(self.adjust_sizes(time_element)))) 
+            else :
+                if i >=2 :
+                    time_line.append(HTML('<b><blue>{}</blue></b>'.format(self.adjust_sizes(time_element))))
+                elif i == 0 :
+                    time_line.append(HTML('       <b><blue>{}</blue>:</b>'.format(self.adjust_sizes(time_element))))
+                else :
+                    time_line.append(HTML('<b><blue>{}</blue>:</b>'.format(self.adjust_sizes(time_element))))
+
+            result= (time_line)
+
+
+        return merge_formatted_text(result)
 
     def extract_date(self,date):  #"11/27/2023"
         ### this function is for the init date >> passed date from `data`
@@ -106,41 +188,56 @@ class JansSelectDate:
         else:
             return '   '
 
-    def _get_formatted_text(self):
+    def _get_calender_text(self):
         result = []
         week_line = []
         for i, week in enumerate(self.entries): 
             for day in range(len(week))  :
                 if i == self.cord_y:
                     if day == self.cord_x:
-                        week_line.append(HTML('<style fg="ansired" bg="#ADD8E6">{}</style>'.format(self.adjust_sizes(week[day]))))
-                        
+                        if self.change_date == True:  #<black>{}</black>
+                            week_line.append(HTML('<style fg="ansired" bg="#002cbf"><black>{}</black></style>'.format(self.adjust_sizes(week[day]))))
+                        else :
+                            week_line.append(HTML('<b><black>{}</black></b>'.format(self.adjust_sizes(week[day]))))
                         # result.append(HTML('<style fg="ansired" bg="#ADD8E6">{}</style>'.format( day)))
                     else :
-                        week_line.append(HTML('<b>{}</b>'.format(self.adjust_sizes(week[day]))))
+                        week_line.append(HTML('<b><black>{}</black></b>'.format(self.adjust_sizes(week[day]))))
                 else:
-                    week_line.append(HTML('<b>{}</b>'.format(self.adjust_sizes(week[day]))))
+                    week_line.append(HTML('<b><black>{}</black></b>'.format(self.adjust_sizes(week[day]))))
             
             result= (week_line)
 
             result.append("\n")
 
         return merge_formatted_text(result)
+    
 
     def inc_month(self,day):
-        if self.current_month != 12:
-            self.current_month+=1
-            self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
-            current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
-            self.extract_date(current_date)
-
+        if self.change_date == True :
+            if self.current_month != 12:
+                self.current_month+=1
+                if len(self.months[self.current_month-1] ) < 9 :
+                    mon_text = self.months[self.current_month-1] + ' '* (9-len(self.months[self.current_month-1] ))
+                else :
+                    mon_text = self.months[self.current_month-1]
+                self.month_label = Label(text=mon_text,width=len(mon_text))
+                current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
+                self.extract_date(current_date)
+            
     def dec_month(self,day):
-        if self.current_month > 1:
-            self.current_month-=1
-            self.month_label = Label(text=self.months[self.current_month-1],width=len(self.months[self.current_month-1]))
-            current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
-            self.extract_date(current_date)
+        if self.change_date == True :
+            if self.current_month > 1:
+                self.current_month-=1
+                if len(self.months[self.current_month-1] ) < 9 :
+                    mon_text = self.months[self.current_month-1] + ' '* (9-len(self.months[self.current_month-1] ))
+                else :
+                    mon_text = self.months[self.current_month-1]
 
+
+                self.month_label = Label(text=mon_text,width=len(mon_text))
+                current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
+                self.extract_date(current_date)
+        
     def inc_year(self,day):
         
         self.current_year+=1
@@ -156,33 +253,80 @@ class JansSelectDate:
         self.extract_date(current_date)# 20/2/1997
 
     def up(self): 
-        if self.cord_y == 0 or int(self.entries[self.cord_y-1][self.cord_x]) == 0:
-            self.dec_month(day=1)
+        if self.change_date == True :
+            if self.cord_y == 0 or int(self.entries[self.cord_y-1][self.cord_x]) == 0:
+                self.dec_month(day=1)
+            else:
+                self.cord_y = (self.cord_y - 1)# % 5
+                #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
         else:
-            self.cord_y = (self.cord_y - 1)# % 5
-            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
+            if self.cord_x ==0 :
+                self.hours +=1
+            elif self.cord_x ==1 :
+                self.minutes +=1
+            elif self.cord_x ==2 :
+                self.seconds +=1
+
+            if self.hours >= 24 :
+                self.hours = 0
+            if self.minutes >= 60 :
+                self.minutes = 0
+            if self.seconds >= 60 :
+                self.seconds = 0
 
     def down(self):
-        
-        if self.cord_y == 4 or int(self.entries[self.cord_y+1][self.cord_x]) == 0:
-            self.inc_month(day=28)
-        else:
-            self.cord_y = (self.cord_y + 1)# % 5
+        if self.change_date == True :
+            if self.cord_y == 4 or int(self.entries[self.cord_y+1][self.cord_x]) == 0:
+                self.inc_month(day=28)
+            else:
+                self.cord_y = (self.cord_y + 1)# % 5
             #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
+        else:
+            if self.cord_x ==0 :
+                self.hours -=1
+            elif self.cord_x ==1 :
+                self.minutes -=1
+            elif self.cord_x ==2 :
+                self.seconds -=1
+
+            if self.hours <=0 :
+                self.hours = 23
+            if self.minutes <=0 :
+                self.minutes = 59
+            if self.seconds <=0 :
+                self.seconds = 59
 
     def right(self):
-        if self.cord_x == 6 or int(self.entries[self.cord_y][self.cord_x+1]) == 0:
-            self.inc_year(day=7)
-        else :
-            self.cord_x = (self.cord_x + 1) #% 7
-            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
+        if self.change_date == True :
+            if self.cord_x == 6 or int(self.entries[self.cord_y][self.cord_x+1]) == 0:
+                self.inc_year(day=7)
+            else :
+                self.cord_x = (self.cord_x + 1) #% 7
+            
+        else:
+            if self.cord_x >= 2 :
+                pass
+            else :
+                self.cord_x = (self.cord_x + 1) #% 7
 
     def left(self):
-        if self.cord_x == 0 or int(self.entries[self.cord_y][self.cord_x-1]) == 0:
-            self.dec_year(day=1)
+        if self.change_date == True :
+            if self.cord_x == 0 or int(self.entries[self.cord_y][self.cord_x-1]) == 0:
+                self.dec_year(day=1)
+            else:
+                self.cord_x = (self.cord_x - 1)# % 7
+                self.depug=Label(text="cord_y = "+str(self.cord_y)+':',)
         else:
-            self.cord_x = (self.cord_x - 1)# % 7
-            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
+            if self.cord_x <=0 :
+                pass
+            else :
+                self.cord_x = (self.cord_x - 1) #% 7
+                #self.depug=Label(text="cord_y = "+str(self.cord_y)+':',)
+
+    def next(self):
+        self.change_date = not self.change_date
+        if self.change_date == False :
+            self.cord_x = 0
 
 
     def __pt_container__(self):
@@ -220,7 +364,7 @@ class DateSelectWidget:
                  key_bindings=self._get_key_bindings(),
             ), height= 10) #D()) #5  ## large sized enties get >> (window too small)
 
-        self.select_box = JansSelectDate(date=self.date,months=self.months )
+        self.select_box = JansSelectDate(date=self.date,months=self.months,mytime=[self.houres,self.minutes,self.seconds] )
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
 
     @property
@@ -252,7 +396,8 @@ class DateSelectWidget:
                 years = int(self.select_box.current_year)
                 months =int(self.select_box.current_month)
                 days = int(self.select_box.entries[self.select_box.cord_y][self.select_box.cord_x] )
-                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+
+                t = (years, months,days,(self.select_box.hours-8),self.select_box.minutes,self.select_box.seconds,0,0,0)  ## the up increment
                 t = time.mktime(t)  
                 self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
                 get_app().layout.container.floats.remove(self.select_box_float)
@@ -329,63 +474,49 @@ class DateSelectWidget:
             else :
                 self.select_box.left()
 
-
         @kb.add("+")
         def _up(event):
-            ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
-            years =int(time.strftime("%Y",ts))
-            months = int(time.strftime("%m",ts))
-            days =  int(time.strftime("%d",ts))
-            self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
-            self.minutes =int(time.strftime("%M",ts)) 
-            self.seconds = int(time.strftime("%S",ts)) +1
-                
-            t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
-            t = time.mktime(t)  
-            self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+            if self.select_box_float not in get_app().layout.container.floats:
+                ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+                years =int(time.strftime("%Y",ts))
+                months = int(time.strftime("%m",ts))
+                days =  int(time.strftime("%d",ts))
+                self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
+                self.minutes =int(time.strftime("%M",ts)) 
+                self.seconds = int(time.strftime("%S",ts)) +1
+                    
+                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+                t = time.mktime(t)  
+                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
 
         @kb.add("-")
         def _up(event):
-            ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
-            years =int(time.strftime("%Y",ts))
-            months = int(time.strftime("%m",ts))
-            days =  int(time.strftime("%d",ts))
-            self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
-            self.minutes =int(time.strftime("%M",ts)) 
-            self.seconds = int(time.strftime("%S",ts)) -1
-                
-            t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
-            t = time.mktime(t)  
-            self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+            if self.select_box_float not in get_app().layout.container.floats:
+                ts = time.strptime(self.text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+                years =int(time.strftime("%Y",ts))
+                months = int(time.strftime("%m",ts))
+                days =  int(time.strftime("%d",ts))
+                self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
+                self.minutes =int(time.strftime("%M",ts)) 
+                self.seconds = int(time.strftime("%S",ts)) -1
+                    
+                t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
+                t = time.mktime(t)  
+                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
 
-      
-
-                      
-
-        @kb.add("w")
-        def _up(event):
-            self.select_box.inc_year()
-
-        @kb.add("s")
-        def _up(event):
-            self.select_box.dec_year()
-
-        @kb.add("a")
-        def _up(event):
-            self.select_box.inc_month()
-
-        @kb.add("d")
-        def _up(event):
-            self.select_box.dec_month()
-
-
-        @kb.add("escape")
         @kb.add("tab")
         def _(event):
             if self.select_box_float in get_app().layout.container.floats:
+                self.select_box.next()
+            else :
+                _focus_next(event)                
+           
+        @kb.add("escape")
+        def _(event):
+            if self.select_box_float in get_app().layout.container.floats:
                 get_app().layout.container.floats.remove(self.select_box_float)
-
-            _focus_next(event)
+                _focus_next(event)
+            
 
         return kb
 
