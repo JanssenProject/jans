@@ -83,7 +83,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
                    )
-
+    
 
     def prepare_tabs(self):
 
@@ -399,7 +399,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
-
+    
     def client_dialog_nav_selection_changed(self, selection):
         self.left_nav = selection
 
@@ -412,9 +412,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
     def __pt_container__(self):
         return self.dialog
-
-
-
 
 
 
