@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* add new methods to allow get/set list of custom attributes from ([#2105](https://github.com/JanssenProject/jans/issues/2105)) ([5ac23a1](https://github.com/JanssenProject/jans/commit/5ac23a18adf3b34fd41fd1199ab168bfc9602fc6)), closes [#2104](https://github.com/JanssenProject/jans/issues/2104)
+* disable TLS in CB client by default ([#2167](https://github.com/JanssenProject/jans/issues/2167)) ([8ec5dd3](https://github.com/JanssenProject/jans/commit/8ec5dd3dc9818a53949468389a1918ed385c28a9))
+* fix susrefire tests in filter module ([#2141](https://github.com/JanssenProject/jans/issues/2141)) ([118d77c](https://github.com/JanssenProject/jans/commit/118d77cd7025dcbe3031bc41450ec285afff4b9f))
+* **jans-orm:** update Couchbase ORM to use SDK 3.x [#1851](https://github.com/JanssenProject/jans/issues/1851) ([#1852](https://github.com/JanssenProject/jans/issues/1852)) ([d9d5157](https://github.com/JanssenProject/jans/commit/d9d5157c3421f4995ee4abd6918c106f9a78dd5f))
+
+
+### Bug Fixes
+
+* don't execute next paged search if current result count less than ([#2171](https://github.com/JanssenProject/jans/issues/2171)) ([94a162f](https://github.com/JanssenProject/jans/commit/94a162f4471ec6e4798721894b4a5a583ad71370))
+* **jans-auth-server:** sql localizedstring persistence SqlEntryManager ([#1475](https://github.com/JanssenProject/jans/issues/1475)) ([b959b94](https://github.com/JanssenProject/jans/commit/b959b94e235c8bb554fcbdc8abbc22e3df540dbe))
+* **jans-orm:** fixed npe in filter processor and covered with tests ([ef46516](https://github.com/JanssenProject/jans/commit/ef4651677c415b92d8db01f6bf67eda4d9b9dd03))
+* **jans-orm:** switch to 1.0.1-SNAPSHOT ([0030da7](https://github.com/JanssenProject/jans/commit/0030da76d16eedbdcfc74b72b99705a9fb63cb27))
+* use iterator to correcly remove OC attribute ([#2138](https://github.com/JanssenProject/jans/issues/2138)) ([b590981](https://github.com/JanssenProject/jans/commit/b590981c53c26f4b1a8b6a0865ddc552e0a347b8))
+
+
+### Documentation
+
+* no docs required ([ef46516](https://github.com/JanssenProject/jans/commit/ef4651677c415b92d8db01f6bf67eda4d9b9dd03))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.0...jans-orm-v1.0.1) (2022-07-06)
 
 
