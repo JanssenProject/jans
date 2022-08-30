@@ -6,6 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -15,12 +16,21 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.io.IOException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -37,6 +47,17 @@ public class ConfigResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
 
+    
+    @Operation(summary = "Gets a list of Gluu attributes.",
+    description= "Gets all Jans authorization server configuration properties.",
+    tags = {"Configuration – Properties"}
+    )
+    @ApiResponses(value = { 
+    @ApiResponse(responseCode = "200", description = "Gluu Attributes",
+            content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = AppConfiguration.class))),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
@@ -48,7 +69,7 @@ public class ConfigResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
-    public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
+    public Response patchAppConfigurationProperty(@NotNull String requestString) throws JsonPatchException, IOException {
         log.debug("AUTH CONF details to patch - requestString:{} ", requestString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = configurationService.find();

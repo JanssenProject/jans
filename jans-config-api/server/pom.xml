@@ -262,6 +262,12 @@
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
+		<!-- Swagger -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core-jakarta</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

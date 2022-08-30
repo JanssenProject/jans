@@ -9,6 +9,14 @@ package io.jans.configapi.rest;
 import io.jans.configapi.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.rest.resource.auth.*;
 import io.jans.configapi.rest.health.ApiHealthCheck;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.*;
+import io.swagger.v3.oas.annotations.tags.*;
+import io.swagger.v3.oas.annotations.security.*;
+import io.swagger.v3.oas.annotations.servers.*;
+
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.ws.rs.ApplicationPath;
@@ -19,11 +27,65 @@ import jakarta.ws.rs.core.Application;
  *
  */
 @ApplicationPath("/api/v1")
+@OpenAPIDefinition(
+        info = @Info(title = "Jans Config API", version = "1.0",
+                     contact = @Contact(name = "Gluu Support",
+                                        url = "https://support.gluu.org",
+                                        email = "xxx@gluu.org"),
+                               
+                     license = @License(name = "Apache 2.0",
+                                        url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
+                    
+        
+                tags = {@Tag(name = "Attribute"),
+                        @Tag(name = "Default Authentication Method"),
+                        @Tag(name = "Cache Configuration – Memcached"),
+                        @Tag(name = "Cache Configuration – Redis"),
+                        @Tag(name = "Cache Configuration – in-Memory"),
+                        @Tag(name = "Cache Configuration – Native-Persistence"),
+                        @Tag(name = "Configuration – Properties"),
+                        @Tag(name = "Fido2 - Configuration"),
+                        @Tag(name = "Configuration – SMTP"),
+                        @Tag(name = "Configuration – Logging"),
+                        @Tag(name = "Configuration – JWK - JSON Web Key (JWK)"),
+                        @Tag(name = "Custom Scripts"),
+                        @Tag(name = "Database - LDAP configuration"),
+                        @Tag(name = "Database - Couchbase configuration"),
+                        @Tag(name = "OAuth - OpenID Connect - Clients"),
+                        @Tag(name = "OAuth - UMA Resources"),
+                        @Tag(name = "OAuth - Scopes"),
+                        @Tag(name = "Configuration – Agama Flow"),
+                        @Tag(name = "Statistics - User"),
+                        @Tag(name = "Health - Check"),
+                        @Tag(name = "Server Stats"),
+                        @Tag(name = "Auth - Session Management"),
+                        @Tag(name = "Configuration – User Management"),
+                        @Tag(name = "SCIM - Config Management"),
+                        @Tag(name = "Organization Configuration"),
+                        @Tag(name = "Auth Server Health - Check"),
+                        @Tag(name = "Admin UI - Role"),
+                        @Tag(name = "Admin UI - Permission"),
+                        @Tag(name = "Admin UI - Role-Permissions Mapping"),
+                        @Tag(name = "Admin UI - License")
+                        },                   
+
+        servers = {
+                @Server(url = "https://jans.io/",
+                        description = "The Jans server"
+                       )
+        })
+/*        
+@SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2,  flows = @OAuthFlows(
+        clientCredentials= @OAuthFlow(tokenUrl="https://{op-hostname}/.../token",
+        scopes = @OAuthScope(name = "write:pets", description = "modify pets in your account"),
+        
+                )))*/
+                                 
 public class ApiApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        HashSet<Class<?>> classes = new HashSet<>();
 
         // General
         classes.add(ObjectMapperContextResolver.class);

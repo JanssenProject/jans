@@ -46,6 +46,7 @@
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.5</jacoco.version>
+		<swagger.version>2.2.2</swagger.version>
 		
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -382,6 +383,14 @@
 				<artifactId>json</artifactId>
 				<version>20210307</version>
 			</dependency>
+			
+			<!-- Swagger -->
+			<dependency>
+			    <groupId>io.swagger.core.v3</groupId>
+			    <artifactId>swagger-core-jakarta</artifactId>
+			    <version>${swagger.version}</version>
+			</dependency>
+			
 
 		</dependencies>
 	</dependencyManagement>
