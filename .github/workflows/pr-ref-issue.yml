@@ -11,6 +11,8 @@ on:
       - reopened
     paths-ignore:
       - "docs/**"
+    tags-ignore:
+      - "release-please-*"
   workflow_dispatch:
 jobs:
   check-prs-issue:
