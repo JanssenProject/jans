@@ -481,7 +481,7 @@ class JansCliApp(Application, JansAuthServer):
                 )
             ])
 
-        dialog = JansGDialog(self, title=params['selected'][0], body=body)
+        dialog = JansGDialog(self, title=params['selected'][0], body=body, width=int(self.width*0.9))
 
         self.show_jans_dialog(dialog)
 
