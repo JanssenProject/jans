@@ -5,7 +5,6 @@ import json
 import os
 import logging
 
-from shutil import get_terminal_size
 import time
 from asyncio import Future, ensure_future
 from pynput.keyboard import Key, Controller
@@ -75,12 +74,8 @@ class JansCliApp(Application, JansAuthServer):
     def __init__(self):
         self.init_logger()
         self.status_bar_text = ''
-        self.width, self.height = get_terminal_size()
         self.set_keybindings()
         # -------------------------------------------------------------------------------- #
-
-        self.dialog_width = int(self.width*0.9) # 120 ## to be dynamic
-        self.dialog_height = int(self.height*0.8) ## to be dynamic
 
         self.keyboard = Controller()
 
@@ -142,7 +137,15 @@ class JansCliApp(Application, JansAuthServer):
         # ----------------------------------------------------------------------------- #
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
+        self.logger.debug(str(self.output.get_size()))
 
+    @property
+    def dialog_width(self):
+        return int(self.output.get_size().rows*0.8)
+
+    @property
+    def dialog_height(self):
+        return int(self.output.get_size().columns*0.9)
 
     def init_logger(self):
         self.logger = logging.getLogger('JansCli')
@@ -472,7 +475,7 @@ class JansCliApp(Application, JansAuthServer):
                 )
             ])
 
-        dialog = JansGDialog(self, title=params['selected'][0], body=body, width=self.dialog_width)
+        dialog = JansGDialog(self, title=params['selected'][0], body=body)
 
         self.show_jans_dialog(dialog)
 

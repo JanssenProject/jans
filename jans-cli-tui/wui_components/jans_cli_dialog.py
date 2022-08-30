@@ -6,10 +6,13 @@ from prompt_toolkit.widgets import Button, Dialog
 from prompt_toolkit.layout.dimension import D
 
 class JansGDialog:
-    def __init__(self, parent, title, body, buttons=[], width=D(preferred=80)):
+    def __init__(self, parent, title, body, buttons=[], width=None):
         self.future = Future()
         self.body = body
         self.myparent = parent
+
+        if not width:
+            width = int(parent.output.get_size().columns * 0.85)
 
         if not buttons:
             buttons = [Button(text="OK")]
