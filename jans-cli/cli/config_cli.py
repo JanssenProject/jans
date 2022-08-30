@@ -8,21 +8,26 @@ import urllib3
 import configparser
 import readline
 import argparse
-import inspect
 import random
 import datetime
 import ruamel.yaml
-import importlib
 import code
 import traceback
 import ast
 import base64
-import pprint
+import requests
+import html
+import glob
+import logging
+import http.client
 
 from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlencode
 from collections import OrderedDict
+from urllib.parse import urljoin
+from http.client import HTTPConnection
+from pygments import highlight, lexers, formatters
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -49,11 +54,6 @@ tabulate_endpoints = {
 tabular_dataset = {'scim.get-users': 'Resources'}
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
-sys.path.append(os.path.join(cur_dir, my_op_mode))
-swagger_client = importlib.import_module(my_op_mode + '.swagger_client')
-swagger_client.models = importlib.import_module(my_op_mode + '.swagger_client.models')
-swagger_client.api = importlib.import_module(my_op_mode + '.swagger_client.api')
-swagger_client.rest = importlib.import_module(my_op_mode + '.swagger_client.rest')
 plugins = []
 
 warning_color = 214
@@ -62,7 +62,11 @@ success_color = 10
 bold_color = 15
 grey_color = 242
 
-clear = lambda: os.system('clear')
+
+def clear():
+    if not debug:
+        os.system('clear')
+
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
@@ -71,8 +75,7 @@ client_id = os.environ.get(my_op_mode + 'jca_client_id')
 client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
 access_token = None
 debug = os.environ.get('jans_client_debug')
-debug_log_file = os.environ.get('jans_debug_log_file')
-error_log_file = os.path.join(cur_dir, 'error.log')
+log_dir = os.environ.get('cli_log_dir', cur_dir)
 
 def encode_decode(s, decode=False):
     cmd = '/opt/jans/bin/encode.py '
@@ -82,28 +85,43 @@ def encode_decode(s, decode=False):
     return result.strip()
 
 
-# dummy api class to reach private ApiClient methods
-class MyApiClient(swagger_client.ApiClient):
-    pass
-
-
-class DummyPool:
-    def close(self):
-        pass
-
-    def join(self):
-        pass
-
-
-myapi = MyApiClient()
-myapi.pool = DummyPool()
-
 ##################### arguments #####################
+
+# load yaml file
+
+my_op_mode
+
+debug_json = 'swagger_yaml.json'
+if os.path.exists(debug_json):
+    with open(debug_json) as f:
+        cfg_yml = json.load(f, object_pairs_hook=OrderedDict)
+else:
+    with open(os.path.join(cur_dir, my_op_mode+'.yaml')) as f:
+        cfg_yml = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
+        if os.environ.get('dump_yaml'):
+            with open(debug_json, 'w') as w:
+                json.dump(cfg_yml, w, indent=2)
+
 op_list = []
 
-for api_name in dir(swagger_client.api):
-    if api_name.endswith('Api') and inspect.isclass(getattr(swagger_client.api, api_name)):
-        op_list.append(api_name[:-3])
+name_regex = re.compile('[^a-zA-Z0-9]')
+
+def get_named_tag(tag):
+    return name_regex.sub('', tag.title())
+
+for path in cfg_yml['paths']:
+    for method in cfg_yml['paths'][path]:
+        if isinstance(cfg_yml['paths'][path][method], dict):
+            for tag_ in cfg_yml['paths'][path][method].get('tags', []):
+                tag = get_named_tag(tag_)
+                if not tag in op_list:
+                    op_list.append(tag)
+
+for yml_fn in glob.glob(os.path.join(cur_dir, '*.yaml')):
+    fname, fext = os.path.splitext(os.path.basename(yml_fn))
+    op_list.append(fname)
+
+op_list.sort()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", help="Hostname of server")
@@ -134,6 +152,9 @@ parser.add_argument("--patch-add", help="Colon delimited key:value pair for add 
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
 parser.add_argument("--no-suggestion", help="Do not use prompt toolkit to display word completer", action='store_true')
+parser.add_argument("-no-color", help="Do not colorize json dumps", action='store_true')
+parser.add_argument("--log-dir", help="Log directory", default=log_dir)
+
 
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
@@ -163,7 +184,7 @@ if not(host and (client_id and client_secret or access_token)):
     client_id = args.client_id
     client_secret = args.client_secret
     debug = args.debug
-    debug_log_file = args.debug_log_file
+    log_dir = args.log_dir
 
     access_token = args.access_token
     if access_token and os.path.isfile(access_token):
@@ -192,7 +213,8 @@ if not(host and (client_id and client_secret or access_token)):
             client_secret = encode_decode(client_secret_enc, decode=True)
 
         debug = config['DEFAULT'].get('debug')
-        debug_log_file = config['DEFAULT'].get('debug_log_file')
+        log_dir = config['DEFAULT'].get('log_dir', log_dir)
+
     else:
         config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net',
                              'jca_client_id': 'your jans config api client id',
@@ -228,6 +250,7 @@ class Menu(object):
         self.children = []
         self.parent = None
         self.ignore = False
+
 
     def __iter__(self):
         self.current_index = 0
@@ -285,15 +308,12 @@ class Menu(object):
 class JCA_CLI:
 
     def __init__(self, host, client_id, client_secret, access_token, test_client=False):
-        self.host = host
+        self.host = self.idp_host = host
         self.client_id = client_id
         self.client_secret = client_secret
         self.use_test_client = test_client
-
-        self.swagger_configuration = swagger_client.Configuration()
-        self.swagger_configuration.host = 'https://{}'.format(self.host)
         self.access_token = access_token or config['DEFAULT'].get('access_token')
-
+        self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.idp_host)
         self.set_user()
         self.plugins()
 
@@ -301,20 +321,35 @@ class JCA_CLI:
             self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
 
         if my_op_mode == 'scim':
-            self.swagger_configuration.host += '/jans-scim/restv1/v2'
+            self.host += '/jans-scim/restv1/v2'
 
+        self.set_logging()
         self.ssl_settings()
-
-        self.swagger_configuration.debug = debug
-        if self.swagger_configuration.debug:
-            self.swagger_configuration.logger_file = debug_log_file
-
-        self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
-
-        self.cfg_yml = self.get_yaml()
         self.make_menu()
         self.current_menu = self.menu
         self.enums()
+
+
+    def set_logging(self):
+        if debug:
+            self.cli_logger = logging.getLogger("urllib3")
+            self.cli_logger.setLevel(logging.DEBUG)
+            self.cli_logger.propagate = True
+            HTTPConnection.debuglevel = 1
+            file_handler = logging.FileHandler(os.path.join(log_dir, 'cli_debug.log'))
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
+            self.cli_logger.addHandler(file_handler)
+            def print_to_log(*args):
+                self.cli_logger.debug(" ".join(args))
+            http.client.print = print_to_log
+
+
+    def log_response(self, response):
+        if debug:
+            self.cli_logger.debug('requests response status: %s', str(response.status_code))
+            self.cli_logger.debug('requests response headers: %s', str(response.headers))
+            self.cli_logger.debug('requests response text: %s', str(response.text))
 
     def enums(self):
         self.enum_dict = {
@@ -354,15 +389,12 @@ class JCA_CLI:
 
     def ssl_settings(self):
         if args.noverify:
-            self.swagger_configuration.verify_ssl = False
+            self.verify_ssl = False
         else:
-            self.swagger_configuration.verify_ssl = True
-
-        if args.config_api_mtls_client_cert:
-            self.swagger_configuration.cert_file = args.config_api_mtls_client_cert
-
-        if args.config_api_mtls_client_key:
-            self.swagger_configuration.key_file = args.config_api_mtls_client_key
+            self.verify_ssl = True
+        self.mtls_client_cert = None
+        if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
+            self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
 
     def drop_to_shell(self, mylocals):
         locals_ = locals()
@@ -370,43 +402,44 @@ class JCA_CLI:
         code.interact(local=locals_)
         sys.exit()
 
-    def get_yaml(self):
-        debug_json = 'swagger_yaml.json'
-        if os.path.exists(debug_json):
-            with open(debug_json) as f:
-                return json.load(f, object_pairs_hook=OrderedDict)
+    def get_request_header(self, headers={}, access_token=None):
+        if not access_token:
+            access_token = self.access_token
 
-        with open(self.swagger_yaml_fn) as f:
-            self.cfg_yml = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
-            if os.environ.get('dump_yaml'):
-                with open(debug_json, 'w') as w:
-                    json.dump(self.cfg_yml, w, indent=2)
-        return self.cfg_yml
+        ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
+        ret_val.update(headers)
+        return ret_val
 
-    def get_rest_client(self):
-        rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
-        if args.key_password:
-            rest.pool_manager.connection_pool_kw['key_password'] = args.key_password
-        return rest
+
 
     def check_connection(self):
-        rest = self.get_rest_client()
-        headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
-        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
-        headers['Content-Type'] = 'application/x-www-form-urlencoded'
-
-        response = rest.POST(
-            url,
-            headers=headers,
-            post_params={"grant_type": "client_credentials"}
-        )
-
-        if response.status != 200:
+        url = 'https://{}/jans-auth/restv1/token'.format(self.idp_host)
+        response = requests.post(
+                url=url,
+                auth=(self.client_id, self.client_secret),
+                data={"grant_type": "client_credentials"},
+                verify=self.verify_ssl,
+                cert=self.mtls_client_cert
+            )
+        self.log_response(response)
+        if response.status_code != 200:
             raise ValueError(
-                self.colored_text("Unable to connect jans-auth server: {}".format(response.reason), error_color))
+                self.colored_text("Unable to connect jans-auth server:\n {}".format(response.text), error_color))
+
+        if not self.use_test_client and self.access_token:
+            response = requests.get(
+                    url = self.jwt_validation_url,
+                    headers=self.get_request_header({'Accept': 'application/json'}),
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+
+        if not response.status_code == 200:
+            self.access_token = None
 
 
     def check_access_token(self):
+
         if not self.access_token :
             print(self.colored_text("Access token was not found.", warning_color))
             return
@@ -424,11 +457,13 @@ class JCA_CLI:
             self.access_token = None
 
 
-    def guess_param_mapping(self, param_s):
-        word_list = re.sub( r"([A-Z])", r" \1", param_s).split()
-        word_list = [w.lower() for w in word_list]
-        param_name = '_'.join(word_list)
-        return param_name
+    def validate_date_time(self, date_str):
+        try:
+            datetime.datetime.fromisoformat(date_str)
+            return True
+        except Exception as e:
+            self.log_response('invalid date-time format: %s'.format(str(e)))
+            return False
 
 
     def make_menu(self):
@@ -447,7 +482,7 @@ class JCA_CLI:
                     return grp
 
 
-        for tag in self.cfg_yml['tags']:
+        for tag in cfg_yml['tags']:
             tname = tag['name'].strip()
             if tname == 'developers':
                 continue
@@ -472,8 +507,8 @@ class JCA_CLI:
         def get_methods_of_tag(tag):
             methods = []
             if tag:
-                for path_name in self.cfg_yml['paths']:
-                    path = self.cfg_yml['paths'][path_name]
+                for path_name in cfg_yml['paths']:
+                    path = cfg_yml['paths'][path_name]
                     for method_name in path:
                         method = path[method_name]
                         if 'tags' in method and tag in method['tags'] and 'operationId' in method:
@@ -530,52 +565,41 @@ class JCA_CLI:
         self.menu = menu
 
 
-    def get_json_from_response(self, response):
-        js_data = {}
-        data = response.data
-        if data:
-            try:
-                js_data = json.loads(data.decode())
-            except:
-                pass
-        return js_data
-
     def get_scoped_access_token(self, scope):
-        sys.stderr.write("Getting access token for scope {}\n".format(scope))
-        rest = self.get_rest_client()
-        headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
+        scope_text = " for scope {}\n".format(scope) if scope else ''
+        sys.stderr.write("Getting access token{}".format(scope_text))
         url = 'https://{}/jans-auth/restv1/token'.format(self.host)
-        headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
         if self.askuser:
             post_params = {"grant_type": "password", "scope": scope, "username": self.auth_username,
                            "password": self.auth_password}
         else:
             post_params = {"grant_type": "client_credentials", "scope": scope}
 
-        response = rest.POST(
+        response = requests.post(
             url,
-            headers=headers,
-            post_params=post_params
+            auth=(client_id, client_secret),
+            data=post_params,
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
         )
-
+        self.log_response(response)
         try:
-            data = json.loads(response.data)
-            if 'access_token' in data:
-                self.swagger_configuration.access_token = data['access_token']
+            result = response.json()
+            if 'access_token' in result:
+                self.access_token = result['access_token']
             else:
                 sys.stderr.write("Error while getting access token")
-                sys.stderr.write(data)
+                sys.stderr.write(result)
                 sys.stderr.write('\n')
         except Exception as e:
             print("Error while getting access token")
-            sys.stderr.write(response.data)
-            sys.stderr.write(e)
+            sys.stderr.write(response.text)
+            sys.stderr.write(str(e))
             sys.stderr.write('\n')
-
 
     def get_jwt_access_token(self):
 
-        rest = self.get_rest_client()
 
         """
         STEP 1: Get device verification code
@@ -583,22 +607,19 @@ class JCA_CLI:
         waits untill verification done.
         """
 
-        headers_basic_auth = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
-        headers_basic_auth['Content-Type'] = 'application/x-www-form-urlencoded'
-        response = rest.POST(
-            'https://{}/jans-auth/restv1/device_authorization'.format(host),
-            headers=headers_basic_auth,
-            post_params={
-                'client_id': self.client_id,
-                'scope': 'openid+profile+email+offline_access'
-                }
-            )
-
-        if response.status != 200:
+        response = requests.post(
+            url='https://{}/jans-auth/restv1/device_authorization'.format(self.host),
+            auth=(self.client_id, self.client_secret),
+            data={'client_id': self.client_id, 'scope': 'openid+profile+email+offline_access'},
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
+        )
+        self.log_response(response)
+        if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get device authorization user code: {}".format(response.reason), error_color))
 
-        result = self.get_json_from_response(response.urllib3_response)
+        result = response.json()
 
         if 'verification_uri' in result and 'user_code' in result:
 
@@ -614,70 +635,70 @@ class JCA_CLI:
         else:
             raise ValueError(self.colored_text("Unable to get device authorization user code"))
 
+
         """
         STEP 2: Get access token for retreiving user info
         After device code was verified, we use it to retreive refresh token
         """
-        response = rest.POST(
-            'https://{}/jans-auth/restv1/token'.format(host),
-            headers=headers_basic_auth,
-            post_params=[
+        response = requests.post(
+            url='https://{}/jans-auth/restv1/token'.format(self.host),
+            auth=(self.client_id, self.client_secret),
+            data=[
                 ('client_id',self.client_id),
                 ('scope','openid+profile+email+offline_access'),
                 ('grant_type', 'urn:ietf:params:oauth:grant-type:device_code'),
                 ('grant_type', 'refresh_token'),
                 ('device_code',result['device_code'])
-                ]
+                ],
+             verify=self.verify_ssl,
+             cert=self.mtls_client_cert
             )
-
-        if response.status != 200:
+        self.log_response(response)
+        if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get access token"))
 
-        result = self.get_json_from_response(response.urllib3_response)
+        result = response.json()
 
+        headers_basic_auth = self.get_request_header(access_token=result['access_token'])
 
         """
         STEP 3: Get user info
         refresh token is used for retreiving user information to identify user roles
         """
-        headers_bearer = urllib3.make_headers()
-        headers_bearer['Content-Type'] = 'application/x-www-form-urlencoded'
-        headers_bearer['Authorization'] = 'Bearer {}'.format(result['access_token'])
-        response = rest.POST(
-            'https://{}/jans-auth/restv1/userinfo'.format(host),
-            headers=headers_bearer,
-            post_params={
-                'access_token': result['access_token'],
-                },
+        response = requests.post(
+            url='https://{}/jans-auth/restv1/userinfo'.format(self.host),
+            headers=headers_basic_auth,
+            data={'access_token': result['access_token']},
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
             )
-
-        if response.status != 200:
+        self.log_response(response)
+        if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get access token"))
 
-        result = response.urllib3_response.data.decode()
+        result = response.text
+
 
         """
         STEP 4: Get access token for config-api endpoints
         Use client creditentials to retreive access token for client endpoints.
         Since introception script will be executed, access token will have permissions with all scopes
         """
-        response = rest.POST(
-            'https://{}/jans-auth/restv1/token'.format(host),
+        response = requests.post(
+            url='https://{}/jans-auth/restv1/token'.format(self.host),
             headers=headers_basic_auth,
-            post_params={
-                'grant_type': 'client_credentials',
-                'scope': 'openid',
-                'ujwt': result,
-                },
+            data={'grant_type': 'client_credentials', 'scope': 'openid', 'ujwt': result},
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
             )
-
-        if response.status != 200:
+        self.log_response(response)
+        if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get access token"))
 
-        result = self.get_json_from_response(response.urllib3_response)
+        result = response.json()
 
         self.access_token = result['access_token']
         access_token_enc = encode_decode(self.access_token)
@@ -692,9 +713,6 @@ class JCA_CLI:
             self.check_access_token()
             self.get_jwt_access_token()
 
-        if not self.use_test_client:
-            self.swagger_configuration.access_token = self.access_token
-
     def print_exception(self, e):
         error_printed = False
         if hasattr(e, 'body'):
@@ -707,6 +725,8 @@ class JCA_CLI:
         if not error_printed:
             print(self.colored_text("Error retreiving data", warning_color))
             print('\u001b[38;5;196m')
+            if isinstance(e, str):
+                print(e)
             if hasattr(e, 'reason'):
                 print(e.reason)
             if hasattr(e, 'body'):
@@ -754,8 +774,11 @@ class JCA_CLI:
 
     def get_input(self, values=[], text='Selection', default=None, itype=None,
                   help_text=None, sitype=None, enforce='__true__',
-                  example=None, spacing=0
+                  example=None, spacing=0, iformat=None
                   ):
+        if isinstance(default, str):
+            default = html.escape(default)
+
         if 'b' in values and 'q' in values and 'x' in values:
             greyed_help_list = [ ('b', 'back'), ('q', 'quit'),  ('x', 'logout and quit') ]
             for k,v in (('w', 'write result'), ('y', 'yes'), ('n', 'no')):
@@ -812,7 +835,8 @@ class JCA_CLI:
                 selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
             else:
                 html_completer = WordCompleter(values)
-                selection = prompt(HTML(' ' * spacing + text + ' '), completer=html_completer)
+                propmt_string = HTML(' ' * spacing + text + ' ')
+                selection = prompt(propmt_string, completer=html_completer)
 
             selection = selection.strip()
             if selection.startswith('_file '):
@@ -837,6 +861,13 @@ class JCA_CLI:
                 if itype == 'array':
                     return []
                 return None
+
+            if selection and iformat:
+                if iformat == 'date-time' and not self.validate_date_time(selection):
+                    print(' ' * spacing,
+                              self.colored_text('Please enter date-time string, i.e. 2001-07-04T12:08:56.235', warning_color),
+                              sep='')
+                    continue
 
             if 'q' in values and selection == 'q':
                 print("Quiting...")
@@ -933,24 +964,20 @@ class JCA_CLI:
 
         return selection
 
+
     def print_underlined(self, text):
         print()
         print(text)
         print('-' * len(text.splitlines()[-1]))
 
-    def print_colored_output(self, data):
-        try:
-            data_json = json.dumps(data, indent=2)
-        except:
-            data = ast.literal_eval(str(data))
-            data_json = json.dumps(data, indent=2)
-
-        print(self.colored_text(data_json, success_color))
 
     def pretty_print(self, data):
-        pp = pprint.PrettyPrinter(indent=2)
-        pp_string = pp.pformat(data)
-        print(self.colored_text(pp_string, success_color))
+        pp_string = json.dumps(data, indent=2)
+        if args.no_color:
+            print(pp_string)
+        else:
+            colorful_json = highlight(pp_string, lexers.JsonLexer(), formatters.TerminalFormatter())
+            print(colorful_json)
 
     def get_url_param(self, url):
         if url.endswith('}'):
@@ -965,9 +992,6 @@ class JCA_CLI:
 
         return param
 
-    def make_swagger_var(self, varname):
-        word_list = re.sub(r'([A-Z])', r' \1', varname).lower().split()
-        return '_'.join(word_list)
 
     def obtain_parameters(self, endpoint, single=False):
         parameters = {}
@@ -983,8 +1007,8 @@ class JCA_CLI:
         n = 1 if single else len(endpoint_parameters)
 
         for param in endpoint_parameters[0:n]:
-            param_name = self.make_swagger_var(param['name'])
-            if not param_name in parameters:
+            param_name = param['name']
+            if param_name not in parameters:
                 text_ = param['name']
                 help_text = param.get('description') or param.get('summary')
                 enforce = True if param['schema']['type'] == 'integer' or (end_point_param and end_point_param['name'] == param['name']) else False
@@ -1001,60 +1025,20 @@ class JCA_CLI:
 
         return parameters
 
-    def get_name_from_string(self, txt):
-        return re.sub(r'[^0-9a-zA-Z\s]+', '', txt)
-
-    def get_api_class_name(self, name):
-        namle_list = self.get_name_from_string(name).split()
-        for i, w in enumerate(namle_list[:]):
-            if len(w) > 1:
-                w = w[0].upper() + w[1:]
-            else:
-                w = w.upper()
-
-            namle_list[i] = w
-
-        return ''.join(namle_list) + 'Api'
 
     def get_path_by_id(self, operation_id):
         retVal = {}
-        for path in self.cfg_yml['paths']:
-            for method in self.cfg_yml['paths'][path]:
-                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method][
+        for path in cfg_yml['paths']:
+            for method in cfg_yml['paths'][path]:
+                if 'operationId' in cfg_yml['paths'][path][method] and cfg_yml['paths'][path][method][
                     'operationId'] == operation_id:
-                    retVal = self.cfg_yml['paths'][path][method].copy()
+                    retVal = cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
                     retVal['__method__'] = method
                     retVal['__urlsuffix__'] = self.get_url_param(path)
 
         return retVal
 
-    def get_tag_from_api_name(self, api_name, qmethod=None):
-
-        for tag in self.cfg_yml['tags']:
-            api_class_name = self.get_api_class_name(tag['name'])
-            if api_class_name == api_name:
-                break
-
-        paths = []
-
-        for path in self.cfg_yml['paths']:
-
-            for method in self.cfg_yml['paths'][path]:
-
-                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method][
-                    'tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
-                    retVal = self.cfg_yml['paths'][path][method].copy()
-                    retVal['__path__'] = path
-                    retVal['__method__'] = method
-                    retVal['__urlsuffix__'] = self.get_url_param(path)
-                    if qmethod:
-                        if method == qmethod:
-                            paths.append(retVal)
-                    else:
-                        paths.append(retVal)
-
-        return paths
 
     def get_scope_for_endpoint(self, endpoint):
         scope = []
@@ -1064,40 +1048,6 @@ class JCA_CLI:
 
         return ' '.join(scope)
 
-    def unmap_model(self, model, data_dict=None):
-        if data_dict is None:
-            data_dict = {}
-
-        for key_ in model.attribute_map:
-
-            val = getattr(model, key_)
-            if isinstance(val, datetime.date):
-                val = str(val)
-
-            if isinstance(val, list):
-                sub_list = []
-                for entry in val:
-                    if hasattr(entry, 'swagger_types'):
-                        sub_list_dict = {}
-                        self.unmap_model(entry, sub_list_dict)
-                        sub_list.append(sub_list_dict)
-                    else:
-                        sub_list.append(entry)
-                data_dict[model.attribute_map[key_]] = sub_list
-            elif hasattr(val, 'swagger_types'):
-                sub_data_dict = {}
-                self.unmap_model(val, sub_data_dict)
-                data_dict[model.attribute_map[key_]] = sub_data_dict
-            else:
-                data_dict[model.attribute_map[key_]] = val
-
-        return data_dict
-
-    def get_model_key_map(self, model, key):
-        key_underscore = key.replace('-', '_')
-        for key_ in model.attribute_map:
-            if model.attribute_map[key_] == key or model.attribute_map[key_] == key_underscore:
-                return key_
 
     def tabular_data(self, data, ome):
         tab_data = []
@@ -1108,9 +1058,45 @@ class JCA_CLI:
                 row_.append(str(entry.get(header, '')))
             tab_data.append(row_)
 
-        print(tabulate(tab_data, headers, tablefmt="grid"))
+        print(tabulate(tab_data, ['#']+headers, tablefmt="grid"))
 
-    def process_get(self, endpoint, return_value=False, parameters=None):
+
+    def get_requests(self, endpoint, params={}):
+        sys.stderr.write("Please wait while retreiving data ...\n")
+
+        security = self.get_scope_for_endpoint(endpoint)
+        self.get_access_token(security)
+
+        url_param_name = self.get_url_param(endpoint.path)
+
+        url = 'https://{}{}'.format(self.host, endpoint.path)
+        if params and url_param_name in params:
+            url = url.format(**{url_param_name: params.pop(url_param_name)})
+
+        if params:
+            url += '?' + urlencode(params)
+
+        response = requests.get(
+            url = url,
+            headers=self.get_request_header({'Accept': 'application/json'}),
+            params=params,
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
+        )
+        self.log_response(response)
+        if response.status_code == 404:
+            print(self.colored_text("Server returned 404", error_color))
+            print(self.colored_text(response.text, error_color))
+            return None
+
+        try:
+            return response.json()
+            print(response.status_code)
+        except Exception as e:
+            print("An error ocurred while retreiving data")
+            self.print_exception(e)
+
+    def process_get(self, endpoint, return_value=False, parameters=None, noprompt=False, update=False):
         clear()
         if not return_value:
             title = endpoint.name
@@ -1119,7 +1105,7 @@ class JCA_CLI:
 
             self.print_underlined(title)
 
-        if not parameters:
+        if not parameters and not noprompt:
             parameters = self.obtain_parameters(endpoint, single=return_value)
 
             for param in parameters.copy():
@@ -1129,72 +1115,49 @@ class JCA_CLI:
         if parameters and not return_value:
             print("Calling Api with parameters:", parameters)
 
-        print("Please wait while retreiving data ...\n")
-
-        api_caller = self.get_api_caller(endpoint)
-
-        api_response = None
-        raise_error = False
-        try:
-            api_response = api_caller(**parameters)
-        except Exception as e:
-            if return_value:
-                raise_error = True
-            else:
-                self.print_exception(e)
-
-        if raise_error:
-            raise ValueError('Not found')
+        data = self.get_requests(endpoint, parameters)
 
         if return_value:
-            if api_response:
-                return api_response
-            return False
+            return data
 
         selections = ['q', 'x', 'b']
         item_counters = []
         tabulated = False
 
-        if api_response:
+        if data:
             try:
-                if 'response' in api_response:
-                    api_response = api_response['response']
+                if 'response' in data:
+                    data = data['response']
             except:
                 pass
-
-            selections.append('w')
-            api_response_unmapped = []
-            if isinstance(api_response, list):
-                for model in api_response:
-                    data_dict = self.unmap_model(model)
-                    api_response_unmapped.append(data_dict)
-            elif isinstance(api_response, dict):
-                api_response_unmapped = api_response
-            else:
-                data_dict = self.unmap_model(api_response)
-                api_response_unmapped = data_dict
 
             op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
             import copy
             if op_mode_endpoint in tabulate_endpoints:
-                api_response_unmapped_ext = copy.deepcopy(api_response_unmapped)
-                if endpoint.info['operationId'] == 'get-user':
-                    for entry in api_response_unmapped_ext:
-                        if entry.get('customAttributes'):
-                            for attrib in entry['customAttributes']:
-                                if attrib['name'] == 'mail':
-                                    entry['mail'] = ', '.join(attrib['values'])
-                                elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
-                                    entry[attrib['name']] = attrib['values'][0]
+                try:
+                    data_ext = copy.deepcopy(data)
+                    if endpoint.info['operationId'] == 'get-user':
+                        for entry in data_ext:
+                            if entry.get('customAttributes'):
+                                for attrib in entry['customAttributes']:
+                                    if attrib['name'] == 'mail':
+                                        entry['mail'] = ', '.join(attrib['values'])
+                                    elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
+                                        entry[attrib['name']] = attrib['values'][0]
 
-                tab_data = api_response_unmapped_ext
-                if op_mode_endpoint in tabular_dataset:
-                    tab_data = api_response_unmapped_ext[tabular_dataset[op_mode_endpoint]]
-                self.tabular_data(tab_data, op_mode_endpoint)
-                item_counters = [str(i + 1) for i in range(len(api_response_unmapped))]
-                tabulated = True
+                    tab_data = data_ext
+                    if op_mode_endpoint in tabular_dataset:
+                        tab_data = data_ext[tabular_dataset[op_mode_endpoint]]
+                    self.tabular_data(tab_data, op_mode_endpoint)
+                    item_counters = [str(i + 1) for i in range(len(data))]
+                    tabulated = True
+                except:
+                    self.pretty_print(data)
             else:
-                self.print_colored_output(api_response_unmapped)
+                self.pretty_print(data)
+
+        if update:
+            return item_counters, data
 
         selections += item_counters
         while True:
@@ -1206,17 +1169,17 @@ class JCA_CLI:
                 fn = input('File name: ')
                 try:
                     with open(fn, 'w') as w:
-                        json.dump(api_response_unmapped, w, indent=2)
+                        json.dump(data, w, indent=2)
                         print("Output was written to", fn)
                 except Exception as e:
                     print("An error ocurred while saving data")
                     self.print_exception(e)
             elif selection in item_counters:
-                self.pretty_print(api_response_unmapped[int(selection) - 1])
+                self.pretty_print(data[int(selection) - 1])
 
     def get_schema_from_reference(self, ref):
         schema_path_list = ref.strip('/#').split('/')
-        schema = self.cfg_yml[schema_path_list[0]]
+        schema = cfg_yml[schema_path_list[0]]
 
         schema_ = schema.copy()
 
@@ -1256,7 +1219,7 @@ class JCA_CLI:
 
         return schema_
 
-    def get_scheme_for_endpoint(self, endpoint):
+    def get_schema_for_endpoint(self, endpoint):
         schema_ = {}
         for content_type in endpoint.info.get('requestBody', {}).get('content', {}):
             if 'schema' in endpoint.info['requestBody']['content'][content_type]:
@@ -1278,10 +1241,6 @@ class JCA_CLI:
 
         return schema_
 
-    def get_swagger_types(self, model, name):
-        for attribute in model.swagger_types:
-            if model.swagger_types[attribute] == name:
-                return attribute
 
     def get_attrib_list(self):
         for parent in self.menu:
@@ -1290,7 +1249,7 @@ class JCA_CLI:
                     attributes = self.process_get(children, return_value=True, parameters={'limit': 1000} )
                     attrib_names = []
                     for a in attributes:
-                        attrib_names.append(a.name)
+                        attrib_names.append(a['name'])
                     attrib_names.sort()
                     return attrib_names
 
@@ -1308,10 +1267,10 @@ class JCA_CLI:
                 enum_obj['enum'] = self.enum_dict[schema['__schema_name__']][path]['enum']
 
 
-    def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None, required_only=False):
+    def get_input_for_schema_(self, schema, data={}, spacing=0, getitem=None, required_only=False):
 
         self.get_enum(schema)
-        data = {}
+
         for prop in schema['properties']:
             item = schema['properties'][prop]
             if getitem and prop != getitem['__name__'] or prop in ('dn', 'inum'):
@@ -1320,76 +1279,58 @@ class JCA_CLI:
             if (required_only and schema.get('required')) and not prop in schema.get('required'):
                 continue
 
-            prop_ = self.get_model_key_map(model, prop)
+            
             if item['type'] == 'object' and 'properties' in item:
+
                 print()
+                data_obj = {}
                 print("Data for object {}. {}".format(prop, item.get('description', '')))
+                result = self.get_input_for_schema_(item, data_obj)
+                data[prop] = result
+                #model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
+                #model_name = self.get_name_from_string(model_name_str)
 
-                model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
-                model_name = self.get_name_from_string(model_name_str)
-
-                if initialised and getattr(model, prop_):
-                    sub_model = getattr(model, prop_)
-                    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
-                elif isinstance(model, type) and hasattr(swagger_client.models, model_name):
-                    sub_model_class = getattr(swagger_client.models, model_name)
-                    result = self.get_input_for_schema_(item, sub_model_class, spacing=3, initialised=initialised)
-                    setattr(model, prop_, result)
-                elif hasattr(swagger_client.models, model.swagger_types[prop_]):
-                    sub_model = getattr(swagger_client.models, model.swagger_types[prop_])
-                    result = self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
-                    setattr(model, prop_, result)
-                else:
-                    sub_model = getattr(model, prop_)
-                    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
-                    # print(self.colored_text("Fix me: can't find model", error_color))
+                #if initialised and getattr(model, prop_):
+                #    sub_model = getattr(model, prop_)
+                #    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
+                #elif isinstance(model, type) and hasattr(swagger_client.models, model_name):
+                #    sub_model_class = getattr(swagger_client.models, model_name)
+                #    result = self.get_input_for_schema_(item, sub_model_class, spacing=3, initialised=initialised)
+                #    setattr(model, prop_, result)
+                #elif hasattr(swagger_client.models, model.swagger_types[prop_]):
+                #    sub_model = getattr(swagger_client.models, model.swagger_types[prop_])
+                #    result = self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
+                #    setattr(model, prop_, result)
+                #else:
+                #    sub_model = getattr(model, prop_)
+                #    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
+                #    # print(self.colored_text("Fix me: can't find model", error_color))
 
             elif item['type'] == 'array' and '__schema_name__' in item:
-                model_name = item['__schema_name__']
-                sub_model_class = getattr(swagger_client.models, model_name)
-                sub_model_list = []
-                sub_model_list_help_text = ''
-                sub_model_list_title_text = item.get('title')
-                if sub_model_list_title_text:
-                    sub_model_list_help_text = item.get('description')
-                else:
-                    sub_model_list_title_text = item.get('description')
 
-                cur_model_data = getattr(model, prop_)
+                sub_data_list = []
+                sub_data_list_title_text = item.get('title') or item.get('description') or prop
+                sub_data_list_selection = 'y'
 
-                if cur_model_data and initialised:
-                    for cur_data in cur_model_data:
-                        print("\nUpdate {}".format(sub_model_list_title_text))
-                        cur_model_data = self.get_input_for_schema_(item, cur_data, spacing=spacing + 3)
-                        sub_model_list.append(cur_model_data)
-
-                sub_model_list_selection = self.get_input(text="Add {}?".format(sub_model_list_title_text),
-                                                          values=['y', 'n'], help_text=sub_model_list_help_text)
-
-                if sub_model_list_selection == 'y':
-                    while True:
-                        sub_model_list_data = self.get_input_for_schema_(item, sub_model_class, spacing=spacing + 3)
-                        sub_model_list.append(sub_model_list_data)
-                        sub_model_list_selection = self.get_input(
-                            text="Add another {}?".format(sub_model_list_title_text), values=['y', 'n'])
-                        if sub_model_list_selection == 'n':
-                            break
-
-                data[prop_] = sub_model_list
+                while sub_data_list_selection == 'y':
+                    sub_data = {}
+                    self.get_input_for_schema_(item, sub_data, spacing=spacing + 3)
+                    sub_data_list.append(sub_data)
+                    sub_data_list_selection = self.get_input(
+                        text="Add another {}?".format(sub_data_list_title_text), values=['y', 'n'])
+                data[prop] = sub_data_list
 
             else:
-                default = getattr(model, prop_)
+
+                default = data.get(prop) or item.get('default')
+                values_ = item.get('enum',[])
+
                 if isinstance(default, property):
                     default = None
                 enforce = True if item['type'] == 'boolean' else False
 
                 if prop in schema.get('required', []):
                     enforce = True
-
-                if not default:
-                    default = item.get('default')
-
-                values_ = item.get('enum', [])
                 if not values_ and item['type'] == 'array' and 'enum' in item['items']:
                     values_ = item['items']['enum']
                 if item['type'] == 'object' and not default:
@@ -1404,42 +1345,44 @@ class JCA_CLI:
                     sitype=item.get('items', {}).get('type'),
                     enforce=enforce,
                     example=item.get('example'),
-                    spacing=spacing
+                    spacing=spacing,
+                    iformat=item.get('format')
                 )
-                data[prop_] = val
 
-        if model.__class__.__name__ == 'type':
-            modelObject = model(**data)
-            for key_ in data:
-                if data[key_] and not getattr(modelObject, key_, None):
-                    setattr(modelObject, key_, data[key_])
-            return modelObject
-        else:
-            for key_ in data:
-                setattr(model, key_, data[key_])
+                print("assign", val, "to", prop)
+                data[prop] = val
 
-            return model
+        return data
 
-    def get_api_caller(self, endpoint):
+
+    def post_requests(self, endpoint, data):
+        url = 'https://{}{}'.format(self.host, endpoint.path)
         security = self.get_scope_for_endpoint(endpoint)
-        if security.strip():
-            self.get_access_token(security)
+        self.get_access_token(security)
+        mime_type = self.get_mime_for_endpoint(endpoint)
 
-        client = getattr(swagger_client, self.get_api_class_name(endpoint.info['tags'][0]))
-        api_instance = self.get_api_instance(client)
-        api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-', '_'))
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
 
-        return api_caller
+        response = requests.post(url,
+            headers=headers,
+            json=data,
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
+            )
+        self.log_response(response)
+
+        try:
+            return response.json()
+        except:
+            self.print_exception(response.text)
 
     def process_post(self, endpoint):
-        schema = self.get_scheme_for_endpoint(endpoint)
+        schema = self.get_schema_for_endpoint(endpoint)
 
         if schema:
 
             title = schema.get('description') or schema['title']
             data_dict = {}
-
-            model_class = getattr(swagger_client.models, schema['__schema_name__'])
 
             if my_op_mode == 'scim':
                 if endpoint.path == '/jans-scim/restv1/v2/Groups':
@@ -1449,7 +1392,7 @@ class JCA_CLI:
                 if endpoint.info['operationId'] == 'create-user':
                     schema['required'] = ['userName', 'name', 'displayName', 'emails', 'password']
 
-            model = self.get_input_for_schema_(schema, model_class, required_only=True)
+            data = self.get_input_for_schema_(schema, data_dict, required_only=True)
 
             optional_fields = []
             required_fields = schema.get('required', []) + ['dn', 'inum']
@@ -1475,11 +1418,11 @@ class JCA_CLI:
                             item_name = optional_fields[int(optional_selection) - 1]
                             schema_item = schema['properties'][item_name].copy()
                             schema_item['__name__'] = item_name
-                            self.get_input_for_schema_(schema, model, initialised=True, getitem=schema_item)
+                            item_data = self.get_input_for_schema_(schema, getitem=schema_item)
+                            data[item_name] = item_data[item_name]
 
-            print("Obtained Data:\n")
-            model_unmapped = self.unmap_model(model)
-            self.print_colored_output(model_unmapped)
+            print("Obtained Data:")
+            self.pretty_print(data)
 
             selection = self.get_input(values=['q', 'x', 'b', 'y', 'n'], text='Continue?')
 
@@ -1488,25 +1431,32 @@ class JCA_CLI:
             model = None
 
         if selection == 'y':
-            api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
-
-            try:
-                api_response = api_caller(body=model) if model else api_caller()
-            except Exception as e:
-                api_response = None
-                self.print_exception(e)
-
-            if api_response:
-                try:
-                    api_response_unmapped = self.unmap_model(api_response)
-                    self.print_colored_output(api_response_unmapped)
-                except:
-                    print(self.colored_text(str(api_response), success_color))
+            response = self.post_requests(endpoint, data)
+            if response:
+                self.pretty_print(response)
 
         selection = self.get_input(values=['q', 'x', 'b'])
         if selection in ('b', 'n'):
             self.display_menu(endpoint.parent)
+
+
+    def delete_requests(self, endpoint, url_param_dict):
+        security = self.get_scope_for_endpoint(endpoint)
+        self.get_access_token(security)
+
+        response = requests.delete(
+            url='https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict)),
+            headers=self.get_request_header({'Accept': 'application/json'}),
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
+            )
+        self.log_response(response)
+        if response.status_code in (200, 204):
+            return None
+
+        return response.text.strip()
+
 
     def process_delete(self, endpoint):
         url_param = self.get_endpiont_url_param(endpoint)
@@ -1519,104 +1469,139 @@ class JCA_CLI:
         if selection in ('b', 'n'):
             self.display_menu(endpoint.parent)
         elif selection == 'y':
-            api_caller = self.get_api_caller(endpoint)
             print("Please wait while deleting {} ...\n".format(url_param_val))
-            api_response = '__result__'
+            
+            url_param_dict = {url_param['name']: url_param_val}
 
-            try:
-                api_response = api_caller(url_param_val) if url_param_val else api_caller()
-            except Exception as e:
-                self.print_exception(e)
+            response = self.delete_requests(endpoint, url_param_dict)
 
-            if api_response is None:
+            if response is None:
                 print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), success_color))
+            else:
+                print(self.colored_text("An error ocurred while deleting entry:", error_color))
+                print(self.colored_text(response, error_color))
 
         selection = self.get_input(['b', 'q', 'x'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
+    def patch_requests(self, endpoint, url_param_dict, data):
+        url = 'https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict))
+        security = self.get_scope_for_endpoint(endpoint)
+        self.get_access_token(security)
+
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': 'application/json-patch+json'})
+        data = data
+        response = requests.patch(
+            url=url,
+            headers=headers,
+            json=data,
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
+            )
+        self.log_response(response)
+        try:
+            return response.json()
+        except:
+            self.print_exception(response.text)
+
+
     def process_patch(self, endpoint):
 
-        if 'PatchOperation' in self.cfg_yml['components']['schemas']:
-            schema = self.cfg_yml['components']['schemas']['PatchOperation'].copy()
-            model = getattr(swagger_client.models, 'PatchOperation')
-            for item in schema['properties']:
-                if not 'type' in schema['properties'][item]:
-                    schema['properties'][item]['type'] = 'string'
+        schema = self.get_schema_for_endpoint(endpoint)
+
+        if 'PatchOperation' in cfg_yml['components']['schemas']:
+            schema = cfg_yml['components']['schemas']['PatchOperation'].copy()
             schema['__schema_name__'] = 'PatchOperation'
         else:
-            schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
+            schema = cfg_yml['components']['schemas']['PatchRequest'].copy()
             schema['__schema_name__'] = 'PatchRequest'
-            model = getattr(swagger_client.models, 'PatchRequest')
 
+
+        for item in schema['properties']:
+            print("d-checking", item)
+            if not 'type' in schema['properties'][item] or schema['properties'][item]['type']=='object':
+                schema['properties'][item]['type'] = 'string'
+
+        url_param_dict = {}
         url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
         if 'name' in url_param:
             url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
+            url_param_dict = {url_param['name']: url_param_val}
+    
         body = []
 
         while True:
-            data = self.get_input_for_schema_(schema, model)
-            guessed_val = self.guess_bool(data.value)
-            if not guessed_val is None:
-                data.value = guessed_val
-            if my_op_mode != 'scim' and not data.path.startswith('/'):
-                data.path = '/' + data.path
+            data = self.get_input_for_schema_(schema)
+            #guessed_val = self.guess_bool(data.value)
+            #if not guessed_val is None:
+            #    data.value = guessed_val
+            if my_op_mode != 'scim' and not data['path'].startswith('/'):
+                data['path'] = '/' + data['path']
 
             if my_op_mode == 'scim':
-                data.path = data.path.replace('/', '.')
+                data['path'] = data['path'].replace('/', '.')
 
             body.append(data)
             selection = self.get_input(text='Another patch operation?', values=['y', 'n'])
             if selection == 'n':
                 break
 
-        unmapped_body = []
-        for item in body:
-            unmapped_body.append(self.unmap_model(item))
+        if endpoint.info['operationId'] == 'patch-oauth-uma-resources-by-id':
+            for patch_item in body:
+                if patch_item['path'] == '/clients':
+                    patch_item['value'] = patch_item['value'].split('_,')
 
-        self.print_colored_output(unmapped_body)
+        self.pretty_print(body)
 
         selection = self.get_input(values=['y', 'n'], text='Continue?')
 
         if selection == 'y':
 
-            api_caller = self.get_api_caller(endpoint)
-
-            print("Please wait patching...\n")
-
             if my_op_mode == 'scim':
                 body = {'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'], 'Operations': body}
 
-            try:
-                if url_param_val:
-                    param_mapping = self.guess_param_mapping(url_param['name'])
-                    payload = {param_mapping: url_param_val, 'body': body}
-                    api_response = api_caller(**payload)
-                else:
-                    api_response = api_caller(body=body)
-            except Exception as e:
-                api_response = None
-                self.print_exception(e)
-
-            if api_response:
-                api_response_unmapped = self.unmap_model(api_response)
-                self.print_colored_output(api_response_unmapped)
+            self.patch_requests(endpoint, url_param_dict, body)
 
         selection = self.get_input(['b'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
+    def get_mime_for_endpoint(self, endpoint, req='requestBody'):
+        for key in endpoint.info[req]['content']:
+            return key
+
+
+    def put_requests(self, endpoint, data):
+
+        security = self.get_scope_for_endpoint(endpoint)
+        self.get_access_token(security)
+
+        mime_type = self.get_mime_for_endpoint(endpoint)
+
+        response = requests.put(
+                url='https://{}{}'.format(self.host, endpoint.path),
+                headers=self.get_request_header({'Accept': mime_type}),
+                json=data,
+                verify=self.verify_ssl,
+                cert=self.mtls_client_cert
+            )
+        self.log_response(response)
+        try:
+            result = response.json()
+        except Exception:
+            self.exit_with_error(response.text)
+
+        return result
+
 
     def process_put(self, endpoint):
 
-        schema = self.get_scheme_for_endpoint(endpoint)
+        schema = self.get_schema_for_endpoint(endpoint)
 
-        initialised = False
-        cur_model = None
+        cur_data = None
         go_back = False
-        key_name = None
-        parent_model = None
 
         if endpoint.info.get('x-cli-getdata') != '_file':
             if 'x-cli-getdata' in endpoint.info and endpoint.info['x-cli-getdata'] != None:
@@ -1624,193 +1609,161 @@ class JCA_CLI:
                     if m.info['operationId'] == endpoint.info['x-cli-getdata']:
                         while True:
                             try:
-                                cur_model = self.process_get(m, return_value=True)
+                                print("cur_data-1")
+                                cur_data = self.process_get(m, return_value=True)
                                 break
                             except ValueError as e:
-                                print(self.colored_text("Server returned no data", error_color))
                                 retry = self.get_input(values=['y', 'n'], text='Retry?')
                                 if retry == 'n':
                                     self.display_menu(endpoint.parent)
                                     break
-                        initialised = True
                         get_endpoint = m
                         break
 
             else:
+                for mi in endpoint.parent :
+                    if mi.method == 'get' and not mi.path.endswith('}'):
+                        cur_data = self.process_get(mi, noprompt=True, update=True)
+                        values = ['b', 'q', 'x'] + cur_data[0]
+                        item_number = self.get_input(text="Enter item # to update", values=values)
+
+                        cur_data = cur_data[1][int(item_number) -1]
+                """
                 for m in endpoint.parent:
                     if m.method == 'get' and m.path.endswith('}'):
                         while True:
                             while True:
                                 try:
+                                    
                                     key_name_desc = self.get_endpiont_url_param(m)
                                     if key_name_desc and 'name' in key_name_desc:
                                         key_name = key_name_desc['name']
-                                    cur_model = self.process_get(m, return_value=True)
+                                    print("P-X", m)
+                                    cur_data = self.process_get(m, return_value=True)
                                     break
                                 except ValueError as e:
-                                    print(self.colored_text("Server returned no data", error_color))
                                     retry = self.get_input(values=['y', 'n'], text='Retry?')
                                     if retry == 'n':
                                         self.display_menu(endpoint.parent)
                                         break
 
-                            if not cur_model is False:
+                            if cur_data is not None:
                                 break
 
-                        initialised = True
                         get_endpoint = m
                         break
-
-            if not cur_model:
+                """
+            if not cur_data:
                 for m in endpoint.parent:
                     if m.method == 'get' and not m.path.endswith('}'):
-                        cur_model = self.process_get(m, return_value=True)
+                        cur_data = self.process_get(m, return_value=True)
                         get_endpoint = m
-
-
-        if not cur_model:
-            cur_model = getattr(swagger_client.models, schema['__schema_name__'])
 
         end_point_param = self.get_endpiont_url_param(endpoint)
 
+        if endpoint.info.get('x-cli-getdata') == '_file':
 
-        if cur_model:
+            # TODO: To be implemented
+            schema_desc = schema.get('description') or schema['__schema_name__']
+            text = 'Enter filename to load data for «{}»: '.format(schema_desc)
+            data_fn = input(self.colored_text(text, 244))
+            if data_fn == 'b':
+                go_back = True
+            elif data_fn == 'q':
+                sys.exit()
+            else:
+                data_org = self.get_json_from_file(data_fn)
 
-            if endpoint.info.get('x-cli-getdata') == '_file':
-
-                schema_desc = schema.get('description') or schema['__schema_name__']
-                text = 'Enter filename to load data for «{}»: '.format(schema_desc)
-                data_fn = input(self.colored_text(text, 244))
-                if data_fn == 'b':
-                    go_back = True
-                elif data_fn == 'q':
-                    sys.exit()
+            data = {}
+            for k in data_org:
+                if k in cur_model.attribute_map:
+                    mapped_key = cur_model.attribute_map[k]
+                    data[mapped_key] = data_org[k]
                 else:
-                    data_org = self.get_json_from_file(data_fn)
+                    data[k] = data_org[k]
 
-                data = {}
-                for k in data_org:
-                    if k in cur_model.attribute_map:
-                        mapped_key = cur_model.attribute_map[k]
-                        data[mapped_key] = data_org[k]
-                    else:
-                        data[k] = data_org[k]
+            print("Please wait while posting data ...\n")
 
-                api_caller = self.get_api_caller(endpoint)
+            response = self.put_requests(endpoint, cur_data)
 
-                print("Please wait while posting data ...\n")
+            if response:
+                self.pretty_print(response)
 
-                try:
-                    api_response = api_caller(body=data)
-                except Exception as e:
-                    api_response = None
-                    self.print_exception(e)
+            selection = self.get_input(values=['q', 'x', 'b'])
+            if selection == 'b':
+                self.display_menu(endpoint.parent)
 
-                if api_response:
-                    api_response_unmapped = self.unmap_model(api_response)
-                    self.print_colored_output(api_response_unmapped)
+        else:
 
+            end_point_param_val = None
+            if end_point_param and end_point_param['name'] in cur_data:
+                end_point_param_val = cur_data[end_point_param['name']]
+
+            schema = self.get_schema_for_endpoint(endpoint)
+            if schema['properties'].get('keys', {}).get('properties'):
+                schema = schema['properties']['keys']
+
+
+            attr_name_list = list(schema['properties'].keys())
+            if 'dn' in attr_name_list:
+                attr_name_list.remove('dn')
+
+            attr_name_list.sort()
+            item_numbers = []
+
+            def print_fields():
+                print("Fields:")
+                for i, attr_name in enumerate(attr_name_list):
+                    print(str(i + 1).rjust(2), attr_name)
+                    item_numbers.append(str(i + 1))
+
+            print_fields()
+            changed_items = []
+            selection_list = ['q', 'x', 'b', 'v', 's', 'l'] + item_numbers
+            help_text = 'q: quit, v: view, s: save, l: list fields #: update field'
+
+            while True:
+                selection = self.get_input(values=selection_list, help_text=help_text)
+                if selection == 'v':
+                    self.pretty_print(cur_data)
+                elif selection == 'l':
+                    print_fields()
+                elif selection in item_numbers:
+                    item = attr_name_list[int(selection) - 1]
+
+                    schema_item = schema['properties'][item]
+                    schema_item['__name__'] = item
+                    self.get_input_for_schema_(schema, data=cur_data, getitem=schema_item)
+                    changed_items.append(item)
+
+                if selection == 'b':
+                    self.display_menu(endpoint.parent)
+                    break
+                elif selection == 's':
+                    print('Changes:')
+                    for ci in changed_items:
+                        str_val = str(cur_data[ci])
+                        print(self.colored_text(ci, bold_color) + ':', self.colored_text(str_val, success_color))
+
+                    selection = self.get_input(values=['y', 'n'], text='Continue?')
+
+                    if selection == 'y':
+                        print("Please wait while posting data ...\n")
+                        put_pname = self.get_url_param(endpoint.path)
+
+                        response = self.put_requests(endpoint, cur_data)
+
+                        if response:
+                            self.pretty_print(response)
+                            go_back = True
+                            break
+
+            if go_back:
                 selection = self.get_input(values=['q', 'x', 'b'])
                 if selection == 'b':
                     self.display_menu(endpoint.parent)
-
-
             else:
-
-                end_point_param_val = None
-                if end_point_param:
-                    end_point_param_val = getattr(cur_model, end_point_param['name'], None) or self.get_model_key_map(cur_model, end_point_param['name'])
-
-                attr_name_list = []
-                for attr_name in cur_model.attribute_map:
-                    if attr_name != 'dn':
-                        attr_name_list.append(cur_model.attribute_map[attr_name])
-
-                attr_name_list.sort()
-                item_numbers = []
-
-                def print_fields():
-                    print("Fields:")
-                    for i, attr_name in enumerate(attr_name_list):
-                        print(str(i + 1).rjust(2), attr_name)
-                        item_numbers.append(str(i + 1))
-
-                print_fields()
-                changed_items = []
-                selection_list = ['q', 'x', 'b', 'v', 's', 'l'] + item_numbers
-                help_text = 'q: quit, v: view, s: save, l: list fields #: update field'
-
-                while True:
-                    selection = self.get_input(values=selection_list, help_text=help_text)
-                    if selection == 'v':
-                        self.pretty_print(self.unmap_model(cur_model))
-                    elif selection == 'l':
-                        print_fields()
-                    elif selection in item_numbers:
-                        item = attr_name_list[int(selection) - 1]
-                        item_unmapped = self.get_model_key_map(cur_model, item)
-                        if schema['properties'].get('keys', {}).get('properties'):
-                            schema = schema['properties']['keys']
-
-                        schema_item = schema['properties'][item]
-                        schema_item['__name__'] = item
-                        self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
-                        changed_items.append(item)
-
-                    if selection == 'b':
-                        self.display_menu(endpoint.parent)
-                        break
-                    elif selection == 's':
-                        print('Changes:')
-                        for ci in changed_items:
-                            model_key = self.get_model_key_map(cur_model, ci)
-                            str_val = str(getattr(cur_model, model_key))
-                            print(self.colored_text(ci, bold_color) + ':', self.colored_text(str_val, success_color))
-
-                        selection = self.get_input(values=['y', 'n'], text='Continue?')
-
-                        if selection == 'y':
-                            schema_must = self.get_scheme_for_endpoint(endpoint)
-                            if schema_must['__schema_name__'] != cur_model.__class__.__name__:
-                                for e in  endpoint.parent.children:
-                                    if e.method == 'get':
-                                        parent_model = self.process_get(e, return_value=True)
-                                        break
-
-
-                                if parent_model and key_name and hasattr(parent_model, 'keys'):
-                                    for i, wkey in enumerate(parent_model.keys):
-                                        if getattr(wkey, key_name) == getattr(cur_model, key_name):
-                                            parent_model.keys[i] = cur_model
-                                            cur_model = parent_model
-                                            break
-
-                            print("Please wait while posting data ...\n")
-                            api_caller = self.get_api_caller(endpoint)
-                            put_pname = self.get_url_param(endpoint.path)
-
-                            try:
-                                if put_pname:
-                                    args_ = {'body': cur_model, put_pname: end_point_param_val}
-                                    api_response = api_caller(**args_)
-                                else:
-                                    api_response = api_caller(body=cur_model)
-                            except Exception as e:
-                                api_response = None
-                                self.print_exception(e)
-
-                            if api_response:
-                                api_response_unmapped = self.unmap_model(api_response)
-                                self.print_colored_output(api_response_unmapped)
-                                go_back = True
-                                break
-
-                if go_back:
-                    selection = self.get_input(values=['q', 'x', 'b'])
-                    if selection == 'b':
-                        self.display_menu(endpoint.parent)
-                else:
-                    self.get_input_for_schema_(schema, cur_model, initialised=initialised)
+                self.get_input_for_schema_(schema, data=cur_data)
 
     def display_menu(self, menu):
         clear()
@@ -1886,38 +1839,44 @@ class JCA_CLI:
         return args_dict
 
     def help_for(self, op_name):
-        paths = self.get_tag_from_api_name(op_name + 'Api')
 
         schema_path = None
 
-        for path in paths:
-            if 'tags' in path:
-                print('Operation ID:', path['operationId'])
-                print('  Description:', path['description'])
-                if path.get('__urlsuffix__'):
-                    print('  url-suffix:', path['__urlsuffix__'])
-                if 'parameters' in path:
-                    param_names = []
-                    for param in path['parameters']:
-                        desc = param.get('description', 'No description is provided for this parameter')
-                        param_type = param.get('schema', {}).get('type')
-                        if param_type:
-                            desc += ' [{}]'.format(param_type)
-                        param_names.append((param['name'], desc))
-                    if param_names:
-                        print('  Parameters:')
-                        for param in param_names:
-                            print('  {}: {}'.format(param[0], param[1]))
+        for path_name in cfg_yml['paths']:
+            for method in cfg_yml['paths'][path_name]:
+                path = cfg_yml['paths'][path_name][method]
+                if isinstance(path, dict):
+                    for tag_ in path['tags']:
+                        tag = get_named_tag(tag_)
+                        if tag != op_name:
+                            continue
 
-                if 'requestBody' in path:
-                    for apptype in path['requestBody'].get('content', {}):
-                        if 'schema' in path['requestBody']['content'][apptype]:
-                            if path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
-                                schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
-                                print('  Schema: Array of {}'.format(schema_path[1:]))
-                            else:
-                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                print('  Schema: {}'.format(schema_path[1:]))
+                        print('Operation ID:', path['operationId'])
+                        print('  Description:', path['description'])
+                        if path.get('__urlsuffix__'):
+                            print('  url-suffix:', path['__urlsuffix__'])
+                        if 'parameters' in path:
+                            param_names = []
+                            for param in path['parameters']:
+                                desc = param.get('description', 'No description is provided for this parameter')
+                                param_type = param.get('schema', {}).get('type')
+                                if param_type:
+                                    desc += ' [{}]'.format(param_type)
+                                param_names.append((param['name'], desc))
+                            if param_names:
+                                print('  Parameters:')
+                                for param in param_names:
+                                    print('  {}: {}'.format(param[0], param[1]))
+
+                        if 'requestBody' in path:
+                            for apptype in path['requestBody'].get('content', {}):
+                                if 'schema' in path['requestBody']['content'][apptype]:
+                                    if path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                        schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
+                                        print('  Schema: Array of {}'.format(schema_path[1:]))
+                                    else:
+                                        schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
+                                        print('  Schema: {}'.format(schema_path[1:]))
 
         if schema_path:
             print()
@@ -1958,62 +1917,12 @@ class JCA_CLI:
 
         return data
 
-    def get_api_instance(self, client):
-        api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
-        if args.key_password:
-            api_instance.api_client.rest_client.pool_manager.connection_pool_kw['key_password'] = args.key_password
-        return api_instance
-
-    def get_path_api_caller_for_path(self, path):
-
-        dummy_enpoint = Menu(name='', info=path)
-        security = self.get_scope_for_endpoint(dummy_enpoint)
-        if security.strip():
-            self.get_access_token(security)
-        class_name = self.get_api_class_name(path['tags'][0])
-        client = getattr(swagger_client, class_name)
-        api_instance = self.get_api_instance(client)
-        api_caller = getattr(api_instance, path['operationId'].replace('-', '_'))
-
-        return api_caller
 
     def process_command_get(self, path, suffix_param, endpoint_params, data_fn, data=None):
-        api_caller = self.get_path_api_caller_for_path(path)
-        api_response = None
-        encoded_param = urlencode(endpoint_params)
+        endpoint = self.get_fake_endpoint(path)
+        response = self.get_requests(endpoint, suffix_param)
+        self.pretty_print(response)
 
-        if encoded_param:
-            sys.stderr.write("Calling with params {}\n".format(encoded_param))
-
-        try:
-            if path.get('__urlsuffix__'):
-                api_response = api_caller(suffix_param[path['__urlsuffix__']], **endpoint_params)
-            else:
-                api_response = api_caller(**endpoint_params)
-        except Exception as e:
-            if hasattr(e, 'reason'):
-                sys.stderr.write(e.reason)
-            if hasattr(e, 'body'):
-                sys.stderr.write(e.body)
-                sys.stderr.write('\n')
-            sys.exit()
-
-        api_response_unmapped = []
-        if isinstance(api_response, list):
-            for model in api_response:
-                data_dict = self.unmap_model(model)
-                api_response_unmapped.append(data_dict)
-        else:
-            data_dict = self.unmap_model(api_response)
-            api_response_unmapped = data_dict
-
-        print(json.dumps(api_response_unmapped, indent=2))
-
-    def get_sub_model(self, field):
-        sub_model_name_str = field.get('title') or field.get('description')
-        sub_model_name = self.get_name_from_string(sub_model_name_str)
-        if hasattr(swagger_client.models, sub_model_name):
-            return getattr(swagger_client.models, sub_model_name)
 
     def exit_with_error(self, error_text):
         error_text += '\n'
@@ -2021,58 +1930,52 @@ class JCA_CLI:
         print()
         sys.exit()
 
-    def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
-        api_caller = self.get_path_api_caller_for_path(path)
 
-        endpoint = Menu(name='', info=path)
-        schema = self.get_scheme_for_endpoint(endpoint)
-        model_name = schema['__schema_name__']
-        model = getattr(swagger_client.models, model_name)
+    def get_fake_endpoint(self, path):
+        endpoint = SimpleNamespace()
+        endpoint.path = path['__path__']
+        endpoint.info = path
+        return endpoint
+
+
+    def print_response(self, response):
+        if response:
+            sys.stderr.write("Server Response:\n")
+            self.pretty_print(response)
+
+    def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
+
+        # TODO: suffix_param, endpoint_params
+
+        endpoint = self.get_fake_endpoint(path)
 
         if not data:
 
             if data_fn.endswith('jwt'):
                 with open(data_fn) as reader:
-                    data_org = jwt.decode(reader.read(),
+                    data = jwt.decode(reader.read(),
                                           options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
             else:
                 try:
-                    data_org = self.get_json_from_file(data_fn)
+                    data = self.get_json_from_file(data_fn)
                 except ValueError as ve:
                     self.exit_with_error(str(ve))
 
-            data = {}
+        if path['__method__'] == 'post':
+            response = self.post_requests(endpoint, data)
+        elif path['__method__'] == 'put':
+            response = self.put_requests(endpoint, data)
 
-            for k in data_org:
-                if k in model.attribute_map:
-                    mapped_key = model.attribute_map[k]
-                    data[mapped_key] = data_org[k]
-                else:
-                    data[k] = data_org[k]
-
-        try:
-            body = myapi._ApiClient__deserialize_model(data, model)
-        except Exception as e:
-            self.exit_with_error(str(e))
-
-        try:
-            if suffix_param:
-                api_response = api_caller(body=body, **suffix_param)
-            else:
-                api_response = api_caller(body=body)
-        except Exception as e:
-            self.print_exception(e)
-            sys.exit()
-
-        unmapped_response = self.unmap_model(api_response)
-        sys.stderr.write("Server Response:\n")
-        print(json.dumps(unmapped_response, indent=2))
+        self.print_response(response)
 
     def process_command_put(self, path, suffix_param, endpoint_params, data_fn, data=None):
         self.process_command_post(path, suffix_param, endpoint_params, data_fn, data=None)
 
     def process_command_patch(self, path, suffix_param, endpoint_params, data_fn, data=None):
+        # TODO: suffix_param, endpoint_params
 
+        endpoint = self.get_fake_endpoint(path)
+        
         if not data:
             try:
                 data = self.get_json_from_file(data_fn)
@@ -2091,36 +1994,18 @@ class JCA_CLI:
             if not item['path'].startswith('/'):
                 item['path'] = '/' + item['path']
 
-        api_caller = self.get_path_api_caller_for_path(path)
+        response = self.patch_requests(endpoint, suffix_param, data)
 
-        try:
-            if suffix_param:
-                api_response = api_caller(suffix_param[path['__urlsuffix__']], body=data)
-            else:
-                api_response = api_caller(body=data)
-        except Exception as e:
-            self.print_exception(e)
-            sys.exit()
+        self.print_response(response)
 
-        unmapped_response = self.unmap_model(api_response)
-        sys.stderr.write("Server Response:\n")
-        print(json.dumps(unmapped_response, indent=2))
 
     def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
-
-        api_caller = self.get_path_api_caller_for_path(path)
-        api_response = None
-
-        try:
-            api_response = api_caller(suffix_param[path['__urlsuffix__']], **endpoint_params)
-        except Exception as e:
-            self.print_exception(e)
-            sys.exit()
-
-        if api_response:
-            unmapped_response = self.unmap_model(api_response)
-            sys.stderr.write("Server Response:\n")
-            print(json.dumps(unmapped_response, indent=2))
+        endpoint = self.get_fake_endpoint(path)
+        response = self.delete_requests(endpoint, suffix_param)
+        if response:
+            self.print_response(response)
+        else:
+            print(self.colored_text("Object was successfully deleted.", success_color))
 
     def process_command_by_id(self, operation_id, url_suffix, endpoint_args, data_fn, data=None):
         path = self.get_path_by_id(operation_id)
@@ -2135,7 +2020,7 @@ class JCA_CLI:
             self.exit_with_error("This operation requires a value for url-suffix {}".format(path['__urlsuffix__']))
 
         endpoint = Menu('', info=path)
-        schema = self.get_scheme_for_endpoint(endpoint)
+        schema = self.get_schema_for_endpoint(endpoint)
 
         if not data:
             op_path = self.get_path_by_id(operation_id)
@@ -2167,93 +2052,36 @@ class JCA_CLI:
         caller_function = getattr(self, 'process_command_' + path['__method__'])
         caller_function(path, suffix_param, endpoint_params, data_fn, data=data)
 
-    def make_schema_val(self, stype):
-        if stype == 'object':
-            return {}
-        elif stype == 'list':
-            return []
-        elif stype == 'bool':
-            return random.choice((True, False))
-        else:
-            return None
-
-    def is_native_type(self, model, prop):
-        stype = getattr(model, prop)
-        if stype.startswith('list['):
-            stype = re.match(r'list\[(.*)\]', stype).group(1)
-        elif stype.startswith('dict('):
-            stype = re.match(r'dict\(([^,]*), (.*)\)', stype).group(2)
-
-        if stype in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
-            return True
-
-    def get_schema_from_model(self, model, schema):
-
-        for key in model.attribute_map:
-            stype = model.swagger_types[key]
-            mapped_key = model.attribute_map[key]
-            if stype in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
-                schema[mapped_key] = self.make_schema_val(stype)
-            else:
-                if stype.startswith('list['):
-                    sub_cls = re.match(r'list\[(.*)\]', stype).group(1)
-                    sub_type = 'list'
-                elif stype.startswith('dict('):
-                    sub_cls = re.match(r'dict\(([^,]*), (.*)\)', stype).group(2)
-                    sub_type = 'dict'
-                else:
-                    sub_cls = stype
-                    sub_type = None
-
-                if sub_cls in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
-                    schema[mapped_key] = self.make_schema_val(sub_type)
-                else:
-                    sub_dict = {}
-                    sub_model = getattr(swagger_client.models, sub_cls)
-                    sub_schema = self.get_schema_from_model(sub_model, sub_dict)
-                    schema[mapped_key] = sub_dict
-
-    def get_swagger_model_attr(self, model, attr):
-        stype = model.swagger_types[attr]
-        if stype in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
-            return getattr(model, attr)
-
-    def fill_defaults(self, schema, schema_={}):
-
-        for k in schema:
-            if isinstance(schema[k], dict):
-                sub_schema_ = None
-                if '$ref' in schema_['properties'][k]:
-                    sub_schema_ = self.cfg_yml['components']['schemas'][schema_['properties'][k]['$ref'].split('/')[-1]]
-                elif schema_['properties'][k].get('items', {}).get('$ref'):
-                    sub_schema_ = self.cfg_yml['components']['schemas'][
-                        schema_['properties'][k]['items']['$ref'].split('/')[-1]]
-                elif 'properties' in schema_['properties'][k]:
-                    sub_schema_ = schema_['properties'][k]
-                if sub_schema_:
-                    self.fill_defaults(schema[k], sub_schema_)
-
-            else:
-                if 'enum' in schema_['properties'][k]:
-                    val = random.choice(schema_['properties'][k]['enum'])
-                    if schema_['properties'][k]['type'] == 'array':
-                        val = [val]
-                    schema[k] = val
-                elif 'default' in schema_['properties'][k]:
-                    schema[k] = schema_['properties'][k]['default']
-                elif 'example' in schema_['properties'][k]:
-                    schema[k] = schema_['properties'][k]['example']
-                elif k in schema_.get('required', []):
-                    schema[k] = schema_['properties'][k]['type']
 
     def get_sample_schema(self, ref):
-        schema_ = self.get_schema_from_reference('#' + args.schema)
-        m = getattr(swagger_client.models, schema_['__schema_name__'])
-        schema = {}
-        self.get_schema_from_model(m, schema)
-        self.fill_defaults(schema, schema_)
+        schema = self.get_schema_from_reference('#' + args.schema)
+        sample_schema = OrderedDict()
+        for prop_name in schema.get('properties', {}):
+            prop = schema['properties'][prop_name]
+            if 'default' in prop:
+                sample_schema[prop_name] = prop['default']
+            elif 'example' in prop:
+                sample_schema[prop_name] = prop['example']
+            elif 'enum' in prop:
+                sample_schema[prop_name] = random.choice(prop['enum'])
+            elif prop.get('type') == 'object':
+                sample_schema[prop_name] = {}
+            elif prop.get('type') == 'array':
+                if 'items' in prop:
+                    if 'enum' in prop['items']:
+                        sample_schema[prop_name] = [random.choice(prop['items']['enum'])]
+                    elif 'type' in prop['items']:
+                        sample_schema[prop_name] = [prop['items']['type']]
+                else:
+                    sample_schema[prop_name] = []
+            elif prop.get('type') == 'boolean':
+                sample_schema[prop_name] = random.choice((True, False))
+            elif prop.get('type') == 'integer':
+                sample_schema[prop_name] = random.randint(1,200)
+            else:
+                sample_schema[prop_name]='string'
 
-        print(json.dumps(schema, indent=2))
+        print(json.dumps(sample_schema, indent=2))
 
     def runApp(self):
         clear()
@@ -2262,7 +2090,12 @@ class JCA_CLI:
 
 def main():
 
+
+    error_log_file = os.path.join(log_dir, 'cli_eorror.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
+
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
     try:
         if not access_token:
