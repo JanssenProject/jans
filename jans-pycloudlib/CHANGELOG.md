@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+
+
+### Bug Fixes
+
+* **images:** conform to new couchbase persistence configuration ([#2188](https://github.com/JanssenProject/jans/issues/2188)) ([c708542](https://github.com/JanssenProject/jans/commit/c7085427fd298f74e8809ef4d6c39f780fa83776))
+* **pycloudlib:** handle type mismatch for iterable ([#2004](https://github.com/JanssenProject/jans/issues/2004)) ([46e0b2e](https://github.com/JanssenProject/jans/commit/46e0b2e4aff70a97cdcdcd0102dc83d294e45fdc))
+
+
+### Documentation
+
+* **pycloudlib:** migrate pycloudlib docs to mkdocstrings ([#2164](https://github.com/JanssenProject/jans/issues/2164)) ([0fb4157](https://github.com/JanssenProject/jans/commit/0fb4157af0666b173e4c262b06afce192630b3ab))
+* **pycloudlib:** update docstrings and internal API docs ([#1566](https://github.com/JanssenProject/jans/issues/1566)) ([0f1a2e6](https://github.com/JanssenProject/jans/commit/0f1a2e6761c0522acdfdab3d69adac5c8062e780))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.0...jans-pycloudlib-v1.0.1) (2022-07-06)
 
 
