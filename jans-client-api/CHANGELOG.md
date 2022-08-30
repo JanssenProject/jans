@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* **jans-client-api:** migration to Weld/Resteasy and Jetty 11 - Issue 260 ([#1319](https://github.com/JanssenProject/jans/issues/1319)) ([420ffc3](https://github.com/JanssenProject/jans/commit/420ffc3329b91c52d5c9996d7c1e600d9b6fead2))
+* **jans-client-api:** Use injectable operations and remove serviceprovider ([#1643](https://github.com/JanssenProject/jans/issues/1643)) ([982cab3](https://github.com/JanssenProject/jans/commit/982cab3bc3f499d3ec3fbefbd10cb87f58333998))
+
+
+### Bug Fixes
+
+* **jans-client-api:** minor observations PR13119 - typo transalation code-improvement ([#1806](https://github.com/JanssenProject/jans/issues/1806)) ([6df2e42](https://github.com/JanssenProject/jans/commit/6df2e422879d8726f2b1d6574fe5492355317bf9))
+* **jans-client-api:** remove jans-config-api dependency and solve wrong  test dependencies ([#1737](https://github.com/JanssenProject/jans/issues/1737)) ([97dbe9c](https://github.com/JanssenProject/jans/commit/97dbe9cc3072ca17e9f092cc6d3df5a510778ac2))
+* **jans-client-api:** upgrade seleniumhq version from 3.x to 4.x ([#2110](https://github.com/JanssenProject/jans/issues/2110)) ([d48271e](https://github.com/JanssenProject/jans/commit/d48271e872de72c7085e592988ad2e4e8950116d))
+
+
+### Miscellaneous Chores
+
+* prepare helm chart release 1.0.1 ([ae78b76](https://github.com/JanssenProject/jans/commit/ae78b760aa536ecde3b7e7972070e144d6c3c072))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-client-api-v1.0.0...jans-client-api-v1.0.1) (2022-07-06)
 
 
