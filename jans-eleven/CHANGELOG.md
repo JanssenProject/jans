@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-eleven-v1.0.0...jans-eleven-v1.0.1) (2022-07-06)
 
 
