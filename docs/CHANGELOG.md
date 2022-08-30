@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+* **agama:** add utility classes for inbound identity ([#2231](https://github.com/JanssenProject/jans/issues/2231)) ([96e32a4](https://github.com/JanssenProject/jans/commit/96e32a407ec6c545b73a6fd103ed2ae5876bd500))
+* **jans-scim:** make max no. of operations and payload size of bulks operations parameterizable ([#1872](https://github.com/JanssenProject/jans/issues/1872)) ([c27a45b](https://github.com/JanssenProject/jans/commit/c27a45bb0a19257c824c4e195f203e9b9b45ec88))
+
+
+### Bug Fixes
+
+* [#2143](https://github.com/JanssenProject/jans/issues/2143) ([#2144](https://github.com/JanssenProject/jans/issues/2144)) ([ff7f9f4](https://github.com/JanssenProject/jans/commit/ff7f9f4110d72b333aae0d2332b429dcbd067da3))
+* [#2157](https://github.com/JanssenProject/jans/issues/2157) ([#2159](https://github.com/JanssenProject/jans/issues/2159)) ([dc8cb60](https://github.com/JanssenProject/jans/commit/dc8cb60990052256b46842f85ebf4961beee82dd))
+* **agama:** template overriding not working with more than one level of nesting ([#1841](https://github.com/JanssenProject/jans/issues/1841)) ([723922a](https://github.com/JanssenProject/jans/commit/723922a17b1babc49a1135030c06db367726ab63))
+* correct the link to image ([#1660](https://github.com/JanssenProject/jans/issues/1660)) ([0943d81](https://github.com/JanssenProject/jans/commit/0943d813f782a3babaa5166f426533fd561419a5))
+* update error pages ([#1957](https://github.com/JanssenProject/jans/issues/1957)) ([3d63f4d](https://github.com/JanssenProject/jans/commit/3d63f4d3d58e86d499271ebafdbc0dd56f5c4e98))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/docs-v1.0.0...docs-v1.0.1) (2022-07-06)
 
 
