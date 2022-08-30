@@ -127,6 +127,7 @@ jobs:
     if: >-
       github.event_name == 'release' &&
       github.event.action == 'published' &&
+      startsWith(github.event.release.name, 'janssen') &&
       !github.event.release.draft &&
       !github.event.release.prerelease
     # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
