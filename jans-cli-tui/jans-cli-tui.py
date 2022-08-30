@@ -454,15 +454,13 @@ class JansCliApp(Application, JansAuthServer):
     def show_jans_dialog(self, dialog):
 
         async def coroutine():
-            app = get_app()
-            focused_before = app.layout.current_window
+            focused_before = self.layout.current_window
             self.layout.focus(dialog)
             result = await self.show_dialog_as_float(dialog)
             try:
-                app.layout.focus(focused_before)
+                self.layout.focus(focused_before)
             except:
-                app.layout.focus(self.center_frame)
-
+                self.layout.focus(self.center_frame)
 
             return result
 
@@ -507,13 +505,12 @@ class JansCliApp(Application, JansAuthServer):
         body = HSplit([Label(message)])
         dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
 
-        app = get_app()
-        focused_before = app.layout.current_window
+        focused_before = self.layout.current_window
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         dialog.me = float_
         dialog.focus_on_exit = focused_before
-        app.layout.focus(dialog)
+        self.layout.focus(dialog)
         self.press_tab()
 
     def show_again(self): ## nasted dialog Button
