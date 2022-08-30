@@ -74,6 +74,8 @@ class JansCliApp(Application, JansAuthServer):
     def __init__(self):
         self.init_logger()
         self.status_bar_text = ''
+        self.styles = dict(style.style_rules)
+
         self.set_keybindings()
         # -------------------------------------------------------------------------------- #
 
@@ -324,17 +326,18 @@ class JansCliApp(Application, JansAuthServer):
 
         return  new_title , cd , width
 
-    def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, width=None, style=''):
+    def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, focusable=None, width=None, style=''):
         title += ': '
         ta = TextArea(
             text=str(value),
             multiline=height > 1,
             height=height,
             read_only=read_only,
-            style="class:textarea-readonly" if read_only else "class:textarea",
-            focusable=not read_only,
+            style=self.styles['textarea-readonly'] if read_only else self.styles['textarea'],
             accept_handler=accept_handler,
+            focusable=not read_only if focusable is None else focusable,
             )
+
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 

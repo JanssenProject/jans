@@ -293,16 +293,16 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             )
 
         def allow_spontaneous_changed(cb):
+            self.spontaneous_scopes.me.window.style = 'underline ' + (self.myparent.styles['textarea'] if cb.checked else self.myparent.styles['textarea-readonly'])
+            self.spontaneous_scopes.me.text = ''
             self.spontaneous_scopes.me.read_only = not cb.checked
-            self.spontaneous_scopes.me.focusable = cb.checked
-            self.myparent.logger.debug("CB-allow-spontaneous: " + str(cb.checked) )
-            self.myparent.invalidate()
 
         self.spontaneous_scopes = self.myparent.getTitledText(
                     "Spontaneos scopes validation regex",
                     name='spontaneousScopes',
                     value=self.data.get('spontaneousScopes',''),
                     read_only=False if 'allowSpontaneousScopes' in self.data and self.data['allowSpontaneousScopes'] else True,
+                    focusable=True,
                     style='green')
 
 
