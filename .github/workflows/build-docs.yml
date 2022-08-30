@@ -76,7 +76,7 @@ jobs:
         if: >-
           github.event_name == 'release' &&
           github.event.action == 'published' &&
-          startsWith(github.event.release.name, 'v')
+          startsWith(github.event.release.name, 'v') &&
           !github.event.release.draft &&
           !github.event.release.prerelease
         env:
