@@ -37,10 +37,9 @@ class JansSelectDate:
         self.change_date = True
         self.date = date  #"11/27/2023"
         self.months = months 
-    
         self.cord_y = 0
         self.cord_x = 0
-
+        self.selected_cord = (0, 0)
         self.extract_date(self.date)
 
         #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
@@ -126,7 +125,7 @@ class JansSelectDate:
             else:
                 space_, colon_ = 0, ':'
 
-            if i == self.cord_x and self.change_date == False:
+            if i == self.cord_x and not self.change_date:
                 time_line.append(HTML('{}<style fg="ansiwhite" bg="#777777"><blue>{}</blue>{}</style>'.format(' '*space_, self.adjust_sizes(time_element), colon_)))
             else :
                 time_line.append(HTML('{}<b><blue>{}</blue>{}</b>'.format(' '*space_, self.adjust_sizes(time_element), colon_)))
@@ -136,14 +135,14 @@ class JansSelectDate:
 
         return merge_formatted_text(result)
 
-    def extract_date(self,date):  #"11/27/2023"
+    def extract_date(self, date):  #"11/27/2023"
         ### this function is for the init date >> passed date from `data`
         
         day = int(date.split('/')[1])
         self.current_month = int(date.split('/')[0])
         self.current_year = int(date.split('/')[-1])
 
-        month_week_list = calendar.monthcalendar(int(self.current_year),int(self.current_month))
+        month_week_list = calendar.monthcalendar(int(self.current_year), int(self.current_month))
 
         self.entries = month_week_list 
 
@@ -158,6 +157,7 @@ class JansSelectDate:
         week_index = self.entries.index(dum_week)
         self.cord_y = week_index 
         self.cord_x = day_index 
+        self.selected_cord = (self.cord_y, self.cord_x)
  
     def adjust_sizes(self,day):
         if str(day) != '0':
@@ -173,8 +173,10 @@ class JansSelectDate:
         week_line = []
         for i, week in enumerate(self.entries): 
             for day in range(len(week)):
-                if i == self.cord_y and day == self.cord_x and self.change_date == True:
+                if i == self.cord_y and day == self.cord_x and self.change_date:
                     week_line.append(HTML('<style fg="ansiwhite" bg="#777777"><black>{}</black></style>'.format(self.adjust_sizes(week[day]))))
+                elif i == self.selected_cord[1] and day == self.selected_cord[0] and not self.change_date:
+                    week_line.append(HTML('<black><b>{}</b></black>'.format(self.adjust_sizes(week[day]))))
                 else:
                     week_line.append(HTML('<black>{}</black>'.format(self.adjust_sizes(week[day]))))
 
@@ -186,7 +188,7 @@ class JansSelectDate:
 
 
     def adjust_month(self, day, i):
-        if self.change_date == True :
+        if self.change_date:
             if i == 1 and self.current_month == 12:
                 return
             if i == -1 and self.current_month == 1:
@@ -235,46 +237,50 @@ class JansSelectDate:
         self.seconds = abs(self.seconds % 60)
 
     def up(self): 
-        if self.change_date == True :
+        if self.change_date:
             if self.cord_y == 0 or int(self.entries[self.cord_y-1][self.cord_x]) == 0:
                 self.dec_month(day=1)
             else:
                 self.cord_y = (self.cord_y - 1)# % 5
                 #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
+            self.selected_cord = (self.cord_x, self.cord_y)
         else:
             self.adjust_time(1)
 
     def down(self):
-        if self.change_date == True :
+        if self.change_date:
             if self.cord_y == 4 or int(self.entries[self.cord_y+1][self.cord_x]) == 0:
                 self.inc_month(day=28)
             else:
                 self.cord_y = (self.cord_y + 1)# % 5
             #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
+            self.selected_cord = (self.cord_x, self.cord_y)
         else:
             self.adjust_time(-1)
 
 
     def right(self):
-        if self.change_date == True :
+        if self.change_date:
             if self.cord_x == 6 or int(self.entries[self.cord_y][self.cord_x+1]) == 0:
                 self.inc_year(day=7)
             else :
                 self.cord_x = (self.cord_x + 1) #% 7
-            
+            self.selected_cord = (self.cord_x, self.cord_y)
         else:
             if self.cord_x >= 2 :
-                pass    
+                pass
             else :
                 self.cord_x = (self.cord_x + 1) #% 7
 
     def left(self):
-        if self.change_date == True :
+        if self.change_date:
             if self.cord_x == 0 or int(self.entries[self.cord_y][self.cord_x-1]) == 0:
                 self.dec_year(day=1)
             else:
                 self.cord_x = (self.cord_x - 1)# % 7
                 self.depug=Label(text="cord_y = "+str(self.cord_y)+':',)
+            self.selected_cord = (self.cord_x, self.cord_y)
+            self.date_changed = True
         else:
             if self.cord_x <=0 :
                 pass
@@ -284,7 +290,7 @@ class JansSelectDate:
 
     def next(self):
         self.change_date = not self.change_date
-        if self.change_date == False :
+        if not self.change_date:
             self.cord_x = 0
 
 
