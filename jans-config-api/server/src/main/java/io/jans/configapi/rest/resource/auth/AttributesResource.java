@@ -58,6 +58,7 @@ public class AttributesResource extends ConfigBaseResource {
     @Inject
     AttributeService attributeService;
 
+    
     @Operation(summary = "Gets a list of Gluu attributes.", description = "Gets a list of Gluu attributes.", operationId = "get-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/attributes.readonly" }), parameters = {

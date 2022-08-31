@@ -6,6 +6,9 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
+
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
@@ -16,7 +19,16 @@ import io.jans.model.custom.script.model.CustomScript;
 import io.jans.service.custom.CustomScriptService;
 import io.jans.util.StringHelper;
 
-import com.github.fge.jsonpatch.JsonPatchException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -41,12 +53,13 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Inject
     CustomScriptService customScriptService;
 
-    /***
-     * Method to fetch a custom scripts
-     * 
-     * @param type - type of the script
-     * @throws NotAuthorizedException
-     */
+    @Operation(summary = "Fetch custom script by name", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.readonly" }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScript.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getAllCustomScripts() {
@@ -54,13 +67,16 @@ public class CustomScriptResource extends ConfigBaseResource {
         logger.debug("Custom Scripts:{}", customScripts);
         return Response.ok(customScripts).build();
     }
-    
-    /***
-     * Method to fetch a custom script based on name
-     * 
-     * @param name - name of custom script
-     * @throws NotAuthorizedException
-     */
+
+    @Operation(summary = "Fetch custom script by name", description = "Fetch custom script by name", operationId = "get-custom-script-by-name", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.readonly" }), parameters = {
+                            @Parameter(in = ParameterIn.PATH, name = "name", required = true, schema = @Schema(name = "name", type = "string", required = true, description = "Script name")) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
@@ -69,32 +85,34 @@ public class CustomScriptResource extends ConfigBaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script to be fetched based on type - name:{} ", escapeLog(name));
         }
-        
+
         CustomScript customScript = customScriptService.getScriptByDisplayName(name);
         checkResourceNotNull(customScript, CUSTOM_SCRIPT);
-        
+
         logger.debug("Custom Script Fetched based on name:{}, customScript:{}", name, customScript);
         return Response.ok(customScript).build();
     }
 
-    /***
-     * Method to fetch a custom script by type
-     * 
-     * @param type - type of the script
-     * @return - List of CustomScript object
-     * @throws NotAuthorizedException
-     */
+    @Operation(summary = "Gets list of scripts by type", description = "Gets list of scripts by type", operationId = "get-config-scripts-by-type", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.readonly" }), parameters = {
+                            @Parameter(in = ParameterIn.PATH, name = "type", required = true, schema = @Schema(name = "type", type = "string", required = true, description = "Script type")) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScript.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
-        
+
         if (logger.isDebugEnabled()) {
-            logger.debug("Custom Script to be fetched based on type - type:{} , pattern:{}, limit:{} ", escapeLog(type), escapeLog(pattern), escapeLog(limit));
+            logger.debug("Custom Script to be fetched based on type - type:{} , pattern:{}, limit:{} ", escapeLog(type),
+                    escapeLog(pattern), escapeLog(limit));
         }
-        
+
         List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,
                 CustomScriptType.getByValue(type.toLowerCase()), limit);
         logger.debug("Custom Scripts fetched :{}", customScripts);
@@ -104,13 +122,15 @@ public class CustomScriptResource extends ConfigBaseResource {
             return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    /***
-     * Method to fetch a custom script by identifier - inum
-     * 
-     * @param inum - unique identifier of the script
-     * @return - CustomScript object
-     * @throws NotAuthorizedException
-     */
+    @Operation(summary = "Gets a script by Inum", description = "Gets a script by Inum", operationId = "get-config-scripts-by-inum", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.readonly" }), parameters = {
+                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", required = true, description = "Script identifier")) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
@@ -131,13 +151,14 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(script).build();
     }
 
-    /***
-     * Method to create a new custom script
-     * 
-     * @param customScript - CustomScript object
-     * @return - CustomScript object
-     * @throws NotAuthorizedException
-     */
+    @Operation(summary = "Adds a new custom script", description = "Adds a new custom script", operationId = "post-config-scripts", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.write" }))
+    @RequestBody(description = "CustomScript object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
     public Response createScript(@Valid CustomScript customScript) {
@@ -154,14 +175,15 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(customScript).build();
     }
 
-    /***
-     * Method to update custom script
-     * 
-     * @param customScript - CustomScript object
-     * @return - CustomScript object
-     * @throws NotAuthorizedException
-     * @throws NotFoundException
-     */
+    @Operation(summary = "Updates a custom script", description = "Updates a custom script", operationId = "put-config-scripts", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.write" }))
+    @RequestBody(description = "CustomScript object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
     public Response updateScript(@Valid @NotNull CustomScript customScript) {
@@ -174,13 +196,14 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(customScript).build();
     }
 
-    /**
-     * Method to delete custom script
-     * 
-     * @param inum - unique identifier of the script
-     * @throws NotAuthorizedException
-     * @return
-     */
+    @Operation(summary = "Deletes a custom script", description = "Deletes a custom script", operationId = "delete-config-scripts-by-inum", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.delete" }), parameters = {
+                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", required = true, description = "Script identifier")) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS })
@@ -198,18 +221,15 @@ public class CustomScriptResource extends ConfigBaseResource {
         }
     }
 
-    /***
-     * Method to patch custom script
-     * 
-     * @param inum       - unique identifier of the script
-     * @param pathString - A JSON Patch JSON file containing an array of patch
-     *                   operations.
-     * @return - CustomScript object
-     * @throws NotAuthorizedException
-     * @throws NotFoundException
-     * @throws JsonPatchException
-     * @throws IOException
-     */
+    @Operation(summary = "Patches a custom script", description = "Patches a custom script", operationId = "patch-config-scripts-by-inum", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/config/scripts.write" }))
+    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
@@ -220,7 +240,7 @@ public class CustomScriptResource extends ConfigBaseResource {
             logger.debug("Custom Script Resource to patch - inum:{} , pathString:{}", escapeLog(inum),
                     escapeLog(pathString));
         }
-        
+
         CustomScript existingScript = customScriptService.getScriptByInum(inum);
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         existingScript = Jackson.applyPatch(pathString, existingScript);

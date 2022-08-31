@@ -86,17 +86,17 @@ public class ConfigResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
-    public Response patchAppConfigurationProperty (@NotNull String requestString) throws JsonPatchException, IOException {
-        log.debug("AUTH CONF details to patch - requestString:{} ", requestString);
+    public Response patchAppConfigurationProperty (@NotNull String jsonPatchString) throws JsonPatchException, IOException {
+        log.debug("AUTH CONF details to patch - jsonPatchString:{} ", jsonPatchString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = configurationService.find();
         log.debug("AUTH CONF details BEFORE patch - appConfiguration :{}", appConfiguration);
-        appConfiguration = Jackson.applyPatch(requestString, conf.getDynamic());
+        appConfiguration = Jackson.applyPatch(jsonPatchString, conf.getDynamic());
         log.debug("AUTH CONF details BEFORE patch merge - appConfiguration:{}", appConfiguration);
         conf.setDynamic(appConfiguration);
         
         //validate Agama Configuration
-        if(requestString.contains(AGAMACONFIGURATION)){
+        if(jsonPatchString.contains(AGAMACONFIGURATION)){
             validateAgamaConfiguration(appConfiguration.getAgamaConfiguration());
         }
         
@@ -106,6 +106,21 @@ public class ConfigResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    @Operation(summary = "Returns persistence type configured for Jans authorization server.",
+    description= "Returns persistence type configured for Jans authorization server.",
+    operationId = "get-properties-persistence",
+    tags = {"Configuration – Properties"},
+    security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.readonly"}))    
+    @ApiResponses(value = { 
+    @ApiResponse(responseCode = "200", description = "Jans Authorization Server config properties",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+            schema =  @Schema(
+                    name = "persistenceType",
+                    type = "string",
+                    description = "Jans Auth Server persistence type"
+                    ))),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     @Path(ApiConstants.PERSISTENCE)
