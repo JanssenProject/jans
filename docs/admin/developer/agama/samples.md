@@ -35,7 +35,7 @@ Source code [here](https://github.com/JanssenProject/jans/raw/main/docs/admin/de
 
 ### UI template
 
-[`login.ftlh`](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/basic/login.ftlh)  is 99% HTML markup and will not be detailed here. There are only a couple of things to highlight:
+[`login.ftlh`](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/basic/login.ftlh) is 99% HTML markup and will not be detailed here. There are only a couple of things to highlight:
 
 - The conditional `<#if !(success!true)>` (around line 27) is used to determine if an error message should be included in the generated markup. It works this way: if the key `success` exists in this template data model, its value is negated (note the bang character before the left parenthesis) and the `if` condition is evaluated. If non-existing, a `true` value is assumed which is then negated and thus the `if` body will not be evaluated-  
 
