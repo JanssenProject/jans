@@ -10432,7 +10432,7 @@
 <div class="highlight"><pre><span></span><code>cat /root/.config/jans-cli.ini | grep &#39;jca_client_id&#39;
 cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
 </code></pre></div>
-<p>The above contains an encoded secret, to decode it run <code>/opt/jans/bin/encode -D &lt;DECODED-PASS&gt;</code>. Keep this credentials safe.</p>
+<p>The above contains an encoded secret, to decode it run <code>/opt/jans/bin/encode.py -D &lt;DECODED-PASS&gt;</code>. Keep this credentials safe.</p>
 <p>Tokens are required to have the right scopes depending on the operation to invoke, the following table summarizes this aspect:</p>
 <table>
 <thead>
@@ -10466,8 +10466,8 @@ cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
 <p><strong>Notes</strong>:</p>
 <ul>
 <li>Tokens have expiration time measured in seconds. When expired, you'll have to re-request</li>
-<li>To get a token with more than one scope, supply the required scopes separated by whitespace in the <code>scope</code> parameter of the request above </li>
-<li>You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it provides the needed scopes </li>
+<li>To get a token with more than one scope, supply the required scopes separated by whitespace in the <code>scope</code> parameter of the request above</li>
+<li>You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it provides the needed scopes</li>
 </ul>
 <h3 id="add-the-flow-to-the-server">Add the flow to the server<a class="headerlink" href="#add-the-flow-to-the-server" title="Permanent link">#</a></h3>
 <p>The easiest way to create a flow is issuing a POST passing the source code in the payload. For our example, if the flow's source code resides in a file named <code>flow.txt</code>, the request would look this way: </p>
@@ -10558,7 +10558,7 @@ cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-12T19:55:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-31T16:07:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-31</span>
       
         <br>
         Created:
