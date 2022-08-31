@@ -48,8 +48,6 @@ public final class Mappings {
             
             map.put(Attrs.UID, "apple-" + profile.get("sub"));
             map.put(Attrs.MAIL, profile.get("email"));
-            map.put(Attrs.DISPLAY_NAME, profile.get("name"));
-            map.put(Attrs.GIVEN_NAME, profile.get("name"));
             
             return map;
         };
