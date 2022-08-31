@@ -130,6 +130,7 @@ If you find a bug in a Janssen project, or you would like to suggest a new featu
 
 Below are the list of current mega releases that hold information about each single release of our servies and modules:
 
+- [v1.0.2](https://github.com/JanssenProject/jans/releases/tag/v1.0.2)
 - [v1.0.1](https://github.com/JanssenProject/jans/releases/tag/v1.0.1)
 - [v1.0.0](https://github.com/JanssenProject/jans/releases/tag/v1.0.0)
 - [v1.0.0-beta.16](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.16)

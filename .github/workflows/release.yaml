@@ -41,7 +41,6 @@ jobs:
 #         package-name: ${{ matrix.charts }}
 #        monorepo-tags: true
   release-simple-pr:
-    needs: release-chart-pr
     runs-on: ubuntu-latest
     strategy:
       #max-parallel: 1

@@ -4,13 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>uma-rs-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <name>UMA RS Core</name>
 
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-client-api-parent</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
     <properties>
         <skip.swagger.client.generation>true</skip.swagger.client.generation>
