@@ -2126,6 +2126,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/script-catalog/agama/inboundID/apple/</loc>
+         <lastmod>2022-08-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/script-catalog/application_session/sample-script/</loc>
          <lastmod>2022-08-31</lastmod>
          <changefreq>daily</changefreq>
