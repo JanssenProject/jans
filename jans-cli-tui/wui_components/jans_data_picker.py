@@ -388,45 +388,47 @@ class DateSelectWidget:
                 self.select_box.up()
 
         @kb.add("down")
-        def _up(event):
+        def _down(event):
             if self.select_box_float not in get_app().layout.container.floats:
                 self.make_time(self.text)
             else :
                 self.select_box.down()
 
         @kb.add("right")
-        def _up(event):
+        def _right(event):
             if self.select_box_float not in get_app().layout.container.floats:
                 self.make_time(self.text)
             else :
                 self.select_box.right()
  
         @kb.add("left")
-        def _up(event):
+        def _left(event):
             if self.select_box_float not in get_app().layout.container.floats:
                 self.make_time(self.text)
             else :
                 self.select_box.left()
 
         @kb.add("+")
-        def _up(event):
+        def _plus(event):
             if self.select_box_float not in get_app().layout.container.floats:
                 self.make_time(self.text)
 
         @kb.add("-")
-        def _up(event):
+        def _minus(event):
             if self.select_box_float not in get_app().layout.container.floats:
                 self.make_time(self.text)
 
         @kb.add("tab")
-        def _(event):
+        def _tab(event):
             if self.select_box_float in get_app().layout.container.floats:
                 self.select_box.next()
             else :
                 _focus_next(event)
 
         @kb.add("escape")
-        def _(event):
+        @kb.add("pageup", eager=True)
+        @kb.add("pagedown", eager=True)
+        def _escape(event):
             if self.select_box_float in get_app().layout.container.floats:
                 get_app().layout.container.floats.remove(self.select_box_float)
                 _focus_next(event)
