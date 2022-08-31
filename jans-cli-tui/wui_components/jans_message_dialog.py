@@ -22,10 +22,10 @@ class JansMessageDialog:
             if self.me in app.root_layout.floats:
                 app.root_layout.floats.remove(self.me)
 
-            try:
-                app.layout.focus(self.focus_on_exit)
-            except:
-                pass
+            #try:
+            app.layout.focus(self.focus_on_exit)
+            #except:
+            #    pass
 
         blist = []
 

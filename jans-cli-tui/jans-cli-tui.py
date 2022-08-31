@@ -511,14 +511,14 @@ class JansCliApp(Application, JansAuthServer):
     def show_message(self, title, message, buttons=[]):
         body = HSplit([Label(message)])
         dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
-
-        focused_before = self.layout.current_window
+        focused_before = self.root_layout.floats[-1].content if self.root_layout.floats else self.layout.current_window
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         dialog.me = float_
         dialog.focus_on_exit = focused_before
         self.layout.focus(dialog)
         self.press_tab()
+        
 
     def show_again(self): ## nasted dialog Button
         self.show_message("Again", "Nasted Dialogs",)
