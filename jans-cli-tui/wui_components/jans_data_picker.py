@@ -72,22 +72,19 @@ class JansSelectDate:
                 Button(text='>',left_symbol='',right_symbol='',width=1  )
             ],style="bg:#1e51fa",padding=1),
             #DynamicContainer(lambda: self.depug),
-            
+
         Window(
             content=FormattedTextControl(
                 text=self._get_calender_text,
-                
-                
             ),
             height=5,
             cursorline=False,
             # width=D(),  #15,
-            style="bg:#ffffff",
+            style="bg:#D3D3D3",
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True,
             
-        ),   
-        Window(height=1,char=' ',style="bg:#ffffff"),
+        ),
         Window(
             content=FormattedTextControl(
                 text=self._get_time_text,
@@ -99,7 +96,7 @@ class JansSelectDate:
             style="bg:#bab1b1",
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True
-        ),               
+        ),
         ])
 
 
@@ -127,13 +124,13 @@ class JansSelectDate:
             if i == self.cord_x:
                 if self.change_date == False: 
                     if i >= 2: 
-                        time_line.append(HTML('<style fg="ansired" bg="#002cbf"><blue>{}</blue></style>'.format(self.adjust_sizes(time_element))))          
+                        time_line.append(HTML('<style fg="ansiwhite" bg="#777777"><blue>{}</blue></style>'.format(self.adjust_sizes(time_element))))          
                     
                     elif i == 0 :
-                        time_line.append(HTML('       <style fg="ansired" bg="#002cbf"><blue>{}</blue>:</style>'.format(self.adjust_sizes(time_element))))          
+                        time_line.append(HTML('       <style fg="ansiwhite" bg="#777777"><blue>{}</blue>:</style>'.format(self.adjust_sizes(time_element))))          
 
                     else :
-                        time_line.append(HTML('<style fg="ansired" bg="#002cbf"><blue>{}</blue>:</style>'.format(self.adjust_sizes(time_element))))          
+                        time_line.append(HTML('<style fg="ansiwhite" bg="#777777"><blue>{}</blue>:</style>'.format(self.adjust_sizes(time_element))))          
                 
                 
                 else :
@@ -196,7 +193,7 @@ class JansSelectDate:
                 if i == self.cord_y:
                     if day == self.cord_x:
                         if self.change_date == True:  #<black>{}</black>
-                            week_line.append(HTML('<style fg="ansired" bg="#002cbf"><black>{}</black></style>'.format(self.adjust_sizes(week[day]))))
+                            week_line.append(HTML('<style fg="ansiwhite" bg="#777777"><black>{}</black></style>'.format(self.adjust_sizes(week[day]))))
                         else :
                             week_line.append(HTML('<b><black>{}</black></b>'.format(self.adjust_sizes(week[day]))))
                         # result.append(HTML('<style fg="ansired" bg="#ADD8E6">{}</style>'.format( day)))
@@ -335,8 +332,8 @@ class JansSelectDate:
 
 class DateSelectWidget:  
     def __init__(self, value):  # ex: value = "2023-11-27T14:05:35"
-        self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-               # text >> showed in the widget         
+        self.months = [calendar.month_name[i] for i in range(1,13)]
+        # text >> showed in the widget
 
         if  value:
             self.text = value
@@ -350,12 +347,12 @@ class DateSelectWidget:
             self.date =  str(today.month) +'/' +str(today.day) +'/'+str(today.year)    ## '11/27/2023' ## 
             self.text = "Enter to Select"
             now = datetime.datetime.now()
-            self.houres = int(now.strftime("%H") )   
+            self.houres = int(now.strftime("%H"))
             self.minutes =int(now.strftime("%M"))
             self.seconds = int(now.strftime("%S"))
 
-        self.value  = str(value)   
-    
+        self.value  = str(value)
+
         self.dropdown = True
         self.window = Window(
             content=FormattedTextControl(
@@ -499,9 +496,9 @@ class DateSelectWidget:
                 self.houres = int(time.strftime("%H",ts)) -8 ## it start from 0 to 23
                 self.minutes =int(time.strftime("%M",ts)) 
                 self.seconds = int(time.strftime("%S",ts)) -1
-                    
+
                 t = (years, months,days,self.houres,self.minutes,self.seconds,0,0,0)  ## the up increment
-                t = time.mktime(t)  
+                t = time.mktime(t)
                 self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
 
         @kb.add("tab")
@@ -509,7 +506,7 @@ class DateSelectWidget:
             if self.select_box_float in get_app().layout.container.floats:
                 self.select_box.next()
             else :
-                _focus_next(event)                
+                _focus_next(event)
            
         @kb.add("escape")
         def _(event):
