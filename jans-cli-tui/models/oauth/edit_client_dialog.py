@@ -23,6 +23,12 @@ from wui_components.jans_data_picker import DateSelectWidget
 from utils import DialogUtils
 
 class EditClientDialog(JansGDialog, DialogUtils):
+    """_summary_
+
+    Args:
+        JansGDialog (_type_): _description_
+        DialogUtils (_type_): _description_
+    """
     def __init__(self, parent, title, data, buttons=[], save_handler=None):
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler

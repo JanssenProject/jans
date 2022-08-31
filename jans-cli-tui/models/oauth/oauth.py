@@ -156,7 +156,7 @@ class JansAuthServer:
                 all_data=result
             )
 
-            self.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
+            self.layout.focus(clients)   
             self.oauth_data_container['clients'] = HSplit([
                 clients
             ])

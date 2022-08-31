@@ -5,7 +5,27 @@ from prompt_toolkit.key_binding import KeyBindings
 
 
 class JansNavBar():
+    """This is a horizontal Navigation bar Widget used in Main screen ('clients', 'scopes', 'keys', 'defaults', 'properties', 'logging')
+    """
     def __init__(self, myparent, entries, selection_changed, select=0, bgcolor='#00ff44'):
+        """init for JansNavBar
+
+        Args:
+            myparent (_type_): _description_
+            entries (_type_): _description_
+            selection_changed (_type_): _description_
+            select (int, optional): _description_. Defaults to 0.
+            bgcolor (str, optional): _description_. Defaults to '#00ff44'.
+        
+        Examples:
+            self.oauth_navbar = JansNavBar(
+                                self,
+                                entries=[('clients', 'Clients'), ('scopes', 'Scopes'), ('keys', 'Keys'), ('defaults', 'Defaults'), ('properties', 'Properties'), ('logging', 'Logging')],
+                                selection_changed=self.oauth_nav_selection_changed,
+                                select=0,
+                                bgcolor='#66d9ef'
+                                )  
+        """
         self.myparent = myparent
         self.navbar_entries = entries
         self.cur_navbar_selection = select
@@ -14,8 +34,9 @@ class JansNavBar():
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.create_window()
 
-
     def create_window(self):
+        """This method creat the Navigation Bar it self
+        """
         self.nav_window = Window(
                             content=FormattedTextControl(
                                 text=self.get_navbar_entries,
@@ -27,6 +48,11 @@ class JansNavBar():
                         )
 
     def get_navbar_entries(self):
+        """Get all selective entries
+
+        Returns:
+            merge_formatted_text: Merge (Concatenate) several pieces of formatted text together. 
+        """
 
         result = []
         for i, entry in enumerate(self.navbar_entries):
@@ -38,8 +64,12 @@ class JansNavBar():
 
         return merge_formatted_text(result)
 
-
     def get_nav_bar_key_bindings(self):
+        """All key binding for the Dialog with Navigation bar
+
+        Returns:
+            KeyBindings: The method according to the binding key
+        """
         kb = KeyBindings()
 
         @kb.add("left")

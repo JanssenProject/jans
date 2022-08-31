@@ -6,7 +6,21 @@ from prompt_toolkit.layout.dimension import D
 
 
 class JansMessageDialog:
+    """This is a Dialog to show Message
+    """
     def __init__(self, title, body, buttons=[], focus_on_exit=None):
+        """init for JansMessageDialog
+
+        Args:
+            title (str): The title of the Dialog message
+            body (widget): Widget to be displayed with the dialog (Usually Label)
+            buttons (list, optional): Dialog main buttons with their handlers. Defaults to [].
+            focus_on_exit (widget, optional): Move the focus on exit. Defaults to None.
+
+        Examples:
+            buttons = [Button("OK", handler=my_method]
+            dialog = JansMessageDialog(title="my title", body=HSplit([Label(message)]), buttons=buttons)
+        """
         self.result = None
         self.me = None
         self.focus_on_exit = focus_on_exit
@@ -22,10 +36,10 @@ class JansMessageDialog:
             if self.me in app.root_layout.floats:
                 app.root_layout.floats.remove(self.me)
 
-            #try:
-            app.layout.focus(self.focus_on_exit)
-            #except:
-            #    pass
+            try:
+                app.layout.focus(self.focus_on_exit)
+            except:
+                pass
 
         blist = []
 

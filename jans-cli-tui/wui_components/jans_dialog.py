@@ -6,6 +6,8 @@ from prompt_toolkit.layout.containers import HSplit
 
 
 class JansDialog():
+    """NOt Used
+    """
     def __init__(self,only_view=False,height=None,width=None,title=None, button_functions=[], entries_list=[], entries_color='#00ff44'):
         self.entries_list = entries_list
         self.button_functions = button_functions

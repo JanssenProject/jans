@@ -9,7 +9,18 @@ from prompt_toolkit.key_binding.bindings.focus import focus_next
 from prompt_toolkit.layout.dimension import D
 
 class JansSelectBox:
+    """_summary_
+    """
     def __init__(self, values=[], value=None, height=4, rotatable_up=True, rotatable_down=True):
+        """_summary_
+
+        Args:
+            values (list, optional): _description_. Defaults to [].
+            value (_type_, optional): _description_. Defaults to None.
+            height (int, optional): _description_. Defaults to 4.
+            rotatable_up (bool, optional): _description_. Defaults to True.
+            rotatable_down (bool, optional): _description_. Defaults to True.
+        """
         self.values = values
         self.set_value(value)
 
@@ -34,6 +45,11 @@ class JansSelectBox:
         )])
 
     def set_value(self, value):
+        """_summary_
+
+        Args:
+            value (_type_): _description_
+        """
         self.value = value
 
         for i, val in enumerate(self.values):
@@ -43,9 +59,12 @@ class JansSelectBox:
         else:
             self.selected_line = 0
 
-
-
     def _get_formatted_text(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         result = []
         for i, entry in enumerate(self.values):
             if i == self.selected_line:
@@ -56,11 +75,21 @@ class JansSelectBox:
 
         return merge_formatted_text(result)
 
-
     def shift(self,seq, n):
+        """_summary_
+
+        Args:
+            seq (_type_): _description_
+            n (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         return seq[n:]+seq[:n]
 
     def up(self):
+        """_summary_
+        """
         if self.selected_line == 0 :
             if self.rotatable_up and  self.values[self.selected_line] == self.values[0]:
                 pass
@@ -71,6 +100,8 @@ class JansSelectBox:
 
 
     def down(self):
+        """_summary_
+        """
 
         if self.selected_line +1 == (self.height):
             if self.rotatable_down and  self.values[self.selected_line] == self.values[-1]:
@@ -86,7 +117,19 @@ class JansSelectBox:
 
 
 class DropDownWidget:
+    """This is a Combobox widget (drop down) to select single from multi choices
+    """
     def __init__(self, values=[], value=None):
+        """init for DropDownWidget
+        Args:
+            values (list, optional): List of values to select one from them. Defaults to [].
+            value (str, optional): The defult selected value. Defaults to None.
+
+        Examples:
+            widget=DropDownWidget(
+                values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
+                value=self.data.get('tokenEndpointAuthMethodsSupported'))
+        """
         self.values = values
         for val in values:
             if val[0] == value:
@@ -108,23 +151,34 @@ class DropDownWidget:
 
     @property
     def value(self):
+        """Getter for the value property
+        
+        Returns:
+            str: The selected value
+        """
         return self.select_box.value
-
 
     @value.setter
     def value(self, value):
         self.select_box.set_value(value)
 
-
     def _get_text(self):
+        """To get The selected value
+
+        Returns:
+            str: The selected value
+        """
         if get_app().layout.current_window is self.window:
             return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format('#00FF00', self.text))
         return '> {} <'.format(self.text)
 
-
     def _get_key_bindings(self):
-        kb = KeyBindings()
+        """All key binding for the Dialog with Navigation bar
 
+        Returns:
+            KeyBindings: The method according to the binding key
+        """
+        kb = KeyBindings()
 
         def _focus_next(event):
             focus_next(event)

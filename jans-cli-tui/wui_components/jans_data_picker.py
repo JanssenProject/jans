@@ -20,19 +20,23 @@ from prompt_toolkit.layout.containers import (
     FloatContainer,
     Window
 )
-
 import calendar
 import time
-# ts = time.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
-# time.strftime("%m/%d/%Y", ts)
-# '11/27/2023'
-#### not finished yet >> data
 import datetime
 
 
 class JansSelectDate:
+    """_summary_
+    """
    
     def __init__(self, date='',months=[],mytime=[]):  
+        """_summary_
+
+        Args:
+            date (str, optional): _description_. Defaults to ''.
+            months (list, optional): _description_. Defaults to [].
+            mytime (list, optional): _description_. Defaults to [].
+        """
         self.hours , self.minuts , self.seconds = mytime
         self.change_date = True
         self.date = date  #"11/27/2023"
@@ -299,9 +303,15 @@ class JansSelectDate:
 
 
 class DateSelectWidget:
+    """This is a Dape Picker widget to select exact time and date
+    """
     def __init__(self, value):  # ex: value = "2023-11-27T14:05:35"
+        """init for DateSelectWidget
+
+        Args:
+            value (str): string time stamp value like "2023-11-27T14:05:35"
+        """
         self.months = [calendar.month_name[i] for i in range(1,13)]
-        # text >> showed in the widget
 
         if  value:
             self.text = value
@@ -334,6 +344,11 @@ class DateSelectWidget:
 
     @property
     def value(self):
+        """Getter for the value property
+        
+        Returns:
+            str: The selected value
+        """
         if self.text != "Enter to Select":
             return self.text
 
@@ -343,6 +358,11 @@ class DateSelectWidget:
         self._value = self.value  
 
     def make_time(self, text):
+        """extract time from the text to increase or decrease
+
+        Args:
+            text (str): the text that appear on the wigdet
+        """
         ts = time.strptime(text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
         years =int(time.strftime("%Y",ts))
         months = int(time.strftime("%m",ts))
@@ -356,11 +376,23 @@ class DateSelectWidget:
         self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
 
     def _get_text(self):
+        """To get The selected value
+
+        Returns:
+            str: The selected value
+        """
+
         if get_app().layout.current_window is self.window:
             return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format('#00FF00', self.text))
         return '> {} <'.format(self.text)
 
     def _get_key_bindings(self):
+        """All key binding for the Dialog with Navigation bar
+
+        Returns:
+            KeyBindings: The method according to the binding key
+        """
+
         kb = KeyBindings()
 
         def _focus_next(event):
