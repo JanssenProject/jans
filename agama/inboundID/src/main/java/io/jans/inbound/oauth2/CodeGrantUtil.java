@@ -64,7 +64,7 @@ public class CodeGrantUtil {
         if (!response.indicatesSuccess()) {
             // The request was denied or some error occurred
             AuthorizationErrorResponse errorResponse = response.toErrorResponse();
-            throw new GeneralException(errorResponse.getErrorObject().getDescription());
+            throw exFromError(errorResponse.getErrorObject());
         }
         
         return response.toSuccessResponse().getAuthorizationCode().getValue();
@@ -86,14 +86,25 @@ public class CodeGrantUtil {
         if (p.getCustParamsTokenReq() != null) {
             p.getCustParamsTokenReq().forEach((k, v) -> params.put(k, Collections.singletonList(v)));
         }
+        
+        TokenRequest request;
+        if (p.isClientCredsInRequestBody()) {
+            params.put("client_id", Collections.singletonList(p.getClientId()));
+            params.put("client_secret", Collections.singletonList(p.getClientSecret()));
 
-        TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, null, null, params);
+            request = new TokenRequest(tokenEndpoint, clientID, codeGrant, null, null, null, params);
+        } else {
+            request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, null, null, params);
+        }
+
         HTTPRequest httpRequest = request.toHTTPRequest();
         httpRequest.setAccept(MediaType.APPLICATION_JSON);
+        //httpRequest.setContentType("application/x-www-form-urlencoded");
+        //httpRequest.setHeader("User-Agent", "curl");
         
         TokenResponse response = TokenResponse.parse(httpRequest.send());
         if (!response.indicatesSuccess()) {
-            throw new GeneralException(response.toErrorResponse().getErrorObject().getDescription());
+            throw exFromError(response.toErrorResponse().getErrorObject());
         }
         return response.toSuccessResponse().toJSONObject();
 
@@ -120,4 +131,26 @@ public class CodeGrantUtil {
 
     }
 
+    private static GeneralException exFromError(ErrorObject o) {
+        
+        Map<String, String> map = new HashMap<>();
+
+        String s = "" + o.getHTTPStatusCode();
+        map.put("HTTP status", s);
+        
+        s = o.getCode();
+        if (s != null) {
+            map.put("error code", s);
+        }
+
+        s = o.getDescription();
+        if (s != null) {
+            map.put("description", s);
+        }
+
+        s = map.toString(); 
+        return new GeneralException(s.substring(1, s.length() - 1));
+        
+    }
+    
 }

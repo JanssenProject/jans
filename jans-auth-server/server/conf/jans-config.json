@@ -430,7 +430,7 @@
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",
-        "maxItemsLoggedInCollections": 3,
+        "maxItemsLoggedInCollections": 7,
         "pageMismatchErrorPage": "mismatch.ftlh",
         "interruptionErrorPage": "timeout.ftlh",
         "crashErrorPage": "crash.ftlh",

@@ -15,6 +15,7 @@ public class OAuthParams {
 
     private String redirectUri;
     
+    private boolean clientCredsInRequestBody;
     private Map<String, String> custParamsAuthReq;
     private Map<String, String> custParamsTokenReq;
 
@@ -72,6 +73,14 @@ public class OAuthParams {
     
     public void setRedirectUri(String redirectUri) {
         this.redirectUri = redirectUri;
+    }
+    
+    public boolean isClientCredsInRequestBody() {
+        return clientCredsInRequestBody;
+    }
+    
+    public void setClientCredsInRequestBody(boolean clientCredsInRequestBody) {
+        this.clientCredsInRequestBody = clientCredsInRequestBody;
     }
     
     public Map<String, String> getCustParamsAuthReq() {

@@ -96,7 +96,7 @@ cat /root/.config/jans-cli.ini | grep 'jca_client_id'
 cat /root/.config/jans-cli.ini | grep 'jca_client_secret_enc'
 ```
 
-The above contains an encoded secret, to decode it run `/opt/jans/bin/encode -D <DECODED-PASS>`. Keep this credentials safe.
+The above contains an encoded secret, to decode it run `/opt/jans/bin/encode.py -D <DECODED-PASS>`. Keep this credentials safe.
 
 Tokens are required to have the right scopes depending on the operation to invoke, the following table summarizes this aspect:
 
@@ -121,8 +121,8 @@ You can extract the token from the (JSON) response obtained which is a self-expl
 **Notes**:
 
 - Tokens have expiration time measured in seconds. When expired, you'll have to re-request
-- To get a token with more than one scope, supply the required scopes separated by whitespace in the `scope` parameter of the request above 
-- You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it provides the needed scopes 
+- To get a token with more than one scope, supply the required scopes separated by whitespace in the `scope` parameter of the request above
+- You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it provides the needed scopes
 
 ### Add the flow to the server
 
