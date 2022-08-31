@@ -45,8 +45,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer//${JYTHON_VERSI
 # Client API
 # ==========
 
-ENV CN_VERSION=1.0.2
-ENV CN_BUILD_DATE='2022-08-30 13:44'
+ENV CN_VERSION=1.0.3-SNAPSHOT
+ENV CN_BUILD_DATE='2022-08-30 16:31'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}.war
 
 COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
