@@ -66,7 +66,7 @@ public class AgamaResource extends ConfigBaseResource {
                             @Parameter(in = ParameterIn.QUERY, name = "limit", required = false, schema = @Schema(name = "limit", type = "integer", defaultValue = "50", description = "Search size - max size of the results to return")),
                             @Parameter(in = ParameterIn.QUERY, name = "includeSource", required = false, schema = @Schema(name = "includeSource", type = "boolean", defaultValue = "false", description = "Boolean value true will include the source content in the response"))
 
-            })
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama Flows", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Flow.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
