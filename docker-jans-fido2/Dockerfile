@@ -211,8 +211,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/fido2" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.2" \
-    release="1" \
+    version="1.0.3" \
+    release="dev" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"
 
