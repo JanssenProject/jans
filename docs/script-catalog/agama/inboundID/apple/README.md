@@ -12,11 +12,11 @@ Please follow the [inbound identity guide](../README.md) **entirely** before pro
 
 ## Flow and assets
 
-Find this flow source code [here](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/io.jans.inbound.Apple). Copy the [logo](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/apple.png) to your server at `/opt/jans/jetty/jans-auth/agama/fl/inboundID`, if desired.
+Find this flow source code [here](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/io.jans.inbound.Apple). Copy the [logo](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/apple.png) to your server at `/opt/jans/jetty/jans-auth/agama/fl/inboundID` directory, if desired.
 
 ## Supply configurations
 
-Create a json fragment using the below as a guide:
+Create a JSON document using the below as a guide:
 
 ```
 {
