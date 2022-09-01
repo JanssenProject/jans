@@ -229,7 +229,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: janssenproject/certmanager:1.0.2_dev
+              image: janssenproject/certmanager:1.0.3_dev
               resources:
                 requests:
                   memory: "300Mi"

@@ -115,8 +115,8 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL name="janssenproject/configurator" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.2" \
-    release="1" \
+    version="1.0.3" \
+    release="dev" \
     summary="Janssen Configuration Manager" \
     description="Manage config and secret"
 
