@@ -112,7 +112,7 @@ For simplicity, we'll illustrate here how to add one of the already implemented 
 
 #### Set configuration parameters
 
-- Create a json file like the below. Replace data in the placeholders appropriately:
+- Create a JSON file like the below. Replace data in the placeholders appropriately:
 
     ```
     [{
@@ -129,7 +129,7 @@ For simplicity, we'll illustrate here how to add one of the already implemented 
     }]
     ```
 
-- Patch the flow using the API. A sample `curl` command would look like this (assuming the json file is named `fb.json`):
+- Patch the flow using the API. A sample `curl` command would look like this (assuming the JSON file is named `fb.json`):
 
     ```
     curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
@@ -137,13 +137,13 @@ For simplicity, we'll illustrate here how to add one of the already implemented 
          https://<your-host>/jans-config-api/api/v1/agama/io.jans.inbound.Facebook
     ```
 
-Later, we'll dive into the meaning of the [configuration parameters](#provider-flow-configurations) set in this json file.
+Later, we'll dive into the meaning of the [configuration parameters](#provider-flow-configurations) set in this JSON file.
 
 ### Parameterize the main flow
 
 So far, if the main flow is launched (learn about this topic [here](https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request)) a screen with an empty "Sign in with" list will be shown. Adding information about the known providers is required.
 
-- Create a json file like the below:
+- Create a JSON file like the below:
 
     ```
     [{
@@ -160,7 +160,7 @@ So far, if the main flow is launched (learn about this topic [here](https://jans
     }]
     ```
 
-- Patch the main flow using the API. A sample `curl` command would look like this (assuming the json file is named `main.json`):
+- Patch the main flow using the API. A sample `curl` command would look like this (assuming the JSON file is named `main.json`):
 
     ```
     curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
@@ -168,13 +168,13 @@ So far, if the main flow is launched (learn about this topic [here](https://jans
          https://<your-host>/jans-config-api/api/v1/agama/io.jans.inbound.ExternalSiteLogin
     ```
 
-Later, we'll dive into the meaning of the [configuration parameters](#main-flow-configurations) set in this json file.
+Later, we'll dive into the meaning of the [configuration parameters](#main-flow-configurations) set in this JSON file.
 
-**Note**: for limitations in PATCH API do not use `"op": "add"` to add another provider. Use `"op": "replace"` and pass the whole JSON configuration (all providers) for `value`.
+**Note**: for limitations in the PATCH endpoint, do not use `"op": "add"` to add another provider. Use `"op": "replace"` and pass the whole JSON configuration (all providers) for `value`.
 
 ### Test
 
-Launch the main flow (learn about this topic [here](https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request)). If everything was setup correctly, a screen with a "Sign in with" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described [here](#main-flow). 
+Launch the main flow (learn about this topic [here](https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request)). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described [here](#main-flow). 
 
 ## Configuration parameters of flows 
     
