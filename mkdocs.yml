@@ -15,13 +15,13 @@ edit_uri: edit/main/docs/
 
 # Plugins
 plugins:
-#    - search
-#    - git-revision-date-localized:
-#        type: timeago
-#        enable_creation_date: true
-#    - git-committers:
-#        repository: JanssenProject/jans
-#        token: !ENV GH_TOKEN
+   - search
+   - git-revision-date-localized:
+       type: timeago
+       enable_creation_date: true
+   - git-committers:
+       repository: JanssenProject/jans
+       token: !ENV GH_TOKEN
 # Configuration
 theme:
     name: material
