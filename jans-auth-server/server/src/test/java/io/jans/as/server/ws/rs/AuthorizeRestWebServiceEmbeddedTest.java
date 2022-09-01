@@ -12,6 +12,7 @@ import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ResponseAsserter;
@@ -120,7 +121,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -168,7 +169,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(jsonObj.getString("redirect"));
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -330,7 +331,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("access_token"), "The access token is null");
                 assertNotNull(params.get("state"), "The state is null");
@@ -422,7 +423,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -470,7 +471,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
@@ -520,7 +521,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
@@ -567,7 +568,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
@@ -616,7 +617,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
@@ -666,7 +667,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -711,7 +712,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -757,7 +758,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "Query is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -935,7 +936,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "Query is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -1012,7 +1013,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -1098,7 +1099,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -1148,7 +1149,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -1196,7 +1197,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
