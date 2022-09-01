@@ -4,25 +4,25 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.client;
+package io.jans.as.model.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Provides functionality to parse query strings.
  *
- * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Javier Rojas Blum
+ * @version November 24, 2017
  */
 public class QueryStringDecoder {
 
-    /**
-     * Avoid instance creation
-     */
-    private QueryStringDecoder() {
-    }
+    private static final Logger log = Logger.getLogger(QueryStringDecoder.class);
 
     /**
      * Decodes a query string and returns a map with the parsed query string
@@ -41,7 +41,11 @@ public class QueryStringDecoder {
                 String name = nameValue.length > 0 ? nameValue[0] : "";
                 String value = nameValue.length > 1 ? nameValue[1] : "";
                 if (StringUtils.isNotBlank(name)) {
-                    map.put(name, value);
+                    try {
+                        map.put(name, URLDecoder.decode(value, Util.UTF8_STRING_ENCODING));
+                    } catch (Exception e) {
+                        log.error(String.format("Error encoding query param, key: '%s', value: '%s'", name, value), e);
+                    }
                 }
             }
         }
