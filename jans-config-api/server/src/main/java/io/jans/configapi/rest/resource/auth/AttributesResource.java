@@ -105,7 +105,6 @@ public class AttributesResource extends ConfigBaseResource {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/attributes.readonly" }), parameters = {
                             @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Attribute ID"))
-
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),

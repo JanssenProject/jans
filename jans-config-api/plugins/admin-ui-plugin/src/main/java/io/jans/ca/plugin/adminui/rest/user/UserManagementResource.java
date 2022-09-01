@@ -4,9 +4,20 @@ import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.configapi.core.rest.ProtectedApi;
+
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.user.UserManagementService;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
+
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;
@@ -36,6 +47,14 @@ public class UserManagementResource {
     @Inject
     UserManagementService userManagementService;
 
+    @Operation(summary = "Get all admin ui roles", description = "Get all admin ui roles", operationId = "get-adminui-roles", tags = {
+            "Admin UI - Role" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read" }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
@@ -55,6 +74,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Add admin ui role", description = "Add admin ui role", operationId = "add-adminui-role", tags = {
+            "Admin UI - Role" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write" }))
+    @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminRole.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,6 +102,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Edit admin ui role", description = "Edit admin ui role", operationId = "edit-adminui-role", tags = {
+            "Admin UI - Role" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write" }))
+    @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminRole.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of  AdminRole")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,6 +130,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Delete admin ui role", description = "Delete admin ui role", operationId = "delete-adminui-role", tags = {
+            "Admin UI - Role" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write" }))
+    @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminRole.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
@@ -112,6 +158,14 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Get admin ui permissions", description = "Get admin ui permissions", operationId = "get-adminui-permissions", tags = {
+            "Admin UI - Permission" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read" }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -131,6 +185,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Add admin ui permissions", description = "Add admin ui permissions", operationId = "add-adminui-permission", tags = {
+            "Admin UI - Permission" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write" }))
+    @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -150,6 +213,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Edit admin ui permissions", description = "Edit admin ui permissions", operationId = "edit-adminui-permission", tags = {
+            "Admin UI - Permission" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write" }))
+    @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -169,6 +241,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Delete admin ui permissions", description = "Delete admin ui permissions", operationId = "delete-adminui-permission", tags = {
+            "Admin UI - Permission" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write" }))
+    @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -188,6 +269,14 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Get admin ui role-permissions mapping", description = "Get admin ui role-permissions mapping", operationId = "get-adminui-role-permissions", tags = {
+            "Admin UI - Role-Permissions Mapping" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly" }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
@@ -207,6 +296,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Add role-permissions mapping", description = "Add role-permissions mapping", operationId = "add-role-permissions-mapping", tags = {
+            "Admin UI - Role-Permissions Mapping" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write" }))
+    @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
@@ -214,7 +312,8 @@ public class UserManagementResource {
     public Response addPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Adding role-permissions to Admin-UI.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.addPermissionsToRole(rolePermissionMappingArg);
+            List<RolePermissionMapping> roleScopeMapping = userManagementService
+                    .addPermissionsToRole(rolePermissionMappingArg);
             log.info("Added role-permissions to Admin-UI..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
@@ -226,6 +325,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Map permissions to role", description = "Map permissions to role", operationId = "map-permissions-to-role", tags = {
+            "Admin UI - Role-Permissions Mapping" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write" }))
+    @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
@@ -233,7 +341,8 @@ public class UserManagementResource {
     public Response mapPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Mapping permissions to Admin-UI role.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.mapPermissionsToRole(rolePermissionMappingArg);
+            List<RolePermissionMapping> roleScopeMapping = userManagementService
+                    .mapPermissionsToRole(rolePermissionMappingArg);
             log.info("Mapped permissions to Admin-UI role..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
@@ -245,6 +354,15 @@ public class UserManagementResource {
         }
     }
 
+    @Operation(summary = "Remove role-permissions mapping", description = "Remove role-permissions mapping", operationId = "remove-role-permissions-permission", tags = {
+            "Admin UI - Role-Permissions Mapping" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write" }))
+    @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
@@ -252,7 +370,8 @@ public class UserManagementResource {
     public Response removePermissionsFromRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Removing permissions to Admin-UI role.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.removePermissionsFromRole(rolePermissionMappingArg);
+            List<RolePermissionMapping> roleScopeMapping = userManagementService
+                    .removePermissionsFromRole(rolePermissionMappingArg);
             log.info("Removed permissions to Admin-UI role..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
