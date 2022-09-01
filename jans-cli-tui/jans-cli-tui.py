@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
 """
-import json
 import os
-import logging
-
+import json
 import time
+import logging
+import importlib
+
+from pathlib import Path
 from asyncio import Future, ensure_future
 from pynput.keyboard import Key, Controller
 
@@ -48,8 +50,6 @@ from wui_components.jans_message_dialog import JansMessageDialog
 
 from cli_style import style
 
-from models.oauth.oauth import JansAuthServer
-from pathlib import Path
 
 # -------------------------------------------------------------------------- #
 
@@ -57,6 +57,7 @@ home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
+cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 def accept_yes():
     get_app().exit(result=True)
@@ -69,15 +70,21 @@ def do_exit(*c):
     get_app().exit(result=False)
 
 
-class JansCliApp(Application, JansAuthServer):
+class JansCliApp(Application):
     
     def __init__(self):
         self.init_logger()
         self.status_bar_text = ''
         self.styles = dict(style.style_rules)
-
+        self._plugins = []
+        self._load_plugins()
         self.set_keybindings()
         # -------------------------------------------------------------------------------- #
+
+        self.not_implemented = Frame(
+                            body=HSplit([Label(text="Not imlemented yet"), Button(text="MyButton")], width=D()),
+                            height=D())
+
 
         self.keyboard = Controller()
 
@@ -87,18 +94,13 @@ class JansCliApp(Application, JansAuthServer):
                         FormattedTextControl(self.update_status_bar), style="class:status", height=1
                     )
 
-        JansAuthServer.initialize(self)
-
-
-        self.not_implemented = Frame(
-                            body=HSplit([Label(text="Not imlemented yet"), Button(text="MyButton")], width=D()),
-                            height=D())
-
         self.center_container = self.not_implemented
 
         self.nav_bar = JansNavBar(
                     self,
-                    entries=[('oauth', 'Auth Server'), ('fido', 'FDIO'), ('scim', 'SCIM'), ('config_api', 'Config-API'), ('client_api', 'Client-API'), ('scripts', 'Scripts')],
+                    entries=[(plugin.pid, plugin.name) for plugin in self._plugins], 
+                    #('oauth', 'Auth Server'), ('fido', 'FDIO'), ('scim', 'SCIM'), ('config_api', 'Config-API'), ('client_api', 'Client-API'), ('scripts', 'Scripts')],
+                    #selection_changed=self.main_nav_selection_changed,
                     selection_changed=self.main_nav_selection_changed,
                     select=0,
                     )
@@ -133,12 +135,21 @@ class JansCliApp(Application, JansAuthServer):
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
         # Since first module is oauth, set center frame to my oauth main container.
-        self.oauth_set_center_frame()
+        #self.oauth_set_center_frame()
 
 
         # ----------------------------------------------------------------------------- #
         self.check_jans_cli_ini()
         # ----------------------------------------------------------------------------- #
+
+    def _load_plugins(self):
+
+        plugin_dir = os.path.join(cur_dir, 'plugins')
+        for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
+            spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file.as_posix())
+            plugin = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(plugin)
+            self._plugins.append(plugin.Plugin(self))
 
     @property
     def dialog_width(self):
@@ -152,7 +163,6 @@ class JansCliApp(Application, JansAuthServer):
         self.logger = logging.getLogger('JansCli')
         self.logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        cur_dir = os.path.dirname(os.path.realpath(__file__))
         file_handler = logging.FileHandler(os.path.join(cur_dir, 'dev.log'))
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
@@ -434,12 +444,17 @@ class JansCliApp(Application, JansAuthServer):
 
         return text
 
+    def get_plugin_by_id(self, pid):
+        for plugin in self._plugins:
+            if plugin.pid == pid:
+                return plugin
+
+
     def main_nav_selection_changed(self, selection):
-        if hasattr(self, selection+'_set_center_frame'):
-            center_frame_setter = getattr(self, selection+'_set_center_frame')
-            center_frame_setter()
-        else:
-            self.center_container = self.not_implemented
+        self.logger.debug("Main navbar selection changed %s", str(selection))
+        plugin = self.get_plugin_by_id(selection)
+        plugin.set_center_frame()
+
 
     async def show_dialog_as_float(self, dialog):
         "Coroutine."

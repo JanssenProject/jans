@@ -64,6 +64,12 @@ class JansNavBar():
 
         return merge_formatted_text(result)
 
+
+    def _set_selection(self):
+
+        if self.selection_changed:
+            self.selection_changed(self.navbar_entries[self.cur_navbar_selection][0])
+
     def get_nav_bar_key_bindings(self):
         """All key binding for the Dialog with Navigation bar
 
@@ -75,9 +81,13 @@ class JansNavBar():
         @kb.add("left")
         def _go_up(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection - 1) % len(self.navbar_entries)
+            self._set_selection()
 
         @kb.add("right")
         def _go_up(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection + 1) % len(self.navbar_entries)
+            self._set_selection()
+
+
 
         return kb

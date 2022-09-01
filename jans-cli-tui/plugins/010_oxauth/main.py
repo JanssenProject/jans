@@ -1,3 +1,6 @@
+import os
+import sys
+
 import threading
 from asyncio import ensure_future
 
@@ -16,6 +19,7 @@ from prompt_toolkit.widgets import (
     Box,
     Button,
     Label,
+    Frame
 )
 
 from cli import config_cli
@@ -25,18 +29,31 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_drop_down import DropDownWidget
-from models.oauth.edit_client_dialog import EditClientDialog
-from models.oauth.edit_scope_dialog import EditScopeDialog
 from wui_components.jans_data_picker import DateSelectWidget
 
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
-class JansAuthServer:
+from edit_client_dialog import EditClientDialog
+from edit_scope_dialog import EditScopeDialog
 
-    def initialize(self):
+
+class Plugin():
+    def __init__(self, app):
+        self.app = app
+        self.pid = 'oxauth'
+        self.name = 'Auth Server'
+
         self.oauth_containers = {}
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
         self.oauth_nav_selection_changed(self.oauth_navbar.navbar_entries[0][0])
+
+    def process(self):
+        pass
+
+    def set_center_frame(self):
+        self.app.center_container = self.oauth_main_container
+
 
     def oauth_prepare_containers(self):
 
@@ -49,9 +66,9 @@ class JansAuthServer:
 
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
-                        self.getButton(text="Get Scopes", name='oauth:scopes:get', jans_help="Retreive first 10 Scopes", handler=self.oauth_get_scopes),
-                        self.getTitledText('Search: ', name='oauth:scopes:search', jans_help='Press enter to perform search'),
-                        self.getButton(text="Add Scope", name='oauth:scopes:add', jans_help="To add a new scope press this button"),
+                        self.app.getButton(text="Get Scopes", name='oauth:scopes:get', jans_help="Retreive first 10 Scopes", handler=self.oauth_get_scopes),
+                        self.app.getTitledText('Search: ', name='oauth:scopes:search', jans_help='Press enter to perform search'),
+                        self.app.getButton(text="Add Scope", name='oauth:scopes:add', jans_help="To add a new scope press this button"),
                         ],
                         padding=3,
                         width=D(),
@@ -61,9 +78,9 @@ class JansAuthServer:
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
-                        self.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
-                        self.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search', accept_handler=self.search_clients),
-                        self.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client),
+                        self.app.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
+                        self.app.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search', accept_handler=self.search_clients),
+                        self.app.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client),
                         
                         ],
                         padding=3,
@@ -90,13 +107,12 @@ class JansAuthServer:
                     )
 
     def oauth_nav_selection_changed(self, selection):
+        self.app.logger.debug("OXUATH NAV: %s", selection)
         if selection in self.oauth_containers:
             self.oauth_main_area = self.oauth_containers[selection]
         else:
-            self.oauth_main_area = self.not_implemented
+            self.oauth_main_area = self.app.not_implemented
 
-    def oauth_set_center_frame(self):
-        self.center_container = self.oauth_main_container
 
     def oauth_update_clients(self, pattern=''):
         endpoint_args='limit:10'
@@ -104,7 +120,7 @@ class JansAuthServer:
             endpoint_args='limit:10,pattern:'+pattern
 
         try :
-            rsponse = self.cli_object.process_command_by_id(
+            rsponse = self.app.cli_object.process_command_by_id(
                         operation_id='get-oauth-openid-clients',
                         url_suffix='',
                         endpoint_args=endpoint_args,
@@ -113,17 +129,17 @@ class JansAuthServer:
                         )
 
         except Exception as e:
-            self.show_message("Error getting clients", str(e))
+            self.app.show_message("Error getting clients", str(e))
             return
 
         if rsponse.status_code not in (200, 201):
-            self.show_message("Error getting clients", str(rsponse.text))
+            self.app.show_message("Error getting clients", str(rsponse.text))
             return
 
         try:
             result = rsponse.json()
         except Exception:
-            self.show_message("Error getting clients", str(rsponse.text))
+            self.app.show_message("Error getting clients", str(rsponse.text))
             #press_tab
             return
 
@@ -142,12 +158,12 @@ class JansAuthServer:
 
         if data:
             clients = JansVerticalNav(
-                myparent=self,
+                myparent=self.app,
                 headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
                 preferred_size= [0,0,30,0],
                 data=data,
                 on_enter=self.edit_client_dialog,
-                on_display=self.data_display_dialog,
+                on_display=self.app.data_display_dialog,
                 on_delete=self.delete_client,
                 # selection_changed=self.data_selection_changed,
                 selectes=0,
@@ -156,14 +172,14 @@ class JansAuthServer:
                 all_data=result
             )
 
-            self.layout.focus(clients)   
+            self.app.layout.focus(clients)
             self.oauth_data_container['clients'] = HSplit([
                 clients
             ])
             get_app().invalidate()
 
         else:
-            self.show_message("Oops", "No matching result")
+            self.app.show_message("Oops", "No matching result")
 
 
     def oauth_get_clients(self):
@@ -173,7 +189,7 @@ class JansAuthServer:
 
     def update_oauth_scopes(self, start_index=0):
         try :
-            result = self.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
+            result = self.app.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
             data =[]
             for d in result: 
                 data.append(
@@ -228,22 +244,21 @@ class JansAuthServer:
         self.edit_scope_dialog()
 
     def edit_client_dialog(self, **params):
-        
         selected_line_data = params['data']  
         title = "Edit user Data (Clients)"
 
-        self.logger.debug("START")
-        self.logger.debug(selected_line_data)
-        self.logger.debug("END")
+        self.app.logger.debug("START")
+        self.app.logger.debug(selected_line_data)
+        self.app.logger.debug("END")
 
-        dialog = EditClientDialog(self, title=title, data=selected_line_data, save_handler=self.save_client)
-        self.show_jans_dialog(dialog)
+        dialog = EditClientDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client)
+        self.app.show_jans_dialog(dialog)
 
     def save_client(self, dialog):
 
-        self.logger.debug(dialog.data)
+        self.app.logger.debug(dialog.data)
 
-        response = self.cli_object.process_command_by_id(
+        response = self.app.cli_object.process_command_by_id(
             operation_id='put-oauth-openid-clients' if dialog.data.get('inum') else 'post-oauth-openid-clients',
             url_suffix='',
             endpoint_args='',
@@ -251,44 +266,42 @@ class JansAuthServer:
             data=dialog.data
         )
 
-        self.logger.debug(response.text)
+        self.app.logger.debug(response.text)
 
         if response.status_code in (200, 201):
             self.oauth_get_clients()
             return True
 
-        self.show_message("Error!", "An error ocurred while saving client:\n" + str(response.text))
+        self.app.show_message("Error!", "An error ocurred while saving client:\n" + str(response.text))
 
     def search_clients(self, tbuffer):
         if not len(tbuffer.text) > 2:
-            self.show_message("Error!", "Search string should be at least three characters")
+            self.app.show_message("Error!", "Search string should be at least three characters")
             return
 
         t = threading.Thread(target=self.oauth_update_clients, args=(tbuffer.text,), daemon=True)
         t.start()
 
 
-
     def add_client(self):
-        dialog = EditClientDialog(self, title="Add Client", data={}, save_handler=self.save_client)
-        result = self.show_jans_dialog(dialog)
+        dialog = EditClientDialog(self.app, title="Add Client", data={}, save_handler=self.save_client)
+        result = self.app.show_jans_dialog(dialog)
 
     def delete_client(self, selected, event):
 
-        dialog = self.get_confirm_dialog("Are you sure want to delete client inum:\n {} ?".format(selected[0]))
+        dialog = self.app.get_confirm_dialog("Are you sure want to delete client inum:\n {} ?".format(selected[0]))
 
         async def coroutine():
-            app = get_app()
-            focused_before = app.layout.current_window
-            self.layout.focus(dialog)
-            result = await self.show_dialog_as_float(dialog)
+            focused_before = self.app.layout.current_window
+            self.app.layout.focus(dialog)
+            result = await self.app.show_dialog_as_float(dialog)
             try:
-                app.layout.focus(focused_before)
+                self.app.layout.focus(focused_before)
             except:
-                app.layout.focus(self.center_frame)
+                self.app.layout.focus(self.app.center_frame)
 
             if result.lower() == 'yes':
-                result = self.cli_object.process_command_by_id(
+                result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-openid-clients-by-inum',
                     url_suffix='inum:{}'.format(selected[0]),
                     endpoint_args='',
