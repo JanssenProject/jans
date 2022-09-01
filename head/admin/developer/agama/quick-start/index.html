@@ -10432,6 +10432,7 @@
 <div class="highlight"><pre><span></span><code>cat /root/.config/jans-cli.ini | grep &#39;jca_client_id&#39;
 cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
 </code></pre></div>
+<p>TODO: this will actually give the admin-ui client creds, not the config api client (1800-prefixed inum) ones as required. Need a way to get config api details without forcing users to connect to the underlying database. </p>
 <p>The above contains an encoded secret, to decode it run <code>/opt/jans/bin/encode.py -D &lt;DECODED-PASS&gt;</code>. Keep this credentials safe.</p>
 <p>Tokens are required to have the right scopes depending on the operation to invoke, the following table summarizes this aspect:</p>
 <table>
@@ -10558,7 +10559,7 @@ cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-31T16:07:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-31</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-01T15:01:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-01</span>
       
         <br>
         Created:
