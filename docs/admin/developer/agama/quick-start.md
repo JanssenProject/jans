@@ -89,16 +89,28 @@ This flow is extremely static and unrealistic but showcases minimal key elements
 
 ### Getting an access token
 
-In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and collect the id and secret of the jans-config-api client this way:
+In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and perform the following steps:
+
+- Run `python3 /opt/jans/jans-cli/config-cli.py`
+- In the menu enter to `OAuth` > `OIDC clients` > `Get list of clients`
+- Accept the default parameters, for `pattern` enter `config`
+- Follow the instructions (in a web browser) to get authorized access
+- A list of results will be shown, pick the value in the `inum` column for the client with display name `Jans Config Api Client`
+- Choose `back`, and enter to `Get client by inum`
+- Enter the collected `inum` and grab the value of `clientSecret` in the resulting JSON document
+- Finally, choose `logout and quit`
+
+The collected secret is encoded, run `python3 /opt/jans/bin/encode.py -D <clientSecret>` to decode it.
+
+The following is an example of how to get a token using `curl`. Replace data in the placeholders appropriately:
 
 ```
-cat /root/.config/jans-cli.ini | grep 'jca_client_id'
-cat /root/.config/jans-cli.ini | grep 'jca_client_secret_enc'
+curl -u '<client-inum:client-secret-decoded>'
+     -d scope='https://jans.io/oauth/config/agama.write'
+     -d grant_type=client_credentials https://<your-host>/jans-auth/restv1/token
 ```
 
-TODO: this will actually give the admin-ui client creds, not the config api client (1800-prefixed inum) ones as required. Need a way to get config api details without forcing users to connect to the underlying database. 
-
-The above contains an encoded secret, to decode it run `/opt/jans/bin/encode.py -D <DECODED-PASS>`. Keep this credentials safe.
+You can extract the token from the (JSON) response obtained which is a self-explanatory. Add the `-k` switch if your server uses a self-signed certificate.
 
 Tokens are required to have the right scopes depending on the operation to invoke, the following table summarizes this aspect:
 
@@ -108,23 +120,13 @@ Tokens are required to have the right scopes depending on the operation to invok
 |`https://jans.io/oauth/config/agama.write`|Create or modify a flow|
 |`https://jans.io/oauth/config/agama.delete`|Remove a flow|
 
-Find [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml) the  open API definition of the REST API - locate the endpoints starting with `/jans-config-api/api/v1/agama`.
-
-The following is an example of how to get a token using `curl`. Replace data in the placeholders appropriately:
-
-```
-curl -u '<jca_client_id:jca_client_secret>'
-     -d scope='https://jans.io/oauth/config/agama.write'
-     -d grant_type=client_credentials https://<your-host>/jans-auth/restv1/token
-```
-
-You can extract the token from the (JSON) response obtained which is a self-explanatory. Add the `-k` switch if your server uses a self-signed certificate.
+You can find [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml) the open API definition of the REST API - locate the endpoints starting with `/jans-config-api/api/v1/agama`.
 
 **Notes**:
 
 - Tokens have expiration time measured in seconds. When expired, you'll have to re-request
 - To get a token with more than one scope, supply the required scopes separated by whitespace in the `scope` parameter of the request above
-- You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it provides the needed scopes
+- You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it can provide the needed scopes
 
 ### Add the flow to the server
 
