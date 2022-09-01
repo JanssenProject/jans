@@ -83,7 +83,7 @@ public class ActionService {
                 if (actionCls == null) throw new ClassNotFoundException(rex.getMessage(), rex);                
             }
         }
-        logger.info("Class {} loaded successfully", className);
+        logger.debug("Class {} loaded successfully", className);
         int arity = rhinoArgs.length;
         
         BiPredicate<Executable, Boolean> pr = (e, staticRequired) -> {

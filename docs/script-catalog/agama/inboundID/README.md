@@ -35,10 +35,10 @@ Note the scope here is limited: no session is created in the Janssen server for 
 
 To facilitate administrators' work, the following flows are already implemented:
 
-- Apple
-- [Facebook](https://github.com/JanssenProject/jans/tree/main/docs/script-catalog/agama/inboundID/facebook)
-- [Github](https://github.com/JanssenProject/jans/tree/main/docs/script-catalog/agama/inboundID/github)
-- [Google](https://github.com/JanssenProject/jans/tree/main/docs/script-catalog/agama/inboundID/google)
+- [Apple](./apple/README.md)
+- [Facebook](./facebook)
+- [Github](./github)
+- [Google](./google)
 
 ### Main flow
 
@@ -71,19 +71,28 @@ To start, let's add the required libraries to the authentication server:
 - Navigate to `/opt/jans/jetty/jans-auth/webapps` and edit the file `jans-auth.xml` by adding `<Set name="extraClasspath">./custom/libs/*</Set>` before the root tag closes
 - Restart the server, e.g. `systemctl restart jans-auth`
 
-### Add the main inbound flow
+### Add the basic authentication flow
 
-- Ensure Agama engine is [enabled](https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine). Download the flow [source](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) file
+The basic authentication flow is employed when no provider is picked from the list (step 1 [here](#main-flow)) but the option to use an existing local account is taken. This flow is detailed in the Agama sample flows [page](https://jans.io/docs/admin/developer/agama/samples/#basic-authentication), however those contents can be skipped for the purpose of this setup.
+
+- Ensure Agama engine is [enabled](https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
 
 - Use the API for adding flows as explained [here](https://jans.io/docs/admin/developer/agama/quick-start/#getting-an-access-token) and [here](https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server). A sample `curl` command would look like this: 
 
     ```
     curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain'
-         --data-binary @io.jans.inbound.ExternalSiteLogin
-         https://<your-host>/jans-config-api/api/v1/agama/io.jans.inbound.ExternalSiteLogin
+         --data-binary @io.jans.flow.sample.basic
+         https://<your-host>/jans-config-api/api/v1/agama/io.jans.flow.sample.basic
     ```
+- In the server, navigate to `/opt/jans/jetty/jans-auth/agama/ftl`. Create the folder hierarchy `samples/basic` there
 
-- In the server, navigate to `/opt/jans/jetty/jans-auth/agama/`. Create folders named `inboundID` inside existing `ftl` and `fl` subdirectories
+- Download the login [template](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/basic/login.ftlh) to `basic` directory 
+
+### Add the main inbound flow
+
+- Download the flow [source](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) and add it as you did with the basic flow, ensure you use `io.jans.inbound.ExternalSiteLogin` this time
+
+- In the server, navigate to `/opt/jans/jetty/jans-auth/agama`. Create folders named `inboundID` inside existing `ftl` and `fl` subdirectories
 
 - Download the default [logo](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/none.png) and place it inside `/opt/jans/jetty/jans-auth/agama/fl/inboundID` folder
 
@@ -216,7 +225,7 @@ The table below explains the meaning of properties:
     
 ### Provider flow configurations
 
-Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows **must not** receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of `Inputs` but `Configs` directive in the [header](https://jans.io/docs/admin/developer/agama/dsl-full/#header-basics) .
+Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows **must not** receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of `Inputs` but `Configs` directive in the [header](https://jans.io/docs/admin/developer/agama/dsl-full/#header-basics).
 
 In practice many identity providers adhere to the OAuth2 `code` grant, so you can re-use the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java) Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.
 
@@ -231,6 +240,7 @@ The table below explains the meaning of its properties:
 |`clientSecret`|Secret associated to the client|
 |`scopes`|A JSON array of strings that represent the scopes of the access tokens to retrieve|
 |`redirectUri`|Redirect URI as in section 3.1.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
+|`clientCredsInRequestBody`|`true` indicates the client authenticates at the token endpoint by including the credentials in the body of the request, otherwise, HTTP Basic authentication is assumed. See section 2.3.1 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
 |`custParamsAuthReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the authorization endpoint if desired|
 |`custParamsTokenReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired|
 
