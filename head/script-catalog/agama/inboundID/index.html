@@ -10396,7 +10396,7 @@
 <h4 id="set-configuration-parameters">Set configuration parameters<a class="headerlink" href="#set-configuration-parameters" title="Permanent link">#</a></h4>
 <ul>
 <li>
-<p>Create a json file like the below. Replace data in the placeholders appropriately:</p>
+<p>Create a JSON file like the below. Replace data in the placeholders appropriately:</p>
 <div class="highlight"><pre><span></span><code>[{
   &quot;op&quot;: &quot;replace&quot;,
   &quot;path&quot;: &quot;/metadata/properties&quot;,
@@ -10412,19 +10412,19 @@
 </code></pre></div>
 </li>
 <li>
-<p>Patch the flow using the API. A sample <code>curl</code> command would look like this (assuming the json file is named <code>fb.json</code>):</p>
+<p>Patch the flow using the API. A sample <code>curl</code> command would look like this (assuming the JSON file is named <code>fb.json</code>):</p>
 <div class="highlight"><pre><span></span><code>curl -k -i -H &#39;Authorization: Bearer &lt;token&gt;&#39; -H &#39;Content-Type: application/json-patch+json&#39;
      -X PATCH -d@fb.json
      https://&lt;your-host&gt;/jans-config-api/api/v1/agama/io.jans.inbound.Facebook
 </code></pre></div>
 </li>
 </ul>
-<p>Later, we'll dive into the meaning of the <a href="#provider-flow-configurations">configuration parameters</a> set in this json file.</p>
+<p>Later, we'll dive into the meaning of the <a href="#provider-flow-configurations">configuration parameters</a> set in this JSON file.</p>
 <h3 id="parameterize-the-main-flow">Parameterize the main flow<a class="headerlink" href="#parameterize-the-main-flow" title="Permanent link">#</a></h3>
 <p>So far, if the main flow is launched (learn about this topic <a href="https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>) a screen with an empty "Sign in with" list will be shown. Adding information about the known providers is required.</p>
 <ul>
 <li>
-<p>Create a json file like the below:</p>
+<p>Create a JSON file like the below:</p>
 <div class="highlight"><pre><span></span><code>[{
   &quot;op&quot;: &quot;replace&quot;,
   &quot;path&quot;: &quot;/metadata/properties&quot;,
@@ -10440,17 +10440,17 @@
 </code></pre></div>
 </li>
 <li>
-<p>Patch the main flow using the API. A sample <code>curl</code> command would look like this (assuming the json file is named <code>main.json</code>):</p>
+<p>Patch the main flow using the API. A sample <code>curl</code> command would look like this (assuming the JSON file is named <code>main.json</code>):</p>
 <div class="highlight"><pre><span></span><code>curl -k -i -H &#39;Authorization: Bearer &lt;token&gt;&#39; -H &#39;Content-Type: application/json-patch+json&#39;
      -X PATCH -d@main.json
      https://&lt;your-host&gt;/jans-config-api/api/v1/agama/io.jans.inbound.ExternalSiteLogin
 </code></pre></div>
 </li>
 </ul>
-<p>Later, we'll dive into the meaning of the <a href="#main-flow-configurations">configuration parameters</a> set in this json file.</p>
-<p><strong>Note</strong>: for limitations in PATCH API do not use <code>"op": "add"</code> to add another provider. Use <code>"op": "replace"</code> and pass the whole JSON configuration (all providers) for <code>value</code>.</p>
+<p>Later, we'll dive into the meaning of the <a href="#main-flow-configurations">configuration parameters</a> set in this JSON file.</p>
+<p><strong>Note</strong>: for limitations in the PATCH endpoint, do not use <code>"op": "add"</code> to add another provider. Use <code>"op": "replace"</code> and pass the whole JSON configuration (all providers) for <code>value</code>.</p>
 <h3 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h3>
-<p>Launch the main flow (learn about this topic <a href="https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>). If everything was setup correctly, a screen with a "Sign in with" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described <a href="#main-flow">here</a>. </p>
+<p>Launch the main flow (learn about this topic <a href="https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described <a href="#main-flow">here</a>. </p>
 <h2 id="configuration-parameters-of-flows">Configuration parameters of flows<a class="headerlink" href="#configuration-parameters-of-flows" title="Permanent link">#</a></h2>
 <h3 id="main-flow-configurations">Main flow configurations<a class="headerlink" href="#main-flow-configurations" title="Permanent link">#</a></h3>
 <p>Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
@@ -10661,7 +10661,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-31T22:01:08+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-31</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-01T23:54:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-01</span>
       
         <br>
         Created:

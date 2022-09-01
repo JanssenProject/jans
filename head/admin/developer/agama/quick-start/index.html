@@ -10428,12 +10428,24 @@
 </ul>
 <p>This flow is extremely static and unrealistic but showcases minimal key elements for flow building. Please <strong>do not</strong> try this flow in any of your production servers.</p>
 <h3 id="getting-an-access-token">Getting an access token<a class="headerlink" href="#getting-an-access-token" title="Permanent link">#</a></h3>
-<p>In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and collect the id and secret of the jans-config-api client this way:</p>
-<div class="highlight"><pre><span></span><code>cat /root/.config/jans-cli.ini | grep &#39;jca_client_id&#39;
-cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
+<p>In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and perform the following steps:</p>
+<ul>
+<li>Run <code>python3 /opt/jans/jans-cli/config-cli.py</code></li>
+<li>In the menu enter to <code>OAuth</code> &gt; <code>OIDC clients</code> &gt; <code>Get list of clients</code></li>
+<li>Accept the default parameters, for <code>pattern</code> enter <code>config</code></li>
+<li>Follow the instructions (in a web browser) to get authorized access</li>
+<li>A list of results will be shown, pick the value in the <code>inum</code> column for the client with display name <code>Jans Config Api Client</code></li>
+<li>Choose <code>back</code>, and enter to <code>Get client by inum</code></li>
+<li>Enter the collected <code>inum</code> and grab the value of <code>clientSecret</code> in the resulting JSON document</li>
+<li>Finally, choose <code>logout and quit</code></li>
+</ul>
+<p>The collected secret is encoded, run <code>python3 /opt/jans/bin/encode.py -D &lt;clientSecret&gt;</code> to decode it.</p>
+<p>The following is an example of how to get a token using <code>curl</code>. Replace data in the placeholders appropriately:</p>
+<div class="highlight"><pre><span></span><code>curl -u &#39;&lt;client-inum:client-secret-decoded&gt;&#39;
+     -d scope=&#39;https://jans.io/oauth/config/agama.write&#39;
+     -d grant_type=client_credentials https://&lt;your-host&gt;/jans-auth/restv1/token
 </code></pre></div>
-<p>TODO: this will actually give the admin-ui client creds, not the config api client (1800-prefixed inum) ones as required. Need a way to get config api details without forcing users to connect to the underlying database. </p>
-<p>The above contains an encoded secret, to decode it run <code>/opt/jans/bin/encode.py -D &lt;DECODED-PASS&gt;</code>. Keep this credentials safe.</p>
+<p>You can extract the token from the (JSON) response obtained which is a self-explanatory. Add the <code>-k</code> switch if your server uses a self-signed certificate.</p>
 <p>Tokens are required to have the right scopes depending on the operation to invoke, the following table summarizes this aspect:</p>
 <table>
 <thead>
@@ -10457,18 +10469,12 @@ cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
 </tr>
 </tbody>
 </table>
-<p>Find <a href="https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml">here</a> the  open API definition of the REST API - locate the endpoints starting with <code>/jans-config-api/api/v1/agama</code>.</p>
-<p>The following is an example of how to get a token using <code>curl</code>. Replace data in the placeholders appropriately:</p>
-<div class="highlight"><pre><span></span><code>curl -u &#39;&lt;jca_client_id:jca_client_secret&gt;&#39;
-     -d scope=&#39;https://jans.io/oauth/config/agama.write&#39;
-     -d grant_type=client_credentials https://&lt;your-host&gt;/jans-auth/restv1/token
-</code></pre></div>
-<p>You can extract the token from the (JSON) response obtained which is a self-explanatory. Add the <code>-k</code> switch if your server uses a self-signed certificate.</p>
+<p>You can find <a href="https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml">here</a> the open API definition of the REST API - locate the endpoints starting with <code>/jans-config-api/api/v1/agama</code>.</p>
 <p><strong>Notes</strong>:</p>
 <ul>
 <li>Tokens have expiration time measured in seconds. When expired, you'll have to re-request</li>
 <li>To get a token with more than one scope, supply the required scopes separated by whitespace in the <code>scope</code> parameter of the request above</li>
-<li>You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it provides the needed scopes</li>
+<li>You don't have to necessarily use the jans-config-api client to get your tokens. Any client, including one registered yourself can be used here as long as it can provide the needed scopes</li>
 </ul>
 <h3 id="add-the-flow-to-the-server">Add the flow to the server<a class="headerlink" href="#add-the-flow-to-the-server" title="Permanent link">#</a></h3>
 <p>The easiest way to create a flow is issuing a POST passing the source code in the payload. For our example, if the flow's source code resides in a file named <code>flow.txt</code>, the request would look this way: </p>
@@ -10559,7 +10565,7 @@ cat /root/.config/jans-cli.ini | grep &#39;jca_client_secret_enc&#39;
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-01T15:01:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-01T23:54:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-01</span>
       
         <br>
         Created:
