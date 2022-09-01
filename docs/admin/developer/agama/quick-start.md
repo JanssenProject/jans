@@ -96,6 +96,8 @@ cat /root/.config/jans-cli.ini | grep 'jca_client_id'
 cat /root/.config/jans-cli.ini | grep 'jca_client_secret_enc'
 ```
 
+TODO: this will actually give the admin-ui client creds, not the config api client (1800-prefixed inum) ones as required. Need a way to get config api details without forcing users to connect to the underlying database. 
+
 The above contains an encoded secret, to decode it run `/opt/jans/bin/encode.py -D <DECODED-PASS>`. Keep this credentials safe.
 
 Tokens are required to have the right scopes depending on the operation to invoke, the following table summarizes this aspect:
