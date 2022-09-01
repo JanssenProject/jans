@@ -10127,7 +10127,7 @@
 
 
 <h1 id="the-sign-in-with-apple-agama-flow">The "Sign In With Apple" Agama flow<a class="headerlink" href="#the-sign-in-with-apple-agama-flow" title="Permanent link">#</a></h1>
-<p>To deploy this flow, a number of configurations are required. Ensure you have an Apple developer account to start. <a href="https://github.com/ananay/apple-auth/blob/master/SETUP.md">This tutorial</a> does a great job at explaining the necessary steps. As you go with it, ensure you collect the following elements:</p>
+<p>To deploy this flow, a number of configurations are required. Ensure you have an Apple developer account to start. <a href="https://github.com/ananay/apple-auth/blob/master/SETUP.md">This tutorial</a> does a great job at explaining the necessary steps. As you go with it, please collect the following elements:</p>
 <ul>
 <li>A service ID</li>
 <li>A team ID</li>
@@ -10163,16 +10163,28 @@
 </code></pre></div>
 <h2 id="expected-journey">Expected journey<a class="headerlink" href="#expected-journey" title="Permanent link">#</a></h2>
 <p>The accompanying images illustrate the steps end-users will go through when using the inbound identity flow taking the Apple route:</p>
-<p><em>Initial provider selector page</em></p>
+<ol>
+<li>
+<p>Initial provider selector page</p>
 <p><img alt="provider selector" src="provider_selector.png" /></p>
-<p><em>Prompt for credentials at Apple website</em></p>
+</li>
+<li>
+<p>Prompt for credentials at Apple website</p>
 <p><img alt="prompt credentials" src="SIWA_creds.png" /></p>
-<p><em>Prompt for a second factor, e.g. SMS (optional)</em></p>
+</li>
+<li>
+<p>Prompt for a second factor, e.g. SMS (optional)</p>
 <p><img alt="prompt second factor" src="SIWA_MFA.png" /></p>
-<p><em>Prompt for browser trust</em></p>
+</li>
+<li>
+<p>Prompt for browser trust</p>
 <p><img alt="browser trust" src="SIWA_trust.png" /></p>
-<p><em>Prompt to before returning to original site</em></p>
+</li>
+<li>
+<p>Prompt before returning to original site</p>
 <p><img alt="prompt continue" src="SIWA_proceed.png" /></p>
+</li>
+</ol>
 <p>Finally, the user should land at the target application.</p>
 
   <hr>
@@ -10180,7 +10192,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-31T22:01:08+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-31</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-01T11:53:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-01</span>
       
         <br>
         Created:
