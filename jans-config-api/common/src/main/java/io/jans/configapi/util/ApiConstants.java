@@ -108,8 +108,6 @@ public class ApiConstants {
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
 
-
-
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
     public static final String PROTECTION_TYPE_UMA = "uma";
@@ -127,5 +125,12 @@ public class ApiConstants {
     public static final int DEFAULT_MAX_COUNT = 200;  
     public static final String SORT_BY = "sortBy";
     public static final String SORT_ORDER = "sortOrder";
+    public static final String ASCENDING = "ascending";
+    public static final String DESCENDING = "descending";
+    public static final String TOTAL_ITEMS = "totalItems";
+    public static final String ENTRIES_COUNT = "entriesCount";
+    public static final String DATA = "data";
+    
+    
 
 }

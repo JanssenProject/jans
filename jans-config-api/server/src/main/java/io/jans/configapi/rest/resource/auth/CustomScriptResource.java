@@ -89,7 +89,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
         
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script to be fetched based on type - type:{} , pattern:{}, limit:{} ", escapeLog(type), escapeLog(pattern), escapeLog(limit));
