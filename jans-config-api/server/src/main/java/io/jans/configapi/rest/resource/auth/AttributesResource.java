@@ -7,6 +7,8 @@
 package io.jans.configapi.rest.resource.auth;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -14,17 +16,19 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.model.GluuAttribute;
-
+import io.jans.orm.model.PagedResult;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 /**
@@ -47,33 +51,17 @@ public class AttributesResource extends ConfigBaseResource {
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS })
-    public Response getAttributes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+    public Response getAttributes(@DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status) throws Exception {
-        List<GluuAttribute> attributes = new ArrayList<GluuAttribute>();
+            @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
 
-        if (status.equalsIgnoreCase(ApiConstants.ALL)) {
-            if (!pattern.isEmpty() && pattern.length() >= 2) {
-                attributes = attributeService.searchAttributes(pattern, limit);
-            } else {
-                attributes = attributeService.searchAttributes(limit);
-            }
-        } else if (status.equalsIgnoreCase(ApiConstants.ACTIVE)) {
-            if (!pattern.isEmpty() && pattern.length() >= 2) {
-                attributes = attributeService.findAttributes(pattern, limit, true);
-            } else {
-                attributes = attributeService.searchAttributes(limit, true);
-            }
+        SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
+                sortOrder, startIndex, limit, null, null, this.getMaxCount());
 
-        } else if (status.equalsIgnoreCase(ApiConstants.INACTIVE)) {
-            if (!pattern.isEmpty() && pattern.length() >= 2) {
-                attributes = attributeService.findAttributes(pattern, limit, false);
-            } else {
-                attributes = attributeService.searchAttributes(limit, false);
-            }
-        }
-
-        return Response.ok(attributes).build();
+        return Response.ok(doSearch(searchReq, status)).build();
     }
 
     @GET
@@ -88,7 +76,7 @@ public class AttributesResource extends ConfigBaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
     public Response createAttribute(@Valid GluuAttribute attribute) {
-        log.debug(" GluuAttribute details to add - attribute = " + attribute);
+        log.debug(" GluuAttribute details to add - attribute:{}", attribute);
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
@@ -103,7 +91,7 @@ public class AttributesResource extends ConfigBaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
     public Response updateAttribute(@Valid GluuAttribute attribute) {
-        log.debug(" GluuAttribute details to update - attribute = " + attribute);
+        log.debug(" GluuAttribute details to update - attribute:{}", attribute);
         String inum = attribute.getInum();
         checkResourceNotNull(inum, GLUU_ATTRIBUTE);
         checkNotNull(attribute.getName(), AttributeNames.NAME);
@@ -124,7 +112,7 @@ public class AttributesResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug(" GluuAttribute details to patch - inum = " + inum + " , pathString = " + pathString);
+        log.debug(" GluuAttribute details to patch - inum:{} , pathString:{}", inum, pathString);
         GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(existingAttribute, GLUU_ATTRIBUTE);
 
@@ -137,11 +125,35 @@ public class AttributesResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS })
     public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug(" GluuAttribute details to delete - inum = " + inum);
+        log.debug(" GluuAttribute details to delete - inum:{}", inum);
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(attribute, GLUU_ATTRIBUTE);
         attributeService.removeAttribute(attribute);
         return Response.noContent().build();
     }
+
+    private Map<String, Object> doSearch(SearchRequest searchReq, String status) {
+
+        logger.debug("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
+
+        PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
+
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        JSONObject dataJsonObject = new JSONObject();
+        if (pagedResult != null) {
+            logger.debug("GluuAttributes fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, pagedResult.getTotalEntriesCount());
+            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, pagedResult.getEntriesCount());
+            dataJsonObject.put(ApiConstants.DATA, pagedResult.getEntries());
+        }
+        else {
+            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, 0);
+            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, 0);
+            dataJsonObject.put(ApiConstants.DATA, Collections.emptyList());
+        }
+       
+        logger.debug("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, dataJsonObject.toMap());
+        return dataJsonObject.toMap();
+     }
 
 }
