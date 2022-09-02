@@ -595,7 +595,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_config_api:
             return
 
-        promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
+        promptForConfigApi = self.getPrompt("Install Jans Config API?", 
                             self.getDefaultOption(Config.install_config_api)
                             )[0].lower()
 
