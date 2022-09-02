@@ -7,6 +7,7 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.server.util.TestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
@@ -144,7 +145,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -284,7 +285,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -436,7 +437,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -636,7 +637,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                     URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getQuery(), "The query string is null");
 
-                    Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                    Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                     assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                     assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");

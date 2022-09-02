@@ -7,6 +7,7 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.server.util.TestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.AuthorizationMethod;
@@ -138,7 +139,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");

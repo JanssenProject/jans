@@ -9,6 +9,7 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -16,7 +17,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.model.GluuAttribute;
-
+import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -34,10 +35,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 /**
@@ -72,33 +75,17 @@ public class AttributesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS })
-    public Response getAttributes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+    public Response getAttributes(@DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status) throws Exception {
-        List<GluuAttribute> attributes = new ArrayList<>();
+            @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
 
-        if (status.equalsIgnoreCase(ApiConstants.ALL)) {
-            if (!pattern.isEmpty() && pattern.length() >= 2) {
-                attributes = attributeService.searchAttributes(pattern, limit);
-            } else {
-                attributes = attributeService.searchAttributes(limit);
-            }
-        } else if (status.equalsIgnoreCase(ApiConstants.ACTIVE)) {
-            if (!pattern.isEmpty() && pattern.length() >= 2) {
-                attributes = attributeService.findAttributes(pattern, limit, true);
-            } else {
-                attributes = attributeService.searchAttributes(limit, true);
-            }
+        SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
+                sortOrder, startIndex, limit, null, null, this.getMaxCount());
 
-        } else if (status.equalsIgnoreCase(ApiConstants.INACTIVE)) {
-            if (!pattern.isEmpty() && pattern.length() >= 2) {
-                attributes = attributeService.findAttributes(pattern, limit, false);
-            } else {
-                attributes = attributeService.searchAttributes(limit, false);
-            }
-        }
-
-        return Response.ok(attributes).build();
+        return Response.ok(doSearch(searchReq, status)).build();
     }
 
     @Operation(summary = "Gets an attribute based on inum", description = "Gets an attribute based on inum", operationId = "get-attributes-by-inum", tags = {
@@ -213,5 +200,29 @@ public class AttributesResource extends ConfigBaseResource {
         attributeService.removeAttribute(attribute);
         return Response.noContent().build();
     }
+
+    private Map<String, Object> doSearch(SearchRequest searchReq, String status) {
+
+        logger.debug("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
+
+        PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
+
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        JSONObject dataJsonObject = new JSONObject();
+        if (pagedResult != null) {
+            logger.debug("GluuAttributes fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, pagedResult.getTotalEntriesCount());
+            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, pagedResult.getEntriesCount());
+            dataJsonObject.put(ApiConstants.DATA, pagedResult.getEntries());
+        }
+        else {
+            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, 0);
+            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, 0);
+            dataJsonObject.put(ApiConstants.DATA, Collections.emptyList());
+        }
+       
+        logger.debug("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, dataJsonObject.toMap());
+        return dataJsonObject.toMap();
+     }
 
 }

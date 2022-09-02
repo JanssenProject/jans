@@ -86,7 +86,7 @@ public class ScopesResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
-            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
         log.debug("SCOPES to be fetched based on type:{}, limit:{}, pattern:{}", type, limit, pattern);

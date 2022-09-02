@@ -71,7 +71,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
     public Response fetchUmaResources(
-            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
         logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}", limit, pattern);
         final List<UmaResource> resources;

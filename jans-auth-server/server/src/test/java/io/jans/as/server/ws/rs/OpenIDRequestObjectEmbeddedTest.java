@@ -218,7 +218,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
@@ -367,7 +367,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -452,7 +452,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -527,7 +527,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -602,7 +602,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -666,7 +666,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -739,7 +739,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
@@ -830,7 +830,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get("access_token"), "The accessToken is null");
             assertNotNull(params.get("id_token"), "The idToken is null");
@@ -885,7 +885,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -939,7 +939,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -1029,7 +1029,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -1134,7 +1134,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");

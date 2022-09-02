@@ -1,6 +1,6 @@
 # The "Sign In With Apple" Agama flow
 
-To deploy this flow, a number of configurations are required. Ensure you have an Apple developer account to start. [This tutorial](https://github.com/ananay/apple-auth/blob/master/SETUP.md) does a great job at explaining the necessary steps. As you go with it, ensure you collect the following elements:
+To deploy this flow, a number of configurations are required. Ensure you have an Apple developer account to start. [This tutorial](https://github.com/ananay/apple-auth/blob/master/SETUP.md) does a great job at explaining the necessary steps. As you go with it, please collect the following elements:
 
 - A service ID
 - A team ID
@@ -12,11 +12,11 @@ Please follow the [inbound identity guide](../README.md) **entirely** before pro
 
 ## Flow and assets
 
-Find this flow source code [here](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/io.jans.inbound.Apple). Copy the [logo](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/apple.png) to your server at `/opt/jans/jetty/jans-auth/agama/fl/inboundID`, if desired.
+Find this flow source code [here](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/io.jans.inbound.Apple). Copy the [logo](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/apple/apple.png) to your server at `/opt/jans/jetty/jans-auth/agama/fl/inboundID` directory, if desired.
 
 ## Supply configurations
 
-Create a json fragment using the below as a guide:
+Create a JSON document using the below as a guide:
 
 ```
 {
@@ -51,24 +51,24 @@ Then use the below to [parameterize the main flow](../README.md#parameterize-the
 
 The accompanying images illustrate the steps end-users will go through when using the inbound identity flow taking the Apple route:
 
-*Initial provider selector page*
+1. Initial provider selector page
 
-![provider selector](provider_selector.png)
+    ![provider selector](provider_selector.png)
 
-*Prompt for credentials at Apple website*
+1. Prompt for credentials at Apple website
 
-![prompt credentials](SIWA_creds.png)
+    ![prompt credentials](SIWA_creds.png)
 
-*Prompt for a second factor, e.g. SMS (optional)*
+1. Prompt for a second factor, e.g. SMS (optional)
 
-![prompt second factor](SIWA_MFA.png)
+    ![prompt second factor](SIWA_MFA.png)
 
-*Prompt for browser trust*
+1. Prompt for browser trust
 
-![browser trust](SIWA_trust.png)
+    ![browser trust](SIWA_trust.png)
 
-*Prompt to before returning to original site*
+1. Prompt before returning to original site
 
-![prompt continue](SIWA_proceed.png)
+    ![prompt continue](SIWA_proceed.png)
 
 Finally, the user should land at the target application.
