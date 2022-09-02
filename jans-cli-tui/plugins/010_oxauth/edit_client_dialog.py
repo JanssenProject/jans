@@ -23,13 +23,21 @@ from wui_components.jans_data_picker import DateSelectWidget
 from utils import DialogUtils
 
 class EditClientDialog(JansGDialog, DialogUtils):
-    """_summary_
-
-    Args:
-        JansGDialog (_type_): _description_
-        DialogUtils (_type_): _description_
+    """The Main Client Dialog that contain every thing related to The Client
     """
     def __init__(self, parent, title, data, buttons=[], save_handler=None):
+        """init for `EditClientDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
+            
+        JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
+        DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
+        
+        Args:
+            parent (widget): _description_
+            title (_type_): _description_
+            data (_type_): _description_
+            buttons (list, optional): _description_. Defaults to [].
+            save_handler (_type_, optional): _description_. Defaults to None.
+        """
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
         self.data = data
@@ -343,10 +351,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText("TLS Subject DN", name='x5c', value=self.data.get('x5c',''),style='green'),
 
                         self.myparent.getTitledWidget(
-                                "Client Experiation Date",
+                                "Client Expiration Date",
                                 name='expirationDate',
                                 widget=DateSelectWidget(
-                                    value=self.data.get('expirationDate', "")
+                                    value=self.data.get('expirationDate', ""),parent=self
                                    ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'expirationDate'),
                                 style='green'
