@@ -75,7 +75,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     private Logger log;
 
     private final SqlFilterConverter filterConverter;
-	private FilterProcessor filterProcessor;
 
 	private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter(false);
 
@@ -84,7 +83,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     protected SqlEntryManager(SqlOperationService operationService) {
         this.operationService = operationService;
         this.filterConverter = new SqlFilterConverter(operationService);
-        this.filterProcessor = new FilterProcessor();
         subscribers = new LinkedList<DeleteNotifier>();
     }
 
@@ -799,10 +797,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     private ConvertedExpression toSqlFilterWithEmptyAlias(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
         return filterConverter.convertToSqlFilter(excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, processor, true);
     }
-
-	private Filter excludeObjectClassFilters(Filter genericFilter) {
-		return filterProcessor.excludeFilter(genericFilter, FilterProcessor.OBJECT_CLASS_EQUALITY_FILTER, FilterProcessor.OBJECT_CLASS_PRESENCE_FILTER);
-	}
 
     private ParsedKey toSQLKey(String dn) {
         return KEY_CONVERTER.convertToKey(dn);
