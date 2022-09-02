@@ -24,7 +24,6 @@ import calendar
 import time
 import datetime
 
-
 class JansSelectDate:
     """_summary_
     """
@@ -43,6 +42,7 @@ class JansSelectDate:
         self.months = months 
         self.cord_y = 0
         self.cord_x = 0
+        self.old_cord_x = 0
         self.selected_cord = (0, 0)
         self.extract_date(self.date)
 
@@ -99,7 +99,6 @@ class JansSelectDate:
             wrap_lines=True
         ),
         ])
-
 
     def digitalize (self,number) :
         if len(str(number)) == 1 :
@@ -190,7 +189,6 @@ class JansSelectDate:
 
         return merge_formatted_text(result)
 
-
     def adjust_month(self, day, i):
         if self.change_date:
             if i == 1 and self.current_month == 12:
@@ -207,7 +205,6 @@ class JansSelectDate:
             current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
             self.extract_date(current_date)
 
-
     def inc_month(self,day):
         self.adjust_month(day, 1)
 
@@ -220,13 +217,11 @@ class JansSelectDate:
         current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
         self.extract_date(current_date)# 20/2/1997
 
-
     def inc_year(self, day):
         self.adjust_year(day, 1)
 
     def dec_year(self, day):
         self.adjust_year(day, -1)
-
 
     def adjust_time(self, i):
         if self.cord_x ==0 :
@@ -262,7 +257,6 @@ class JansSelectDate:
         else:
             self.adjust_time(-1)
 
-
     def right(self):
         if self.change_date:
             if self.cord_x == 6 or int(self.entries[self.cord_y][self.cord_x+1]) == 0:
@@ -294,23 +288,27 @@ class JansSelectDate:
 
     def next(self):
         self.change_date = not self.change_date
+         
         if not self.change_date:
+            self.old_cord_x = self.cord_x 
             self.cord_x = 0
+        else:
+            self.cord_x = self.old_cord_x
 
 
     def __pt_container__(self):
         return self.container
 
-
 class DateSelectWidget:
     """This is a Dape Picker widget to select exact time and date
     """
-    def __init__(self, value):  # ex: value = "2023-11-27T14:05:35"
+    def __init__(self, value,parent):  # ex: value = "2023-11-27T14:05:35"
         """init for DateSelectWidget
 
         Args:
             value (str): string time stamp value like "2023-11-27T14:05:35"
         """
+        self.parent = parent
         self.months = [calendar.month_name[i] for i in range(1,13)]
 
         if  value:
@@ -414,41 +412,33 @@ class DateSelectWidget:
 
         @kb.add("up")
         def _up(event):
-            if self.select_box_float not in get_app().layout.container.floats:
-                self.make_time(self.text)
-            else :
+            if self.select_box_float in get_app().layout.container.floats:
                 self.select_box.up()
 
         @kb.add("down")
         def _down(event):
-            if self.select_box_float not in get_app().layout.container.floats:
-                self.make_time(self.text)
-            else :
+            if self.select_box_float in get_app().layout.container.floats:
                 self.select_box.down()
 
         @kb.add("right")
         def _right(event):
-            if self.select_box_float not in get_app().layout.container.floats:
-                self.make_time(self.text)
-            else :
+            if self.select_box_float  in get_app().layout.container.floats:
                 self.select_box.right()
- 
+
         @kb.add("left")
         def _left(event):
-            if self.select_box_float not in get_app().layout.container.floats:
-                self.make_time(self.text)
-            else :
+            if self.select_box_float  in get_app().layout.container.floats:
                 self.select_box.left()
 
-        @kb.add("+")
-        def _plus(event):
-            if self.select_box_float not in get_app().layout.container.floats:
-                self.make_time(self.text)
+        # @kb.add("+")
+        # def _plus(event):
+        #     if self.select_box_float not in get_app().layout.container.floats:
+        #         self.make_time(self.text)
 
-        @kb.add("-")
-        def _minus(event):
-            if self.select_box_float not in get_app().layout.container.floats:
-                self.make_time(self.text)
+        # @kb.add("-")
+        # def _minus(event):
+        #     if self.select_box_float not in get_app().layout.container.floats:
+        #         self.make_time(self.text)
 
         @kb.add("tab")
         def _tab(event):
@@ -458,12 +448,32 @@ class DateSelectWidget:
                 _focus_next(event)
 
         @kb.add("escape")
-        @kb.add("pageup", eager=True)
-        @kb.add("pagedown", eager=True)
         def _escape(event):
             if self.select_box_float in get_app().layout.container.floats:
-                get_app().layout.container.floats.remove(self.select_box_float)
-                _focus_next(event)
+                app = get_app()
+                app.layout.container.floats.remove(self.select_box_float) 
+                app.layout.focus(self.parent.dialog.navbar)
+
+
+        @kb.add("pageup", eager=True)
+        def _pageup(event):
+            if self.select_box_float in get_app().layout.container.floats:
+                _escape(event)
+                self.parent.dialog.navbar.go_up()
+            else :
+                app = get_app()
+                self.parent.dialog.navbar.go_up()
+                app.layout.focus(self.parent.dialog.navbar)
+
+        @kb.add("pagedown", eager=True)
+        def _pagedown(event):
+            if self.select_box_float in get_app().layout.container.floats:
+                _escape(event)
+                self.parent.dialog.navbar.go_down()
+            else :
+                app = get_app()
+                self.parent.dialog.navbar.go_down()
+                app.layout.focus(self.parent.dialog.navbar)
 
         return kb
 
