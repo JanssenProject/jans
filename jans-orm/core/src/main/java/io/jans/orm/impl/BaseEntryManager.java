@@ -60,6 +60,7 @@ import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
 
@@ -107,6 +108,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	protected O operationService = null;
 	protected PersistenceExtension persistenceExtension = null;
+
+	protected FilterProcessor filterProcessor = new FilterProcessor();
 
 	@Override
 	public void persist(Object entry) {
@@ -2234,6 +2237,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return addObjectClassFilter(attributesFilter, objectClasses);
 	}
 
+	protected Filter excludeObjectClassFilters(Filter genericFilter) {
+		return filterProcessor.excludeFilter(genericFilter, FilterProcessor.OBJECT_CLASS_EQUALITY_FILTER, FilterProcessor.OBJECT_CLASS_PRESENCE_FILTER);
+	}
+
 	protected Filter[] createAttributesFilter(List<AttributeData> attributes) {
 		if ((attributes == null) || (attributes.size() == 0)) {
 			return null;
@@ -2245,8 +2252,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			String attributeName = attribute.getName();
 			for (Object value : attribute.getValues()) {
 				Filter filter = Filter.createEqualityFilter(attributeName, value);
-				if ((attribute.getMultiValued() != null) && attribute.getMultiValued()) {
-					filter.multiValued();
+				if (attribute.getMultiValued() != null) {
+					filter.multiValued(attribute.getMultiValued());
 				}
 
 				results.add(filter);
