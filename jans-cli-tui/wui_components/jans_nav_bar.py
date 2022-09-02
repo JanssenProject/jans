@@ -11,7 +11,7 @@ class JansNavBar():
         """init for JansNavBar
 
         Args:
-            myparent (_type_): _description_
+            myparent (widget): This is the parent widget for the dialog, to caluclate the size
             entries (_type_): _description_
             selection_changed (_type_): _description_
             select (int, optional): _description_. Defaults to 0.
