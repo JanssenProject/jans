@@ -92,15 +92,15 @@ class JansSideNavBar():
         self.cur_tab = self.navbar_entries[self.cur_navbar_selection]
         self.selection_changed(self.cur_tab)
 
-    # def go_up(self):
-    #     self.cur_navbar_selection = (
-    #         self.cur_navbar_selection - 1) % len(self.navbar_entries)
-    #     self.update_selection()
+    def go_up(self):
+        self.cur_navbar_selection = (
+            self.cur_navbar_selection - 1) % len(self.navbar_entries)
+        self.update_selection()
 
-    # def go_down(self):
-    #     self.cur_navbar_selection = (
-    #         self.cur_navbar_selection + 1) % len(self.navbar_entries)
-    #     self.update_selection()
+    def go_down(self):
+        self.cur_navbar_selection = (
+            self.cur_navbar_selection + 1) % len(self.navbar_entries)
+        self.update_selection()
 
     def get_nav_bar_key_bindings(self):
         """All key binding for the Dialog with Navigation bar
