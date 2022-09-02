@@ -452,7 +452,6 @@ class DateSelectWidget:
             if self.select_box_float in get_app().layout.container.floats:
                 app = get_app()
                 app.layout.container.floats.remove(self.select_box_float) 
-                app.layout.focus(self.parent.dialog.navbar)
 
 
         @kb.add("pageup", eager=True)
