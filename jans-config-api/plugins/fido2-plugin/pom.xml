@@ -114,6 +114,12 @@
 			<artifactId>cucumber-reporting</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- Swagger -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core-jakarta</artifactId>
+		</dependency>
 
 	</dependencies>
 

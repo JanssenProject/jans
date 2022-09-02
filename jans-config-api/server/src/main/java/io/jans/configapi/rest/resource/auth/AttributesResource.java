@@ -18,6 +18,7 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.model.PagedResult;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
