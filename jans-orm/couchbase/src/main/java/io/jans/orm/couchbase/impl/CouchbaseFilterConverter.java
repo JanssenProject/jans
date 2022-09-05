@@ -241,16 +241,17 @@ public class CouchbaseFilterConverter {
             	filterParameters.add(variableExpressionInitial);
                 like.append("$" + variableExpressionInitial);
             }
-            like.append("%");
 
             String[] subAny = currentGenericFilter.getSubAny();
             if ((subAny != null) && (subAny.length > 0)) {
+    			StringBuilder anyBuilder = new StringBuilder("%");
                 for (String any : subAny) {
-                	String variableExpressionAny = buildVariableExpression(internalAttribute + "_any", multiValued, any, queryParameters);
-                	filterParameters.add(variableExpressionAny);
-                    like.append("$" + variableExpressionAny);
-                    like.append("%");
+                	anyBuilder.append(any);
+                	anyBuilder.append("%");
                 }
+            	String variableExpressionAny = buildVariableExpression(internalAttribute + "_any", multiValued, anyBuilder.toString(), queryParameters);
+                like.append("$" + variableExpressionAny);
+            	filterParameters.add(variableExpressionAny);
             }
 
             if (currentGenericFilter.getSubFinal() != null) {
