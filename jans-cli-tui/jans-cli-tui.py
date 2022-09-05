@@ -6,6 +6,7 @@ import json
 import time
 import logging
 import importlib
+import sys
 
 from pathlib import Path
 from asyncio import Future, ensure_future
@@ -146,6 +147,7 @@ class JansCliApp(Application):
 
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
+            sys.path.append(plugin_file.parent.as_posix())
             spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file.as_posix())
             plugin = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(plugin)
