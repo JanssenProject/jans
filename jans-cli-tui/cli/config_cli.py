@@ -1287,6 +1287,9 @@ class JCA_CLI:
     def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
         endpoint = self.get_fake_endpoint(path)
         response = self.delete_requests(endpoint, suffix_param)
+        if self.wrapped:
+            return response
+
         if response:
             self.print_response(response)
         else:
