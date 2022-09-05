@@ -105,6 +105,7 @@ public class RegisterRequest extends BaseRequest {
     private Integer defaultMaxAge;
     private List<String> defaultAcrValues;
     private String initiateLoginUri;
+    private List<String> groups;
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
     private List<String> authorizedOrigins;
@@ -154,6 +155,7 @@ public class RegisterRequest extends BaseRequest {
         this.contacts = new ArrayList<>();
         this.defaultAcrValues = new ArrayList<>();
         this.postLogoutRedirectUris = new ArrayList<>();
+        this.groups = new ArrayList<>();
         this.requestUris = new ArrayList<>();
         this.authorizedOrigins = new ArrayList<>();
         this.scope = new ArrayList<>();
@@ -1075,6 +1077,24 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Returns groups
+     *
+     * @return groups
+     */
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    /**
+     * Sets groups
+     *
+     * @param groups groups
+     */
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
+    }
+
+    /**
      * Returns the URLs supplied by the RP to request that the user be redirected to this location after a logout has
      * been performed.
      *
@@ -1357,6 +1377,7 @@ public class RegisterRequest extends BaseRequest {
         result.setClaimsRedirectUris(extractListByKey(requestObject, CLAIMS_REDIRECT_URIS.toString()));
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
         result.setPostLogoutRedirectUris(extractListByKey(requestObject, POST_LOGOUT_REDIRECT_URIS.toString()));
+        result.setGroups(extractListByKey(requestObject, GROUPS.toString()));
         result.setDefaultAcrValues(extractListByKey(requestObject, DEFAULT_ACR_VALUES.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
@@ -1569,6 +1590,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(initiateLoginUri)) {
             function.apply(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
+        }
+        if (groups != null && !groups.isEmpty()) {
+            function.apply(GROUPS.toString(), toJSONArray(groups));
         }
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             function.apply(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
