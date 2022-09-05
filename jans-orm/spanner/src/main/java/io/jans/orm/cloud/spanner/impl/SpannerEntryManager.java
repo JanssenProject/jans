@@ -811,7 +811,7 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
     	return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, true);
     }
 
-	private Filter excludeObjectClassFilters(Filter genericFilter) {
+	protected Filter excludeObjectClassFilters(Filter genericFilter) {
 		return filterProcessor.excludeFilter(genericFilter, FilterProcessor.OBJECT_CLASS_EQUALITY_FILTER, FilterProcessor.OBJECT_CLASS_PRESENCE_FILTER);
 	}
 
