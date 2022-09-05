@@ -1274,6 +1274,11 @@ paths:
                     processing requests from the Client.
                   items:
                     type: string
+                groups:
+                  type: array
+                  description: Array of client's groups.
+                  items:
+                    type: string
                 initiate_login_uri:
                   type: string
                   description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
@@ -1612,6 +1617,11 @@ paths:
                 initiate_login_uri:
                   type: string
                   description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                groups:
+                  type: array
+                  description: Array of client's groups.
+                  items:
+                    type: string
                 post_logout_redirect_uris:
                   type: array
                   description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been
@@ -1949,6 +1959,11 @@ paths:
                   initiate_login_uri:
                     type: string
                     description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                  groups:
+                    type: array
+                    description: Array of client's groups.
+                    items:
+                      type: string
                   post_logout_redirect_uris:
                     type: array
                     description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been
