@@ -210,7 +210,6 @@ class JansCliApp(Application):
                     async def coroutine():
                         app = get_app()
                         focused_before = app.layout.current_window
-                        self.layout.focus(dialog)
                         await self.show_dialog_as_float(dialog)
                         try:
                             app.layout.focus(focused_before)
@@ -246,7 +245,6 @@ class JansCliApp(Application):
         async def coroutine():
             app = get_app()
             focused_before = app.layout.current_window
-            self.layout.focus(dialog)
             result = await self.show_dialog_as_float(dialog)
             try:
                 app.layout.focus(focused_before)
@@ -462,7 +460,7 @@ class JansCliApp(Application):
         "Coroutine."
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
-
+        self.layout.focus(dialog)
         result = await dialog.future
 
         if float_ in self.root_layout.floats:
@@ -479,7 +477,6 @@ class JansCliApp(Application):
 
         async def coroutine():
             focused_before = self.layout.current_window
-            self.layout.focus(dialog)
             result = await self.show_dialog_as_float(dialog)
             try:
                 self.layout.focus(focused_before)
@@ -529,7 +526,7 @@ class JansCliApp(Application):
         body = HSplit([Label(message)])
         dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
 
-        focused_before = self.layout.current_window
+        focused_before = self.root_layout.floats[-1].content if self.root_layout.floats else self.layout.current_window
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         dialog.me = float_

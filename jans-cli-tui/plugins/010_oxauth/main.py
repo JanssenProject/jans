@@ -291,7 +291,6 @@ class Plugin():
 
         async def coroutine():
             focused_before = self.app.layout.current_window
-            self.app.layout.focus(dialog)
             result = await self.app.show_dialog_as_float(dialog)
             try:
                 self.app.layout.focus(focused_before)
