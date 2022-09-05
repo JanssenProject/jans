@@ -232,6 +232,11 @@ public enum RegisterRequestParam {
     INITIATE_LOGIN_URI("initiate_login_uri"),
 
     /**
+     * Groups (roles)
+     */
+    GROUPS("groups"),
+
+    /**
      * URL supplied by the RP to request that the user be redirected to this location after a logout has been performed,
      */
     POST_LOGOUT_REDIRECT_URIS("post_logout_redirect_uris"),
