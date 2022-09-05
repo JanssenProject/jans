@@ -242,8 +242,19 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "o")
     private String organization;
 
+    @AttributeName(name = "jansGrp")
+    private String[] groups;
+
     @Expiration
     private Integer ttl;
+
+    public String[] getGroups() {
+        return groups;
+    }
+
+    public void setGroups(String[] groups) {
+        this.groups = groups;
+    }
 
     public String getOrganization() {
         return organization;
