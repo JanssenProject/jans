@@ -518,7 +518,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	@Override
 	public boolean contains(Object entry) {
 		if (entry == null) {
-			throw new MappingException("Entry to persist is null");
+			throw new MappingException("Entry for check if exists is null");
 		}
 
 		// Check entry class
@@ -531,7 +531,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 
-		String[] ldapReturnAttributes = getAttributes(entry, propertiesAnnotations, false);
+		String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 
 		return contains(dnValue.toString(), entryClass, propertiesAnnotations, attributes, objectClasses, ldapReturnAttributes);
 	}
@@ -645,7 +645,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 						AttributesList.class);
 				if (ldapAttribute != null) {
 					if (entry == null) {
-						continue;
+						return null;
 					} else {
 						List<AttributeData> attributesList = getAttributeDataListFromCustomAttributesList(entry,
 								(AttributesList) ldapAttribute, propertyName);
