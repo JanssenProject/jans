@@ -60,19 +60,19 @@ COPY LICENSE /licenses/LICENSE
 # SETUP ENVS
 # ==========
 
-ENV HOSTNAME="demoexample.jans.io" \
-    ADMIN_PASS="" \
-    ORG_NAME="Janssen" \
-    EMAIL="support.jans.io" \
-    CITY="Austin" \
-    STATE="TX" \
-    COUNTRY="US" \
+ENV CN_HOSTNAME="demoexample.jans.io" \
+    CN_ADMIN_PASS="" \
+    CN_ORG_NAME="Janssen" \
+    CN_EMAIL="support.jans.io" \
+    CN_CITY="Austin" \
+    CN_STATE="TX" \
+    CN_COUNTRY="US" \
     # Install with local mysql by default
     INSTALL_LDAP="false" \
-    INSTALL_CONFIG_API="true" \
-    INSTALL_SCIM_SERVER="true" \
-    INSTALL_FIDO2="true" \
-    INSTALL_CLIENT_API="true" \
+    CN_INSTALL_CONFIG_API="true" \
+    CN_INSTALL_SCIM_SERVER="true" \
+    CN_INSTALL_FIDO2="true" \
+    CN_INSTALL_CLIENT_API="true" \
     MYSQL_DATABASE="jans" \
     MYSQL_USER="jans" \
     MYSQL_PASSWORD=""

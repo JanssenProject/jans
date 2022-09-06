@@ -5,17 +5,17 @@ set -e
 # INSTALL JANSSEN
 # PASSED VARS:
 # JANS_SOURCE_VERSION: Specifies the exact commit version to build off of
-# HOSTNAME : hostname i.e test.jans.io
-# ORG_NAME : Organization name i.e Janssen
-# EMAIL: i.e support@jans.io
-# CITY: i.e Austin
-# STATE: i.e TX
-# COUNTRY: i.e US
-# ADMIN_PASS: LDAP or MYSQL and ADMIN user password
+# CN_HOSTNAME : hostname i.e test.jans.io
+# CN_ORG_NAME : Organization name i.e Janssen
+# CN_EMAIL: i.e support@jans.io
+# CN_CITY: i.e Austin
+# CN_STATE: i.e TX
+# CN_COUNTRY: i.e US
+# CN_ADMIN_PASS: LDAP or MYSQL and ADMIN user password
 # INSTALL_LDAP
-# INSTALL_CONFIG_API
-# INSTALL_SCIM_SERVER
-# INSTALL_CLIENT_API
+# CN_INSTALL_CONFIG_API
+# CN_INSTALL_SCIM_SERVER
+# CN_INSTALL_CLIENT_API
 # MYSQL_DATABASE
 # MYSQL_USER
 # MYSQL_PASSWORD
@@ -25,21 +25,21 @@ set -e
 
 install_gluu() {
   echo "*****   Writing properties!!   *****"
-  echo "hostname=${HOSTNAME}" | tee -a setup.properties > /dev/null
+  echo "hostname=${CN_HOSTNAME}" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
-  echo "admin_password=${ADMIN_PASS}" | tee -a setup.properties > /dev/null
-  echo "orgName=${ORG_NAME}" | tee -a setup.properties > /dev/null
-  echo "admin_email=${EMAIL}" | tee -a setup.properties > /dev/null
-  echo "city=${CITY}" | tee -a setup.properties > /dev/null
-  echo "state=${STATE}" | tee -a setup.properties > /dev/null
-  echo "countryCode=${COUNTRY}" | tee -a setup.properties > /dev/null
+  echo "admin_password=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
+  echo "orgName=${CN_ORG_NAME}" | tee -a setup.properties > /dev/null
+  echo "admin_email=${CN_EMAIL}" | tee -a setup.properties > /dev/null
+  echo "city=${CN_CITY}" | tee -a setup.properties > /dev/null
+  echo "state=${CN_STATE}" | tee -a setup.properties > /dev/null
+  echo "countryCode=${CN_COUNTRY}" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
-  echo "ldapPass=${ADMIN_PASS}" | tee -a setup.properties > /dev/null
+  echo "ldapPass=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
   echo "installLdap=""$([[ ${INSTALL_LDAP} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "install_config_api=""$([[ ${INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "install_scim_server=""$([[ ${INSTALL_SCIM_SERVER} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "installFido2=""$([[ ${INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "install_client_api=""$([[ ${INSTALL_CLIENT_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM_SERVER} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_client_api=""$([[ ${CN_INSTALL_CLIENT_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
 
   if [[ "${INSTALL_LDAP}" == "false" ]]; then
     echo "rdbm_install=2" | tee -a setup.properties > /dev/null
@@ -51,7 +51,7 @@ install_gluu() {
     echo "rdbm_host=${MYSQL_HOST}" | tee -a setup.properties > /dev/null
   fi
 
-  echo "*****   Running the setup script for ${ORG_NAME}!!   *****"
+  echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
   python3 install.py -yes --args="-f setup.properties -n"
   echo "*****   Setup script completed!!    *****"
