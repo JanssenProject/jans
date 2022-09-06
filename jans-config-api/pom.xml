@@ -556,6 +556,76 @@
 						</execution>
 					</executions>
 				</plugin>
+				   <!-- swagger.json - generate API documentation -->
+    <!--   <plugin>
+        <groupId>com.github.kongchen</groupId>
+        <artifactId>swagger-maven-plugin</artifactId>
+        <version>${swagger-maven-plugin-version}</version>
+        <configuration>
+          <apiSources>
+            <apiSource>
+              <schemes>http,https</schemes>
+              <basePath>/api</basePath>
+              <info>
+                <title>${project.name}</title>
+                <termsOfService>Please read on https://example.com/terms-of-service</termsOfService>
+                <description>${project.description}. More on: http://example.com/${project.artifactId}</description>
+                <contact>
+                  <name>Example LLC
+                  </name>
+                  <url>https://example.com</url>
+                  <email>contact@example.com</email>
+                </contact>
+                <license>
+                  <name>Apache License v2.0</name>
+                  <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
+                </license>
+                <version>${project.version}</version>
+              </info>
+              <swaggerDirectory>${project.build.directory}/swagger-ui</swaggerDirectory>
+              
+                  Do not use: swaggerFileName, as it will be used as classifier. 
+                  In a multi-module project will have different classifier for different APIs
+               
+              <outputFormats>json</outputFormats>
+              <attachSwaggerArtifact>true</attachSwaggerArtifact>
+            </apiSource>
+          </apiSources>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>compile</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+			 -->
+			<!-- 
+			 <plugin>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>2.0.7</version>
+                <configuration>
+                    <outputFileName>${project.artifactId}-swagger</outputFileName>
+                    <outputPath>${project.build.directory}/swagger</outputPath>
+                    <openapiFilePath>${project.build.outputDirectory}/openapi-info.json</openapiFilePath>
+                    <outputFormat>JSONANDYAML</outputFormat>
+                    <prettyPrint>TRUE</prettyPrint>
+                    <resourcePackages>
+                        <package>com.mycompany.api.resource</package>
+                    </resourcePackages>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin> -->
 			</plugins>
 
 		</pluginManagement>

@@ -304,30 +304,29 @@
 		<plugins>
 		
 		<!-- swagger -->
-			<plugin>
+		
+<!-- 		<plugin>
 				<groupId>com.github.kongchen</groupId>
 				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.4</version>
+				<version>3.1.1</version>
 				<configuration>
 					<apiSources>
 						<apiSource>
 						<springmvc>false</springmvc>
+						<locations>io.jans.configapi.rest</locations>
 						<schemes>http,https</schemes>
+						<host>jans.com</host>
+						<basePath>/jans-config-api/api/v1/</basePath>
 							<info>
 								<title>jans-config-api</title>
 								<description>jans-config-api</description>
 								<version>1.0.0</version>
-							</info>
-							<basePath>/jans-config-api/api/v1/</basePath>
-							
-							<!-- <locations><location>io.jans.configapi.rest</location>
-							<location>io.jans.configapi.rest.resource.auth</location></locations> -->
-							 <locations>io.jans.configapi</locations>
-							<!--     <locations>${project.groupId}</locations> -->
-							<!-- <outputPath>${basedir}/generated/document.html</outputPath> -->
-							<swaggerDirectory>${project.build.directory}/swagger-ui</swaggerDirectory>
-							<!-- <swaggerFileName>config-api.yaml</swaggerFileName> -->
-							 <attachSwaggerArtifact>true</attachSwaggerArtifact>
+							</info> 
+
+							        <swaggerDirectory>${project.build.directory}/swagger-ui</swaggerDirectory>
+            
+             <outputFormats>json</outputFormats>
+
 						</apiSource>
 					</apiSources>
 				</configuration>
@@ -339,7 +338,36 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>  -->
+			
+			 <plugin>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>2.0.9</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <outputFileName>openapi_1</outputFileName>
+                            <outputPath>${project.parent.basedir}/swagger</outputPath>
+                            <!-- <configurationFilePath>${project.basedir}/src/main/resources/openapi-configuration.yaml</configurationFilePath> -->
+                            <contextId>jans-config-api-server</contextId>
+                            <prettyPrint>true</prettyPrint>
+                        </configuration>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>io.swagger.core.v3</groupId>
+                        <artifactId>swagger-models</artifactId>
+                          <version>2.2.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+			
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
