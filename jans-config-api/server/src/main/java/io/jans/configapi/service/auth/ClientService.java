@@ -80,8 +80,6 @@ public class ClientService implements Serializable {
         if (logger.isDebugEnabled()) {
             logger.debug("Search Clients with pattern:{}, sizeLimit:{}", escapeLog(pattern), escapeLog(sizeLimit));
         }
-        
-        logger.error("Search Clients with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
@@ -90,7 +88,7 @@ public class ClientService implements Serializable {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
-        logger.error("Search Clients with searchFilter:{}", searchFilter);
+        logger.debug("Search Clients with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, searchFilter, sizeLimit);
     }
 

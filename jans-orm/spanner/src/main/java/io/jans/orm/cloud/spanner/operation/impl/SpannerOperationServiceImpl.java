@@ -554,12 +554,12 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
     public <O> PagedResult<EntryData> search(String key, String objectClass, ConvertedExpression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
                                               SpannerBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
-        LOG.error("SpannerOperationServiceImpl::search() - key:{}, objectClass:{}, expression:{}, scope:{}, attributes:{}, orderBy:{}, batchOperationWraper:{}, returnDataType:{}, start:{},  count:{},  pageSize:{}", key, objectClass, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start,  count,  pageSize);
+
         TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
-        LOG.error("SpannerOperationServiceImpl::search() - tableMapping:{}",tableMapping);
+
         PagedResult<EntryData> result = searchImpl(tableMapping, key, expression, scope, attributes, orderBy, batchOperationWraper,
 						returnDataType, start, count, pageSize);
-        LOG.error("SpannerOperationServiceImpl::search() - result:{}",result);
+
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("SQL operation: search, duration: {}, table: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}", duration, tableMapping.getTableName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 
@@ -568,21 +568,19 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
 	private <O> PagedResult<EntryData> searchImpl(TableMapping tableMapping, String key, ConvertedExpression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             SpannerBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
-	    
-	    LOG.error("SpannerOperationServiceImpl::searchImpl() - tableMapping:{}, key:{}, expression:{}, scope:{}, attributes:{}, orderBy:{}, batchOperationWraper:{}, returnDataType:{}, start:{}, count:{}, pageSize:{}",tableMapping, key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
         BatchOperation<O> batchOperation = null;
         if (batchOperationWraper != null) {
             batchOperation = (BatchOperation<O>) batchOperationWraper.getBatchOperation();
         }
-        LOG.error("SpannerOperationServiceImpl::searchImpl() - batchOperation:{}, tableMapping:{} ",batchOperation, tableMapping);
+
 		Table table = buildTable(tableMapping);
-		LOG.error("SpannerOperationServiceImpl::searchImpl() - table:{} ",table);
+
 		PlainSelect sqlSelectQuery = new PlainSelect();
 		sqlSelectQuery.setFromItem(table);
-		LOG.error("SpannerOperationServiceImpl::searchImpl() - sqlSelectQuery:{} ",sqlSelectQuery);
+
 		List<SelectItem> selectItems = buildSelectAttributes(tableMapping, key, attributes);
 		sqlSelectQuery.addSelectItems(selectItems);
-		LOG.error("SpannerOperationServiceImpl::searchImpl() - selectItems:{}, expression:{} ",selectItems, expression);
+		
 		if (expression != null) {
 			applyWhereExpression(sqlSelectQuery, expression);
 		}
@@ -602,7 +600,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
             sqlSelectQuery.withOrderByElements(Arrays.asList(orderByElements));
         }
-        LOG.error("SpannerOperationServiceImpl::searchImpl() - After orderBy - sqlSelectQuery:{}, returnDataType:{} ",sqlSelectQuery, returnDataType);
+
         List<EntryData> searchResultList = new LinkedList<EntryData>();
         if ((SearchReturnDataType.SEARCH == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
         	List<EntryData> lastResult = null;
@@ -634,7 +632,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 	    				applyParametersBinding(statementBuilder, expression);
 
 	    				Statement statement = statementBuilder.build();
-	                    LOG.error("Executing query: '{}'", statement);
+	                    LOG.debug("Executing query: '{}'", statement);
 
 	                    try (ResultSet resultSet = databaseClient.singleUse().executeQuery(statement)) {
 	                    	lastResult = getEntryDataList(tableMapping.getObjectClass(), resultSet);
@@ -725,7 +723,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
     			applyParametersBinding(statementBuilder, expression);
 
     			Statement statement = statementBuilder.build();
-                LOG.error("Calculating count. Executing query: '{}'", statement);
+                LOG.debug("Calculating count. Executing query: '{}'", statement);
 
                 try (ResultSet countResult = databaseClient.singleUse().executeQuery(statement)) {
                 	if (!countResult.next()) {

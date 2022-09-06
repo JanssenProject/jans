@@ -411,7 +411,7 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
-        LOG.error("findPagedEntries() baseDN:{}, entryClass:{}, filter:{}, ldapReturnAttributes:{}, sortBy:{}, sortOrder:{}, start:{}, count:{}, chunkSize ", baseDN, entryClass, filter, ldapReturnAttributes, sortBy, sortOrder, start, count, chunkSize);
+
         PagedResult<EntryData> searchResult = findEntriesImpl(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, sortBy, sortOrder,
                 null, SearchReturnDataType.SEARCH_COUNT, start, count, chunkSize);
 
@@ -434,7 +434,6 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
     protected <T> PagedResult<EntryData> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
             String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, BatchOperation<T> batchOperation, SearchReturnDataType returnDataType, int start,
             int count, int chunkSize) {
-        LOG.error("SpannerEntryManager:findEntriesImpl() baseDN:{}, entryClass:{}, filter:{}, scope:{}, ldapReturnAttributes:{}, sortBy:{}, sortOrder:{}, batchOperation:{}, returnDataType:{}, start:{}, count:{}, chunkSize{}", baseDN, entryClass, filter, scope, ldapReturnAttributes, sortBy, sortOrder, batchOperation, returnDataType, start, count, chunkSize);
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
@@ -447,18 +446,18 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
 
         Filter searchFilter;
         if (objectClasses.length > 0) {
-        	 LOG.error("Filter: {}", filter);
+        	 LOG.trace("Filter: {}", filter);
             searchFilter = addObjectClassFilter(filter, objectClasses);
         } else {
             searchFilter = filter;
         }
 
         // Find entries
-        LOG.error("-------------------------------------------------------");
-        LOG.error("Filter: {}", filter);
-        LOG.error("objectClasses count: {} ", objectClasses.length);
-        LOG.error("objectClasses: {}", ArrayHelper.toString(objectClasses));
-        LOG.error("Search filter: {}", searchFilter);
+        LOG.trace("-------------------------------------------------------");
+        LOG.trace("Filter: {}", filter);
+        LOG.trace("objectClasses count: {} ", objectClasses.length);
+        LOG.trace("objectClasses: {}", ArrayHelper.toString(objectClasses));
+        LOG.trace("Search filter: {}", searchFilter);
 
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
@@ -477,25 +476,21 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
         String key = toSQLKey(baseDN).getKey();
         ConvertedExpression convertedExpression;
-        LOG.error("SpannerEntryManager:findEntriesImpl() key:{} ", key);
 		try {
 			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
-			LOG.error("SpannerEntryManager:findEntriesImpl() convertedExpression-1:{} ", convertedExpression);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter), ex);
 		}
-		
+
         PagedResult<EntryData> searchResult = null;
         try {
             SpannerBatchOperationWraper<T> batchOperationWraper = null;
-            LOG.error("SpannerEntryManager:findEntriesImpl() batchOperation:{} ", batchOperation);
             if (batchOperation != null) {
                 batchOperationWraper = new SpannerBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            LOG.error("SpannerEntryManager:findEntriesImpl() batchOperationWraper:{} ", batchOperationWraper);
             searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
-            LOG.error("SpannerEntryManager:findEntriesImpl() searchResult:{} ", searchResult);
+
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s', expression: '%s'", key, convertedExpression));
             }
