@@ -488,7 +488,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
             }
         }
 
-        StringBuilder baseQuery = new StringBuilder("SELECT ").append(StringHelper.toString(backticksAttributes(select))).append(" FROM `").append(bucketMapping.getBucketName()).append("` AS gluu_doc ").
+        StringBuilder baseQuery = new StringBuilder("SELECT ").append(StringHelper.toString(backticksAttributes(select))).append(" FROM `").append(bucketMapping.getBucketName()).append("` AS jans_doc ").
         		append("WHERE ").append(finalExpression);
 
         StringBuilder baseQueryWithOrder = new StringBuilder(baseQuery);
@@ -597,7 +597,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         result.setStart(start);
 
         if ((SearchReturnDataType.COUNT == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
-            StringBuilder selectCountQuery = new StringBuilder("SELECT COUNT(*) as TOTAL").append(" FROM `").append(bucketMapping.getBucketName()).append("` AS gluu_doc ").
+            StringBuilder selectCountQuery = new StringBuilder("SELECT COUNT(*) as TOTAL").append(" FROM `").append(bucketMapping.getBucketName()).append("` AS jans_doc ").
             		append("WHERE ").append(finalExpression);
             try {
                 LOG.debug("Calculating count. Execution query: '" + selectCountQuery + "'");
@@ -624,7 +624,11 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 		
 		String[] resultAttributes = new String[attributes.length];
 		for (int i = 0; i < attributes.length; i++) {
-			resultAttributes[i] = '`' + attributes[i] + "`";
+			if (attributes[i].contains("*")) {
+				resultAttributes[i] = attributes[i];
+			} else {
+				resultAttributes[i] = '`' + attributes[i] + "`";
+			}
 		}
 
 		return resultAttributes;
