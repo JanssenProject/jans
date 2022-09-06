@@ -595,7 +595,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_config_api:
             return
 
-        promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
+        promptForConfigApi = self.getPrompt("Install Jans Config API?", 
                             self.getDefaultOption(Config.install_config_api)
                             )[0].lower()
 
@@ -607,7 +607,7 @@ class PropertiesUtils(SetupUtils):
 
     def prompt_for_client_api(self):
 
-        prompt = self.getPrompt("Install Jans Client Api?", 
+        prompt = self.getPrompt("Install Jans Client API?", 
                             self.getDefaultOption(Config.install_client_api)
                             )[0].lower()
 
@@ -617,7 +617,7 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_client_api')
 
         if Config.install_client_api:
-            prompt = self.getPrompt("  Use Jans Storage for Client Api?", 'y')[0].lower()
+            prompt = self.getPrompt("  Use Jans Storage for Client API?", 'y')[0].lower()
             if prompt == 'n':
                 Config.client_api_storage_type = 'h2'
 

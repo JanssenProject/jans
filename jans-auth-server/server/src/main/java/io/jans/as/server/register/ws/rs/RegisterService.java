@@ -255,6 +255,12 @@ public class RegisterService {
         if (StringUtils.isNotBlank(requestObject.getInitiateLoginUri())) {
             client.setInitiateLoginUri(requestObject.getInitiateLoginUri());
         }
+
+        final List<String> groups = requestObject.getGroups();
+        if (groups != null && !groups.isEmpty()) {
+            client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
+        }
+
         List<String> postLogoutRedirectUris = requestObject.getPostLogoutRedirectUris();
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             postLogoutRedirectUris = new ArrayList<>(new HashSet<>(postLogoutRedirectUris)); // Remove repeated elements

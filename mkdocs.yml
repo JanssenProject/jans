@@ -15,13 +15,13 @@ edit_uri: edit/main/docs/
 
 # Plugins
 plugins:
-    - search
-    - git-revision-date-localized:
-        type: timeago
-        enable_creation_date: true
-    - git-committers:
-        repository: JanssenProject/jans
-        token: !ENV GH_TOKEN
+   - search
+   - git-revision-date-localized:
+       type: timeago
+       enable_creation_date: true
+   - git-committers:
+       repository: JanssenProject/jans
+       token: !ENV GH_TOKEN
 # Configuration
 theme:
     name: material
@@ -108,6 +108,7 @@ extra:
 nav:
 - 'Administration':
     - 'Deployment and Planning Guide':
+        - 'admin/deployment/README.md'
         - 'Platform Goal': 'admin/deployment/platform-goal.md'
         - 'Use Cases': 'admin/deployment/use-cases.md'
         - 'Components': 'admin/deployment/components.md'
@@ -137,7 +138,9 @@ nav:
         - 'Machine-to-Machine Authentication': 'admin/deployment/machine-to-machine.md'
         - 'FAQ': 'admin/deployment/faq.md'
     - 'Installation':
+        - 'admin/install/README.md'
         - 'VM Installation':
+            - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
@@ -145,6 +148,7 @@ nav:
             - 'FIPS DISA STIG': 'admin/install/vm-install/disa-stig.md'
             - 'Dynamic Download': 'admin/install/vm-install/dynamic-download.md'
         - 'Helm Deployments':
+            - 'admin/install/helm-install/README.md'
             - 'Local Kubernetes Cluster': 'admin/install/helm-install/local.md'
             - 'Amazon EKS': 'admin/install/helm-install/amazon-eks.md'
             - 'Google GKE': 'admin/install/helm-install/google-gke.md'
@@ -155,6 +159,7 @@ nav:
         - 'CORS configuration': 'admin/install/cors.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
+        - 'admin/kubernetes-ops/README.md'
         - 'Scaling': 'admin/kubernetes-ops/scaling.md'
         - 'Backup and Restore': 'admin/kubernetes-ops/backup-restore.md'
         - 'Certificate Management': 'admin/kubernetes-ops/cert-management.md'
@@ -164,6 +169,7 @@ nav:
         - 'Health Check': 'admin/kubernetes-ops/health-check.md'
         - 'FAQ': 'admin/kubernetes-ops/faq.md'
     - 'VM Operation Guide':
+        - 'admin/vm-ops/README.md'
         - 'Running Setup': 'admin/vm-ops/running-setup.md'
         - 'Backup': 'admin/vm-ops/backup.md'
         - 'Logs': 'admin/vm-ops/logs.md'
@@ -217,21 +223,26 @@ nav:
         - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
     - 'Auth Server Admin Guide':
+        - 'admin/auth-server/README.md'
         - 'Configuration':
+            - 'admin/auth-server/configuration/README.md'
             - 'JSON Properties': 'admin/auth-server/configuration/json-properties.md'
             - 'JVM Considerations': 'admin/auth-server/configuration/jvm-considerations.md'
         - 'Session Management':
+            - 'admin/auth-server/session-management/README.md'
             - 'What is a session?': 'admin/auth-server/session-management/what-is.md'
             - 'IDP v RP Sessions': 'admin/auth-server/session-management/idp-v-rp.md'
             - 'Multiple Sessions in One Browser': 'admin/auth-server/session-management/multiple-sessions-one-browser.md'
             - 'Multiple Browser Sessions': 'admin/auth-server/session-management/multiple-browser-sessions.md'
         - 'Tokens':
+            - 'admin/auth-server/tokens/README.md'
             - 'OAuth Access Tokens': 'admin/auth-server/tokens/oauth-access-tokens.md'
             - 'OAuth Refresh Tokens': 'admin/auth-server/tokens/oauth-refresh-tokens.md'
             - 'OpenID id_token': 'admin/auth-server/tokens/openid-id-token.md'
             - 'OpenID Userinfo Token': 'admin/auth-server/tokens/openid-userinfo-token.md'
             - 'UMA RPT Token': 'admin/auth-server/tokens/uma-rpt-token.md'
         - 'Endpoints':
+            - 'admin/auth-server/endpoints/README.md'
             - 'Configuration': 'admin/auth-server/endpoints/configuration.md'
             - 'Client Registration': 'admin/auth-server/endpoints/client-registration.md'
             - 'Authorization': 'admin/auth-server/endpoints/authorization.md'
@@ -245,33 +256,38 @@ nav:
             - 'Device Authorization': 'admin/auth-server/endpoints/device-authorization.md'
             - 'Backchannel Authentication': 'admin/auth-server/endpoints/backchannel-authentication.md'
         - 'Crypto':
+            - 'admin/auth-server/crypto/README.md'
             - 'Supported Algorithms': 'admin/auth-server/crypto/supported-algorithms.md'
             - 'Key Storage': 'admin/auth-server/crypto/key-storage.md'
             - 'Key Rotation': 'admin/auth-server/crypto/key-rotation.md'
             - 'Manual Key Rotation': 'admin/auth-server/crypto/manual-key-regeneration.md'
         - 'OpenID Features':
+            - 'admin/auth-server/openid-features/README.md'
             - 'Pairwise/Public Subject Identifiers': 'admin/auth-server/openid-features/subject-identifiers.md'
             - 'id_token': 'admin/auth-server/openid-features/id-token.md'
             - 'ACRs': 'admin/auth-server/openid-features/acrs.md'
             - 'Request Objects': 'admin/auth-server/openid-features/request-objects.md'
             - 'Prompt Parameter': 'admin/auth-server/openid-features/prompt-parameter.md'
             - 'Consent':
-                - 'Overview': 'admin/auth-server/openid-features/consent/index.md'
+                - 'admin/auth-server/openid-features/consent/README.md'
                 - 'Customize': 'admin/auth-server/openid-features/consent/customize.md'
                 - 'List/Delete Consent': 'admin/auth-server/openid-features/consent/list-delete.md'
             - 'CIBA': 'admin/auth-server/openid-features/ciba.md'
             - 'JARM': 'admin/auth-server/openid-features/jarm.md'
             - 'SIOP': 'admin/auth-server/openid-features/siop.md'
             - 'User Claims':
+                - 'admin/auth-server/openid-features/user-claims/README.md'
                 - 'Built-in Claims': 'admin/auth-server/openid-features/user-claims/built-in-claims.md'
                 - 'Adding Custom Claims': 'admin/auth-server/openid-features/user-claims/custom-claims.md'
                 - 'Claim Uniqueness/Validation': 'admin/auth-server/openid-features/user-claims/claim-uniqueness-validation.md'
             - 'Logout':
+                - 'admin/auth-server/openid-features/logout/README.md'
                 - 'Front Channel': 'admin/auth-server/openid-features/logout/front-channel.md'
                 - 'Back Channel': 'admin/auth-server/openid-features/logout/back-channel.md'
                 - 'Customizing Logout': 'admin/auth-server/openid-features/logout/customizing-logout.md'
                 - 'Forcing Logout on Browser Exit': 'admin/auth-server/openid-features/logout/forcing-logout.md'
         - 'OAuth Features':
+            - 'admin/auth-server/oauth-features/README.md'
             - 'Password Grant': 'admin/auth-server/oauth-features/password-grant.md'
             - 'Device Grant': 'admin/auth-server/oauth-features/device-grant.md'
             - 'Client Credential Grant': 'admin/auth-server/oauth-features/client-credential-grant.md'
@@ -280,14 +296,16 @@ nav:
             - 'MTLS': 'admin/auth-server/oauth-features/mtls.md'
             - 'PAR': 'admin/auth-server/oauth-features/par.md'
         - 'UMA Features':
-            - 'Overview': 'admin/auth-server/uma-features/index.md'
+            - 'admin/auth-server/uma-features/README.md'
             - 'RPT Endpoint': 'admin/auth-server/uma-features/rpt-endpoint.md'
             - 'Claims Gathering Endpoint': 'admin/auth-server/uma-features/claims-gathering-endpoint.md'
         - 'Client Management':
+            - 'admin/auth-server/client-management/README.md'
             - 'Overview': 'admin/auth-server/client-management/index.md'
             - 'Client Schema': 'admin/auth-server/client-management/client-schema.md'
             - 'Client Authentication': 'admin/auth-server/client-management/client-authn.md'
             - 'Configuration':
+                - 'admin/auth-server/client-management/configuration/README.md'
                 - 'Redirect URIs': 'admin/auth-server/client-management/configuration/redirect-uris.md'
                 - 'Grants': 'admin/auth-server/client-management/configuration/grants.md'
                 - 'Response Types': 'admin/auth-server/client-management/configuration/response-types.md'
@@ -297,24 +315,28 @@ nav:
             - 'Sector Identifiers': 'admin/auth-server/client-management/sector-identifiers.md'
             - 'Client Scripts': 'admin/auth-server/client-management/client-scripts.md'
         - 'Internationalization':
+            - 'admin/auth-server/international/README.md'
             - 'Web Pages': 'admin/auth-server/international/web-pages.md'
             - 'Client Configuration': 'admin/auth-server/international/client-config.md'
             - 'Scope Descriptions': 'admin/auth-server/international/scope-descriptions.md'
         - 'Reporting and Metrics':
+            - 'admin/auth-server/reporting-metrics/README.md'
             - 'Health': 'admin/auth-server/reporting-metrics/health.md'
             - 'Monthly Active Users': 'admin/auth-server/reporting-metrics/mau.md'
             - 'Failed/Successful Authentications': 'admin/auth-server/reporting-metrics/failed-success-authn.md'
             - 'Tokens Issued': 'admin/auth-server/reporting-metrics/tokens-issued.md'
             - 'User/Client Counts': 'admin/auth-server/reporting-metrics/user-client-count.md'
         - 'Logging':
+            - 'admin/auth-server/logging/README.md'
             - 'Standard Logs': 'admin/auth-server/logging/standard-logs.md'
             - 'Log Levels': 'admin/auth-server/logging/log-levels.md'
             - 'Audit Logs': 'admin/auth-server/logging/audit-logs.md'
             - 'Custom Logs': 'admin/auth-server/logging/custom-logs.md'
             - 'log4j2 Configuration': 'admin/auth-server/logging/log4j2.md'
     - 'Developer Guide':
+        - 'admin/developer/README.md'
         - 'Agama':
-            - 'Overview': 'admin/developer/agama/index.md'
+            - 'admin/developer/agama/README.md'
             - 'Quick Start Guide': 'admin/developer/agama/quick-start.md'
             - 'Development Lifecycle': 'admin/developer/agama/lifecycle.md'
             - 'DSL Guide': 'admin/developer/agama/dsl.md'
@@ -334,9 +356,11 @@ nav:
         - 'Back Channel Scripts': 'admin/developer/back-channel-scripts.md'
         - 'Managed Beans': 'admin/developer/managed-beans.md'
         - 'Customization':
+            - 'admin/developer/customization/README.md'
             - 'Customize Web pages': 'admin/developer/customization/customize-web-pages.md'
             - 'Custom client logs': 'admin/developer/customization/custom-client-logs.md'
         - 'Scripts':
+            - 'admin/developer/scripts/README.md'
             - 'Person Authentication': 'admin/developer/scripts/person-authentication.md'
             - 'Consent Gathering': 'admin/developer/scripts/consent-gathering.md'
             - 'Post Authentication': 'admin/developer/scripts/post-authentication.md'
@@ -360,8 +384,10 @@ nav:
             - 'Persistence': 'admin/developer/scripts/persistence.md'
             - 'Config API': 'admin/developer/scripts/config-api.md'
     - 'Reference Guide':
+        - 'admin/reference/README.md'
         - 'Javadocs / OpenAPI': 'admin/reference/openapi.md'
         - 'Database Reference':
+            - 'admin/reference/database/README.md'
             - 'Database Overview': 'admin/reference/database/index.md'
             - 'RDBMS Erwin Table': 'admin/reference/database/rdbms-erwin.md'
             - 'LDAP Schema': 'admin/reference/database/ldap-schema.md'
@@ -384,6 +410,7 @@ nav:
      #       - 'PostgreSQL Operation': 'admin/reference/database/postgres-ops.md'
             - 'Converting Data': 'admin/reference/database/converting-data.md'
         - 'JSON Configuration/Properties':
+            - 'admin/reference/json/README.md'
             - 'Auth Server': 'admin/reference/json/auth-server.md'
             - 'FIDO': 'admin/reference/json/fido.md'
             - 'SCIM': 'admin/reference/json/scim.md'
@@ -391,6 +418,7 @@ nav:
             - 'Config API': 'admin/reference/json/config-api.md'
         - 'Javadocs': 'admin/reference/javadocs.md'
         - 'Kubernetes':
+            - 'admin/reference/kubernetes/README.md'
             - 'Helm Chart': 'admin/reference/kubernetes/helm-chart.md'
             - 'Config and Secret Keys': 'admin/reference/kubernetes/config-secret-keys.md'
             - 'Image Config Properties':
@@ -405,7 +433,7 @@ nav:
                 - 'Cert Manager': 'admin/reference/kubernetes/image-cert-mgr.md'
                 - 'Gluu OpenDJ': 'admin/reference/kubernetes/image-opendj.md'
     - 'Jans Eleven Admin Guide':
-        - 'Overview': 'admin/eleven/index.md'
+        - 'admin/eleven/README.md'
         - 'Supported Algorithms': 'admin/eleven/supported-algs.md'
         - 'Configuration': 'admin/eleven/config.md'
         - 'Logs': 'admin/eleven/logs.md'
@@ -416,6 +444,7 @@ nav:
         - 'Testing with Google Cloud Key Management': 'admin/eleven/google-key-mgt.md'
         - 'Testing end-to-end with Auth Server': 'admin/eleven/auth-server-test.md'
     - 'FIDO Admin Guide':
+        - 'admin/fido/README.md'
         - 'Configuration': 'admin/fido/config.md'
         - 'Vendor Metadata Management': 'admin/fido/vendor-metadata.md'
         - 'Key Management/Rotation': 'admin/fido/key-mgt.md'
@@ -426,6 +455,7 @@ nav:
         - 'Bluetooth Authenticator Support': 'admin/fido/bluetooth-authn.md'
         - 'SCIM Extension': 'admin/fido/scim.md'
     - 'SCIM Admin Guide':
+        - 'admin/scim/README.md'
         - 'Configuration': 'admin/scim/config.md'
         - 'Logs': 'admin/scim/logs.md'
         - 'Monitoring': 'admin/scim/monitoring.md'
@@ -434,9 +464,11 @@ nav:
         - 'Bulk Adding Users': 'admin/scim/bulk-users.md'
         - 'Adding Custom Attributes': 'admin/scim/custom-attributes.md'
     - 'Integration Guide':
+        - 'admin/integration/README.md'
         - 'Custom Web Development': 'admin/integration/custom-web.md'
         - 'SAML': 'admin/integration/saml.md'
         - 'Applications':
+            - 'admin/integration/apps/README.md'
             - 'Rancher': 'admin/integration/apps/rancher.md'
             - 'Rocket': 'admin/integration/apps/rocket.md'
             - 'NextCloud': 'admin/integration/apps/nextcloud.md'
@@ -446,6 +478,7 @@ nav:
             - 'Moodle': 'admin/integration/apps/moodle.md'
             - 'Drupal': 'admin/integration/apps/drupal.md'
         - 'SaaS provider':
+            - 'admin/integration/saas/README.md'
             - 'Office365': 'admin/integration/saas/office365.md'
             - 'Salesforce': 'admin/integration/saas/salesforce.md'
             - 'Google': 'admin/integration/saas/google.md'
@@ -457,6 +490,7 @@ nav:
         - 'Gluu Casa': 'admin/integration/casa.md'
         - 'FAQ': 'admin/integration/integration-faq.md'
     - 'Client API Admin Guide':
+        - 'admin/client-api/README.md'
         - 'OAuth Features': 'admin/client-api/oauth-features.md'
         - 'OpenID Connect Features': 'admin/client-api/oidc-features.md'
         - 'UMA Features': 'admin/client-api/uma-features.md'
@@ -467,12 +501,14 @@ nav:
         - 'Key Management': 'admin/client-api/key-mgt.md'
         - 'SDKs': 'admin/client-api/sdks.md'
     - 'Config API Admin Guide':
+        - 'admin/config-api/README.md'
         - 'Configuration': 'admin/config-api/config.md'
         - 'Security': 'admin/config-api/security.md'
         - 'Logs': 'admin/config-api/logs.md'
         - 'Monitoring': 'admin/config-api/monitoring.md'
         - 'Plugins': 'admin/config-api/plugins.md'
     - 'Janssen Recipes':
+        - 'admin/recipes/README.md'
         - 'Returning Group/Role User Information': 'admin/recipes/returning-group.md'
         - 'Passwordless': 'admin/recipes/passwordless.md'
         - 'Forcing Re-Authentication': 'admin/recipes/forcing-reauthn.md'
@@ -486,10 +522,12 @@ nav:
         - 'Password Expirations': 'admin/recipes/password-expirations.md'
         - 'Locking or Disabling Accounts': 'admin/recipes/locking-accounts.md'
         - 'Forgot Password':
+            - 'admin/recipes/forgot-password/README.md'
             - 'Email': 'admin/recipes/forgot-password/email.md'
             - 'SMS': 'admin/recipes/forgot-password/sms.md'
         - 'Adaptive Authentication': 'admin/recipes/adaptive-authn.md'
         - 'API Access Control':
+            - 'admin/recipes/api-access-control/README.md'
             - 'Access Tokens': 'admin/recipes/api-access-control/access-tokens.md'
             - 'Client Credential Grant Flow': 'admin/recipes/api-access-control/client-credential-grant-flow.md'
             - 'Using Scopes to Manage Access': 'admin/recipes/api-access-control/scope-access.md'
@@ -499,10 +537,12 @@ nav:
             - 'Using OPA and Access Tokens': 'admin/recipes/api-access-control/opa-access-tokens.md'
             - 'OpenAPI Best Security Practices': 'admin/recipes/api-access-control/openapi-best-practice.md'
         - 'Open Banking':
+            - 'admin/recipes/open-banking/README.md'
             - 'Open Banking Requirements': 'admin/recipes/open-banking/requirements.md'
             - 'Client Registration': 'admin/recipes/open-banking/client-registration.md'
             - 'FAPI Authentication Request': 'admin/recipes/open-banking/fapi-authn-request.md'
         - 'Custom Web Development':
+            - 'admin/recipes/custom-web-development/README.md'
             - 'Protecting a Website with mod_auth_openidc': 'admin/recipes/custom-web-development/mod-auth-openidc.md'
             - 'AppAuth iOS': 'admin/recipes/custom-web-development/appauth-ios.md'
             - 'AppAuth Android': 'admin/recipes/custom-web-development/appauth-android.md'
@@ -517,10 +557,12 @@ nav:
             - 'Flask': 'admin/recipes/custom-web-development/flask.md'
             - 'ASP Net': 'admin/recipes/custom-web-development/asp-net.md'
         - 'SAML':
+            - 'admin/recipes/saml/README.md'
             - 'SSO with SAML SPs': 'admin/recipes/saml/sso-sp.md'
             - 'Federation with SAML IDPs': 'admin/recipes/saml/federation.md'
             - 'SAML IDP Initiated Authentication': 'admin/recipes/saml/idp-init-authn.md'
         - 'Applications':
+            - 'admin/recipes/apps/README.md'
             - 'Rancher': 'admin/recipes/apps/rancher.md'
             - 'Rocket': 'admin/recipes/apps/rocket.md'
             - 'NextCloud': 'admin/recipes/apps/nextcloud.md'
@@ -531,6 +573,7 @@ nav:
             - 'Drupal': 'admin/recipes/apps/drupal.md'
             - 'Kafka': 'admin/recipes/apps/kafka.md'
         - 'SaaS Provider':
+            - 'admin/recipes/saas/README.md'
             - 'Office365': 'admin/recipes/saas/office365.md'
             - 'Google': 'admin/recipes/saas/google.md'
             - 'Amazon AWS': 'admin/recipes/saas/aws.md'
@@ -543,11 +586,14 @@ nav:
         - 'Gluu Casa': 'admin/recipes/casa.md'
         - 'FAQ': 'admin/recipes/faq.md'
     - 'Upgrade Guide':
+        - 'admin/upgrade/README.md'
         - 'VM':
+            - 'admin/upgrade/vm/README.md'
             - 'Version Upgrade Paths': 'admin/upgrade/vm/paths.md'
             - 'Backup': 'admin/upgrade/vm/backup.md'
             - 'Rollback': 'admin/upgrade/vm/rollback.md'
         - 'Kubernetes':
+            - 'admin/upgrade/kubernetes/README.md'
             - 'Version Upgrade Paths': 'admin/upgrade/kubernetes/paths.md'
             - 'Backup': 'admin/upgrade/kubernetes/backup.md'
             - 'Rollback': 'admin/upgrade/kubernetes/rollback.md'
@@ -562,6 +608,7 @@ nav:
         - 'Consent Gathering': 'script-catalog/consent_gathering/sample-script/README.md'
         - 'Discovery': 'script-catalog/discovery/discovery/README.md'
         - 'Dynamic Scope':
+            - 'script-catalog/dynamic_scope/README.md'
             - 'Dynamic Permission': 'script-catalog/dynamic_scope/dynamic-permission/README.md'
             - 'memberof Attribute': 'script-catalog/dynamic_scope/memberof-attribute/README.md'
             - 'Organization Name Scope': 'script-catalog/dynamic_scope/org-name/README.md'
@@ -594,6 +641,7 @@ nav:
             - 'YubiCloud External Autheticator': 'script-catalog/person_authentication/yubicloud-external-authenticator/README.md'
         - 'Post Authentication': 'script-catalog/post_authn/post-authn/README.md'
         - 'Resource Owner Password':
+            - 'script-catalog/resource_owner_password_credentials/README.md'
             - 'Resource Owner Password': 'script-catalog/resource_owner_password_credentials/resource-owner-password-credentials/README.md'
             - 'Resource Owner Password (Custom Param)': 'script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-custom-params/README.md'
         - 'Revoke Token': 'script-catalog/revoke_token/revoke-token/README.md'
@@ -602,6 +650,7 @@ nav:
         - 'UMA Claims Gathering': 'script-catalog/uma_claims_gathering/uma-claims-gathering/README.md'
         - 'UMA RPT Claims': 'script-catalog/uma_rpt_claims/uma-rpt-claims/README.md'
         - 'UMA RPT Policy':
+            - 'script-catalog/uma_rpt_policy/README.md'
             - 'UMA Client Authz RPT Policy': 'script-catalog/uma_rpt_policy/uma-client-authz-rpt-policy/README.md'
             - 'UMA RPT Policy': 'script-catalog/uma_rpt_policy/uma-rpt-policy/README.md'
         - 'Update Token': 'script-catalog/update_token/sample-script/README.md'

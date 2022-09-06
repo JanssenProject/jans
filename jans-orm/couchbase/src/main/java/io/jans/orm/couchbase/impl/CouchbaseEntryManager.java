@@ -838,6 +838,9 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 			return filter;
 		}
 		
+		// Make sure that there is only one objectClass in filter
+		filter = excludeObjectClassFilters(filter);
+
 		// In Couchbase implementation we need to use first one as entry type
 		Filter searchFilter = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[0]);
 		if (filter != null) {

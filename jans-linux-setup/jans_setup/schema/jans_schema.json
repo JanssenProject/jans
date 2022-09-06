@@ -1212,7 +1212,7 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Usr group",
+      "desc": "Group",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansGrp"
@@ -3468,6 +3468,7 @@
       "kind": "STRUCTURAL",
       "may": [
         "o",
+        "jansGrp",
         "displayName",
         "description",
         "inum",
