@@ -1,0 +1,55 @@
+version: "3.7"
+services:
+  mysql:
+    image: mysql:8.0.30
+    command: "--default-authentication-plugin=mysql_native_password"
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - cloud_bridge
+    environment:
+      - MYSQL_DATABASE=jans
+      - MYSQL_USER=jans
+      - MYSQL_PASSWORD=1t5Fin3#security
+      - MYSQL_ROOT_PASSWORD=1t5Fin3#security
+  jans:
+    image: janssenproject/monolith:1.0.3_dev
+    build: .
+    restart: always
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - mysql
+    networks:
+      - cloud_bridge
+    environment:
+      - HOSTNAME=demoexample.jans.io
+      - ADMIN_PASS=1t5Fin3#security
+      - ORG_NAME=Janssen
+      - EMAIL=support@jans.io
+      - CITY=Austin
+      - STATE"TX
+      - COUNTRY=US
+      - INSTALL_CONFIG_API=true
+      - INSTALL_SCIM_SERVER=true
+      - INSTALL_FIDO2=true
+      - INSTALL_CLIENT_API=true
+      - MYSQL_DATABASE=jans
+      - MYSQL_USER=jans
+      - MYSQL_PASSWORD=1t5Fin3#security
+      - MYSQL_HOST=mysql
+    volumes:
+      - ${HOME}/jans-auth-custom:/opt/jans/jetty/jans-auth/custom
+      - ${HOME}/jans-client-api-custom:/opt/jans/jetty/jans-client-api/custom
+      - ${HOME}/jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom
+      - ${HOME}/jans-fido2-custom:/opt/jans/jetty/jans-fido2/custom
+      - ${HOME}/jans-scim-custom:/opt/jans/jetty/jans-scim/custom
+volumes:
+  db-data:
+networks:
+  cloud_bridge:
+    driver: bridge

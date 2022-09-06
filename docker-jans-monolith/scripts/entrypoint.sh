@@ -11,12 +11,14 @@ set -e
 # CITY: i.e Austin
 # STATE: i.e TX
 # COUNTRY: i.e US
-# ADMIN_PASS: LDAP and ADMIN user password
+# ADMIN_PASS: LDAP or MYSQL and ADMIN user password
 # INSTALL_LDAP
 # INSTALL_CONFIG_API
 # INSTALL_SCIM_SERVER
 # INSTALL_CLIENT_API
-
+# MYSQL_DATABASE
+# MYSQL_USER
+# MYSQL_PASSWORD
 # ======================================================================================================================
 
 # Functions
@@ -40,10 +42,13 @@ install_gluu() {
   echo "install_client_api=""$([[ ${INSTALL_CLIENT_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
 
   if [[ "${INSTALL_LDAP}" == "false" ]]; then
-    echo "rdbm_install=True" | tee -a setup.properties > /dev/null
-    echo "rdbm_install_type=1" | tee -a setup.properties > /dev/null
+    echo "rdbm_install=2" | tee -a setup.properties > /dev/null
+    echo "rdbm_install_type=2" | tee -a setup.properties > /dev/null
+    echo "rdbm_db=${MYSQL_DATABASE}" | tee -a setup.properties > /dev/null
+    echo "rdbm_user=${MYSQL_USER}" | tee -a setup.properties > /dev/null
+    echo "rdbm_password=${MYSQL_PASSWORD}" | tee -a setup.properties > /dev/null
     echo "rdbm_type=mysql" | tee -a setup.properties > /dev/null
-    echo "rdbm_host=localhost" | tee -a setup.properties > /dev/null
+    echo "rdbm_host=${MYSQL_HOST}" | tee -a setup.properties > /dev/null
   fi
 
   echo "*****   Running the setup script for ${ORG_NAME}!!   *****"
@@ -54,3 +59,15 @@ install_gluu() {
 }
 
 install_gluu 2>&1 | tee setup_log
+/etc/init.d/apache2 start
+/opt/dist/scripts/jans-auth start
+/opt/dist/scripts/jans-client-api start
+/opt/dist/scripts/jans-config-api start
+/opt/dist/scripts/jans-scim start
+/opt/dist/scripts/jans-fido2 start
+
+tail -f /opt/jans/jetty/jans-auth/logs/*.log \
+-f /opt/jans/jetty/jans-client-api/logs/*.log \
+-f /opt/jans/jetty/jans-config-api/logs/*.log \
+-f /opt/jans/jetty/jans-fido2/logs/*.log \
+-f /opt/jans/jetty/jans-scim/logs/*.log

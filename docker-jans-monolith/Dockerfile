@@ -15,7 +15,7 @@ RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
 # Prevent prompt errors during package installation
 RUN DEBIAN_FRONTEND=noninteractive \
   apt-get update \
-  && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg \
+  && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip \
   && apt-get clean \
   # Cleaning up package lists
   && rm -rf /var/lib/apt/lists/*
@@ -28,7 +28,7 @@ RUN systemctl mask dev-hugepages.mount sys-fs-fuse-connections.mount
 RUN rm -f /lib/systemd/system/systemd*udev*
 RUN rm -f /lib/systemd/system/getty.target
 
-HEALTHCHECK --interval=35s --timeout=4s CMD systemctl is-active --quiet jans-auth.service || exit 1
+#HEALTHCHECK --interval=35s --timeout=4s CMD systemctl is-active --quiet jans-auth.service || exit 1
 
 # Ports required by jetty
 EXPOSE 443 8080 3306 33060 1636
@@ -37,7 +37,7 @@ EXPOSE 443 8080 3306 33060 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=6cf25aeaeaa6445022d6d69ea36675d8a863edb1
+ENV JANS_SOURCE_VERSION=7262ae916214529c730dd13f50563a03555e8e91
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -45,11 +45,10 @@ RUN rm -rf /tmp/jans
 # ======
 # Python
 # ======
-#COPY requirements.txt /app/requirements.txt
-#RUN python3 -m ensurepip \
-#    && pip3 install --no-cache-dir -U pip wheel \
-#    && pip3 install --no-cache-dir -r /app/requirements.txt \
-#    && pip3 uninstall -y pip wheel
+COPY requirements.txt /app/requirements.txt
+RUN pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =======
 # License
@@ -62,7 +61,7 @@ COPY LICENSE /licenses/LICENSE
 # ==========
 
 ENV HOSTNAME="demoexample.jans.io" \
-    ADMIN_PASS="Test5451#" \
+    ADMIN_PASS="" \
     ORG_NAME="Janssen" \
     EMAIL="support.jans.io" \
     CITY="Austin" \
@@ -73,7 +72,10 @@ ENV HOSTNAME="demoexample.jans.io" \
     INSTALL_CONFIG_API="true" \
     INSTALL_SCIM_SERVER="true" \
     INSTALL_FIDO2="true" \
-    INSTALL_CLIENT_API="true"
+    INSTALL_CLIENT_API="true" \
+    MYSQL_DATABASE="jans" \
+    MYSQL_USER="jans" \
+    MYSQL_PASSWORD=""
 
 # ==========
 # misc stuff
