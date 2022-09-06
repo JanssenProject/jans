@@ -347,8 +347,9 @@
                 <executions>
                     <execution>
                         <configuration>
+                         <outputFormat>JSON</outputFormat>
                             <outputFileName>openapi_1</outputFileName>
-                            <outputPath>${project.parent.basedir}/swagger</outputPath>
+                            <outputPath>${project.parent.basedir}/docs</outputPath>
                             <!-- <configurationFilePath>${project.basedir}/src/main/resources/openapi-configuration.yaml</configurationFilePath> -->
                             <contextId>jans-config-api-server</contextId>
                             <prettyPrint>true</prettyPrint>
