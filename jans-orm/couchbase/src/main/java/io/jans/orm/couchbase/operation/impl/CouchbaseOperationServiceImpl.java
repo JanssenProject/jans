@@ -488,7 +488,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
             }
         }
 
-        StringBuilder baseQuery = new StringBuilder("SELECT ").append(StringHelper.toString(select)).append(" FROM `").append(bucketMapping.getBucketName()).append("` AS gluu_doc ").
+        StringBuilder baseQuery = new StringBuilder("SELECT ").append(StringHelper.toString(backticksAttributes(select))).append(" FROM `").append(bucketMapping.getBucketName()).append("` AS gluu_doc ").
         		append("WHERE ").append(finalExpression);
 
         StringBuilder baseQueryWithOrder = new StringBuilder(baseQuery);
@@ -616,6 +616,19 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
         return result;
     }
+
+	private String[] backticksAttributes(String[] attributes) {
+		if (ArrayHelper.isEmpty(attributes)) {
+			return attributes;
+		}
+		
+		String[] resultAttributes = new String[attributes.length];
+		for (int i = 0; i < attributes.length; i++) {
+			resultAttributes[i] = '`' + attributes[i] + "`";
+		}
+
+		return resultAttributes;
+	}
 
     public String[] createStoragePassword(String[] passwords) {
         if (ArrayHelper.isEmpty(passwords)) {
