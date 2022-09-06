@@ -1187,6 +1187,15 @@ class JCA_CLI:
                                 elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
                                     entry[attrib['name']] = attrib['values'][0]
 
+                elif endpoint.info['operationId'] == 'get-oauth-openid-clients':
+                    for entry in api_response_unmapped_ext:
+                        if entry.get('displayName'):
+                            break
+                        for custom_attrib in entry.get('customAttributes', []):
+                            if custom_attrib.get('name') == 'displayName':
+                                entry['displayName'] = custom_attrib.get('value') or custom_attrib.get('values',['?'])[0]
+                                break
+
                 tab_data = api_response_unmapped_ext
                 if op_mode_endpoint in tabular_dataset:
                     tab_data = api_response_unmapped_ext[tabular_dataset[op_mode_endpoint]]
