@@ -43,7 +43,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
         
         if (activeFilter != null) {
-            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, activeFilter);
+           searchFilter = Filter.createANDFilter(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter), activeFilter);            
         }
 
         log.debug("Search GluuAttributes with searchFilter:{}", searchFilter);
