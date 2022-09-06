@@ -46,25 +46,25 @@ public class CouchbaseFilterConverterCheckExcludeFilterTest {
 		ConvertedExpression expression1 = simpleConverter.convertToCouchbaseFilter(filter1, null, null);
 
 		String query1 = toSelectSQL(expression1);
-		assertEquals(query1, "SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE ( ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) )");
+		assertEquals(query1, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ( ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) )");
 
 		Filter filter2 = filterProcessor.excludeFilter(filter1, filterEq3);
 
 		ConvertedExpression expression2 = simpleConverter.convertToCouchbaseFilter(filter2, null, null);
 
 		String query2 = toSelectSQL(expression2);
-		assertEquals(query2, "SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE ( ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) )");
+		assertEquals(query2, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ( ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) )");
 
 		Filter filter3 = filterProcessor.excludeFilter(filter1, Filter.createEqualityFilter("objectClass", null));
 
 		ConvertedExpression expression3 = simpleConverter.convertToCouchbaseFilter(filter3, null, null);
 
 		String query3 = toSelectSQL(expression3);
-		assertEquals(query3, "SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE ( ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) )");
+		assertEquals(query3, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ( ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER( uid ) = \"test\" AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) AND ANY added_ IN added SATISFIES added_ = \"2020-12-16T14:58:18.398Z\" END ) )");
 	}
 
 	private String toSelectSQL(ConvertedExpression convertedExpression) {
-		String select = String.format("SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE %s", convertedExpression.expression());
+		String select = String.format("SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE %s", convertedExpression.expression());
 		
 		// Substitute parameters for test
 		JsonObject params = convertedExpression.getQueryParameters();
