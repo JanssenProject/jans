@@ -531,7 +531,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 
-		String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
+		String[] ldapReturnAttributes = getAttributes(entry, propertiesAnnotations, false);
 
 		return contains(dnValue.toString(), entryClass, propertiesAnnotations, attributes, objectClasses, ldapReturnAttributes);
 	}
@@ -645,7 +645,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 						AttributesList.class);
 				if (ldapAttribute != null) {
 					if (entry == null) {
-						return null;
+						continue;
 					} else {
 						List<AttributeData> attributesList = getAttributeDataListFromCustomAttributesList(entry,
 								(AttributesList) ldapAttribute, propertyName);
