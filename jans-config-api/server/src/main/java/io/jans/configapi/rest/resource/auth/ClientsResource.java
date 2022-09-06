@@ -84,12 +84,14 @@ public class ClientsResource extends ConfigBaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
+        logger.error("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                limit, pattern, startIndex, sortBy, sortOrder);
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
                 startIndex, limit, null, null, this.getMaxCount());
-
+        logger.error("Client searchReq:{}",searchReq);
         final List<Client> clients = this.doSearch(searchReq);
-        logger.trace("Client serach result:{}", clients);
+        logger.error("Client serach result:{}", clients);
         return Response.ok(getClients(clients)).build();
     }
 
@@ -220,19 +222,20 @@ public class ClientsResource extends ConfigBaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Client search params - searchReq:{} ", escapeLog(searchReq));
         }
-
+        logger.error("Client doSearch - searchReq:{} ", searchReq);
         PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
+        logger.error("Client doSearch - pagedResult:{} ", pagedResult);
         if (logger.isTraceEnabled()) {
             logger.trace("PagedResult  - pagedResult:{}", pagedResult);
         }
 
         List<Client> clients = new ArrayList<>();
         if (pagedResult != null) {
-            logger.trace("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            logger.error("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             clients = pagedResult.getEntries();
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Clients fetched  - clients:{}", clients);
+            logger.error("Clients fetched  - clients:{}", clients);
         }
         return clients;
     }
