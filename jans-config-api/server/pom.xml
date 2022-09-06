@@ -302,6 +302,44 @@
 		</resources>
 
 		<plugins>
+		
+		<!-- swagger -->
+			<plugin>
+				<groupId>com.github.kongchen</groupId>
+				<artifactId>swagger-maven-plugin</artifactId>
+				<version>3.1.4</version>
+				<configuration>
+					<apiSources>
+						<apiSource>
+						<springmvc>false</springmvc>
+						<schemes>http,https</schemes>
+							<info>
+								<title>jans-config-api</title>
+								<description>jans-config-api</description>
+								<version>1.0.0</version>
+							</info>
+							<basePath>/jans-config-api/api/v1/</basePath>
+							
+							<!-- <locations><location>io.jans.configapi.rest</location>
+							<location>io.jans.configapi.rest.resource.auth</location></locations> -->
+							 <locations>io.jans.configapi</locations>
+							<!--     <locations>${project.groupId}</locations> -->
+							<!-- <outputPath>${basedir}/generated/document.html</outputPath> -->
+							<swaggerDirectory>${project.build.directory}/swagger-ui</swaggerDirectory>
+							<!-- <swaggerFileName>config-api.yaml</swaggerFileName> -->
+							 <attachSwaggerArtifact>true</attachSwaggerArtifact>
+						</apiSource>
+					</apiSources>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -465,43 +503,7 @@
 				</configuration>
 			</plugin>
 			
-			<!-- swagger -->
-			<plugin>
-				<groupId>com.github.kongchen</groupId>
-				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.4</version>
-				<configuration>
-					<apiSources>
-						<apiSource>
-							<info>
-								<title>jans-config-api</title>
-								<description>jans-config-api</description>
-								<version>1.0.0</version>
-								<license>
-								<name>Jans License</name>
-								<url>https://github.com/JanssenProject/blob/master/LICENSE</url>
-								</license>
-							</info>
-							<basePath>/jans-config-api/api/v1/</basePath>
-							<locations>
-							<location>io.jans.configapi.rest.resource.auth.AttributesResource</location>
-							</locations>
-							<outputPath>${basedir}/generated/document.html</outputPath>
-							<swaggerDirectory>${basedir}/docs</swaggerDirectory>
-							<swaggerFileName>config-api.yaml</swaggerFileName>
-							 <attachSwaggerArtifact>true</attachSwaggerArtifact>
-						</apiSource>
-					</apiSources>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+			
     
 		</plugins>
 	</build>
