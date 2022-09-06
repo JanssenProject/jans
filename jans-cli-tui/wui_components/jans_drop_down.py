@@ -8,6 +8,7 @@ from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.key_binding.bindings.focus import focus_next
 from prompt_toolkit.layout.dimension import D
 
+
 class JansSelectBox:
     """_summary_
     """
@@ -38,7 +39,7 @@ class JansSelectBox:
             height=self.height,
             cursorline=False,
             width=D(),  #15,
-            style="bg:#4D4D4D",
+            style='bg:#4D4D4D',
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True,
             allow_scroll_beyond_bottom=True,
@@ -194,16 +195,16 @@ class DropDownWidget:
 
             self.value = self.select_box.value
 
-        @kb.add("up")
+        @kb.add('up')
         def _up(event):
             self.select_box.up()
 
-        @kb.add("down")
+        @kb.add('down')
         def _up(event):
             self.select_box.down()
 
-        @kb.add("escape")
-        @kb.add("tab")
+        @kb.add('escape')
+        @kb.add('tab')
         def _(event):
             if self.select_box_float in get_app().layout.container.floats:
                 get_app().layout.container.floats.remove(self.select_box_float)

@@ -51,7 +51,7 @@ from wui_components.jans_message_dialog import JansMessageDialog
 
 from cli_style import style
 
-
+from multi_lang import _
 # -------------------------------------------------------------------------- #
 
 home_dir = Path.home()
@@ -83,16 +83,16 @@ class JansCliApp(Application):
         # -------------------------------------------------------------------------------- #
 
         self.not_implemented = Frame(
-                            body=HSplit([Label(text="Not imlemented yet"), Button(text="MyButton")], width=D()),
+                            body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
                             height=D())
 
 
         self.keyboard = Controller()
 
-        self.yes_button = Button(text="Yes", handler=accept_yes)
-        self.no_button = Button(text="No", handler=accept_no)
+        self.yes_button = Button(text=_("Yes"), handler=accept_yes)
+        self.no_button = Button(text=_("No"), handler=accept_no)
         self.status_bar = Window(
-                        FormattedTextControl(self.update_status_bar), style="class:status", height=1
+                        FormattedTextControl(self.update_status_bar), style='class:status', height=1
                     )
 
         self.center_container = self.not_implemented
@@ -169,7 +169,7 @@ class JansCliApp(Application):
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
-        self.logger.debug("JANS CLI Started")
+        self.logger.debug('JANS CLI Started')
 
     def press_tab(self):
         self.keyboard.press(Key.tab)
@@ -191,8 +191,8 @@ class JansCliApp(Application):
         self.press_tab()
 
         if status not in (True, 'ID Token is expired'):
-            buttons = [Button("OK", handler=self.jans_creds_dialog)]
-            self.show_message("Error getting Connection Config Api", status, buttons=buttons)
+            buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
+            self.show_message(_("Error getting Connection Config Api"), status, buttons=buttons)
 
         else:
             if not test_client and not self.cli_object.access_token:
@@ -200,12 +200,10 @@ class JansCliApp(Application):
                     response = self.cli_object.get_device_verification_code()
                     result = response.json()
 
-                    msg = "Please visit verification url {} and enter user code {} in {} secods".format(
-                        result['verification_uri'], result['user_code'], result['expires_in']
-                        )
+                    msg = _("Please visit verification url")+str(result['verification_uri'])+_("and enter user code ")+str(result['user_code'])+_(" in ")+str(result['expires_in'])+_(" secods")
 
                     body = HSplit([Label(msg)])
-                    dialog = JansGDialog(self, title="Waiting Response", body=body)
+                    dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
 
                     async def coroutine():
                         app = get_app()
@@ -218,7 +216,7 @@ class JansCliApp(Application):
                         try:
                             self.cli_object.get_jwt_access_token(result)
                         except Exception as e:
-                            err_dialog = JansGDialog(self, title="Error!", body=HSplit([Label(str(e))]))
+                            err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
                             await self.show_dialog_as_float(err_dialog)
                             self.create_cli()
 
@@ -234,13 +232,13 @@ class JansCliApp(Application):
     def jans_creds_dialog(self, *params):
 
         body=HSplit([
-            self.getTitledText("Hostname", name='jans_host', value=config_cli.host or '', jans_help="FQN name of Jannsen Config Api Server"),
-            self.getTitledText("Client ID", name='jca_client_id', value=config_cli.client_id or '', jans_help="Jannsen Config Api Client ID"),
-            self.getTitledText("Client Secret", name='jca_client_secret', value=config_cli.client_secret or '', jans_help="Jannsen Config Api Client Secret")
+            self.getTitledText(_("Hostname"), name='jans_host', value=config_cli.host or '', jans_help=_("FQN name of Jannsen Config Api Server")),
+            self.getTitledText(_("Client ID"), name='jca_client_id', value=config_cli.client_id or '', jans_help=_("Jannsen Config Api Client ID")),
+            self.getTitledText(_("Client Secret"), name='jca_client_secret', value=config_cli.client_secret or '', jans_help=_("Jannsen Config Api Client Secret"))
             ])
 
-        buttons = [Button("Save", handler=self.save_creds)]
-        dialog = JansGDialog(self, title="Janssen Config Api Client Credidentials", body=body, buttons=buttons)
+        buttons = [Button(_("Save"), handler=self.save_creds)]
+        dialog = JansGDialog(self, title=_("Janssen Config Api Client Credidentials"), body=body, buttons=buttons)
 
         async def coroutine():
             app = get_app()
@@ -265,14 +263,14 @@ class JansCliApp(Application):
     def set_keybindings(self):
         # Global key bindings.
         self.bindings = KeyBindings()
-        self.bindings.add("tab")(self.focus_next)
-        self.bindings.add("s-tab")(self.focus_previous)
-        self.bindings.add("c-c")(do_exit)
-        self.bindings.add("f1")(self.help)
+        self.bindings.add('tab')(self.focus_next)
+        self.bindings.add('s-tab')(self.focus_previous)
+        self.bindings.add('c-c')(do_exit)
+        self.bindings.add('f1')(self.help)
 
     # ----------------------------------------------------------------- #
     def help(self,ev):
-        self.show_message("Help",'''<Enter> Edit current selection\n<j> Display current item in JSON format\n<d> Delete current selection''')
+        self.show_message(_("Help"),'''<Enter> {} \n<j> {}\n<d> {}'''.format(_("Edit current selection"),_("Display current item in JSON format"),_("Delete current selection")))
     # ----------------------------------------------------------------- #
 
     def get_help_from_schema(self, schema, jans_name):
@@ -451,13 +449,13 @@ class JansCliApp(Application):
 
 
     def main_nav_selection_changed(self, selection):
-        self.logger.debug("Main navbar selection changed %s", str(selection))
+        self.logger.debug('Main navbar selection changed %s', str(selection))
         plugin = self.get_plugin_by_id(selection)
         plugin.set_center_frame()
 
 
     async def show_dialog_as_float(self, dialog):
-        "Coroutine."
+        'Coroutine.'
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         self.layout.focus(dialog)
@@ -491,7 +489,7 @@ class JansCliApp(Application):
 
         body = HSplit([
                 TextArea(
-                    lexer=DynamicLexer(lambda: PygmentsLexer.from_filename(".json", sync_from_start=True)),
+                    lexer=DynamicLexer(lambda: PygmentsLexer.from_filename('.json', sync_from_start=True)),
                     scrollbar=True,
                     line_numbers=True,
                     multiline=True,
@@ -535,13 +533,13 @@ class JansCliApp(Application):
         self.press_tab()
 
     def show_again(self): ## nasted dialog Button
-        self.show_message("Again", "Nasted Dialogs",)
+        self.show_message(_("Again"), _("Nasted Dialogs"),)
 
 
     def get_confirm_dialog(self, message):
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
-        buttons = [Button("No"), Button("Yes")]
-        dialog = JansGDialog(self, title="Confirmation", body=body, buttons=buttons)
+        buttons = [Button(_("No")), Button(_("Yes"))]
+        dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons)
         return dialog
 
 

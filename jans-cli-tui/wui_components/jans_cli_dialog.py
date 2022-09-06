@@ -1,9 +1,10 @@
 import json
 from functools import partial
 from asyncio import Future
-
 from prompt_toolkit.widgets import Button, Dialog
 from prompt_toolkit.layout.dimension import D
+
+from multi_lang import _
 
 class JansGDialog:
     """This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
@@ -29,7 +30,7 @@ class JansGDialog:
             width = int(parent.output.get_size().columns * 0.85)
 
         if not buttons:
-            buttons = [Button(text="OK")]
+            buttons = [Button(text=_("OK"))]
 
         def do_handler(button_text, handler):
             if handler:

@@ -78,12 +78,12 @@ class JansNavBar():
         """
         kb = KeyBindings()
 
-        @kb.add("left")
+        @kb.add('left')
         def _go_up(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection - 1) % len(self.navbar_entries)
             self._set_selection()
 
-        @kb.add("right")
+        @kb.add('right')
         def _go_up(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection + 1) % len(self.navbar_entries)
             self._set_selection()

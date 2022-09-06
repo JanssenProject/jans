@@ -3,53 +3,64 @@ site_url: 'https://gluu.org/gluu-4/'
 repo_url: 'https://github.com/JanssenProject'
 edit_uri: '#https://github.com/JanssenProject'
 site_description: "this is desc"
+  
 plugins:
   - mkdocstrings
+  # - search
+
 nav:
     - Home: 'docs/home/index.md'
-    - Gallery:
-        - 'CLI': 'docs/Gallery/cli.md'
-        - 'TUI': 'docs/Gallery/tui.md'
-    - Components:
+    - Gallery: 
+      - 'docs/Gallery/gallery.md'
+      - TUI :
+        - 'docs/Gallery/tui.md'
+      - CLI :
+        - 'docs/Gallery/cli.md'
+
+    - Components:       
+      - docs/wui_components/wui_components.md  
+      - Dialogs components :
         - 'jans_cli_dialog': 'docs/wui_components/jans_cli_dialog.md'
-        - 'jans_data_picker': 'docs/wui_components/jans_data_picker.md'
         - 'jans_dialog_with_nav': 'docs/wui_components/jans_dialog_with_nav.md'
-        - 'jans_drop_down': 'docs/wui_components/jans_drop_down.md'
         - 'jans_message_dialog': 'docs/wui_components/jans_message_dialog.md'
+      - Navigation bar components :
         - 'jans_nav_bar': 'docs/wui_components/jans_nav_bar.md'
         - 'jans_side_nav_bar': 'docs/wui_components/jans_side_nav_bar.md'
         - 'jans_vetrical_nav': 'docs/wui_components/jans_vetrical_nav.md'
+      - Custom components :
+        - 'jans_data_picker': 'docs/wui_components/jans_data_picker.md'
+        - 'jans_drop_down': 'docs/wui_components/jans_drop_down.md'
 
-    - TUI Main Components:
-        - 'Clinets': 'docs/Clinets/Clinets.md'   
-        - 'Scopes': 'docs/Scopes/Scopes.md'   
-        - 'Keys': 'docs/Keys/Keys.md'   
-        - 'Defaults': 'docs/Defaults/Defaults.md'   
-        - 'Properties': 'docs/Properties/Properties.md'   
-        - 'Logging': 'docs/Logging/Logging.md'   
-    - Clinets:
-        - 'Add Credintials': 'docs/Clinets/AddCredintials.md'
-        - 'Get Device Verification': 'docs/Clinets/Get.md'
-        - 'Add New Client': 'docs/Clinets/Add.md'
-        - 'Remove Client': 'docs/Clinets/Remove.md'
-        - 'Edit Client': 'docs/Clinets/Edit.md'
-        - 'Search Client': 'docs/Clinets/Search.md'
-    - Scopes: 
-        - 'Scopes': 'docs/Scopes/Scopes.md'
-    - Keys: 
-        - 'Keys': 'docs/Keys/Keys.md'
-    - Defaults: 
-        - 'Defaults': 'docs/Defaults/Defaults.md'
-    - Properties: 
-        - 'Properties': 'docs/Properties/Properties.md'
-    - Logging: 
-        - 'Logging': 'docs/Logging/Logging.md'
-    - About:
-        - 'License': 'license.md'
-        - 'Release Notes': 'release-notes.md'
 theme:
-    name: readthedocs
-    locale: en
-    include_sidebar: false
-# theme: 
-#   readthedocs
+    homepage: https://example.com
+    name: material
+      
+
+    logo: img/logo.png
+    favicon: img/favicon.ico    
+
+    features:
+      - navigation.instant
+      - toc.follow
+      - navigation.tabs
+      - navigation.tabs.sticky 
+      - navigation.top
+      
+
+    palette: 
+        - media: "(prefers-color-scheme: light)"
+          scheme: default
+          primary: white
+          accent: green
+          toggle:
+                icon: material/weather-sunny
+                name: Switch to dark mode
+
+        - media: "(prefers-color-scheme: dark)"
+          scheme: slate
+          primary: black
+          accent: green
+          toggle:
+            icon: material/weather-night
+            name: Switch to light mode
+

@@ -52,7 +52,7 @@ class JansSideNavBar():
                         style=self.entries_color,
 
                     ),
-                    style="class:select-box",
+                    style='class:select-box',
                     height=Dimension(preferred=len(
                         self.navbar_entries)*2, max=len(self.navbar_entries)*2+1),
                     cursorline=True,
@@ -80,10 +80,10 @@ class JansSideNavBar():
         result = []
         for i, entry in enumerate(self.navbar_entries):
             if i == self.cur_navbar_selection:
-                result.append([("[SetCursorPosition]", "")])
+                result.append([('[SetCursorPosition]', '')])
             result.append(entry)
-            result.append("\n")
-            result.append("\n")
+            result.append('\n')
+            result.append('\n')
         return merge_formatted_text(result)
 
     def update_selection(self):
@@ -110,13 +110,13 @@ class JansSideNavBar():
         """
         kb = KeyBindings()
 
-        @kb.add("up")
+        @kb.add('up')
         def _go_up(event) -> None:
             self.cur_navbar_selection = (
                 self.cur_navbar_selection - 1) % len(self.navbar_entries)
             self.update_selection()
 
-        @kb.add("down")
+        @kb.add('down')
         def _go_down(event) -> None:
             self.cur_navbar_selection = (
                 self.cur_navbar_selection + 1) % len(self.navbar_entries)

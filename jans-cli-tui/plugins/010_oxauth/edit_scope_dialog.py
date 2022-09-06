@@ -42,6 +42,8 @@ from prompt_toolkit.widgets import (
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 
+from multi_lang import _
+
 
 class EditScopeDialog:
     def __init__(self,myparent, **params):
@@ -71,16 +73,16 @@ class EditScopeDialog:
             navbar=DynamicContainer(lambda:self.side_NavBar),
             content=DynamicContainer(lambda: self.myparent.oauth_tabs['clients'][self.myparent.oauth_dialog_nav]), ## can be diffrent
              button_functions=[
-                (accept, "Save"),    ## button name is changed to make sure it is another one
-                (cancel, "Cancel")
+                (accept, _("Save")),    ## button name is changed to make sure it is another one
+                (cancel, _("Cancel"))
             ],
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
                    )
 
 
-        ok_button = Button(text="OK", handler=accept)
-        cancel_button = Button(text="Cancel", handler=cancel)
+        ok_button = Button(text=_("OK"), handler=accept)
+        cancel_button = Button(text=_("Cancel"), handler=cancel)
         buttons = [cancel_button]
         #if params.get('ok_button'):
         buttons.insert(0, ok_button)

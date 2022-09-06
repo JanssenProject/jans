@@ -306,6 +306,7 @@ class DateSelectWidget:
         """init for DateSelectWidget
 
         Args:
+            parent (widget): This is the parent widget for the dialog, to access `Pageup` and `Pagedown`
             value (str): string time stamp value like "2023-11-27T14:05:35"
         """
         self.parent = parent

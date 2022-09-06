@@ -34,9 +34,17 @@ from wui_components.jans_data_picker import DateSelectWidget
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 
+from multi_lang import _
 
 class Plugin():
+    """This is a general class for plugins 
+    """
     def __init__(self, app):
+        """init for Plugin class "oxauth"
+
+        Args:
+            app (_type_): _description_
+        """
         self.app = app
         self.pid = 'oxauth'
         self.name = 'Auth Server'
@@ -50,10 +58,13 @@ class Plugin():
         pass
 
     def set_center_frame(self):
+        """center frame content
+        """
         self.app.center_container = self.oauth_main_container
 
-
     def oauth_prepare_containers(self):
+        """prepare the main container (tabs) for the current Plugin 
+        """
 
         self.oauth_data_container = {
             'clients' :HSplit([],width=D()),
@@ -64,9 +75,9 @@ class Plugin():
 
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
-                        self.app.getButton(text="Get Scopes", name='oauth:scopes:get', jans_help="Retreive first 10 Scopes", handler=self.oauth_get_scopes),
-                        self.app.getTitledText('Search: ', name='oauth:scopes:search', jans_help='Press enter to perform search'),
-                        self.app.getButton(text="Add Scope", name='oauth:scopes:add', jans_help="To add a new scope press this button"),
+                        self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_scopes),
+                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search")),
+                        self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button")),
                         ],
                         padding=3,
                         width=D(),
@@ -76,9 +87,9 @@ class Plugin():
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
-                        self.app.getButton(text="Get Clients", name='oauth:clients:get', jans_help="Retreive first 10 OpenID Connect clients", handler=self.oauth_get_clients),
-                        self.app.getTitledText('Search', name='oauth:clients:search', jans_help='Press enter to perform search', accept_handler=self.search_clients),
-                        self.app.getButton(text="Add Client", name='oauth:clients:add', jans_help="To add a new client press this button", handler=self.add_client),
+                        self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first 10 OpenID Connect clients"), handler=self.oauth_get_clients),
+                        self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_clients),
+                        self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
                         
                         ],
                         padding=3,
@@ -96,7 +107,9 @@ class Plugin():
                                     )
 
     def oauth_prepare_navbar(self):
-         self.oauth_navbar = JansNavBar(
+        """prepare the navbar for the current Plugin 
+        """
+        self.oauth_navbar = JansNavBar(
                     self,
                     entries=[('clients', 'Clients'), ('scopes', 'Scopes'), ('keys', 'Keys'), ('defaults', 'Defaults'), ('properties', 'Properties'), ('logging', 'Logging')],
                     selection_changed=self.oauth_nav_selection_changed,
@@ -105,14 +118,23 @@ class Plugin():
                     )
 
     def oauth_nav_selection_changed(self, selection):
-        self.app.logger.debug("OXUATH NAV: %s", selection)
+        """This method for the selection change
+
+        Args:
+            selection (str): the current selected tab
+        """
+        self.app.logger.debug('OXUATH NAV: %s', selection)
         if selection in self.oauth_containers:
             self.oauth_main_area = self.oauth_containers[selection]
         else:
             self.oauth_main_area = self.app.not_implemented
 
-
     def oauth_update_clients(self, pattern=''):
+        """update the current clients data to server
+
+        Args:
+            pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
+        """
         endpoint_args='limit:10'
         if pattern:
             endpoint_args='limit:10,pattern:'+pattern
@@ -127,17 +149,17 @@ class Plugin():
                         )
 
         except Exception as e:
-            self.app.show_message("Error getting clients", str(e))
+            self.app.show_message(_("Error getting clients"), str(e))
             return
 
         if rsponse.status_code not in (200, 201):
-            self.app.show_message("Error getting clients", str(rsponse.text))
+            self.app.show_message(_("Error getting clients"), str(rsponse.text))
             return
 
         try:
             result = rsponse.json()
         except Exception:
-            self.app.show_message("Error getting clients", str(rsponse.text))
+            self.app.show_message(_("Error getting clients"), str(rsponse.text))
             #press_tab
             return
 
@@ -177,15 +199,21 @@ class Plugin():
             get_app().invalidate()
 
         else:
-            self.app.show_message("Oops", "No matching result")
-
+            self.app.show_message(_("Oops"), _("No matching result"))
 
     def oauth_get_clients(self):
-        self.oauth_data_container['clients'] = HSplit([Label("Please wait while getting clients")], width=D())
+        """Method to get the clients data from server
+        """
+        self.oauth_data_container['clients'] = HSplit([Label(_("Please wait while getting clients"))], width=D())
         t = threading.Thread(target=self.oauth_update_clients, daemon=True)
         t.start()
 
-    def update_oauth_scopes(self, start_index=0):
+    def oauth_update_scopes(self, start_index=0):
+        """update the current Scopes data to server
+
+        Args:
+            start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
+        """
         try :
             result = self.app.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
             data =[]
@@ -227,12 +255,14 @@ class Plugin():
             get_app().invalidate()
 
         except Exception as e:
-            self.oauth_data_container['scopes'] = HSplit([Label("Faild to Fitch client Data.. Reason: " + str(e))], width=D())
+            self.oauth_data_container['scopes'] = HSplit([Label(_("Faild to Fitch client Data.. Reason: ") + str(e))], width=D())
             get_app().invalidate()
 
     def oauth_get_scopes(self):
-        self.oauth_data_container['scopes'] = HSplit([Label("Please wait while getting Scopes")], width=D())
-        t = threading.Thread(target=self.update_oauth_scopes, daemon=True)
+        """Method to get the Scopes data from server
+        """
+        self.oauth_data_container['scopes'] = HSplit([Label(_("Please wait while getting Scopes"))], width=D())
+        t = threading.Thread(target=self.oauth_update_scopes, daemon=True)
         t.start()
 
     def display_scope(self):
@@ -253,6 +283,14 @@ class Plugin():
         self.app.show_jans_dialog(dialog)
 
     def save_client(self, dialog):
+        """This method to save the client data to server
+
+        Args:
+            dialog (_type_): the main dialog to save data in
+
+        Returns:
+            _type_: bool value to check the status code response
+        """
 
         self.app.logger.debug(dialog.data)
 
@@ -270,24 +308,34 @@ class Plugin():
             self.oauth_get_clients()
             return True
 
-        self.app.show_message("Error!", "An error ocurred while saving client:\n" + str(response.text))
+        self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
 
     def search_clients(self, tbuffer):
         if not len(tbuffer.text) > 2:
-            self.app.show_message("Error!", "Search string should be at least three characters")
+            self.app.show_message(_("Error!"), _("Search string should be at least three characters"))
             return
 
         t = threading.Thread(target=self.oauth_update_clients, args=(tbuffer.text,), daemon=True)
         t.start()
 
-
     def add_client(self):
-        dialog = EditClientDialog(self.app, title="Add Client", data={}, save_handler=self.save_client)
+        """Method to display the dialog of clients
+        """
+        dialog = EditClientDialog(self.app, title=_("Add Client"), data={}, save_handler=self.save_client)
         result = self.app.show_jans_dialog(dialog)
 
     def delete_client(self, selected, event):
+        """This method for the deletion of the clients data
 
-        dialog = self.app.get_confirm_dialog("Are you sure want to delete client inum:\n {} ?".format(selected[0]))
+        Args:
+            selected (_type_): The selected Client
+            event (_type_): _description_
+
+        Returns:
+            str: The server response
+        """
+
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete client inum:")+"\n {} ?".format(selected[0]))
 
         async def coroutine():
             focused_before = self.app.layout.current_window

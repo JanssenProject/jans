@@ -92,7 +92,7 @@ class JansVerticalNav():
                         key_bindings=self._get_key_bindings(),
                         style=self.headerColor,
                     ),
-                    style="class:select-box",
+                    style='class:select-box',
                     height=D(preferred=1, max=1),
                     cursorline=False,
                 ),
@@ -104,7 +104,7 @@ class JansVerticalNav():
                         key_bindings=self._get_key_bindings(),
                         style=self.entriesColor,
                     ),
-                    style="class:select-box",
+                    style='class:select-box',
                     height=D(preferred=len(self.data), max=len(self.data)),
                     cursorline=True,
                     right_margins=[ScrollbarMargin(display_arrows=True), ],
@@ -169,7 +169,7 @@ class JansVerticalNav():
             y += self.headers[k] + ' ' * \
                 (self.spaces[k] - len(self.headers[k]) + 5)
         result.append(y)
-        result.append("\n")
+        result.append('\n')
 
         return merge_formatted_text(result)
 
@@ -182,10 +182,10 @@ class JansVerticalNav():
         result = []
         for i, entry in enumerate(self.mod_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
             if i == self.selectes:
-                result.append([("[SetCursorPosition]", "")])
+                result.append([('[SetCursorPosition]', '')])
             
             result.append('     '.join(entry))
-            result.append("\n")
+            result.append('\n')
 
         return merge_formatted_text(result)
     
@@ -197,22 +197,22 @@ class JansVerticalNav():
         """
         kb = KeyBindings()
 
-        @kb.add("up")
+        @kb.add('up')
         def _go_up(event) -> None:
             self.selectes = (self.selectes - 1) % len(self.data)
 
-        @kb.add("down")
+        @kb.add('down')
         def _go_up(event) -> None:
             self.selectes = (self.selectes + 1) % len(self.data)
 
-        @kb.add("enter")
+        @kb.add('enter')
         def _(event):
             passed = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
             self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
 
 
-        @kb.add("d")
+        @kb.add('d')
         def _(event):
             selected_line = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
@@ -224,7 +224,7 @@ class JansVerticalNav():
                 data=self.all_data[self.selectes])
 
 
-        @kb.add("delete")
+        @kb.add('delete')
         def _(event):
             if self.on_delete:
                 selected_line = [i.strip() for i in self.data[self.selectes]]
