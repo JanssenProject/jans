@@ -80,5 +80,5 @@ After adding the record you can hit endpoints such as https://demoexample.jans.i
 Grab a fresh ubuntu 22.04 lts VM and run:
 
 ```bash
-
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssendemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
