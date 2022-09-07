@@ -9,7 +9,7 @@ package io.jans.as.server.bcauthorize.ws.rs;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -74,7 +74,7 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
                         + "idTokenHint = {}, deviceRegistrationToken = {}, isSecure = {}",
                 idTokenHint, deviceRegistrationToken, securityContext.isSecure());
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.CIBA);
 
         Response.ResponseBuilder builder = Response.ok();
 

@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -45,7 +45,7 @@ public class UmaMetadataWS {
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response getConfiguration() {
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
         try {
             final String baseEndpointUri = appConfiguration.getBaseEndpoint();

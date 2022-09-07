@@ -7,7 +7,7 @@
 package io.jans.as.server.session.ws.rs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.CookieService;
@@ -53,7 +53,7 @@ public class CheckSessionStatusRestWebServiceImpl {
     @Produces({MediaType.APPLICATION_JSON})
     public Response requestCheckSessionStatus(@Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse,
                                               @Context SecurityContext securityContext) throws IOException {
-        errorResponseFactory.validateComponentEnabled(ComponentType.STATUS_SESSION);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.STATUS_SESSION);
         String sessionIdCookie = cookieService.getSessionIdFromCookie(httpRequest);
         log.debug("Found session '{}' cookie: '{}'", CookieService.SESSION_ID_COOKIE_NAME, sessionIdCookie);
 
