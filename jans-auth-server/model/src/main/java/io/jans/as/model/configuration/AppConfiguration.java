@@ -312,7 +312,7 @@ public class AppConfiguration implements Configuration {
     private List<String> discoveryAllowedKeys;
     private List<String> discoveryDenyKeys;
 
-    private List<String> enabledComponents;
+    private List<String> featureFlags;
 
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
     private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
@@ -383,25 +383,25 @@ public class AppConfiguration implements Configuration {
         this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
     }
 
-    public Set<ComponentType> getEnabledComponentTypes() {
-        return ComponentType.fromValues(getEnabledComponents());
+    public Set<FeatureFlagType> getEnabledFeatureFlags() {
+        return FeatureFlagType.fromValues(getFeatureFlags());
     }
 
-    public boolean isEnabledComponent(ComponentType componentType) {
-        final Set<ComponentType> enabledComponentTypes = getEnabledComponentTypes();
-        if (enabledComponentTypes.isEmpty())
+    public boolean isFeatureEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> flags = getEnabledFeatureFlags();
+        if (flags.isEmpty())
             return true;
 
-        return enabledComponentTypes.contains(componentType);
+        return flags.contains(flagType);
     }
 
-    public List<String> getEnabledComponents() {
-        if (enabledComponents == null) enabledComponents = new ArrayList<>();
-        return enabledComponents;
+    public List<String> getFeatureFlags() {
+        if (featureFlags == null) featureFlags = new ArrayList<>();
+        return featureFlags;
     }
 
-    public void setEnabledComponents(List<String> enabledComponents) {
-        this.enabledComponents = enabledComponents;
+    public void setFeatureFlags(List<String> featureFlags) {
+        this.featureFlags = featureFlags;
     }
 
     public Boolean getUseNestedJwtDuringEncryption() {
