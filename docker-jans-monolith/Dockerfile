@@ -28,7 +28,7 @@ RUN systemctl mask dev-hugepages.mount sys-fs-fuse-connections.mount
 RUN rm -f /lib/systemd/system/systemd*udev*
 RUN rm -f /lib/systemd/system/getty.target
 
-#HEALTHCHECK --interval=35s --timeout=4s CMD systemctl is-active --quiet jans-auth.service || exit 1
+HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
 # Ports required by jetty
 EXPOSE 443 8080 3306 33060 1636
@@ -70,7 +70,7 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     # Install with local mysql by default
     INSTALL_LDAP="false" \
     CN_INSTALL_CONFIG_API="true" \
-    CN_INSTALL_SCIM_SERVER="true" \
+    CN_INSTALL_SCIM="true" \
     CN_INSTALL_FIDO2="true" \
     CN_INSTALL_CLIENT_API="true" \
     MYSQL_DATABASE="jans" \

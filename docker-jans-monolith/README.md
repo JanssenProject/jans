@@ -13,30 +13,29 @@ For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.2_dev`.
 
 The following environment variables are supported by the container:
 
-| ENV                      | Description                                      | Default                                          |
-|--------------------------|--------------------------------------------------|--------------------------------------------------|
-| `CN_HOSTNAME`            | Hostname to install janssen with.                | `demoexample.jans.io`                            |
-| `CN_ADMIN_PASS`          | Password of the admin user.                      | `1t5Fin3#security`                               |
-| `CN_ORG_NAME`            | Organization name. Used for ssl cert generation. | `Janssen`                                        |
-| `CN_EMAIL`               | Email. Used for ssl cert generation.             | `support@jans.io`                                |
-| `CN_CITY`                | City. Used for ssl cert generation.              | `Austin`                                         |
-| `CN_STATE`               | State. Used for ssl cert generation              | `TX`                                             |
-| `CN_COUNTRY`             | Country. Used for ssl cert generation.           | `US`                                             |
-| `CN_INSTALL_LDAP`        | **NOT SUPPORRTED YET**                           | `true`                                           |
-| `CN_INSTALL_CONFIG_API`  | Installs the Config API service.                 | `true`                                           |
-| `CN_INSTALL_SCIM_SERVER` | Installs the SCIM  API service.                  | `true`                                           |
-| `CN_INSTALL_FIDO2`       | Installs the FIDO2 API service.                  | `true`                                           |
-| `CN_INSTALL_CLIENT_API`  | Installs the CLIENT API service.                 | `true`                                           |
-| `MYSQL_DATABASE`         | MySQL jans database.                             | `jans`                                           |
-| `MYSQL_USER`             | MySQL database user.                             | `jans`                                           |
-| `MYSQL_PASSWORD`         | MySQL database user password.                    | `1t5Fin3#security`                               |
-| `MYSQL_HOST`             | MySQL host.                                      | `mysql` which is the docker compose service name |
+| ENV                     | Description                                      | Default                                          |
+|-------------------------|--------------------------------------------------|--------------------------------------------------|
+| `CN_HOSTNAME`           | Hostname to install janssen with.                | `demoexample.jans.io`                            |
+| `CN_ADMIN_PASS`         | Password of the admin user.                      | `1t5Fin3#security`                               |
+| `CN_ORG_NAME`           | Organization name. Used for ssl cert generation. | `Janssen`                                        |
+| `CN_EMAIL`              | Email. Used for ssl cert generation.             | `support@jans.io`                                |
+| `CN_CITY`               | City. Used for ssl cert generation.              | `Austin`                                         |
+| `CN_STATE`              | State. Used for ssl cert generation              | `TX`                                             |
+| `CN_COUNTRY`            | Country. Used for ssl cert generation.           | `US`                                             |
+| `CN_INSTALL_LDAP`       | **NOT SUPPORRTED YET**                           | `false`                                          |
+| `CN_INSTALL_CONFIG_API` | Installs the Config API service.                 | `true`                                           |
+| `CN_INSTALL_SCIM`       | Installs the SCIM  API service.                  | `true`                                           |
+| `CN_INSTALL_FIDO2`      | Installs the FIDO2 API service.                  | `true`                                           |
+| `CN_INSTALL_CLIENT_API` | Installs the CLIENT API service.                 | `true`                                           |
+| `MYSQL_DATABASE`        | MySQL jans database.                             | `jans`                                           |
+| `MYSQL_USER`            | MySQL database user.                             | `jans`                                           |
+| `MYSQL_PASSWORD`        | MySQL database user password.                    | `1t5Fin3#security`                               |
+| `MYSQL_HOST`            | MySQL host.                                      | `mysql` which is the docker compose service name |
 
 
 ## Pre-requisites
 
-- [Docker](https://docs.docker.com/install)
-- [Docker Compose](https://docs.docker.com/compose/install/) which should be installed with your docker installation.
+- [Docker](https://docs.docker.com/install). Docker compose should be installed by default with Docker.
 
 ## How to run
 

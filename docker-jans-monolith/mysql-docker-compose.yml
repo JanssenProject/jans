@@ -35,7 +35,7 @@ services:
       - CN_STATE=TX
       - CN_COUNTRY=US
       - CN_INSTALL_CONFIG_API=true
-      - CN_INSTALL_SCIM_SERVER=true
+      - CN_INSTALL_SCIM=true
       - CN_INSTALL_FIDO2=true
       - CN_INSTALL_CLIENT_API=true
       - MYSQL_DATABASE=jans

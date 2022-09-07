@@ -11,6 +11,10 @@ if [[ ! "$JANS_PERSISTENCE" ]]; then
   read -rp "Enter persistence type [LDAP(NOT SUPPORTED YET)|MYSQL]:                            " JANS_PERSISTENCE
 fi
 
+if [[ -z $EXT_IP ]]; then
+  EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+fi
+
 sudo apt-get update
 # Install Docker and Docker compose plugin
 sudo apt-get remove docker docker-engine docker.io containerd runc -y || echo "Docker doesn't exist..installing.."
@@ -42,7 +46,7 @@ if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   docker compose -f /tmp/jans/docker-jans-monolith/mysql-docker-compose.yml up -d
 fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
-echo "Waiting for the Janssen server to come up. This will take around 3 mins"
+echo "Waiting for the Janssen server to come up. Depending on the  resources it may take 3-5 mins for the services to be up."
 sleep 180
 cat << EOF > testendpoints.sh
 echo -e "Testing openid-configuration endpoint.. \n"
@@ -51,7 +55,6 @@ echo -e "Testing scim-configuration endpoint.. \n"
 curl -k https://$JANS_FQDN/.well-known/scim-configuration
 echo -e "Testing fido2-configuration endpoint.. \n"
 curl -k https://$JANS_FQDN/.well-known/fido2-configuration
-cd ..
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."

@@ -14,7 +14,7 @@ set -e
 # CN_ADMIN_PASS: LDAP or MYSQL and ADMIN user password
 # INSTALL_LDAP
 # CN_INSTALL_CONFIG_API
-# CN_INSTALL_SCIM_SERVER
+# CN_INSTALL_SCIM
 # CN_INSTALL_CLIENT_API
 # MYSQL_DATABASE
 # MYSQL_USER
@@ -37,7 +37,7 @@ install_gluu() {
   echo "ldapPass=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
   echo "installLdap=""$([[ ${INSTALL_LDAP} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM_SERVER} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_client_api=""$([[ ${CN_INSTALL_CLIENT_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
 
@@ -52,6 +52,7 @@ install_gluu() {
   fi
 
   echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
+  echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
   python3 install.py -yes --args="-f setup.properties -n"
   echo "*****   Setup script completed!!    *****"
