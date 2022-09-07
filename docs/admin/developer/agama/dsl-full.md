@@ -815,7 +815,7 @@ When E is not null
 ```
 
 </td>
-		<td>Similar to the first example.<br/>If an exception is thrown by the invocation, it's caught and assigned to variable <code>E</code>, while <code>number</code> is assigned <code>null</code>.<br/>Note both checked and unchecked exceptions are caught</td>
+		<td>Similar to the first example.<br/>If an exception is thrown by the invocation, it's caught and assigned to variable <code>E</code>.<br/>Note both checked and unchecked exceptions are caught</td>
 	</tr>
 	<tr>
 <td>
