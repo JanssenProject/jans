@@ -36,12 +36,12 @@ The following environment variables are supported by the container:
 ## Pre-requisites
 
 - [Docker](https://docs.docker.com/install)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/) which should be installed with your docker installation.
 
 ## How to run
 
 ```bash
-docker-compose -f mysql-docker-compose.yml up -d
+docker compose -f mysql-docker-compose.yml up -d
 ```
 
 ## Clean up
@@ -49,7 +49,7 @@ docker-compose -f mysql-docker-compose.yml up -d
 Remove setup and volumes
 
 ```
-docker-compose -f mysql-docker-compose.yml down && rm jans-*
+docker compose -f mysql-docker-compose.yml down && rm jans-*
 ```
 
 ## Test

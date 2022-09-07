@@ -43,11 +43,11 @@ services:
       - MYSQL_PASSWORD=1t5Fin3#security
       - MYSQL_HOST=mysql
     volumes:
-      - jans-auth-custom:/opt/jans/jetty/jans-auth/custom
-      - jans-client-api-custom:/opt/jans/jetty/jans-client-api/custom
-      - jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom
-      - jans-fido2-custom:/opt/jans/jetty/jans-fido2/custom
-      - jans-scim-custom:/opt/jans/jetty/jans-scim/custom
+      - ./jans-auth-custom:/opt/jans/jetty/jans-auth/custom
+      - ./jans-client-api-custom:/opt/jans/jetty/jans-client-api/custom
+      - ./jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom
+      - ./jans-fido2-custom:/opt/jans/jetty/jans-fido2/custom
+      - ./jans-scim-custom:/opt/jans/jetty/jans-scim/custom
 volumes:
   db-data:
 networks:

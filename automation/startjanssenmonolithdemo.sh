@@ -13,7 +13,7 @@ fi
 
 sudo apt-get update
 # Install Docker and Docker compose plugin
-sudo apt-get remove docker docker-engine docker.io containerd runc -y
+sudo apt-get remove docker docker-engine docker.io containerd runc -y || echo "Docker doesn't exist..installing.."
 sudo apt-get update
 sudo apt-get install \
   ca-certificates \
@@ -30,6 +30,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the docker-jans-monolith code
+rm -rf /tmp/jans || echo "/tmp/jans doesn't exist"
 git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
@@ -38,7 +39,7 @@ git clone --filter blob:none --no-checkout https://github.com/janssenproject/jan
     && cd ../../
 
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
-  docker-compose -f /tmp/jans/mysql-docker-compose.yml up -d
+  docker compose -f /tmp/jans/docker-jans-monolith/mysql-docker-compose.yml up -d
 fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 echo "Waiting for the Janssen server to come up. This will take around 3 mins"
@@ -54,3 +55,4 @@ cd ..
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
+echo -e "Add the following record to your local computers' hosts file to engage with the services $EXT_IP $JANS_FQDN"
