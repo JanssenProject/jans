@@ -31,7 +31,7 @@ echo \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
-
+WORKING_DIRECTORY=$PWD
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the docker-jans-monolith code
 rm -rf /tmp/jans || echo "/tmp/jans doesn't exist"
@@ -40,7 +40,7 @@ git clone --filter blob:none --no-checkout https://github.com/janssenproject/jan
     && git sparse-checkout init --cone \
     && git checkout main \
     && git sparse-checkout set docker-jans-monolith \
-    && cd ../../
+    && cd "$WORKING_DIRECTORY"
 
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   docker compose -f /tmp/jans/docker-jans-monolith/mysql-docker-compose.yml up -d
@@ -59,3 +59,5 @@ EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
 echo -e "Add the following record to your local computers' hosts file to engage with the services $EXT_IP $JANS_FQDN"
+echo -e "To clean up run:"
+echo -e "docker compose -f /tmp/jans/docker-jans-monolith/mysql-docker-compose.yml down && rm -rf /tmp/jans"
