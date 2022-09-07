@@ -314,13 +314,13 @@
 				<executions>
 					<execution>
 						<configuration>
-							<!-- <outputFormat>JSON</outputFormat> -->
 							<outputFileName>jans-config-api-swagger-auto</outputFileName>
-							<locations></locations>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>
+							<resourcePackages>
+								<package>io.jans.configapi.rest</package>			
+							</resourcePackages>
 						</configuration>
-						<!-- <phase>compile</phase> <goals> <goal>resolve</goal> </goals> -->
 					</execution>
 				</executions>
 				<dependencies>

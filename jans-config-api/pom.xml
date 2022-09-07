@@ -568,8 +568,7 @@
 					<executions>
 						<execution>
 							<configuration>
-								<outputFormat>JSON</outputFormat>
-								<outputFileName>openapi_1-new</outputFileName>
+								<outputFormat>YAML</outputFormat>
 								<outputPath>${project.parent.basedir}/docs</outputPath>
 								<prettyPrint>true</prettyPrint>
 							</configuration>

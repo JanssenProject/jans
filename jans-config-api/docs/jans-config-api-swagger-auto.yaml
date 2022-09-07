@@ -3335,58 +3335,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/uma/resources.readonly
-  /{job-id}:
-    get:
-      operationId: get
-      parameters:
-      - name: wait
-        in: query
-        schema:
-          type: integer
-          format: int64
-          default: -1
-      - name: job-id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
-    post:
-      operationId: readAndRemove
-      parameters:
-      - name: wait
-        in: query
-        schema:
-          type: integer
-          format: int64
-          default: -1
-      - name: job-id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
-    delete:
-      operationId: remove
-      parameters:
-      - name: job-id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            '*/*': {}
 components:
   schemas:
     AuthenticationMethod:
@@ -3562,7 +3510,7 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
+        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -3570,7 +3518,7 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
@@ -3892,8 +3840,6 @@ components:
           format: int32
         displayName:
           type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3905,6 +3851,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
         baseDn:
           type: string
         inum:
@@ -4712,6 +4660,8 @@ components:
             - METRIC
             - STAT
             - PAR
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -4721,8 +4671,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -5007,13 +4955,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
