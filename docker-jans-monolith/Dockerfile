@@ -10,23 +10,24 @@ RUN find /etc/systemd/system \
     -exec rm \{} \;
 
 # Disable list of suggested/ recommended dependencies
-RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
-RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker \
+    && echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+
 # Prevent prompt errors during package installation
 RUN DEBIAN_FRONTEND=noninteractive \
-  apt-get update \
-  && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip \
-  && apt-get clean \
-  # Cleaning up package lists
-  && rm -rf /var/lib/apt/lists/*
+    apt-get update \
+    && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip \
+    && apt-get clean \
+    # Cleaning up package lists
+    && rm -rf /var/lib/apt/lists/*
 
 
-RUN systemctl set-default multi-user.target
-RUN systemctl mask dev-hugepages.mount sys-fs-fuse-connections.mount
+RUN systemctl set-default multi-user.target \
+    && systemctl mask dev-hugepages.mount sys-fs-fuse-connections.mount
 
 # Workkaround agetty high CPU. https://bugzilla.redhat.com/show_bug.cgi?id=1046469
-RUN rm -f /lib/systemd/system/systemd*udev*
-RUN rm -f /lib/systemd/system/getty.target
+RUN rm -f /lib/systemd/system/systemd*udev* \
+    && rm -f /lib/systemd/system/getty.target
 
 HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
