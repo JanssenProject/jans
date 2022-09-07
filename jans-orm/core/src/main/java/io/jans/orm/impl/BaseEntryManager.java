@@ -518,7 +518,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	@Override
 	public boolean contains(Object entry) {
 		if (entry == null) {
-			throw new MappingException("Entry to persist is null");
+			throw new MappingException("Entry for check if exists is null");
 		}
 
 		// Check entry class
