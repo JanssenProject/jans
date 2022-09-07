@@ -11,7 +11,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
@@ -139,7 +139,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         log.debug("Attempting to request backchannel authorization: "
                 + "isSecure = {}", securityContext.isSecure());
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.CIBA);
 
         Response.ResponseBuilder builder = Response.ok();
 
