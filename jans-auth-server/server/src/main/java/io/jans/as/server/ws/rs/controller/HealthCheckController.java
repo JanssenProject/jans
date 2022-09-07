@@ -6,7 +6,7 @@
 
 package io.jans.as.server.ws.rs.controller;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.orm.PersistenceEntryManager;
 
@@ -39,7 +39,7 @@ public class HealthCheckController {
     @Path("/health-check")
     @Produces(MediaType.APPLICATION_JSON)
     public String healthCheckController() {
-        errorResponseFactory.validateComponentEnabled(ComponentType.HEALTH_CHECK);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.HEALTH_CHECK);
         boolean isConnected = persistenceEntryManager.getOperationService().isConnected();
         String dbStatus = isConnected ? "online" : "offline";
         return "{\"status\": \"running\", \"db_status\":\"" + dbStatus + "\"}";

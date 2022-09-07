@@ -9,7 +9,7 @@ package io.jans.as.server.jans.ws.rs;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.service.AttributeService;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.gluu.GluuConfiguration;
@@ -62,7 +62,7 @@ public class JansConfigurationWS {
     @GET
     @Produces({"application/json"})
     public Response getConfiguration() {
-        errorResponseFactory.validateComponentEnabled(ComponentType.JANS_CONFIGURATION);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.JANS_CONFIGURATION);
         try {
             final GluuConfiguration conf = new GluuConfiguration();
 

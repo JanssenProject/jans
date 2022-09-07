@@ -7,7 +7,7 @@
 package io.jans.as.server.register.ws.rs.action;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -85,7 +85,7 @@ public class RegisterReadAction {
         log.debug("Attempting to read client: clientId = {}, registrationAccessToken = {} isSecure = {}",
                 clientId, accessToken, securityContext.isSecure());
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.REGISTRATION);
 
         Response.ResponseBuilder builder = Response.ok();
 
