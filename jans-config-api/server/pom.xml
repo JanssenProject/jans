@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-config-api-server</artifactId>
@@ -302,73 +305,32 @@
 		</resources>
 
 		<plugins>
-		
-		<!-- swagger -->
-		
-<!-- 		<plugin>
-				<groupId>com.github.kongchen</groupId>
-				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.1</version>
-				<configuration>
-					<apiSources>
-						<apiSource>
-						<springmvc>false</springmvc>
-						<locations>io.jans.configapi.rest</locations>
-						<schemes>http,https</schemes>
-						<host>jans.com</host>
-						<basePath>/jans-config-api/api/v1/</basePath>
-							<info>
-								<title>jans-config-api</title>
-								<description>jans-config-api</description>
-								<version>1.0.0</version>
-							</info> 
 
-							        <swaggerDirectory>${project.build.directory}/swagger-ui</swaggerDirectory>
-            
-             <outputFormats>json</outputFormats>
-
-						</apiSource>
-					</apiSources>
-				</configuration>
+			<!-- swagger -->
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<version>${swagger-maven-plugin-jakarta}</version>
 				<executions>
 					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
+						<configuration>
+							<!-- <outputFormat>JSON</outputFormat> -->
+							<outputFileName>jans-config-api-swagger-auto</outputFileName>
+							<locations></locations>
+							<contextId>${project.artifactId}</contextId>
+							<prettyPrint>true</prettyPrint>
+						</configuration>
+						<!-- <phase>compile</phase> <goals> <goal>resolve</goal> </goals> -->
 					</execution>
 				</executions>
-			</plugin>  -->
-			
-			 <plugin>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-maven-plugin-jakarta</artifactId>
-                <version>2.2.2</version>
-                <executions>
-                    <execution>
-                        <configuration>
-                         <outputFormat>JSON</outputFormat>
-                            <outputFileName>openapi_1</outputFileName>
-                            <outputPath>${project.parent.basedir}/docs</outputPath>
-                            <!-- <configurationFilePath>${project.basedir}/src/main/resources/openapi-configuration.yaml</configurationFilePath> -->
-                            <contextId>jans-config-api-server</contextId>
-                            <prettyPrint>true</prettyPrint>
-                        </configuration>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>resolve</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-	                <dependency>
-					    <groupId>io.swagger.core.v3</groupId>
-					    <artifactId>swagger-models-jakarta</artifactId>
-					    <version>2.2.2</version>
+				<dependencies>
+					<dependency>
+						<groupId>io.swagger.core.v3</groupId>
+						<artifactId>swagger-models-jakarta</artifactId>
+						<version>${swagger-models-jakarta}</version>
 					</dependency>
-                </dependencies>
-            </plugin>
-			
+				</dependencies>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -531,9 +493,9 @@
 					<scanIntervalSeconds>3</scanIntervalSeconds>
 				</configuration>
 			</plugin>
-			
-			
-    
+
+
+
 		</plugins>
 	</build>
 

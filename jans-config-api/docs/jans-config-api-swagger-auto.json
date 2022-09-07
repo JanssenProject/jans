@@ -4905,13 +4905,16 @@
           "tooltip" : {
             "type" : "string"
           },
-          "adminCanView" : {
+          "whitePagesCanView" : {
             "type" : "boolean"
           },
           "adminCanEdit" : {
             "type" : "boolean"
           },
-          "userCanAccess" : {
+          "userCanEdit" : {
+            "type" : "boolean"
+          },
+          "adminCanView" : {
             "type" : "boolean"
           },
           "userCanView" : {
@@ -4920,10 +4923,7 @@
           "adminCanAccess" : {
             "type" : "boolean"
           },
-          "userCanEdit" : {
-            "type" : "boolean"
-          },
-          "whitePagesCanView" : {
+          "userCanAccess" : {
             "type" : "boolean"
           },
           "baseDn" : {
@@ -6441,6 +6441,9 @@
               "enum" : [ "UNKNOWN", "HEALTH_CHECK", "USERINFO", "CLIENTINFO", "ID_GENERATION", "REGISTRATION", "INTROSPECTION", "REVOKE_TOKEN", "REVOKE_SESSION", "ACTIVE_SESSION", "END_SESSION", "STATUS_SESSION", "JANS_CONFIGURATION", "CIBA", "UMA", "U2F", "DEVICE_AUTHZ", "METRIC", "STAT", "PAR" ]
             }
           },
+          "fapi" : {
+            "type" : "boolean"
+          },
           "allResponseTypesSupported" : {
             "uniqueItems" : true,
             "type" : "array",
@@ -6448,9 +6451,6 @@
               "type" : "string",
               "enum" : [ "code", "token", "id_token" ]
             }
-          },
-          "fapi" : {
-            "type" : "boolean"
           }
         }
       },
@@ -6827,12 +6827,12 @@
           "internal" : {
             "type" : "boolean"
           },
-          "locationPath" : {
-            "type" : "string"
-          },
           "locationType" : {
             "type" : "string",
             "enum" : [ "ldap", "file" ]
+          },
+          "locationPath" : {
+            "type" : "string"
           },
           "baseDn" : {
             "type" : "string"
