@@ -1,6 +1,8 @@
 # Overview
 
-Docker monolith image packaging for Janssen. This image is for test and dev purposes only! This image packs sql and janssen services including, the auth-server, client-api, config-api, fido2, and scim.
+**This image is for testing and development purposes only! Use Janssen [helm charts](../charts) for production setups**
+
+Docker monolith image packaging for Janssen.This image packs janssen services including, the auth-server, client-api, config-api, fido2, and scim.
 
 ## Versions
 
@@ -73,3 +75,11 @@ Add to your `/etc/hosts` file the ip domain record which should be the ip of the
 ```
 
 After adding the record you can hit endpoints such as https://demoexample.jans.io/.well-known/openid-configuration
+
+## Quick start 
+
+Grab a fresh ubuntu 22.04 lts VM and run:
+
+```bash
+
+```
