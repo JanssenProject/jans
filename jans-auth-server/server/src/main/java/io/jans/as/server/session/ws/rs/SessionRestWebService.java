@@ -1,6 +1,6 @@
 package io.jans.as.server.session.ws.rs;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -77,7 +77,7 @@ public class SessionRestWebService {
             @Context HttpServletResponse response,
             @Context SecurityContext securityContext) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.ACTIVE_SESSION);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACTIVE_SESSION);
             AuthorizationGrant grant = validateToken(getToken(authorization));
 
             ExecutionContext executionContext = new ExecutionContext(request, response);

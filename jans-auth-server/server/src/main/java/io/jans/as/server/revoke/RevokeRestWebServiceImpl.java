@@ -7,7 +7,7 @@
 package io.jans.as.server.revoke;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.TokenTypeHint;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -81,7 +81,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
     public Response requestAccessToken(String tokenString, String tokenTypeHint, String clientId,
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug("Attempting to revoke token: token = {}, tokenTypeHint = {}, isSecure = {}", tokenString, tokenTypeHint, sec.isSecure());
-        errorResponseFactory.validateComponentEnabled(ComponentType.REVOKE_TOKEN);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.REVOKE_TOKEN);
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REVOCATION);
 
         validateToken(tokenString);

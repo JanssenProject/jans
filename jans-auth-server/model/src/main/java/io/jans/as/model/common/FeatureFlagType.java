@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Yuriy Zabrovarnyy
+ * @author Yuriy Z
  */
-public enum ComponentType {
+public enum FeatureFlagType {
 
     UNKNOWN("unknown"),
     HEALTH_CHECK("health_check"),
@@ -34,7 +34,7 @@ public enum ComponentType {
 
     private final String value;
 
-    ComponentType(String value) {
+    FeatureFlagType(String value) {
         this.value = value;
     }
 
@@ -42,11 +42,11 @@ public enum ComponentType {
         return value;
     }
 
-    public static ComponentType fromValue(String v) {
+    public static FeatureFlagType fromValue(String v) {
         if (StringUtils.isBlank(v)) {
             return UNKNOWN;
         }
-        for (ComponentType t : values()) {
+        for (FeatureFlagType t : values()) {
             if (t.getValue().equalsIgnoreCase(v)) {
                 return t;
             }
@@ -55,14 +55,14 @@ public enum ComponentType {
         return UNKNOWN;
     }
 
-    public static Set<ComponentType> fromValues(List<String> values) {
-        Set<ComponentType> result = new HashSet<>();
+    public static Set<FeatureFlagType> fromValues(List<String> values) {
+        Set<FeatureFlagType> result = new HashSet<>();
         if (values == null || values.isEmpty()) {
             return result;
         }
 
         for (String v : values) {
-            final ComponentType t = fromValue(v);
+            final FeatureFlagType t = fromValue(v);
             if (t != UNKNOWN) {
                 result.add(t);
             }
