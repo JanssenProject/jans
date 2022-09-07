@@ -92,6 +92,4 @@ LABEL name="janssenproject/monolith" \
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# Workaround for docker/docker#27202, technique based on comments from docker/docker#9212
 CMD ["/bin/bash", "-c", "exec /app/scripts/entrypoint.sh --log-target=journal 3>&1"]
-#CMD ["bash", "/app/scripts/entrypoint.sh"]

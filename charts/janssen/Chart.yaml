@@ -21,7 +21,7 @@ annotations:
     - name: scim
       image: janssenproject/scim:1.0.3_dev
     - name: monolith
-      image: janssenproject/monolith:1.0.d
+      image: janssenproject/monolith:1.0.3_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
