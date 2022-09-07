@@ -99,11 +99,10 @@ class ConfigApiInstaller(JettyInstaller):
         try:
             cfg_yml = self.read_config_api_swagger()
             scopes_def = cfg_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
-            scope_type = cfg_yml['components']['securitySchemes']['oauth2']['type']
         except:
             scopes_def = {}
-            scope_type = 'oauth2'
 
+        scope_type = 'oauth'
         self.check_clients([('jca_client_id', '1800.')])
 
         if not Config.get('jca_client_pw'):
