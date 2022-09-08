@@ -6,9 +6,9 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
+import io.jans.configapi.core.model.PatchRequest;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.AttributeService;
@@ -63,15 +63,9 @@ public class AttributesResource extends ConfigBaseResource {
     AttributeService attributeService;
 
     @Operation(summary = "Gets a list of Gluu attributes.", description = "Gets a list of Gluu attributes.", operationId = "get-attributes", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "limit", required = false, schema = @Schema(name = "limit", type = "integer", defaultValue = "50", description = "Search size - max size of the results to return")),
-                            @Parameter(in = ParameterIn.QUERY, name = "pattern", required = false, schema = @Schema(name = "pattern", type = "string", description = "Search pattern")),
-                            @Parameter(in = ParameterIn.QUERY, name = "status", required = false, schema = @Schema(name = "status", type = "string", defaultValue = "all", description = "Status of the attribute"))
-
-    })
+            "Attribute" }, security = @SecurityRequirement(name = "oauth2"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GluuAttribute.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GluuAttribute.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -91,11 +85,9 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets an attribute based on inum", description = "Gets an attribute based on inum", operationId = "get-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Attribute ID"))
-    })
+                    "https://jans.io/oauth/config/attributes.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -112,7 +104,7 @@ public class AttributesResource extends ConfigBaseResource {
                     "https://jans.io/oauth/config/attributes.write" }))
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -135,7 +127,7 @@ public class AttributesResource extends ConfigBaseResource {
                     "https://jans.io/oauth/config/attributes.write" }))
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
@@ -158,9 +150,8 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Partially modify a GluuAttribute", description = "Partially modify a GluuAttribute", operationId = "patch-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, description = "Attribute ID", schema = @Schema(type = "string")) })
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+                    "https://jans.io/oauth/config/attributes.write" }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = PatchRequest.class))))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -183,10 +174,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Deletes an attribute based on inum", description = "Deletes an attribute based on inum", operationId = "delete-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Attribute ID"))
-
-    })
+                    "https://jans.io/oauth/config/attributes.delete" }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

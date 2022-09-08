@@ -235,7 +235,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
     put:
       tags:
       - Admin UI - Permission
@@ -465,7 +465,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
     put:
       tags:
       - Admin UI - Role

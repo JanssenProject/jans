@@ -31,7 +31,7 @@ public class HealthCheckResource extends ConfigBaseResource {
     @Operation(summary = "Returns auth server health status", description = "Returns auth server health status", operationId = "get-auth-server-health", tags = {
             "Auth Server Health - Check" })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Health Check Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Produces(MediaType.APPLICATION_JSON)

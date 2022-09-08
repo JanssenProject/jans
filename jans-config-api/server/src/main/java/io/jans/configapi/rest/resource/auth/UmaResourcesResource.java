@@ -19,8 +19,6 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.exception.EntryPersistenceException;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -59,13 +57,9 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of UMA resources", description = "Gets list of UMA resources", operationId = "get-oauth-uma-resources", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/uma/resources.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "limit", required = false, schema = @Schema(name = "limit", type = "integer", defaultValue = "50", description = "Search size - max size of the results to return")),
-                            @Parameter(in = ParameterIn.QUERY, name = "pattern", required = false, schema = @Schema(name = "pattern", type = "string", description = "Search pattern"))
-
-    })
+                    ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of UmaResource", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = UmaResource.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = UmaResource.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -85,10 +79,9 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets an UMA resource by ID", description = "Gets an UMA resource by ID", operationId = "get-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/uma/resources.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "id", required = true, schema = @Schema(name = "id", type = "string", description = "Resource ID")) })
+                    ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "UmaResource", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -102,10 +95,9 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Fetch uma resources by client id", description = "Fetch uma resources by client id", operationId = "get-oauth-uma-resources-by-clientid", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/uma/resources.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "associatedClientId", required = true, schema = @Schema(name = "associatedClientId", type = "string", description = "Client ID")) })
+                    ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of UmaResource", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = UmaResource.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = UmaResource.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -120,10 +112,10 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Creates an UMA resource", description = "Creates an UMA resource", operationId = "post-oauth-uma-resources", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/uma/resources.write" }))
+                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }))
     @RequestBody(description = "UmaResource object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created UmaResource", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -153,7 +145,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates an UMA resource", description = "Updates an UMA resource", operationId = "put-oauth-uma-resources", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/uma/resources.write" }))
+                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }))
     @RequestBody(description = "UmaResource object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "UmaResource", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class))),
@@ -176,7 +168,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch UMA resource", description = "Patch UMA resource", operationId = "patch-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/openid/clients.write" }))
+                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS  }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]") }))
     @ApiResponses(value = {
@@ -200,7 +192,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Deletes an UMA resource", description = "Deletes an UMA resource", operationId = "delete-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/uma/resources.delete" }))
+                    ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS  }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

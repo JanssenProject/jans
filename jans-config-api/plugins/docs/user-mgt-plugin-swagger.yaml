@@ -16,7 +16,7 @@ servers:
 tags:
 - name: Configuration – User Management
 paths:
-  /configuser:
+  /mgt/configuser:
     get:
       tags:
       - Configuration – User Management
@@ -24,41 +24,6 @@ paths:
       description: Gets list of users
       operationId: get-user
       parameters:
-      - name: limit
-        in: query
-        schema:
-          type: integer
-          description: Search size - max size of the results to return
-          format: int64
-          default: 50
-      - name: pattern
-        in: query
-        schema:
-          type: string
-          description: Search pattern
-      - name: startIndex
-        in: query
-        schema:
-          type: integer
-          description: The 1-based index of the first query result.
-          format: int64
-          default: 1
-      - name: sortBy
-        in: query
-        schema:
-          type: string
-          description: Attribute whose value will be used to order the returned response
-          default: inum
-      - name: sortOrder
-        in: query
-        schema:
-          type: string
-          description: Order in which the sortBy param is applied. Allowed values
-            are "ascending" and "descending".
-          default: ascending
-          enum:
-          - ascending
-          - descending
       - name: limit
         in: query
         schema:
@@ -152,7 +117,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
-  /configuser/{inum}:
+  /mgt/configuser/{inum}:
     get:
       tags:
       - Configuration – User Management
@@ -160,12 +125,6 @@ paths:
       description: Get User by Inum
       operationId: get-user-by-inum
       parameters:
-      - name: inum
-        in: path
-        required: true
-        schema:
-          type: string
-          description: User identifier
       - name: inum
         in: path
         required: true
@@ -199,12 +158,6 @@ paths:
         required: true
         schema:
           type: string
-          description: User identifier
-      - name: inum
-        in: path
-        required: true
-        schema:
-          type: string
       responses:
         "204":
           description: No Content
@@ -224,12 +177,6 @@ paths:
       description: Patch user properties by Inum
       operationId: patch-user-by-inum
       parameters:
-      - name: inum
-        in: path
-        required: true
-        schema:
-          type: string
-          description: User identifier
       - name: inum
         in: path
         required: true

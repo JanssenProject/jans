@@ -25,8 +25,6 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,16 +70,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Gets list of users", description = "Gets list of users", operationId = "get-user", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/user.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "limit", required = false, schema = @Schema(name = "limit", type = "integer", defaultValue = "50", description = "Search size - max size of the results to return")),
-                            @Parameter(in = ParameterIn.QUERY, name = "pattern", required = false, schema = @Schema(name = "pattern", type = "string", description = "Search pattern")),
-                            @Parameter(in = ParameterIn.QUERY, name = "startIndex", required = false, schema = @Schema(name = "startIndex", type = "integer", defaultValue = "1", description = "The 1-based index of the first query result.")),
-                            @Parameter(in = ParameterIn.QUERY, name = "sortBy", required = false, schema = @Schema(name = "sortBy", type = "string", defaultValue = "inum", description = "Attribute whose value will be used to order the returned response")),
-                            @Parameter(in = ParameterIn.QUERY, name = "sortOrder", required = false, schema = @Schema(name = "sortOrder", type = "string", defaultValue = "ascending", allowableValues = {
-                                    "ascending",
-                                    "descending" }, description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"."))
-
-    })
+                    ApiAccessConstants.USER_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomUser.class, description = "List of CustomUser")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -111,8 +100,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Get User by Inum", description = "Get User by Inum", operationId = "get-user-by-inum", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/user.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "User identifier")) })
+                    ApiAccessConstants.USER_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "CustomUser identified by inum"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -143,7 +131,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/user.write" }))
+                    ApiAccessConstants.USER_WRITE_ACCESS}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -180,7 +168,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Update User", description = "Update User", operationId = "put-user", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/user.write" }))
+                    ApiAccessConstants.USER_WRITE_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -219,8 +207,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/user.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "User identifier")) })
+                    ApiAccessConstants.USER_WRITE_ACCESS  }))
     @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = {
             @ExampleObject(value = "[ {\"jsonPatchString\": {\"op\": \"add\", \"path\": \"userId\",\"value\": \"test-user\" }, \"customAttributes\": [{\"name\": \"name, displayName, birthdate, email\",\"multiValued\": true,\"values\": [\"string\"]}]}]") }))
     @ApiResponses(value = {
@@ -259,8 +246,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Delete User", description = "Delete User", operationId = "delete-user", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/user.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "User identifier")) })
+                    ApiAccessConstants.USER_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

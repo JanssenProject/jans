@@ -16,7 +16,7 @@ servers:
 tags:
 - name: SCIM - Config Management
 paths:
-  /scim-config:
+  /scim/scim-config:
     get:
       tags:
       - SCIM - Config Management
@@ -25,7 +25,7 @@ paths:
       operationId: get-scim-config
       responses:
         "200":
-          description: ScimApp Configuration
+          description: Ok
           content:
             application/json:
               schema:
@@ -54,7 +54,7 @@ paths:
             example: "[ {op:replace, path: loggingLevel, value: DEBUG } ]"
       responses:
         "200":
-          description: ScimApp Configuration
+          description: Ok
           content:
             application/json:
               schema:

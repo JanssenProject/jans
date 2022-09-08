@@ -54,7 +54,7 @@ public class Fido2ConfigResource extends BaseResource {
             "Fido2 - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/fido2.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Fido2Config", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DbApplicationConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -69,7 +69,7 @@ public class Fido2ConfigResource extends BaseResource {
     @Operation(summary = "Updates Fido2 configuration properties", description = "Updates Fido2 configuration properties", operationId = "put-properties-fido2", tags = {
             "Fido2 - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/fido2.write" }))
-    @RequestBody(description = "Fido2Config", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class)))
+    @RequestBody(description = "Fido2Config", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DbApplicationConfiguration.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Fido2Config", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

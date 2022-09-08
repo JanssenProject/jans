@@ -30,8 +30,6 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -86,18 +84,9 @@ public class ClientsResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/openid/clients.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "limit", required = false, schema = @Schema(name = "limit", type = "integer", defaultValue = "50", description = "Search size - max size of the results to return")),
-                            @Parameter(in = ParameterIn.QUERY, name = "pattern", required = false, schema = @Schema(name = "pattern", type = "string", description = "Search pattern")),
-                            @Parameter(in = ParameterIn.QUERY, name = "startIndex", required = false, schema = @Schema(name = "startIndex", type = "integer", defaultValue = "1", description = "The 1-based index of the first query result.")),
-                            @Parameter(in = ParameterIn.QUERY, name = "sortBy", required = false, schema = @Schema(name = "sortBy", type = "string", defaultValue = "inum", description = "Attribute whose value will be used to order the returned response")),
-                            @Parameter(in = ParameterIn.QUERY, name = "sortOrder", required = false, schema = @Schema(name = "sortOrder", type = "string", defaultValue = "ascending", allowableValues = {
-                                    "ascending",
-                                    "descending" }, description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"."))
-
-    })
+                    "https://jans.io/oauth/config/openid/clients.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of OpenID clients", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Client.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Client.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -124,10 +113,9 @@ public class ClientsResource extends ConfigBaseResource {
 
     @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/openid/clients.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Client identifier")) })
+                    "https://jans.io/oauth/config/openid/clients.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OpenID client", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -147,7 +135,7 @@ public class ClientsResource extends ConfigBaseResource {
                     "https://jans.io/oauth/config/openid/clients.write" }))
     @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created OpenID Connect Client", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -194,7 +182,7 @@ public class ClientsResource extends ConfigBaseResource {
                     "https://jans.io/oauth/config/openid/clients.write" }))
     @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated OpenID Connect Client", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -231,12 +219,11 @@ public class ClientsResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/openid/clients.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Client identifier")) })
+                    "https://jans.io/oauth/config/openid/clients.write" }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: backchannel_authentication_request_signing_alg, value: false } ]") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated OpenID Connect Client", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -260,8 +247,7 @@ public class ClientsResource extends ConfigBaseResource {
 
     @Operation(summary = "Delete OpenId Connect client", description = "Delete OpenId Connect client", operationId = "delete-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/openid/clients.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Client identifier")) })
+                    "https://jans.io/oauth/config/openid/clients.delete" }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

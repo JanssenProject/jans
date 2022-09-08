@@ -225,8 +225,8 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-	       <!-- swagger -->
+
+			<!-- swagger -->
 			<plugin>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-maven-plugin-jakarta</artifactId>
@@ -234,11 +234,12 @@
 				<executions>
 					<execution>
 						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
 							<outputFileName>fido2-plugin-swagger</outputFileName>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>
 							<resourcePackages>
-								<package>io.jans.configapi.plugin.fido2.rest</package>			
+								<package>io.jans.configapi.plugin.fido2.rest</package>
 							</resourcePackages>
 						</configuration>
 					</execution>
@@ -251,7 +252,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			
+					
 			
 		</plugins>
 	</build>

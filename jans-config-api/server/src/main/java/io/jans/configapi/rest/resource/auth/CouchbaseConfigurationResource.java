@@ -20,8 +20,6 @@ import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,9 +49,9 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of existing Couchbase configurations", description = "Gets list of existing Couchbase configurations", operationId = "get-config-database-couchbase", tags = {
             "Database - Couchbase configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/couchbase.readonly" }))
+                    ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS  }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of CouchbaseConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CouchbaseConnectionConfiguration.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CouchbaseConnectionConfiguration.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -64,8 +62,7 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets a Couchbase configurations by name", description = "Gets a Couchbase configurations by name", operationId = "get-config-database-couchbase-by-name", tags = {
             "Database - Couchbase configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/couchbase.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "name", required = false, schema = @Schema(name = "name", type = "string", required = true, description = "Name of Couchbase configuration")) })
+                    ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "CouchbaseConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -81,10 +78,10 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Adds a new Couchbase configuration", description = "Adds a new Couchbase configuration", operationId = "post-config-database-couchbase", tags = {
             "Database - Couchbase configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/couchbase.write" }))
+                    ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS }))
     @RequestBody(description = "CouchbaseConnectionConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created CouchbaseConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -98,10 +95,10 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates Couchbase configuration", description = "Updates Couchbase configuration", operationId = "put-config-database-couchbase", tags = {
             "Database - Couchbase configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/couchbase.write" }))
+                    ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS }))
     @RequestBody(description = "CouchbaseConnectionConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated CouchbaseConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -116,8 +113,7 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Deletes a Couchbase configurations by name", description = "Deletes a Couchbase configurations by name", operationId = "delete-config-database-couchbase-by-name", tags = {
             "Database - Couchbase configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/couchbase.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "name", required = false, schema = @Schema(name = "name", type = "string", required = true, description = "Name of Couchbase configuration")) })
+                    ApiAccessConstants.DATABASE_COUCHBASE_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -135,11 +131,10 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patches a Couchbase configurations by name", description = "Patches a Couchbase configurations by name", operationId = "patch-config-database-couchbase-by-name", tags = {
             "Database - Couchbase configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/couchbase.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "name", required = false, schema = @Schema(name = "name", type = "string", required = true, description = "Name of Couchbase configuration")) })
+                    ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS  }))
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patched CouchbaseConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -159,11 +154,10 @@ public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Tests a Couchbase configuration", description = "Tests a Couchbase configuration", operationId = "post-config-database-couchbase-test", tags = {
             "Database - Couchbase configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/couchbase.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "name", required = false, schema = @Schema(name = "name", type = "string", required = true, description = "Name of Couchbase configuration")) })
+                    ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS  }))
     @RequestBody(description = "CouchbaseConnectionConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CouchbaseConnectionConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Test status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST

@@ -18,8 +18,6 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -54,9 +52,9 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of JSON Web Key (JWK) used by server", description = "Gets list of JSON Web Key (JWK) used by server", operationId = "get-config-jwks", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/jwks.readonly" }))
+                    ApiAccessConstants.JWKS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "JSON Web Key (JWK)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -69,9 +67,9 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Replaces JSON Web Keys", description = "Replaces JSON Web Keys", operationId = "put-config-jwks", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/jwks.write" }))
+                    ApiAccessConstants.JWKS_WRITE_ACCESS}))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "WebKeysConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
@@ -87,11 +85,11 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Patches JSON Web Keys", description = "Patches JSON Web Keys", operationId = "patch-config-jwks", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/jwks.write" }))
+                    ApiAccessConstants.JWKS_WRITE_ACCESS }))
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[{\"op\": \"add\",\"path\": \"/keys/1\", \"value\": { \"kty\": \"RSA\", \"e\": \"AQAB\",\"use\": \"sig\",\"crv\": \"\",\"kid\": \"dd570bfb-276a-44aa-a97d-667b57587108_sig_rs256\",\"x5c\": [\"MIIDBDCC...\"],\"exp\": 1599751946863,\"alg\": \"RS256\",\"n\": \"zj1NE..\"}}]") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "WebKeysConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
@@ -110,7 +108,7 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Configuration – JWK - JSON Web Key (JWK)", description = "Configuration – JWK - JSON Web Key (JWK)", operationId = "post-config-jwks-key", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/jwks.write" }))
+                    ApiAccessConstants.JWKS_WRITE_ACCESS }))
     @RequestBody(description = "JSONWebKey object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
@@ -141,10 +139,9 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Get a JSON Web Key based on kid", description = "Get a JSON Web Key based on kid", operationId = "get-jwk-by-kid", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/jwks.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "kid", required = true, description = "kid", schema = @Schema(type = "string")) })
+                    ApiAccessConstants.JWKS_READ_ACCESS  }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "JSON Web Key (JWK)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -160,12 +157,11 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch a specific JSON Web Key based on kid", description = "Patch a specific JSON Web Key based on kid", operationId = "patch-config-jwk-kid", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/jwks.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "kid", required = true, description = "kid", schema = @Schema(type = "string")) })
+                    ApiAccessConstants.JWKS_WRITE_ACCESS }))
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[{\"op\": \"add\",\"path\": \"/kty\", \"value\": \"RSA\"}]") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "JSONWebKey", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -200,8 +196,7 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Delete a JSON Web Key based on kid", description = "Delete a JSON Web Key based on kid", operationId = "delete-config-jwk-kid", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/jwks.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "kid", required = true, description = "kid", schema = @Schema(type = "string")) })
+                    ApiAccessConstants.JWKS_WRITE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),

@@ -237,6 +237,7 @@
 				<executions>
 					<execution>
 						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
 							<outputFileName>scim-plugin-swagger</outputFileName>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>

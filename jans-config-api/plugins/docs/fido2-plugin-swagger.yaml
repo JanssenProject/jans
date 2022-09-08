@@ -19,7 +19,7 @@ tags:
 - name: Admin UI - Role-Permissions Mapping
 - name: Admin UI - License
 paths:
-  /config:
+  /fido2/config:
     get:
       tags:
       - Fido2 - Configuration
@@ -28,11 +28,11 @@ paths:
       operationId: get-properties-fido2
       responses:
         "200":
-          description: Fido2Config
+          description: Ok
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/DbApplicationConfiguration'
         "401":
           description: Unauthorized
         "500":
@@ -51,7 +51,7 @@ paths:
         content:
           application/json:
             schema:
-              type: string
+              $ref: '#/components/schemas/DbApplicationConfiguration'
       responses:
         "200":
           description: Fido2Config
@@ -66,7 +66,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.write
-  /registration/entries/{username}:
+  /fido2/registration/entries/{username}:
     get:
       tags:
       - Fido2 - Registration
@@ -74,12 +74,6 @@ paths:
       description: Get details of connected FIDO2 devices registered to user
       operationId: get-registration-entries-fido2
       parameters:
-      - name: username
-        in: path
-        required: true
-        schema:
-          type: string
-          description: Username
       - name: username
         in: path
         required: true
@@ -103,6 +97,16 @@ paths:
         - https://jans.io/oauth/config/fido2.readonly
 components:
   schemas:
+    DbApplicationConfiguration:
+      type: object
+      properties:
+        dn:
+          type: string
+        dynamicConf:
+          type: string
+        revision:
+          type: integer
+          format: int64
     Fido2RegistrationData:
       type: object
       properties:

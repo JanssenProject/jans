@@ -43,9 +43,9 @@ public class SessionResource extends ConfigBaseResource {
 
     @Operation(summary = "Returns current session", description = "Returns current session", operationId = "get-sessions", tags = {
             "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/session.readonly", "revoke_session" }))
+                    ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS , "revoke_session" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of SessionId", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SessionId.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SessionId.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -58,7 +58,8 @@ public class SessionResource extends ConfigBaseResource {
 
     @Operation(summary = "Revoke all sessions by userDn", description = "Revoke all sessions by userDn", operationId = "revoke-user-session", tags = {
             "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/session.delete" }))
+                    ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
+                    ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }))
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

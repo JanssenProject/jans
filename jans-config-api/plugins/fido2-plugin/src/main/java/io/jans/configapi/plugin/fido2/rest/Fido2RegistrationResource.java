@@ -44,8 +44,7 @@ public class Fido2RegistrationResource extends BaseResource {
 
     @Operation(summary = "Get details of connected FIDO2 devices registered to user", description = "Get details of connected FIDO2 devices registered to user", operationId = "get-registration-entries-fido2", tags = {
     "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            "https://jans.io/oauth/config/fido2.readonly" }), parameters = {
-                    @Parameter(in = ParameterIn.PATH, name = "username", required = true, schema = @Schema(name = "username", type = "string", description = "Username")) })
+            "https://jans.io/oauth/config/fido2.readonly" }))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Fido2RegistrationEntry.class)))),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),

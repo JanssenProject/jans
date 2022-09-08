@@ -17,8 +17,6 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.model.ldap.GluuLdapConfiguration;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,9 +49,9 @@ public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of existing LDAP configurations.", description = "Gets list of existing LDAP configurations.", operationId = "get-config-database-ldap", tags = {
             "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/ldap.readonly" }))
+                    ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of GluuLdapConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GluuLdapConfiguration.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GluuLdapConfiguration.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -65,10 +63,9 @@ public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets an LDAP configuration by name.", description = "Gets an LDAP configuration by name.", operationId = "get-config-database-ldap-by-name", tags = {
             "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/ldap.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "name", required = true, description = "Name of LDAP configuration", schema = @Schema(type = "string")) })
+                    ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "GluuLdapConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -81,7 +78,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Adds a new LDAP configuration", description = "Adds a new LDAP configuration", operationId = "post-config-database-ldap", tags = {
             "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/ldap.write" }))
+                    ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS  }))
     @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
@@ -108,10 +105,10 @@ public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates LDAP configuration", description = "Updates LDAP configuration", operationId = "put-config-database-ldap", tags = {
             "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/ldap.write" }))
+                    ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }))
     @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated GluuLdapConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -126,8 +123,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Deletes an LDAP configuration", description = "Deletes an LDAP configuration", operationId = "delete-config-database-ldap-by-name", tags = {
             "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/ldap.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "name", required = true, description = "Name of LDAP configuration", schema = @Schema(type = "string")) })
+                    ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -147,12 +143,11 @@ public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patches a LDAP configuration by name", description = "Patches a LDAP configuration by name", operationId = "patch-config-database-ldap-by-name", tags = {
             "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/ldap.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "name", required = true, description = "Name of LDAP configuration", schema = @Schema(type = "string")) })
+                    ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }))
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[{\"op\": \"replace\",\"path\": \"/maxConnections\", \"value\": \"8\"}]") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated GluuLdapConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -173,10 +168,10 @@ public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Tests an LDAP configuration", description = "Tests an LDAP configuration", operationId = "post-config-database-ldap-test", tags = {
             "Database - LDAP configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/ldap.readonly" }))
+                    ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }))
     @RequestBody(description = "GluuLdapConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuLdapConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Test status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST

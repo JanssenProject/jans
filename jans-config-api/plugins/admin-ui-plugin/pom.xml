@@ -170,6 +170,7 @@
 				<executions>
 					<execution>
 						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
 							<outputFileName>jans-admin-ui-plugin-swagger</outputFileName>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>

@@ -19,8 +19,6 @@ import io.jans.orm.sql.operation.impl.SqlConnectionProvider;
 import org.slf4j.Logger;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -54,9 +52,9 @@ public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of existing sql configurations", description = "Gets list of existing sql configurations", operationId = "get-config-database-sql", tags = {
             "Database - Sql configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/sql.readonly" }))
+                    ApiAccessConstants.DATABASE_SQL_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of SqlConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SqlConnectionConfiguration.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SqlConnectionConfiguration.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -67,10 +65,9 @@ public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets a Sql configurations by name", description = "Gets a Sql configurations by name", operationId = "get-config-database-sql-by-name", tags = {
             "Database - Sql configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/sql.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "name", required = false, schema = @Schema(name = "name", type = "string", description = "Name of Sql configuration")) })
+                    ApiAccessConstants.DATABASE_SQL_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "SqlConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -83,10 +80,10 @@ public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Adds a new Sql configuration", description = "Adds a new Sql configuration", operationId = "post-config-database-sql", tags = {
             "Database - Sql configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/sql.write" }))
+                    ApiAccessConstants.DATABASE_SQL_WRITE_ACCESS }))
     @RequestBody(description = "SqlConnectionConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created SqlConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -100,10 +97,10 @@ public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates Sql configuration", description = "Updates Sql configuration", operationId = "put-config-database-sql", tags = {
             "Database - Sql configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/sql.write" }))
+                    ApiAccessConstants.DATABASE_SQL_WRITE_ACCESS }))
     @RequestBody(description = "SqlConnectionConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated SqlConnectionConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -118,8 +115,7 @@ public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates Sql configuration", description = "Updates Sql configuration", operationId = "delete-config-database-sql-by-name", tags = {
             "Database - Sql configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/sql.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "name", required = false, schema = @Schema(name = "name", type = "string", description = "Name of Sql configuration")) })
+                    ApiAccessConstants.DATABASE_SQL_DELETE_ACCESS}))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -137,8 +133,7 @@ public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch Sql configuration", description = "Patch Sql configuration", operationId = "patch-config-database-sql-by-name", tags = {
             "Database - Sql configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/sql.write" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "name", required = false, schema = @Schema(name = "name", type = "string", description = "Name of Sql configuration")) })
+                    ApiAccessConstants.DATABASE_SQL_WRITE_ACCESS }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: maxConnections, value: 8 } ]") }))
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
@@ -160,7 +155,7 @@ public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Tests a Sql configuration", description = "Tests a Sql configuration", operationId = "post-config-database-sql-test", tags = {
             "Database - Sql configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/database/sql.write" }))
+                    ApiAccessConstants.DATABASE_SQL_READ_ACCESS}))
     @RequestBody(description = "SqlConnectionConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SqlConnectionConfiguration.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Test status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),

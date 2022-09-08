@@ -21,8 +21,6 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.util.StringHelper;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,15 +70,9 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of Scopes", description = "Gets list of Scopes", operationId = "get-oauth-scopes", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "type", required = false, schema = @Schema(name = "type", type = "string", description = "Scope type")),
-                            @Parameter(in = ParameterIn.QUERY, name = "limit", required = false, schema = @Schema(name = "limit", type = "integer", defaultValue = "50", description = "Search size - max size of the results to return")),
-                            @Parameter(in = ParameterIn.QUERY, name = "pattern", required = false, schema = @Schema(name = "pattern", type = "string", description = "Search pattern")),
-                            @Parameter(in = ParameterIn.QUERY, name = "withAssociatedClients", required = false, schema = @Schema(name = "withAssociatedClients", type = "boolean", defaultValue = "false", description = "Boolean value true will fetch associated clients with scopes"))
-
-    })
+                    ApiAccessConstants.SCOPES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of Scope", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -101,11 +93,9 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Get Scope by Inum", description = "Get Scope by Inum", operationId = "get-oauth-scopes-by-inum", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Scope ID")),
-                            @Parameter(in = ParameterIn.QUERY, name = "withAssociatedClients", required = false, schema = @Schema(name = "withAssociatedClients", type = "boolean", defaultValue = "false", description = "Boolean value true will fetch associated clients with scopes")) })
+                    ApiAccessConstants.SCOPES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Scope object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScope.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScope.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -122,10 +112,9 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Get Scope by creatorId", description = "Get Scope by creatorId", operationId = "get-scope-by-creator", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "creatorId", required = true, schema = @Schema(name = "creatorId", type = "string", description = "Id of the scope creator. If creator is client then client_id if user then user_id.")) })
+                    ApiAccessConstants.SCOPES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of Scope", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -142,11 +131,9 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Get Scope by type", description = "Get Scope by type", operationId = "get-scope-by-type", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "type", required = true, schema = @Schema(name = "type", type = "string", description = "Type of the scope", allowableValues = {
-                                    "openid", "dynamic", "uma", "spontaneous", "oauth" })) })
+                    ApiAccessConstants.SCOPES_READ_ACCESS}))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of Scope", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -164,7 +151,7 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Create Scope", description = "Create Scope", operationId = "post-oauth-scopes", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.write" }))
+                    ApiAccessConstants.SCOPES_WRITE_ACCESS }))
     @RequestBody(description = "Scope object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class))),
@@ -194,7 +181,7 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Update Scope", description = "Update Scope", operationId = "put-oauth-scopes", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.write" }))
+                    ApiAccessConstants.SCOPES_WRITE_ACCESS  }))
     @RequestBody(description = "Scope object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class))),
@@ -224,8 +211,7 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch Scope", description = "Patch Scope", operationId = "patch-oauth-scopes-by-id", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Scope ID")) })
+                    ApiAccessConstants.SCOPES_WRITE_ACCESS }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]") }))
     @ApiResponses(value = {
@@ -253,8 +239,7 @@ public class ScopesResource extends ConfigBaseResource {
 
     @Operation(summary = "Delete Scope", description = "Delete Scope", operationId = "delete-oauth-scopes-by-inum", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/scopes.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "inum", required = true, schema = @Schema(name = "inum", type = "string", description = "Scope ID")) })
+                    ApiAccessConstants.SCOPES_DELETE_ACCESS  }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

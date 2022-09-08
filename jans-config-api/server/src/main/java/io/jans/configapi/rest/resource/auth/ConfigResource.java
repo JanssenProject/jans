@@ -56,7 +56,7 @@ public class ConfigResource extends ConfigBaseResource {
     tags = {"Configuration – Properties"},
     security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.readonly"}))    
     @ApiResponses(value = { 
-    @ApiResponse(responseCode = "200", description = "Jans Authorization Server config properties",
+    @ApiResponse(responseCode = "200", description = "Ok",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
             schema = @Schema(implementation = AppConfiguration.class))),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -78,7 +78,7 @@ public class ConfigResource extends ConfigBaseResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON,
                             array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))                    
             @ApiResponses(value = { 
-            @ApiResponse(responseCode = "200", description = "Jans Authorization Server config properties",
+            @ApiResponse(responseCode = "200", description = "Ok",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
                            schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

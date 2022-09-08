@@ -45,7 +45,7 @@ public class LicenseResource {
 
     @Operation(summary = "Check if admin-ui license is active", description = "Check if admin-ui license is active", operationId = "is-license-active", tags = {
             "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly" }))
+                    SCOPE_LICENSE_READ }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
@@ -70,7 +70,7 @@ public class LicenseResource {
 
     @Operation(summary = "Activate license using license-key", description = "Activate license using license-key", operationId = "activate-adminui-license", tags = {
             "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/config/adminui/license.write" }))
+                    SCOPE_LICENSE_WRITE }))
     @RequestBody(description = "LicenseRequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseRequest.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
@@ -96,7 +96,7 @@ public class LicenseResource {
 
     @Operation(summary = "Save license api credentials", description = "Save license api credentials", operationId = "save-license-api-credentials", tags = {
             "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/config/adminui/license.write" }))
+                    SCOPE_LICENSE_WRITE }))
     @RequestBody(description = "LicenseSpringCredentials object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseSpringCredentials.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
@@ -122,7 +122,7 @@ public class LicenseResource {
 
     @Operation(summary = "Get admin ui license details", description = "Get admin ui license details", operationId = "get-adminui-license", tags = {
             "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly" }))
+                    SCOPE_LICENSE_READ }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseResponse.class, description = "License Response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),

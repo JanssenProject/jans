@@ -232,6 +232,7 @@
 				<executions>
 					<execution>
 						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
 							<outputFileName>user-mgt-plugin-swagger</outputFileName>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>

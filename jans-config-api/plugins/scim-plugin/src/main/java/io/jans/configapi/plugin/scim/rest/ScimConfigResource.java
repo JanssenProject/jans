@@ -44,7 +44,7 @@ public class ScimConfigResource {
             "SCIM - Config Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/scim/config.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "ScimApp Configuration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ScimAppConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ScimAppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -61,7 +61,7 @@ public class ScimConfigResource {
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: loggingLevel, value: DEBUG } ]") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "ScimApp Configuration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ScimAppConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ScimAppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH

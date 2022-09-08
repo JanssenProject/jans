@@ -41,19 +41,15 @@ import jakarta.ws.rs.core.Application;
                 @Tag(name = "OAuth - OpenID Connect - Clients"), @Tag(name = "OAuth - UMA Resources"),
                 @Tag(name = "OAuth - Scopes"), @Tag(name = "Configuration – Agama Flow"),
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
-                @Tag(name = "Auth - Session Management"), @Tag(name = "Configuration – User Management"),
-                @Tag(name = "SCIM - Config Management"), @Tag(name = "Organization Configuration"),
-                @Tag(name = "Auth Server Health - Check"), @Tag(name = "Admin UI - Role"),
-                @Tag(name = "Admin UI - Permission"), @Tag(name = "Admin UI - Role-Permissions Mapping"),
-                @Tag(name = "Admin UI - License") },
+                @Tag(name = "Auth - Session Management"),
+                @Tag(name = "Organization Configuration"),
+                @Tag(name = "Auth Server Health - Check") },
 
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
         @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/properties.readonly", description = "View Auth Server properties related information"),
         @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/properties.write", description = "Manage Auth Server properties related information"),
-        @OAuthScope(name = "https://jans.io/oauth/config/fido2.readonly", description = "View FIDO2 related information"),
-        @OAuthScope(name = "https://jans.io/oauth/config/fido2.write", description = "Manage FIDO2 related information"),
         @OAuthScope(name = "https://jans.io/oauth/config/attributes.readonly", description = "View attribute related information"),
         @OAuthScope(name = "https://jans.io/oauth/config/attributes.write", description = "Manage attribute related information"),
         @OAuthScope(name = "https://jans.io/oauth/config/attributes.delete", description = "Delete attribute related information"),
@@ -90,10 +86,6 @@ import jakarta.ws.rs.core.Application;
         @OAuthScope(name = "https://jans.io/oauth/config/database/sql.write", description = "Manage SQL database related information"),
         @OAuthScope(name = "https://jans.io/oauth/config/database/sql.delete", description = "Delete SQL database related information"),
         @OAuthScope(name = "https://jans.io/oauth/config/stats.readonly", description = "View server with basic statistic"),
-        @OAuthScope(name = "https://jans.io/oauth/config/scim/users.read", description = "View scim user related information"),
-        @OAuthScope(name = "https://jans.io/oauth/config/scim/users.write", description = "Manage scim user related information"),
-        @OAuthScope(name = "https://jans.io/scim/config.readonly", description = "View SCIM App configuration"),
-        @OAuthScope(name = "https://jans.io/scim/config.write", description = "Manage SCIM App configuration"),
         @OAuthScope(name = "https://jans.io/oauth/config/organization.readonly", description = "View organization configuration information"),
         @OAuthScope(name = "https://jans.io/oauth/config/organization.write", description = "Manage organization configuration information"),
         @OAuthScope(name = "https://jans.io/oauth/config/user.readonly", description = "View user related information"),

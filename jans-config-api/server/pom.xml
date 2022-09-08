@@ -314,6 +314,7 @@
 				<executions>
 					<execution>
 						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
 							<outputFileName>jans-config-api-swagger-auto</outputFileName>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>

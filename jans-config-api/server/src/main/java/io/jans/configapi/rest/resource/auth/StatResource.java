@@ -9,8 +9,6 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,12 +40,7 @@ public class StatResource extends ConfigBaseResource {
 
     @Operation(summary = "Provides server with basic statistic", description = "Provides server with basic statistic", operationId = "get-stat", tags = {
             "Statistics - User" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/stats.readonly", "jans_stat" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "month", required = false, schema = @Schema(name = "month", type = "string", description = "Month for which the stat report is to be fetched. The parameter is mandatory if start_month and end_month parameters are not present"), example = "202012, 202101"),
-                            @Parameter(in = ParameterIn.QUERY, name = "start_month", required = false, schema = @Schema(name = "start_month", type = "string", description = "Start-Month for which the stat report is to be fetched")),
-                            @Parameter(in = ParameterIn.QUERY, name = "end_month", required = false, schema = @Schema(name = "end_month", type = "string", description = "End-Month for which the stat report is to be fetched")),
-                            @Parameter(in = ParameterIn.QUERY, name = "format", required = false, schema = @Schema(name = "format", type = "string", description = "Report format", defaultValue = "json", allowableValues = {
-                                    "json", "openmetrics" })) })
+                    ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT  }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stats", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonNode.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

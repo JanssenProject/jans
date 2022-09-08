@@ -15,17 +15,6 @@ import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.dsl.TranspilerException;
 import io.jans.agama.dsl.error.SyntaxException;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.*;
-
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
@@ -33,6 +22,15 @@ import io.jans.configapi.service.auth.AgamaFlowService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.exception.EntryPersistenceException;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -61,12 +59,7 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Fetches all agama flow.", description = "Fetches all agama flow.", operationId = "get-agama-flows", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.QUERY, name = "pattern", required = false, schema = @Schema(name = "pattern", type = "string", description = "Search pattern")),
-                            @Parameter(in = ParameterIn.QUERY, name = "limit", required = false, schema = @Schema(name = "limit", type = "integer", defaultValue = "50", description = "Search size - max size of the results to return")),
-                            @Parameter(in = ParameterIn.QUERY, name = "includeSource", required = false, schema = @Schema(name = "includeSource", type = "boolean", defaultValue = "false", description = "Boolean value true will include the source content in the response"))
-
-    })
+                    "https://jans.io/oauth/config/agama.readonly" }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama Flows", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Flow.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -95,9 +88,7 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets an agama flow based on Qname.", description = "Gets an agama flow based on Qname.", operationId = "get-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.readonly" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "qname", required = true, schema = @Schema(type = "string")),
-                            @Parameter(in = ParameterIn.QUERY, name = "includeSource", required = false, schema = @Schema(name = "includeSource", type = "boolean", defaultValue = "false", description = "Boolean value true will include the source content in the response")) })
+                    "https://jans.io/oauth/config/agama.readonly" }) )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -122,9 +113,9 @@ public class AgamaResource extends ConfigBaseResource {
     @Operation(summary = "Create a new agama flow", description = "Create a new agama flow", operationId = "post-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/agama.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class)))
+    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -152,11 +143,10 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Create a new agama flow from source", description = "Create a new agama flow from source.", operationId = "post-agama-flow-from-source", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "qname", required = true, description = "Flow Qname", schema = @Schema(type = "string")) })
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
+                    "https://jans.io/oauth/config/agama.write" }))
+    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -193,11 +183,10 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Update agama flow from source file", description = "Update agama flow from source file.", operationId = "put-agama-flow-from-source", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "qname", required = true, description = "Flow Qname", schema = @Schema(type = "string")) })
+                    "https://jans.io/oauth/config/agama.write" }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -230,8 +219,7 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Partially modify a Agama Flow", description = "Partially modify a Agama Flow", operationId = "patch-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "qname", required = true, description = "Flow Qname", schema = @Schema(type = "string")) })
+                    "https://jans.io/oauth/config/agama.write" }) )
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patched Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
@@ -269,8 +257,7 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Deletes an agama flow based on Qname", description = "Deletes an agama flow based on Qname", operationId = "delete-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.delete" }), parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "qname", required = true, description = "Flow Qname", schema = @Schema(type = "string")) })
+                    "https://jans.io/oauth/config/agama.delete" }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
