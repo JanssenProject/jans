@@ -1299,7 +1299,7 @@ class JCA_CLI:
     def get_attrib_list(self):
         for parent in self.menu:
             for children in parent:
-                if children.info['operationId'] == 'get-attributes':
+                if children.info.get('operationId') == 'get-attributes':
                     attributes = self.process_get(children, return_value=True, parameters={'limit': 1000} )
                     attrib_names = []
                     for a in attributes:
@@ -1407,6 +1407,9 @@ class JCA_CLI:
                     values_ = item['items']['enum']
                 if item['type'] == 'object' and not default:
                     default = {}
+
+                if not values_:
+                    values_ = []
 
                 val = self.get_input(
                     values=values_,
@@ -1550,7 +1553,11 @@ class JCA_CLI:
 
     def process_patch(self, endpoint):
 
-        if 'PatchOperation' in self.cfg_yml['components']['schemas']:
+        if endpoint.info['operationId'] == 'patch-user-by-inum':
+            schema = self.cfg_yml['components']['schemas']['CustomAttribute'].copy()
+            schema['__schema_name__'] = 'CustomAttribute'
+            model = getattr(swagger_client.models, 'CustomAttribute')
+        elif 'PatchOperation' in self.cfg_yml['components']['schemas']:
             schema = self.cfg_yml['components']['schemas']['PatchOperation'].copy()
             model = getattr(swagger_client.models, 'PatchOperation')
             for item in schema['properties']:
@@ -1568,16 +1575,20 @@ class JCA_CLI:
             url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
         body = []
 
+        if endpoint.info['operationId'] == 'patch-user-by-inum':
+            patch_op = self.get_input(text="Patch operation", values=['add', 'remove', 'replace'], help_text='The operation to be performed')
+
         while True:
             data = self.get_input_for_schema_(schema, model)
-            guessed_val = self.guess_bool(data.value)
-            if not guessed_val is None:
-                data.value = guessed_val
-            if my_op_mode != 'scim' and not data.path.startswith('/'):
-                data.path = '/' + data.path
+            if endpoint.info['operationId'] != 'patch-user-by-inum':
+                guessed_val = self.guess_bool(data.value)
+                if not guessed_val is None:
+                    data.value = guessed_val
+                if my_op_mode != 'scim' and not data.path.startswith('/'):
+                    data.path = '/' + data.path
 
-            if my_op_mode == 'scim':
-                data.path = data.path.replace('/', '.')
+                if my_op_mode == 'scim':
+                    data.path = data.path.replace('/', '.')
 
             body.append(data)
             selection = self.get_input(text='Another patch operation?', values=['y', 'n'])
@@ -1600,7 +1611,9 @@ class JCA_CLI:
 
             if my_op_mode == 'scim':
                 body = {'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'], 'Operations': body}
-
+            elif endpoint.info['operationId'] == 'patch-user-by-inum':
+                patch_data = {'jsonPatchString': json.dumps([{'op': patch_op, 'path': '/dn', 'value': 'inum={},ou=people,o=jans'.format(url_param_val)}]), 'customAttributes':unmapped_body}
+                body = patch_data
             try:
                 if url_param_val:
                     param_mapping = self.guess_param_mapping(url_param['name'])
