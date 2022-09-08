@@ -4,6 +4,7 @@ import time
 import sys
 import json
 import uuid
+import shutil
 
 from setup_app import paths
 from setup_app.static import InstallTypes, AppType, InstallOption, BackendTypes, colors
@@ -94,10 +95,17 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             err_msg = "Couchbase package not found at %s. Exiting with error..." % (self.couchbasePackageFolder)
             self.logIt(err_msg, True, True)
 
-        packageName = max(cb_package_list)
-        self.logIt("Found package '%s' for install" % packageName)
-        installOutput = self.installPackage(packageName)
-        Config.post_messages.append(installOutput)
+        package_name = max(cb_package_list)
+        self.logIt("Found package '%s' for install" % package_name)
+
+        if base.clone_type == 'deb':
+            apt_path = shutil.which('apt')
+            self.chown(self.couchbasePackageFolder, '_apt', 'nogroup', recursive=True)
+            install_output = self.run([apt_path, 'install', '-y', package_name])
+        else:
+            install_output = self.installPackage(package_name)
+
+        Config.post_messages.append(install_output)
 
 
     def couchebaseCreateCluster(self):
