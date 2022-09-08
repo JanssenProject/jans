@@ -5349,9 +5349,9 @@ components:
           items:
             type: string
           example: 'id_generation_endpoint, auth_level_mapping, etc.'
-        enabledComponents:
+        featureFlags:
           type: array
-          description: List of auth components enabled
+          description: List of enabled feature flags
           items:
             type: string
           example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'

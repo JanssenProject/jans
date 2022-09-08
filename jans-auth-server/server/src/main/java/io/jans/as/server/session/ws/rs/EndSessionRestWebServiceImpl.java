@@ -11,7 +11,7 @@ import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -119,7 +119,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sid: {}, Is Secure = {}",
                     idTokenHint, postLogoutRedirectUri, sid, sec.isSecure());
 
-            errorResponseFactory.validateComponentEnabled(ComponentType.END_SESSION);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.END_SESSION);
 
             Jwt idToken = validateIdTokenHint(idTokenHint, postLogoutRedirectUri);
             validateSidRequestParameter(sid, postLogoutRedirectUri);

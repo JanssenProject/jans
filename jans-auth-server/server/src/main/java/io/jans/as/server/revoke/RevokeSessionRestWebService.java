@@ -7,7 +7,7 @@
 package io.jans.as.server.revoke;
 
 import io.jans.as.common.model.common.User;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.common.model.session.SessionId;
@@ -75,7 +75,7 @@ public class RevokeSessionRestWebService {
             log.debug("Attempting to revoke session: userCriterionKey = {}, userCriterionValue = {}, isSecure = {}",
                     userCriterionKey, userCriterionValue, sec.isSecure());
 
-            errorResponseFactory.validateComponentEnabled(ComponentType.REVOKE_SESSION);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.REVOKE_SESSION);
             validateAccess();
 
             final User user = userService.getUserByAttribute(userCriterionKey, userCriterionValue);

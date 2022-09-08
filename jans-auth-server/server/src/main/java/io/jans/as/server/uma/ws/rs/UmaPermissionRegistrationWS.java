@@ -8,7 +8,7 @@ package io.jans.as.server.uma.ws.rs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.UmaConstants;
@@ -73,7 +73,7 @@ public class UmaPermissionRegistrationWS {
                                        @HeaderParam("Authorization") String authorization,
                                        String requestAsString) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
 

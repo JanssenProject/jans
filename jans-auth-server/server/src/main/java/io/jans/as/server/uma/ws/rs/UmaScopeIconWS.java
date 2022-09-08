@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
@@ -45,7 +45,7 @@ public class UmaScopeIconWS {
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response getScopeDescription(@PathParam("id") String id) {
         log.trace("UMA - get scope's icon : id: {}", id);
-        errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
         try {
             if (StringUtils.isNotBlank(id)) {

@@ -7,7 +7,7 @@
 package io.jans.as.server.servlet;
 
 import io.jans.as.common.service.AttributeService;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -173,25 +173,25 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 
-            if (appConfiguration.isEnabledComponent(ComponentType.REVOKE_TOKEN))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
                 jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.REVOKE_SESSION))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_SESSION))
                 jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl("/revoke_session"));
-            if (appConfiguration.isEnabledComponent(ComponentType.USERINFO))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.USERINFO))
                 jsonObj.put(USER_INFO_ENDPOINT, appConfiguration.getUserInfoEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.CLIENTINFO))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENTINFO))
                 jsonObj.put(CLIENT_INFO_ENDPOINT, appConfiguration.getClientInfoEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.END_SESSION))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.END_SESSION))
                 jsonObj.put(END_SESSION_ENDPOINT, appConfiguration.getEndSessionEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.REGISTRATION))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.REGISTRATION))
                 jsonObj.put(REGISTRATION_ENDPOINT, appConfiguration.getRegistrationEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.ID_GENERATION))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.ID_GENERATION))
                 jsonObj.put(ID_GENERATION_ENDPOINT, appConfiguration.getIdGenerationEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.INTROSPECTION))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.INTROSPECTION))
                 jsonObj.put(INTROSPECTION_ENDPOINT, appConfiguration.getIntrospectionEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.DEVICE_AUTHZ))
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.DEVICE_AUTHZ))
                 jsonObj.put(DEVICE_AUTHZ_ENDPOINT, appConfiguration.getDeviceAuthzEndpoint());
-            if (appConfiguration.isEnabledComponent(ComponentType.PAR)) {
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.PAR)) {
                 jsonObj.put(PAR_ENDPOINT, appConfiguration.getParEndpoint());
                 jsonObj.put(REQUIRE_PAR, appConfiguration.getRequirePar());
             }
@@ -457,25 +457,25 @@ public class OpenIdConfiguration extends HttpServlet {
             aliases.put(JWKS_URI, appConfiguration.getMtlsJwksUri());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsCheckSessionIFrame()))
             aliases.put(CHECK_SESSION_IFRAME, appConfiguration.getMtlsCheckSessionIFrame());
-        if (appConfiguration.isEnabledComponent(ComponentType.REVOKE_TOKEN) && StringUtils.isNotBlank(appConfiguration.getMtlsTokenRevocationEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN) && StringUtils.isNotBlank(appConfiguration.getMtlsTokenRevocationEndpoint()))
             aliases.put(REVOCATION_ENDPOINT, appConfiguration.getMtlsTokenRevocationEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.REVOKE_SESSION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_SESSION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
             aliases.put(SESSION_REVOCATION_ENDPOINT, StringUtils.replace(appConfiguration.getMtlsEndSessionEndpoint(), "/end_session", "/revoke_session"));
-        if (appConfiguration.isEnabledComponent(ComponentType.USERINFO) && StringUtils.isNotBlank(appConfiguration.getMtlsUserInfoEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.USERINFO) && StringUtils.isNotBlank(appConfiguration.getMtlsUserInfoEndpoint()))
             aliases.put(USER_INFO_ENDPOINT, appConfiguration.getMtlsUserInfoEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.CLIENTINFO) && StringUtils.isNotBlank(appConfiguration.getMtlsClientInfoEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.CLIENTINFO) && StringUtils.isNotBlank(appConfiguration.getMtlsClientInfoEndpoint()))
             aliases.put(CLIENT_INFO_ENDPOINT, appConfiguration.getMtlsClientInfoEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.END_SESSION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.END_SESSION) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
             aliases.put(END_SESSION_ENDPOINT, appConfiguration.getMtlsEndSessionEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.REGISTRATION) && StringUtils.isNotBlank(appConfiguration.getMtlsRegistrationEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.REGISTRATION) && StringUtils.isNotBlank(appConfiguration.getMtlsRegistrationEndpoint()))
             aliases.put(REGISTRATION_ENDPOINT, appConfiguration.getMtlsRegistrationEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.ID_GENERATION) && StringUtils.isNotBlank(appConfiguration.getMtlsIdGenerationEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.ID_GENERATION) && StringUtils.isNotBlank(appConfiguration.getMtlsIdGenerationEndpoint()))
             aliases.put(ID_GENERATION_ENDPOINT, appConfiguration.getMtlsIdGenerationEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.INTROSPECTION) && StringUtils.isNotBlank(appConfiguration.getMtlsIntrospectionEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.INTROSPECTION) && StringUtils.isNotBlank(appConfiguration.getMtlsIntrospectionEndpoint()))
             aliases.put(INTROSPECTION_ENDPOINT, appConfiguration.getMtlsIntrospectionEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.DEVICE_AUTHZ) && StringUtils.isNotBlank(appConfiguration.getMtlsDeviceAuthzEndpoint()))
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.DEVICE_AUTHZ) && StringUtils.isNotBlank(appConfiguration.getMtlsDeviceAuthzEndpoint()))
             aliases.put(DEVICE_AUTHZ_ENDPOINT, appConfiguration.getMtlsDeviceAuthzEndpoint());
-        if (appConfiguration.isEnabledComponent(ComponentType.PAR) && StringUtils.isNotBlank(appConfiguration.getMtlsParEndpoint())) {
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.PAR) && StringUtils.isNotBlank(appConfiguration.getMtlsParEndpoint())) {
             aliases.put(PAR_ENDPOINT, appConfiguration.getMtlsParEndpoint());
         }
 

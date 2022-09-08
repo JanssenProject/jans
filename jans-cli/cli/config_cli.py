@@ -40,7 +40,7 @@ except ModuleNotFoundError:
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
     'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
-    'jca.get-attributes': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
+    'jca.get-all-attribute': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
     'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
     'jca.get-oauth-scopes': ['dn', 'id', 'scopeType'],
     'scim.get-users': ['id', 'userName', 'displayName', 'active']
@@ -1186,6 +1186,10 @@ class JCA_CLI:
                                     entry['mail'] = ', '.join(attrib['values'])
                                 elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
                                     entry[attrib['name']] = attrib['values'][0]
+
+                elif endpoint.info['operationId'] == 'get-all-attribute':
+                    if 'data' in api_response_unmapped_ext:
+                        api_response_unmapped_ext = api_response_unmapped_ext['data']
 
                 elif endpoint.info['operationId'] == 'get-oauth-openid-clients':
                     for entry in api_response_unmapped_ext:
