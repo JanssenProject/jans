@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
@@ -140,7 +140,7 @@ public class UmaResourceRegistrationWS {
             @PathParam("rsid")
                     String rsid) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             umaValidationService.validateRestrictedByClient(authorizationGrant.getClientDn(), rsid);
@@ -197,7 +197,7 @@ public class UmaResourceRegistrationWS {
         try {
             log.trace("Getting list of resource descriptions.");
 
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             final String clientDn = authorizationGrant.getClientDn();
@@ -241,7 +241,7 @@ public class UmaResourceRegistrationWS {
         try {
             log.debug("Deleting resource descriptions'");
 
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             umaValidationService.validateRestrictedByClient(authorizationGrant.getClientDn(), rsid);
@@ -266,7 +266,7 @@ public class UmaResourceRegistrationWS {
             log.trace("putResourceImpl, rsid: {}, status: {}", escapeLog(rsid), status.name());
         }
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
         AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
         umaValidationService.validateResource(resource);

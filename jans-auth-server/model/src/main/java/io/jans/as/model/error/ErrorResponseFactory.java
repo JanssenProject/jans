@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.Configuration;
@@ -102,21 +102,21 @@ public class ErrorResponseFactory implements Configuration {
         return error.toJSonString();
     }
 
-    public void validateComponentEnabled(ComponentType componentType) {
-        final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
-        if (enabledComponents.isEmpty()) { // no restrictions
+    public void validateFeatureEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> enabledFlags = appConfiguration.getEnabledFeatureFlags();
+        if (enabledFlags.isEmpty()) { // no restrictions
             return;
         }
 
-        if (enabledComponents.contains(componentType)) { // component is enabled
+        if (enabledFlags.contains(flagType)) { // component is enabled
             return;
         }
 
-        log.info("Component is disabled, type: {}", componentType);
+        log.info("Feature flag is disabled, type: {}", flagType);
 
         throw new WebApplicationException(Response
                 .status(Response.Status.FORBIDDEN)
-                .entity(errorAsJson(TokenErrorResponseType.ACCESS_DENIED, "Component is disabled on server."))
+                .entity(errorAsJson(TokenErrorResponseType.ACCESS_DENIED, "Feature flag is disabled on server."))
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
     }

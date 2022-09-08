@@ -654,7 +654,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private Response processCIBA(String scope, String authReqId, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
-        errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.CIBA);
 
         log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
         final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);

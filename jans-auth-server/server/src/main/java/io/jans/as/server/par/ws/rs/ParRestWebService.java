@@ -4,7 +4,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.config.Constants;
@@ -104,7 +104,7 @@ public class ParRestWebService {
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.PAR);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.PAR);
 
             scope = ServerUtil.urlDecode(scope); // it may be encoded
             String tokenBindingHeader = httpRequest.getHeader("Sec-Token-Binding");

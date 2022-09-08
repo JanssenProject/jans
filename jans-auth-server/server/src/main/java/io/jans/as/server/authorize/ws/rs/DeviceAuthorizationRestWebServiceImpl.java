@@ -8,7 +8,7 @@ package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.StringUtils;
@@ -97,7 +97,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
 
         try {
             log.debug("Attempting to request device codes: clientId = {}, scope = {}", clientId, scope);
-            errorResponseFactory.validateComponentEnabled(ComponentType.DEVICE_AUTHZ);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.DEVICE_AUTHZ);
 
             SessionClient sessionClient = identity.getSessionClient();
             Client client = sessionClient != null ? sessionClient.getClient() : null;

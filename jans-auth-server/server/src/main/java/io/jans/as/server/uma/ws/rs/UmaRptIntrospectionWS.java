@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaConstants;
@@ -93,7 +93,7 @@ public class UmaRptIntrospectionWS {
 
     private Response introspect(String authorization, String token, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
             umaValidationService.assertHasProtectionScope(authorization);
 
             final UmaRPT rpt = rptService.getRPTByCode(token);
