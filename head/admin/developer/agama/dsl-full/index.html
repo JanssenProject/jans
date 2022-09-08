@@ -12377,7 +12377,15 @@ hasOne = Call map.numbers contains 1
 <p>Any method that meets the conditions above (public or interface static) and that is reachable in the JVM <a href="../java-classpath/">classpath</a> can be called; developers are not restricted solely to <code>java.*</code> packages. </p>
 <p>When using <code>Call</code>, the method to execute is picked based on the name (e.g. after the <code>#</code> sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), there is no way to know which of the available variants will be called. The <code>java.util.Arrays</code> class has several methods of this kind for instance.</p>
 <p>Once a concrete method is picked, a best effort is made to convert (if required) the values passed as arguments so that they match the expected parameter types in the method signature. If a conversion fails, this will degenerate in an <code>IllegalArgumentException</code>.</p>
-<p><em>list</em> and <em>map</em> literals cannot be passed as arguments to method calls directly. This means the following is illegal: <code>Call co.Utils#myMethod { key: [ 1, 2 , 3] } [ "Yeeha!" ]</code>. To achieve the same effect assign the literal value to a variable and pass that instead.</p>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>
+<p><em>list</em> and <em>map</em> literals cannot be passed as arguments to method calls directly. This means the following is illegal: <code>Call co.Utils#myMethod { key: [ 1, 2 , 3] } [ "Yeeha!" ]</code>. To achieve the same effect assign the literal value to a variable and pass that instead</p>
+</li>
+<li>
+<p><code>Call</code>ing a method that mutates one or more of the arguments passed will not work properly if the corresponding parameters in the method signature have type information attached. For example, copying a list into another using <code>java.util.Collections#copy​(List&lt;? super T&gt; dest, List&lt;? extends T&gt; src)</code> may not behave as expected. Conversely, calling <code>java.lang.reflect.Array#set​(Object array, int index, Object value)</code> works fine because <code>array</code> does not have a parameterized type. The practice of mutating passed arguments is unusual and sometimes discouraged in programming</p>
+</li>
+</ul>
 <h3 id="exception-handling">Exception handling<a class="headerlink" href="#exception-handling" title="Permanent link">#</a></h3>
 <p>As seen in the examples Agama can deal with Java exceptions, however, this feature should be used sparingly. When exception handling is really required, create wrapper methods in Java to do it instead of delegating that to the DSL.</p>
 <h3 id="oop-prose-warning">OOP prose warning<a class="headerlink" href="#oop-prose-warning" title="Permanent link">#</a></h3>
@@ -12626,7 +12634,7 @@ x[2] = &quot;polo&quot;    //adds the key/value pair &quot;2&quot; / &quot;polo&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-07T12:10:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-07</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-08T15:02:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-08</span>
       
         <br>
         Created:
