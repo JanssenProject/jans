@@ -2860,7 +2860,7 @@ paths:
       description: Returns current session.
       operationId: get-sessions
       security:
-        - oauth2: [https://jans.io/oauth/jans-auth-server/session.readonly revoke_session]
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.readonly]
       tags:
         - Auth - Session Management
       responses:
@@ -2892,7 +2892,7 @@ paths:
       description: Revoke all sessions by userDn.
       operationId: revoke-user-session
       security:
-        - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete]
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete, revoke_session]
       tags:
         - Auth - Session Management
       responses:
@@ -5129,7 +5129,7 @@ components:
           type: array
           description: Authorization Request Custom Allowed Parameters.
           items:
-            type: string
+            $ref: '#/components/schemas/AuthorizationRequestCustomParameter'
         openidScopeBackwardCompatibility:
           type: boolean
           description: Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
@@ -7753,8 +7753,8 @@ components:
           description: Session status
           type: string
           enum:
-            - authenticated
-            - unauthenticated
+            - AUTHENTICATED
+            - UNAUTHENTICATED
         sessionState:
           description: state of session.
           type: string
@@ -7788,3 +7788,16 @@ components:
           description: Session creation date.
           type: string
           format: date
+ 
+    AuthorizationRequestCustomParameter:
+      title: AuthorizationRequestCustomParameter
+      description: AuthorizationRequestCustomParameter details
+      type: object
+      properties:
+        paramName:
+          type: string
+          description: Name of the custom parameter
+        returnInResponse:
+          type: boolean
+          description: indicates if the parameter by default will be returned in response.
+          default: false
