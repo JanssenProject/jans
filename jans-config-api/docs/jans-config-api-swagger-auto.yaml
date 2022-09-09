@@ -3227,19 +3227,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -3668,9 +3668,9 @@ components:
           type: array
           items:
             type: string
-        value:
-          type: string
         displayValue:
+          type: string
+        value:
           type: string
     LocalizedString:
       type: object
@@ -3679,13 +3679,13 @@ components:
           type: object
           additionalProperties:
             type: string
-        value:
-          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
+        value:
+          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4681,13 +4681,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -5064,10 +5064,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     SessionId:
       type: object
       properties:

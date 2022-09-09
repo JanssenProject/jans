@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScimAppConfiguration'
+                $ref: '#/components/schemas/AppConfiguration'
         "401":
           description: Unauthorized
         "500":
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScimAppConfiguration'
+                $ref: '#/components/schemas/AppConfiguration'
         "401":
           description: Unauthorized
         "500":
@@ -68,16 +68,9 @@ paths:
         - https://jans.io/scim/config.write
 components:
   schemas:
-    ScimAppConfiguration:
+    AppConfiguration:
       type: object
       properties:
-        maxCount:
-          type: integer
-          format: int32
-        disableJdkLogger:
-          type: boolean
-        useLocalCache:
-          type: boolean
         baseDN:
           type: string
         applicationUrl:
@@ -90,6 +83,18 @@ components:
           type: string
         protectionMode:
           type: string
+          enum:
+          - OAUTH
+          - BYPASS
+        maxCount:
+          type: integer
+          format: int32
+        bulkMaxOperations:
+          type: integer
+          format: int32
+        bulkMaxPayloadSize:
+          type: integer
+          format: int64
         userExtensionSchemaURI:
           type: string
         loggingLevel:
@@ -106,12 +111,10 @@ components:
           format: int32
         metricReporterEnabled:
           type: boolean
-        bulkMaxOperations:
-          type: integer
-          format: int32
-        bulkMaxPayloadSize:
-          type: integer
-          format: int64
+        disableJdkLogger:
+          type: boolean
+        useLocalCache:
+          type: boolean
     JsonPatch:
       type: object
   securitySchemes:
