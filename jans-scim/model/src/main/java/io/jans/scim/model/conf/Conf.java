@@ -3,7 +3,6 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
-
 package io.jans.scim.model.conf;
 
 import io.jans.orm.annotation.AttributeName;
@@ -36,8 +35,8 @@ public class Conf {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
 	public AppConfiguration getDynamicConf() {

@@ -48,7 +48,12 @@
 	</build>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- Jans -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-scim-model</artifactId>
+            <version>${janssen.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
