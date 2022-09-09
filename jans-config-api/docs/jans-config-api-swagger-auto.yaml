@@ -8,7 +8,7 @@ info:
   license:
     name: Apache 2.0
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: "1.0"
+  version: 1.0.0
 servers:
 - url: https://jans.io/
   description: The Jans server
@@ -3229,17 +3229,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
-        userCanView:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -4681,13 +4681,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

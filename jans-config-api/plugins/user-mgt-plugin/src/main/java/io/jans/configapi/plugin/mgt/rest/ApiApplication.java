@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @ApplicationPath("/mgt")
-@OpenAPIDefinition(info = @Info(title = "Jans Config API - User-Mgt", version = "1.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
+@OpenAPIDefinition(info = @Info(title = "Jans Config API - User-Mgt", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 

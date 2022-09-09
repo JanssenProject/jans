@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath("/scim")
-@OpenAPIDefinition(info = @Info(title = "Jans Config API - SCIM", version = "1.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
+@OpenAPIDefinition(info = @Info(title = "Jans Config API - SCIM", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 

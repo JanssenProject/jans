@@ -8,7 +8,7 @@ info:
   license:
     name: Apache 2.0
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: "1.0"
+  version: 1.0.0
 servers:
 - url: https://jans.io/
   description: The Jans server
@@ -19,54 +19,6 @@ tags:
 - name: Admin UI - Role-Permissions Mapping
 - name: Admin UI - License
 paths:
-  /admin-ui/oauth2/access-token:
-    get:
-      operationId: getAccessToken
-      parameters:
-      - name: code
-        in: query
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            application/json: {}
-  /admin-ui/oauth2/api-protection-token:
-    get:
-      operationId: getApiProtectionToken
-      parameters:
-      - name: ujwt
-        in: query
-        schema:
-          type: string
-      responses:
-        default:
-          description: default response
-          content:
-            application/json: {}
-  /admin-ui/oauth2/config:
-    get:
-      operationId: getOAuth2Config
-      responses:
-        default:
-          description: default response
-          content:
-            application/json: {}
-  /admin-ui/oauth2/user-info:
-    post:
-      operationId: getUserInfo
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/UserInfoRequest'
-        required: true
-      responses:
-        default:
-          description: default response
-          content:
-            application/json: {}
   /admin-ui/license/activateLicense:
     post:
       tags:
@@ -533,11 +485,11 @@ paths:
       description: Delete admin ui role
       operationId: delete-adminui-role
       requestBody:
-        description: AdminRole object
         content:
-          application/json:
+          '*/*':
             schema:
               $ref: '#/components/schemas/AdminRole'
+        required: true
       responses:
         "200":
           description: Ok
@@ -558,13 +510,6 @@ paths:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
 components:
   schemas:
-    UserInfoRequest:
-      type: object
-      properties:
-        code:
-          type: string
-        access_token:
-          type: string
     LicenseRequest:
       type: object
       properties:

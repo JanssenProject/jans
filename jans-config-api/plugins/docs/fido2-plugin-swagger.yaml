@@ -8,7 +8,7 @@ info:
   license:
     name: Apache 2.0
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: "1.0"
+  version: 1.0.0
 servers:
 - url: https://jans.io/
   description: The Jans server
