@@ -8,7 +8,6 @@ package io.jans.configapi.plugin.fido2.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.jans.as.common.model.registration.Client;
 import io.jans.config.oxtrust.DbApplicationConfiguration;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
