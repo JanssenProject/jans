@@ -35,8 +35,8 @@ public class Conf {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
 	public AppConfiguration getDynamicConf() {

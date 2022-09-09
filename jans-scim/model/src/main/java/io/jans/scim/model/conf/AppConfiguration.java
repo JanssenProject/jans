@@ -1,7 +1,6 @@
 package io.jans.scim.model.conf;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
