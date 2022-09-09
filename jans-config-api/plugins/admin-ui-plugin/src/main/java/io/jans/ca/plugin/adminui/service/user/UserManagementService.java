@@ -307,15 +307,15 @@ public class UserManagementService {
         }
     }
 
-    public List<RolePermissionMapping> removePermissionsFromRole(RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
+    public List<RolePermissionMapping> removePermissionsFromRole(String role) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
-            if (isFalse(getRoleObjByName(rolePermissionMappingArg.getRole()).getDeletable())) {
+            if (isFalse(getRoleObjByName(role).getDeletable())) {
                 log.error(ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> !ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                    .stream().filter(ele -> !ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
             adminConf.getDynamic().setRolePermissionMapping(roleScopeMapping);
             entryManager.merge(adminConf);
