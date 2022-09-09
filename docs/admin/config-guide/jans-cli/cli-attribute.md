@@ -7,12 +7,15 @@ First thing, let's get the information for `Attribute`:
 In return, we get a list of Operations ID as below:
 
 ```text
-Operation ID: get-attributes
+Operation ID: get-all-attribute
   Description: Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.
   Parameters:
   limit: Search size - max size of the results to return. [integer]
   pattern: Search pattern. [string]
   status: Status of the attribute [string]
+  startIndex: The 1-based index of the first query result. [integer]
+  sortBy: Attribute whose value will be used to order the returned response. [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending". [string]
 Operation ID: post-attributes
   Description: Adds a new attribute.
   Schema: /components/schemas/GluuAttribute
@@ -30,7 +33,7 @@ Operation ID: patch-attributes-by-inum
   url-suffix: inum
   Schema: Array of /components/schemas/PatchRequest
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
 ```
 
 We have discussed here about each of this operations ID with few examples to understand how these really works.
@@ -53,17 +56,20 @@ Table of Contents
 As we know, Attributes are individual pieces of user data, like `uid` or `email`, that are required by applications in order to identify a user and grant access to protect resources. The user attributes that are available in your Janssen Server can be found by using this operation-ID. If we look at the description below:
 
 ```text
-Operation ID: get-attributes
+Operation ID: get-all-attribute
   Description: Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.
   Parameters:
   limit: Search size - max size of the results to return. [integer]
   pattern: Search pattern. [string]
   status: Status of the attribute [string]
+  startIndex: The 1-based index of the first query result. [integer]
+  sortBy: Attribute whose value will be used to order the returned response. [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending". [string]
 ```
 
 To get all the attributes without any arguments, run the following command:
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes
+/opt/jans/jans-cli/config-cli.py --operation-id get-all-attribute
 ```
 
 To get attributes with passing the arguments, let's retrieve randomly limit:5:
