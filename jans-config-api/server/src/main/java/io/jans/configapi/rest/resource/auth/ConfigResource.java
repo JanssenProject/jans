@@ -6,6 +6,8 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -15,12 +17,22 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
+
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.io.IOException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -37,6 +49,18 @@ public class ConfigResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
 
+    
+    @Operation(summary = "Gets all Jans authorization server configuration properties.",
+    description= "Gets all Jans authorization server configuration properties.",
+    operationId = "get-properties",
+    tags = {"Configuration – Properties"},
+    security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.readonly"}))    
+    @ApiResponses(value = { 
+    @ApiResponse(responseCode = "200", description = "Ok",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+            schema = @Schema(implementation = AppConfiguration.class))),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
@@ -45,20 +69,34 @@ public class ConfigResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    @Operation(summary = "Partially modifies Jans authorization server Application configuration properties.",
+            description= "Partially modifies Jans authorization server AppConfiguration properties.",
+            operationId = "patch-properties",
+            tags = {"Configuration – Properties"},
+            security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.write"})) 
+            @RequestBody( description="String representing patch-document.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON,
+                            array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))                    
+            @ApiResponses(value = { 
+            @ApiResponse(responseCode = "200", description = "Ok",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                           schema = @Schema(implementation = AppConfiguration.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
-    public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
-        log.debug("AUTH CONF details to patch - requestString:{} ", requestString);
+    public Response patchAppConfigurationProperty (@NotNull String jsonPatchString) throws JsonPatchException, IOException {
+        log.debug("AUTH CONF details to patch - jsonPatchString:{} ", jsonPatchString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = configurationService.find();
         log.debug("AUTH CONF details BEFORE patch - appConfiguration :{}", appConfiguration);
-        appConfiguration = Jackson.applyPatch(requestString, conf.getDynamic());
+        appConfiguration = Jackson.applyPatch(jsonPatchString, conf.getDynamic());
         log.debug("AUTH CONF details BEFORE patch merge - appConfiguration:{}", appConfiguration);
         conf.setDynamic(appConfiguration);
         
         //validate Agama Configuration
-        if(requestString.contains(AGAMACONFIGURATION)){
+        if(jsonPatchString.contains(AGAMACONFIGURATION)){
             validateAgamaConfiguration(appConfiguration.getAgamaConfiguration());
         }
         
@@ -68,6 +106,21 @@ public class ConfigResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    @Operation(summary = "Returns persistence type configured for Jans authorization server.",
+    description= "Returns persistence type configured for Jans authorization server.",
+    operationId = "get-properties-persistence",
+    tags = {"Configuration – Properties"},
+    security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.readonly"}))    
+    @ApiResponses(value = { 
+    @ApiResponse(responseCode = "200", description = "Jans Authorization Server config properties",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+            schema =  @Schema(
+                    name = "persistenceType",
+                    type = "string",
+                    description = "Jans Auth Server persistence type"
+                    ))),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     @Path(ApiConstants.PERSISTENCE)

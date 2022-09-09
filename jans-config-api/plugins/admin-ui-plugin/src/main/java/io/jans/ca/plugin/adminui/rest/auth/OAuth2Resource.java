@@ -10,6 +10,9 @@ import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
+
+import io.swagger.v3.oas.annotations.Hidden;
+
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;
@@ -19,6 +22,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+@Hidden
 @Path("/admin-ui/oauth2")
 public class OAuth2Resource {
 
