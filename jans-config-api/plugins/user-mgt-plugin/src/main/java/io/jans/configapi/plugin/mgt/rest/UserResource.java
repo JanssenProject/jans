@@ -131,7 +131,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_WRITE_ACCESS}))
+                    ApiAccessConstants.USER_WRITE_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -146,12 +146,14 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
+
         // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
         checkMissingAttributes(user, null);
+        ignoreCustomObjectClassesForNonLDAP(user);
 
         user = userMgmtSrv.addUser(user, true);
         logger.debug("User created {}", user);
@@ -184,6 +186,7 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
+
         // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
@@ -191,6 +194,7 @@ public class UserResource extends BaseResource {
         // checking mandatory attributes
         List<String> excludeAttributes = List.of(USER_PWD);
         checkMissingAttributes(user, excludeAttributes);
+        ignoreCustomObjectClassesForNonLDAP(user);
 
         user = userMgmtSrv.updateUser(user);
         logger.debug("Updated user:{}", user);
@@ -207,7 +211,7 @@ public class UserResource extends BaseResource {
 
     @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.USER_WRITE_ACCESS  }))
+                    ApiAccessConstants.USER_WRITE_ACCESS }))
     @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = {
             @ExampleObject(value = "[ {\"jsonPatchString\": {\"op\": \"add\", \"path\": \"userId\",\"value\": \"test-user\" }, \"customAttributes\": [{\"name\": \"name, displayName, birthdate, email\",\"multiValued\": true,\"values\": [\"string\"]}]}]") }))
     @ApiResponses(value = {
@@ -226,9 +230,11 @@ public class UserResource extends BaseResource {
         }
         // check if user exists
         User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
+
         // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
+        ignoreCustomObjectClassesForNonLDAP(existingUser);
 
         // patch user
         existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
@@ -321,6 +327,7 @@ public class UserResource extends BaseResource {
             CustomUser customUser = new CustomUser();
             setParentAttributes(customUser, user);
             customUserList.add(customUser);
+            ignoreCustomObjectClassesForNonLDAP(customUser);
         }
         logger.debug("Custom Users - customUserList:{}", customUserList);
         return customUserList;
@@ -346,6 +353,7 @@ public class UserResource extends BaseResource {
         customUser.setUpdatedAt(user.getUpdatedAt());
         customUser.setUserId(user.getUserId());
 
+        ignoreCustomObjectClassesForNonLDAP(customUser);
         return setCustomUserAttributes(customUser, user);
     }
 
@@ -391,4 +399,9 @@ public class UserResource extends BaseResource {
         logger.debug("Custom User - user:{}", user);
         return user;
     }
+
+    private User ignoreCustomObjectClassesForNonLDAP(User user) {
+        return userMgmtSrv.ignoreCustomObjectClassesForNonLDAP(user);
+    }
+
 }

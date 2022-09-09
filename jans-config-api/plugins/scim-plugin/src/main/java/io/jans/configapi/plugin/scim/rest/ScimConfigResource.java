@@ -5,10 +5,10 @@ import com.github.fge.jsonpatch.JsonPatchException;
 
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.scim.service.ScimConfigService;
-import io.jans.configapi.plugin.scim.model.config.ScimAppConfiguration;
-import io.jans.configapi.plugin.scim.model.config.ScimConf;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.scim.util.Constants;
+import io.jans.scim.model.conf.AppConfiguration;
+import io.jans.scim.model.conf.Conf;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -44,13 +44,13 @@ public class ScimConfigResource {
             "SCIM - Config Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/scim/config.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ScimAppConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { "https://jans.io/scim/config.readonly" })
     public Response getAppConfiguration() {
-        ScimAppConfiguration appConfiguration = scimConfigService.find();
+        AppConfiguration appConfiguration = scimConfigService.find();
         log.debug("SCIM appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
@@ -61,7 +61,7 @@ public class ScimConfigResource {
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: loggingLevel, value: DEBUG } ]") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ScimAppConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
@@ -70,8 +70,8 @@ public class ScimConfigResource {
     public Response patchAppConfigurationProperty(@NotNull String requestString)
             throws IOException, JsonPatchException {
         log.debug("AUTH CONF details to patch - requestString:{}", requestString);
-        ScimConf conf = scimConfigService.findConf();
-        ScimAppConfiguration appConfiguration = conf.getDynamicConf();
+        Conf conf = scimConfigService.findConf();
+        AppConfiguration appConfiguration = conf.getDynamicConf();
         log.trace("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);
 
         appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
