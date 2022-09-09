@@ -3227,19 +3227,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -4360,6 +4360,8 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4395,8 +4397,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
