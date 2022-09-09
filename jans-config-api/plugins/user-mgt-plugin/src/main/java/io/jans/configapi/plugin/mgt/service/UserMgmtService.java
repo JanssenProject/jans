@@ -10,6 +10,8 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
+import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
@@ -44,6 +46,9 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
     private AppConfiguration appConfiguration;
 
     @Inject
+    ConfigurationService configurationService;
+
+    @Inject
     AuthUtil authUtil;
 
     @Inject
@@ -67,7 +72,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
         }
         Filter searchFilter = null;
         if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
-            String[] targetArray = new String[]{searchRequest.getFilter()};
+            String[] targetArray = new String[] { searchRequest.getFilter() };
             Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                     null);
             Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
@@ -116,6 +121,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
         logger.debug("User before patch user:{}", user);
 
         // persist user
+        ignoreCustomObjectClassesForNonLDAP(user);
         user = updateUser(user);
         logger.debug("User after patch user:{}", user);
         return user;
@@ -243,9 +249,10 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
             logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
                     authUtil.containsField(allFields, attribute));
 
-            //check if to be excluded
+            // check if to be excluded
             if (isExcludedAttribute(excludeAttributes, attribute)) {
-                logger.debug("Not checking if the attribute:{} is missing as it's in excludeAttributes:{}", attribute, excludeAttributes);
+                logger.debug("Not checking if the attribute:{} is missing as it's in excludeAttributes:{}", attribute,
+                        excludeAttributes);
                 continue;
             }
 
@@ -292,12 +299,24 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
             }
 
             Date date = mgtUtil.parseStringToDateObj(optionalBithdate.get().toString());
-            //parse date with persistenceEntryManager.decodeTime if it is null
+            // parse date with persistenceEntryManager.decodeTime if it is null
             if (date == null) {
                 date = persistenceEntryManager.decodeTime(null, optionalBithdate.get().toString());
             }
             user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
             user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
+        }
+        return user;
+    }
+
+    public User ignoreCustomObjectClassesForNonLDAP(User user) {
+        String persistenceType = configurationService.getPersistenceType();
+        logger.debug("persistenceType: {}", persistenceType);
+        if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
+            logger.debug(
+                    "Setting CustomObjectClasses :{} to null as its used only for LDAP and current persistenceType is {} ",
+                    user.getCustomObjectClasses(), persistenceType);
+            user.setCustomObjectClasses(null);
         }
         return user;
     }
