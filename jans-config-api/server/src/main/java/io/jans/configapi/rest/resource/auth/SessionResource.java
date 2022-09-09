@@ -12,6 +12,13 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.SessionService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
@@ -27,28 +34,44 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class SessionResource extends ConfigBaseResource {
-    
+
     @Inject
     Logger log;
 
     @Inject
     SessionService sessionService;
 
+    @Operation(summary = "Returns current session", description = "Returns current session", operationId = "get-sessions", tags = {
+            "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS , "revoke_session" }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SessionId.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS })
-    public Response getAllSessions() {     
+    public Response getAllSessions() {
         final List<SessionId> sessions = sessionService.getSessions();
         logger.debug("sessions:{}", sessions);
-        return Response.ok(sessions).build(); 
+        return Response.ok(sessions).build();
     }
-    
+
+    @Operation(summary = "Revoke all sessions by userDn", description = "Revoke all sessions by userDn", operationId = "revoke-user-session", tags = {
+            "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
+                    ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }))
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
+            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION })
     @Path(ApiConstants.USERDN_PATH)
     public Response getAppConfiguration(@PathParam(ApiConstants.USERDN) @NotNull String userDn) {
         logger.debug("userDn:{}", userDn);
-        sessionService.revokeSession(userDn);        
+        sessionService.revokeSession(userDn);
         return Response.ok().build();
     }
-    
+
 }
