@@ -1,0 +1,293 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - User-Mgt
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+  variables: {}
+tags:
+- name: Configuration – User Management
+paths:
+  /mgt/configuser:
+    get:
+      tags:
+      - Configuration – User Management
+      summary: Gets list of users
+      description: Gets list of users
+      operationId: get-user
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+      - name: sortOrder
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomUser'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.readonly
+    put:
+      tags:
+      - Configuration – User Management
+      summary: Update User
+      description: Update User
+      operationId: put-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+    post:
+      tags:
+      - Configuration – User Management
+      summary: Create new User
+      description: Create new User
+      operationId: post-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+  /mgt/configuser/{inum}:
+    get:
+      tags:
+      - Configuration – User Management
+      summary: Get User by Inum
+      description: Get User by Inum
+      operationId: get-user-by-inum
+      parameters:
+      - name: inum
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.readonly
+    delete:
+      tags:
+      - Configuration – User Management
+      summary: Delete User
+      description: Delete User
+      operationId: delete-user
+      parameters:
+      - name: inum
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.delete
+    patch:
+      tags:
+      - Configuration – User Management
+      summary: Patch user properties by Inum
+      description: Patch user properties by Inum
+      operationId: patch-user-by-inum
+      parameters:
+      - name: inum
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: UserPatchRequest
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/UserPatchRequest'
+            example:
+            - jsonPatchString:
+                op: add
+                path: userId
+                value: test-user
+              customAttributes:
+              - name: "name, displayName, birthdate, email"
+                multiValued: true
+                values:
+                - string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+components:
+  schemas:
+    CustomObjectAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+        multiValued:
+          type: boolean
+        values:
+          type: array
+          items:
+            type: object
+        value:
+          type: object
+        displayValue:
+          type: string
+    CustomUser:
+      type: object
+      properties:
+        dn:
+          type: string
+        userId:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        oxAuthPersistentJwt:
+          type: array
+          items:
+            type: string
+        customAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomObjectAttribute'
+        customObjectClasses:
+          type: array
+          items:
+            type: string
+        inum:
+          type: string
+        mail:
+          type: string
+        displayName:
+          type: string
+        jansStatus:
+          type: string
+        givenName:
+          type: string
+        userPassword:
+          type: string
+        status:
+          type: string
+        baseDn:
+          type: string
+    UserPatchRequest:
+      type: object
+      properties:
+        jsonPatchString:
+          type: string
+        customAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomObjectAttribute'
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/oauth/config/user.readonly: View user related information
+            https://jans.io/oauth/config/user.write: Manage user related information
+            https://jans.io/oauth/config/user.delete: Delete user related information
