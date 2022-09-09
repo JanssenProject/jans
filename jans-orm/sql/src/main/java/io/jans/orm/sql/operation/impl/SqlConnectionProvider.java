@@ -216,41 +216,44 @@ public class SqlConnectionProvider {
     	PreparedStatement preparedStatement = con.prepareStatement(QUERY_ENGINE_TYPE);
     	preparedStatement.setString(1, schemaName);
 
-    	ResultSet tableEnginesResultSet = preparedStatement.executeQuery();
-    	while (tableEnginesResultSet.next()) {
-    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
-    		String engineName = tableEnginesResultSet.getString("ENGINE");
-
-        	tableEnginesMap.put(tableName, engineName);
+    	try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
+	    	while (tableEnginesResultSet.next()) {
+	    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+	    		String engineName = tableEnginesResultSet.getString("ENGINE");
+	
+	        	tableEnginesMap.put(tableName, engineName);
+	    	}
     	}
 
         LOG.info("Scanning DB metadata...");
-        ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"});
-    	while (tableResultSet.next()) {
-    		String tableName = tableResultSet.getString("TABLE_NAME");
-    		Map<String, AttributeType> tableColumns = new HashMap<>();
-    		
-    		String engineType = tableEnginesMap.get(tableName);
-    		
-            LOG.debug("Found table: '{}'.", tableName);
-            ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null);
-        	while (columnResultSet.next()) {
-        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
-				String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
-
-				String remark = columnResultSet.getString("REMARKS");
-        		if (mariaDb && LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
-        			columnTypeName = JSON_TYPE_NAME;
-        		}
-
-        		boolean multiValued = SqlConnectionProvider.JSON_TYPE_NAME.equals(columnTypeName);
-
-        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
-        		tableColumns.put(columnName, attributeType);
-        	}
-
-        	tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
-    	}
+        try (ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"})) {
+	    	while (tableResultSet.next()) {
+	    		String tableName = tableResultSet.getString("TABLE_NAME");
+	    		Map<String, AttributeType> tableColumns = new HashMap<>();
+	    		
+//	    		String engineType = tableEnginesMap.get(tableName);
+	    		
+	            LOG.debug("Found table: '{}'.", tableName);
+	            try (ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null)) {
+		        	while (columnResultSet.next()) {
+		        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
+						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
+		
+						String remark = columnResultSet.getString("REMARKS");
+		        		if (mariaDb && LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
+		        			columnTypeName = JSON_TYPE_NAME;
+		        		}
+		
+		        		boolean multiValued = SqlConnectionProvider.JSON_TYPE_NAME.equals(columnTypeName);
+		
+		        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
+		        		tableColumns.put(columnName, attributeType);
+		        	}
+	            }
+	
+	        	tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
+	    	}
+        }
 
     	takes = System.currentTimeMillis() - takes;
         LOG.info("Metadata scan finisehd in {} milliseconds", takes);
