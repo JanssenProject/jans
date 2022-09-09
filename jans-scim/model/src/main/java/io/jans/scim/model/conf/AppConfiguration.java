@@ -3,20 +3,13 @@ package io.jans.scim.model.conf;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.jans.config.oxtrust.Configuration;
-
 import java.io.Serializable;
-
-import jakarta.enterprise.inject.Vetoed;
-
 
 /**
  * Janssen Project configuration
  *
  * @author Yuriy Movchan
- * @version 0.1, 05/15/2013
  */
-@Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration, Serializable {
 

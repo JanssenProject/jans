@@ -3,7 +3,6 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
-
 package io.jans.scim.model.conf;
 
 import io.jans.orm.annotation.AttributeName;
