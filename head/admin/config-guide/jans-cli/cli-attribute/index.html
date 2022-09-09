@@ -10736,12 +10736,15 @@
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Attribute
 </code></pre></div>
 In return, we get a list of Operations ID as below:</p>
-<div class="highlight"><pre><span></span><code>Operation ID: get-attributes
+<div class="highlight"><pre><span></span><code>Operation ID: get-all-attribute
   Description: Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.
   Parameters:
   limit: Search size - max size of the results to return. [integer]
   pattern: Search pattern. [string]
   status: Status of the attribute [string]
+  startIndex: The 1-based index of the first query result. [integer]
+  sortBy: Attribute whose value will be used to order the returned response. [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are &quot;ascending&quot; and &quot;descending&quot;. [string]
 Operation ID: post-attributes
   Description: Adds a new attribute.
   Schema: /components/schemas/GluuAttribute
@@ -10759,7 +10762,7 @@ Operation ID: patch-attributes-by-inum
   url-suffix: inum
   Schema: Array of /components/schemas/PatchRequest
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
 </code></pre></div>
 <p>We have discussed here about each of this operations ID with few examples to understand how these really works.</p>
 <h1 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h1>
@@ -10777,15 +10780,18 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;
 <p>Prerequisite: Know how to use the Janssen CLI in <a href="../cli-index/">command-line mode</a></p>
 </blockquote>
 <p>As we know, Attributes are individual pieces of user data, like <code>uid</code> or <code>email</code>, that are required by applications in order to identify a user and grant access to protect resources. The user attributes that are available in your Janssen Server can be found by using this operation-ID. If we look at the description below:</p>
-<div class="highlight"><pre><span></span><code>Operation ID: get-attributes
+<div class="highlight"><pre><span></span><code>Operation ID: get-all-attribute
   Description: Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.
   Parameters:
   limit: Search size - max size of the results to return. [integer]
   pattern: Search pattern. [string]
   status: Status of the attribute [string]
+  startIndex: The 1-based index of the first query result. [integer]
+  sortBy: Attribute whose value will be used to order the returned response. [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are &quot;ascending&quot; and &quot;descending&quot;. [string]
 </code></pre></div>
 <p>To get all the attributes without any arguments, run the following command:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-all-attribute
 </code></pre></div></p>
 <p>To get attributes with passing the arguments, let's retrieve randomly limit:5:</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5
@@ -11362,7 +11368,7 @@ Server Response:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-11T12:55:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-09T07:24:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-09</span>
       
         <br>
         Created:
