@@ -11,8 +11,10 @@ import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.service.UserMgmtService;
 import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
+import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -53,13 +55,16 @@ public class UserResource extends BaseResource {
     EncryptionService encryptionService;
 
     @Inject
+    ConfigurationService configurationService;
+
+    @Inject
     MgtUtil mgtUtil;
 
     @Inject
     UserMgmtService userMgmtSrv;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.USER_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     public Response getUsers(
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -72,8 +77,8 @@ public class UserResource extends BaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
-        SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder, startIndex,
-                limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
+        SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder,
+                startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
 
         List<CustomUser> customUsers = this.doSearch(searchReq);
         logger.debug("CustomUser search result:{}", customUsers);
@@ -82,7 +87,7 @@ public class UserResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.USER_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
@@ -95,6 +100,7 @@ public class UserResource extends BaseResource {
 
         // excludedAttributes
         user = excludeUserAttributes(user);
+        ignoreCustomObjectClassesForNonLDAP(user);
         logger.debug("user:{}", user);
 
         // get custom user
@@ -105,7 +111,7 @@ public class UserResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {ApiAccessConstants.USER_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response createUser(@Valid CustomUser customUser)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
@@ -114,12 +120,13 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
-        //parse birthdate if present
+        // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
         checkMissingAttributes(user, null);
+        ignoreCustomObjectClassesForNonLDAP(customUser);
 
         user = userMgmtSrv.addUser(user, true);
         logger.debug("User created {}", user);
@@ -135,7 +142,7 @@ public class UserResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {ApiAccessConstants.USER_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response updateUser(@Valid CustomUser customUser)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
@@ -144,7 +151,9 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
-        //parse birthdate if present
+        ignoreCustomObjectClassesForNonLDAP(customUser);
+
+        // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
@@ -166,17 +175,19 @@ public class UserResource extends BaseResource {
     }
 
     @PATCH
-    @ProtectedApi(scopes = {ApiAccessConstants.USER_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
-                              @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException,
-            InvocationTargetException, JsonPatchException, IOException {
+            @NotNull UserPatchRequest userPatchRequest)
+            throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
         // check if user exists
         User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
-        //parse birthdate if present
+        ignoreCustomObjectClassesForNonLDAP(existingUser);
+
+        // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
 
@@ -196,7 +207,7 @@ public class UserResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.USER_DELETE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
     public Response deleteUser(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
@@ -231,7 +242,7 @@ public class UserResource extends BaseResource {
         users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
         logger.debug("Users fetched  - users:{}", users);
 
-        //parse birthdate if present
+        // parse birthdate if present
         users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
 
         // get customUser()
@@ -264,6 +275,7 @@ public class UserResource extends BaseResource {
             CustomUser customUser = new CustomUser();
             setParentAttributes(customUser, user);
             customUserList.add(customUser);
+            ignoreCustomObjectClassesForNonLDAP(customUser);
         }
         logger.debug("Custom Users - customUserList:{}", customUserList);
         return customUserList;
@@ -288,7 +300,7 @@ public class UserResource extends BaseResource {
         customUser.setOxAuthPersistentJwt(user.getOxAuthPersistentJwt());
         customUser.setUpdatedAt(user.getUpdatedAt());
         customUser.setUserId(user.getUserId());
-
+        ignoreCustomObjectClassesForNonLDAP(customUser);
         return setCustomUserAttributes(customUser, user);
     }
 
@@ -334,4 +346,17 @@ public class UserResource extends BaseResource {
         logger.debug("Custom User - user:{}", user);
         return user;
     }
+
+    private User ignoreCustomObjectClassesForNonLDAP(User user) {
+        String persistenceType = configurationService.getPersistenceType();
+        logger.debug("persistenceType: {}", persistenceType);
+        if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
+            logger.debug(
+                    "Setting CustomObjectClasses :{} to null as its used only for LDAP and current persistenceType is {} ",
+                    user.getCustomObjectClasses(), persistenceType);
+            user.setCustomObjectClasses(null);
+        }
+        return user;
+    }
+
 }

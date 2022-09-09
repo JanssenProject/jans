@@ -2860,7 +2860,7 @@ paths:
       description: Returns current session.
       operationId: get-sessions
       security:
-        - oauth2: [https://jans.io/oauth/jans-auth-server/session.readonly revoke_session]
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.readonly]
       tags:
         - Auth - Session Management
       responses:
@@ -2892,7 +2892,7 @@ paths:
       description: Revoke all sessions by userDn.
       operationId: revoke-user-session
       security:
-        - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete]
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete, revoke_session]
       tags:
         - Auth - Session Management
       responses:
@@ -7753,8 +7753,8 @@ components:
           description: Session status
           type: string
           enum:
-            - authenticated
-            - unauthenticated
+            - AUTHENTICATED
+            - UNAUTHENTICATED
         sessionState:
           description: state of session.
           type: string
