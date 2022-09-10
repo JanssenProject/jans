@@ -408,8 +408,7 @@ class JCA_CLI:
 
     def check_access_token(self):
         if not self.access_token :
-            print(self.colored_text("Access token was not found.", warning_color))
-            return
+            return False
 
         try:
             jwt.decode(self.access_token,
@@ -419,9 +418,12 @@ class JCA_CLI:
                             'verify_aud': False
                              }
                     )
+            return True
         except Exception as e:
             print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
             self.access_token = None
+
+        return False
 
 
     def guess_param_mapping(self, param_s):
@@ -688,9 +690,9 @@ class JCA_CLI:
     def get_access_token(self, scope):
         if self.use_test_client:
             self.get_scoped_access_token(scope)
-        elif not self.access_token:
-            self.check_access_token()
-            self.get_jwt_access_token()
+        else:
+             if not self.check_access_token():
+                self.get_jwt_access_token()
 
         if not self.use_test_client:
             self.swagger_configuration.access_token = self.access_token
