@@ -21,9 +21,9 @@ set -e
 # MYSQL_PASSWORD
 # ======================================================================================================================
 
+IS_JANS_DEPLOYED=/janssen/deployed
 # Functions
-
-install_gluu() {
+install_jans() {
   echo "*****   Writing properties!!   *****"
   echo "hostname=${CN_HOSTNAME}" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
@@ -59,13 +59,26 @@ install_gluu() {
 
 }
 
-install_gluu 2>&1 | tee setup_log
-/etc/init.d/apache2 start
-/opt/dist/scripts/jans-auth start
-/opt/dist/scripts/jans-client-api start
-/opt/dist/scripts/jans-config-api start
-/opt/dist/scripts/jans-scim start
-/opt/dist/scripts/jans-fido2 start
+check_installed_jans() {
+  if [ -f "$IS_JANS_DEPLOYED" ]; then
+    echo "Janssen Authorization has already been installed. Starting services..."
+  else
+    install_jans 2>&1 | tee setup_log || exit 1
+    touch "$IS_JANS_DEPLOYED"
+  fi
+}
+
+start_services() {
+  /etc/init.d/apache2 start
+  /opt/dist/scripts/jans-auth start
+  /opt/dist/scripts/jans-client-api start
+  /opt/dist/scripts/jans-config-api start
+  /opt/dist/scripts/jans-scim start
+  /opt/dist/scripts/jans-fido2 start
+}
+
+check_installed_jans
+start_services
 
 tail -f /opt/jans/jetty/jans-auth/logs/*.log \
 -f /opt/jans/jetty/jans-client-api/logs/*.log \

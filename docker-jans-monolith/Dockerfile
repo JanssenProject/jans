@@ -25,14 +25,14 @@ RUN DEBIAN_FRONTEND=noninteractive \
 RUN systemctl set-default multi-user.target \
     && systemctl mask dev-hugepages.mount sys-fs-fuse-connections.mount
 
-# Workkaround agetty high CPU. https://bugzilla.redhat.com/show_bug.cgi?id=1046469
+# Workaround agetty high CPU. https://bugzilla.redhat.com/show_bug.cgi?id=1046469
 RUN rm -f /lib/systemd/system/systemd*udev* \
     && rm -f /lib/systemd/system/getty.target
 
 HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
 # Ports required by jetty
-EXPOSE 443 8080 3306 33060 1636
+EXPOSE 443 8080 1636
 
 # =====================
 # jans-linux-setup
