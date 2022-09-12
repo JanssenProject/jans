@@ -5227,6 +5227,9 @@ components:
         keepAuthenticatorAttributesOnAcrChange:
           type: boolean
           description: Boolean value specifying whether to keep authenticator attributes on ACR change.
+        disableAuthnForMaxAgeZero:
+          type: boolean
+          description: Boolean value specifying whether to disable authentication when max_age=0 (false by default)
         deviceAuthzRequestExpiresIn:
           type: integer
           description: Expiration time given for device authorization requests.

@@ -36,6 +36,7 @@ import io.jans.as.server.service.external.session.SessionEventType;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -151,16 +152,26 @@ public class AuthorizeRestWebServiceValidator {
         if (maxAge == null) {
             maxAge = client.getDefaultMaxAge();
         }
+        if (maxAge == null) { // if not set, it's still valid
+            return true;
+        }
+
+        if (maxAge == 0) { // issue #2361: allow authentication for max_age=0
+            if (BooleanUtils.isTrue(appConfiguration.getDisableAuthnForMaxAgeZero())) {
+                return false;
+            }
+            return true;
+        }
+
 
         GregorianCalendar userAuthnTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         if (sessionUser.getAuthenticationTime() != null) {
             userAuthnTime.setTime(sessionUser.getAuthenticationTime());
         }
-        if (maxAge != null) {
-            userAuthnTime.add(Calendar.SECOND, maxAge);
-            return userAuthnTime.after(ServerUtil.now());
-        }
-        return true;
+
+        userAuthnTime.add(Calendar.SECOND, maxAge);
+        return userAuthnTime.after(ServerUtil.now());
+
     }
 
     public void validateRequestJwt(String request, String requestUri, RedirectUriResponse redirectUriResponse) {
