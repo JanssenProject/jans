@@ -5,8 +5,7 @@
 [Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. 
 
 ## Authentication flow
-```
-mermaid 
+```mermaid 
 sequenceDiagram
 	title Integrating DUO's Universal Prompt as an authentication method in Janssen server
 	autonumber 1
