@@ -75,11 +75,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#implement-two-step-authentication-using-janssen-server-and-duo-security" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -7566,85 +7561,10 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Passwordless
-          <span class="md-nav__icon md-icon"></span>
-        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Passwordless
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#enable-janssen-server-interception-script-for-duo" class="md-nav__link">
-    Enable Janssen Server Interception Script for Duo
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuring-duo-credentials" class="md-nav__link">
-    Configuring Duo credentials
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuring-custom-script-properties" class="md-nav__link">
-    Configuring Custom Script Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-casa-duo-plugin" class="md-nav__link">
-    Install Casa Duo plugin
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#make-duo-default-authentication-method" class="md-nav__link">
-    Make Duo Default Authentication Method
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#test" class="md-nav__link">
-    Test
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -10781,65 +10701,6 @@
   
   
   
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#enable-janssen-server-interception-script-for-duo" class="md-nav__link">
-    Enable Janssen Server Interception Script for Duo
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuring-duo-credentials" class="md-nav__link">
-    Configuring Duo credentials
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuring-custom-script-properties" class="md-nav__link">
-    Configuring Custom Script Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-casa-duo-plugin" class="md-nav__link">
-    Install Casa Duo plugin
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#make-duo-default-authentication-method" class="md-nav__link">
-    Make Duo Default Authentication Method
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#test" class="md-nav__link">
-    Test
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -10857,72 +10718,16 @@
 
 
 
-<h1 id="implement-two-step-authentication-using-janssen-server-and-duo-security">Implement Two-Step Authentication Using Janssen Server and Duo Security<a class="headerlink" href="#implement-two-step-authentication-using-janssen-server-and-duo-security" title="Permanent link">#</a></h1>
-<p>This document explains how to use Janssen Server Duo interception script to configure a two-step authentication process with username and password as the first step, and Duo as the second step. </p>
-<p><a href="https://duo.com/">Duo Security</a> is a SaaS authentication provider that supports multi-factor authentication including push-approvals, passcode, SMS-OTP etc. Duo provides web SDK via which clients like Janssen Server can integrate with Duo Security services. </p>
-<p><img alt="Duo integration diagram" src="../../../assets/image-duo-integration-diagram.png" /></p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
-<ul>
-<li>An account with Duo Security  </li>
-<li>User being authenticated will need to download the Duo mobile app</li>
-<li>Janssen Server with <a href="../../integration/casa/">Casa integrated</a> </li>
-</ul>
-<h2 id="enable-janssen-server-interception-script-for-duo">Enable Janssen Server Interception Script for Duo<a class="headerlink" href="#enable-janssen-server-interception-script-for-duo" title="Permanent link">#</a></h2>
-<ul>
-<li>Go to Janssen Server installation</li>
-<li>Get <code>duo_web</code> python library using commands below
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> /opt/jans/python/libs
-wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/auth/lib/duo_web.py
-sudo systemctl restart jans-auth
-</code></pre></div></li>
-<li>Use <code>jans-cli</code> to enable Duo script using instructions <a href="../../config-guide/jans-cli/im/im-custom-scripts/#update-custom-scripts">here</a>. Set the <code>enabled</code> property for Duo script to <code>true</code></li>
-<li>Confirm that the script has been marked enabled in <a href="../../config-guide/jans-cli/im/im-custom-scripts/#get-list-of-custom-scripts">CLI script listing</a>. Alternatively, access Janssen Server's OpenID Connect configuration endpoint at URL below. In the response JSON, find <code>duo</code> listed under <code>acr_values_supported</code>
-  <div class="highlight"><pre><span></span><code>https://jans-server-name/jans-auth/.well-known/openid-configuration
-</code></pre></div></li>
-</ul>
-<h2 id="configuring-duo-credentials">Configuring Duo credentials<a class="headerlink" href="#configuring-duo-credentials" title="Permanent link">#</a></h2>
-<ul>
-<li>In order to connect to Duo Security via web SDK, Janssen Server Duo interception script needs to be provided with credentials as below:<ul>
-<li>ikey (integration key): Obtained from Duo security account</li>
-<li>skey (secret key): Obtained from Duo security account</li>
-<li>akey: Is an random alphanumeric key that need to be generated by following the instructions under <code>Generate an akey</code> section <a href="https://duo.com/docs/duoweb-v2">here</a></li>
-</ul>
-</li>
-<li>Provide these values to the script by editing the placeholder JSON file located at <code>/etc/certs/duo_creds.json</code> on Janssen Server. Replace placeholders with actual values and save the file. Sample contents of <code>duo_creds.json</code> is shown below:</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="p">{</span><span class="nt">&quot;ikey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace-ikey-value&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;skey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace-skey-value&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;akey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace-akey-value&quot;</span><span class="p">}</span><span class="w"></span>
-</code></pre></div>
-<h2 id="configuring-custom-script-properties">Configuring Custom Script Properties<a class="headerlink" href="#configuring-custom-script-properties" title="Permanent link">#</a></h2>
-<ul>
-<li>
-<p>There are two mandatory properties that Janssen Server Duo interception script requires</p>
-<ul>
-<li><code>duo_creds_file</code> : Path to the file where values for ikey, skey and akey are stored. For example, <code>/etc/certs/duo_creds.json</code></li>
-<li><code>duo_host</code> : Name of the host supplied by the Duo Security for your web-sdk to connect. For example: <code>api-random.duosecurity.com</code></li>
-</ul>
-<p><a href="https://jans.io/docs/admin/config-guide/jans-cli/cli-custom-scripts/#update-an-existing-custom-script">Update the custom script</a> using <code>jans-cli</code> to set values for these two properties. </p>
-</li>
-</ul>
-<!--       There are other optional properties that you can set as per the requirements. Find complete list [here](TODO) -->
+  <h1>Passwordless</h1>
 
-<h2 id="install-casa-duo-plugin">Install Casa Duo plugin<a class="headerlink" href="#install-casa-duo-plugin" title="Permanent link">#</a></h2>
-<p>Follow <a href="https://gluu.org/docs/casa/plugins/duo/#add-the-plugin-to-casa">these instructions</a> to install Casa Duo plugin </p>
-<h2 id="make-duo-default-authentication-method">Make Duo Default Authentication Method<a class="headerlink" href="#make-duo-default-authentication-method" title="Permanent link">#</a></h2>
-<p>Change the default authentication method to <code>duo</code> using Jans-CLI by following <a href="../../config-guide/jans-cli/cli-default-authentication-method/#update-default-authentication-method">these</a> steps.   </p>
-<h2 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h2>
-<ul>
-<li>After installing Casa Duo plugin, option to enable Duo as an authentication method would become available on Casa administration console under <code>Enabled Authentication Methods</code>.</li>
-<li>Administrator can enable Duo Security as authentication method by checking the box and clicking on <code>Save</code></li>
-<li>At this point, any user can log into Casa and configure Duo as authentication method for individual's account using <a href="https://gluu.org/docs/casa/plugins/duo/#testing">these steps</a></li>
-<li>During the next login attempt, user will be first presented with login/password authentication, if successful, Duo authentication screen will be presented.</li>
-</ul>
+<p>This is a placeholder</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-29T06:00:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-12T16:46:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-12</span>
       
         <br>
         Created:
