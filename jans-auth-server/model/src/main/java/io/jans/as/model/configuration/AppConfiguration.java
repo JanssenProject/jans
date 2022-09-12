@@ -278,6 +278,7 @@ public class AppConfiguration implements Configuration {
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
+    private Boolean disableAuthnForMaxAgeZero;
     private Boolean keepAuthenticatorAttributesOnAcrChange = false;
     private int deviceAuthzRequestExpiresIn;
     private int deviceAuthzTokenPollInterval;
@@ -2136,6 +2137,14 @@ public class AppConfiguration implements Configuration {
 
     public void setKeepAuthenticatorAttributesOnAcrChange(Boolean keepAuthenticatorAttributesOnAcrChange) {
         this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
+    }
+
+    public Boolean getDisableAuthnForMaxAgeZero() {
+        return disableAuthnForMaxAgeZero;
+    }
+
+    public void setDisableAuthnForMaxAgeZero(Boolean disableAuthnForMaxAgeZero) {
+        this.disableAuthnForMaxAgeZero = disableAuthnForMaxAgeZero;
     }
 
     public String getBackchannelClientId() {
