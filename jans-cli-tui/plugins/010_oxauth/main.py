@@ -135,9 +135,9 @@ class Plugin():
         Args:
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
-        endpoint_args='limit:10'
+        endpoint_args ='limit:10'
         if pattern:
-            endpoint_args='limit:10,pattern:'+pattern
+            endpoint_args +=',pattern:'+pattern
 
         try :
             rsponse = self.app.cli_object.process_command_by_id(
@@ -215,24 +215,39 @@ class Plugin():
             start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
         """
         try :
-            result = self.app.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
-            data =[]
-            for d in result: 
-                data.append(
-                    [
-                    d['id'],
-                    d['description'],
-                    d['scopeType']
-                    ]
-                )
+            rsponse = self.app.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
+        except Exception as e:
+            self.app.show_message(_("Error getting scopes"), str(e))
+            return
 
-            clients = JansVerticalNav(
-                myparent=self,
+        if rsponse.status_code not in (200, 201):
+            self.app.show_message(_("Error getting scopes"), str(rsponse.text))
+            return
+
+        try:
+            result = rsponse.json()
+        except Exception:
+            self.app.show_message(_("Error getting scopes"), str(rsponse.text))
+            return
+
+
+        data =[]
+        for d in result: 
+            data.append(
+                [
+                d['id'],
+                d['description'],
+                d['scopeType']
+                ]
+            )
+
+        scopes = JansVerticalNav(
+                myparent=self.app,
                 headers=['id', 'Description', 'Type'],
                 preferred_size= [0,0,30,0],
                 data=data,
                 on_enter=self.edit_scope_dialog,
-                on_display=self.data_display_dialog,
+                on_display=self.app.data_display_dialog,
                 # selection_changed=self.data_selection_changed,
                 selectes=0,
                 headerColor='green',
@@ -240,23 +255,21 @@ class Plugin():
                 all_data=result
             )
 
-            buttons = []
-            if start_index > 0:
-                buttons.append(Button("Prev"))
-            if len(result) >= 10:
-                buttons.append(Button("Next"))
+        buttons = []
+        if start_index > 0:
+            buttons.append(Button("Prev"))
+        if len(result) >= 10:
+            buttons.append(Button("Next"))
 
-            self.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
-            self.oauth_data_container['scopes'] = HSplit([
-                clients,
-                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-            ])
+        self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
+        self.oauth_data_container['scopes'] = HSplit([
+            scopes,
+            VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
+        ])
 
-            get_app().invalidate()
+        get_app().invalidate()
 
-        except Exception as e:
-            self.oauth_data_container['scopes'] = HSplit([Label(_("Faild to Fitch client Data.. Reason: ") + str(e))], width=D())
-            get_app().invalidate()
+
 
     def oauth_get_scopes(self):
         """Method to get the Scopes data from server
@@ -357,3 +370,11 @@ class Plugin():
             return result
 
         ensure_future(coroutine())
+
+
+    def edit_scope_dialog(self, **params):
+        selected_line_data = params['data']  
+        title = _("Edit Scopes")
+
+        dialog = EditScopeDialogDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client)
+        self.app.show_jans_dialog(dialog)

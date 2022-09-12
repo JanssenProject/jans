@@ -52,7 +52,7 @@ result = cli_object.process_command_by_id(
         data_fn='',
         data={}
         )
-"""
+
 result = cli_object.process_command_by_id(
         operation_id='get-oauth-openid-clients',
         url_suffix='',
@@ -61,7 +61,8 @@ result = cli_object.process_command_by_id(
         data={}
         )
 
+"""
 
-
+result = cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
 
 print(result)
