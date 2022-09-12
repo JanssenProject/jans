@@ -328,6 +328,7 @@ class JCA_CLI:
 
 
     def check_connection(self):
+        self.cli_logger.debug("Checking connection")
         url = 'https://{}/jans-auth/restv1/token'.format(self.idp_host)
         try:
 
@@ -339,6 +340,7 @@ class JCA_CLI:
                     cert=self.mtls_client_cert
                 )
         except Exception as e:
+            self.cli_logger.error(str(e))
             if self.wrapped:
                 return str(e)
 
@@ -363,7 +365,9 @@ class JCA_CLI:
                 )
 
         if not response.status_code == 200:
+            config['DEFAULT']['access_token_enc'] = ''
             self.access_token = None
+            write_config()
             return response.text
 
         return True
@@ -1387,7 +1391,6 @@ def main():
                 cli_object.get_sample_schema(args.schema)
             elif args.operation_id:
                 cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
-            print()
 
     #except Exception as e:
     #    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
