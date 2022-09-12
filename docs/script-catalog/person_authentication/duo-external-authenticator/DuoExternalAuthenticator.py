@@ -1,76 +1,55 @@
-# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
-# Copyright (c) 2020, Janssen Project
-#
-# Author: Yuriy Movchan
-#
-
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import AuthenticationService
-from io.jans.as.server.service import UserService
-from io.jans.service import MailService
-from io.jans.util import ArrayHelper
+from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service.common import UserService
 from io.jans.util import StringHelper
+from io.jans.util import ArrayHelper
 from java.util import Arrays
+from io.jans.as.server.service.net import HttpService
+import os
+import java
+import sys
+from com.duosecurity import Client
+from com.duosecurity.exception import DuoException
+from com.duosecurity.model import Token
+from io.jans.jsf2.service import FacesService
+from jakarta.faces.context import FacesContext
+from io.jans.jsf2.message import FacesMessages
+from io.jans.as.server.util import ServerUtil
 
-import duo_web
-import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Duo. Initialization"
-
-        duo_creds_file = configurationAttributes.get("duo_creds_file").getValue2()
-        # Load credentials from file
-        f = open(duo_creds_file, 'r')
-        try:
-            creds = json.loads(f.read())
-        except:
-            print "Duo. Initialization. Failed to load creds from file:", duo_creds_file
-            return False
-        finally:
-            f.close()
-
-        self.ikey = str(creds["ikey"])
-        self.skey = str(creds["skey"])
-        self.akey = str(creds["akey"])
-
-        self.use_duo_group = False
-        if (configurationAttributes.containsKey("duo_group")):
-            self.duo_group = configurationAttributes.get("duo_group").getValue2()
-            self.use_duo_group = True
-            print "Duo. Initialization. Using Duo only if user belong to group:", self.duo_group
-
-        self.use_audit_group = False
-        if (configurationAttributes.containsKey("audit_group")):
-            self.audit_group = configurationAttributes.get("audit_group").getValue2()
-
-            if (not configurationAttributes.containsKey("audit_group_email")):
-                print "Duo. Initialization. Property audit_group_email is not specified"
-                return False
-
-            self.audit_email = configurationAttributes.get("audit_group_email").getValue2()
-            self.use_audit_group = True
-
-            print "Duo. Initialization. Using audito group:", self.audit_group
+        print "Duo-Universal. Initialization"
+        
+        if (not configurationAttributes.containsKey("client_id")):
+	        print "Duo Universal. Initialization. Property client_id is not specified"
+	        return False
+        else: 
+        	self.client_id = configurationAttributes.get("client_id").getValue2() 
+        	
+        if (not configurationAttributes.containsKey("client_secret")):
+	        print "Duo Universal. Initialization. Property client_secret is not specified"
+	        return False
+        else: 
+        	self.client_secret = configurationAttributes.get("client_secret").getValue2() 
+        	
+        if (not configurationAttributes.containsKey("api_hostname")):
+	        print "Duo Universal. Initialization. Property api_hostname is not specified"
+	        return False
+        else: 
+        	self.api_hostname = configurationAttributes.get("api_hostname").getValue2() 
             
-        if (self.use_duo_group or self.use_audit_group):
-            if (not configurationAttributes.containsKey("audit_attribute")):
-                print "Duo. Initialization. Property audit_attribute is not specified"
-                return False
-            else:
-                self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
-
-        print "Duo. Initialized successfully"
+        print "Duo-Universal. Initialized successfully"
         return True   
 
     def destroy(self, configurationAttributes):
-        print "Duo. Destroy"
-        print "Duo. Destroyed successfully"
+        print "Duo-Universal. Destroy"
+        print "Duo-Universal. Destroyed successfully"
         return True
 
     def getApiVersion(self):
@@ -86,19 +65,19 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        duo_host = configurationAttributes.get("duo_host").getValue2()
-
-        authenticationService = CdiUtil.bean(AuthenticationService)
-
+        print "Duo-Universal. Authenticate for step %s" % step
+        
         identity = CdiUtil.bean(Identity)
-
         if (step == 1):
-            print "Duo. Authenticate for step 1"
+            authenticationService = CdiUtil.bean(AuthenticationService)
 
             # Check if user authenticated already in another custom script
             user = authenticationService.getAuthenticatedUser()
+            
             if user == None:
+                print "user is none"
                 credentials = identity.getCredentials()
+                
                 user_name = credentials.getUsername()
                 user_password = credentials.getPassword()
     
@@ -106,101 +85,81 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                     userService = CdiUtil.bean(UserService)
                     logged_in = authenticationService.authenticate(user_name, user_password)
-    
+    				
                 if (not logged_in):
+                    print "return false"
                     return False
-    
-                user = authenticationService.getAuthenticatedUser()
-
-            if (self.use_duo_group):
-                print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
-                is_member_duo_group = self.isUserMemberOfGroup(user, self.audit_attribute, self.duo_group)
-                if (is_member_duo_group):
-                    print "Duo. Authenticate for step 1. User '" + user.getUserId() + "' member of Duo group"
-                    duo_count_login_steps = 2
-                else:
-                    self.processAuditGroup(user)
-                    duo_count_login_steps = 1
-
-                identity.setWorkingParameter("duo_count_login_steps", duo_count_login_steps)
-
+                identity.setWorkingParameter('username',user_name)
             return True
+            
         elif (step == 2):
-            print "Duo. Authenticate for step 2"
-            user = authenticationService.getAuthenticatedUser()
-            if user == None:
-                print "Duo. Authenticate for step 2. Failed to determine user name"
-                return False
-
-            user_name = user.getUserId()
-
-            sig_response_array = requestParameters.get("sig_response")
-            if ArrayHelper.isEmpty(sig_response_array):
-                print "Duo. Authenticate for step 2. sig_response is empty"
-                return False
-
-            duo_sig_response = sig_response_array[0]
-
-            print "Duo. Authenticate for step 2. duo_sig_response: " + duo_sig_response
-
-            authenticated_username = duo_web.verify_response(self.ikey, self.skey, self.akey, duo_sig_response)
-
-            print "Duo. Authenticate for step 2. authenticated_username: " + authenticated_username + ", expected user_name: " + user_name
-
-            if (not StringHelper.equals(user_name, authenticated_username)):
-                return False
-
-            self.processAuditGroup(user)
-
-            return True
+               
+            identity = CdiUtil.bean(Identity)
+            
+            state = ServerUtil.getFirstValue(requestParameters, "state")
+ 			# Get state to verify consistency and originality
+            if  identity.getWorkingParameter('state_duo') == state :
+        	
+            	# Get authorization token to trade for 2FA
+            	duoCode = ServerUtil.getFirstValue(requestParameters, "duo_code")
+	        	try:
+	               token = self.duo_client.exchangeAuthorizationCodeFor2FAResult(duoCode, identity.getWorkingParameter('username'))
+                   print "token status %s " % token.getAuth_result().getStatus()
+	        	except:
+	                # Handle authentication failure.
+	               print "authentication failure", sys.exc_info()[1]
+	               return False
+	        
+	        # User successfully passed Duo authentication.
+	        
+	        if "allow" == token.getAuth_result().getStatus():
+	           return True
+	           
+	        return False
+                
         else:
+            print "Neither step 1 or 2" 
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        identity = CdiUtil.bean(Identity)
-        authenticationService = CdiUtil.bean(AuthenticationService)
-
-        duo_host = configurationAttributes.get("duo_host").getValue2()
-
+    	print "Duo-Universal. Prepare for step %s" % step
+        
         if (step == 1):
-            print "Duo. Prepare for step 1"
-
             return True
         elif (step == 2):
-            print "Duo. Prepare for step 2"
+        	identity = CdiUtil.bean(Identity)
+            user_name = identity.getWorkingParameter('username')
+        	facesContext = CdiUtil.bean(FacesContext)
+        	request = facesContext.getExternalContext().getRequest()
+        	httpService = CdiUtil.bean(HttpService)
+        	url = httpService.constructServerUrl(request) + "/postlogin.htm"
+        	
+        	try:
+	        	self.duo_client = Client(self.client_id,self.client_secret,self.api_hostname,url)
+	        	self.duo_client.healthCheck()
+	    	except:
+                print "Duo-Universal. Duo config error. Verify the values in Duo-Universal.conf are correct ", sys.exc_info()[1]
+                            
+                state = self.duo_client.generateState()
+                identity.setWorkingParameter("state_duo",state)
+                prompt_uri = self.duo_client.createAuthUrl(user_name, state)
+                
+                facesService = CdiUtil.bean(FacesService)
+                facesService.redirectToExternalURL(prompt_uri )
 
-            user = authenticationService.getAuthenticatedUser()
-            if (user == None):
-                print "Duo. Prepare for step 2. Failed to determine user name"
-                return False
-            user_name = user.getUserId()
-
-            duo_sig_request = duo_web.sign_request(self.ikey, self.skey, self.akey, user_name)
-            print "Duo. Prepare for step 2. duo_sig_request: " + duo_sig_request
-            
-            identity.setWorkingParameter("duo_host", duo_host)
-            identity.setWorkingParameter("duo_sig_request", duo_sig_request)
-
-            return True
+                return True
+                    
         else:
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        if step == 2:
-            return Arrays.asList("duo_count_login_steps", "cas2_user_uid")
-
-        return None
+        return Arrays.asList("state_duo", "username")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        identity = CdiUtil.bean(Identity)
-        if (identity.isSetWorkingParameter("duo_count_login_steps")):
-            return int(identity.getWorkingParameter("duo_count_login_steps"))
-
         return 2
 
     def getPageForStep(self, configurationAttributes, step):
-        if (step == 2):
-            return "/auth/duo/duologin.xhtml"
+        print "Duo-Universal. getPageForStep - %s " % step
         return ""
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
@@ -212,28 +171,4 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def isUserMemberOfGroup(self, user, attribute, group):
-        is_member = False
-        member_of_list = user.getAttributeValues(attribute)
-        if (member_of_list != None):
-            for member_of in member_of_list:
-                if StringHelper.equalsIgnoreCase(group, member_of) or member_of.endswith(group):
-                    is_member = True
-                    break
-
-        return is_member
-
-    def processAuditGroup(self, user):
-        if (self.use_audit_group):
-            is_member = self.isUserMemberOfGroup(user, self.audit_attribute, self.audit_group)
-            if (is_member):
-                print "Duo. Authenticate for processAuditGroup. User '" + user.getUserId() + "' member of audit group"
-                print "Duo. Authenticate for processAuditGroup. Sending e-mail about user '" + user.getUserId() + "' login to", self.audit_email
-                
-                # Send e-mail to administrator
-                user_id = user.getUserId()
-                mailService = CdiUtil.bean(MailService)
-                subject = "User log in: " + user_id
-                body = "User log in: " + user_id
-                mailService.sendMail(self.audit_email, subject, body)
+        
