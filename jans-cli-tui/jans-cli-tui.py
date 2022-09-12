@@ -200,9 +200,8 @@ class JansCliApp(Application):
                     response = self.cli_object.get_device_verification_code()
                     result = response.json()
 
-                    msg = _("Please visit verification url")+str(result['verification_uri'])+_("and enter user code ")+str(result['user_code'])+_(" in ")+str(result['expires_in'])+_(" secods")
-
-                    body = HSplit([Label(msg)])
+                    msg = _("Please visit verification url %s and enter user code %s in %d seconds.")
+                    body = HSplit([Label(msg % (result['verification_uri'], result['user_code'], result['expires_in']))])
                     dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
 
                     async def coroutine():
