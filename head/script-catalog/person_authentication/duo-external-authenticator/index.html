@@ -10898,9 +10898,8 @@
 <h2 id="integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server">Integrating DUO's Universal Prompt as an authentication method in Janssen server<a class="headerlink" href="#integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server" title="Permanent link">#</a></h2>
 <p><a href="https://duosecurity.com">Duo Security</a> is a SaaS authentication provider. This document will explain how to use Janssen's <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/DuoExternalAuthenticator.py">Duo interception script</a> to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. </p>
 <h2 id="authentication-flow">Authentication flow<a class="headerlink" href="#authentication-flow" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>mermaid 
-sequenceDiagram
-    title Integrating DUO&#39;s Universal Prompt as an authentication method in Janssen server
+<pre class="mermaid"><code>sequenceDiagram
+    title Integrating DUO's Universal Prompt as an authentication method in Janssen server
     autonumber 1
     Jans AS&lt;-User agent: Invoke /authorize endpoint
     Jans AS-&gt;User agent: Present Username password screen
@@ -10922,8 +10921,7 @@ sequenceDiagram
       Jans AS-&gt;Jans AS: 9. Dynamic enrollment or registration
     end
 
-    Jans AS-&gt;User agent: 10. write Jans session cookie
-</code></pre></div>
+    Jans AS-&gt;User agent: 10. write Jans session cookie</code></pre>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Janssen Server </li>
@@ -11062,7 +11060,7 @@ sequenceDiagram
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-12T14:04:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-12T14:18:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-12</span>
       
         <br>
         Created:
