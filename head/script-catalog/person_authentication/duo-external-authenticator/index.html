@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -9783,9 +9788,100 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Duo External Authenticator
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Duo External Authenticator
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server" class="md-nav__link">
+    Integrating DUO's Universal Prompt as an authentication method in Janssen server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-flow" class="md-nav__link">
+    Authentication flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-duo-account" class="md-nav__link">
+    Configure Duo Account
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-jans-auth-server-as" class="md-nav__link">
+    Configure Jans-auth server (AS)
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure Jans-auth server (AS)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-the-duo-universal-dependency-to-your-jans-auth-server" class="md-nav__link">
+    1. Add the duo-universal Dependency to your jans-auth server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-custom-script" class="md-nav__link">
+    2. Add custom script
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#make-duo-the-default-authentication-mechanism" class="md-nav__link">
+    Make Duo the Default Authentication Mechanism
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-the-feature" class="md-nav__link">
+    Test the feature
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10704,6 +10800,83 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server" class="md-nav__link">
+    Integrating DUO's Universal Prompt as an authentication method in Janssen server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-flow" class="md-nav__link">
+    Authentication flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-duo-account" class="md-nav__link">
+    Configure Duo Account
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-jans-auth-server-as" class="md-nav__link">
+    Configure Jans-auth server (AS)
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure Jans-auth server (AS)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-the-duo-universal-dependency-to-your-jans-auth-server" class="md-nav__link">
+    1. Add the duo-universal Dependency to your jans-auth server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-custom-script" class="md-nav__link">
+    2. Add custom script
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#make-duo-the-default-authentication-mechanism" class="md-nav__link">
+    Make Duo the Default Authentication Mechanism
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-the-feature" class="md-nav__link">
+    Test the feature
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -10722,14 +10895,174 @@
 
   <h1>Duo External Authenticator</h1>
 
-<p>This is a placeholder</p>
+<h2 id="integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server">Integrating DUO's Universal Prompt as an authentication method in Janssen server<a class="headerlink" href="#integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server" title="Permanent link">#</a></h2>
+<p><a href="https://duosecurity.com">Duo Security</a> is a SaaS authentication provider. This document will explain how to use Janssen's <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/DuoExternalAuthenticator.py">Duo interception script</a> to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. </p>
+<h2 id="authentication-flow">Authentication flow<a class="headerlink" href="#authentication-flow" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code>mermaid 
+sequenceDiagram
+    title Integrating DUO&#39;s Universal Prompt as an authentication method in Janssen server
+    autonumber 1
+    Jans AS&lt;-User agent: Invoke /authorize endpoint
+    Jans AS-&gt;User agent: Present Username password screen
+    User agent-&gt;Jans AS: Submit credentials
+    Jans AS-&gt;DUO Security Service: Redirects login request to IDP
+
+    loop n times - (multistep authentication)
+    DUO Security Service-&gt;User agent: Present universal prompt screen
+    User agent-&gt;DUO Security Service: Present credentials
+    end
+
+    DUO Security Service-&gt;Jans AS: return state, code(duo_code)
+    Jans AS-&gt;Jans AS: check state
+    Jans AS-&gt;DUO Security Service: send code (duo_code) in exchange for token
+    DUO Security Service -&gt;   Jans AS: token
+    Jans AS-&gt;Jans AS: inspect token if (token.getAuth_result().getStatus() == success), \nmark user as authenticated
+
+    opt if new user
+      Jans AS-&gt;Jans AS: 9. Dynamic enrollment or registration
+    end
+
+    Jans AS-&gt;User agent: 10. write Jans session cookie
+</code></pre></div>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<ul>
+<li>A Janssen Server </li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/DuoExternalAuthenticator.py">Duo interception script</a> (included in the default Janssen Server distribution);</li>
+<li>An account with <a href="https://duo.com/">Duo Security</a>.   </li>
+<li>Users should download the DUO mobile app</li>
+</ul>
+<h2 id="configure-duo-account">Configure Duo Account<a class="headerlink" href="#configure-duo-account" title="Permanent link">#</a></h2>
+<ol>
+<li>
+<p><a href="https://duo.com/">Sign up</a> for a Duo account.</p>
+</li>
+<li>
+<p>Log in to the Duo Admin Panel and navigate to Applications.</p>
+</li>
+<li>
+<p>Click Protect an Application and locate Web SDK in the applications list. Click Protect this Application to get your client ID, secret key, and API hostname.</p>
+</li>
+</ol>
+<p>For additional info for the steps refer to Duo's Web SDK 4, check <a href="https://duo.com/docs/duoweb-v4">this article</a>. </p>
+<h2 id="configure-jans-auth-server-as">Configure Jans-auth server (AS)<a class="headerlink" href="#configure-jans-auth-server-as" title="Permanent link">#</a></h2>
+<h3 id="1-add-the-duo-universal-dependency-to-your-jans-auth-server">1. Add the duo-universal Dependency to your jans-auth server<a class="headerlink" href="#1-add-the-duo-universal-dependency-to-your-jans-auth-server" title="Permanent link">#</a></h3>
+<p>The dependencies have to be added separately as mentioned in the steps below. Using a fat jar (duo-universal-sdk-1.0.3-with-dependencies.jar leads to conflicts.)</p>
+<ul>
+<li>[ ] Copy these jar files to the following jans-auth folder inside the Janssen Server chroot: <code>/opt/jans/jetty/jans-auth/custom/libs</code>
+<br/>Dependency jars: 
+        <br/><em> <a href="https://repo1.maven.org/maven2/com/duosecurity/duo-universal-sdk/1.0.3/duo-universal-sdk-1.0.3.jar">duo-universal-sdk-1.0.3.jar</a> ,
+                <br/></em> <a href="https://repo1.maven.org/maven2/com/squareup/retrofit2/converter-jackson/2.1.0/converter-jackson-2.1.0.jar">converter-jackson-2.1.0.jar</a> ,
+                <br/><em> <a href="https://repo1.maven.org/maven2/com/auth0/java-jwt/3.3.0/java-jwt-3.3.0.jar">java-jwt-3.3.0.jar</a>,
+                <br/></em> <a href="https://repo1.maven.org/maven2/com/squareup/okhttp3/logging-interceptor/3.3.1/logging-interceptor-3.3.1.jar">logging-interceptor-3.3.1.jar</a>,
+                <br/><em> <a href="https://repo1.maven.org/maven2/org/projectlombok/lombok/1.18.16/lombok-1.18.16.jar">lombok-1.18.16.jar</a>,
+                <br/></em> <a href="https://repo1.maven.org/maven2/com/squareup/retrofit2/retrofit/2.5.0/retrofit-2.5.0.jar">retrofit-2.5.0.jar</a>,
+                <br/><em> <a href="https://repo1.maven.org/maven2/com/squareup/okio/okio/2.9.0/okio-2.9.0.jar">okio-2.9.0.jar</a>,
+                <br/></em> <a href="https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/3.12.0/okhttp-3.12.0.jar">okhttp-3.12.0.jar</a>,
+                <br/>* <a href="https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/1.4.21/kotlin-stdlib-1.4.21.jar">kotlin-stdlib-1.4.21.jar</a>     </li>
+<li>[ ] Edit /opt/jans/jetty/jans-auth/webapps/jans-auth.xml and add the following line:
+<code>&lt;Set name="extraClasspath"&gt;./custom/libs/duo-universal-sdk-1.0.3.jar,./custom/libs/converter-jackson-2.1.0.jar,./custom/libs/java-jwt-3.3.0.jar,./custom/libs/logging-interceptor-3.3.1.jar,./custom/libs/lombok-1.18.16.jar,./custom/libs/retrofit-2.5.0.jar,./custom/libs/okio-2.9.0.jar,./custom/libs/okhttp-3.12.0.jar,./custom/libs/kotlin-stdlib-1.4.21.jar&lt;/Set&gt;</code></li>
+<li>[ ] Restart the <code>jans-auth</code> service</li>
+</ul>
+<h3 id="2-add-custom-script">2. Add custom script<a class="headerlink" href="#2-add-custom-script" title="Permanent link">#</a></h3>
+<ol>
+<li>Create <code>cs.json</code> with the contents of a CUSTOM script. To do that, run the following command.
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript &gt; /tmp/cs.json
+</code></pre></div></li>
+<li>Edit the file's contents to reflect the addition of the duo custom script. </li>
+<li>Set enabled flag <code>true</code></li>
+<li>
+<p>Configure the api_hostname, client_id and client_secret
+     |  Property    |Status     |   Description |   Example     |
+     |-----------------------|---------------|-----------------------|-----------------------|
+     |api_hostname      |Mandatory     |URL of the Duo API Server|api-random.duosecurity.com|
+     |client_id     |Mandatory    |Value from the Duo application using Web SDK 4 that was registered using DUO Admin console|DI3ICTTJKLL8PPPNGH7YI|
+     |client_secret |Mandatory|Value from the Duo application using Web SDK 4 that was registered using DUO Admin console|eEbJdi3hg42zxyFYbHArU5RuioPP|   </p>
+</li>
+<li>
+<p><code>name</code> field should reflect the use case</p>
+</li>
+<li><code>script_type</code> should be <code>PERSON_AUTHENTICATION</code></li>
+</ol>
+<p><div class="highlight"><pre><span></span><code>{
+  &quot;dn&quot;: null,
+  &quot;inum&quot;: null,
+  &quot;name&quot;: &quot;duo&quot;,
+  &quot;aliases&quot;: [],
+  &quot;description&quot;: &quot;DUO&#39;s custom script&quot;,
+  &quot;script&quot;: &quot;_file /root/script.py&quot;,
+  &quot;scriptType&quot;: &quot;PERSON_AUTHENTICATION&quot;,
+  &quot;programmingLanguage&quot;: &quot;JYTHON&quot;,
+  &quot;moduleProperties&quot;: {
+    &quot;value1&quot;: null,
+    &quot;value2&quot;: null,
+    &quot;description&quot;: null
+  },
+  &quot;configurationProperties&quot;: 
+
+[{
+    &quot;value1&quot;: &quot;api_hostname&quot;,
+    &quot;value2&quot;: &quot;api-random.duosecurity.com&quot;,
+    &quot;description&quot;: &quot;URL of the Duo API Server&quot;,
+    &quot;hide&quot;: true
+  },
+{
+    &quot;value1&quot;: &quot;client_id&quot;,
+    &quot;value2&quot;: &quot;DI3ICTTJKLL8PPPNGH7YI&quot;,
+    &quot;description&quot;: &quot;Value from the Duo application using Web SDK 4 that was registered using DUO Admin console&quot;,
+    &quot;hide&quot;: true
+  },
+  {
+    &quot;value1&quot;: &quot;client_secret&quot;,
+    &quot;value2&quot;: &quot;eEbJdi3hg42zxyFYbHArU5RuioPP&quot;,
+    &quot;description&quot;: &quot;Value from the Duo application using Web SDK 4 that was registered using DUO Admin console&quot;,
+    &quot;hide&quot;: true
+  }
+]
+,
+  &quot;level&quot;: &quot;integer&quot;,
+  &quot;revision&quot;: 0,
+  &quot;enabled&quot;: true,
+  &quot;scriptError&quot;: {
+    &quot;raisedAt&quot;: null,
+    &quot;stackTrace&quot;: null
+  },
+  &quot;modified&quot;: false,
+  &quot;internal&quot;: false
+}
+</code></pre></div>
+3. Add the custom script 
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
+</code></pre></div></p>
+<p>Now Duo is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request Duo authentication for users. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>. </p>
+</div>
+<h2 id="make-duo-the-default-authentication-mechanism">Make Duo the Default Authentication Mechanism<a class="headerlink" href="#make-duo-the-default-authentication-mechanism" title="Permanent link">#</a></h2>
+<p>For CURL commands, use this <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/config-guide/curl.md#2-enable-an-authentication-script">link</a> as a reference.</p>
+<p>Steps:
+1. Create a file say <code>duo-auth-default.json</code> with the following contents
+<div class="highlight"><pre><span></span><code>{
+  &quot;defaultAcr&quot;: &quot;duo&quot;
+}
+</code></pre></div>
+2.Update the default authentication method to Google Sign-in
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/duo-auth-default.json
+</code></pre></div>
+:memo: <strong>NOTE</strong></p>
+<p>To make sure <code>duo</code> has been enabled successfully as a default authentication method, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>. </p>
+<h2 id="test-the-feature">Test the feature<a class="headerlink" href="#test-the-feature" title="Permanent link">#</a></h2>
+<p>To test , enter the complete URL for authorization in a browser or create a simple web page with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>
+<p>An example of a complete URL looks like this -
+<div class="highlight"><pre><span></span><code>https://&lt;your.jans.server&gt;/jans-auth/authorize.htm?response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin&amp;client_id=&lt;replace_with_inum_client_id&gt;&amp;scope=openid+profile+email+user_name&amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff
+</code></pre></div></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-22T08:49:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-12T14:04:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-12</span>
       
         <br>
         Created:
