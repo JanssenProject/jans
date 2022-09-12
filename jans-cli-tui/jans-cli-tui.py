@@ -188,6 +188,8 @@ class JansCliApp(Application):
 
         status = self.cli_object.check_connection()
 
+        self.logger.info("OpenID Configuration: %s", self.cli_object.openid_configuration)
+
         self.press_tab()
 
         if status not in (True, 'ID Token is expired'):
@@ -411,6 +413,7 @@ class JansCliApp(Application):
 
 
     def getTitledWidget(self, title, name, widget, jans_help='', style=''):
+        title += ': '
         widget.window.jans_name = name
         widget.window.jans_help = jans_help
         #li, w2, width = self.handle_long_string(title, widget.values, widget)

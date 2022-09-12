@@ -283,32 +283,41 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         ]
                             )
 
-        self.tabs['Encryption/Signing'] = HSplit([
+
+        encryption_signing = [
                         self.myparent.getTitledText(title =_("Client JWKS URI"), name='jwksUri', value=self.data.get('jwksUri',''),style='green'),
                         self.myparent.getTitledText(title =_("Client JWKS"), name='jwks', value=self.data.get('jwks',''),style='green'),
-                        VSplit([
-                            Label(text=_("id_token")), 
-                            Label(text="a, b, c",style='red'),
-                        ]),
-                        VSplit([
-                            Label(text=_("Access token")), 
-                            Label(text="a",style='red'),
-                        ]),
-                        VSplit([
-                            Label(text=_("Userinfo")), 
-                            Label(text="a, b, c",style='red'),
-                        ]),
-                        VSplit([
-                            Label(text=_("JARM")), 
-                            Label(text="a, b, c",style='red'),
-                        ]),
-                        VSplit([
-                            Label(text=_("Request Object")), 
-                            Label(text="a, b, c",style='red'),
-                        ]),
-
                         ]
-                            )
+
+
+        for title, swagger_key, openid_key  in (
+
+                (_("ID Token Alg for Signing "), 'idTokenSignedResponseAlg', 'id_token_signing_alg_values_supported'),
+                (_("ID Token Alg for Encryption"), 'idTokenEncryptedResponseAlg', 'id_token_encryption_alg_values_supported'),
+                (_("ID Token Enc for Encryption"), 'idTokenEncryptedResponseEnc', 'id_token_encryption_enc_values_supported'),
+                #(_("Access Token Alg for Signing "), 'accessTokenSigningAlg', 'id_token_signing_alg_values_supported'), #?? openid key
+
+                (_("User Info for Signing "), 'userInfoSignedResponseAlg', 'userinfo_signing_alg_values_supported'),
+                (_("User Info Alg for Encryption"), 'userInfoEncryptedResponseAlg', 'userinfo_encryption_alg_values_supported'),
+                (_("User Info Enc for Encryption"), 'userInfoEncryptedResponseEnc', 'userinfo_encryption_enc_values_supported'),
+
+                (_("Request Object Alg for Signing "), 'requestObjectSigningAlg', 'request_object_signing_alg_values_supported'),
+                (_("Request Object Alg for Encryption"), 'requestObjectEncryptionAlg', 'request_object_encryption_alg_values_supported'),
+                (_("Request Object Enc for Encryption"), 'requestObjectEncryptionEnc', 'request_object_encryption_enc_values_supported'),
+                ):
+
+            encryption_signing.append(self.myparent.getTitledWidget(
+                                title,
+                                name=swagger_key,
+                                widget=DropDownWidget(
+                                    values=[ (alg, alg) for alg in self.myparent.cli_object.openid_configuration[openid_key] ],
+                                    value=self.data.get(swagger_key)
+                                    ),
+                                jans_help=self.myparent.get_help_from_schema(schema, swagger_key),
+                                style='green'))
+
+
+        self.tabs['Encryption/Signing'] = HSplit(encryption_signing)
 
         def allow_spontaneous_changed(cb):
             self.spontaneous_scopes.me.window.style = 'underline ' + (self.myparent.styles['textarea'] if cb.checked else self.myparent.styles['textarea-readonly'])

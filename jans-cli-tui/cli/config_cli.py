@@ -222,6 +222,7 @@ class JCA_CLI:
         self.wrapped = __name__ != "__main__"
         self.access_token = access_token or config['DEFAULT'].get('access_token')
         self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.idp_host)
+        self.discovery_endpoint = '/.well-known/openid-configuration'
         self.set_user()
         self.plugins()
 
@@ -369,6 +370,23 @@ class JCA_CLI:
             self.access_token = None
             write_config()
             return response.text
+
+        try:
+            response = requests.get(
+                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
+                    headers=self.get_request_header({'Accept': 'application/json'}),
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+        except Exception as e:
+            self.cli_logger.error(str(e))
+            if self.wrapped:
+                return str(e)
+
+            raise ValueError(
+                self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
+
+        self.openid_configuration = response.json()
 
         return True
 
