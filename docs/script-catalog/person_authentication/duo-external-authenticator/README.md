@@ -7,29 +7,25 @@
 ## Authentication flow
 ```mermaid 
 sequenceDiagram
-	title Integrating DUO's Universal Prompt as an authentication method in Janssen server
-	autonumber 1
-	Jans AS<-User agent: Invoke /authorize endpoint
-	Jans AS->User agent: Present Username password screen
-	User agent->Jans AS: Submit credentials
-	Jans AS->DUO Security Service: Redirects login request to IDP
-
-	loop n times - (multistep authentication)
-	DUO Security Service->User agent: Present universal prompt screen
-	User agent->DUO Security Service: Present credentials
-	end
-
-	DUO Security Service->Jans AS: return state, code(duo_code)
-	Jans AS->Jans AS: check state
-	Jans AS->DUO Security Service: send code (duo_code) in exchange for token
-	DUO Security Service ->   Jans AS: token
-	Jans AS->Jans AS: inspect token if (token.getAuth_result().getStatus() == success), \nmark user as authenticated
-
-	opt if new user
-	  Jans AS->Jans AS: 9. Dynamic enrollment or registration
-	end
-
-	Jans AS->User agent: 10. write Jans session cookie
+title Integrating DUO's Universal Prompt as an authentication method in Janssen server
+autonumber 1
+RP->Jans AS: Invoke /authorize endpoint
+Jans AS->RP: Present Username password screen
+RP->Jans AS: Submit credentials
+Jans AS->DUO Security Service: Redirects login request to IDP
+loop n times - (multistep authentication)
+DUO Security Service->RP: Present universal prompt screen
+RP->DUO Security Service: Present credentials
+end
+DUO Security Service->Jans AS: return state, code(duo_code)
+Jans AS->Jans AS: check state
+Jans AS->DUO Security Service: send code (duo_code) in exchange for token
+DUO Security Service ->   Jans AS: token
+Jans AS->Jans AS: inspect token if (token.getAuth_result().getStatus() == success), \nmark user as authenticated
+opt if new user
+Jans AS->Jans AS: 9. Dynamic enrollment or registration
+end
+Jans AS->RP: 10. write Jans session cookie
 ```
 
 ## Prerequisites
