@@ -1916,10 +1916,21 @@ paths:
           content:
             application/json:
               schema:
-                title: OpenID Clients.
-                description: List of OpenID clients.
-                items:
-                  $ref: '#/components/schemas/Client'
+                title: OpenID clients paginated result
+                description: OpenID clients paginated result
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    description: Total number of records in the database.
+                  entriesCount:
+                    type: integer
+                    description: Total number of records in the response.
+                  data:
+                    description: List of OpenID clients.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Client'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2564,14 +2575,67 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/AgamaFlow'
+                title: Agama Flow paginated result
+                description: Agama Flow paginated result
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    description: Total number of records in the database.
+                  entriesCount:
+                    type: integer
+                    description: Total number of records in the response.
+                  data:
+                    description: List of all Agama Flow.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgamaFlow'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.readonly]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: qname
+          in: query
+          name: sortBy
+          description: Flow whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: includeSource
+          description: Boolean value true indcates source to be included in response.
+  
     post:
       summary: Create a new agama flow.
       description: Create a new agama flow.
@@ -7801,3 +7865,5 @@ components:
           type: boolean
           description: indicates if the parameter by default will be returned in response.
           default: false
+		  
+		  

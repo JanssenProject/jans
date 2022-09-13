@@ -10,12 +10,16 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
+import io.jans.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.GluuAttribute;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
+import io.jans.orm.model.PagedResult;
 import io.jans.service.custom.CustomScriptService;
 import io.jans.util.StringHelper;
 
@@ -55,12 +59,25 @@ public class CustomScriptResource extends ConfigBaseResource {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SCRIPTS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScript.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
-    public Response getAllCustomScripts() {
+    public Response getAllCustomScripts( @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Search Custom Script filters with limit:{}, pattern:{}, status:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(status), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder));
+        }
+        
         List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
         logger.debug("Custom Scripts:{}", customScripts);
         return Response.ok(customScripts).build();
@@ -245,5 +262,23 @@ public class CustomScriptResource extends ConfigBaseResource {
         logger.debug(" Custom Script Resource after patch - existingScript:{}", existingScript);
         return Response.ok(existingScript).build();
     }
+    
+    private PagedResult<CustomScript> doSearch(SearchRequest searchReq, CustomScriptType type) {
+
+        logger.debug("GluuAttribute search params - searchReq:{} , type:{} ", searchReq, type);
+
+        PagedResult<CustomScript> pagedResult = customScriptService.searchFlows(searchReq, type);
+
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        if (pagedResult != null) {
+            logger.debug(
+                    "GluuAttributes fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+        }
+
+        logger.debug("GluuAttributes fetched new  - pagedResult:{} ", pagedResult);
+        return pagedResult;
+    }
+
 
 }

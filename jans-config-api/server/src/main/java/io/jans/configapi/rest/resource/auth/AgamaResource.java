@@ -16,13 +16,15 @@ import io.jans.agama.dsl.TranspilerException;
 import io.jans.agama.dsl.error.SyntaxException;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.service.auth.AgamaFlowService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.exception.EntryPersistenceException;
-
+import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -61,34 +63,34 @@ public class AgamaResource extends ConfigBaseResource {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/agama.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Agama Flows", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Flow.class)))),
+            @ApiResponse(responseCode = "200", description = "Agama Flows", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS })
     public Response getFlows(@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @DefaultValue("qname") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Search Agama Flow with pattern:{}, sizeLimit:{}, includeSource:{}", escapeLog(pattern),
-                    escapeLog(limit), escapeLog(includeSource));
+            logger.debug(
+                    "Search Agama Flow with pattern:{}, limit:{}, startIndex:{}, sortBy:{}, sortOrder:{}, includeSource:{}",
+                    escapeLog(pattern), escapeLog(limit), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder), escapeLog(includeSource));
         }
 
-        List<Flow> flows = null;
-        if (!pattern.isEmpty() && pattern.length() >= 2) {
-            flows = agamaFlowService.searchAgamaFlows(pattern, limit);
-        } else {
-            flows = agamaFlowService.getAllAgamaFlows(limit);
-        }
+        SearchRequest searchReq = createSearchRequest(agamaFlowService.getAgamaFlowDn(null), pattern, sortBy, sortOrder,
+                startIndex, limit, null, null, this.getMaxCount());
 
-        flows = flows.stream().map(f -> minimize(f, includeSource)).collect(Collectors.toList());
-        return Response.ok(flows).build();
+        return Response.ok(doSearch(searchReq, includeSource)).build();
     }
 
     @Operation(summary = "Gets an agama flow based on Qname.", description = "Gets an agama flow based on Qname.", operationId = "get-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.readonly" }) )
+                    "https://jans.io/oauth/config/agama.readonly" }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -219,7 +221,7 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Partially modify a Agama Flow", description = "Partially modify a Agama Flow", operationId = "patch-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }) )
+                    "https://jans.io/oauth/config/agama.write" }))
     @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Patched Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
@@ -402,6 +404,25 @@ public class AgamaResource extends ConfigBaseResource {
         }
         return flow;
 
+    }
+
+    private PagedResult<Flow> doSearch(SearchRequest searchReq, boolean includeSource) {
+
+        logger.debug("Filters for Searching Agama Flow  - searchReq:{}, includeSource:{} ", searchReq, includeSource);
+
+        PagedResult<Flow> pagedResult = agamaFlowService.searchFlows(searchReq);
+
+        logger.debug("Agama Flow PagedResult  - pagedResult:{}", pagedResult);
+        if (pagedResult != null) {
+            logger.debug(
+                    "Agama Flow fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+            List<Flow> flows = pagedResult.getEntries();
+            flows = flows.stream().map(f -> minimize(f, includeSource)).collect(Collectors.toList());
+            pagedResult.setEntries(flows);
+        }
+        logger.debug("Agama Flow fetched new  - pagedResult:{} ", pagedResult);
+        return pagedResult;
     }
 
 }

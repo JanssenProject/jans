@@ -35,11 +35,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
+import static io.jans.as.model.util.Util.escapeLog;
 
-import org.json.JSONObject;
+import java.io.IOException;
+
 import org.slf4j.Logger;
 
 /**
@@ -63,17 +62,25 @@ public class AttributesResource extends ConfigBaseResource {
     @Operation(summary = "Gets a list of Gluu attributes.", description = "Gets a list of Gluu attributes.", operationId = "get-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GluuAttribute.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS })
-    public Response getAttributes(@DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+    public Response getAttributes(
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
             @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Search Attribute filters with limit:{}, pattern:{}, status:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(status), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder));
+        }
 
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount());
@@ -188,28 +195,21 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private Map<String, Object> doSearch(SearchRequest searchReq, String status) {
+    private PagedResult<GluuAttribute> doSearch(SearchRequest searchReq, String status) {
 
         logger.debug("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
         PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
 
         logger.debug("PagedResult  - pagedResult:{}", pagedResult);
-        JSONObject dataJsonObject = new JSONObject();
         if (pagedResult != null) {
-            logger.debug("GluuAttributes fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
-            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, pagedResult.getTotalEntriesCount());
-            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, pagedResult.getEntriesCount());
-            dataJsonObject.put(ApiConstants.DATA, pagedResult.getEntries());
+            logger.debug(
+                    "GluuAttributes fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
         }
-        else {
-            dataJsonObject.put(ApiConstants.TOTAL_ITEMS, 0);
-            dataJsonObject.put(ApiConstants.ENTRIES_COUNT, 0);
-            dataJsonObject.put(ApiConstants.DATA, Collections.emptyList());
-        }
-       
-        logger.debug("GluuAttributes fetched new  - dataJsonObject:{}, data:{} ", dataJsonObject, dataJsonObject.toMap());
-        return dataJsonObject.toMap();
-     }
+
+        logger.debug("GluuAttributes fetched new  - pagedResult:{} ", pagedResult);
+        return pagedResult;
+    }
 
 }
