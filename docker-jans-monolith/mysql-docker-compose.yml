@@ -48,7 +48,6 @@ services:
       - ./jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom
       - ./jans-fido2-custom:/opt/jans/jetty/jans-fido2/custom
       - ./jans-scim-custom:/opt/jans/jetty/jans-scim/custom
-      - ./jans-deployed:/janssen
 volumes:
   db-data:
 networks:
