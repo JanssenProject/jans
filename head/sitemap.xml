@@ -1091,11 +1091,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/scripts/person-authentication-fido2/</loc>
-         <lastmod>2022-09-13</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/person-authentication-interface/</loc>
          <lastmod>2022-09-13</lastmod>
          <changefreq>daily</changefreq>
