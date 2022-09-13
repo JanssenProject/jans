@@ -10899,29 +10899,25 @@
 <p><a href="https://duosecurity.com">Duo Security</a> is a SaaS authentication provider. This document will explain how to use Janssen's <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/DuoExternalAuthenticator.py">Duo interception script</a> to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. </p>
 <h2 id="authentication-flow">Authentication flow<a class="headerlink" href="#authentication-flow" title="Permanent link">#</a></h2>
 <pre class="mermaid"><code>sequenceDiagram
-    title Integrating DUO's Universal Prompt as an authentication method in Janssen server
-    autonumber 1
-    Jans AS&lt;-User agent: Invoke /authorize endpoint
-    Jans AS-&gt;User agent: Present Username password screen
-    User agent-&gt;Jans AS: Submit credentials
-    Jans AS-&gt;DUO Security Service: Redirects login request to IDP
-
-    loop n times - (multistep authentication)
-    DUO Security Service-&gt;User agent: Present universal prompt screen
-    User agent-&gt;DUO Security Service: Present credentials
-    end
-
-    DUO Security Service-&gt;Jans AS: return state, code(duo_code)
-    Jans AS-&gt;Jans AS: check state
-    Jans AS-&gt;DUO Security Service: send code (duo_code) in exchange for token
-    DUO Security Service -&gt;   Jans AS: token
-    Jans AS-&gt;Jans AS: inspect token if (token.getAuth_result().getStatus() == success), \nmark user as authenticated
-
-    opt if new user
-      Jans AS-&gt;Jans AS: 9. Dynamic enrollment or registration
-    end
-
-    Jans AS-&gt;User agent: 10. write Jans session cookie</code></pre>
+title Integrating DUO's Universal Prompt as an authentication method in Janssen server
+autonumber 1
+RP-&gt;Jans AS: Invoke /authorize endpoint
+Jans AS-&gt;RP: Present Username password screen
+RP-&gt;Jans AS: Submit credentials
+Jans AS-&gt;DUO Security Service: Redirects login request to IDP
+loop n times - (multistep authentication)
+DUO Security Service-&gt;RP: Present universal prompt screen
+RP-&gt;DUO Security Service: Present credentials
+end
+DUO Security Service-&gt;Jans AS: return state, code(duo_code)
+Jans AS-&gt;Jans AS: check state
+Jans AS-&gt;DUO Security Service: send code (duo_code) in exchange for token
+DUO Security Service -&gt;   Jans AS: token
+Jans AS-&gt;Jans AS: inspect token if (token.getAuth_result().getStatus() == success), \nmark user as authenticated
+opt if new user
+Jans AS-&gt;Jans AS: 9. Dynamic enrollment or registration
+end
+Jans AS-&gt;RP: 10. write Jans session cookie</code></pre>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Janssen Server </li>
@@ -11060,7 +11056,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-12T14:18:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-13T07:05:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-13</span>
       
         <br>
         Created:
