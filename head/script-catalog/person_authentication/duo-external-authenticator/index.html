@@ -10901,23 +10901,23 @@
 <pre class="mermaid"><code>sequenceDiagram
 title Integrating DUO's Universal Prompt as an authentication method in Janssen server
 autonumber 1
-RP-&gt;Jans AS: Invoke /authorize endpoint
-Jans AS-&gt;RP: Present Username password screen
-RP-&gt;Jans AS: Submit credentials
-Jans AS-&gt;DUO Security Service: Redirects login request to IDP
+RP-&gt;&gt;Jans AS: Invoke /authorize endpoint
+Jans AS-&gt;&gt;RP: Present Username password screen
+RP-&gt;&gt;Jans AS: Submit credentials
+Jans AS-&gt;&gt;DUO Security Service: Redirects login request to IDP
 loop n times - (multistep authentication)
-DUO Security Service-&gt;RP: Present universal prompt screen
-RP-&gt;DUO Security Service: Present credentials
+DUO Security Service-&gt;&gt;RP: Present universal prompt screen
+RP-&gt;&gt;DUO Security Service: Present credentials
 end
-DUO Security Service-&gt;Jans AS: return state, code(duo_code)
-Jans AS-&gt;Jans AS: check state
-Jans AS-&gt;DUO Security Service: send code (duo_code) in exchange for token
-DUO Security Service -&gt;   Jans AS: token
-Jans AS-&gt;Jans AS: inspect token if (token.getAuth_result().getStatus() == success), \nmark user as authenticated
+DUO Security Service-&gt;&gt;Jans AS: return state, code(duo_code)
+Jans AS-&gt;&gt;Jans AS: check state
+Jans AS-&gt;&gt;DUO Security Service: send code (duo_code) in exchange for token
+DUO Security Service -&gt;&gt;   Jans AS: token
+Jans AS-&gt;&gt;Jans AS: inspect token if (token.getAuth_result().getStatus() == success), \nmark user as authenticated
 opt if new user
-Jans AS-&gt;Jans AS: 9. Dynamic enrollment or registration
+Jans AS-&gt;&gt;Jans AS: 9. Dynamic enrollment or registration
 end
-Jans AS-&gt;RP: 10. write Jans session cookie</code></pre>
+Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Janssen Server </li>
@@ -11056,7 +11056,7 @@ Jans AS-&gt;RP: 10. write Jans session cookie</code></pre>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-13T07:05:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-13T16:41:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-13</span>
       
         <br>
         Created:
