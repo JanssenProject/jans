@@ -223,6 +223,7 @@ class JCA_CLI:
         self.access_token = access_token or config['DEFAULT'].get('access_token')
         self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.idp_host)
         self.discovery_endpoint = '/.well-known/openid-configuration'
+        self.openid_configuration = {}
         self.set_user()
         self.plugins()
 
