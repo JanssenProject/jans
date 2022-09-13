@@ -376,5 +376,5 @@ class Plugin():
         selected_line_data = params['data']  
         title = _("Edit Scopes")
 
-        dialog = EditScopeDialogDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client)
+        dialog = EditScopeDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client)
         self.app.show_jans_dialog(dialog)
