@@ -14,7 +14,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -100,7 +100,7 @@ public class ClientService implements Serializable {
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, null);
     }
 
-    public PagedResult<Client> searchClients(SearchRequest searchRequest) {
+    public PagedResult<Client> getClients(SearchRequest searchRequest) {
         if (logger.isDebugEnabled()) {
             logger.debug("Search Clients with searchRequest:{}", escapeLog(searchRequest));
         }

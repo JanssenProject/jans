@@ -4,10 +4,11 @@ package io.jans.configapi.service.auth;
 import io.jans.agama.model.Flow;
 import io.jans.agama.model.FlowMetadata;
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.configapi.core.model.SearchRequest;
+
 import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.util.AuthUtil;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;

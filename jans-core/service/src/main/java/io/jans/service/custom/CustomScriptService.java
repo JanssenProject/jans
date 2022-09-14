@@ -38,7 +38,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
         return String.format("ou=scripts,%s", organizationService.getDnForOrganization(null));
     }
 
-    public PagedResult<CustomScript> searchFlows(SearchRequest searchRequest, CustomScriptType type) {
+    public PagedResult<CustomScript> searchScripts(SearchRequest searchRequest, CustomScriptType type) {
         log.debug("Search CustomScript with searchRequest:{}, type:{}", searchRequest, type);
 
         Filter searchFilter = null;

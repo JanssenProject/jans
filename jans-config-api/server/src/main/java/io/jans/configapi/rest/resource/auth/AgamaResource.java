@@ -17,12 +17,12 @@ import io.jans.agama.dsl.error.SyntaxException;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.service.auth.AgamaFlowService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.SearchRequest;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -421,7 +421,7 @@ public class AgamaResource extends ConfigBaseResource {
             flows = flows.stream().map(f -> minimize(f, includeSource)).collect(Collectors.toList());
             pagedResult.setEntries(flows);
         }
-        logger.debug("Agama Flow fetched new  - pagedResult:{} ", pagedResult);
+        logger.debug("Agama Flow pagedResult:{} ", pagedResult);
         return pagedResult;
     }
 

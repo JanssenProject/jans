@@ -14,7 +14,6 @@ import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ScopeService;
@@ -23,6 +22,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
@@ -48,12 +48,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-
-import org.json.JSONObject;
 
 /**
  * @author Mougang T.Gasmyr
@@ -284,7 +280,7 @@ public class ClientsResource extends ConfigBaseResource {
             logger.debug("Client search params - searchReq:{} ", escapeLog(searchReq));
         }
 
-        PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
+        PagedResult<Client> pagedResult = clientService.getClients(searchReq);
         if (logger.isTraceEnabled()) {
             logger.trace("PagedResult  - pagedResult:{}", pagedResult);
         }
@@ -299,7 +295,7 @@ public class ClientsResource extends ConfigBaseResource {
             logger.debug("Clients fetched  - clients:{}", clients);
             pagedResult.setEntries(clients);
         }
-        logger.debug("Clients fetched new  - pagedResult:{}", pagedResult);
+        logger.debug("Clients pagedResult:{}", pagedResult);
         return pagedResult;
 
     }
@@ -369,4 +365,5 @@ public class ClientsResource extends ConfigBaseResource {
             return null;
         }
     }
+
 }

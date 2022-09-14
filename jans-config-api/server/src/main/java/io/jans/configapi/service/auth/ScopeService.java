@@ -15,9 +15,11 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.rest.model.CustomScope;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class ScopeService {
 
+    private static final String JANS_SCOPE_TYP = "jansScopeTyp";
     @Inject
     Logger logger;
 
@@ -143,17 +146,14 @@ public class ScopeService {
                 null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
         if (StringHelper.isNotEmpty(scopeType)) {
-            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("jansScopeTyp", scopeType), searchFilter);
+            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter(JANS_SCOPE_TYP, scopeType), searchFilter);
         }
         try {
             List<CustomScope> scopes = persistenceEntryManager.findEntries(getDnForScope(null), CustomScope.class,
                     searchFilter, sizeLimit);
 
             if (withAssociatedClients) {
-                List<Client> clients = clientService.getAllClients();
-                List<UmaResource> umaResources = umaResourceService.getAllResources();
-                return (scopes.stream().map(scope -> setClients(scope, clients, umaResources))
-                        .collect(Collectors.toList()));
+                getAssociatedClients(scopes);
             }
 
             return scopes;
@@ -174,16 +174,13 @@ public class ScopeService {
     public List<CustomScope> getAllScopesList(int size, String scopeType, boolean withAssociatedClients) {
         Filter searchFilter = null;
         if (StringHelper.isNotEmpty(scopeType)) {
-            searchFilter = Filter.createEqualityFilter("jansScopeTyp", scopeType);
+            searchFilter = Filter.createEqualityFilter(JANS_SCOPE_TYP, scopeType);
         }
         List<CustomScope> scopes = persistenceEntryManager.findEntries(getDnForScope(null), CustomScope.class,
                 searchFilter, size);
 
         if (withAssociatedClients) {
-            List<Client> clients = clientService.getAllClients();
-            List<UmaResource> umaResources = umaResourceService.getAllResources();
-            return (scopes.stream().map(scope -> setClients(scope, clients, umaResources))
-                    .collect(Collectors.toList()));
+            getAssociatedClients(scopes);
         }
         return scopes;
     }
@@ -232,12 +229,60 @@ public class ScopeService {
                         ele -> ele.getClients().contains(clientService.getDnForClient(client.getClientId())))) {
                     customScope.getClients().add(client);
                 }
-            } else if (scope.getScopeType() == ScopeType.SPONTANEOUS) {
-                if (client.getClientId().equals(customScope.getCreatorId())) {
-                    customScope.getClients().add(client);
-                }
+            } else if ((scope.getScopeType() == ScopeType.SPONTANEOUS)
+                    && (client.getClientId().equals(customScope.getCreatorId()))) {
+                customScope.getClients().add(client);
             }
         }
         return customScope;
+    }
+
+    public List<CustomScope> getAssociatedClients(List<CustomScope> scopes) {
+        logger.debug("Getting associatedClients for scopes:{}", scopes);
+        if (scopes == null) {
+            return scopes;
+        }
+        List<Client> clients = clientService.getAllClients();
+        List<UmaResource> umaResources = umaResourceService.getAllResources();
+        return (scopes.stream().map(scope -> setClients(scope, clients, umaResources)).collect(Collectors.toList()));
+
+    }
+
+    public PagedResult<CustomScope> getScopeResult(SearchRequest searchRequest, String scopeType,
+            boolean withAssociatedClients) {
+        logger.debug("Search Scope with searchRequest:{}, scopeType:{}, withAssociatedClients:{}", searchRequest,
+                scopeType, withAssociatedClients);
+
+        String[] targetArray = new String[] { searchRequest.getFilter() };
+
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
+                null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
+                null);
+        Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
+        if (StringHelper.isNotEmpty(scopeType)) {
+            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter(JANS_SCOPE_TYP, scopeType), searchFilter);
+        }
+        logger.debug("Search Scope with searchFilter:{}", searchFilter);
+
+        PagedResult<CustomScope> pagedResult = persistenceEntryManager.findPagedEntries(getDnForScope(null),
+                CustomScope.class, searchFilter, null, searchRequest.getSortBy(),
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex() - 1,
+                searchRequest.getCount(), searchRequest.getMaxCount());
+
+        if (pagedResult != null) {
+            logger.debug(
+                    "Scope fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+
+            List<CustomScope> scopes = pagedResult.getEntries();
+            if (withAssociatedClients) {
+                getAssociatedClients(scopes);
+            }
+
+            logger.debug("scopes:{}", scopes);
+            pagedResult.setEntries(scopes);
+        }
+        return pagedResult;
     }
 }
