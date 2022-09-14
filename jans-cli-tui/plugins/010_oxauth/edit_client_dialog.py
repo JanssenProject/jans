@@ -73,7 +73,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if not cfr:
                 return
 
-            self.myparent.logger.debug('handler: '+str(save_handler))
+            for ditem in self.drop_down_select_first:
+                if ditem in self.data and self.data[ditem] is None:
+                    self.data.pop(ditem)
+
+            self.myparent.logger.debug('DATA: '+str(self.data))
+
             close_me = True
             if save_handler:
                 close_me = self.save_handler(self)
@@ -290,12 +295,19 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         ]
 
 
+        self.drop_down_select_first = []
+
+
+        # keep this line until this issue is closed https://github.com/JanssenProject/jans/issues/2372
+        self.myparent.cli_object.openid_configuration['access_token_singing_alg_values_supported'] = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512']
+
+
         for title, swagger_key, openid_key  in (
 
                 (_("ID Token Alg for Signing "), 'idTokenSignedResponseAlg', 'id_token_signing_alg_values_supported'),
                 (_("ID Token Alg for Encryption"), 'idTokenEncryptedResponseAlg', 'id_token_encryption_alg_values_supported'),
                 (_("ID Token Enc for Encryption"), 'idTokenEncryptedResponseEnc', 'id_token_encryption_enc_values_supported'),
-                #(_("Access Token Alg for Signing "), 'accessTokenSigningAlg', 'id_token_signing_alg_values_supported'), #?? openid key
+                (_("Access Token Alg for Signing "), 'accessTokenSigningAlg', 'access_token_singing_alg_values_supported'), #?? openid key
 
                 (_("User Info for Signing "), 'userInfoSignedResponseAlg', 'userinfo_signing_alg_values_supported'),
                 (_("User Info Alg for Encryption"), 'userInfoEncryptedResponseAlg', 'userinfo_encryption_alg_values_supported'),
@@ -306,16 +318,19 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("Request Object Enc for Encryption"), 'requestObjectEncryptionEnc', 'request_object_encryption_enc_values_supported'),
                 ):
 
+            self.drop_down_select_first.append(swagger_key)
+
+            values = [ (alg, alg) for alg in self.myparent.cli_object.openid_configuration[openid_key] ]
+
             encryption_signing.append(self.myparent.getTitledWidget(
                                 title,
                                 name=swagger_key,
                                 widget=DropDownWidget(
-                                    values=[ (alg, alg) for alg in self.myparent.cli_object.openid_configuration[openid_key] ],
+                                    values=values,
                                     value=self.data.get(swagger_key)
                                     ),
                                 jans_help=self.myparent.get_help_from_schema(schema, swagger_key),
                                 style='green'))
-
 
         self.tabs['Encryption/Signing'] = HSplit(encryption_signing)
 

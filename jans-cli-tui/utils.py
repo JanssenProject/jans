@@ -31,7 +31,6 @@ class DialogUtils:
                         value_ = me.value
 
                     data[key_] = value_
-
         return data
 
 

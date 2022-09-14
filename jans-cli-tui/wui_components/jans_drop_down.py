@@ -105,6 +105,8 @@ class JansSelectBox:
         else:
             self.selected_line = (self.selected_line - 1) % (self.height)
 
+        self.set_value(self.values[self.selected_line][0])
+
     def down(self):
         """_summary_
         """
@@ -116,6 +118,8 @@ class JansSelectBox:
                 self.values = self.shift(self.values, 1)
         else:
             self.selected_line = (self.selected_line + 1) % (self.height)
+
+        self.set_value(self.values[self.selected_line][0])
 
     def __pt_container__(self):
         return self.container
