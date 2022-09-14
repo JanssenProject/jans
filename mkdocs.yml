@@ -107,6 +107,7 @@ extra:
 # Navigation
 nav:
 - 'Administration':
+    - 'Introduction': 'admin/README.md'
     - 'Deployment and Planning Guide':
         - 'admin/deployment/README.md'
         - 'Platform Goal': 'admin/deployment/platform-goal.md'

@@ -4327,6 +4327,8 @@ components:
           - remote
         keepAuthenticatorAttributesOnAcrChange:
           type: boolean
+        disableAuthnForMaxAgeZero:
+          type: boolean
         deviceAuthzRequestExpiresIn:
           type: integer
           format: int32
