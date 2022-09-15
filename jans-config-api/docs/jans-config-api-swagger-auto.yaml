@@ -1849,7 +1849,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jwks.write
+        - https://jans.io/oauth/config/jwks.delete
     patch:
       tags:
       - Configuration – JWK - JSON Web Key (JWK)
@@ -3317,19 +3317,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
+        adminCanAccess:
+          type: boolean
+        userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -3758,9 +3758,9 @@ components:
           type: array
           items:
             type: string
-        value:
-          type: string
         displayValue:
+          type: string
+        value:
           type: string
     LocalizedString:
       type: object
@@ -3769,13 +3769,13 @@ components:
           type: object
           additionalProperties:
             type: string
-        value:
-          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
+        value:
+          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4452,6 +4452,8 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4487,8 +4489,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -4773,13 +4773,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -5156,10 +5156,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     SessionId:
       type: object
       properties:

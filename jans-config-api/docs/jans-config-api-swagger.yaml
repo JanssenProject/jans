@@ -5666,6 +5666,14 @@ components:
       properties:
         dn:
           type: string
+        expirationDate:
+          description: Expiry date of the Scope.
+          type: string
+          format: date
+        deletable:
+          description: Specifies if the scope can be deleted.
+          type: boolean
+          default: false
         inum:
           description: Unique id identifying the .
           type: string
@@ -5745,15 +5753,8 @@ components:
           description: Specifies if the scope is of type UMA.
           type: boolean
           default: false
-        deletable:
-          description: Specifies if the scope can be deleted.
-          type: boolean
-          default: false
-        expirationDate:
-          description: Expiry date of the Scope.
-          type: string
-          format: date
-  
+        baseDn:
+          type: string  
 
   
     ExtendedScope:
@@ -7610,11 +7611,19 @@ components:
     Organization:
       type: object
       properties:
+        dn:
+          type: string
+        baseDn:
+          type: string
         displayName:
           type: string
+          maxLength: 60
+          minLength: 0
           description: Organization name
         description:
           type: string
+          maxLength: 60
+          minLength: 0
           description: Organization description 
         member:
           type: string
@@ -7648,6 +7657,8 @@ components:
         jsFaviconPath:
           type: string
           description: Path to organization favicon image
+        organizationTitle:
+          type: string
   
   
     FacterData:
