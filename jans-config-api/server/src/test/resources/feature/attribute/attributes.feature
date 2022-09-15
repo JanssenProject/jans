@@ -22,6 +22,21 @@ Scenario: Fetch all attributes
 	#And assert response.length != null 
 	#And assert response.length >= 10 
 
+@ignore
+Scenario: Fetch based on filter
+	Given url mainUrl 
+	And print 'accessToken = '+accessToken
+	And print 'issuer = '+issuer
+	And header Authorization = 'Bearer ' + accessToken
+	#And header issuer = issuer 
+	And param limit = 3 	
+	And param pattern = 'edu' 
+	And param startIndex = 1 
+	When method GET 
+	Then status 200 
+	And print response
+	#And assert response.length != null 
+	#And assert response.length >= 10 
 
 Scenario: Fetch the first three attributes 
 	Given url mainUrl
@@ -30,7 +45,7 @@ Scenario: Fetch the first three attributes
 	When method GET 
 	Then status 200
 	And print response 
-	And assert response.length == 3 
+	#And assert response.length == 3 
 
 
 Scenario: Search attributes given a search pattern 

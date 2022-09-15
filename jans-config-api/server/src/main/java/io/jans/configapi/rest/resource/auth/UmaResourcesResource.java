@@ -15,9 +15,10 @@ import io.jans.configapi.service.auth.UmaResourceService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.exception.EntryPersistenceException;
-
+import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -34,6 +35,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import static io.jans.as.model.util.Util.escapeLog;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -59,22 +63,23 @@ public class UmaResourcesResource extends ConfigBaseResource {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = UmaResource.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
     public Response fetchUmaResources(
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-        logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}", limit, pattern);
-        final List<UmaResource> resources;
-        if (!pattern.isEmpty() && pattern.length() >= 2) {
-            resources = umaResourceService.findResources(pattern, 1000);
-        } else {
-            resources = umaResourceService.getAllResources(limit);
-        }
-        return Response.ok(resources).build();
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+        logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit,
+                pattern, startIndex, sortBy, sortOrder);
+        SearchRequest searchReq = createSearchRequest(umaResourceService.getBaseDnForResource(), pattern, sortBy,
+                sortOrder, startIndex, limit, null, null, this.getMaxCount());
+
+        return Response.ok(doSearch(searchReq)).build();
     }
 
     @Operation(summary = "Gets an UMA resource by ID", description = "Gets an UMA resource by ID", operationId = "get-oauth-uma-resources-by-id", tags = {
@@ -168,7 +173,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch UMA resource", description = "Patch UMA resource", operationId = "patch-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS  }))
+                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
             @ExampleObject(value = "[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]") }))
     @ApiResponses(value = {
@@ -192,7 +197,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
 
     @Operation(summary = "Deletes an UMA resource", description = "Deletes an UMA resource", operationId = "delete-oauth-uma-resources-by-id", tags = {
             "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS  }))
+                    ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -215,5 +220,25 @@ public class UmaResourcesResource extends ConfigBaseResource {
         logger.debug("UMA RESOURCE to be fetched based on  associatedClientId:{}", associatedClientId);
 
         return umaResourceService.getResourcesByClient(associatedClientDn);
+    }
+
+    private PagedResult<UmaResource> doSearch(SearchRequest searchReq) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("UmaResource search params - searchReq:{} ", escapeLog(searchReq));
+        }
+
+        PagedResult<UmaResource> pagedResult = umaResourceService.searchUmaResource(searchReq);
+        if (logger.isTraceEnabled()) {
+            logger.trace("UmaResource PagedResult  - pagedResult:{}", pagedResult);
+        }
+
+        if (pagedResult != null) {
+            logger.debug(
+                    "UmaResource fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+        }
+        logger.debug("UmaResource  - pagedResult:{}", pagedResult);
+        return pagedResult;
+
     }
 }

@@ -9,7 +9,11 @@ package io.jans.configapi.service.auth;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
+
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
@@ -132,5 +136,21 @@ public class UmaResourceService {
     public String getBaseDnForResource() {
         final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=jans"
         return String.format("ou=resources,%s", umaBaseDn);
+    }
+
+    public PagedResult<UmaResource> searchUmaResource(SearchRequest searchRequest) {
+        logger.debug("Search UmaResource with searchRequest:{}", searchRequest);
+
+        String[] targetArray = new String[] { searchRequest.getFilter() };
+        Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
+                null);
+        Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
+        logger.debug("Search UmaResources with searchFilter:{}", searchFilter);
+
+        return persistenceEntryManager.findPagedEntries(getBaseDnForResource(), UmaResource.class, searchFilter, null,
+                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+
     }
 }

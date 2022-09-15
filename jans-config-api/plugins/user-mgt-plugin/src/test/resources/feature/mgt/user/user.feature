@@ -42,7 +42,7 @@ And param limit = 3
 When method GET
 Then status 200
 And print response
-And assert response.length == 3
+#And assert response.length == 3
 
 
 Scenario: Get an user by inum(unexisting user)

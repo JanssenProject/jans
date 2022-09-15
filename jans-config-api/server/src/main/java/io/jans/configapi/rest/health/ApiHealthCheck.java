@@ -39,7 +39,7 @@ public class ApiHealthCheck extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
 
-    @Operation(summary = "Returns application health status", description = "Gets a list of Gluu attributes.", operationId = "get-config-health", tags = {
+    @Operation(summary = "Returns application health status", description = "Returns application health status", operationId = "get-config-health", tags = {
     "Health - Check" })
     @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = HealthStatus.class)))),
