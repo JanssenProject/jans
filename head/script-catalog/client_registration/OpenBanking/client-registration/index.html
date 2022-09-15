@@ -10968,7 +10968,7 @@
 
     <span class="c1"># 4. in order to run introspection script, assign it to run for this client</span>
     <span class="n">client</span><span class="o">.</span><span class="n">setAccessTokenAsJwt</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">getAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  
+    <span class="n">client</span><span class="o">.</span><span class="n">getAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">setRunIntrospectionScriptBeforeJwtCreation</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  
     <span class="n">dnOfIntrospectionScript</span> <span class="o">=</span> <span class="s2">&quot;inum=CABA-2222,ou=scripts,o=jans&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">getAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">getIntrospectionScripts</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dnOfIntrospectionScript</span><span class="p">)</span>
 
@@ -11014,7 +11014,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-25T16:42:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-15T10:25:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-15</span>
       
         <br>
         Created:
