@@ -479,7 +479,7 @@ class JCA_CLI:
                     path = self.cfg_yml['paths'][path_name]
                     for method_name in path:
                         method = path[method_name]
-                        if method.get('operationId') in excluded_operations[my_op_mode]:
+                        if hasattr(method, 'get') and method.get('operationId') in excluded_operations[my_op_mode]:
                             continue
                         if 'tags' in method and tag in method['tags'] and 'operationId' in method:
                             if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
@@ -1025,8 +1025,7 @@ class JCA_CLI:
         retVal = {}
         for path in self.cfg_yml['paths']:
             for method in self.cfg_yml['paths'][path]:
-                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method][
-                    'operationId'] == operation_id:
+                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method]['operationId'] == operation_id:
                     retVal = self.cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
                     retVal['__method__'] = method
@@ -1047,8 +1046,7 @@ class JCA_CLI:
 
             for method in self.cfg_yml['paths'][path]:
 
-                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method][
-                    'tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
+                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
                     retVal = self.cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
                     retVal['__method__'] = method
@@ -1642,7 +1640,6 @@ class JCA_CLI:
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
-
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
@@ -1672,29 +1669,40 @@ class JCA_CLI:
                         break
 
             else:
-                for m in endpoint.parent:
-                    if m.method == 'get' and m.path.endswith('}'):
-                        while True:
+                if endpoint.info['operationId'] == 'put-properties-fido2':
+                    for m in endpoint.parent:
+                        if m.method == 'get':
+                            break
+                    cur_model = self.process_get(m, return_value=True)
+                    initialised = True
+                    get_endpoint = m
+
+                else:
+                    for m in endpoint.parent:
+                        cur_model = self.process_get(m, return_value=True)
+                        
+                        if m.method == 'get' and m.path.endswith('}'):
                             while True:
-                                try:
-                                    key_name_desc = self.get_endpiont_url_param(m)
-                                    if key_name_desc and 'name' in key_name_desc:
-                                        key_name = key_name_desc['name']
-                                    cur_model = self.process_get(m, return_value=True)
-                                    break
-                                except ValueError as e:
-                                    print(self.colored_text("Server returned no data", error_color))
-                                    retry = self.get_input(values=['y', 'n'], text='Retry?')
-                                    if retry == 'n':
-                                        self.display_menu(endpoint.parent)
+                                while True:
+                                    try:
+                                        key_name_desc = self.get_endpiont_url_param(m)
+                                        if key_name_desc and 'name' in key_name_desc:
+                                            key_name = key_name_desc['name']
+                                        cur_model = self.process_get(m, return_value=True)
                                         break
+                                    except ValueError as e:
+                                        print(self.colored_text("Server returned no data", error_color))
+                                        retry = self.get_input(values=['y', 'n'], text='Retry?')
+                                        if retry == 'n':
+                                            self.display_menu(endpoint.parent)
+                                            break
 
-                            if not cur_model is False:
-                                break
+                                if not cur_model is False:
+                                    break
 
-                        initialised = True
-                        get_endpoint = m
-                        break
+                            initialised = True
+                            get_endpoint = m
+                            break
 
             if not cur_model:
                 for m in endpoint.parent:
