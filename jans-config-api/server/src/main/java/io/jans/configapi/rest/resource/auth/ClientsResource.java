@@ -86,7 +86,7 @@ public class ClientsResource extends ConfigBaseResource {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/openid/clients.readonly" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Client.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -105,10 +105,7 @@ public class ClientsResource extends ConfigBaseResource {
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
                 startIndex, limit, null, null, this.getMaxCount());
-
-        final List<Client> clients = this.doSearch(searchReq);
-        logger.trace("Client serach result:{}", clients);
-        return Response.ok(getClients(clients)).build();
+        return Response.ok(this.doSearch(searchReq)).build();
     }
 
     @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
@@ -278,25 +275,29 @@ public class ClientsResource extends ConfigBaseResource {
         return UUID.randomUUID().toString();
     }
 
-    private List<Client> doSearch(SearchRequest searchReq) {
+    private PagedResult<Client> doSearch(SearchRequest searchReq) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client search params - searchReq:{} ", escapeLog(searchReq));
         }
 
-        PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
+        PagedResult<Client> pagedResult = clientService.getClients(searchReq);
         if (logger.isTraceEnabled()) {
             logger.trace("PagedResult  - pagedResult:{}", pagedResult);
         }
 
-        List<Client> clients = new ArrayList<>();
         if (pagedResult != null) {
-            logger.trace("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-            clients = pagedResult.getEntries();
-        }
-        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Client fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+
+            List<Client> clients = pagedResult.getEntries();
+            getClients(clients);
             logger.debug("Clients fetched  - clients:{}", clients);
+            pagedResult.setEntries(clients);
         }
-        return clients;
+        logger.debug("Clients pagedResult:{}", pagedResult);
+        return pagedResult;
+
     }
 
     private Client ignoreCustomObjectClassesForNonLDAP(Client client) {

@@ -29,12 +29,12 @@ Feature: Verify Custom Script configuration endpoint
     Then status 200
     And print response
     And assert response.length != null
-    And print response[0]
-	And print 'Script inum = '+response[0].name
-    And assert response[0].name != null
-	And print  'Script Name = '+response[0].name
-	And print 'Fetching script by name' + '-' +response[0].name
-	Given url mainUrl + '/name' + '/'+response[0].name
+    And print response.entries[0]
+	And print 'Script inum = '+response.entries[0].name
+    And assert response.entries[0].name != null
+	And print  'Script Name = '+response.entries[0].name
+	And print 'Fetching script by name' + '-' +response.entries[0].name
+	Given url mainUrl + '/name' + '/'+response.entries[0].name
 	And header Authorization = 'Bearer ' + accessToken
 	When method GET
     Then status 200
@@ -70,15 +70,15 @@ Feature: Verify Custom Script configuration endpoint
     Then status 200
     And print response
     And assert response.length != null
-    And print response[0]
-	And print 'Script inum = '+response[0].inum
-    And assert response[0].inum != null
-	And print  'Script Type = '+response[0].scriptType
-	And print 'Patching script ' + '-' +response[0].scriptType + '-' +response[0].inum
-	Given url mainUrl + '/'+response[0].inum
+    And print response.entries[0]
+	And print 'Script inum = '+response.entries[0].inum
+    And assert response.entries[0].inum != null
+	And print  'Script Type = '+response.entries[0].scriptType
+	And print 'Patching script ' + '-' +response.entries[0].scriptType + '-' +response.entries[0].inum
+	Given url mainUrl + '/'+response.entries[0].inum
 	And header Authorization = 'Bearer ' + accessToken
 	And header Content-Type = 'application/json-patch+json'
-	And def request_body = "[ {\"op\":\"replace\", \"path\": \"/enabled\", \"value\":"+response[0].enabled+" } ]"
+	And def request_body = "[ {\"op\":\"replace\", \"path\": \"/enabled\", \"value\":"+response.entries[0].enabled+" } ]"
 	And print 'request_body ='+request_body
 	And request request_body
 	When method PATCH

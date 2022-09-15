@@ -10,13 +10,15 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.service.custom.CustomScriptService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
-import io.jans.service.custom.CustomScriptService;
+import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,7 +38,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -55,15 +56,26 @@ public class CustomScriptResource extends ConfigBaseResource {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SCRIPTS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScript.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
-    public Response getAllCustomScripts() {
-        List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
-        logger.debug("Custom Scripts:{}", customScripts);
-        return Response.ok(customScripts).build();
+    public Response getAllCustomScripts(
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Search Custom Script filters with limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder));
+        }
+
+        return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(), null)).build();
     }
 
     @Operation(summary = "Fetch custom script by name", description = "Fetch custom script by name", operationId = "get-custom-script-by-name", tags = {
@@ -94,7 +106,7 @@ public class CustomScriptResource extends ConfigBaseResource {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SCRIPTS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScript.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -102,21 +114,21 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Custom Script to be fetched based on type - type:{} , pattern:{}, limit:{} ", escapeLog(type),
-                    escapeLog(pattern), escapeLog(limit));
+            logger.debug(
+                    "Custom Script to be fetched based on type - type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                    escapeLog(type), escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder));
         }
 
-        List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,
-                CustomScriptType.getByValue(type.toLowerCase()), limit);
-        logger.debug("Custom Scripts fetched :{}", customScripts);
-        if (customScripts != null && !customScripts.isEmpty())
-            return Response.ok(customScripts).build();
-        else
-            return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(),
+                CustomScriptType.getByValue(type.toLowerCase()))).build();
     }
 
     @Operation(summary = "Gets a script by Inum", description = "Gets a script by Inum", operationId = "get-config-scripts-by-inum", tags = {
@@ -244,6 +256,27 @@ public class CustomScriptResource extends ConfigBaseResource {
 
         logger.debug(" Custom Script Resource after patch - existingScript:{}", existingScript);
         return Response.ok(existingScript).build();
+    }
+
+    private PagedResult<CustomScript> doSearch(String pattern, String sortBy, String sortOrder, Integer startIndex,
+            int limit, int maximumRecCount, CustomScriptType type) {
+
+        logger.debug(
+                "CustomScript search params -  - pattern:{}, sortBy:{}, sortOrder:{}, startIndex:{}, limit:{}, maximumRecCount:{}, type:{}",
+                pattern, sortBy, sortOrder, startIndex, limit, maximumRecCount, type);
+
+        PagedResult<CustomScript> pagedResult = customScriptService.searchScripts(pattern, sortBy, sortOrder,
+                startIndex, limit, maximumRecCount, type);
+
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        if (pagedResult != null) {
+            logger.debug(
+                    "CustomScripts fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+        }
+
+        logger.debug("CustomScript pagedResult:{} ", pagedResult);
+        return pagedResult;
     }
 
 }
