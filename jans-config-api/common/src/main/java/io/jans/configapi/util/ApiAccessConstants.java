@@ -46,6 +46,7 @@ public class ApiAccessConstants {
 
     public static final String JWKS_READ_ACCESS = "https://jans.io/oauth/config/jwks.readonly";
     public static final String JWKS_WRITE_ACCESS = "https://jans.io/oauth/config/jwks.write";
+    public static final String JWKS_DELETE_ACCESS = "https://jans.io/oauth/config/jwks.delete";
 
     public static final String OPENID_CLIENTS_READ_ACCESS = "https://jans.io/oauth/config/openid/clients.readonly";
     public static final String OPENID_CLIENTS_WRITE_ACCESS = "https://jans.io/oauth/config/openid/clients.write";

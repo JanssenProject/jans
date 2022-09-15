@@ -355,6 +355,12 @@
                 "scopes":[
                     "https://jans.io/oauth/config/jwks.write"
                 ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/jwks.delete"
+                ]
             }
         ]
     },

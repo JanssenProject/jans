@@ -4560,19 +4560,25 @@ components:
             - query
             - fragment
             - form_post
+            - query.jwt
+            - fragment.jwt
+            - form_post.jwt
+            - jwt
         grantTypesSupported:
           type: array
           description: A list of the OAuth 2.0 Grant Type values that this OP supports.
           items:
             type: string
           enum:
+            - none
             - authorization_code
             - implicit
             - password
             - client_credentials
             - refresh_token
-            - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
-            - '\urn\:openid\:params\:grant-type\:ciba'
+            - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:openid:params:grant-type:ciba
+            - urn:ietf:params:oauth:grant-type:device_code
         subjectTypesSupported:
           type: array
           description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
@@ -4891,7 +4897,7 @@ components:
         cleanServiceBatchChunkSize:
           type: integer
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
-          example: 10000
+          example: 100
         keyRegenerationEnabled:
           type: boolean
           description: Boolean value specifying whether to regenerate keys.
@@ -6482,6 +6488,8 @@ components:
           description: defaultCleanupBatchSize page size.
           type: integer
         deleteExpiredOnGetRequest:
+          type: boolean
+        disableAttemptUpdateBeforeInsert:
           type: boolean
     SmtpConfiguration:
       type: object
