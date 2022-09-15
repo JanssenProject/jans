@@ -81,7 +81,7 @@ public class RegisterRequest extends BaseRequest {
     private String tlsClientAuthSubjectDn;
     private Boolean allowSpontaneousScopes;
     private List<String> spontaneousScopes;
-    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    private Boolean runIntrospectionScriptBeforeJwtCreation;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
     private String subjectIdentifierAttribute;
@@ -235,12 +235,12 @@ public class RegisterRequest extends BaseRequest {
         this.additionalAudience = additionalAudience;
     }
 
-    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
-        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
+        return runIntrospectionScriptBeforeJwtCreation;
     }
 
-    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
-        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public void setRunIntrospectionScriptBeforeJwtCreation(Boolean runIntrospectionScriptBeforeJwtCreation) {
+        this.runIntrospectionScriptBeforeJwtCreation = runIntrospectionScriptBeforeJwtCreation;
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
@@ -1390,7 +1390,7 @@ public class RegisterRequest extends BaseRequest {
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
-        result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
+        result.setRunIntrospectionScriptBeforeJwtCreation(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString()));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
@@ -1653,8 +1653,8 @@ public class RegisterRequest extends BaseRequest {
         if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
             function.apply(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
         }
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
-            function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
+        if (runIntrospectionScriptBeforeJwtCreation != null) {
+            function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), runIntrospectionScriptBeforeJwtCreation.toString());
         }
         if (keepClientAuthorizationAfterExpiration != null) {
             function.apply(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration.toString());
