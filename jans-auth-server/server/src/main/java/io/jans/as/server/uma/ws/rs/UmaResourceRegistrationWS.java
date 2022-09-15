@@ -317,7 +317,6 @@ public class UmaResourceRegistrationWS {
         ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
         ldapResource.setId(rsid);
-        ldapResource.setRev("1");
         ldapResource.setCreator(userDn);
         ldapResource.setDn(resourceDn);
         ldapResource.setScopes(scopeDNs);
@@ -357,7 +356,6 @@ public class UmaResourceRegistrationWS {
         ldapResource.setIconUri(resource.getIconUri());
         ldapResource.setScopes(umaScopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(resource.getScopes()));
         ldapResource.setScopeExpression(resource.getScopeExpression());
-        ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
         ldapResource.setType(resource.getType());
         if (resource.getExp() != null && resource.getExp() > 0) {
             ldapResource.setExpirationDate(new Date(resource.getExp() * 1000L));
@@ -367,15 +365,6 @@ public class UmaResourceRegistrationWS {
         resourceService.updateResource(ldapResource);
 
         return ldapResource;
-    }
-
-    private int incrementRev(String rev) {
-        try {
-            return Integer.parseInt(rev) + 1;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return 1; // fallback
     }
 
     private <T> T throwNotFoundException(String rsid) {
