@@ -64,6 +64,7 @@ bold_color = 15
 grey_color = 242
 
 clear = lambda: os.system('clear')
+
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
@@ -492,7 +493,6 @@ class JCA_CLI:
 
         menu = Menu('Main Menu')
 
-        
         for grp in menu_groups:
             methods = get_methods_of_tag(grp.tag)
             m = Menu(name=grp.mname)
@@ -1679,8 +1679,6 @@ class JCA_CLI:
 
                 else:
                     for m in endpoint.parent:
-                        cur_model = self.process_get(m, return_value=True)
-                        
                         if m.method == 'get' and m.path.endswith('}'):
                             while True:
                                 while True:
