@@ -5495,9 +5495,17 @@ components:
       properties:
         dn:
           type: string
+        baseDn:
+          type: string
+        selected:
+          type: boolean
         inum:
           description: XRI i-number. Identifier to uniquely identify the attribute.
           type: string
+        sourceAttribute:
+          type: string
+        nameIdType:
+          type: string		  
         name:
           type: string
           description: Name of the attribute.
@@ -5507,6 +5515,8 @@ components:
         description:
           type: string
           description: User friendly descriptive detail of attribute.
+        origin:
+          type: string		  
         dataType:
           type: string
           description: Data Type of attribute.
@@ -5518,24 +5528,6 @@ components:
             - CERTIFICATE
             - DATE
             - JSON
-        status:
-          type: string
-          description: Attrubute status
-          enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
-        lifetime:
-          type: string
-        sourceAttribute:
-          type: string
-        salt:
-          type: string
-        nameIdType:
-          type: string
-        origin:
-          type: string
         editType:
           type: array
           description: GluuUserRole
@@ -5569,6 +5561,14 @@ components:
           type: string
         seeAlso:
           type: string
+        status:
+          type: string
+          description: Attrubute status
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - EXPIRED
+            - REGISTER
         saml1Uri:
           type: string
         saml2Uri:
@@ -5581,6 +5581,15 @@ components:
         oxMultiValuedAttribute:
           type: boolean
           description: Boolean value indicating if the attribute can hold multiple value.
+        jansHideOnDiscovery:
+          type: boolean
+          description: Boolean value indicating if the attribute should be shown on that discovery page.
+        custom:
+          type: boolean	
+          description: Boolean value indicating if it is a custom attribute.
+        requred:
+          type: boolean	
+          description: Boolean value indicating if it is a attribute required.
         attributeValidation:
           type: object
           description: Details of validations to be applied on the attribute
@@ -5593,10 +5602,26 @@ components:
             maxLength:
               type: integer
         tooltip:
+          type: string	
+        lifetime:
           type: string
-        jansHideOnDiscovery:
+        adminCanAccess:
           type: boolean
-          description: Boolean value indicating if the attribute should be shown on that discovery page.
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+
+
+
     PatchRequest:
       description: A JSONPatch document as defined by RFC 6902
       required:
