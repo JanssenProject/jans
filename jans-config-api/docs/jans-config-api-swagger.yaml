@@ -3946,6 +3946,7 @@ components:
           type: string
         details:
           type: string
+		  
     CustomScript:
       type: object
       description: Script
@@ -4046,6 +4047,10 @@ components:
           type: boolean
           description: boolean value indicating if the script is internal.
           default: false
+        locationPath:
+          type: string
+        baseDn:
+          type: string
 
     LdapConfiguration:
       type: object
