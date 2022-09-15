@@ -21,6 +21,7 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 from utils import DialogUtils
+from wui_components.jans_vetrical_nav import JansVerticalNav
 
 from multi_lang import _
 
@@ -106,7 +107,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
                    )
     
-
     def prepare_tabs(self):
         """Prepare the tabs for Edil Client Dialogs
         """
@@ -145,6 +145,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 current_value=self.data.get('subjectType'),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'subjectType'),
                                 style='green'),
+
+                        self.myparent.getTitledText(_("Sector Identifier URI"), name='sectorIdentifierUri', value=self.data.get('sectorIdentifierUri',''), jans_help=self.myparent.get_help_from_schema(schema, 'sectorIdentifierUri'), style='green'),
+                                
                         self.myparent.getTitledCheckBoxList(
                                 _("Grant"), 
                                 name='grantTypes', 
@@ -205,7 +208,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value=self.data.get('additionalAudience',''),
                             style='green'),
                         VSplit([
-                                        Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3)
+                                Label(text=_("audiences"),style='bold',width=len(_("audiences")*2)), ## TODO
+                                Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3)
                         ]),
                         self.myparent.getTitledText(_("Access token lifetime"), name='accessTokenLifetime', value=self.data.get('accessTokenLifetime',''),style='green'),
                         self.myparent.getTitledText(_("Refresh token lifetime"), name='refreshTokenLifetime', value=self.data.get('refreshTokenLifetime',''),style='green'),
@@ -230,13 +234,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
             #self.myparent.getTitledText(title ="Logo URI", name='logoUri', value=self.data.get('logoUri',''),style='green'),
             #self.myparent.getTitledText(title ="Term of service URI", name='tosUri', value=self.data.get('tosUri',''),style='green'),
 
-            self.myparent.getTitledText(_("Contacts"),
+            self.myparent.getTitledText(_("Contacts"),              ### height =3 insted of the <+> button
                             name='contacts',
                             value='\n'.join(self.data.get('contacts', [])), 
                             height=3,
                             style='green'),
 
-            self.myparent.getTitledText(_("Authorized JS origins"),
+            self.myparent.getTitledText(_("Authorized JS origins"),  ### height =3 insted of the <+> button
                             name='authorizedOrigins',
                             value='\n'.join(self.data.get('authorizedOrigins', [])), 
                             height=3,
@@ -247,6 +251,20 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.getTitledText(title =_("Software statement"), name='softwareStatement', value=self.data.get('softwareStatement',''), style='green'),
             
         ],width=D())
+
+
+        self.uma_resources = HSplit([],width=D())
+        self.resources = HSplit([
+                    VSplit([
+                        self.myparent.getButton(text=_("Get Resources"), name='oauth:Resources:get', jans_help=_("Retreive UMA Resources"), handler=self.oauth_update_uma_resources),
+                        self.myparent.getTitledText(_("Search"), name='oauth:Resources:search', jans_help=_("Press enter to perform search"), accept_handler=self.oauth_update_uma_resources),
+                    
+                        ],
+                        padding=3,
+                        width=D(),
+                        ),
+                    DynamicContainer(lambda: self.uma_resources)
+                    ])
 
         self.tabs['CIBA/PAR/UMA'] = HSplit([
                         Label(text=_("CIBA"),style='bold'),
@@ -283,7 +301,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             style='green'),
 
 
-                        Label(text=_("tabel"),style='blue'),  ## TODO with Jans VerticalNav  
+
+                    self.resources,
 
                         ]
                             )
@@ -356,26 +375,34 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         self.spontaneous_scopes,
 
-                        #self.myparent.getTitledText("Spontaneous Scopes",
-                        #    name='spontaneousScopes',
-                        #    value='\n'.join(self.data.get('spontaneousScopes', [])),
-                        #    height=3,
-                        #    style='green'),
+
+                        VSplit([   ## TODO what the functionality would be?
+                                Label(text=_("Spontaneous scopes"),style='bold',width=len(_("Spontaneous scopes")*2)), ## TODO
+                                Button(_("View current"), handler=self.myparent.show_again,left_symbol='<',right_symbol='>',width=len(_("View current"))+2)
+                        ]),
 
                         self.myparent.getTitledText(_("Initial Login URI"), name='initiateLoginUri', value=self.data.get('initiateLoginUri',''),style='green'),
 
-                        self.myparent.getTitledText(_("Request URIs"),
+                        self.myparent.getTitledText(_("Request URIs"), ### height =3 insted of the <+> button
                             name='requestUris',
                             value='\n'.join(self.data.get('requestUris', [])),
                             height=3,
                             style='green'),
 
-                        self.myparent.getTitledText(_("Default  ACR"),
+                        self.myparent.getTitledText(_("Default  ACR"), ### height =3 >> "the type is array" cant be dropdown
+                            name='defaultAcrValues',
+                            value='\n'.join(self.data.get('defaultAcrValues', [])), 
+                            height=3,
+                            style='green'),
+
+                        self.myparent.getTitledText(_("Allowed  ACR"), ### height =3 insted of the <+> button
                             name='authorizedAcrValues',
                             value='\n'.join(self.data.get('authorizedAcrValues', [])), 
                             height=3,
                             style='green'),
- 
+
+
+
                         self.myparent.getTitledText(_("TLS Subject DN"), name='x5c', value=self.data.get('x5c',''),style='green'),
 
                         self.myparent.getTitledWidget(
@@ -441,7 +468,68 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
-    
+    def oauth_update_uma_resources (self, pattern=''): 
+        """update the current uma_resources  data to server
+
+        Args:
+            pattern (str, optional): endpoint arguments for the uma_resources data. Defaults to ''.
+        """
+        endpoint_args ='limit:10'
+        if pattern:
+            endpoint_args +=',pattern:'+pattern
+
+        try :
+            rsponse = self.myparent.cli_object.process_command_by_id(
+                        operation_id='get-oauth-uma-resources',
+                        url_suffix='',
+                        endpoint_args=endpoint_args,
+                        data_fn=None,
+                        data={}
+                        )
+
+        except Exception as e:
+            self.myparent.show_message(_("Error getting clients"), str(e))
+            return
+
+        if rsponse.status_code not in (200, 201):
+            self.myparent.show_message(_("Error getting clients"), str(rsponse.text))
+            return
+
+        try:
+            result = rsponse.json()
+        except Exception:
+            self.myparent.show_message(_("Error getting clients"), str(rsponse.text))
+            #press_tab
+            return
+        data =[]
+
+        for d in result:
+            data.append(
+                [
+                d['id'],
+                d['description'],
+                d.get('scopes', '') 
+                ]
+            )
+
+        self.uma_resources = HSplit([
+                            JansVerticalNav(
+                                    myparent=self.myparent,
+                                    headers=['id', 'Description', 'Scopes'],
+                                    preferred_size= [0,0,0],
+                                    data=data,
+                                    on_enter=self.myparent.edit_scope_dialog,
+                                    on_display=self.myparent.data_display_dialog,
+                                    # selection_changed=self.data_selection_changed,
+                                    selectes=0,
+                                    headerColor='green',
+                                    entriesColor='blue',
+                                    all_data=result,
+                            ),
+            ])
+        self.myparent.logger.debug('UMA: '+str(result))
+        return result
+        
     def client_dialog_nav_selection_changed(self, selection):
         self.left_nav = selection
 
