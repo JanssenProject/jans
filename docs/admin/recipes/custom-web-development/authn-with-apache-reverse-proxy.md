@@ -147,7 +147,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
         "softwareStatement": null,
         "attributes": {
           "tlsClientAuthSubjectDn": null,
-          "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+          "runIntrospectionScriptBeforeJwtCreation": false,
           "keepClientAuthorizationAfterExpiration": false,
           "allowSpontaneousScopes": false,
           "spontaneousScopes": null,

@@ -143,7 +143,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -247,7 +247,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -346,7 +346,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -605,7 +605,7 @@ Please wait while posting data ...
   "softwareStatement": null,
   "attributes": {
     "tlsClientAuthSubjectDn": null,
-    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+    "runIntrospectionScriptBeforeJwtCreation": false,
     "keepClientAuthorizationAfterExpiration": false,
     "allowSpontaneousScopes": false,
     "spontaneousScopes": null,
@@ -807,7 +807,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
   "softwareStatement": null,
   "attributes": {
     "tlsClientAuthSubjectDn": null,
-    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+    "runIntrospectionScriptBeforeJwtCreation": false,
     "keepClientAuthorizationAfterExpiration": false,
     "allowSpontaneousScopes": false,
     "spontaneousScopes": null,
