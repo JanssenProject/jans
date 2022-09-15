@@ -4170,21 +4170,21 @@ components:
             - CRYPT-BCRYPT
             - CRYPT-BCRYPT
             - PKCS5S2
-        operationTracingEnabled:
-          type: boolean
-          description: Boolean value True if tracing is enabled on the environment.
-          default: false
-        mutationTokensEnabled:
-          type: boolean
-          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
         connectTimeout:
           type: integer
           description: The default timeout for connection timeout.
           format: int32
-        computationPoolSize:
+        mutationTokensEnabled:
+          type: boolean
+          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
+        kvTimeout:
           type: integer
+          description: Key Value (KV) timeout.
           format: int32
-          description: Sets the pool size (number of threads to use) for all non-blocking operations, default value is the number of CPUs.
+        queryTimeout:
+          type: integer
+          description: Query timeout.
+          format: int32	
         useSSL:
           type: boolean
           description: Identifies if SSL should be enabled.
@@ -4195,7 +4195,7 @@ components:
         sslTrustStorePin:
           type: string
           description: The PIN to use to access the contents of the trust store.
-        sslTrustStoreFormat:
+        sslTrustStoreType:
           type: string
           description: The format to use for the trust store.
         binaryAttributes:
@@ -4207,7 +4207,7 @@ components:
           type: array
           description: List of certificate attributes.
           items:
-            type: string
+            type: string 
 
     SqlConfiguration:
       type: object
