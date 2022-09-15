@@ -10,7 +10,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 
-import io.jans.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;

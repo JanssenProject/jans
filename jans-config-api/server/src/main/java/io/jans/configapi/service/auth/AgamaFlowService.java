@@ -8,7 +8,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.util.AuthUtil;
-import io.jans.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;

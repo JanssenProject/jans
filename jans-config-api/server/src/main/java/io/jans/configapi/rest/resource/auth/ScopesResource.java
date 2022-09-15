@@ -11,7 +11,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.persistence.model.Scope;
-import io.jans.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.CustomScope;

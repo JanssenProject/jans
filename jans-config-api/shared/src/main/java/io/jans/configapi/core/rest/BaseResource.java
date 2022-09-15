@@ -8,7 +8,7 @@ package io.jans.configapi.core.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.model.ApiError;
-import io.jans.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.model.SortOrder;
 
 import jakarta.ws.rs.BadRequestException;

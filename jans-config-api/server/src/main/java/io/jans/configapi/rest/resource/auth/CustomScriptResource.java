@@ -13,13 +13,13 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.service.auth.CustomSrpService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.PagedResult;
-import io.jans.service.custom.CustomScriptService;
 import io.jans.util.StringHelper;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +51,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     private static final String PATH_SEPARATOR = "/";
 
     @Inject
-    CustomScriptService customScriptService;
+    CustomSrpService customScriptService;
 
     @Operation(summary = "Fetch custom script by name", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
