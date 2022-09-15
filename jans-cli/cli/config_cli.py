@@ -1227,7 +1227,11 @@ class JCA_CLI:
                     print("An error ocurred while saving data")
                     self.print_exception(e)
             elif selection in item_counters:
-                self.pretty_print(api_response_unmapped[int(selection) - 1])
+                if my_op_mode == 'scim' and 'Resources' in api_response_unmapped:
+                    items = api_response_unmapped['Resources'] 
+                elif my_op_mode == 'jca' and 'data' in api_response_unmapped:
+                    items = api_response_unmapped['data']
+                self.pretty_print(items[int(selection) - 1])
 
     def get_schema_from_reference(self, ref):
         schema_path_list = ref.strip('/#').split('/')
