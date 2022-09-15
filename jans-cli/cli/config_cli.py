@@ -47,6 +47,7 @@ tabulate_endpoints = {
 }
 
 tabular_dataset = {'scim.get-users': 'Resources'}
+excluded_operations = {'scim': ['search-user'], 'jca':[]}
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
@@ -478,6 +479,8 @@ class JCA_CLI:
                     path = self.cfg_yml['paths'][path_name]
                     for method_name in path:
                         method = path[method_name]
+                        if method.get('operationId') in excluded_operations[my_op_mode]:
+                            continue
                         if 'tags' in method and tag in method['tags'] and 'operationId' in method:
                             if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
                                 continue
