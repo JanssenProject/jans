@@ -17,6 +17,7 @@ public enum ErrorResponse {
     AUDIT_LOGGING_ERROR("Error in audit logging"),
     ERROR_READING_CONFIG("Error in reading auiConfiguration"),
     ERROR_READING_ROLE_PERMISSION_MAP("Error in reading role-permissions mapping from Auth Server."),
+    ROLE_PERMISSION_MAP_NOT_FOUND("Role-permissions mapping not found."),
     ROLE_NOT_FOUND("Bad Request: Admin UI Role not found in Auth Server."),
     PERMISSION_NOT_FOUND("Bad Request: Admin UI permission not found in Auth Server."),
     ERROR_IN_MAPPING_ROLE_PERMISSION("Error in mapping role-permission."),
