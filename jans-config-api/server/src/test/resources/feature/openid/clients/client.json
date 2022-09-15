@@ -23,7 +23,7 @@
   "accessTokenSigningAlg": "RS256",
   "attributes": {
   	"tlsClientAuthSubjectDn":"",
-  	"runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":false,
+  	"runIntrospectionScriptBeforeJwtCreation":false,
   	"keepClientAuthorizationAfterExpiration":false,
   	"allowSpontaneousScopes":false,
   	"spontaneousScopes":[],"spontaneousScopeScriptDns":[],

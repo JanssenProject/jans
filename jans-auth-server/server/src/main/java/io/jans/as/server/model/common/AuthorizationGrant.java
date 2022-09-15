@@ -253,7 +253,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
         Audience.setAudience(jwt.getClaims(), getClient());
 
-        if (isTrue(client.getAttributes().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims())) {
+        if (isTrue(client.getAttributes().getRunIntrospectionScriptBeforeJwtCreation())) {
             runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
         }
 

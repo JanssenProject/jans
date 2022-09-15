@@ -164,7 +164,7 @@ class ClientRegistration(ClientRegistrationType):
 
         # inorder to run introspection script
         client.setAccessTokenAsJwt(True)
-        client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(True)  
+        client.getAttributes().setRunIntrospectionScriptBeforeJwtCreation(True)
         dnOfIntrospectionScript = "inum=CABA-2222,ou=scripts,o=jans"
         client.getAttributes().getIntrospectionScripts().add(dnOfIntrospectionScript)
 

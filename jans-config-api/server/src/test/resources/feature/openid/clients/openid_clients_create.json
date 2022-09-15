@@ -72,7 +72,7 @@
     ],
     "attributes": {
         "tlsClientAuthSubjectDn": "123",
-        "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": "true",
+        "runIntrospectionScriptBeforeJwtCreation": "true",
         "keepClientAuthorizationAfterExpiration": false,
         "allowSpontaneousScopes": "true",
         "backchannelLogoutSessionRequired": "true",
@@ -107,7 +107,7 @@
     },
     "tlsClientAuthSubjectDn": "123",
     "frontChannelLogoutSessionRequired": true,
-    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": "true",
+    "runIntrospectionScriptBeforeJwtCreation": "true",
     "backchannelLogoutSessionRequired": "true",
     "keepClientAuthorizationAfterExpiration": false,
     "allowSpontaneousScopes": "true",

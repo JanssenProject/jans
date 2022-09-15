@@ -5657,7 +5657,7 @@ components:
         tlsClientAuthSubjectDn:
           description: String representation of the expected subject distinguished name of the certificate, which the OAuth client will use in mutual TLS authentication.
           type: string
-        runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+        runIntrospectionScriptBeforeJwtCreation:
           description: boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT.
           type: boolean
         keepClientAuthorizationAfterExpiration:
