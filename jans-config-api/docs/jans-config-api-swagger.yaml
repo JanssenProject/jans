@@ -6350,9 +6350,6 @@ components:
           type: array
           items:
             type: string
-        rev:
-          description: Resource revision.
-          type: string
         creator:
           description: Resource creator or owner.
           type: string
