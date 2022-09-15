@@ -32,8 +32,8 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("tlsClientAuthSubjectDn")
     private String tlsClientAuthSubjectDn;
 
-    @JsonProperty("runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims")
-    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+    @JsonProperty("runIntrospectionScriptBeforeJwtCreation")
+    private Boolean runIntrospectionScriptBeforeJwtCreation = false;
 
     @JsonProperty("keepClientAuthorizationAfterExpiration")
     private Boolean keepClientAuthorizationAfterExpiration = false;
@@ -218,15 +218,15 @@ public class ClientAttributes implements Serializable {
         this.updateTokenScriptDns = updateTokenScriptDns;
     }
 
-    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims == null) {
-            runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+    public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
+        if (runIntrospectionScriptBeforeJwtCreation == null) {
+            runIntrospectionScriptBeforeJwtCreation = false;
         }
-        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+        return runIntrospectionScriptBeforeJwtCreation;
     }
 
-    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
-        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public void setRunIntrospectionScriptBeforeJwtCreation(Boolean runIntrospectionScriptBeforeJwtCreation) {
+        this.runIntrospectionScriptBeforeJwtCreation = runIntrospectionScriptBeforeJwtCreation;
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
@@ -337,7 +337,7 @@ public class ClientAttributes implements Serializable {
     public String toString() {
         return "ClientAttributes{" +
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
-                ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
+                ", runIntrospectionScriptBeforeJwtCreation=" + runIntrospectionScriptBeforeJwtCreation +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
                 ", spontaneousScopes=" + spontaneousScopes +

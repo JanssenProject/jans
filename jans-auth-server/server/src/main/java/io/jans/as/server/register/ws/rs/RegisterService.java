@@ -191,8 +191,8 @@ public class RegisterService {
         if (requestObject.getSpontaneousScopes() != null) {
             client.getAttributes().setSpontaneousScopes(requestObject.getSpontaneousScopes());
         }
-        if (requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-            client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        if (requestObject.getRunIntrospectionScriptBeforeJwtCreation() != null) {
+            client.getAttributes().setRunIntrospectionScriptBeforeJwtCreation(requestObject.getRunIntrospectionScriptBeforeJwtCreation());
         }
         if (requestObject.getKeepClientAuthorizationAfterExpiration() != null) {
             client.getAttributes().setKeepClientAuthorizationAfterExpiration(requestObject.getKeepClientAuthorizationAfterExpiration());
