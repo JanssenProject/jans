@@ -13,10 +13,9 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.service.auth.CustomSrpService;
+import io.jans.service.custom.CustomScriptService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.PagedResult;
@@ -51,7 +50,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     private static final String PATH_SEPARATOR = "/";
 
     @Inject
-    CustomSrpService customScriptService;
+    CustomScriptService customScriptService;
 
     @Operation(summary = "Fetch custom script by name", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -76,10 +75,7 @@ public class CustomScriptResource extends ConfigBaseResource {
                     escapeLog(sortOrder));
         }
 
-        SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount());
-
-        return Response.ok(doSearch(searchReq, null)).build();
+        return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(), null)).build();
     }
 
     @Operation(summary = "Fetch custom script by name", description = "Fetch custom script by name", operationId = "get-custom-script-by-name", tags = {
@@ -131,10 +127,8 @@ public class CustomScriptResource extends ConfigBaseResource {
                     escapeLog(sortOrder));
         }
 
-        SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount());
-
-        return Response.ok(doSearch(searchReq, CustomScriptType.getByValue(type.toLowerCase()))).build();
+        return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(),
+                CustomScriptType.getByValue(type.toLowerCase()))).build();
     }
 
     @Operation(summary = "Gets a script by Inum", description = "Gets a script by Inum", operationId = "get-config-scripts-by-inum", tags = {
@@ -264,11 +258,15 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(existingScript).build();
     }
 
-    private PagedResult<CustomScript> doSearch(SearchRequest searchReq, CustomScriptType type) {
+    private PagedResult<CustomScript> doSearch(String pattern, String sortBy, String sortOrder, Integer startIndex,
+            int limit, int maximumRecCount, CustomScriptType type) {
 
-        logger.debug("CustomScript search params - searchReq:{} , type:{} ", searchReq, type);
+        logger.debug(
+                "CustomScript search params -  - pattern:{}, sortBy:{}, sortOrder:{}, startIndex:{}, limit:{}, maximumRecCount:{}, type:{}",
+                pattern, sortBy, sortOrder, startIndex, limit, maximumRecCount, type);
 
-        PagedResult<CustomScript> pagedResult = customScriptService.searchScripts(searchReq, type);
+        PagedResult<CustomScript> pagedResult = customScriptService.searchScripts(pattern, sortBy, sortOrder,
+                startIndex, limit, maximumRecCount, type);
 
         logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         if (pagedResult != null) {

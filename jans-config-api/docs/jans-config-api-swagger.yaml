@@ -6565,6 +6565,7 @@ components:
           description: Time interval for the Clean Service in seconds.
         cleanServiceBatchChunkSize:
           type: integer
+          default: 100
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
         useLocalCache:
           description: Boolean value to indicate if Local Cache is to be used.
@@ -6587,6 +6588,9 @@ components:
         metricReporterKeepDataDays:
           type: integer
           description: The days to keep report data.
+        metricReporterEnabled:
+          type: boolean
+          description: Boolean value specifying whether metric reporter is enabled.
         personCustomObjectClassList:
           type: array
           description: Custom object class list for dynamic person enrolment.
@@ -6684,20 +6688,18 @@ components:
         authenticatorCertsFolder:
           description: Authenticators certificates fodler.
           type: string
+        mdsAccessToken:
+          description: MDS access token.
+          type: string
         mdsCertsFolder:
           description: MDS TOC root certificates folder.
           type: string
         mdsTocsFolder:
           description: MDS TOC files folder.
           type: string
-        serverMetadataFolder:
-          description: Authenticators metadata in json format.
-          type: string
-        requestedParties:
-          description: Authenticators metadata in json format.
-          type: array
-          items:
-            $ref: '#/components/schemas/RequestedParties'
+        checkU2fAttestations:
+          description: Boolean value indcating if U2f attestation needs to be checked.
+          type: boolean
         userAutoEnrollment:
           description: Allow to enroll users on enrollment/authentication requests.
           type: boolean
@@ -6707,11 +6709,20 @@ components:
         authenticationHistoryExpiration:
           description: Expiration time in seconds for approved authentication requests.
           type: integer
+        serverMetadataFolder:
+          description: Authenticators metadata in json format.
+          type: string
         requestedCredentialTypes:
           description: List of Requested Credential Types.
           type: array
           items:
             type: string
+        requestedParties:
+          description: Authenticators metadata in json format.
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedParties'
+
     RequestedParties:
       type: object
       description: Credential Type.
