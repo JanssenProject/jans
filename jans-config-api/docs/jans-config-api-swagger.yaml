@@ -7886,6 +7886,8 @@ components:
       title: Agama flow object
       description: Object that represents an Agama flow
       type: object
+      required:
+        - qname
       properties:
         dn:
           description: Flow distinguished name

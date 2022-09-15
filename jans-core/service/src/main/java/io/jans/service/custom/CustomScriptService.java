@@ -9,8 +9,6 @@ package io.jans.service.custom;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
-
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.PagedResult;
@@ -44,27 +42,28 @@ public class CustomScriptService extends AbstractCustomScriptService {
                 pattern, sortBy, sortOrder, startIndex, limit, maximumRecCount, type);
 
         Filter searchFilter = null;
-        if (StringUtils.isNotBlank(pattern)) {
-            String[] targetArray = new String[] { pattern };
+        String[] targetArray = new String[] { pattern };
 
-            boolean useLowercaseFilter = isLowercaseFilter(baseDn());
-            if (useLowercaseFilter) {
-                searchFilter = Filter.createORFilter(
-                        Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null,
-                                targetArray, null),
-                        Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null,
-                                targetArray, null));
-            } else {
-                searchFilter = Filter.createORFilter(
-                        Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null),
-                        Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null));
-            }
+        boolean useLowercaseFilter = isLowercaseFilter(baseDn());
+        if (useLowercaseFilter) {
+            searchFilter = Filter.createORFilter(
+                    Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null,
+                            targetArray, null),
+                    Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null,
+                            targetArray, null));
+        } else {
+            searchFilter = Filter.createORFilter(
+                    Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null),
+                    Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null));
         }
-        Filter typeFilter = null;
+
+        Filter filter = searchFilter;
+        log.debug("filter:{}", filter);
         if (type != null) {
-            typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
+            Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
+            filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
-        Filter filter = Filter.createANDFilter(searchFilter, typeFilter);
+
         log.debug("Searching CustomScript Flow with filter:{}", filter);
 
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null, sortBy,
