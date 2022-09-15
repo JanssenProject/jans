@@ -27,9 +27,6 @@ class JansSelectBox:
         self.values = values
         self.values_flag = (values[0],values[-1])
         self.set_value(value)
-
-        # if not self.values :
-
         # --------------------------------------------------- #
         self.height = min(len(self.values), height)
         self.rotatable_up = rotatable_up
@@ -105,12 +102,9 @@ class JansSelectBox:
         else:
             self.selected_line = (self.selected_line - 1) % (self.height)
 
-        self.set_value(self.values[self.selected_line][0])
-
     def down(self):
         """_summary_
         """
-
         if self.selected_line + 1 == (self.height):
             if self.rotatable_down and self.values[self.selected_line] == self.values_flag[-1]:
                 pass
@@ -118,8 +112,6 @@ class JansSelectBox:
                 self.values = self.shift(self.values, 1)
         else:
             self.selected_line = (self.selected_line + 1) % (self.height)
-
-        self.set_value(self.values[self.selected_line][0])
 
     def __pt_container__(self):
         return self.container
@@ -201,10 +193,6 @@ class DropDownWidget:
             if self.select_box_float not in get_app().layout.container.floats:
                 get_app().layout.container.floats.append(self.select_box_float)
             else:
-                # if self.select_box.values[self.select_box.selected_line][1] == "Select One":
-                #     self.text = "Enter to Select"
-                #     get_app().layout.container.floats.remove(self.select_box_float)
-                # else :
                 self.text = self.select_box.values[self.select_box.selected_line][1]
                 get_app().layout.container.floats.remove(self.select_box_float)
 
@@ -215,7 +203,7 @@ class DropDownWidget:
             self.select_box.up()
 
         @kb.add('down')
-        def _up(event):
+        def _down(event):
             self.select_box.down()
 
         @kb.add('escape')
