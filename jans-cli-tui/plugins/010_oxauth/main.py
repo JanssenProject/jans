@@ -269,8 +269,6 @@ class Plugin():
 
         get_app().invalidate()
 
-
-
     def oauth_get_scopes(self):
         """Method to get the Scopes data from server
         """
@@ -281,18 +279,15 @@ class Plugin():
     def display_scope(self):
         pass
 
-    def edit_scope(self, selected,event,size): ## enter 
-        self.edit_scope_dialog()
-
     def edit_client_dialog(self, **params):
+        
         selected_line_data = params['data']  
         title = "Edit user Data (Clients)"
 
         self.app.logger.debug("START")
         self.app.logger.debug(selected_line_data)
         self.app.logger.debug("END")
-
-        dialog = EditClientDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client)
+        dialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client)
         self.app.show_jans_dialog(dialog)
 
     def save_client(self, dialog):
@@ -371,8 +366,8 @@ class Plugin():
 
         ensure_future(coroutine())
 
-
     def edit_scope_dialog(self, **params):
+        
         selected_line_data = params['data']  
         title = _("Edit Scopes")
 
