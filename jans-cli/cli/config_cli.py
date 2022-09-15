@@ -1337,7 +1337,7 @@ class JCA_CLI:
             if getitem and prop != getitem['__name__'] or prop in ('dn', 'inum'):
                 continue
 
-            if (required_only and schema.get('required')) and not prop in schema.get('required'):
+            if required_only and not prop in schema.get('required', []):
                 continue
 
             prop_ = self.get_model_key_map(model, prop)
