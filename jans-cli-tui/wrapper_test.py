@@ -63,6 +63,41 @@ result = cli_object.process_command_by_id(
 
 """
 
-result = cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
+# result = cli_object.process_command_by_id(
+#         'get-oauth-uma-resources', '', 'limit:10', {})
 
-print(result)
+
+result =  cli_object.process_command_by_id(
+    operation_id='get-oauth-uma-resources',
+    url_suffix='',
+    endpoint_args='pattern:',
+    data_fn=None
+    )
+print(result.text)
+
+
+'''
+[
+        {"dn":"jansId=1caf7fbe-349f-468a-ac48-8cbf24a638bd,
+        ou=resources,
+        ou=uma,
+        o=jans",
+        "id":"1caf7fbe-349f-468a-ac48-8cbf24a638bd",
+        "name":"test-uma-resource",
+        "description":"This is a test UMA Resource",
+        "deletable":false
+        },
+        
+        {"dn":"jansId=9b993eae-0239-4d20-9c1b-bce445c5e153,
+        ou=resources,
+        ou=uma,
+        o=jans",
+        "id":"9b993eae-0239-4d20-9c1b-bce445c5e153",
+        "name":"test2-uma resourse",
+        "description":"description2",
+        "deletable":false
+        }
+        
+]      
+
+'''
