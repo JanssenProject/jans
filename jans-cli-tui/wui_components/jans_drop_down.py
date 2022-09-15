@@ -25,7 +25,7 @@ class JansSelectBox:
         """
 
         self.values = values
-
+        self.values_flag = (values[0],values[-1])
         self.set_value(value)
 
         # if not self.values :
@@ -98,7 +98,7 @@ class JansSelectBox:
         """_summary_
         """
         if self.selected_line == 0:
-            if self.rotatable_up and self.values[self.selected_line] == self.values[0]:
+            if self.rotatable_up and self.values[self.selected_line] == self.values_flag[0]:
                 pass
             else:
                 self.values = self.shift(self.values, -1)
@@ -112,7 +112,7 @@ class JansSelectBox:
         """
 
         if self.selected_line + 1 == (self.height):
-            if self.rotatable_down and self.values[self.selected_line] == self.values[-1]:
+            if self.rotatable_down and self.values[self.selected_line] == self.values_flag[-1]:
                 pass
             else:
                 self.values = self.shift(self.values, 1)
