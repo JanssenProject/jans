@@ -149,7 +149,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -253,7 +253,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -341,7 +341,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -431,7 +431,7 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -576,7 +576,7 @@ Calling with params limit=2
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -680,7 +680,7 @@ Calling with params limit=2
     "softwareStatement": null,
     "attributes": {
       "tlsClientAuthSubjectDn": null,
-      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "runIntrospectionScriptBeforeJwtCreation": false,
       "keepClientAuthorizationAfterExpiration": false,
       "allowSpontaneousScopes": false,
       "spontaneousScopes": null,
@@ -804,7 +804,7 @@ It contains a lot of properties. But, It's not important to fill each of these p
   "softwareStatement": null,
   "attributes": {
     "tlsClientAuthSubjectDn": null,
-    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": true,
+    "runIntrospectionScriptBeforeJwtCreation": true,
     "keepClientAuthorizationAfterExpiration": true,
     "allowSpontaneousScopes": false,
     "spontaneousScopes": [],

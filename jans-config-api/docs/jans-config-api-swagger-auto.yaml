@@ -3588,7 +3588,7 @@ components:
       properties:
         tlsClientAuthSubjectDn:
           type: string
-        runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+        runIntrospectionScriptBeforeJwtCreation:
           type: boolean
         keepClientAuthorizationAfterExpiration:
           type: boolean

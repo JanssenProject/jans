@@ -148,7 +148,7 @@ The following are the ***mandatory*** functions which need to be implemented in 
 
         # 4. in order to run introspection script, assign it to run for this client
         client.setAccessTokenAsJwt(True)
-        client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(True)  
+        client.getAttributes().setRunIntrospectionScriptBeforeJwtCreation(True)  
         dnOfIntrospectionScript = "inum=CABA-2222,ou=scripts,o=jans"
         client.getAttributes().getIntrospectionScripts().add(dnOfIntrospectionScript)
         
