@@ -204,26 +204,12 @@ paths:
       tags:
         - Attribute
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: Gluu Attributes paginated result
-                description: Gluu Attributes paginated result
-                type: object
-                properties:
-                  totalItems:
-                    type: integer
-                    description: Total number of records in the database.
-                  entriesCount:
-                    type: integer
-                    description: Total number of records in the response.
-                  data:
-                    description: List of all attribute.
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           description: Unauthorized
         '500':
@@ -269,8 +255,6 @@ paths:
           in: query
           name: sortOrder
           description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
-  
-
 
     post:
       summary: Adds a new attribute.
@@ -989,19 +973,52 @@ paths:
       tags:
         - Custom Scripts
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/CustomScript'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.readonly]
+      parameters:
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+  
     post:
       summary: Adds a new custom script.
       description: Adds a new custom script.
@@ -1115,16 +1132,37 @@ paths:
         description: Script type.
         required: true
       - schema:
+          type: integer
+          default: 50
+        in: query
+        name: limit
+        description: Search size - max size of the results to return.
+      - schema:
           type: string
         in: query
         name: pattern
         description: Search pattern.
       - schema:
           type: integer
-          default: 50
+          default: 1
         in: query
-        name: limit
-        description: Search size - max size of the results to return.
+        name: startIndex
+        description: The 1-based index of the first query result.
+      - schema:
+          type: string
+          default: inum
+        in: query
+        name: sortBy
+        description: Attribute whose value will be used to order the returned response.
+      - schema:
+          type: string
+          default: ascending
+          enum:
+            - ascending
+            - descending
+        in: query
+        name: sortOrder
+        description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
     get:
       summary: Gets list of scripts by type.
       description: Gets list of scripts by type.
@@ -1133,13 +1171,12 @@ paths:
       tags:
         - Custom Scripts
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/CustomScript'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1911,15 +1948,12 @@ paths:
       description: Gets list of OpenID Connect clients
       operationId: get-oauth-openid-clients
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: OpenID Clients.
-                description: List of OpenID clients.
-                items:
-                  $ref: '#/components/schemas/Client'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2098,15 +2132,12 @@ paths:
       description: Gets list of UMA resources.
       operationId: get-oauth-uma-resources
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: UMA Resource list.
-                description: List of UMA Resource.
-                items:
-                  $ref: '#/components/schemas/UmaResource'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2125,6 +2156,28 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+  
     post:
       tags:
         - OAuth - UMA Resources
@@ -2300,15 +2353,12 @@ paths:
       description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
       operationId: get-oauth-scopes
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: Scope list.
-                description: List of scope.
-                items:
-                  $ref: '#/components/schemas/ExtendedScope'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2339,11 +2389,28 @@ paths:
           name: pattern
           description: Search pattern.
         - schema:
-            type: boolean
-            default: false
+            type: integer
+            default: 1
           in: query
-          name: withAssociatedClients
-          description: Also fetch associated clients with scopes.
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+  
+
     post:
       tags:
         - OAuth - Scopes
@@ -2559,19 +2626,58 @@ paths:
       tags:
         - Configuration – Agama Flow
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/AgamaFlow'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/agama.readonly]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: qname
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: includeSource
+          description: Boolean value true indcates source to be included in response.
+  
     post:
       summary: Create a new agama flow.
       description: Create a new agama flow.
@@ -2913,15 +3019,12 @@ paths:
       description: Gets list of users
       operationId: get-user
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: Users.
-                description: List of users.
-                items:
-                  $ref: '#/components/schemas/CustomUser'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3843,6 +3946,7 @@ components:
           type: string
         details:
           type: string
+		  
     CustomScript:
       type: object
       description: Script
@@ -3943,6 +4047,10 @@ components:
           type: boolean
           description: boolean value indicating if the script is internal.
           default: false
+        locationPath:
+          type: string
+        baseDn:
+          type: string
 
     LdapConfiguration:
       type: object
@@ -4067,21 +4175,21 @@ components:
             - CRYPT-BCRYPT
             - CRYPT-BCRYPT
             - PKCS5S2
-        operationTracingEnabled:
-          type: boolean
-          description: Boolean value True if tracing is enabled on the environment.
-          default: false
-        mutationTokensEnabled:
-          type: boolean
-          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
         connectTimeout:
           type: integer
           description: The default timeout for connection timeout.
           format: int32
-        computationPoolSize:
+        mutationTokensEnabled:
+          type: boolean
+          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
+        kvTimeout:
           type: integer
+          description: Key Value (KV) timeout.
           format: int32
-          description: Sets the pool size (number of threads to use) for all non-blocking operations, default value is the number of CPUs.
+        queryTimeout:
+          type: integer
+          description: Query timeout.
+          format: int32	
         useSSL:
           type: boolean
           description: Identifies if SSL should be enabled.
@@ -4092,7 +4200,7 @@ components:
         sslTrustStorePin:
           type: string
           description: The PIN to use to access the contents of the trust store.
-        sslTrustStoreFormat:
+        sslTrustStoreType:
           type: string
           description: The format to use for the trust store.
         binaryAttributes:
@@ -4104,7 +4212,7 @@ components:
           type: array
           description: List of certificate attributes.
           items:
-            type: string
+            type: string 
 
     SqlConfiguration:
       type: object
@@ -4452,19 +4560,25 @@ components:
             - query
             - fragment
             - form_post
+            - query.jwt
+            - fragment.jwt
+            - form_post.jwt
+            - jwt
         grantTypesSupported:
           type: array
           description: A list of the OAuth 2.0 Grant Type values that this OP supports.
           items:
             type: string
           enum:
+            - none
             - authorization_code
             - implicit
             - password
             - client_credentials
             - refresh_token
-            - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
-            - '\urn\:openid\:params\:grant-type\:ciba'
+            - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:openid:params:grant-type:ciba
+            - urn:ietf:params:oauth:grant-type:device_code
         subjectTypesSupported:
           type: array
           description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
@@ -4783,7 +4897,7 @@ components:
         cleanServiceBatchChunkSize:
           type: integer
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
-          example: 10000
+          example: 100
         keyRegenerationEnabled:
           type: boolean
           description: Boolean value specifying whether to regenerate keys.
@@ -5392,9 +5506,17 @@ components:
       properties:
         dn:
           type: string
+        baseDn:
+          type: string
+        selected:
+          type: boolean
         inum:
           description: XRI i-number. Identifier to uniquely identify the attribute.
           type: string
+        sourceAttribute:
+          type: string
+        nameIdType:
+          type: string		  
         name:
           type: string
           description: Name of the attribute.
@@ -5404,6 +5526,8 @@ components:
         description:
           type: string
           description: User friendly descriptive detail of attribute.
+        origin:
+          type: string		  
         dataType:
           type: string
           description: Data Type of attribute.
@@ -5415,24 +5539,6 @@ components:
             - CERTIFICATE
             - DATE
             - JSON
-        status:
-          type: string
-          description: Attrubute status
-          enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
-        lifetime:
-          type: string
-        sourceAttribute:
-          type: string
-        salt:
-          type: string
-        nameIdType:
-          type: string
-        origin:
-          type: string
         editType:
           type: array
           description: GluuUserRole
@@ -5466,6 +5572,14 @@ components:
           type: string
         seeAlso:
           type: string
+        status:
+          type: string
+          description: Attrubute status
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - EXPIRED
+            - REGISTER
         saml1Uri:
           type: string
         saml2Uri:
@@ -5478,6 +5592,15 @@ components:
         oxMultiValuedAttribute:
           type: boolean
           description: Boolean value indicating if the attribute can hold multiple value.
+        jansHideOnDiscovery:
+          type: boolean
+          description: Boolean value indicating if the attribute should be shown on that discovery page.
+        custom:
+          type: boolean	
+          description: Boolean value indicating if it is a custom attribute.
+        requred:
+          type: boolean	
+          description: Boolean value indicating if it is a attribute required.
         attributeValidation:
           type: object
           description: Details of validations to be applied on the attribute
@@ -5490,10 +5613,26 @@ components:
             maxLength:
               type: integer
         tooltip:
+          type: string	
+        lifetime:
           type: string
-        jansHideOnDiscovery:
+        adminCanAccess:
           type: boolean
-          description: Boolean value indicating if the attribute should be shown on that discovery page.
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+
+
+
     PatchRequest:
       description: A JSONPatch document as defined by RFC 6902
       required:
@@ -5527,6 +5666,14 @@ components:
       properties:
         dn:
           type: string
+        expirationDate:
+          description: Expiry date of the Scope.
+          type: string
+          format: date
+        deletable:
+          description: Specifies if the scope can be deleted.
+          type: boolean
+          default: false
         inum:
           description: Unique id identifying the .
           type: string
@@ -5606,15 +5753,8 @@ components:
           description: Specifies if the scope is of type UMA.
           type: boolean
           default: false
-        deletable:
-          description: Specifies if the scope can be deleted.
-          type: boolean
-          default: false
-        expirationDate:
-          description: Expiry date of the Scope.
-          type: string
-          format: date
-  
+        baseDn:
+          type: string  
 
   
     ExtendedScope:
@@ -5649,6 +5789,10 @@ components:
           type: array
           items:
             type: string
+        value:
+          type: string
+        displayValue:
+          type: string
     ClientAttributes:
       title: ClientAttributes
       description: Attribute.
@@ -5760,12 +5904,19 @@ components:
       properties:
         dn:
           type: string
+        baseDn:
+          type: string
+        expirationDate:
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
+          type: string
+          format: date-time
+        deletable:
+          description: Specifies whether client is deletable.
+          type: boolean
+          default: false
         inum:
           description: XRI i-number. Client Identifier to uniquely identify the client.
           type: string
-        displayName:
-          type: string
-          description: Name of the user suitable for display to end-users
         clientSecret:
           type: string
           description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
@@ -5830,18 +5981,21 @@ components:
         idTokenTokenBindingCnf:
           description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
           type: string
+        clientName:
+          $ref: '#/components/schemas/LocalizedString'
+          description: Name of the user suitable for display to end-users
         logoUri:
           description: URL that references a logo for the Client application.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         clientUri:
           description: URL of the home page of the Client. The value of this field must point to a valid Web page.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         policyUri:
           description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         tosUri:
           description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         jwksUri:
           description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
           type: string
@@ -5985,9 +6139,6 @@ components:
           type: integer
           format: int32
           example: 1000000
-        requireAuthTime:
-          description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
-          type: boolean
         defaultAcrValues:
           description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
           type: array
@@ -6131,20 +6282,34 @@ components:
         backchannelUserCodeParameter:
           description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
           type: boolean
-        expirationDate:
-          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
-          type: string
-          format: date-time
-        deletable:
-          description: Specifies whether client is deletable.
-          type: boolean
-          default: false
-        jansId:
-          description: Attribute Scope Id.
-          type: string
         description:
           description: Description of the client.
           type: string
+        organization:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string
+        ttl:
+          type: integer
+          format: int32
+        displayName:
+          type: string
+        tokenBindingSupported:
+          type: boolean
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
+
 
     UmaResource:
       title: UMAResource object
@@ -6186,9 +6351,6 @@ components:
           type: array
           items:
             type: string
-        rev:
-          description: Resource revision.
-          type: string
         creator:
           description: Resource creator or owner.
           type: string
@@ -6350,6 +6512,8 @@ components:
           type: integer
         deleteExpiredOnGetRequest:
           type: boolean
+        disableAttemptUpdateBeforeInsert:
+          type: boolean
     SmtpConfiguration:
       type: object
       description: SMTP configuration.
@@ -6462,6 +6626,7 @@ components:
           description: Time interval for the Clean Service in seconds.
         cleanServiceBatchChunkSize:
           type: integer
+          default: 100
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
         useLocalCache:
           description: Boolean value to indicate if Local Cache is to be used.
@@ -6484,6 +6649,9 @@ components:
         metricReporterKeepDataDays:
           type: integer
           description: The days to keep report data.
+        metricReporterEnabled:
+          type: boolean
+          description: Boolean value specifying whether metric reporter is enabled.
         personCustomObjectClassList:
           type: array
           description: Custom object class list for dynamic person enrolment.
@@ -6581,20 +6749,18 @@ components:
         authenticatorCertsFolder:
           description: Authenticators certificates fodler.
           type: string
+        mdsAccessToken:
+          description: MDS access token.
+          type: string
         mdsCertsFolder:
           description: MDS TOC root certificates folder.
           type: string
         mdsTocsFolder:
           description: MDS TOC files folder.
           type: string
-        serverMetadataFolder:
-          description: Authenticators metadata in json format.
-          type: string
-        requestedParties:
-          description: Authenticators metadata in json format.
-          type: array
-          items:
-            $ref: '#/components/schemas/RequestedParties'
+        checkU2fAttestations:
+          description: Boolean value indcating if U2f attestation needs to be checked.
+          type: boolean
         userAutoEnrollment:
           description: Allow to enroll users on enrollment/authentication requests.
           type: boolean
@@ -6604,11 +6770,20 @@ components:
         authenticationHistoryExpiration:
           description: Expiration time in seconds for approved authentication requests.
           type: integer
+        serverMetadataFolder:
+          description: Authenticators metadata in json format.
+          type: string
         requestedCredentialTypes:
           description: List of Requested Credential Types.
           type: array
           items:
             type: string
+        requestedParties:
+          description: Authenticators metadata in json format.
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedParties'
+
     RequestedParties:
       type: object
       description: Credential Type.
@@ -7436,11 +7611,19 @@ components:
     Organization:
       type: object
       properties:
+        dn:
+          type: string
+        baseDn:
+          type: string
         displayName:
           type: string
+          maxLength: 60
+          minLength: 0
           description: Organization name
         description:
           type: string
+          maxLength: 60
+          minLength: 0
           description: Organization description 
         member:
           type: string
@@ -7474,6 +7657,8 @@ components:
         jsFaviconPath:
           type: string
           description: Path to organization favicon image
+        organizationTitle:
+          type: string
   
   
     FacterData:
@@ -7701,6 +7886,8 @@ components:
       title: Agama flow object
       description: Object that represents an Agama flow
       type: object
+      required:
+        - qname
       properties:
         dn:
           description: Flow distinguished name
@@ -7804,3 +7991,35 @@ components:
           type: boolean
           description: indicates if the parameter by default will be returned in response.
           default: false
+		  
+    PagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            type: object		  
+			
+    LocalizedString:
+      type: object
+      properties:
+        values:
+          type: object
+          additionalProperties:
+            type: string
+        value:
+          type: string
+        languageTags:
+          uniqueItems: true
+          type: array
+          items:
+            type: string

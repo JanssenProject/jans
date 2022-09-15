@@ -15,7 +15,6 @@
 			<includes>
 				<include>io.jans:jans-scim-model</include>
 				<include>io.jans:jans-scim-client</include>
-				<!-- <include>io.smallrye.config:smallrye-config</include> -->
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>

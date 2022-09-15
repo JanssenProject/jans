@@ -196,13 +196,13 @@ public class JwksResource extends ConfigBaseResource {
 
     @Operation(summary = "Delete a JSON Web Key based on kid", description = "Delete a JSON Web Key based on kid", operationId = "delete-config-jwk-kid", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JWKS_WRITE_ACCESS }))
+                    ApiAccessConstants.JWKS_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_DELETE_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response deleteKey(@PathParam(ApiConstants.KID) @NotNull String kid) {
         log.debug("Key to be to be deleted - kid:{}", kid);
