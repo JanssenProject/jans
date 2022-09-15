@@ -8,8 +8,10 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.util.AuthUtil;
-
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.search.filter.Filter;
 
@@ -73,6 +75,25 @@ public class AgamaFlowService implements Serializable {
 
         logger.debug("Agama Flows with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getAgamaFlowDn(null), Flow.class, searchFilter, sizeLimit);
+
+    }
+
+    public PagedResult<Flow> searchFlows(SearchRequest searchRequest) {
+        logger.debug("Search Agama Flow with searchRequest:{}", searchRequest);
+
+        Filter searchFilter = null;
+        if (StringUtils.isNotBlank(searchRequest.getFilter())) {
+            String[] targetArray = new String[] { searchRequest.getFilter() };
+            searchFilter = Filter.createORFilter(
+                    Filter.createSubstringFilter(Flow.ATTR_NAMES.QNAME, null, targetArray, null),
+                    Filter.createSubstringFilter(Flow.ATTR_NAMES.META, null, targetArray, null));
+        }
+
+        logger.debug("Searching Agama Flow with searchFilter:{}", searchFilter);
+
+        return persistenceEntryManager.findPagedEntries(getAgamaFlowDn(null), Flow.class, searchFilter, null,
+                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
@@ -240,16 +261,19 @@ public class AgamaFlowService implements Serializable {
                 attributeClass = attributeValue.getClass().toString();
                 logger.debug(" Flow attribute data - key:{} - attributeValue:{}, attributeClass:{}, dataType:{}", key,
                         attributeValue, attributeClass, dataType);
-                
-                logger.trace("Non Mandatory attribute check result - key:{} - attributeValue:{}, dataType:{}, !isStringDataPresent(dataType, attributeValue):{}, !isIntegerDataPresent(dataType, attributeValue):{}, !isFlowMetadataPresent(dataType, attributeValue):{}",  key,
-                        attributeValue, dataType, !isStringDataPresent(dataType, attributeValue), !isIntegerDataPresent(dataType, attributeValue), !isFlowMetadataPresent(dataType, attributeValue));
+
+                logger.trace(
+                        "Non Mandatory attribute check result - key:{} - attributeValue:{}, dataType:{}, !isStringDataPresent(dataType, attributeValue):{}, !isIntegerDataPresent(dataType, attributeValue):{}, !isFlowMetadataPresent(dataType, attributeValue):{}",
+                        key, attributeValue, dataType, !isStringDataPresent(dataType, attributeValue),
+                        !isIntegerDataPresent(dataType, attributeValue),
+                        !isFlowMetadataPresent(dataType, attributeValue));
 
                 // ignore if empty
                 if (isStringDataPresent(dataType, attributeValue) || isIntegerDataPresent(dataType, attributeValue)
                         || isFlowMetadataPresent(dataType, attributeValue)) {
-                 // report as value should be null
+                    // report as value should be null
                     unwantedAttributes.append(key).append(",");
-                }                
+                }
             }
         } // for
         logger.debug("Checking mandatory unwantedAttributes:{} ", unwantedAttributes);
@@ -293,8 +317,7 @@ public class AgamaFlowService implements Serializable {
 
         if (dataType == null || attributeValue == null) {
             return false;
-        }
-        else if ("io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName())) {
+        } else if ("io.jans.agama.model.FlowMetadata".equalsIgnoreCase(dataType.getName())) {
             FlowMetadata flowMetadata = FlowMetadata.class.cast(attributeValue);
 
             if (flowMetadata == null) {
@@ -304,7 +327,7 @@ public class AgamaFlowService implements Serializable {
                     || StringUtils.isNotBlank(flowMetadata.getAuthor())
                     || StringUtils.isNotBlank(flowMetadata.getDescription()) || flowMetadata.getInputs() != null
                     || (flowMetadata.getTimeout() != null && flowMetadata.getTimeout() > 0)
-                    || flowMetadata.getProperties() != null ) {
+                    || flowMetadata.getProperties() != null) {
                 logger.debug("FlowMetadata is not null !!!");
                 return true;
             }

@@ -100,7 +100,7 @@ public class ClientService implements Serializable {
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, null);
     }
 
-    public PagedResult<Client> searchClients(SearchRequest searchRequest) {
+    public PagedResult<Client> getClients(SearchRequest searchRequest) {
         if (logger.isDebugEnabled()) {
             logger.debug("Search Clients with searchRequest:{}", escapeLog(searchRequest));
         }

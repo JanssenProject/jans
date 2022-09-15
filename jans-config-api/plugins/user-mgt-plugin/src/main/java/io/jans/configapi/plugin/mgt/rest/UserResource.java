@@ -3,7 +3,6 @@ package io.jans.configapi.plugin.mgt.rest;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.EncryptionService;
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -13,6 +12,7 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -72,7 +71,7 @@ public class UserResource extends BaseResource {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomUser.class, description = "List of CustomUser")))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -92,10 +91,7 @@ public class UserResource extends BaseResource {
         SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder,
                 startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
 
-        List<CustomUser> customUsers = this.doSearch(searchReq);
-        logger.debug("CustomUser search result:{}", customUsers);
-
-        return Response.ok(customUsers).build();
+        return Response.ok(this.doSearch(searchReq)).build();
     }
 
     @Operation(summary = "Get User by Inum", description = "Get User by Inum", operationId = "get-user-by-inum", tags = {
@@ -270,7 +266,7 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private List<CustomUser> doSearch(SearchRequest searchReq)
+    private PagedResult<User> doSearch(SearchRequest searchReq)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
@@ -281,24 +277,26 @@ public class UserResource extends BaseResource {
             logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         }
 
-        List<User> users = new ArrayList<>();
+        List<User> users = null;
         if (pagedResult != null) {
             logger.debug("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             users = pagedResult.getEntries();
-        }
-        if (logger.isDebugEnabled()) {
+
+            // excludedAttributes
+            users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
             logger.debug("Users fetched  - users:{}", users);
+
+            // parse birthdate if present
+            users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
+
+            // get customUser()
+            getCustomUserList(users);
+            pagedResult.setEntries(users);
         }
 
-        // excludedAttributes
-        users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
-        logger.debug("Users fetched  - users:{}", users);
+        logger.debug("User pagedResult:{}", pagedResult);
+        return pagedResult;
 
-        // parse birthdate if present
-        users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
-
-        // get customUser()
-        return getCustomUserList(users);
     }
 
     private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
