@@ -5788,6 +5788,10 @@ components:
           type: array
           items:
             type: string
+        value:
+          type: string
+        displayValue:
+          type: string
     ClientAttributes:
       title: ClientAttributes
       description: Attribute.
@@ -5796,7 +5800,7 @@ components:
         tlsClientAuthSubjectDn:
           description: String representation of the expected subject distinguished name of the certificate, which the OAuth client will use in mutual TLS authentication.
           type: string
-        runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+        runIntrospectionScriptBeforeJwtCreation:
           description: boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT.
           type: boolean
         keepClientAuthorizationAfterExpiration:
@@ -5899,12 +5903,19 @@ components:
       properties:
         dn:
           type: string
+        baseDn:
+          type: string
+        expirationDate:
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
+          type: string
+          format: date-time
+        deletable:
+          description: Specifies whether client is deletable.
+          type: boolean
+          default: false
         inum:
           description: XRI i-number. Client Identifier to uniquely identify the client.
           type: string
-        displayName:
-          type: string
-          description: Name of the user suitable for display to end-users
         clientSecret:
           type: string
           description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
@@ -5969,18 +5980,21 @@ components:
         idTokenTokenBindingCnf:
           description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
           type: string
+        clientName:
+          $ref: '#/components/schemas/LocalizedString'
+          description: Name of the user suitable for display to end-users
         logoUri:
           description: URL that references a logo for the Client application.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         clientUri:
           description: URL of the home page of the Client. The value of this field must point to a valid Web page.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         policyUri:
           description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         tosUri:
           description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         jwksUri:
           description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
           type: string
@@ -6124,9 +6138,6 @@ components:
           type: integer
           format: int32
           example: 1000000
-        requireAuthTime:
-          description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
-          type: boolean
         defaultAcrValues:
           description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
           type: array
@@ -6270,20 +6281,34 @@ components:
         backchannelUserCodeParameter:
           description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
           type: boolean
-        expirationDate:
-          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
-          type: string
-          format: date-time
-        deletable:
-          description: Specifies whether client is deletable.
-          type: boolean
-          default: false
-        jansId:
-          description: Attribute Scope Id.
-          type: string
         description:
           description: Description of the client.
           type: string
+        organization:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string
+        ttl:
+          type: integer
+          format: int32
+        displayName:
+          type: string
+        tokenBindingSupported:
+          type: boolean
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
+
 
     UmaResource:
       title: UMAResource object
@@ -7973,3 +7998,18 @@ components:
           type: array
           items:
             type: object		  
+			
+    LocalizedString:
+      type: object
+      properties:
+        values:
+          type: object
+          additionalProperties:
+            type: string
+        value:
+          type: string
+        languageTags:
+          uniqueItems: true
+          type: array
+          items:
+            type: string

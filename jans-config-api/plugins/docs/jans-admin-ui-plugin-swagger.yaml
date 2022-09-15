@@ -147,29 +147,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/logging/audit:
-    post:
-      operationId: auditLogging
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              type: object
-              additionalProperties:
-                type: object
-        required: true
-      responses:
-        default:
-          description: default response
-          content:
-            application/json: {}
-  /admin-ui/user/permissions:
+  /admin-ui/adminUIPermissions:
     get:
       tags:
       - Admin UI - Permission
-      summary: Get admin ui permissions
-      description: Get admin ui permissions
-      operationId: get-adminui-permissions
+      summary: Get all admin ui permissions
+      description: Get all admin ui permissions
+      operationId: get-all-adminui-permissions
       responses:
         "200":
           description: Ok
@@ -248,13 +232,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
-  /admin-ui/user/rolePermissionsMapping:
+  /admin-ui/adminUIRolePermissionsMapping:
     get:
       tags:
       - Admin UI - Role-Permissions Mapping
-      summary: Get admin ui role-permissions mapping
-      description: Get admin ui role-permissions mapping
-      operationId: get-adminui-role-permissions
+      summary: Get all admin ui role-permissions mapping
+      description: Get all admin ui role-permissions mapping
+      operationId: get-all-adminui-role-permissions
       responses:
         "200":
           description: Ok
@@ -333,13 +317,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
-  /admin-ui/user/roles:
+  /admin-ui/adminUIRoles:
     get:
       tags:
       - Admin UI - Role
       summary: Get all admin ui roles
       description: Get all admin ui roles
-      operationId: get-adminui-roles
+      operationId: get-all-adminui-roles
       responses:
         "200":
           description: Ok
@@ -418,15 +402,45 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
-  /admin-ui/user/permissions/{permission}:
+  /admin-ui/adminUIPermissions/{adminUIPermission}:
+    get:
+      tags:
+      - Admin UI - Permission
+      summary: Get admin ui permission by permission-name
+      description: Get admin ui permission by permission-name
+      operationId: get-adminui-permission
+      parameters:
+      - name: adminUIPermission
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminPermission'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
     delete:
       tags:
       - Admin UI - Permission
-      summary: Delete admin ui permissions
-      description: Delete admin ui permissions
+      summary: Delete admin ui permission by permission-name
+      description: Delete admin ui permission by permission-name
       operationId: delete-adminui-permission
       parameters:
-      - name: permission
+      - name: adminUIPermission
         in: path
         required: true
         schema:
@@ -449,15 +463,45 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
-  /admin-ui/user/roles/{role}:
+  /admin-ui/adminUIRoles/{adminUIRole}:
+    get:
+      tags:
+      - Admin UI - Role
+      summary: Get admin ui role details by role-name
+      description: Get admin ui role details by role-name
+      operationId: get-adminui-role
+      parameters:
+      - name: adminUIRole
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRole'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
     delete:
       tags:
       - Admin UI - Role
-      summary: Delete admin ui role
-      description: Delete admin ui role
+      summary: Delete admin ui role by role-name
+      description: Delete admin ui role by role-name
       operationId: delete-adminui-role
       parameters:
-      - name: role
+      - name: adminUIRole
         in: path
         required: true
         schema:
@@ -480,15 +524,45 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
-  /admin-ui/user/rolePermissionsMapping/{role}:
+  /admin-ui/adminUIRolePermissionsMapping/{adminUIRole}:
+    get:
+      tags:
+      - Admin UI - Role-Permissions Mapping
+      summary: Get admin ui role-permissions mapping by role-name
+      description: Get admin ui role-permissions mapping by role-name
+      operationId: get-adminui-role-permissions
+      parameters:
+      - name: adminUIRole
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RolePermissionMapping'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
     delete:
       tags:
       - Admin UI - Role-Permissions Mapping
-      summary: Remove role-permissions mapping
-      description: Remove role-permissions mapping
+      summary: Remove role-permissions mapping by role-name
+      description: Remove role-permissions mapping by role-name
       operationId: remove-role-permissions-permission
       parameters:
-      - name: role
+      - name: adminUIRole
         in: path
         required: true
         schema:
