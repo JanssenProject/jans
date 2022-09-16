@@ -54,6 +54,9 @@ public class UserResource extends BaseResource {
     private static final String GIVEN_NAME = "givenName";
     private static final String USER_PWD = "userPassword";
     private static final String INUM = "inum";
+    private class UserPagedResult extends PagedResult<CustomUser>{};
+
+
 
     @Inject
     Logger logger;
@@ -71,7 +74,7 @@ public class UserResource extends BaseResource {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -266,7 +269,7 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private PagedResult<User> doSearch(SearchRequest searchReq)
+    private UserPagedResult doSearch(SearchRequest searchReq)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
@@ -277,10 +280,10 @@ public class UserResource extends BaseResource {
             logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         }
 
-        List<User> users = null;
+        UserPagedResult pagedCustomUser = new UserPagedResult();
         if (pagedResult != null) {
             logger.debug("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-            users = pagedResult.getEntries();
+            List<User> users = pagedResult.getEntries();
 
             // excludedAttributes
             users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
@@ -290,12 +293,15 @@ public class UserResource extends BaseResource {
             users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
 
             // get customUser()
-            getCustomUserList(users);
-            pagedResult.setEntries(users);
+            List<CustomUser> customUsers = getCustomUserList(users);
+            pagedCustomUser.setStart(pagedResult.getStart());
+            pagedCustomUser.setEntriesCount(pagedResult.getEntriesCount());
+            pagedCustomUser.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
+            pagedCustomUser.setEntries(customUsers);
         }
 
-        logger.debug("User pagedResult:{}", pagedResult);
-        return pagedResult;
+        logger.debug("User pagedCustomUser:{}", pagedCustomUser);
+        return pagedCustomUser;
 
     }
 

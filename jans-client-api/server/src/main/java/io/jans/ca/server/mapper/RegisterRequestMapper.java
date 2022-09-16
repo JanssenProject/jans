@@ -104,7 +104,7 @@ public class RegisterRequestMapper {
         }
 
         rp.setSubjectType(safeToString(request.getSubjectType()));
-        rp.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(request.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        rp.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(request.getRunIntrospectionScriptBeforeJwtCreation());
         rp.setIdTokenSignedResponseAlg(safeToString(request.getIdTokenSignedResponseAlg()));
         rp.setIdTokenEncryptedResponseAlg(safeToString(request.getIdTokenEncryptedResponseAlg()));
         rp.setIdTokenEncryptedResponseEnc(safeToString(request.getIdTokenEncryptedResponseEnc()));
@@ -248,7 +248,7 @@ public class RegisterRequestMapper {
             request.setSubjectType(SubjectType.fromString(rp.getSubjectType()));
         }
 
-        request.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(rp.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        request.setRunIntrospectionScriptBeforeJwtCreation(rp.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         request.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(rp.getIdTokenSignedResponseAlg()));
         request.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseAlg()));
         request.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseEnc()));
