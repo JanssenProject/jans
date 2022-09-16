@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -350,20 +349,21 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
-        ParsedKey keyWithInum = toSQLKey(dn);
+        String key = toSQLKey(dn).getKey();
+
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilterWithEmptyAlias(searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilterWithEmptyAlias(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryDeleteException(String.format("Failed to convert filter '%s' to expression", searchFilter), ex);
 		}
-        
+
         try {
-        	int processed = (int) getOperationService().delete(keyWithInum.getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, count);
+        	int processed = (int) getOperationService().delete(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, count);
         	
         	return processed;
         } catch (Exception ex) {
-            throw new EntryDeleteException(String.format("Failed to delete entries with key: '%s', expression: '%s'", keyWithInum.getKey(), convertedExpression), ex);
+            throw new EntryDeleteException(String.format("Failed to delete entries with key: '%s', expression: '%s'", key, convertedExpression), ex);
         }
     }
 
@@ -470,10 +470,12 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 		// Prepare properties types to allow build filter properly
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
-        ParsedKey keyWithInum = toSQLKey(baseDN);
+
+        String key = toSQLKey(baseDN).getKey();
+
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
@@ -484,18 +486,18 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             if (batchOperation != null) {
                 batchOperationWraper = new SqlBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            searchResult = searchImpl(keyWithInum.getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, currentLdapReturnAttributes,
+            searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s', expression: '%s'", keyWithInum.getKey(), convertedExpression));
+                throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s', expression: '%s'", key, convertedExpression));
             }
 
             return searchResult;
         } catch (SearchException ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s'", keyWithInum.getKey()), ex);
+            throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s'", key), ex);
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s', expression: '%s'", keyWithInum.getKey(), convertedExpression), ex);
+            throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s', expression: '%s'", key, convertedExpression), ex);
         }
     }
 
@@ -516,17 +518,18 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		// Prepare properties types to allow build filter properly
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
+        String key = toSQLKey(baseDN).getKey();
+
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
 
         PagedResult<EntryData> searchResult = null;
         try {
-            ParsedKey keyWithInum = toSQLKey(baseDN);
-            searchResult = searchImpl(keyWithInum.getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, SearchScope.SUB, ldapReturnAttributes, null,
+            searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, SearchScope.SUB, ldapReturnAttributes, null,
                     null, SearchReturnDataType.SEARCH, 0, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: '%s', filter: '%s'", baseDN, searchFilter));
@@ -608,15 +611,17 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         // Prepare properties types to allow build filter properly
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
+        String key = toSQLKey(baseDN).getKey();
+
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
 
 		try {
-            PagedResult<EntryData> searchResult = searchImpl(toSQLKey(baseDN).getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression,
+            PagedResult<EntryData> searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression,
                     SearchScope.SUB, SqlOperationService.UID_ARRAY, null, null, SearchReturnDataType.SEARCH, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
@@ -687,16 +692,18 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		// Prepare properties types to allow build filter properly
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
+        String key = toSQLKey(baseDN).getKey();
+
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
 
         PagedResult<EntryData> searchResult;
         try {
-            searchResult = searchImpl(toSQLKey(baseDN).getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, null, null,
+            searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, null, null,
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -783,20 +790,26 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         }
 	}
 
-    private ConvertedExpression toSqlFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
-        return filterConverter.convertToSqlFilter(excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap);
+    private ConvertedExpression toSqlFilter(String key, String objectClass, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+    	TableMapping tableMapping = getTableMapping(key, objectClass);
+
+        return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap);
     }
 
-    private ConvertedExpression toSqlFilterWithEmptyAlias(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
-        return filterConverter.convertToSqlFilter(excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, true);
+    private ConvertedExpression toSqlFilterWithEmptyAlias(String key, String objectClass, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+    	TableMapping tableMapping = getTableMapping(key, objectClass);
+
+        return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, true);
     }
 
-    private ConvertedExpression toSqlFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
-        return filterConverter.convertToSqlFilter(excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, processor);
-    }
-    private ConvertedExpression toSqlFilterWithEmptyAlias(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
-        return filterConverter.convertToSqlFilter(excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, processor, true);
-    }
+	private TableMapping getTableMapping(String key, String objectClass) {
+		TableMapping tableMapping = getOperationService().getTabeMapping(key, objectClass);
+    	if (tableMapping == null) {
+            throw new MappingException(String.format("Failed to get table mapping by key '%s' and objectClass '%s'", key, objectClass));
+    	}
+
+    	return tableMapping;
+	}
 
     private ParsedKey toSQLKey(String dn) {
         return KEY_CONVERTER.convertToKey(dn);
@@ -963,21 +976,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		return true;
 	}
 
-    @Override
-    protected List<AttributeData> getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
-        List<AttributeData> listAttributes = new ArrayList<>();
-
-        localizedString.getLanguageTags().forEach(languageTag -> {
-            String value = localizedString.getValue(languageTag);
-            String key = localizedString.addLdapLanguageTag(ldapAttributeName, languageTag);
-            AttributeData attributeData = new AttributeData(key, value);
-
-            listAttributes.add(attributeData);
-        });
-
-        return listAttributes;
-    }
-
 	private String getBaseObjectClass(String[] objectClasses) {
 		if (ArrayHelper.isEmpty(objectClasses)) {
 			throw new MappingException("Object class isn't defined!");
@@ -986,7 +984,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		if (StringHelper.isEmpty(objectClasses[0])) {
 			throw new MappingException("First object class is invalid!");
 		}
-
+		
 		return objectClasses[0];
 	}
 
@@ -994,8 +992,8 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		if (ArrayHelper.isEmpty(objectClasses)) {
 			throw new MappingException(String.format("Object class isn't defined in bean '%s'!", entryClass));
 		}
-
+		
 		return objectClasses[0];
-    }
+	}
 
 }

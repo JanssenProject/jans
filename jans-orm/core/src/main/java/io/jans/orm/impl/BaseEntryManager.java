@@ -214,7 +214,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	@SuppressWarnings("unchecked")
 	protected Void merge(Object entry, boolean isSchemaUpdate, boolean isConfigurationUpdate, AttributeModificationType schemaModificationType) {
 		if (entry == null) {
-			throw new MappingException("Entry to persist is null");
+			throw new MappingException("Entry for check if exists is null");
 		}
 
 		Class<?> entryClass = entry.getClass();
