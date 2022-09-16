@@ -10,6 +10,7 @@
         <classes>
             <class name="io.jans.as.server.model.CIBAGrantTest" />
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
+            <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
 
             <class name="io.jans.as.server.service.MTLSServiceTest" />
             <class name="io.jans.as.server.service.ScopeServiceTest" />
