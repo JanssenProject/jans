@@ -769,10 +769,6 @@ class PropertiesUtils(SetupUtils):
             else:
                 Config.rdbm_port = 5432
                 Config.rdbm_type = 'pgsql'
-            if not Config.rdbm_host:
-
-            if not Config.rdbm_password:
-                Config.rdbm_password = self.getPW(special='.*=+-()[]{}')
 
         elif backend_type_str in (BackendStrings.REMOTE_MYSQL, BackendStrings.REMOTE_PGSQL):
             Config.opendj_install = InstallTypes.NONE
