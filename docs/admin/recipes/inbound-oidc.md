@@ -43,7 +43,6 @@ rp->>browser: Page is accessed
 
 ## Prerequisites
 
-- A Jans-auth Server (installation instructions [here](../install/vm-install/ubuntu.md))
 - The [external oauth2 server authentication script](../../script-catalog/person_authentication/oidc/oidc-jans-script.py)
 - External OAuth2 Provider credentials: you can choose any external OP server that follows OAuth2 standards and authentication features.  
 - RP application: This is your application that will be used by your users and where you want to add this auth feature.
