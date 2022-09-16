@@ -437,11 +437,16 @@ class PropertiesUtils(SetupUtils):
     def check_oxd_server(self, oxd_url, error_out=True, log_error=True):
 
         oxd_url = os.path.join(oxd_url, 'health-check')
+
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = True
+        ctx.verify_mode = ssl.CERT_NONE
+
         try:
             result = urllib.request.urlopen(
                         oxd_url,
-                        timeout = 2,
-                        context=ssl._create_unverified_context()
+                        timeout=2,
+                        context=ctx
                     )
             if result.code == 200:
                 oxd_status = json.loads(result.read().decode())
