@@ -13,6 +13,7 @@ import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.persistence.model.ScopeAttributes;
 import io.jans.as.server.ciba.CIBAConfigurationService;
@@ -42,65 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ACR_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENCRYPTION_ENC_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTH_LEVEL_MAPPING;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_LOGOUT_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CHECK_SESSION_IFRAME;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_LOCALES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_PARAMETER_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIM_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLIENT_INFO_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.DEVICE_AUTHZ_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.DISPLAY_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.DPOP_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.END_SESSION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONTCHANNEL_LOGOUT_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.GRANT_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ISSUER;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.JWKS_URI;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.MTLS_ENDPOINT_ALIASES;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_POLICY_URI;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_TOS_URI;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.PAR_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REGISTRATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_PARAMETER_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_URI_PARAMETER_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_PAR;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_REQUEST_URI_REGISTRATION;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_MODES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REVOCATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SERVICE_DOCUMENTATION;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SESSION_REVOCATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SUBJECT_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.UI_LOCALES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_SIGNING_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 import static io.jans.as.model.util.StringUtils.implode;
 
 /**
@@ -229,13 +172,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
-            JSONArray subjectTypesSupported = new JSONArray();
-            for (String subjectType : appConfiguration.getSubjectTypesSupported()) {
-                subjectTypesSupported.put(subjectType);
-            }
-            if (subjectTypesSupported.length() > 0) {
-                jsonObj.put(SUBJECT_TYPES_SUPPORTED, subjectTypesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getSubjectTypesSupported(), SUBJECT_TYPES_SUPPORTED);
 
             JSONArray authorizationSigningAlgValuesSupported = new JSONArray();
             for (String authorizationSigningAlg : appConfiguration.getAuthorizationSigningAlgValuesSupported()) {
@@ -261,13 +198,7 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(AUTHORIZATION_ENCRYPTION_ENC_VALUES_SUPPORTED, authorizationEncryptionEncValuesSupported);
             }
 
-            JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
-            for (String userInfoSigningAlg : appConfiguration.getUserInfoSigningAlgValuesSupported()) {
-                userInfoSigningAlgValuesSupported.put(userInfoSigningAlg);
-            }
-            if (userInfoSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(USER_INFO_SIGNING_ALG_VALUES_SUPPORTED, userInfoSigningAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getUserInfoSigningAlgValuesSupported(), USER_INFO_SIGNING_ALG_VALUES_SUPPORTED);
 
             JSONArray userInfoEncryptionAlgValuesSupported = new JSONArray();
             for (String userInfoEncryptionAlg : appConfiguration.getUserInfoEncryptionAlgValuesSupported()) {
@@ -285,95 +216,30 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED, userInfoEncryptionAlgValuesSupported);
             }
 
-            JSONArray idTokenSigningAlgValuesSupported = new JSONArray();
-            for (String idTokenSigningAlg : appConfiguration.getIdTokenSigningAlgValuesSupported()) {
-                idTokenSigningAlgValuesSupported.put(idTokenSigningAlg);
-            }
-            if (idTokenSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED, idTokenSigningAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getIdTokenSigningAlgValuesSupported(), ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
 
-            JSONArray idTokenEncryptionAlgValuesSupported = new JSONArray();
-            for (String idTokenEncryptionAlg : appConfiguration.getIdTokenEncryptionAlgValuesSupported()) {
-                idTokenEncryptionAlgValuesSupported.put(idTokenEncryptionAlg);
-            }
-            if (idTokenEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED, idTokenEncryptionAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getIdTokenEncryptionAlgValuesSupported(), ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
 
-            JSONArray idTokenEncryptionEncValuesSupported = new JSONArray();
-            for (String idTokenEncryptionEnc : appConfiguration.getIdTokenEncryptionEncValuesSupported()) {
-                idTokenEncryptionEncValuesSupported.put(idTokenEncryptionEnc);
-            }
-            if (idTokenEncryptionEncValuesSupported.length() > 0) {
-                jsonObj.put(ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED, idTokenEncryptionEncValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getIdTokenEncryptionEncValuesSupported(), ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
-            JSONArray requestObjectSigningAlgValuesSupported = new JSONArray();
-            for (String requestObjectSigningAlg : appConfiguration.getRequestObjectSigningAlgValuesSupported()) {
-                requestObjectSigningAlgValuesSupported.put(requestObjectSigningAlg);
-            }
-            if (requestObjectSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED, requestObjectSigningAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getAccessTokenSigningAlgValuesSupported(), ACCESS_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
 
-            JSONArray requestObjectEncryptionAlgValuesSupported = new JSONArray();
-            for (String requestObjectEncryptionAlg : appConfiguration.getRequestObjectEncryptionAlgValuesSupported()) {
-                requestObjectEncryptionAlgValuesSupported.put(requestObjectEncryptionAlg);
-            }
-            if (requestObjectEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED, requestObjectEncryptionAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getRequestObjectSigningAlgValuesSupported(), REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED);
 
-            JSONArray requestObjectEncryptionEncValuesSupported = new JSONArray();
-            for (String requestObjectEncryptionEnc : appConfiguration.getRequestObjectEncryptionEncValuesSupported()) {
-                requestObjectEncryptionEncValuesSupported.put(requestObjectEncryptionEnc);
-            }
-            if (requestObjectEncryptionEncValuesSupported.length() > 0) {
-                jsonObj.put(REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED, requestObjectEncryptionEncValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getRequestObjectEncryptionAlgValuesSupported(), REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED);
 
-            JSONArray tokenEndpointAuthMethodsSupported = new JSONArray();
-            for (String tokenEndpointAuthMethod : appConfiguration.getTokenEndpointAuthMethodsSupported()) {
-                tokenEndpointAuthMethodsSupported.put(tokenEndpointAuthMethod);
-            }
-            if (tokenEndpointAuthMethodsSupported.length() > 0) {
-                jsonObj.put(TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED, tokenEndpointAuthMethodsSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getRequestObjectEncryptionEncValuesSupported(), REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
-            JSONArray tokenEndpointAuthSigningAlgValuesSupported = new JSONArray();
-            for (String tokenEndpointAuthSigningAlg : appConfiguration
-                    .getTokenEndpointAuthSigningAlgValuesSupported()) {
-                tokenEndpointAuthSigningAlgValuesSupported.put(tokenEndpointAuthSigningAlg);
-            }
-            if (tokenEndpointAuthSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED,
-                        tokenEndpointAuthSigningAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getTokenEndpointAuthMethodsSupported(), TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED);
 
-            JSONArray dpopSigningAlgValuesSupported = new JSONArray();
-            for (String dpopSigningAlg : appConfiguration.getDpopSigningAlgValuesSupported()) {
-                dpopSigningAlgValuesSupported.put(dpopSigningAlg);
-            }
-            if (dpopSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(DPOP_SIGNING_ALG_VALUES_SUPPORTED, dpopSigningAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration
+                    .getTokenEndpointAuthSigningAlgValuesSupported(), TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED);
 
-            JSONArray displayValuesSupported = new JSONArray();
-            for (String display : appConfiguration.getDisplayValuesSupported()) {
-                displayValuesSupported.put(display);
-            }
-            if (displayValuesSupported.length() > 0) {
-                jsonObj.put(DISPLAY_VALUES_SUPPORTED, displayValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getDpopSigningAlgValuesSupported(), DPOP_SIGNING_ALG_VALUES_SUPPORTED);
 
-            JSONArray claimTypesSupported = new JSONArray();
-            for (String claimType : appConfiguration.getClaimTypesSupported()) {
-                claimTypesSupported.put(claimType);
-            }
-            if (claimTypesSupported.length() > 0) {
-                jsonObj.put(CLAIM_TYPES_SUPPORTED, claimTypesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getDisplayValuesSupported(), DISPLAY_VALUES_SUPPORTED);
+
+            Util.putArray(jsonObj, appConfiguration.getClaimTypesSupported(), CLAIM_TYPES_SUPPORTED);
 
             jsonObj.put(SERVICE_DOCUMENTATION, appConfiguration.getServiceDocumentation());
 
@@ -383,21 +249,9 @@ public class OpenIdConfiguration extends HttpServlet {
             }
             jsonObj.put(ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED, idTokenTokenBindingCnfValuesSupported);
 
-            JSONArray claimsLocalesSupported = new JSONArray();
-            for (String claimLocale : appConfiguration.getClaimsLocalesSupported()) {
-                claimsLocalesSupported.put(claimLocale);
-            }
-            if (claimsLocalesSupported.length() > 0) {
-                jsonObj.put(CLAIMS_LOCALES_SUPPORTED, claimsLocalesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getClaimsLocalesSupported(), CLAIMS_LOCALES_SUPPORTED);
 
-            JSONArray uiLocalesSupported = new JSONArray();
-            for (String uiLocale : appConfiguration.getUiLocalesSupported()) {
-                uiLocalesSupported.put(uiLocale);
-            }
-            if (uiLocalesSupported.length() > 0) {
-                jsonObj.put(UI_LOCALES_SUPPORTED, uiLocalesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getUiLocalesSupported(), UI_LOCALES_SUPPORTED);
 
             JSONArray scopesSupported = new JSONArray();
             JSONArray claimsSupported = new JSONArray();

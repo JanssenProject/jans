@@ -111,6 +111,15 @@ public class RegisterParamsValidator {
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_signed_response_alg is not valid.");
         }
 
+        if (registerRequest.getAccessTokenSigningAlg() != null
+                && registerRequest.getAccessTokenSigningAlg() != SignatureAlgorithm.NONE &&
+                !appConfiguration.getAccessTokenSigningAlgValuesSupported().contains(
+                        registerRequest.getAccessTokenSigningAlg().toString())) {
+            log.debug("Parameter access_token_signed_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter access_token_signed_alg is not valid.");
+        }
+
         if (registerRequest.getIdTokenEncryptedResponseAlg() != null &&
                 !appConfiguration.getIdTokenEncryptionAlgValuesSupported().contains(
                         registerRequest.getIdTokenEncryptedResponseAlg().toString())) {

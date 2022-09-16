@@ -108,6 +108,7 @@ public class AppConfiguration implements Configuration {
     private List<String> idTokenSigningAlgValuesSupported;
     private List<String> idTokenEncryptionAlgValuesSupported;
     private List<String> idTokenEncryptionEncValuesSupported;
+    private List<String> accessTokenSigningAlgValuesSupported;
     private Boolean forceSignedRequestObject = false;
     private List<String> requestObjectSigningAlgValuesSupported;
     private List<String> requestObjectEncryptionAlgValuesSupported;
@@ -1249,6 +1250,14 @@ public class AppConfiguration implements Configuration {
 
     public void setIdTokenEncryptionEncValuesSupported(List<String> idTokenEncryptionEncValuesSupported) {
         this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
+    }
+
+    public List<String> getAccessTokenSigningAlgValuesSupported() {
+        return accessTokenSigningAlgValuesSupported;
+    }
+
+    public void setAccessTokenSigningAlgValuesSupported(List<String> accessTokenSigningAlgValuesSupported) {
+        this.accessTokenSigningAlgValuesSupported = accessTokenSigningAlgValuesSupported;
     }
 
     public Boolean getForceSignedRequestObject() {
