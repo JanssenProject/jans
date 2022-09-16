@@ -386,7 +386,7 @@ class PropertiesUtils(SetupUtils):
                                     if not Config.thread_queue:
                                         print("{}    Successfully connected to Couchbase server{}".format(colors.OKGREEN, colors.ENDC))
                                     return retval
-                except:
+                except Exception:
                     pass
 
 
@@ -521,11 +521,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installHttpd:
             return
 
-        promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
+        prompt_for_httpd = self.getPrompt("Install Apache HTTPD Server", 
                                         self.getDefaultOption(Config.installHTTPD)
                                         )[0].lower()
 
-        Config.installHttpd = True if promptForHTTPD == 'y' else False
+        Config.installHttpd = prompt_for_httpd == 'y'
 
         if Config.installed_instance and Config.installHttpd:
             Config.addPostSetupService.append('installHttpd')
@@ -535,14 +535,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_scim_server:
             return
 
-        promptForScimServer = self.getPrompt("Install Scim Server?",
+        prompt_for_scim_server = self.getPrompt("Install Scim Server?",
                                             self.getDefaultOption(Config.install_scim_server)
                                             )[0].lower()
         
-        if promptForScimServer == 'y':
-            Config.install_scim_server = True
-        else:
-            Config.install_scim_server = False
+            Config.install_scim_server =  prompt_for_scim_server == 'y'
 
         if Config.installed_instance and Config.install_scim_server:
             Config.addPostSetupService.append('install_scim_server')
@@ -551,10 +548,10 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installFido2:
             return
 
-        promptForFido2Server = self.getPrompt("Install Fido2 Server?",
+        prompt_for_fido2_server = self.getPrompt("Install Fido2 Server?",
                                             self.getDefaultOption(Config.installFido2)
                                             )[0].lower()
-        Config.installFido2 = True if promptForFido2Server == 'y' else False
+        Config.installFido2 = prompt_for_fido2_server == 'y'
 
         if Config.installed_instance and Config.installFido2:
             Config.addPostSetupService.append('installFido2')
@@ -565,16 +562,16 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installOxd:
             return
 
-        promptForOxd = self.getPrompt("Install Oxd?", 
+        prompt_for_oxd = self.getPrompt("Install Oxd?", 
                                             self.getDefaultOption(Config.installOxd)
                                             )[0].lower()
-        Config.installOxd = True if promptForOxd == 'y' else False
+        Config.installOxd = prompt_for_oxd == 'y'
 
         if Config.installOxd:
-            promptForOxdJansStorage = self.getPrompt("  Use Janssen Storage for Oxd?",
+            use_jans_storage = self.getPrompt("  Use Janssen Storage for Oxd?",
                                                 self.getDefaultOption(Config.get('oxd_use_jans_storage'))
                                                 )[0].lower()
-            Config.oxd_use_jans_storage = True if promptForOxdJansStorage == 'y' else False
+            Config.oxd_use_jans_storage = use_jans_storage == 'y'
 
 
         if Config.installed_instance and Config.installOxd:
@@ -585,14 +582,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installEleven:
             return
 
-        promptForinstallEleven = self.getPrompt("Install Eleven Server?",
+        promp_for_eleven = self.getPrompt("Install Eleven Server?",
                                             self.getDefaultOption(Config.installEleven)
                                             )[0].lower()
-        
-        if promptForinstallEleven == 'y':
-            Config.installEleven = True
-        else:
-            Config.installEleven = False
+
+        Config.installEleven = promp_for_eleven == 'y'
 
         if Config.installed_instance and Config.installEleven:
             Config.addPostSetupService.append('installEleven')
@@ -602,11 +596,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_config_api:
             return
 
-        promptForConfigApi = self.getPrompt("Install Jans Config API?", 
+        prompt_for_config_api = self.getPrompt("Install Jans Config API?", 
                             self.getDefaultOption(Config.install_config_api)
                             )[0].lower()
 
-        Config.install_config_api = True if promptForConfigApi == 'y' else False
+        Config.install_config_api = prompt_for_config_api == 'y'
 
         if Config.installed_instance and Config.install_config_api:
             Config.addPostSetupService.append('install_config_api')
@@ -618,7 +612,7 @@ class PropertiesUtils(SetupUtils):
                             self.getDefaultOption(Config.install_client_api)
                             )[0].lower()
 
-        Config.install_client_api = True if prompt == 'y' else False
+        Config.install_client_api = prompt == 'y'
 
         if Config.installed_instance and Config.install_client_api:
             Config.addPostSetupService.append('install_client_api')
