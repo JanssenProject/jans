@@ -8,9 +8,9 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://gitter.im/JanssenProject/Lobby)
 
-**Get Started**: [Quick Start](#quick-start) | [User Guides](docs/user)
+**Get Started**: [Documentation](https://docs.jans.io/) | [Quick Start](#quick-start) | [User Guides](https://docs.jans.io/head/admin/recipes/)
 
-**Contribute**: [Contribution Guide](docs/CONTRIBUTING.md) | [Community Docs](docs/community) | [Developer Guides](docs/developer)
+**Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/) | [Developer Guides](https://docs.jans.io/head/developer/)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
