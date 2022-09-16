@@ -538,8 +538,8 @@ class PropertiesUtils(SetupUtils):
         prompt_for_scim_server = self.getPrompt("Install Scim Server?",
                                             self.getDefaultOption(Config.install_scim_server)
                                             )[0].lower()
-        
-            Config.install_scim_server =  prompt_for_scim_server == 'y'
+
+        Config.install_scim_server =  prompt_for_scim_server == 'y'
 
         if Config.installed_instance and Config.install_scim_server:
             Config.addPostSetupService.append('install_scim_server')
