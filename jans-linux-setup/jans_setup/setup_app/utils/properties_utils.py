@@ -11,6 +11,7 @@ import pymysql
 import psycopg2
 import inspect
 import ldap3
+import tempfile
 
 from setup_app import paths
 from setup_app.messages import msg
@@ -459,12 +460,13 @@ class PropertiesUtils(SetupUtils):
     def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
 
         oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
-        self.writeFile(oxd_crt_fn, oxd_cert)
-        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-        
-        if ssl_subjects.get('commonName') != oxd_hostname:
-            return ssl_subjects
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            oxd_crt_fn = os.path.join(tmpdirname, 'oxd.crt')
+            self.writeFile(oxd_crt_fn, oxd_cert)
+            ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+
+            if ssl_subjects.get('commonName') != oxd_hostname:
+                return ssl_subjects
 
 
     def promptForBackendMappings(self):
