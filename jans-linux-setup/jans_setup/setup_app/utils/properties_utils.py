@@ -8,6 +8,7 @@ import urllib
 import ssl
 import re
 import pymysql
+import psycopg2
 import inspect
 import ldap3
 
@@ -15,7 +16,7 @@ from setup_app import paths
 from setup_app.messages import msg
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
-from setup_app.static import InstallTypes, colors
+from setup_app.static import InstallTypes, colors, BackendStrings
 
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
@@ -659,16 +660,18 @@ class PropertiesUtils(SetupUtils):
     def prompt_for_backend(self):
         print('Chose Backend Type:')
 
-        backend_types = ['Local OpenDj',
-                         'Remote OpenDj',
-                         'Local MySQL',
-                         'Remote MySQL',
-                         ]
+        backend_types = [
+                    BackendStrings.LOCAL_OPENDJ,
+                    BackendStrings.LOCAL_MYSQL,
+                    BackendStrings.REMOTE_MYSQL,
+                    BackendStrings.LOCAL_PGSQL,
+                    BackendStrings.REMOTE_PGSQL,
+                    ]
 
         if not os.path.exists(os.path.join(Config.install_dir, 'package')):
-            backend_types += ['Remote Couchbase', 'Cloud Spanner']
+            backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
             if 'couchbase' in self.getBackendTypes():
-                backend_types.insert(2, 'Local Couchbase')
+                backend_types.insert(2, BackendStrings.LOCAL_COUCHBASE)
 
         nlist = []
         for i, btype in enumerate(backend_types):
@@ -697,7 +700,7 @@ class PropertiesUtils(SetupUtils):
 
         backend_type_str = backend_types[int(choice)-1]
 
-        if backend_type_str == 'Local OpenDj':
+        if backend_type_str == BackendStrings.LOCAL_OPENDJ:
             Config.opendj_install = InstallTypes.LOCAL
             ldapPass = Config.ldapPass or Config.admin_password or self.getPW(special='.*=!%&+/-')
 
@@ -712,7 +715,7 @@ class PropertiesUtils(SetupUtils):
             Config.ldapPass = ldapPass
 
 
-        elif backend_type_str == 'Remote OpenDj':
+        elif backend_type_str == BackendStrings.REMOTE_OPENDJ:
             Config.opendj_install = InstallTypes.REMOTE
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
@@ -726,7 +729,7 @@ class PropertiesUtils(SetupUtils):
             Config.ldapPass = ldapPass
             Config.ldap_hostname = ldapHost
 
-        elif backend_type_str == 'Local Couchbase':
+        elif backend_type_str == BackendStrings.LOCAL_COUCHBASE:
             Config.opendj_install = InstallTypes.NONE
             Config.cb_install = InstallTypes.LOCAL
             Config.isCouchbaseUserAdmin = True
@@ -742,7 +745,7 @@ class PropertiesUtils(SetupUtils):
             Config.cb_password = cbPass
             Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
-        elif backend_type_str == 'Remote Couchbase':
+        elif backend_type_str == BackendStrings.REMOTE_COUCHBASE:
             Config.opendj_install = InstallTypes.NONE
             Config.cb_install = InstallTypes.REMOTE
 
@@ -756,38 +759,50 @@ class PropertiesUtils(SetupUtils):
 
             Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
-        elif backend_type_str == 'Local MySQL':
+        elif backend_type_str in (BackendStrings.LOCAL_MYSQL, BackendStrings.LOCAL_PGSQL):
             Config.opendj_install = InstallTypes.NONE
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.LOCAL
-            Config.rdbm_type = 'mysql'
-            Config.rdbm_host = 'localhost'
-            Config.rdbm_user = 'jans'
-            Config.rdbm_password = self.getPW(special='.*=+-()[]{}')
-            Config.rdbm_port = 3306
-            Config.rdbm_db = 'jansdb'
+            if backend_type_str == BackendStrings.LOCAL_MYSQL:
+                Config.rdbm_port = 3306
+                Config.rdbm_type = 'mysql'
+            else:
+                Config.rdbm_port = 5432
+                Config.rdbm_type = 'pgsql'
+            if not Config.rdbm_host:
 
-        elif backend_type_str == 'Remote MySQL':
+            if not Config.rdbm_password:
+                Config.rdbm_password = self.getPW(special='.*=+-()[]{}')
+
+        elif backend_type_str in (BackendStrings.REMOTE_MYSQL, BackendStrings.REMOTE_PGSQL):
             Config.opendj_install = InstallTypes.NONE
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.REMOTE
-            Config.rdbm_type = 'mysql'
+            if backend_type_str == BackendStrings.REMOTE_MYSQL:
+                Config.rdbm_port = 3306
+                Config.rdbm_type = 'mysql'
+            else:
+                Config.rdbm_port = 5432
+                Config.rdbm_type = 'pgsql'
 
             while True:
-                Config.rdbm_host = self.getPrompt("  Mysql host", Config.get('rdbm_host'))
-                Config.rdbm_port = self.getPrompt("  Mysql port", 3306, itype=int, indent=1)
-                Config.rdbm_user = self.getPrompt("  Mysql user", Config.get('rdbm_user'))
-                Config.rdbm_password = self.getPrompt("  Mysql password")
-                Config.rdbm_db = self.getPrompt("  Mysql database", Config.get('rdbm_db'))
+                Config.rdbm_host = self.getPrompt("  {} host".format(Config.rdbm_type.upper()), Config.get('rdbm_host'))
+                Config.rdbm_port = self.getPrompt("  {} port".format(Config.rdbm_type.upper()), Config.rdbm_port, itype=int, indent=1)
+                Config.rdbm_user = self.getPrompt("  {} user".format(Config.rdbm_type.upper()), Config.get('rdbm_user'))
+                Config.rdbm_password = self.getPrompt("  {} password".format(Config.rdbm_type.upper()))
+                Config.rdbm_db = self.getPrompt("  {} database".format(Config.rdbm_type.upper()), Config.get('rdbm_db'))
 
                 try:
-                    pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
-                    print("  {}MySQL connection was successful{}".format(colors.OKGREEN, colors.ENDC))
+                    if Config.rdbm_type == 'mysql':
+                        pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                    else:
+                        psycopg2.connect(dbname=Config.rdbm_db, user=Config.rdbm_user, password=Config.rdbm_password, host=Config.rdbm_host, port=Config.rdbm_port)
+                    print("  {}{} connection was successful{}".format(colors.OKGREEN, Config.rdbm_type.upper(), colors.ENDC))
                     break
                 except Exception as e:
-                    print("  {}Can't connect to MySQL: {}{}".format(colors.DANGER, e, colors.ENDC))
+                    print("  {}Can't connect to {}: {}{}".format(colors.DANGER,Config.rdbm_type.upper(), e, colors.ENDC))
 
-        elif backend_type_str == 'Cloud Spanner':
+        elif backend_type_str == BackendStrings.CLOUD_SPANNER:
             Config.opendj_install = InstallTypes.NONE
             Config.rdbm_type = 'spanner'
             Config.rdbm_install = True

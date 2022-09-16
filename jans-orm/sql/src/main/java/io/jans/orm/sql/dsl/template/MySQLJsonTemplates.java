@@ -10,18 +10,18 @@ import io.jans.orm.sql.impl.SqlOps;
  *
  * @author Yuriy Movchan Date: 01/27/2021
  */
-public class SqlJsonMySQLTemplates extends MySQLTemplates {
+public class MySQLJsonTemplates extends MySQLTemplates {
 	
     public static Builder builder() {
         return new Builder() {
             @Override
             protected SQLTemplates build(char escape, boolean quote) {
-                return new SqlJsonMySQLTemplates(escape, quote);
+                return new MySQLJsonTemplates(escape, quote);
             }
         };
     }
 
-    public SqlJsonMySQLTemplates(char escape, boolean quote) {
+    public MySQLJsonTemplates(char escape, boolean quote) {
 		super(escape, quote);
 
 		add(SqlOps.JSON_CONTAINS, "JSON_CONTAINS({0}->{2}, CAST({1} AS JSON))");

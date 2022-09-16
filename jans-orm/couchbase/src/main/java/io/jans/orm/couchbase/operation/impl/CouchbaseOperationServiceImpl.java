@@ -476,7 +476,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         }
 
         String[] select = attributes;
-        if (select == null) {
+        if (ArrayHelper.isEmpty(select)) {
             select = new String[] { "jans_doc.*", CouchbaseOperationService.DN };
         } else if ((select.length == 1) && StringHelper.isEmpty(select[0])) {
         	// Compatibility with base persistence layer when application pass filter new String[] { "" }

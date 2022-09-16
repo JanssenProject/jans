@@ -338,7 +338,7 @@ public class SpannerFilterConverter {
 				structField = childTableMapping.getColumTypes().get(attributeNameLower);
 			}
 		}
-		
+
 		if (structField == null) {
 	        throw new SearchException(String.format("Unknown column name '%s' in table/child table '%s'", attributeName, tableMapping.getTableName()));
 		}
