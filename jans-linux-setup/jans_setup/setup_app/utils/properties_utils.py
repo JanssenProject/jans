@@ -11,6 +11,7 @@ import pymysql
 import psycopg2
 import inspect
 import ldap3
+import tempfile
 
 from setup_app import paths
 from setup_app.messages import msg
@@ -69,7 +70,7 @@ class PropertiesUtils(SetupUtils):
 
         except KeyboardInterrupt:
             sys.exit()
-        except:
+        except Exception:
             return None
 
     def check_properties(self):
@@ -85,9 +86,9 @@ class PropertiesUtils(SetupUtils):
         while not Config.orgName:
             Config.orgName = input('Organization Name: ').strip()
         while not Config.countryCode:
-            testCode = input('2 Character Country Code: ').strip()
-            if len(testCode) == 2:
-                Config.countryCode = testCode
+            test_code = input('2 Character Country Code: ').strip()
+            if len(test_code) == 2:
+                Config.countryCode = test_code
             else:
                 print('Country code should only be two characters. Try again\n')
         while not Config.city:
@@ -98,7 +99,7 @@ class PropertiesUtils(SetupUtils):
             tld = None
             try:
                 tld = ".".join(self.hostname.split(".")[-2:])
-            except:
+            except Exception:
                 tld = Config.hostname
             Config.admin_email = "support@%s" % tld
 
@@ -180,7 +181,6 @@ class PropertiesUtils(SetupUtils):
 
         no_update += ['noPrompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
 
-        cb_install = False
         map_db = []
 
         if prop_file.endswith('.enc'):
@@ -192,7 +192,7 @@ class PropertiesUtils(SetupUtils):
 
         try:
             p = base.read_properties_file(prop_file)
-        except:
+        except Exception:
             self.logIt("Error loading properties", True)
 
         if p.get('ldap_type') == 'openldap':
@@ -219,14 +219,14 @@ class PropertiesUtils(SetupUtils):
                     mapping_locations = json.loads(p[prop])
                     setattr(Config, prop, mapping_locations)
                     for l in mapping_locations:
-                        if not mapping_locations[l] in map_db:
+                        if mapping_locations[l] not in map_db:
                             map_db.append(mapping_locations[l])
 
                 if p[prop] == 'True':
                     setattr(Config, prop, True)
                 elif p[prop] == 'False':
                     setattr(Config, prop, False)
-            except:
+            except Exception:
                 self.logIt("Error loading property %s" % prop)
 
         if prop_file.endswith('-DEC~'):
@@ -245,7 +245,7 @@ class PropertiesUtils(SetupUtils):
             else:
                 Config.opendj_install = InstallTypes.NONE
 
-        if map_db and not 'ldap' in map_db:
+        if map_db and 'ldap' not in map_db:
             Config.opendj_install = InstallTypes.NONE
 
         if 'couchbase' in map_db:
@@ -260,12 +260,12 @@ class PropertiesUtils(SetupUtils):
 
         if Config.cb_install == InstallTypes.LOCAL:
             available_backends = self.getBackendTypes()
-            if not 'couchbase' in available_backends:
+            if 'couchbase' not in available_backends:
                 print("Couchbase package is not available exiting.")
                 sys.exit(1)
 
 
-        if (not 'cb_password' in properties_list) and Config.cb_install:
+        if ('cb_password' not in properties_list) and Config.cb_install:
             Config.cb_password = p.get('ldapPass')
 
         if Config.cb_install == InstallTypes.REMOTE:
@@ -295,7 +295,7 @@ class PropertiesUtils(SetupUtils):
 
         self.logIt('Saving properties to %s' % prop_fn)
 
-        def getString(value):
+        def get_string(value):
             if isinstance(value, str):
                 return str(value).strip()
             elif isinstance(value, bool) or isinstance(value, int) or isinstance(value, float):
@@ -318,7 +318,7 @@ class PropertiesUtils(SetupUtils):
                     if obj_name == 'mapping_locations':
                         p[obj_name] = json.dumps(obj)
                     else:
-                        value = getString(obj)
+                        value = get_string(obj)
                         if value != '':
                             p[obj_name] = value
 
@@ -327,7 +327,7 @@ class PropertiesUtils(SetupUtils):
 
             self.run([paths.cmd_chmod, '600', prop_fn])
 
-            # TODO: uncomment later
+            # uncomment later
             return
 
             self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.admin_password])
@@ -338,7 +338,7 @@ class PropertiesUtils(SetupUtils):
 
             self.run(['rm', '-f', prop_fn])
 
-        except:
+        except Exception:
             self.logIt("Error saving properties", True)
 
     def getBackendTypes(self):
@@ -386,7 +386,7 @@ class PropertiesUtils(SetupUtils):
                                     if not Config.thread_queue:
                                         print("{}    Successfully connected to Couchbase server{}".format(colors.OKGREEN, colors.ENDC))
                                     return retval
-                except:
+                except Exception:
                     pass
 
 
@@ -436,11 +436,16 @@ class PropertiesUtils(SetupUtils):
     def check_oxd_server(self, oxd_url, error_out=True, log_error=True):
 
         oxd_url = os.path.join(oxd_url, 'health-check')
+
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = True
+        ctx.verify_mode = ssl.CERT_NONE
+
         try:
             result = urllib.request.urlopen(
                         oxd_url,
-                        timeout = 2,
-                        context=ssl._create_unverified_context()
+                        timeout=2,
+                        context=ctx
                     )
             if result.code == 200:
                 oxd_status = json.loads(result.read().decode())
@@ -459,12 +464,13 @@ class PropertiesUtils(SetupUtils):
     def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
 
         oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
-        self.writeFile(oxd_crt_fn, oxd_cert)
-        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-        
-        if ssl_subjects.get('commonName') != oxd_hostname:
-            return ssl_subjects
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            oxd_crt_fn = os.path.join(tmpdirname, 'oxd.crt')
+            self.writeFile(oxd_crt_fn, oxd_cert)
+            ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+
+            if ssl_subjects.get('commonName') != oxd_hostname:
+                return ssl_subjects
 
 
     def promptForBackendMappings(self):
@@ -515,11 +521,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installHttpd:
             return
 
-        promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
+        prompt_for_httpd = self.getPrompt("Install Apache HTTPD Server", 
                                         self.getDefaultOption(Config.installHTTPD)
                                         )[0].lower()
 
-        Config.installHttpd = True if promptForHTTPD == 'y' else False
+        Config.installHttpd = prompt_for_httpd == 'y'
 
         if Config.installed_instance and Config.installHttpd:
             Config.addPostSetupService.append('installHttpd')
@@ -529,14 +535,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_scim_server:
             return
 
-        promptForScimServer = self.getPrompt("Install Scim Server?",
+        prompt_for_scim_server = self.getPrompt("Install Scim Server?",
                                             self.getDefaultOption(Config.install_scim_server)
                                             )[0].lower()
-        
-        if promptForScimServer == 'y':
-            Config.install_scim_server = True
-        else:
-            Config.install_scim_server = False
+
+        Config.install_scim_server =  prompt_for_scim_server == 'y'
 
         if Config.installed_instance and Config.install_scim_server:
             Config.addPostSetupService.append('install_scim_server')
@@ -545,10 +548,10 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installFido2:
             return
 
-        promptForFido2Server = self.getPrompt("Install Fido2 Server?",
+        prompt_for_fido2_server = self.getPrompt("Install Fido2 Server?",
                                             self.getDefaultOption(Config.installFido2)
                                             )[0].lower()
-        Config.installFido2 = True if promptForFido2Server == 'y' else False
+        Config.installFido2 = prompt_for_fido2_server == 'y'
 
         if Config.installed_instance and Config.installFido2:
             Config.addPostSetupService.append('installFido2')
@@ -559,16 +562,16 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installOxd:
             return
 
-        promptForOxd = self.getPrompt("Install Oxd?", 
+        prompt_for_oxd = self.getPrompt("Install Oxd?", 
                                             self.getDefaultOption(Config.installOxd)
                                             )[0].lower()
-        Config.installOxd = True if promptForOxd == 'y' else False
+        Config.installOxd = prompt_for_oxd == 'y'
 
         if Config.installOxd:
-            promptForOxdJansStorage = self.getPrompt("  Use Janssen Storage for Oxd?",
+            use_jans_storage = self.getPrompt("  Use Janssen Storage for Oxd?",
                                                 self.getDefaultOption(Config.get('oxd_use_jans_storage'))
                                                 )[0].lower()
-            Config.oxd_use_jans_storage = True if promptForOxdJansStorage == 'y' else False
+            Config.oxd_use_jans_storage = use_jans_storage == 'y'
 
 
         if Config.installed_instance and Config.installOxd:
@@ -579,14 +582,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installEleven:
             return
 
-        promptForinstallEleven = self.getPrompt("Install Eleven Server?",
+        promp_for_eleven = self.getPrompt("Install Eleven Server?",
                                             self.getDefaultOption(Config.installEleven)
                                             )[0].lower()
-        
-        if promptForinstallEleven == 'y':
-            Config.installEleven = True
-        else:
-            Config.installEleven = False
+
+        Config.installEleven = promp_for_eleven == 'y'
 
         if Config.installed_instance and Config.installEleven:
             Config.addPostSetupService.append('installEleven')
@@ -596,11 +596,11 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_config_api:
             return
 
-        promptForConfigApi = self.getPrompt("Install Jans Config API?", 
+        prompt_for_config_api = self.getPrompt("Install Jans Config API?", 
                             self.getDefaultOption(Config.install_config_api)
                             )[0].lower()
 
-        Config.install_config_api = True if promptForConfigApi == 'y' else False
+        Config.install_config_api = prompt_for_config_api == 'y'
 
         if Config.installed_instance and Config.install_config_api:
             Config.addPostSetupService.append('install_config_api')
@@ -612,7 +612,7 @@ class PropertiesUtils(SetupUtils):
                             self.getDefaultOption(Config.install_client_api)
                             )[0].lower()
 
-        Config.install_client_api = True if prompt == 'y' else False
+        Config.install_client_api = prompt == 'y'
 
         if Config.installed_instance and Config.install_client_api:
             Config.addPostSetupService.append('install_client_api')
@@ -769,10 +769,6 @@ class PropertiesUtils(SetupUtils):
             else:
                 Config.rdbm_port = 5432
                 Config.rdbm_type = 'pgsql'
-            if not Config.rdbm_host:
-
-            if not Config.rdbm_password:
-                Config.rdbm_password = self.getPW(special='.*=+-()[]{}')
 
         elif backend_type_str in (BackendStrings.REMOTE_MYSQL, BackendStrings.REMOTE_PGSQL):
             Config.opendj_install = InstallTypes.NONE
