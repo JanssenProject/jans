@@ -31,6 +31,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def install(self):
         self.qchar = '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
         self.local_install()
+        if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
+            self.reset_rdbm_db()
         jans_schema_files = []
         self.jans_attributes = []
         for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
@@ -44,6 +46,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.import_ldif()
         self.create_indexes()
         self.rdbmProperties()
+
+    def reset_rdbm_db(self):
+        self.logIt("Resetting DB {}".format(Config.rdbm_db))
+        self.dbUtils.metadata.reflect(self.dbUtils.engine)
+        self.dbUtils.metadata.drop_all(self.dbUtils.engine)
+        self.dbUtils.session.commit()
+        self.dbUtils.metadata.clear()
 
     def local_install(self):
         if not Config.rdbm_password:
