@@ -70,7 +70,7 @@ class PropertiesUtils(SetupUtils):
 
         except KeyboardInterrupt:
             sys.exit()
-        except:
+        except Exception:
             return None
 
     def check_properties(self):
@@ -86,9 +86,9 @@ class PropertiesUtils(SetupUtils):
         while not Config.orgName:
             Config.orgName = input('Organization Name: ').strip()
         while not Config.countryCode:
-            testCode = input('2 Character Country Code: ').strip()
-            if len(testCode) == 2:
-                Config.countryCode = testCode
+            test_code = input('2 Character Country Code: ').strip()
+            if len(test_code) == 2:
+                Config.countryCode = test_code
             else:
                 print('Country code should only be two characters. Try again\n')
         while not Config.city:
@@ -99,7 +99,7 @@ class PropertiesUtils(SetupUtils):
             tld = None
             try:
                 tld = ".".join(self.hostname.split(".")[-2:])
-            except:
+            except Exception:
                 tld = Config.hostname
             Config.admin_email = "support@%s" % tld
 
@@ -181,7 +181,6 @@ class PropertiesUtils(SetupUtils):
 
         no_update += ['noPrompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
 
-        cb_install = False
         map_db = []
 
         if prop_file.endswith('.enc'):
@@ -193,7 +192,7 @@ class PropertiesUtils(SetupUtils):
 
         try:
             p = base.read_properties_file(prop_file)
-        except:
+        except Exception:
             self.logIt("Error loading properties", True)
 
         if p.get('ldap_type') == 'openldap':
@@ -220,14 +219,14 @@ class PropertiesUtils(SetupUtils):
                     mapping_locations = json.loads(p[prop])
                     setattr(Config, prop, mapping_locations)
                     for l in mapping_locations:
-                        if not mapping_locations[l] in map_db:
+                        if mapping_locations[l] not in map_db:
                             map_db.append(mapping_locations[l])
 
                 if p[prop] == 'True':
                     setattr(Config, prop, True)
                 elif p[prop] == 'False':
                     setattr(Config, prop, False)
-            except:
+            except Exception:
                 self.logIt("Error loading property %s" % prop)
 
         if prop_file.endswith('-DEC~'):
@@ -246,7 +245,7 @@ class PropertiesUtils(SetupUtils):
             else:
                 Config.opendj_install = InstallTypes.NONE
 
-        if map_db and not 'ldap' in map_db:
+        if map_db and 'ldap' not in map_db:
             Config.opendj_install = InstallTypes.NONE
 
         if 'couchbase' in map_db:
@@ -261,12 +260,12 @@ class PropertiesUtils(SetupUtils):
 
         if Config.cb_install == InstallTypes.LOCAL:
             available_backends = self.getBackendTypes()
-            if not 'couchbase' in available_backends:
+            if 'couchbase' not in available_backends:
                 print("Couchbase package is not available exiting.")
                 sys.exit(1)
 
 
-        if (not 'cb_password' in properties_list) and Config.cb_install:
+        if ('cb_password' not in properties_list) and Config.cb_install:
             Config.cb_password = p.get('ldapPass')
 
         if Config.cb_install == InstallTypes.REMOTE:
@@ -296,7 +295,7 @@ class PropertiesUtils(SetupUtils):
 
         self.logIt('Saving properties to %s' % prop_fn)
 
-        def getString(value):
+        def get_string(value):
             if isinstance(value, str):
                 return str(value).strip()
             elif isinstance(value, bool) or isinstance(value, int) or isinstance(value, float):
@@ -319,7 +318,7 @@ class PropertiesUtils(SetupUtils):
                     if obj_name == 'mapping_locations':
                         p[obj_name] = json.dumps(obj)
                     else:
-                        value = getString(obj)
+                        value = get_string(obj)
                         if value != '':
                             p[obj_name] = value
 
@@ -328,7 +327,7 @@ class PropertiesUtils(SetupUtils):
 
             self.run([paths.cmd_chmod, '600', prop_fn])
 
-            # TODO: uncomment later
+            # uncomment later
             return
 
             self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.admin_password])
@@ -339,7 +338,7 @@ class PropertiesUtils(SetupUtils):
 
             self.run(['rm', '-f', prop_fn])
 
-        except:
+        except Exception:
             self.logIt("Error saving properties", True)
 
     def getBackendTypes(self):
