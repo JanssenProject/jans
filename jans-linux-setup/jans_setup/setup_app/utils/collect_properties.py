@@ -79,6 +79,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_password_enc = jans_sql_prop['auth.userPassword']
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
             Config.rdbm_db = jans_sql_prop['db.schema.name']
+            if Config.rdbm_type == 'postgresql':
+                Config.rdbm_type = 'pgsql'
 
         if not Config.persistence_type in ('couchbase', 'ldap') and Config.get('jansSpannerProperties') and os.path.exists(Config.jansSpannerProperties):
             Config.rdbm_type = 'spanner'
