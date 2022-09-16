@@ -119,7 +119,7 @@ public class RegisterCreateAction {
 
             setSubjectType(r);
             setIdTokenSignedResponseAlg(r);
-            setAccessTokenSigningAlg(r);
+            setAccessTokenSigningAlgFallback(r);
 
             registerParamsValidator.validateAlgorithms(r);
 
@@ -236,7 +236,7 @@ public class RegisterCreateAction {
         }
     }
 
-    private void setAccessTokenSigningAlg(RegisterRequest r) {
+    private void setAccessTokenSigningAlgFallback(RegisterRequest r) {
         if (r.getAccessTokenSigningAlg() == null) {
             r.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
         }
