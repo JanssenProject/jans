@@ -14,8 +14,8 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
-![Hex.pm](https://img.shields.io/hexpm/l/plug)
-![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)
+[![Hex.pm](https://img.shields.io/hexpm/l/plug)](./LICENSE)
+[![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)](#users-and-community)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 **Table of Contents**
@@ -67,7 +67,7 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 ### Installation
 
-Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) to know all the installation options
+Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Documentation](https://docs.jans.io/head/admin/install/) to know all the installation options
 
 ## Users and Community
 
@@ -85,11 +85,11 @@ Building a large community is our number one goal. Please let us know what we ca
 
 ### Code of Conduct
 
-[Janssen code of conduct](docs/CODE_OF_CONDUCT.md) ensures that Janssen community is a welcoming place for everyone. 
+[Janssen code of conduct](https://docs.jans.io/head/CODE_OF_CONDUCT/) ensures that Janssen community is a welcoming place for everyone. 
 
 ### Contribution Guidelines
 
-[Contribution guide](docs/CONTRIBUTING.md) will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️ 
+[Contribution guide](https://docs.jans.io/head/CONTRIBUTING/) will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️ 
 
 ## Security
 
@@ -100,7 +100,7 @@ Refer to [Janssen Security Policy](.github/SECURITY.md)
 
 ## Documentation
 
-Refer to [Janssen Wiki](https://github.com/JanssenProject/jans/wiki) for documentation.
+Visit [Janssen Documentation Site](https://docs.jans.io/) for documentation around current as well as previous versions.
 
 ## Design
 
@@ -116,11 +116,11 @@ The Janssen Project is aligned with the goals of cloud native infrastructure to 
 
 ## Governance
 
-Janssen is a Linux Foundation project, governed according to the [charter](./docs/community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
+Janssen is a Linux Foundation project, governed according to the [charter](https://docs.jans.io/head/governance/charter/). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
 
 ## Support
 
-Documentation currently is a work in progress. Draft pages are currently available on [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/). You may want to also check Gluu Server [docs](https://gluu.org/docs), which have a lot in common with Janssen.
+Documentation currently is a work in progress and published on [Documentation site](https://docs.jans.io/). You may want to also check Gluu Server [docs](https://gluu.org/docs), which have a lot in common with Janssen.
 
 We prefer to have all our discussions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) to better facilitate faster responses. However, other means are available such as the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free there with your Github identity.
 
