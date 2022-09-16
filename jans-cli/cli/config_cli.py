@@ -47,6 +47,7 @@ tabulate_endpoints = {
 }
 
 tabular_dataset = {'scim.get-users': 'Resources'}
+excluded_operations = {'scim': ['search-user'], 'jca':[]}
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
@@ -63,6 +64,7 @@ bold_color = 15
 grey_color = 242
 
 clear = lambda: os.system('clear')
+
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
@@ -478,6 +480,8 @@ class JCA_CLI:
                     path = self.cfg_yml['paths'][path_name]
                     for method_name in path:
                         method = path[method_name]
+                        if hasattr(method, 'get') and method.get('operationId') in excluded_operations[my_op_mode]:
+                            continue
                         if 'tags' in method and tag in method['tags'] and 'operationId' in method:
                             if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
                                 continue
@@ -489,7 +493,6 @@ class JCA_CLI:
 
         menu = Menu('Main Menu')
 
-        
         for grp in menu_groups:
             methods = get_methods_of_tag(grp.tag)
             m = Menu(name=grp.mname)
@@ -1022,8 +1025,7 @@ class JCA_CLI:
         retVal = {}
         for path in self.cfg_yml['paths']:
             for method in self.cfg_yml['paths'][path]:
-                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method][
-                    'operationId'] == operation_id:
+                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method]['operationId'] == operation_id:
                     retVal = self.cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
                     retVal['__method__'] = method
@@ -1044,8 +1046,7 @@ class JCA_CLI:
 
             for method in self.cfg_yml['paths'][path]:
 
-                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method][
-                    'tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
+                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
                     retVal = self.cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
                     retVal['__method__'] = method
@@ -1227,7 +1228,11 @@ class JCA_CLI:
                     print("An error ocurred while saving data")
                     self.print_exception(e)
             elif selection in item_counters:
-                self.pretty_print(api_response_unmapped[int(selection) - 1])
+                if my_op_mode == 'scim' and 'Resources' in api_response_unmapped:
+                    items = api_response_unmapped['Resources'] 
+                elif my_op_mode == 'jca' and 'data' in api_response_unmapped:
+                    items = api_response_unmapped['data']
+                self.pretty_print(items[int(selection) - 1])
 
     def get_schema_from_reference(self, ref):
         schema_path_list = ref.strip('/#').split('/')
@@ -1332,7 +1337,7 @@ class JCA_CLI:
             if getitem and prop != getitem['__name__'] or prop in ('dn', 'inum'):
                 continue
 
-            if (required_only and schema.get('required')) and not prop in schema.get('required'):
+            if required_only and not prop in schema.get('required', []):
                 continue
 
             prop_ = self.get_model_key_map(model, prop)
@@ -1635,7 +1640,6 @@ class JCA_CLI:
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
-
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
@@ -1665,29 +1669,38 @@ class JCA_CLI:
                         break
 
             else:
-                for m in endpoint.parent:
-                    if m.method == 'get' and m.path.endswith('}'):
-                        while True:
+                if endpoint.info['operationId'] == 'put-properties-fido2':
+                    for m in endpoint.parent:
+                        if m.method == 'get':
+                            break
+                    cur_model = self.process_get(m, return_value=True)
+                    initialised = True
+                    get_endpoint = m
+
+                else:
+                    for m in endpoint.parent:
+                        if m.method == 'get' and m.path.endswith('}'):
                             while True:
-                                try:
-                                    key_name_desc = self.get_endpiont_url_param(m)
-                                    if key_name_desc and 'name' in key_name_desc:
-                                        key_name = key_name_desc['name']
-                                    cur_model = self.process_get(m, return_value=True)
-                                    break
-                                except ValueError as e:
-                                    print(self.colored_text("Server returned no data", error_color))
-                                    retry = self.get_input(values=['y', 'n'], text='Retry?')
-                                    if retry == 'n':
-                                        self.display_menu(endpoint.parent)
+                                while True:
+                                    try:
+                                        key_name_desc = self.get_endpiont_url_param(m)
+                                        if key_name_desc and 'name' in key_name_desc:
+                                            key_name = key_name_desc['name']
+                                        cur_model = self.process_get(m, return_value=True)
                                         break
+                                    except ValueError as e:
+                                        print(self.colored_text("Server returned no data", error_color))
+                                        retry = self.get_input(values=['y', 'n'], text='Retry?')
+                                        if retry == 'n':
+                                            self.display_menu(endpoint.parent)
+                                            break
 
-                            if not cur_model is False:
-                                break
+                                if not cur_model is False:
+                                    break
 
-                        initialised = True
-                        get_endpoint = m
-                        break
+                            initialised = True
+                            get_endpoint = m
+                            break
 
             if not cur_model:
                 for m in endpoint.parent:
