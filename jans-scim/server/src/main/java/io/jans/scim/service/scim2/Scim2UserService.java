@@ -382,7 +382,7 @@ public class Scim2UserService implements Serializable {
 
 		res.setEntitlements(getAttributeListValue(person, Entitlement.class, "jansEntitlements"));
 		res.setRoles(getAttributeListValue(person, Role.class, "jansRole"));
-		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "jansx509Certificate"));
+		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "jans509Certificate"));
 
 		res.setPairwiseIdentifiers(person.getPpid());
 
