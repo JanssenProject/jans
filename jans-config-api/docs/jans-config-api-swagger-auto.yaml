@@ -3317,6 +3317,10 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        userCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
         adminCanView:
@@ -3324,10 +3328,6 @@ components:
         userCanEdit:
           type: boolean
         adminCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -3678,7 +3678,7 @@ components:
       properties:
         tlsClientAuthSubjectDn:
           type: string
-        runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+        runIntrospectionScriptBeforeJwtCreation:
           type: boolean
         keepClientAuthorizationAfterExpiration:
           type: boolean
@@ -3758,9 +3758,9 @@ components:
           type: array
           items:
             type: string
-        displayValue:
-          type: string
         value:
+          type: string
+        displayValue:
           type: string
     LocalizedString:
       type: object
@@ -3769,13 +3769,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        value:
+          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
-        value:
-          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4452,6 +4452,8 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4487,8 +4489,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -5156,10 +5156,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     SessionId:
       type: object
       properties:
@@ -5338,8 +5338,6 @@ components:
           type: array
           items:
             type: string
-        rev:
-          type: string
         creator:
           type: string
         description:

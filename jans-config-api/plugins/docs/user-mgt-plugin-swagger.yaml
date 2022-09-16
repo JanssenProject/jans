@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedResult'
+                $ref: '#/components/schemas/UserPagedResult'
         "401":
           description: Unauthorized
         "500":
@@ -270,7 +270,7 @@ components:
           type: string
         baseDn:
           type: string
-    PagedResult:
+    UserPagedResult:
       type: object
       properties:
         start:
@@ -285,7 +285,7 @@ components:
         entries:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/CustomUser'
     UserPatchRequest:
       type: object
       properties:
