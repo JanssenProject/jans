@@ -6518,6 +6518,8 @@ components:
       type: object
       description: SMTP configuration.
       properties:
+        valid:
+          type: boolean
         host:
           description: Hostname of the SMTP server.
           type: string
