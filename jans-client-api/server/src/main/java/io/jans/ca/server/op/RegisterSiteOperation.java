@@ -607,7 +607,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         if (params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-            request.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+            request.setRunIntrospectionScriptBeforeJwtCreation(params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         }
 
         if (!Strings.isNullOrEmpty(params.getIdTokenSignedResponseAlg())) {
