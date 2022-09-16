@@ -216,18 +216,18 @@ class SetupUtils(Crypto64):
     def applyChangesInFiles(self, changes):
         self.logIt("Applying changes to %s files..." % changes['name'])
         for change in changes['files']:
-            file = change['path']
+            cfile = change['path']
 
-            text = self.readFile(file)
-            file_backup = '%s.bak' % file
+            text = self.readFile(cfile)
+            file_backup = '%s.bak' % cfile
             self.writeFile(file_backup, text)
             self.logIt("Created backup of %s file %s..." % (changes['name'], file_backup))
 
             for replace in change['replace']:
                 text = self.replaceInText(text, replace['pattern'], replace['update'])
 
-            self.writeFile(file, text)
-            self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
+            self.writeFile(cfile, text)
+            self.logIt("Wrote updated %s file %s..." % (changes['name'], cfile))
 
 
     def copyFile(self, inFile, destFolder, backup=True):
@@ -387,24 +387,15 @@ class SetupUtils(Crypto64):
 
     def renderTemplateInOut(self, file_path, template_folder, output_dir, pystring=False):
         fn = os.path.basename(file_path)
-        in_fp = os.path.join(template_folder, fn) 
+        in_fp = os.path.join(template_folder, fn)
+        out_fp = os.path.join(output_dir, fn)
         self.logIt("Rendering template %s" % in_fp)
-        template_text = self.readFile(in_fp)
 
         # Create output folder if needed
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
-        for k in format_dict:
-            if isinstance(format_dict[k], bool):
-                format_dict[k] = str(format_dict[k]).lower()
-
-        if pystring:
-            rendered_text = Template(template_text).substitute(format_dict)
-        else:
-            rendered_text = self.fomatWithDict(template_text, format_dict)
-        out_fp = os.path.join(output_dir, fn)
+        rendered_text = self.render_template(in_fp, pystring)
 
         self.writeFile(out_fp, rendered_text)
 
@@ -485,6 +476,20 @@ class SetupUtils(Crypto64):
                 rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
                 self.logIt("Writing rendered template {}".format(full_output_file))
                 full_output_file.write_text(rendered_text)
+
+    def render_template(self, tmp_fn, pystring=False):
+        template_text = self.readFile(tmp_fn)
+        format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+        for k in format_dict:
+            if isinstance(format_dict[k], bool):
+                format_dict[k] = str(format_dict[k]).lower()
+
+        if pystring:
+            rendered_text = Template(template_text).substitute(format_dict)
+        else:
+             rendered_text = self.fomatWithDict(template_text, format_dict)
+
+        return rendered_text
 
     def add_yacron_job(self, command, schedule, name=None, args={}):
         import ruamel.yaml
