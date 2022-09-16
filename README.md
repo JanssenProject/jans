@@ -59,7 +59,7 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 1. **[jans-core](jans-core)**: This library has code that is shared across several janssen projects. You will most likely need this project when you build other Janssen components.
 
-1. **[jans-orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
+1. **[jans-orm](jans-orm)**: This is the library for persistence and caching implementations in Janssen. Currently, LDAP and Couchbase are supported. RDBMS is coming soon.
 
 1. **[Agama](agama)**: Agama module offers an alternative way to build authentication flows in Janssen Server. With Agama, flows are coded in a DSL (domain specific language) designed for the sole purpose of writing web flows.
 
@@ -73,7 +73,7 @@ Janssen can be installed as cloud-native in a Kubernetes cluster or as a server 
 
 A BIG thanks to all amazing contributors!! 👏 👏
 
-There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. 
+There are many ways you can contribute. Of course, you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. 
 
 Building a large community is our number one goal. Please let us know what we can do to make you feel more welcome, no matter what you want to contribute.
 
@@ -94,7 +94,7 @@ Building a large community is our number one goal. Please let us know what we ca
 ## Security
 
 ### Disclosing vulnerabilities
-If you think you found a security vulnerability, please refrain from posting it publicly on the forums, the chat, or GitHub. Instead, send us an email on security@jans.io.
+If you think you found a security vulnerability, please refrain from posting it publicly on the forums, the chat, or GitHub. Instead, email us on security@jans.io.
 
 Refer to [Janssen Security Policy](.github/SECURITY.md)
 
@@ -116,19 +116,19 @@ The Janssen Project is aligned with the goals of cloud native infrastructure to 
 
 ## Governance
 
-Janssen is a Linux Foundation project, governed according to the [charter](https://docs.jans.io/head/governance/charter/). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
+Janssen is a Linux Foundation project, governed according to the [charter](https://docs.jans.io/head/governance/charter/). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision-making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
 
 ## Support
 
 Documentation currently is a work in progress and published on [Documentation site](https://docs.jans.io/). You may want to also check Gluu Server [docs](https://gluu.org/docs), which have a lot in common with Janssen.
 
-We prefer to have all our discussions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) to better facilitate faster responses. However, other means are available such as the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free there with your Github identity.
+We prefer to have all our discussions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) to better facilitate faster responses. However, other means are available such as the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free there with your GitHub identity.
 
 If you find a bug in a Janssen project, or you would like to suggest a new feature, try the [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) first. If you have a "howto" or "usage" question, [raise the question or usage](https://github.com/JanssenProject/jans/discussion)! 
 
 ## Releases
 
-Below are the list of current mega releases that hold information about each single release of our servies and modules:
+Below are the list of current mega releases that hold information about each single release of our services and modules:
 
 - [v1.0.2](https://github.com/JanssenProject/jans/releases/tag/v1.0.2)
 - [v1.0.1](https://github.com/JanssenProject/jans/releases/tag/v1.0.1)
@@ -140,11 +140,11 @@ Below are the list of current mega releases that hold information about each sin
 
 ### History
 
-The initial code was ported by [Gluu](https://gluu.org), based on version 4.2 of it's identity and access management (IAM) platform. Gluu launched in 2009 with the goal of creating an enterprise-grade open source distribution of IAM components. In 2012, Gluu started work on an OAuth Authorization Server to implement OpenID Connect, which they saw as a promising next-generation replacement for SAML. This project was called [oxAuth](https://github.com/GluuFederation/oxauth), and over time, became the core component of the Gluu Server.  Gluu has submitted many [self-certifications](https://openid.net/certification/) at the OpenID Foundation. Today, it is  one of the most comprehensive OpenID Connect Providers.
+The initial code was ported by [Gluu](https://gluu.org), based on version 4.2 of its identity and access management (IAM) platform. Gluu launched in 2009 with the goal of creating an enterprise-grade open source distribution of IAM components. In 2012, Gluu started work on an OAuth Authorization Server to implement OpenID Connect, which they saw as a promising next-generation replacement for SAML. This project was called [oxAuth](https://github.com/GluuFederation/oxauth), and over time, became the core component of the Gluu Server.  Gluu has submitted many [self-certifications](https://openid.net/certification/) at the OpenID Foundation. Today, it is  one of the most comprehensive OpenID Connect Providers.
 
 In 2020, Gluu decided to democratize the governance of the oxAuth project by moving it to the Linux Foundation. The name of the project was changed from oxAuth to Janssen, to avoid any potential trademark issues. Gluu felt that a collaboration with the Linux Foundation would help to build a larger ecosystem.
 
 ### Why the name Janssen?
 
-Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Complex open source infrastructure, like competitive animal husbandry, requires incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize identity and access management.
+Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well-trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Complex open source infrastructure, like competitive animal husbandry, requires incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize identity and access management.
 
