@@ -522,11 +522,17 @@ class JansCliApp(Application):
         # self.show_jans_dialog(dialog)
         pass
 
-    def show_message(self, title, message, buttons=[]):
+    def show_message(self, title, message, buttons=[],tobefocused=None):
         body = HSplit([Label(message)])
         dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
 
-        focused_before = self.root_layout.floats[-1].content if self.root_layout.floats else self.layout.current_window
+        if not tobefocused:
+            focused_before = self.root_layout.floats[-1].content if self.root_layout.floats else self.layout.current_window #show_message
+        else :
+            focused_before = self.root_layout.floats[-1].content if self.root_layout.floats else tobefocused 
+        self.logger.debug("********************************")
+        self.logger.debug("focused_before = " + str(focused_before))
+        self.logger.debug("********************************")
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         dialog.me = float_
