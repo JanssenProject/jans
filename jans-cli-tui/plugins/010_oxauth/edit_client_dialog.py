@@ -12,6 +12,7 @@ from prompt_toolkit.widgets import (
     Button,
     Label,
 )
+from prompt_toolkit.application.current import get_app
 
 from cli import config_cli
 from static import DialogResult
@@ -22,6 +23,8 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 from utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
+from view_uma_dialog import ViewUMADialog
+import threading
 
 from multi_lang import _
 
@@ -256,8 +259,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.uma_resources = HSplit([],width=D())
         self.resources = HSplit([
                     VSplit([
-                        self.myparent.getButton(text=_("Get Resources"), name='oauth:Resources:get', jans_help=_("Retreive UMA Resources"), handler=self.oauth_update_uma_resources),
-                        self.myparent.getTitledText(_("Search"), name='oauth:Resources:search', jans_help=_("Press enter to perform search"), accept_handler=self.oauth_update_uma_resources),
+                        self.myparent.getButton(text=_("Get Resources"), name='oauth:Resources:get', jans_help=_("Retreive UMA Resources"), handler=self.oauth_get_uma_resources),
+                        self.myparent.getTitledText(_("Search"), name='oauth:Resources:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_uma_resources),
                     
                         ],
                         padding=3,
@@ -468,6 +471,24 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
+
+
+    def oauth_get_uma_resources(self):
+        """Method to get the clients data from server
+        """
+        t = threading.Thread(target=self.oauth_update_uma_resources, daemon=True)
+        t.start()
+
+
+    def search_uma_resources(self, tbuffer):
+        if not len(tbuffer.text) > 2:
+            self.myparent.show_message(_("Error!"), _("Search string should be at least three characters"))
+            return
+
+        t = threading.Thread(target=self.oauth_update_uma_resources, args=(tbuffer.text,), daemon=True)
+        t.start()
+
+
     def oauth_update_uma_resources (self, pattern=''): 
         """update the current uma_resources  data to server
 
@@ -501,24 +522,27 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.show_message(_("Error getting clients"), str(rsponse.text))
             #press_tab
             return
+
         data =[]
 
         for d in result:
             data.append(
                 [
-                d['id'],
-                d['description'],
-                d.get('scopes', '') 
+                str(d['id']),
+                str(d.get('description', '')),
+                str(d.get('scopes', [''])[0] )
                 ]
             )
+        
 
-        self.uma_resources = HSplit([
+        if data :
+            self.uma_resources = HSplit([
                             JansVerticalNav(
                                     myparent=self.myparent,
                                     headers=['id', 'Description', 'Scopes'],
-                                    preferred_size= [0,0,0],
+                                    preferred_size= [36,0,0],
                                     data=data,
-                                    on_enter=self.myparent.edit_scope_dialog,
+                                    on_enter=self.view_uma_resources,
                                     on_display=self.myparent.data_display_dialog,
                                     # selection_changed=self.data_selection_changed,
                                     selectes=0,
@@ -527,12 +551,29 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     all_data=result,
                             ),
             ])
-        self.myparent.logger.debug('UMA: '+str(result))
-        return result
         
+            # self.uma_result = result
+            
+            # return result
+            get_app().invalidate()
+        else:
+            self.myparent.show_message(_("Oops"), _("No matching result"))  
+            
+
     def client_dialog_nav_selection_changed(self, selection):
         self.left_nav = selection
 
+    def view_uma_resources(self, **params):
+        
+        selected_line_data = params['data']    ##self.uma_result 
+        title = "Edit user Data (Clients)"
+
+        dialog = ViewUMADialog(self.myparent, title=title, data=selected_line_data, save_handler=self.save_client)
+        
+        self.myparent.show_jans_dialog(dialog)
+
+    def save_client(self, dialog):
+        pass
     def __pt_container__(self):
         return self.dialog
 
