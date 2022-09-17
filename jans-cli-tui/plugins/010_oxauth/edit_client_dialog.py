@@ -291,20 +291,25 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         self.myparent.getTitledText(title =_("Claims redirect URI"), name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='green'),
 
-                        self.myparent.getTitledText(_("RPT Mofification Script"),
-                            name='rptClaimsScripts',
-                            value='\n'.join(self.data.get('rptClaimsScripts', [])), 
+                        # self.myparent.getTitledText(_("RPT Mofification Script"),
+                        #     name='rptClaimsScripts',
+                        #     value='\n'.join(self.data.get('rptClaimsScripts', [])), 
+                        #     height=3,
+                        #     style='green'),
+
+                        # self.myparent.getTitledText(_("Claims Gathering Script"),
+                        #     name='claimRedirectUris',
+                        #     value='\n'.join(self.data.get('claimRedirectUris', [])), 
+                        #     height=3,
+                        #     style='green'),
+
+
+                        self.myparent.getTitledText(_("UMA Authorization Policies"),
+                            name='umaAuthorizationPolicies',
+                            value='\n'.join(self.data.get('umaAuthorizationPolicies', [])), 
                             height=3,
                             style='green'),
-
-                        self.myparent.getTitledText(_("Claims Gathering Script"),
-                            name='claimRedirectUris',
-                            value='\n'.join(self.data.get('claimRedirectUris', [])), 
-                            height=3,
-                            style='green'),
-
-
-
+                            
                     self.resources,
 
                         ]
