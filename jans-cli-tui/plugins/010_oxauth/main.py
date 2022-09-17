@@ -285,9 +285,6 @@ class Plugin():
         selected_line_data = params['data']  
         title = "Edit user Data (Clients)"
 
-        self.app.logger.debug("START")
-        self.app.logger.debug(selected_line_data)
-        self.app.logger.debug("END")
         dialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client)
         self.app.show_jans_dialog(dialog)
 
