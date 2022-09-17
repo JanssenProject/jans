@@ -199,7 +199,8 @@ class Plugin():
             get_app().invalidate()
 
         else:
-            self.app.show_message(_("Oops"), _("No matching result"))
+            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
+            # self.app.layout.focus(self.oauth_containers['clients'])
 
     def oauth_get_clients(self):
         """Method to get the clients data from server
@@ -320,7 +321,7 @@ class Plugin():
 
     def search_clients(self, tbuffer):
         if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"))
+            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['clients'])
             return
 
         t = threading.Thread(target=self.oauth_update_clients, args=(tbuffer.text,), daemon=True)
