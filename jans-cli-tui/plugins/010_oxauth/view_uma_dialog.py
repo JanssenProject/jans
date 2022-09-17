@@ -11,6 +11,8 @@ from prompt_toolkit.layout.containers import (
     VSplit,
     DynamicContainer,
 )
+from prompt_toolkit.key_binding import KeyBindings
+
 from prompt_toolkit.widgets import (
     Button,
     Label,
@@ -44,6 +46,7 @@ from prompt_toolkit.widgets import (
     Shadow,
 )
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
+from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from utils import DialogUtils
 
@@ -61,6 +64,9 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
         self.data = data
+        self.UMA_containers = {}
+        self.UMA_prepare_containers()
+
 
         def delete():
             self.myparent.show_again()
@@ -69,17 +75,17 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         def cancel():
             self.future.set_result(DialogResult.CANCEL)
 
-#    {"dn":"jansId=1caf7fbe-349f-468a-ac48-8cbf24a638bd,
-#         ou=resources,
-#         ou=uma,
-#         o=jans",
-#         "id":"1caf7fbe-349f-468a-ac48-8cbf24a638bd",
-#         "name":"test-uma-resource",
-#         "description":"This is a test UMA Resource",
-#         "deletable":false
+        self.side_nav_bar =  JansNavBar(
+                    self,
+                    entries=[('scope', 'scope'), ('expression', 'scope expression'), ],
+                    selection_changed=self.oauth_nav_selection_changed,
+                    select=0,
+                    bgcolor='#8a8a8a'
+                    )
 
-        self.dialog = Dialog(title='title',
-        
+
+        self.dialog = Dialog(title='UMA-resources',
+
         body=     
         HSplit([
 
@@ -105,17 +111,16 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 read_only=True,
                                 style='green'),    
 
-            Label(text=_("Scope Selection"),style='bold',width=len(_("Scope Selection"))), ## TODO dont know what is that
 
-            self.myparent.getTitledText(
-                                "Scope  or Expression",
-                                name='scopeExpression',
-                                value=self.data.get('scopeExpression',''),
-                                read_only=True,
-                                style='green',
-                                # height=3   ### enmpty spaces eccures here
-                                ), 
+            VSplit([
+            Label(text=_("Scope Selection"),style='green bold',width=len(_("Scope Selection"))), ## TODO dont know what is that
 
+            Box(self.side_nav_bar.nav_window, style='fg:#4D4D4D bg:#ffffff', height=1),
+
+            ]),
+            
+            DynamicContainer(lambda: self.oauth_main_area),
+            
             self.myparent.getTitledText(
                                 "Associated Client",
                                 name='clients',
@@ -130,7 +135,9 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 read_only=True,
                                 style='green'), 
 
-        ], padding=1,width=self.myparent.dialog_width,),
+        ], padding=1,width=100,
+        # key_bindings=self.get_uma_dialog_key_bindings()
+        ),
         buttons=[
                 Button(
                     text="Cancel",
@@ -143,11 +150,51 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             ],
             with_background=False,
             # width=140,
-            
-            
-  
         )
-   
+
+
+    def UMA_prepare_containers(self):
+        
+        self.oauth_main_area =  self.UMA_containers['scope'] = HSplit([
+        self.myparent.getTitledText(
+                                "Scopes",
+                                name='scope',
+                                value=self.data.get('scope',[]),
+                                read_only=True,
+                                style='green',
+                            )
+
+        ],width=D())
+        
+        
+
+        self.UMA_containers['expression'] = HSplit([
+        self.myparent.getTitledText(
+                                "Expression",
+                                name='expression',
+                                value=self.data.get('expression',[]),
+                                read_only=True,
+                                style='green',
+                            ),
+
+        ],width=D())
+        
+
+
+    
+    def oauth_nav_selection_changed(self, selection):
+        """This method for the selection change
+
+        Args:
+            selection (str): the current selected tab
+        """
+        if selection in self.UMA_containers:
+            self.oauth_main_area = self.UMA_containers[selection]
+        
+        
+
+    def save(self):
+        pass
 
     def __pt_container__(self):
         return self.dialog
