@@ -180,7 +180,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         ],width=D(),
                     )
 
-
         self.tabs['Dynamic'] = HSplit([
                        self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
                        self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True),
@@ -217,7 +216,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         ],width=D(),
                     )
 
-
         self.tabs['Spontaneous'] = HSplit([
                     self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green',read_only=True,),
                     self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
@@ -229,7 +227,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         
                                                 ],width=D(),
                     )
-
 
         self.tabs['UMA'] = HSplit([
                     self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
