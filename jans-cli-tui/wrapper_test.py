@@ -67,37 +67,45 @@ result = cli_object.process_command_by_id(
 #         'get-oauth-uma-resources', '', 'limit:10', {})
 
 
-result =  cli_object.process_command_by_id(
-    operation_id='get-oauth-uma-resources',
-    url_suffix='',
-    endpoint_args='pattern:',
-    data_fn=None
-    )
+result = cli_object.process_command_by_id(
+        operation_id='get-oauth-uma-resources',
+        url_suffix='',
+        endpoint_args='pattern:dn',
+        data_fn=None,
+        data={}
+        )
 print(result.text)
 
-
 '''
-[
-        {"dn":"jansId=1caf7fbe-349f-468a-ac48-8cbf24a638bd,
-        ou=resources,
-        ou=uma,
-        o=jans",
-        "id":"1caf7fbe-349f-468a-ac48-8cbf24a638bd",
-        "name":"test-uma-resource",
-        "description":"This is a test UMA Resource",
-        "deletable":false
-        },
-        
-        {"dn":"jansId=9b993eae-0239-4d20-9c1b-bce445c5e153,
-        ou=resources,
-        ou=uma,
-        o=jans",
-        "id":"9b993eae-0239-4d20-9c1b-bce445c5e153",
-        "name":"test2-uma resourse",
-        "description":"description2",
-        "deletable":false
-        }
-        
-]      
+{'dn': 'jansId=5635e18b-67b9-4997-a786-a6b2cdb84355,ou=resources,ou=uma,o=jans',
+ 'id': '5635e18b-67b9-4997-a786-a6b2cdb84355', 
+'name': '[GET] /document',
+ 'scopes': ['inum=40a48740-4892-4fce-b30f-81c5c45670f4,ou=scopes,o=jans'],
+  'clients': ['inum=e218bef8-a3cb-4b01-b1c6-e3514d98fb68,ou=clients,o=jans'],
+   'rev': '1',
+    'creationDate': '2022-09-15T09:03:14',
+     'expirationDate': '2022-10-05T09:03:14', 
+     'deletable': True}, 
+     
+{'dn': 'jansId=9b473b72-496b-4414-828c-a4d2bebca97b,ou=resources,ou=uma,o=jans', 
+'id': '9b473b72-496b-4414-828c-a4d2bebca97b',
+ 'name': '[GET] /photo',
+  'scopes': ['inum=40a48740-4892-4fce-b30f-81c5c45670f4,ou=scopes,o=jans'], 
+  'clients': ['inum=e218bef8-a3cb-4b01-b1c6-e3514d98fb68,ou=clients,o=jans'],
+   'rev': '1',
+    'creationDate': '2022-09-15T09:03:13',
+     'expirationDate': '2022-10-05T09:03:13', 'deletable': True},
+     
+{'dn': 'jansId=095a7fd8-e92f-43a2-a7d1-e52c123d3f02,ou=resources,ou=uma,o=jans',
+ 'id': '095a7fd8-e92f-43a2-a7d1-e52c123d3f02', 
+ 'name': '[PUT, POST] /photo', 
+ 'scopes': ['inum=514b71e9-b12b-42b5-9b9f-2453ae24ed08,ou=scopes,o=jans',
+  'inum=19927467-d607-4c69-b145-f8752bd63e8c,ou=scopes,o=jans'], 
+  'clients': ['inum=ac1ebdf4-a794-4fef-8bcq-33291221c4a5,ou=clients,o=jans'],
+   'rev': '1', 
+   'creationDate': '2022-09-15T09:03:14', 
+   'expirationDate': '2022-10-05T09:03:14',
+    'deletable': True}
+    ]
 
 '''
