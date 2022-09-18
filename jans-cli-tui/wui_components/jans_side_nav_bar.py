@@ -57,7 +57,7 @@ class JansSideNavBar():
                     height=Dimension(preferred=len(
                         self.navbar_entries)*2, max=len(self.navbar_entries)*2+1),
                     cursorline=True,
-                    width= 10 #self.get_data_width()
+                    width= self.get_data_width()
                 ),
             ]
             ), floats=[]
