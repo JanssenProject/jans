@@ -6,16 +6,14 @@ site_description: "this is desc"
   
 plugins:
   - mkdocstrings
-  # - search
+  - search
 
 nav:
     - Home: 'docs/home/index.md'
     - Gallery: 
       - 'docs/Gallery/gallery.md'
-      - TUI :
-        - 'docs/Gallery/tui.md'
-      - CLI :
-        - 'docs/Gallery/cli.md'
+      - TUI : 'docs/Gallery/tui.md'
+      - CLI : 'docs/Gallery/cli.md'
 
     - Components:       
       - docs/wui_components/wui_components.md  
@@ -30,6 +28,24 @@ nav:
       - Custom components :
         - 'jans_data_picker': 'docs/wui_components/jans_data_picker.md'
         - 'jans_drop_down': 'docs/wui_components/jans_drop_down.md'
+    - Plugins : 
+      - 'Plugins': 'docs/plugins/plugins.md'
+      - OAuth : 
+        - Main OAuth : 'docs/plugins/oauth/oauth.md'
+        - 'Client Dialog': 'docs/plugins/oauth/edit_client_dialog.md'
+        - 'Scope Dialog': 'docs/plugins/oauth/edit_scope_dialog.md'
+        - 'UMA Dialog': 'docs/plugins/oauth/edit_uma_dialog.md'
+      - FIDO : 
+        - Main FIDO : 'docs/plugins/fido/fido.md'
+      - SCIM : 
+        - Main SCIM : 'docs/plugins/scim/scim.md'
+      - Config API : 
+        - Main Config API : 'docs/plugins/config_api/config_api.md'
+      - Client API : 
+        - Main Client API : 'docs/plugins/client_api/client_api.md'
+      - Scripts : 
+        - Main Scripts : 'docs/plugins/scripts/scripts.md'
+
 
 theme:
     homepage: https://example.com
@@ -45,6 +61,9 @@ theme:
       - navigation.tabs
       - navigation.tabs.sticky 
       - navigation.top
+      - navigation.sections
+      - content.code.annotate
+      # - navigation.expand
       
 
     palette: 
