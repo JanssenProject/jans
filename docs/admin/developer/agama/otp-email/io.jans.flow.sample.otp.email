@@ -1,10 +1,10 @@
 Flow io.jans.flow.sample.otp.email
     Basepath "samples/otp-email"
-    
+
 //Launch usr/pwd authentication
 obj = Trigger io.jans.flow.sample.basic
 When obj.success is false
-    Finish obj 
+    Finish obj
     
 userId = obj.data.userId
 email = Call io.jans.agama.samples.EmailOTPUtil#emailOf userId

@@ -10,12 +10,12 @@ When providerId is null
     
     When providerId is null
         //Launch basic authn 
-        obj = Trigger io.jans.flow.sample.basic    
+        obj = Trigger io.jans.flow.sample.basic
         Log "Basic authentication finished with success:" obj.success
         Finish obj
         
 provider = providers.$providerId
-//See class io.jans.inbound.oauth2 for reference
+//See class io.jans.inbound.Provider for reference
 
 When provider is null or provider.enabled is false
     msg = Call java.lang.String#format "Provider '%s' not recognized. Is it enabled?" providerId
@@ -54,15 +54,13 @@ When profile.mail is null or profile.mail.empty is true
         When mail is null
             obj = { success: false, error: "Unable to complete profile data: e-mail not provided" }
             Finish obj
-        Otherwise
-            profile.mail = [ mail ]
-            
-id | E = Call idProc process profile
 
-When id is not null
-    obj = { success: true, data: { userId: id } }
-Otherwise
-    Log "@e Unable to process the incoming user" E
-    obj = { success: false, error: E.message }
-    
+        profile.mail = [ mail ]
+
+uid | E = Call idProc process profile
+When E is null
+    Finish uid
+
+Log "@e Unable to process the incoming user" E
+obj = { success: false, error: E.message }
 Finish obj
