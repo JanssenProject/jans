@@ -42,9 +42,7 @@ from prompt_toolkit.widgets import (
     Label,
     RadioList,
     TextArea,
-    CheckboxList,
-    Shadow,
-)
+ )
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_side_nav_bar import JansSideNavBar
@@ -58,8 +56,22 @@ from multi_lang import _
 
 
 class ViewUMADialog(JansGDialog, DialogUtils):
+    """The Main UMA-resources Dialog to view UMA Resource Details
+    """
 
     def __init__(self, parent, title, data, buttons=[], save_handler=None):
+        """init for `ViewUMADialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
+            
+        JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
+        DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
+        
+        Args:
+            parent (widget): This is the parent widget for the dialog
+            title (str): The Main dialog title
+            data (list): selected line data 
+            button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
+            save_handler (method, optional): handler invoked when closing the dialog. Defaults to None.
+        """
 
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
@@ -152,9 +164,9 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             # width=140,
         )
 
-
     def UMA_prepare_containers(self):
-        
+        """Prepare the containers for UMA Dialog
+        """
         self.oauth_main_area =  self.UMA_containers['scope'] = HSplit([
         self.myparent.getTitledText(
                                 _("Scopes"),
@@ -179,11 +191,8 @@ class ViewUMADialog(JansGDialog, DialogUtils):
 
         ],width=D())
         
-
-
-    
     def oauth_nav_selection_changed(self, selection):
-        """This method for the selection change
+        """This method for the selection change for tabs
 
         Args:
             selection (str): the current selected tab

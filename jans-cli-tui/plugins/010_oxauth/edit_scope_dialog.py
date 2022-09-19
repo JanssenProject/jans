@@ -64,7 +64,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             title (str): The Main dialog title
             data (list): selected line data 
             button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
-            save_handler (method, optional): _description_. Defaults to None.
+            save_handler (method, optional): handler after closing the dialog. Defaults to None.
         """
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
