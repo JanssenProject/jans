@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.querydsl.sql.Configuration;
-import com.querydsl.sql.MySQLTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.SQLTemplatesRegistry;
@@ -40,9 +39,12 @@ import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
-import io.jans.orm.sql.dsl.template.SqlJsonMySQLTemplates;
+import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
+import io.jans.orm.sql.dsl.template.PostgreSQLJsonTemplates;
 import io.jans.orm.sql.model.ResultCode;
 import io.jans.orm.sql.model.TableMapping;
+import io.jans.orm.sql.operation.SqlOperationService;
+import io.jans.orm.sql.operation.SupportedDbType;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.PropertiesHelper;
 import io.jans.orm.util.StringHelper;
@@ -54,12 +56,9 @@ import io.jans.orm.util.StringHelper;
  */
 public class SqlConnectionProvider {
 
-    protected static final String JSON_TYPE_NAME = "json";
-    protected static final String LONGTEXT_TYPE_NAME = "longtext";
-
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
-    private static final String QUERY_ENGINE_TYPE =
+    private static final String MYSQL_QUERY_ENGINE_TYPE =
     		"SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
 
     private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
@@ -78,7 +77,7 @@ public class SqlConnectionProvider {
 
     private PasswordEncryptionMethod passwordEncryptionMethod;
 
-	private String dbType;
+	private SupportedDbType dbType;
 	private String dbVersion;
 
 	private boolean mariaDb = false;
@@ -195,7 +194,13 @@ public class SqlConnectionProvider {
 
         try (Connection con = this.poolingDataSource.getConnection()) {
         	DatabaseMetaData databaseMetaData = con.getMetaData();
-        	this.dbType = databaseMetaData.getDatabaseProductName().toLowerCase();
+        	String dbTypeString = databaseMetaData.getDatabaseProductName();
+        	this.dbType = SupportedDbType.resolveDbType(dbTypeString.toLowerCase());
+        	
+        	if (this.dbType == null) {
+                throw new ConnectionException(String.format("Database type '%s' is not supported", dbTypeString));
+        	}
+        	
         	this.dbVersion = databaseMetaData.getDatabaseProductVersion().toLowerCase();
         	if ((this.dbVersion != null) && this.dbVersion.toLowerCase().contains("mariadb")) {
         		this.mariaDb = true;
@@ -212,26 +217,28 @@ public class SqlConnectionProvider {
     private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
         long takes = System.currentTimeMillis();
 
-        LOG.info("Detecting engine types...");
-    	PreparedStatement preparedStatement = con.prepareStatement(QUERY_ENGINE_TYPE);
-    	preparedStatement.setString(1, schemaName);
-
-    	try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
-	    	while (tableEnginesResultSet.next()) {
-	    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
-	    		String engineName = tableEnginesResultSet.getString("ENGINE");
+        if (SupportedDbType.MYSQL == dbType) {
+	        LOG.info("Detecting engine types...");
+	    	PreparedStatement preparedStatement = con.prepareStatement(MYSQL_QUERY_ENGINE_TYPE);
+	    	preparedStatement.setString(1, schemaName);
 	
-	        	tableEnginesMap.put(tableName, engineName);
+	    	try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
+		    	while (tableEnginesResultSet.next()) {
+		    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+		    		String engineName = tableEnginesResultSet.getString("ENGINE");
+		
+		        	tableEnginesMap.put(tableName, engineName);
+		    	}
 	    	}
-    	}
-
+        }
+	
         LOG.info("Scanning DB metadata...");
         try (ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"})) {
 	    	while (tableResultSet.next()) {
 	    		String tableName = tableResultSet.getString("TABLE_NAME");
 	    		Map<String, AttributeType> tableColumns = new HashMap<>();
 	    		
-//	    		String engineType = tableEnginesMap.get(tableName);
+	//    		String engineType = tableEnginesMap.get(tableName);
 	    		
 	            LOG.debug("Found table: '{}'.", tableName);
 	            try (ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null)) {
@@ -240,11 +247,15 @@ public class SqlConnectionProvider {
 						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 		
 						String remark = columnResultSet.getString("REMARKS");
-		        		if (mariaDb && LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
-		        			columnTypeName = JSON_TYPE_NAME;
+		        		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && SqlOperationService.JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
+		        			columnTypeName = SqlOperationService.JSON_TYPE_NAME;
+		        		}
+
+		        		if (SqlOperationService.JSONB_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
+		        			columnTypeName = SqlOperationService.JSONB_TYPE_NAME;
 		        		}
 		
-		        		boolean multiValued = SqlConnectionProvider.JSON_TYPE_NAME.equals(columnTypeName);
+		        		boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName) || SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
 		
 		        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
 		        		tableColumns.put(columnName, attributeType);
@@ -264,8 +275,10 @@ public class SqlConnectionProvider {
 		try (Connection con = poolingDataSource.getConnection()) {
 			DatabaseMetaData databaseMetaData = con.getMetaData();
 			SQLTemplates.Builder sqlBuilder = templatesRegistry.getBuilder(databaseMetaData);
-			if (sqlBuilder instanceof MySQLTemplates.Builder) {
-				sqlBuilder = SqlJsonMySQLTemplates.builder();
+			if (SupportedDbType.MYSQL == dbType) {
+				sqlBuilder = MySQLJsonTemplates.builder();
+			} else if (SupportedDbType.POSTGRESQL == dbType) {
+				sqlBuilder = PostgreSQLJsonTemplates.builder().quote();
 			}
 			this.sqlTemplates = sqlBuilder.printSchema().build();
 			Configuration configuration = new Configuration(sqlTemplates);
@@ -444,6 +457,10 @@ public class SqlConnectionProvider {
 
 	public boolean isMariaDb() {
 		return mariaDb;
+	}
+
+	public SupportedDbType getDbType() {
+		return dbType;
 	}
 
 }
