@@ -11,7 +11,7 @@ In this page an overview of the flow development process is presented. In short,
 As usual, several iterations will take place until you get it right.
 
 !!! Note
-    Throughout this document it is assumed you have a working single VM standard Janssen installation
+    Throughout this document it is assumed you have a standard single-VM Janssen installation
     
 ## Design and code
 
