@@ -41,8 +41,6 @@ theme:
       - navigation.indexes 
       - navigation.expand
 
- 
-
     palette: 
         - media: "(prefers-color-scheme: light)"
           scheme: default
@@ -64,6 +62,7 @@ theme:
 markdown_extensions:
   - attr_list
   - admonition
+  - md_in_html
   - toc:
   # - pymdownx.superfences:
   #     custom_fences:
@@ -101,13 +100,10 @@ nav:
       - Jans Cli : 'docs/Gallery/gallery.md'
       - Jans Tui : 'docs/Gallery/gallery.md'
 
-
     - Gallery: 
       - 'docs/Gallery/gallery.md'
       - TUI : 'docs/Gallery/tui.md'
       - CLI : 'docs/Gallery/cli.md'
-
-
 
     - Plugins : 
       - 'Plugins': 'docs/plugins/plugins.md'

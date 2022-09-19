@@ -1,4 +1,9 @@
-<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - cloud native identity and access management platform"></h1>
+# "Janssen Project - cloud native identity and access management platform"
+
+<figure markdown>
+  ![Image title](https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_transparent_630px_182px.png)
+  <figcaption>Janssen</figcaption>
+</figure>
 
 ## Welcome to the Janssen Project
 
