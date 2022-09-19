@@ -169,11 +169,18 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         checked=self.data.get('showInConfigurationEndpoint'),
                         style='green'),
 
-                         self.myparent.getTitledText(_("Claims"),
+                        VSplit([
+                        
+                        self.myparent.getTitledText(_("Claims"),
                             name='claims',
                             value='\n'.join(self.data.get('claims', [])),
                             height=3, 
                             style='green'),
+                        self.myparent.getTitledText(_("Search"), name='oauth:scopes:openID:claims:search',style='fg:green',width=10,jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_clients
+
+                        ]),
+
+
 
                         # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
 
