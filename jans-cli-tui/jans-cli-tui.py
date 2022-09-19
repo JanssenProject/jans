@@ -341,6 +341,7 @@ class JansCliApp(Application):
             text=str(value),
             multiline=height > 1,
             height=height,
+            width=width,
             read_only=read_only,
             style=self.styles['textarea-readonly'] if read_only else self.styles['textarea'],
             accept_handler=accept_handler,
