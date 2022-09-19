@@ -4822,6 +4822,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#serialization-errors" class="md-nav__link">
+    Serialization errors
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -11044,6 +11051,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#serialization-errors" class="md-nav__link">
+    Serialization errors
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -11284,6 +11298,15 @@
 <p>A java invocation is attempting to call a method that is not part of the given class or the number of parameters passed for the method is not correct.</p>
 <h3 id="no-finish-instruction-was-reached">No Finish instruction was reached<a class="headerlink" href="#no-finish-instruction-was-reached" title="Permanent link">#</a></h3>
 <p>This occurs when no <code>Finish</code> statement has been found in the execution of a flow and there are no remaining instructions.</p>
+<h3 id="serialization-errors">Serialization errors<a class="headerlink" href="#serialization-errors" title="Permanent link">#</a></h3>
+<p>Agama engine saves the state of a flow (see <em>continuations</em> <a href="../hello-world-closer/">here</a>) every time an <a href="../dsl/#rrf">RRF</a> or <a href="../dsl-full/#rfac">RFAC</a> instruction is reached. For this purpose the <a href="https://github.com/EsotericSoftware/kryo">KRYO</a> library is employed. If kryo is unable to serialize a variable in use by your flow, a serialization error will appear in the screen or in the logs. Normally the problematic (Java) class is logged and this helps reveal the variable that is causing the issue. Note variables that hold "native" Agama values like strings or maps are never troublesome; the problems may originate from values obtained via <a href="../dsl-full/#java-interaction">Call</a>.</p>
+<p>To fix a serialization problem, try some of the following:</p>
+<ul>
+<li>Check if the value held by the variable is needed for RRF/RFAC or some upcoming statement. If that's not the case, simply set it to <code>null</code> before RRF/RFAC occurs</li>
+<li>Adjust the given class so it is "serialization" friendlier. With kryo, classes are not required to implement the <code>java.io.Serializable</code> interface </li>
+<li>Find a replacement for the problematic class</li>
+<li>As a last resort, set <code>serializerType</code> property of the <a href="../engine-config/">engine</a> to <code>null</code>. Note this will switch to standard Java serialization. This setting applies globally for all your flows</li>
+</ul>
 <h2 id="classes-added-on-the-fly">Classes added on the fly<a class="headerlink" href="#classes-added-on-the-fly" title="Permanent link">#</a></h2>
 <h3 id="a-class-does-not-see-other-classes-in-its-own-package">A class does not "see" other classes in its own package<a class="headerlink" href="#a-class-does-not-see-other-classes-in-its-own-package" title="Permanent link">#</a></h3>
 <p>This is a limitation of the scripting engine. Here, classes have to be imported even if they belong to the same package, or the fully qualified name used.</p>
@@ -11342,7 +11365,7 @@ Call java.lang.String#join &quot;&quot; strings
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-11T19:58:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-19T13:55:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-19</span>
       
         <br>
         Created:
