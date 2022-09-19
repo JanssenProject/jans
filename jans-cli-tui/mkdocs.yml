@@ -28,7 +28,6 @@ theme:
     features:
       - navigation.instant
       - toc.follow
-        # - toc.autohide
           - search.suggest
           - search.highlight
       - navigation.tabs
