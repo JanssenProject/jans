@@ -1805,6 +1805,27 @@ components:
           type: string
           description: A detailed human-readable message of the error
       description: See section 3.12 of RFC 7644
+    AuthenticationScheme:
+      required:
+      - type
+      - name
+      - description
+      type: object
+      properties:
+        type:
+          type: string
+          example: oauth2
+        name:
+          type: string
+        description:
+          type: string
+        specUri:
+          type: string
+        documentationUri:
+          type: string
+        primary:
+          type: boolean
+      description: See section 5 of RFC 7643
     ServiceProviderConfigResponse:
       type: object
       properties:
@@ -1859,21 +1880,9 @@ components:
             supported:
               type: boolean
         authenticationSchemes:
-          type: object
-          properties:
-            type:
-              type: string
-              example: oauth2
-            name:
-              type: string
-            description:
-              type: string
-            specUri:
-              type: string
-            documentationUri:
-              type: string
-            primary:
-              type: boolean
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationScheme'
       description: See section 5 of RFC 7643
     ResourceType:
       type: object
