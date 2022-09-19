@@ -120,7 +120,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.tabs['Basic'] = HSplit([
                         self.myparent.getTitledText(
-                                "Client_ID",
+                                _("Client_ID"),
                                 name='inum',
                                 value=self.data.get('inum',''),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'inum'),
@@ -232,10 +232,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     )
 
         self.tabs['SoftwareInfo'] =  HSplit([
-            #self.myparent.getTitledText(title ="Client URI", name='clientUri', value=self.data.get('clientUri',''),style='green'),
-            #self.myparent.getTitledText(title ="Policy URI", name='policyUri', value=self.data.get('policyUri',''),style='green'),
-            #self.myparent.getTitledText(title ="Logo URI", name='logoUri', value=self.data.get('logoUri',''),style='green'),
-            #self.myparent.getTitledText(title ="Term of service URI", name='tosUri', value=self.data.get('tosUri',''),style='green'),
+            #self.myparent.getTitledText(title =_("Client URI"), name='clientUri', value=self.data.get('clientUri',''),style='green'),
+            #self.myparent.getTitledText(title =_("Policy URI"), name='policyUri', value=self.data.get('policyUri',''),style='green'),
+            #self.myparent.getTitledText(title =_("Logo URI"), name='logoUri', value=self.data.get('logoUri',''),style='green'),
+            #self.myparent.getTitledText(title =_("Term of service URI"), name='tosUri', value=self.data.get('tosUri',''),style='green'),
 
             self.myparent.getTitledText(_("Contacts"),              ### height =3 insted of the <+> button
                             name='contacts',
@@ -417,7 +417,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 _("Client Expiration Date"),
                                 name='expirationDate',
                                 widget=DateSelectWidget(
-                                    value=self.data.get('expirationDate', ""),parent=self
+                                    value=self.data.get('expirationDate', ''),parent=self
                                    ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'expirationDate'),
                                 style='green'
@@ -571,7 +571,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
     def view_uma_resources(self, **params):
         
         selected_line_data = params['data']    ##self.uma_result 
-        title = "Edit user Data (Clients)"
+        title = _("Edit user Data (Clients)")
 
         dialog = ViewUMADialog(self.myparent, title=title, data=selected_line_data, save_handler=self.save_client)
         
