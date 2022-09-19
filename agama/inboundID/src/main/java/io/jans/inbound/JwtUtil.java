@@ -69,4 +69,6 @@ public class JwtUtil {
 
     }
 
+    private JwtUtil() { }
+
 }
