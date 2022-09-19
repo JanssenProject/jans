@@ -5,7 +5,6 @@ repo_url: 'https://github.com/JanssenProject'
 edit_uri: 'https://github.com/JanssenProject'
 site_description: "Jans-Tui Docs"
 
-
 # Copyright
 copyright: Copyright &copy; 2022, The Janssen Project
 
@@ -29,7 +28,7 @@ theme:
     features:
       - navigation.instant
       - toc.follow
-        - toc.autohide
+        # - toc.autohide
           - search.suggest
           - search.highlight
       - navigation.tabs
