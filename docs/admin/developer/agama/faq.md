@@ -22,6 +22,17 @@ A java invocation is attempting to call a method that is not part of the given c
 
 This occurs when no `Finish` statement has been found in the execution of a flow and there are no remaining instructions.
 
+### Serialization errors
+
+Agama engine saves the state of a flow (see *continuations* [here](./hello-world-closer.md)) every time an [RRF](./dsl.md#rrf) or [RFAC](./dsl-full.md#rfac) instruction is reached. For this purpose the [KRYO](https://github.com/EsotericSoftware/kryo) library is employed. If kryo is unable to serialize a variable in use by your flow, a serialization error will appear in the screen or in the logs. Normally the problematic (Java) class is logged and this helps reveal the variable that is causing the issue. Note variables that hold "native" Agama values like strings or maps are never troublesome; the problems may originate from values obtained via [Call](./dsl-full.md#java-interaction).
+
+To fix a serialization problem, try some of the following:
+
+- Check if the value held by the variable is needed for RRF/RFAC or some upcoming statement. If that's not the case, simply set it to `null` before RRF/RFAC occurs
+- Adjust the given class so it is "serialization" friendlier. With kryo, classes are not required to implement the `java.io.Serializable` interface 
+- Find a replacement for the problematic class
+- As a last resort, set `serializerType` property of the [engine](./engine-config.md) to `null`. Note this will switch to standard Java serialization. This setting applies globally for all your flows
+
 ## Classes added on the fly
 
 ### A class does not "see" other classes in its own package
