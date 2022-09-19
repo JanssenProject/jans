@@ -90,7 +90,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         HSplit([
 
             self.myparent.getTitledText(
-                                "Resource id",
+                                _("Resource id"),
                                 name='id',
                                 value=self.data.get('id',''),
                                 read_only=True,
@@ -98,14 +98,14 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                             ),
 
             self.myparent.getTitledText(
-                                "Display Name",
+                                _("Display Name"),
                                 name='name',
                                 value=self.data.get('name',''),
                                 read_only=True,
                                 style='green'),
 
             self.myparent.getTitledText(
-                                "IconURL",
+                                _("IconURL"),
                                 name='iconUri',
                                 value=self.data.get('iconUri',''),
                                 read_only=True,
@@ -122,14 +122,14 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             DynamicContainer(lambda: self.oauth_main_area),
             
             self.myparent.getTitledText(
-                                "Associated Client",
+                                _("Associated Client"),
                                 name='clients',
                                 value=self.data.get('clients',''),
                                 read_only=True,
                                 style='green'), 
 
             self.myparent.getTitledText(
-                                "Creation time",
+                                _("Creation time"),
                                 name='creationDate',
                                 value=self.data.get('creationDate',''),
                                 read_only=True,
@@ -140,11 +140,11 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         ),
         buttons=[
                 Button(
-                    text="Cancel",
+                    text=_("Cancel"),
                     handler=cancel,
                 ) ,
                 Button(
-                    text="Delete",
+                    text=_("Delete"),
                     handler=delete,
                 ) 
             ],
@@ -157,7 +157,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         
         self.oauth_main_area =  self.UMA_containers['scope'] = HSplit([
         self.myparent.getTitledText(
-                                "Scopes",
+                                _("Scopes"),
                                 name='scope',
                                 value=self.data.get('scope',[]),
                                 read_only=True,
@@ -170,7 +170,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
 
         self.UMA_containers['expression'] = HSplit([
         self.myparent.getTitledText(
-                                "Expression",
+                                _("Expression"),
                                 name='expression',
                                 value=self.data.get('expression',[]),
                                 read_only=True,

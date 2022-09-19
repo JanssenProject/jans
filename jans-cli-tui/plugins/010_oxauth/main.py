@@ -258,9 +258,9 @@ class Plugin():
 
         buttons = []
         if start_index > 0:
-            buttons.append(Button("Prev"))
+            buttons.append(Button(_("Prev")))
         if len(result) >= 10:
-            buttons.append(Button("Next"))
+            buttons.append(Button(_("Next")))
 
         self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
         self.oauth_data_container['scopes'] = HSplit([
@@ -283,7 +283,7 @@ class Plugin():
     def edit_client_dialog(self, **params):
         
         selected_line_data = params['data']  
-        title = "Edit user Data (Clients)"
+        title = _("Edit user Data (Clients)")
 
         dialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client)
         self.app.show_jans_dialog(dialog)
