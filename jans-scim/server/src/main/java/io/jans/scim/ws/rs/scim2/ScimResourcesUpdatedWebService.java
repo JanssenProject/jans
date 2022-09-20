@@ -219,68 +219,10 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     @PostConstruct
     private void init() {
+        init(ScimResourcesUpdatedWebService.class);
         ldapBackend = scimFilterParserService.isLdapBackend();
         attributeDataTypes = new HashMap<>();
         attributeService.getAllAttributes().forEach(ga -> attributeDataTypes.put(ga.getName(), ga.getDataType()));
     }
-
-/*
-    //Groups endpoint not necessary, but if needed, we need to guarantee first that excludeMetaLastMod is refreshed
-    //whenever the group is updated in GUI or via SCIM (or cust script)
-    //@Path("UpdatedGroups")
-    //@GET
-    @Produces(MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT)
-    @ProtectedApi
-    public Response groupsChangedAfter(@QueryParam("timeStamp") String isoDate) {
-
-        Response response;
-        log.debug("Executing web service method. groupsChangedAfter");
-
-        try {
-            String date = ZonedDateTime.parse(isoDate).format(DateTimeFormatter.ISO_INSTANT);
-            //In database, excludeMetaLastMod is just a string (not date)
-
-            Filter filter = Filter.createORFilter(
-                    Filter.createNOTFilter(Filter.createPresenceFilter("jansMetaLastMod")),
-                    Filter.createGreaterOrEqualFilter("jansMetaLastMod", date));
-            List<GluuGroup> list = entryManager.findEntries(groupService.getDnForGroup(null), GluuGroup.class, filter);
-            response = Response.ok(getGroupResultsAsJson(list)).build();
-
-        } catch (DateTimeParseException e) {
-            response = getErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
-        } catch (Exception e1) {
-            log.error("Failure at groupsChangedAfter method", e1);
-            response = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e1.getMessage());
-        }
-        return response;
-
-    }
-
-    private String getGroupResultsAsJson(List<GluuGroup> list) throws Exception {
-
-        List<BaseScimResource> resources = new ArrayList<>();
-        long fresher = 0;
-
-        for (GluuGroup group : list) {
-            GroupResource jsScimGrp = new GroupResource();
-            scim2GroupService.transferAttributesToGroupResource(group, jsScimGrp, userWebService.getEndpointUrl(), groupWebService.getEndpointUrl());
-            resources.add(jsScimGrp);
-
-            String modified = group.getAttribute("jansMetaLastMod");
-            try {
-                if (modified != null) {
-                    long updatedAt = ZonedDateTime.parse(modified).toInstant().toEpochMilli();
-                    if (fresher < updatedAt) {
-                        fresher = updatedAt;
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Error parsing supposed ISO date {}", modified);
-            }
-        }
-        return  getResultsAsJson(resources, fresher);
-
-    }
-    */
 
 }
