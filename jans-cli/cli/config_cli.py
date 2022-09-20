@@ -793,10 +793,14 @@ class JCA_CLI:
             print(' ' * spacing, self.colored_text('«{}»'.format(help_text), 244), sep='')
 
         if example:
+            join_char = '_,' if itype == 'array' else ', '
             if isinstance(example, list):
-                example_str = ', '.join(example)
+                example_str = join_char.join(example)
             else:
                 example_str = str(example)
+            if join_char == '_,':
+                example_str = example_str.replace(' ', join_char)
+
             print(' ' * spacing, self.colored_text('Example: {}'.format(example_str), 244), sep='')
 
         if not default is None:
