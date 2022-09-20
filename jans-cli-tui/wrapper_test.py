@@ -68,9 +68,9 @@ result = cli_object.process_command_by_id(
 
 
 result = cli_object.process_command_by_id(
-        operation_id='get-oauth-uma-resources',
-        url_suffix='',
-        endpoint_args='pattern:dn',
+        operation_id='get-oauth-uma-resources-by-clientid',
+        url_suffix='clientId:1800.f33615dd-907d-45d5-9494-f358aa1a9912',
+        endpoint_args='',
         data_fn=None,
         data={}
         )

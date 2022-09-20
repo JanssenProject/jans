@@ -31,9 +31,11 @@ tags:
   - name: OAuth - OpenID Connect - Clients
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
+  - name: Configuration – Agama Flow
   - name: Statistics - User
   - name: Health - Check
   - name: Server Stats
+  - name: Auth - Session Management
   - name: Configuration – User Management
   - name: SCIM - Config Management
   - name: Organization Configuration
@@ -193,24 +195,21 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [ https://jans.io/oauth/config/fido2.readonly ]
+		
   /jans-config-api/api/v1/attributes:
     get:
       summary: Gets a list of Gluu attributes.
       description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
-      operationId: get-attributes
+      operationId: get-all-attribute
       tags:
         - Attribute
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: Gluu Attributes
-                description: List of all attribute.
-                type: array
-                items:
-                  $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           description: Unauthorized
         '500':
@@ -235,6 +234,28 @@ paths:
           in: query
           name: status
           description: Status of the attribute
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+
     post:
       summary: Adds a new attribute.
       description: Adds a new attribute.
@@ -952,19 +973,52 @@ paths:
       tags:
         - Custom Scripts
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/CustomScript'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.readonly]
+      parameters:
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+  
     post:
       summary: Adds a new custom script.
       description: Adds a new custom script.
@@ -1016,6 +1070,35 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.write]
+
+  /jans-config-api/api/v1/config/scripts/name/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        description: Script name.
+        schema:
+          type: string
+    get:
+      summary: Fetch custom script by name.
+      description: Fetch custom script by name.
+      operationId: get-custom-script-by-name
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/scripts.readonly]
+
   /jans-config-api/api/v1/config/scripts/type/{type}:
     parameters:
       - schema:
@@ -1049,16 +1132,37 @@ paths:
         description: Script type.
         required: true
       - schema:
+          type: integer
+          default: 50
+        in: query
+        name: limit
+        description: Search size - max size of the results to return.
+      - schema:
           type: string
         in: query
         name: pattern
         description: Search pattern.
       - schema:
           type: integer
-          default: 50
+          default: 1
         in: query
-        name: limit
-        description: Search size - max size of the results to return.
+        name: startIndex
+        description: The 1-based index of the first query result.
+      - schema:
+          type: string
+          default: inum
+        in: query
+        name: sortBy
+        description: Attribute whose value will be used to order the returned response.
+      - schema:
+          type: string
+          default: ascending
+          enum:
+            - ascending
+            - descending
+        in: query
+        name: sortOrder
+        description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
     get:
       summary: Gets list of scripts by type.
       description: Gets list of scripts by type.
@@ -1067,13 +1171,12 @@ paths:
       tags:
         - Custom Scripts
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/CustomScript'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1845,15 +1948,12 @@ paths:
       description: Gets list of OpenID Connect clients
       operationId: get-oauth-openid-clients
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: OpenID Clients.
-                description: List of OpenID clients.
-                items:
-                  $ref: '#/components/schemas/Client'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2023,6 +2123,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/openid/clients.write]
+
   /jans-config-api/api/v1/uma/resources:
     get:
       tags:
@@ -2031,15 +2132,12 @@ paths:
       description: Gets list of UMA resources.
       operationId: get-oauth-uma-resources
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: UMA Resource list.
-                description: List of UMA Resource.
-                items:
-                  $ref: '#/components/schemas/UmaResource'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2058,6 +2156,28 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+  
     post:
       tags:
         - OAuth - UMA Resources
@@ -2139,6 +2259,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
+
     delete:
       tags:
         - OAuth - UMA Resources
@@ -2156,6 +2277,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.delete]
+
     patch:
       tags:
         - OAuth - UMA Resources
@@ -2187,6 +2309,42 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/uma/resources.write]
+
+
+  /jans-config-api/api/v1/uma/resources/clientId/{clientId}:
+    parameters:
+      - name: clientId
+        in: path
+        required: true
+        description: Client ID.
+        schema:
+          type: string
+    get:
+      tags:
+        - OAuth - UMA Resources
+      summary: Fetch uma resources by client id.
+      description: Fetch uma resources by client id.
+      operationId: get-oauth-uma-resources-by-clientid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA Resource list.
+                description: List of UMA Resource.
+                items:
+                  $ref: '#/components/schemas/UmaResource'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/uma/resources.readonly]
+
+
   /jans-config-api/api/v1/scopes:
     get:
       tags:
@@ -2195,15 +2353,12 @@ paths:
       description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
       operationId: get-oauth-scopes
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: Scope description list.
-                description: List of scope description.
-                items:
-                  $ref: '#/components/schemas/Scope'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2233,6 +2388,29 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+  
+
     post:
       tags:
         - OAuth - Scopes
@@ -2291,6 +2469,7 @@ paths:
         name: inum
         in: path
         required: true
+        
     get:
       tags:
         - OAuth - Scopes
@@ -2303,7 +2482,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scope'
+                $ref: '#/components/schemas/ExtendedScope'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2312,6 +2491,13 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
+      parameters:
+      - schema:
+          type: boolean
+          default: false
+        in: query
+        name: withAssociatedClients
+        description: Also fetch associated clients with scopes.
     delete:
       tags:
         - OAuth - Scopes
@@ -2359,6 +2545,303 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/scopes.write]
+
+  /jans-config-api/api/v1/scopes/creator/{creatorId}:
+    parameters:
+      - schema:
+          type: string
+        name: creatorId
+        in: path
+        required: true
+        description: Id of the scope creator. If creator is client then client_id if user then user_id.
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Get Scope by creatorId
+      description: Get Scope by creatorId
+      operationId: get-scope-by-creator
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope list.
+                description: List of scope.
+                items:
+                  $ref: '#/components/schemas/ExtendedScope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
+
+  /jans-config-api/api/v1/scopes/type/{type}:
+    parameters:
+      - schema:
+          type: string
+          enum:
+            - openid
+            - dynamic
+            - uma
+            - spontaneous
+            - oauth
+        name: type
+        in: path
+        required: true
+        description: Type of the scope. 
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Get Scope by Type
+      description: Get Scope by type
+      operationId: get-scope-by-type
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope list.
+                description: List of scope.
+                items:
+                  $ref: '#/components/schemas/ExtendedScope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
+
+  /jans-config-api/api/v1/agama:
+    get:
+      summary: Fetches all agama flow.
+      description: Fetches all agama flow.
+      operationId: get-agama-flows
+      tags:
+        - Configuration – Agama Flow
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.readonly]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: qname
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: includeSource
+          description: Boolean value true indcates source to be included in response.
+  
+    post:
+      summary: Create a new agama flow.
+      description: Create a new agama flow.
+      operationId: post-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgamaFlow'
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+
+  /jans-config-api/api/v1/agama/{qname}:
+    parameters:
+      - schema:
+          type: string
+        name: qname
+        in: path
+        description: flow qname.
+        required: true
+    get:
+      summary: Gets an agama flow based on Qname.
+      description: Gets an agama flow based on Qname.
+      operationId: get-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.readonly]
+    
+    post:
+      summary: Create a new agama flow from source.
+      description: Create a new agama flow from source.
+      operationId: post-agama-flow-from-source
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+   
+    patch:
+      summary: Partially modify a Agama Flow.
+      description: Partially modify a Agama Flow.
+      operationId: patch-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: enabled, value: \"false\" } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+
+    delete:
+      summary: Deletes an agama flow based on Qname.
+      description: Deletes an agama flow based on Qname.
+      operationId: delete-agama-flow
+      tags:
+        - Configuration – Agama Flow
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.delete]
+
+  /jans-config-api/api/v1/agama/source/{qname}:
+    parameters:
+      - schema:
+          type: string
+        name: qname
+        in: path
+        description: flow qname.
+        required: true
+
+    put:
+      summary: Update agama flow from source file.
+      description: Update agama flow from source file.
+      operationId: put-agama-flow-from-source
+      tags:
+        - Configuration – Agama Flow
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgamaFlow'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/agama.write]
+
   /jans-config-api/api/v1/stat:
     get:
       summary: Provides server with basic statistic.
@@ -2477,6 +2960,57 @@ paths:
         '500':
           description: Internal Server Error
   
+  /jans-config-api/api/v1/jans-auth-server/session:
+    get:
+      summary: Returns current session.
+      description: Returns current session.
+      operationId: get-sessions
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.readonly]
+      tags:
+        - Auth - Session Management
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Auth session
+                description: List of auth session.
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessionId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+  
+  /jans-config-api/api/v1/jans-auth-server/session/{userDn}:
+    parameters:
+      - name: userDn
+        in: path
+        description: User domain name.
+        required: true
+        schema:
+          type: string
+    post:
+      summary: Revoke all sessions by userDn.
+      description: Revoke all sessions by userDn.
+      operationId: revoke-user-session
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/session.delete, revoke_session]
+      tags:
+        - Auth - Session Management
+      responses:
+        '200':
+          description: Ok
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  
   /jans-config-api/mgt/configuser:
     get:
       tags:
@@ -2485,15 +3019,12 @@ paths:
       description: Gets list of users
       operationId: get-user
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                title: Users.
-                description: List of users.
-                items:
-                  $ref: '#/components/schemas/CustomUser'
+                $ref: '#/components/schemas/PagedResult'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2664,7 +3195,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/user.write]
 
  
-  /jans-config-api/scim/config:
+  /jans-config-api/scim/scim-config:
     get:
       summary: Retrieves SCIM App configuration.
       description: Retrieves SCIM configuration.
@@ -3356,7 +3887,11 @@ components:
             https://jans.io/oauth/config/user.readonly: View user related information
             https://jans.io/oauth/config/user.write: Manage user related information
             https://jans.io/oauth/config/user.delete: Delete user related information
-            
+            https://jans.io/oauth/config/agama.readonly: View Agama Flow related information
+            https://jans.io/oauth/config/agama.write: Manage Agama Flow related information
+            https://jans.io/oauth/config/agama.delete: Delete Agama Flow related information
+            https://jans.io/oauth/jans-auth-server/session.readonly: View Session related information
+            https://jans.io/oauth/jans-auth-server/session.delete: Delete Session information
 
   responses:
     Found:
@@ -3411,6 +3946,7 @@ components:
           type: string
         details:
           type: string
+		  
     CustomScript:
       type: object
       description: Script
@@ -3511,6 +4047,10 @@ components:
           type: boolean
           description: boolean value indicating if the script is internal.
           default: false
+        locationPath:
+          type: string
+        baseDn:
+          type: string
 
     LdapConfiguration:
       type: object
@@ -3635,21 +4175,21 @@ components:
             - CRYPT-BCRYPT
             - CRYPT-BCRYPT
             - PKCS5S2
-        operationTracingEnabled:
-          type: boolean
-          description: Boolean value True if tracing is enabled on the environment.
-          default: false
-        mutationTokensEnabled:
-          type: boolean
-          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
         connectTimeout:
           type: integer
           description: The default timeout for connection timeout.
           format: int32
-        computationPoolSize:
+        mutationTokensEnabled:
+          type: boolean
+          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
+        kvTimeout:
           type: integer
+          description: Key Value (KV) timeout.
           format: int32
-          description: Sets the pool size (number of threads to use) for all non-blocking operations, default value is the number of CPUs.
+        queryTimeout:
+          type: integer
+          description: Query timeout.
+          format: int32	
         useSSL:
           type: boolean
           description: Identifies if SSL should be enabled.
@@ -3660,7 +4200,7 @@ components:
         sslTrustStorePin:
           type: string
           description: The PIN to use to access the contents of the trust store.
-        sslTrustStoreFormat:
+        sslTrustStoreType:
           type: string
           description: The format to use for the trust store.
         binaryAttributes:
@@ -3672,7 +4212,7 @@ components:
           type: array
           description: List of certificate attributes.
           items:
-            type: string
+            type: string 
 
     SqlConfiguration:
       type: object
@@ -3866,13 +4406,81 @@ components:
           type: string
           description: URL for the Introspection Endpoint.
           example: 'https://server.example.com/restv1/introspection'
+        parEndpoint:
+          type: string
+          description: URL for Pushed Authorisation Request (PAR) Endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/par'
+        requirePar:
+          description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
+          type: boolean  
         deviceAuthzEndpoint:
           type: string
           description: URL for the Device Authorization.
           example: 'https://server.example.com/restv1/device_authorization'
+        mtlsAuthorizationEndpoint:
+          type: string
+          description: URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls'
+        mtlsTokenEndpoint:
+          type: string
+          description: URL for MTLS Authorization token Endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/token'
+        mtlsTokenRevocationEndpoint:
+          type: string
+          description: URL for MTLS Authorization token revocation endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/revoke'
+        mtlsUserInfoEndpoint:
+          type: string
+          description: URL for MTLS User Info endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/userinfo'
+        mtlsClientInfoEndpoint:
+          type: string
+          description: URL for MTLS Client Info endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/clientinfo'
+        mtlsCheckSessionIFrame:
+          type: string
+          description: URL for MTLS IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API..
+          example: 'https://server.example.com/jans-auth/restv1/mtls/opiframe.htm'
+        mtlsEndSessionEndpoint:
+          type: string
+          description: URL for MTLS to which an RP can perform a redirect to request that the end user be logged out at the OP.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/end_session'
+        mtlsJwksUri:
+          type: string
+          description: URL for MTLS of the OP\'s JSON Web Key Set (JWK) document.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/jwks'
+        mtlsRegistrationEndpoint:
+          type: string
+          description: URL for MTLS Registration endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/register'
+        mtlsIdGenerationEndpoint:
+          type: string
+          description: URL for MTLS Id generation endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/id'
+        mtlsIntrospectionEndpoint:
+          type: string
+          description: URL for MTLS Introspection endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/introspection'
+        mtlsParEndpoint:
+          type: string
+          description: URL for MTLS Pushed Authorisation Request (PAR) endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/par'
+        mtlsDeviceAuthzEndpoint:
+          type: string
+          description: URL for MTLS Device Authorization endpoint.
+          example: 'https://server.example.com/jans-auth/restv1/mtls/device_authorization'  
         sessionAsJwt:
           type: boolean
           description: Boolean value true saves session data as a JWT.
+        requireRequestObjectEncryption:
+          type: boolean
+          description: Boolean value true encrypts request object.
+        requirePkce:
+          type: boolean
+          description: Boolean value true check for Proof Key for Code Exchange (PKCE).
+        allowAllValueForRevokeEndpoint:
+          type: boolean
+          description: Boolean value true allow all value for revoke endpoint.
         sectorIdentifierCacheLifetimeInMinutes:
           type: integer
           description:  Sector Identifier cache lifetime in minutes.
@@ -3907,6 +4515,15 @@ components:
         umaRestrictResourceToAssociatedClient:
           type: boolean
           description: Restrict access to resource by associated client.
+        statTimerIntervalInSeconds:
+          type: integer
+          description: Statistical data capture time interval.
+        statAuthorizationScope:
+          type: string
+          description: Scope required for Statistical Authorization. 
+        allowSpontaneousScopes:
+          type: boolean
+          description: Specifies whether to allow spontaneous scopes.
         spontaneousScopeLifetime:
           type: integer
           description: The lifetime of spontaneous scope in seconds.
@@ -3914,6 +4531,17 @@ components:
           type: string
           description: Specifies which LDAP attribute is used for the subject identifier claim.
           example: inum
+        publicSubjectIdentifierPerClientEnabled:
+          type: boolean
+          description: Specifies whether public subject identifier is allowed per client.
+        subjectIdentifiersPerClientSupported:
+          type: array
+          description: A list of the subject identifiers supported per client.
+          items:
+            type: string
+          enum:
+            - mail
+            - uid
         responseTypesSupported:
           type: array
           description: A list of the OAuth 2.0 response_type values that this OP supports.
@@ -3932,19 +4560,25 @@ components:
             - query
             - fragment
             - form_post
+            - query.jwt
+            - fragment.jwt
+            - form_post.jwt
+            - jwt
         grantTypesSupported:
           type: array
           description: A list of the OAuth 2.0 Grant Type values that this OP supports.
           items:
             type: string
           enum:
+            - none
             - authorization_code
             - implicit
             - password
             - client_credentials
             - refresh_token
-            - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
-            - '\urn\:openid\:params\:grant-type\:ciba'
+            - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:openid:params:grant-type:ciba
+            - urn:ietf:params:oauth:grant-type:device_code
         subjectTypesSupported:
           type: array
           description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
@@ -3959,6 +4593,45 @@ components:
           enum:
             - public
             - pairwise
+        authorizationSigningAlgValuesSupported:
+          type: array
+          description: A list of the authorization signing algorithms supported.
+          items:
+            type: string
+          enum:
+            - HS256
+            - HS384
+            - HS512
+            - RS256
+            - RS384
+            - RS512
+            - ES256
+            - ES384
+            - ES512
+            - ES512
+            - PS256
+            - PS384
+            - PS512
+        authorizationEncryptionAlgValuesSupported:
+          type: array
+          description: A list of the authorization encryption algorithms supported.
+          items:
+            type: string
+          enum:
+            - RSA1_5
+            - RSA-OAEP
+            - A128KW
+            - A256KW
+        authorizationEncryptionEncValuesSupported:
+          type: array
+          description: A list of the authorization encryption algorithms supported.
+          items:
+            type: string
+          enum:
+            - A128CBC+HS256
+            - A256CBC+HS512
+            - A128GCM
+            - A256GCM
         userInfoSigningAlgValuesSupported:
           type: array
           description: A list of the JWS signing algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
@@ -4036,6 +4709,9 @@ components:
             - A256CBC+HS512
             - A128GCM
             - A256GCM
+        forceSignedRequestObject:
+          type: boolean
+          description: Boolean value true indicates that signed request object is mandatory.
         requestObjectSigningAlgValuesSupported:
           type: array
           description: A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects.
@@ -4178,17 +4854,17 @@ components:
         requestUriParameterSupported:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request_uri parameter.
-        requestUriBlockList:
-          type: array
-          description: Block list for requestUri that can come to Authorization Endpoint (e.g. "localhost")
-          items:
-            type: string
         requestUriHashVerificationEnabled:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request_uri hash verification.
         requireRequestUriRegistration:
           type: boolean
           description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter.
+        requestUriBlockList:
+          type: array
+          description: Block list for requestUri that can come to Authorization Endpoint (e.g. "localhost")
+          items:
+            type: string
         opPolicyUri:
           type: string
           description: URL that the OpenID Provider provides to the person registering the Client to read about the OP\'s requirements on how the Relying Party can use the data provided by the OP.
@@ -4221,7 +4897,7 @@ components:
         cleanServiceBatchChunkSize:
           type: integer
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
-          example: 10000
+          example: 100
         keyRegenerationEnabled:
           type: boolean
           description: Boolean value specifying whether to regenerate keys.
@@ -4318,6 +4994,12 @@ components:
           type: integer
           description: The expiration notificator interval in seconds.
           example: 600
+        redirectUrisRegexEnabled:
+          type: boolean
+          description: Enable/Disable redirect uris validation using regular expression.
+        useHighestLevelScriptIfAcrScriptNotFound:
+          type: boolean
+          description: Enable/Disable usage of highest level script in case ACR script does not exist.
         authenticationFiltersEnabled:
           type: boolean
           description: Boolean value specifying whether to enable user authentication filters.
@@ -4327,6 +5009,9 @@ components:
         clientRegDefaultToCodeFlowWithRefresh:
           type: boolean
           description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.
+        grantTypesAndResponseTypesAutofixEnabled:
+          type: boolean
+          description: Boolean value specifying whether to Grant types and Response types can be auto fixed.
         authenticationFilters:
           type: array
           description: List of authentication filters.
@@ -4348,9 +5033,6 @@ components:
         sessionIdUnauthenticatedUnusedLifetime:
           type: integer
           description: The lifetime for unused unauthenticated session states.
-        sessionIdEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable authentication by session_id.
         sessionIdPersistOnPromptNone:
           type: boolean
           description: Boolean value specifying whether to persist session ID on prompt none.
@@ -4363,12 +5045,18 @@ components:
         sessionIdPersistInCache:
           type: boolean
           description: Boolean value specifying whether to persist session_id in cache.
+        includeSidInResponse:
+          type: boolean
+          description: Boolean value specifying whether to include sessionId in response.
         sessionIdLifetime:
           type: integer
           description: The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.
         serverSessionIdLifetime:
           type: integer
           description: The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.
+        activeSessionAuthorizationScope:
+          type: string
+          description: Authorization Scope for active session
         configurationUpdateInterval:
           type: integer
           description: The interval for configuration update in seconds.
@@ -4440,11 +5128,21 @@ components:
             - OLDER
             - NEWER
             - FIRST
-        checkUserPresenceOnRefreshToken:
+        keyAlgsAllowedForGeneration:
+          type: array
+          description: List of algorithm allowed to be used for key generation.
+          items:
+            type: string
+          example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
+        keySignWithSameKeyButDiffAlg:
           type: boolean
-          description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.)
-          example: false
-          default: false
+          description: Specifies if signing to be done with same key but apply different algorithms.
+        staticKid:
+          type: string
+          description: Specifies static Kid
+        staticDecryptionKid:
+          type: string
+          description: Specifies static decryption Kid.
         oxElevenTestModeToken:
           type: string
           description: oxEleven Test Mode Token.
@@ -4467,6 +5165,9 @@ components:
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
           description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
+        introspectionSkipAuthorization:
+          type: boolean
+          description: Specifies if authorization to be skipped for introspection.
         endSessionWithAccessToken:
           type: boolean
           description: Accept access token to call end_session endpoint.
@@ -4542,16 +5243,42 @@ components:
           type: array
           description: Authorization Request Custom Allowed Parameters.
           items:
-            type: string
-        legacyDynamicRegistrationScopeParam:
-          type: boolean
-          description: Legacy Dynamic Registration Scopes JSON Array Param.
+            $ref: '#/components/schemas/AuthorizationRequestCustomParameter'
         openidScopeBackwardCompatibility:
           type: boolean
           description: Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
         disableU2fEndpoint:
           type: boolean
           description: Enable/Disable U2F endpoints.
+        dcrSignatureValidationEnabled:
+          type: boolean
+          description: Boolean value enables DCR signature validation. Default is false.
+        dcrSignatureValidationSharedSecret:
+          type: string
+          description: Specifies shared secret for Dynamic Client Registration.
+        dcrSignatureValidationSoftwareStatementJwksURIClaim:
+          type: string
+          description: Specifies claim name inside software statement. Value of claim should point to JWKS URI.
+        dcrSignatureValidationSoftwareStatementJwksClaim:
+          type: string
+          description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
+        dcrSignatureValidationJwks:
+          type: string
+          description: Specifies JWKS for all DCR's validations.
+        dcrSignatureValidationJwksUri:
+          type: string
+          description: Specifies JWKS URI for all DCR's validations.
+        dcrAuthorizationWithClientCredentials:
+          type: boolean
+          description: Boolean value indicating if DCR authorization to be performed using client credentials.
+        dcrAuthorizationWithMTLS:
+          type: boolean
+          description: Boolean value indicating if DCR authorization allowed with MTLS.
+        dcrIssuers:
+          type: array
+          description: List of DCR issuers.
+          items:
+            type: string
         useLocalCache:
           type: boolean
           description: Boolean value specifying whether to enable local in-memory cache.
@@ -4576,6 +5303,11 @@ components:
         refreshTokenExtendLifetimeOnRotation:
           type: boolean
           description: Boolean value specifying whether to extend refresh tokens on rotation.
+        checkUserPresenceOnRefreshToken:
+          type: boolean
+          description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.)
+          example: false
+          default: false
         consentGatheringScriptBackwardCompatibility:
           type: boolean
           description: Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false AS will pick up script based on client configuration.
@@ -4609,6 +5341,9 @@ components:
         keepAuthenticatorAttributesOnAcrChange:
           type: boolean
           description: Boolean value specifying whether to keep authenticator attributes on ACR change.
+        disableAuthnForMaxAgeZero:
+          type: boolean
+          description: Boolean value specifying whether to disable authentication when max_age=0 (false by default)
         deviceAuthzRequestExpiresIn:
           type: integer
           description: Expiration time given for device authorization requests.
@@ -4690,9 +5425,53 @@ components:
         cibaMaxExpirationTimeAllowedSec:
           type: integer
           description: Specifies the CIBA token expiration time in seconds.
+        dpopSigningAlgValuesSupported:
+          type: array
+          description: Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported.
+          items:
+            type: string
+            enum:
+              - RS256
+              - RS384
+              - RS512
+              - ES256
+              - ES384
+              - ES512
+              - PS256
+              - PS384
+              - PS512
+        dpopTimeframe:
+          type: integer
+          description: Demonstration of Proof-of-Possession (DPoP) timeout.
+          default: 5
+        dpopJtiCacheTime:
+          type: integer
+          description: Demonstration of Proof-of-Possession (DPoP) cache time.
+          default: 3600
+        allowIdTokenWithoutImplicitGrantType:
+          type: boolean
+          description: Specifies if a token without implicit grant types is allowed.
         discoveryCacheLifetimeInMinutes:
           type: integer
           description: Lifetime of discovery cache.
+        discoveryAllowedKeys:
+          type: array
+          description: List of configuration response claim allowed to be displayed in discovery endpoint.
+          items:
+            type: string
+          example: 'authorization_endpoint, token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..'
+        discoveryDenyKeys:
+          type: array
+          description: List of configuration response claims which must not be displayed in discovery endpoint response.
+          items:
+            type: string
+          example: 'id_generation_endpoint, auth_level_mapping, etc.'
+        featureFlags:
+          type: array
+          description: List of enabled feature flags
+          items:
+            type: string
+          example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'
         httpLoggingEnabled:
           type: boolean
           description: Enable/Disable request/response logging filter.
@@ -4706,70 +5485,11 @@ components:
           type: string
           description: Path to external log4j2 logging configuration.
           example: /identity/logviewer/configure
-        dcrSignatureValidationEnabled:
-          type: boolean
-          description: Boolean value enables DCR signature validation. Default is false.
-        dcrSignatureValidationSharedSecret:
-          type: string
-          description: Specifies shared secret for Dynamic Client Registration.
-        dcrSignatureValidationSoftwareStatementJwksURIClaim:
-          type: string
-          description: Specifies claim name inside software statement. Value of claim should point to JWKS URI.
-        dcrSignatureValidationSoftwareStatementJwksClaim:
-          type: string
-          description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
-        dcrSignatureValidationJwks:
-          type: string
-          description: Specifies JWKS for all DCR's validations.
-        dcrSignatureValidationJwksUri:
-          type: string
-          description: Specifies JWKS URI for all DCR's validations.
-        dcrAuthorizationWithClientCredentials:
-          type: boolean
-          description: Boolean value indicating if DCR authorization to be performed using client credentials.
-        statTimerIntervalInSeconds:
-          type: integer
-          description: Statistical data capture time interval.
-        statWebServiceIntervalLimitInSeconds:
-          type: integer
-          description: Statistical data capture time interval limit.
-        keyAlgsAllowedForGeneration:
-          type: array
-          description: List of algorithm allowed to be used for key generation.
-          items:
-            type: string
-          example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
-        discoveryAllowedKeys:
-          type: array
-          description: List of configuration response claim allowed to be displayed in discovery endpoint.
-          items:
-            type: string
-          example: 'authorization_endpoint, token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..'
-        allowIdTokenWithoutImplicitGrantTypes:
-          type: boolean
-          description: Specifies if a token without implicit grant types is allowed.
-        keySignWithSameKeyButDiffAlg:
-          type: boolean
-          description: Specifies if signing to be done with same key but apply different algorithms.
-        enabledComponents:
-          type: array
-          description: List of auth components enabled
-          items:
-            type: string
-          example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'
-        staticKid:
-          type: string
-          description: Specifies static Kid
-        redirectUrisRegexEnabled:
-          type: boolean
-          description: Enable/Disable redirect uris validation using regular expression.
-        useHighestLevelScriptIfAcrScriptNotFound:
-          type: boolean
-          description: Enable/Disable usage of highest level script in case ACR script does not exist.
         agamaConfiguration:
           type: object
-          desciption: Engine Config which offers an alternative way to build authentication flows in Janssen server
+          description: Engine Config which offers an alternative way to build authentication flows in Janssen server
           $ref: '#/components/schemas/EngineConfig'
+
 
     GluuAttribute:
       title: GluuAttribute
@@ -4786,9 +5506,17 @@ components:
       properties:
         dn:
           type: string
+        baseDn:
+          type: string
+        selected:
+          type: boolean
         inum:
           description: XRI i-number. Identifier to uniquely identify the attribute.
           type: string
+        sourceAttribute:
+          type: string
+        nameIdType:
+          type: string		  
         name:
           type: string
           description: Name of the attribute.
@@ -4798,6 +5526,8 @@ components:
         description:
           type: string
           description: User friendly descriptive detail of attribute.
+        origin:
+          type: string		  
         dataType:
           type: string
           description: Data Type of attribute.
@@ -4809,24 +5539,6 @@ components:
             - CERTIFICATE
             - DATE
             - JSON
-        status:
-          type: string
-          description: Attrubute status
-          enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
-        lifetime:
-          type: string
-        sourceAttribute:
-          type: string
-        salt:
-          type: string
-        nameIdType:
-          type: string
-        origin:
-          type: string
         editType:
           type: array
           description: GluuUserRole
@@ -4855,11 +5567,19 @@ components:
           items:
             type: string
             enum:
-              - openid
+              - OPENID
         claimName:
           type: string
         seeAlso:
           type: string
+        status:
+          type: string
+          description: Attrubute status
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - EXPIRED
+            - REGISTER
         saml1Uri:
           type: string
         saml2Uri:
@@ -4872,6 +5592,15 @@ components:
         oxMultiValuedAttribute:
           type: boolean
           description: Boolean value indicating if the attribute can hold multiple value.
+        jansHideOnDiscovery:
+          type: boolean
+          description: Boolean value indicating if the attribute should be shown on that discovery page.
+        custom:
+          type: boolean	
+          description: Boolean value indicating if it is a custom attribute.
+        requred:
+          type: boolean	
+          description: Boolean value indicating if it is a attribute required.
         attributeValidation:
           type: object
           description: Details of validations to be applied on the attribute
@@ -4884,10 +5613,26 @@ components:
             maxLength:
               type: integer
         tooltip:
+          type: string	
+        lifetime:
           type: string
-        jansHideOnDiscovery:
+        adminCanAccess:
           type: boolean
-          description: Boolean value indicating if the attribute should be shown on that discovery page.
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+
+
+
     PatchRequest:
       description: A JSONPatch document as defined by RFC 6902
       required:
@@ -4921,6 +5666,14 @@ components:
       properties:
         dn:
           type: string
+        expirationDate:
+          description: Expiry date of the Scope.
+          type: string
+          format: date
+        deletable:
+          description: Specifies if the scope can be deleted.
+          type: boolean
+          default: false
         inum:
           description: Unique id identifying the .
           type: string
@@ -4970,26 +5723,52 @@ components:
           type: object
           description: ScopeAttributes
           properties:
-            spontaneousClientId:
-              type: string
             spontaneousClientScopes:
               type: array
               items:
                 type: string
             showInConfigurationEndpoint:
               type: boolean
+        creatorId:
+          description: Id of the scope creator. If creator is client then client_id if user then user_id
+          type: string
+        creatorType:
+          description: Scope creator type
+          type: string
+          enum:
+            - NONE
+            - CLIENT
+            - USER
+            - AUTO
+        creationDate:
+          description: Scope creation date time.
+          type: string
+          format: date
+        creatorAttributes:
+          description: Stores creator attributes
+          type: object
+          additionalProperties:
+            type: string
         umaType:
           description: Specifies if the scope is of type UMA.
           type: boolean
           default: false
-        deletable:
-          description: Specifies if the scope can be deleted.
-          type: boolean
-          default: false
-        expirationDate:
-          description: Expiry date of the Scope.
-          type: string
-          format: date
+        baseDn:
+          type: string  
+
+  
+    ExtendedScope:
+      allOf: # Combines the Scope and the inline model
+        - $ref: '#/components/schemas/Scope'
+        - type: object
+        - type: object
+          properties:
+            clients:
+              description: Associated oidc clients
+              type: array
+              items:
+                $ref: '#/components/schemas/Client'
+
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
@@ -5010,6 +5789,10 @@ components:
           type: array
           items:
             type: string
+        value:
+          type: string
+        displayValue:
+          type: string
     ClientAttributes:
       title: ClientAttributes
       description: Attribute.
@@ -5018,7 +5801,7 @@ components:
         tlsClientAuthSubjectDn:
           description: String representation of the expected subject distinguished name of the certificate, which the OAuth client will use in mutual TLS authentication.
           type: string
-        runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+        runIntrospectionScriptBeforeJwtCreation:
           description: boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT.
           type: boolean
         keepClientAuthorizationAfterExpiration:
@@ -5087,31 +5870,31 @@ components:
         requirePar:
           description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
           type: boolean
-        authorizationSignedResponseAlg:
+        jansAuthSignedRespAlg:
           description: JWS alg algorithm JWA required for signing authorization responses.
           type: string
-        authorizationEncryptedResponseAlg:
+        jansAuthEncRespAlg:
           description: JWE alg algorithm JWA required for encrypting authorization responses.
           type: string
-        authorizationEncryptedResponseEnc:
+        jansAuthEncRespEnc:
           description: JWE enc algorithm JWA required for encrypting auhtorization responses.
           type: string
-        publicSubjectIdentifierAttribute:
+        jansSubAttr:
           description: custom subject identifier attribute.
           type: string
         redirectUrisRegex:
           description:  If set, redirectUri must match to this regexp
           type: string
-        authorizedAcrValues:
+        jansAuthorizedAcr:
           description:  List of thentication Context Class Reference (ACR) that must exist.
           type: array
           items:
             type: string
-        defaultPromptLogin:
+        jansDefaultPromptLogin:
           description: sets prompt=login to the authorization request, which causes the authorization server to force the user to sign in again before it will show the authorization prompt.
           type: boolean
-			
-			
+
+
     Client:
       title: Client object
       description: Client.
@@ -5121,12 +5904,19 @@ components:
       properties:
         dn:
           type: string
+        baseDn:
+          type: string
+        expirationDate:
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
+          type: string
+          format: date-time
+        deletable:
+          description: Specifies whether client is deletable.
+          type: boolean
+          default: false
         inum:
           description: XRI i-number. Client Identifier to uniquely identify the client.
           type: string
-        displayName:
-          type: string
-          description: Name of the user suitable for display to end-users
         clientSecret:
           type: string
           description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
@@ -5191,18 +5981,21 @@ components:
         idTokenTokenBindingCnf:
           description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
           type: string
+        clientName:
+          $ref: '#/components/schemas/LocalizedString'
+          description: Name of the user suitable for display to end-users
         logoUri:
           description: URL that references a logo for the Client application.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         clientUri:
           description: URL of the home page of the Client. The value of this field must point to a valid Web page.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         policyUri:
           description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         tosUri:
           description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
-          type: string
+          $ref: '#/components/schemas/LocalizedString'
         jwksUri:
           description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
           type: string
@@ -5346,9 +6139,6 @@ components:
           type: integer
           format: int32
           example: 1000000
-        requireAuthTime:
-          description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
-          type: boolean
         defaultAcrValues:
           description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
           type: array
@@ -5492,29 +6282,42 @@ components:
         backchannelUserCodeParameter:
           description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
           type: boolean
-        expirationDate:
-          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
-          type: string
-          format: date-time
-        deletable:
-          description: Specifies whether client is deletable.
-          type: boolean
-          default: false
-        jansId:
-          description: Attribute Scope Id.
-          type: string
         description:
           description: Description of the client.
           type: string
+        organization:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string
+        ttl:
+          type: integer
+          format: int32
+        displayName:
+          type: string
+        tokenBindingSupported:
+          type: boolean
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
+
 
     UmaResource:
       title: UMAResource object
       description: UMAResource
       type: object
       required:
-        - id
-        - type
-        - iconUri
+        - name
+        - description
       properties:
         dn:
           type: string
@@ -5548,9 +6351,6 @@ components:
           type: array
           items:
             type: string
-        rev:
-          description: Resource revision.
-          type: string
         creator:
           description: Resource creator or owner.
           type: string
@@ -5712,10 +6512,14 @@ components:
           type: integer
         deleteExpiredOnGetRequest:
           type: boolean
+        disableAttemptUpdateBeforeInsert:
+          type: boolean
     SmtpConfiguration:
       type: object
       description: SMTP configuration.
       properties:
+        valid:
+          type: boolean
         host:
           description: Hostname of the SMTP server.
           type: string
@@ -5824,6 +6628,7 @@ components:
           description: Time interval for the Clean Service in seconds.
         cleanServiceBatchChunkSize:
           type: integer
+          default: 100
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
         useLocalCache:
           description: Boolean value to indicate if Local Cache is to be used.
@@ -5846,6 +6651,9 @@ components:
         metricReporterKeepDataDays:
           type: integer
           description: The days to keep report data.
+        metricReporterEnabled:
+          type: boolean
+          description: Boolean value specifying whether metric reporter is enabled.
         personCustomObjectClassList:
           type: array
           description: Custom object class list for dynamic person enrolment.
@@ -5943,20 +6751,18 @@ components:
         authenticatorCertsFolder:
           description: Authenticators certificates fodler.
           type: string
+        mdsAccessToken:
+          description: MDS access token.
+          type: string
         mdsCertsFolder:
           description: MDS TOC root certificates folder.
           type: string
         mdsTocsFolder:
           description: MDS TOC files folder.
           type: string
-        serverMetadataFolder:
-          description: Authenticators metadata in json format.
-          type: string
-        requestedParties:
-          description: Authenticators metadata in json format.
-          type: array
-          items:
-            $ref: '#/components/schemas/RequestedParties'
+        checkU2fAttestations:
+          description: Boolean value indcating if U2f attestation needs to be checked.
+          type: boolean
         userAutoEnrollment:
           description: Allow to enroll users on enrollment/authentication requests.
           type: boolean
@@ -5966,11 +6772,20 @@ components:
         authenticationHistoryExpiration:
           description: Expiration time in seconds for approved authentication requests.
           type: integer
+        serverMetadataFolder:
+          description: Authenticators metadata in json format.
+          type: string
         requestedCredentialTypes:
           description: List of Requested Credential Types.
           type: array
           items:
             type: string
+        requestedParties:
+          description: Authenticators metadata in json format.
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedParties'
+
     RequestedParties:
       type: object
       description: Credential Type.
@@ -6787,15 +7602,30 @@ components:
         useLocalCache:
           type: boolean
           description: Boolean value specifying whether to enable local in-memory cache.
+        bulkMaxOperations:
+          type: integer
+          description: Specifies maximum bulk operations.
+        bulkMaxPayloadSize:
+          type: integer
+          format: int64
+          description: Specifies maximum payload size of bulk operations.
   
     Organization:
       type: object
       properties:
+        dn:
+          type: string
+        baseDn:
+          type: string
         displayName:
           type: string
+          maxLength: 60
+          minLength: 0
           description: Organization name
         description:
           type: string
+          maxLength: 60
+          minLength: 0
           description: Organization description 
         member:
           type: string
@@ -6829,6 +7659,8 @@ components:
         jsFaviconPath:
           type: string
           description: Path to organization favicon image
+        organizationTitle:
+          type: string
   
   
     FacterData:
@@ -6892,10 +7724,10 @@ components:
           type: string
           description: User status
           enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
+            - active
+            - inactive
+            - expired
+            - register
         userId:
           description: A domain issued and managed identifier for the user.
           type: string
@@ -6960,56 +7792,236 @@ components:
             $ref: '#/components/schemas/CustomAttribute'
 
     EngineConfig:
-      title: Engine config object
-      description: Engine config object that offers an alternative way to build authentication flows in Janssen server.
+      title: Agama engine configuration
+      description: Agama engine configuration object
       type: object
       properties:
         enabled:
           type: boolean
-          description: boolean value indicating if agama configuration enabled.
+          description: A boolean value that specifies if the engine is enabled
           default: false
         templatesPath:
           type: string
-          description: path to the templates
+          description: Root of templates
           default: '/ftl'
         scriptsPath:
           type: string
-          description: path to the scripts
+          description: Root of the hierarchy of classes that can be added on the fly
           default: '/scripts'
         serializerType:
           type: string
-          description: type of supported serializer
+          description: Used for continuations serialization
           default: KRYO
           enum:
             - KRYO
             - FST
         maxItemsLoggedInCollections:
           type: integer
-          description: maximum logged in collection item
+          description: Number of items to traverse in a collection when it is logged
           default: 3
           minimum: 1
         pageMismatchErrorPage:
           type: string
-          description: mismatch error page.
+          description: Location of the page used when an unexpected URL is requested
           default: mismatch.ftl
         interruptionErrorPage:
           type: string
-          description: interruption error page.
+          description: Location of the page shown when a user exceeds the amount of time allowed to take a flow to completion
           default: timeout.ftl
         crashErrorPage:
           type: string
-          description: crash error page.
+          description: Location of the page shown when an error has occured while running a flow
           default: crash.ftl
         finishedFlowPage:
           type: string
-          description: finished flow page.
+          description: Location of the page shown when a flow has finished
           default: finished.ftl
         bridgeScriptPage:
           type: string
-          description: bridge script page.
+          description: JSF page of the bridge script
           default: agama.xhtml
         defaultResponseHeaders:
           type: object
           additionalProperties:
             type: string
 
+
+    FlowMetadata:
+      title: Metadata of an Agama flow
+      description: Metadata of an Agama flow
+      type: object
+      properties:
+        funcName:
+          description: For internal use only. This property should not be modified
+          type: string
+        inputs:
+          description: For internal use only. This property should not be modified
+          type: array
+          items:
+            type: string
+        timeout:
+          description: For internal use only. This property should not be modified
+          type: integer
+          format: int64
+          default: 0
+        displayName:
+          description: Name of the flow for displaying purposes
+          type: string
+        author:
+          description: Author of the flow
+          type: string
+        timestamp:
+          description: Flow creation timestamp relative to UNIX epoch
+          type: integer
+          format: int64
+          default: 0
+        description:
+          description: Descriptive details of the flow
+          type: string
+        properties:
+          description: Configuration parameters of the flow
+          type: object
+          additionalProperties:
+            type: string
+
+    AgamaFlow:
+      title: Agama flow object
+      description: Object that represents an Agama flow
+      type: object
+      required:
+        - qname
+      properties:
+        dn:
+          description: Flow distinguished name
+          type: string
+        qname:
+          description: Flow qualified name
+          type: string
+        revision:
+          description: Revision number of the flow
+          type: integer
+          format: int64
+          default: 0
+        enabled:
+          description: Whether the flow can be launched directly from an authentication request
+          type: boolean
+          default: false
+        metadata:
+          description: Flow metadata
+          $ref: '#/components/schemas/FlowMetadata'
+        source:
+          description: Source code
+          type: string
+        codeError:
+          type: string
+          description: Errors in the flow source detected by Agama transpiler
+  
+    SessionId:
+      title: Session details
+      description: Session details
+      type: object
+      properties:
+        dn:
+          type: string
+          description: Domain name.
+        id:
+          type: string
+          description: Unique session id
+        outsideSid:
+          type: string
+          description: User session id
+        lastUsedAt:
+          description: Timestamp of session used last time.
+          type: string
+          format: date
+        userDn:
+          description: Session user domain name.
+          type: string
+        authenticationTime:
+          description: Session authentication time.
+          type: string
+          format: date
+        state:
+          description: Session status
+          type: string
+          enum:
+            - AUTHENTICATED
+            - UNAUTHENTICATED
+        sessionState:
+          description: state of session.
+          type: string
+        permissionGranted:
+          type: boolean
+          description: Boolean flag indicated if permission granted
+        isJwt:
+          type: boolean
+          description: Boolean flag indicated if jwt
+        jwt:
+          type: string
+          description: Jwt
+        permissionGrantedMap:
+          description: Map containing permission.
+          type: object
+          additionalProperties:
+            type: boolean  
+        sessionAttributes:
+          description: Session attributes
+          type: object
+          additionalProperties:
+            type: string
+        expirationDate:
+          description: Expiration date.
+          type: string
+          format: date
+        deletable:
+          type: boolean
+          description: If permission is deletable
+        creationDate:
+          description: Session creation date.
+          type: string
+          format: date
+ 
+    AuthorizationRequestCustomParameter:
+      title: AuthorizationRequestCustomParameter
+      description: AuthorizationRequestCustomParameter details
+      type: object
+      properties:
+        paramName:
+          type: string
+          description: Name of the custom parameter
+        returnInResponse:
+          type: boolean
+          description: indicates if the parameter by default will be returned in response.
+          default: false
+		  
+    PagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            type: object		  
+			
+    LocalizedString:
+      type: object
+      properties:
+        values:
+          type: object
+          additionalProperties:
+            type: string
+        value:
+          type: string
+        languageTags:
+          uniqueItems: true
+          type: array
+          items:
+            type: string

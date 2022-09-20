@@ -60,8 +60,8 @@ urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
 host = os.environ.get('jans_host')
-client_id = os.environ.get(my_op_mode + 'jca_client_id')
-client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
+client_id = os.environ.get(my_op_mode + '_client_id')
+client_secret = os.environ.get(my_op_mode + '_client_secret')
 access_token = None
 debug = os.environ.get('jans_client_debug')
 log_dir = os.environ.get('cli_log_dir', cur_dir)
@@ -232,6 +232,8 @@ class JCA_CLI:
 
         self.set_logging()
         self.ssl_settings()
+
+
 
     def getCredentials(self): 
         if self.host == '' or self.client_id == '' or self.client_secret == '' :
@@ -933,7 +935,6 @@ class JCA_CLI:
         return ' '.join(scope)
 
 
-
     def get_requests(self, endpoint, params={}):
         if not self.wrapped:
             sys.stderr.write("Please wait while retreiving data ...\n")
@@ -1223,7 +1224,8 @@ class JCA_CLI:
 
     def process_command_get(self, path, suffix_param, endpoint_params, data_fn, data=None):
         endpoint = self.get_fake_endpoint(path)
-        response = self.get_requests(endpoint, endpoint_params)
+        params = {**suffix_param, **endpoint_params}
+        response = self.get_requests(endpoint, params)
         if not self.wrapped:
             self.pretty_print(response)
         else:
