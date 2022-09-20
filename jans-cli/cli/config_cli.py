@@ -1199,6 +1199,7 @@ class JCA_CLI:
                         for custom_attrib in entry.get('customAttributes', []):
                             if custom_attrib.get('name') == 'displayName':
                                 entry['displayName'] = custom_attrib.get('value') or custom_attrib.get('values',['?'])[0]
+                                break
                         if isinstance(entry['clientName'], dict) and 'value' in entry['clientName']:
                             entry['clientName'] = entry['clientName']['value']
 
