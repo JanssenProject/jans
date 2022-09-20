@@ -99,8 +99,6 @@ public class CodeGrantUtil {
 
         HTTPRequest httpRequest = request.toHTTPRequest();
         httpRequest.setAccept(MediaType.APPLICATION_JSON);
-        //httpRequest.setContentType("application/x-www-form-urlencoded");
-        //httpRequest.setHeader("User-Agent", "curl");
         
         TokenResponse response = TokenResponse.parse(httpRequest.send());
         if (!response.indicatesSuccess()) {

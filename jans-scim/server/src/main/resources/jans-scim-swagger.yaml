@@ -1455,6 +1455,27 @@ definitions:
       detail:
         type: string
         description: A detailed human-readable message of the error
+  AuthenticationScheme:
+    description: See section 5 of RFC 7643
+    type: object
+    required:
+    - type
+    - name
+    - description
+    properties:
+      type:
+        type: string
+        example: oauth2
+      name:
+        type: string
+      description:
+        type: string
+      specUri:
+        type: string
+      documentationUri:
+        type: string
+      primary:
+        type: boolean
   ServiceProviderConfigResponse:
     description: See section 5 of RFC 7643
     type: object
@@ -1510,20 +1531,9 @@ definitions:
           supported:
             type: boolean
       authenticationSchemes:
-        properties:
-          type:
-            type: string
-            example: oauth2
-          name:
-            type: string
-          description:
-            type: string
-          specUri:
-            type: string
-          documentationUri:
-            type: string
-          primary:
-            type: boolean
+        type: array
+        items:
+          $ref: "#/definitions/AuthenticationScheme"
   ResourceType:
     description: See section 6 of RFC 7643
     type: object

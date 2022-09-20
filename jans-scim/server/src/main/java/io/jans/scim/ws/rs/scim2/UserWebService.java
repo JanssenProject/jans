@@ -149,6 +149,8 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
             log.debug("Executing web service method. createUser");
 
             executeValidation(user);
+            if (StringUtils.isEmpty(user.getUserName())) throw new SCIMException("Empty username not allowed");
+
             checkUidExistence(user.getUserName());
             assignMetaInformation(user);
             ScimResourceUtil.adjustPrimarySubAttributes(user);
