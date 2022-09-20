@@ -56,13 +56,18 @@ def check_install_dependencies():
 
     try:
         from distutils import dist
-    except:
+    except ImportError:
         package_dependencies.append('python3-distutils')
 
     try:
         import ldap3
-    except:
+    except ImportError:
         package_dependencies.append('python3-ldap3')
+
+    try:
+        import psycopg2
+    except ImportError:
+        missing_packages.append('python3-psycopg2')
 
     if package_dependencies and not argsp.yes:
         install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(package_dependencies)))
