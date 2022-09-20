@@ -129,7 +129,7 @@ Thinks to keep in mind when testing flows:
 
 - When a flow crashes for some reason, a page is shown summarizing the error details. Sometimes this is enough to fix the problems, however logs tend to offer quite a better insight.
 
-- Authentication flows are usually short-lived. This means the "journey" has to finish within a defined period of time. If exceeded, users will land at an error page. To learn more about this behavior and how to tweak, visit [Flows lifetime](./flows-lifecycle.md#timeouts).
+- Authentication flows are usually short-lived. This means the "journey" has to finish within a defined timeframe. If exceeded, users will land at an error page. To learn more about this behavior and how to tweak, visit [Flows lifetime](./flows-lifecycle.md#timeouts).
 
 - The engine often prevents manipulation of URLs so end users cannot mess with the navigation and provoke inconsistent states. This sometimes occurs in web applications when the browser's back button is used. Click [here](./flows-lifecycle.md#flow-advance-and-navigation) to learn more about flow navigation.
 
