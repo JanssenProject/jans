@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Don't start any optional services except for the few we need.
 RUN find /etc/systemd/system \
@@ -16,7 +16,7 @@ RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker \
 # Prevent prompt errors during package installation
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update \
-    && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip \
+    && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc \
     && apt-get clean \
     # Cleaning up package lists
     && rm -rf /var/lib/apt/lists/*
@@ -38,7 +38,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=732ce6afb18fb1f352dfbf4ce971039b8824bc36
+ENV JANS_SOURCE_VERSION=0d4aad2da1c2802a3f098c3590ffcde1c8d094d5
 
 # cleanup
 RUN rm -rf /tmp/jans
