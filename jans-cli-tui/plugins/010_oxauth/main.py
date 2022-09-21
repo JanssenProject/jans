@@ -281,6 +281,8 @@ class Plugin():
         pass
 
     def edit_client_dialog(self, **params):
+        self.app.logger.debug('selected_line_data: '+str(params['data']))
+
         
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
@@ -298,7 +300,7 @@ class Plugin():
             _type_: bool value to check the status code response
         """
 
-        self.app.logger.debug(dialog.data)
+        self.app.logger.debug('Saved DATA: '+str(dialog.data))
 
         response = self.app.cli_object.process_command_by_id(
             operation_id='put-oauth-openid-clients' if dialog.data.get('inum') else 'post-oauth-openid-clients',
