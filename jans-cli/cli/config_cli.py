@@ -824,6 +824,11 @@ class JCA_CLI:
                 selection = prompt(HTML(' ' * spacing + text + ' '), completer=html_completer)
 
             selection = selection.strip()
+
+            if selection == '_b':
+                self.display_menu(self.current_menu)
+                break
+
             if selection.startswith('_file '):
                 fname = selection.split()[1]
                 if os.path.isfile(fname):
