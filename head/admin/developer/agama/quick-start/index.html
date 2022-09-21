@@ -11140,12 +11140,12 @@
 <p>To trigger an Agama flow, the <code>acr_values</code> parameter must be equal to <code>agama</code></p>
 </li>
 <li>
-<p>The qualified name (identifier) of the flow to trigger is passed using the parameter referenced via property <code>cust_param_name</code> of the Agama bridge script. <code>customParam1</code> will work in most installations since this is the default value employed in the script. For the current example <code>customParam1=test</code> should be fine</p>
+<p>The qualified name (identifier) of the flow to trigger is passed using the parameter referenced in property <code>cust_param_name</code> of the Agama bridge script. <code>customParam1</code> will work in most cases since this is the default value employed by the Jans installer. For the current example <code>customParam1=test</code> should be fine</p>
 </li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>To use a different parameter ensure to register the given parameter in the <a href="../../../config-guide/jans-cli/im/im-jans-authorization-server/">server configuration</a> (property <code>authorizationRequestCustomAllowedParameters</code>) and update the bridge accordingly</p>
+<p>To use a different parameter name ensure to register the given parameter in the <a href="../../../config-guide/jans-cli/im/im-jans-authorization-server/">server configuration</a> (property <code>authorizationRequestCustomAllowedParameters</code>) and update the bridge accordingly</p>
 </div>
 <ul>
 <li>If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  <code>height</code> and <code>color</code>, you can use <code>test-{"height": 190, "color": "blue"}</code> for the value of <code>customParam1</code>. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be <code>test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D</code>. If certain inputs are not provided, <code>null</code> values will be assigned for them</li>
@@ -11188,7 +11188,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-20T16:23:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-21T16:32:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-21</span>
       
         <br>
         Created:

@@ -11904,24 +11904,24 @@ y = ...
 z = [ 3.1416, 2.71828 ]
 
 Match car.model to
-    x
-        //Code in this block will be executed if car.model is equal to the value of x
-       ...
+   x
+      //Code in this block will be executed if car.model is equal to the value of x
+      ...
 
-    -y //Here we use minus y
-       ...  
+   -y //Here we use minus y
+      ...  
 
-    z[0]
-       ...
+   z[0]
+      ...
 
-    1.618 //Literal values can be used too for matching
-       ...  
+   1.618 //Literal values can be used too for matching
+      ...  
 
-    null
-        ...
+   null
+      ...
 
 Otherwise    //optional block
-    //Instructions here are executed if there was no match at all 
+   //Instructions here are executed if there was no match at all 
 </code></pre></div>
 <h2 id="flow-finish">Flow finish<a class="headerlink" href="#flow-finish" title="Permanent link">#</a></h2>
 <p><code>Finish</code> is used to terminate a flow's execution. A flow can finish successfully, failed, or aborted. Examples:</p>
@@ -12026,7 +12026,7 @@ result = RFAC map.twitter.loginUrl
 </code></pre></div>
 
 </td>
-        <td>Redirects to the given location. Once the user browser is taken to the callback URL by the external site, the data included in the query string or payload is stored in <code>result</code> (a _map_) for further processing</td>
+        <td>Redirects to the given location. Once the user browser is taken to the callback URL by the external site, the data included in the query string or payload is stored in <code>result</code> (a map) for further processing</td>
     </tr>
 </table>
 
@@ -12431,14 +12431,16 @@ x[y]
 </code></pre></div>
 
 </td>
-<td>
+</tr><tr>
+<td colspan="3">
 
 <div class="highlight"><pre><span></span><code>x[ z[0] ]
 //illegal: variable expressions not allowed for indexes 
 </code></pre></div>
 
 </td>
-<td>
+</tr><tr>
+<td colspan="3">
 
 <div class="highlight"><pre><span></span><code>x[obj.property]
 //illegal: variable expressions not allowed for indexes
@@ -12639,7 +12641,7 @@ x[2] = &quot;polo&quot;    //adds the key/value pair &quot;2&quot; / &quot;polo&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-08T15:02:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-21T16:32:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-21</span>
       
         <br>
         Created:
