@@ -132,16 +132,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText(_("Client Name"), name='displayName', value=self.data.get('displayName',''), jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), style='green'),
                         self.myparent.getTitledText(_("Client Secret"), name='clientSecret', value=self.data.get('clientSecret',''), jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), style='green'),
                         self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
-                        self.myparent.getTitledWidget(
-                                _("Authn Method token endpoint"),
-                                name='tokenEndpointAuthMethodsSupported',
-                                widget=DropDownWidget(  
-                                    values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
-                                    value=self.data.get('tokenEndpointAuthMethodsSupported')
-                                    ),
-                                jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethodsSupported'),
-                                style='green'
-                                ),
+                        
+                        self.myparent.getTitledText(_("Authn Method token endpoint"),
+                            name='tokenEndpointAuthMethodsSupported',
+                            value='\n'.join(self.data.get('tokenEndpointAuthMethodsSupported', [])),
+                            height=3, 
+                            style='green'),
+                            
                         self.myparent.getTitledRadioButton(
                                 _("Subject Type"), 
                                 name='subjectType', 
