@@ -44,6 +44,7 @@ tabulate_endpoints = {
     'jca.get-all-attribute': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
     'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
     'jca.get-oauth-scopes': ['dn', 'id', 'scopeType'],
+    'jca.get-oauth-uma-resources': ['dn', 'name', 'expirationDate'],
     'scim.get-users': ['id', 'userName', 'displayName', 'active']
 }
 
@@ -1239,8 +1240,8 @@ class JCA_CLI:
             elif selection in item_counters:
                 if my_op_mode == 'scim' and 'Resources' in api_response_unmapped:
                     items = api_response_unmapped['Resources'] 
-                elif my_op_mode == 'jca' and 'data' in api_response_unmapped:
-                    items = api_response_unmapped['data']
+                elif my_op_mode == 'jca' and 'entries' in api_response_unmapped:
+                    items = api_response_unmapped['entries']
                 self.pretty_print(items[int(selection) - 1])
 
     def get_schema_from_reference(self, ref):
