@@ -64,6 +64,7 @@ check_installed_jans() {
     echo "Janssen Authorization has already been installed. Starting services..."
   else
     install_jans 2>&1 | tee setup_log || exit 1
+    mkdir janssen
     touch "$IS_JANS_DEPLOYED"
   fi
 }

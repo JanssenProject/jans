@@ -187,11 +187,14 @@ Finally the flow assets must be uploaded. You can SFTP/SCP or use other means to
 
 This section assumes your [client application](#client-application) is ready, or at least you have made the configurations required so that you can trigger an (OpendId Connect) authentication request.
 
-This usually boils down to create and launch a URL looking like `https://<your-host>/jans-auth/restv1/authorize?acr_values=agama&customParam1=test&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. You may like to check the [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details, however, keep in mind that:
+This usually boils down to create and launch a URL looking like `https://<your-host>/jans-auth/restv1/authorize?acr_values=agama&customParam1=flow-qname&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. You may like to check the [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details, however, keep in mind that:
 
 - To trigger an Agama flow, the `acr_values` parameter must be equal to `agama`
 
-- The identifier (qualified name) of the flow to trigger is passed using an already registered custom parameter. By now it suffices to say that `customParam1` will work in most installations. Note the parameter value in the example equals the name given to the Hello World flow
+- The qualified name (identifier) of the flow to trigger is passed using the parameter referenced via property `cust_param_name` of the Agama bridge script. `customParam1` will work in most installations since this is the default value employed in the script. For the current example `customParam1=test` should be fine
+
+!!! Note
+    To use a different parameter ensure to register the given parameter in the [server configuration](../../config-guide/jans-cli/im/im-jans-authorization-server.md) (property `authorizationRequestCustomAllowedParameters`) and update the bridge accordingly
 
 - If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test-{"height": 190, "color": "blue"}` for the value of `customParam1`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
 
