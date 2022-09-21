@@ -60,8 +60,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             'postLogoutRedirectUris',
                             'contacts',
                             'authorizedOrigins',
-                            'rptClaimsScripts',
-                            'claimRedirectUris',
+                            'umaAuthorizationPolicies',
+                            #'rptClaimsScripts',
+                            #'claimRedirectUris',
                              ):
                 if self.data[list_key]:
                     self.data[list_key] = self.data[list_key].splitlines()
@@ -134,7 +135,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledWidget(
                                 _("Authn Method token endpoint"),
                                 name='tokenEndpointAuthMethodsSupported',
-                                widget=DropDownWidget(
+                                widget=DropDownWidget(  
                                     values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
                                     value=self.data.get('tokenEndpointAuthMethodsSupported')
                                     ),
@@ -209,11 +210,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             title=_("Access token additional audiences"),
                             name='additionalAudience',
                             value=self.data.get('additionalAudience',''),
-                            style='green'),
-                        VSplit([
-                                Label(text=_("audiences"),style='bold',width=len(_("audiences")*2)), ## TODO
-                                Button("+", handler=self.myparent.show_again,left_symbol='[',right_symbol=']',width=3)
-                        ]),
+                            style='green',
+                            height = 3),
+
                         self.myparent.getTitledText(_("Access token lifetime"), name='accessTokenLifetime', value=self.data.get('accessTokenLifetime',''),style='green'),
                         self.myparent.getTitledText(_("Refresh token lifetime"), name='refreshTokenLifetime', value=self.data.get('refreshTokenLifetime',''),style='green'),
                         self.myparent.getTitledText(_("Defult max authn age"), name='defaultMaxAge', value=self.data.get('defaultMaxAge',''),style='green'),
@@ -232,10 +231,16 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     )
 
         self.tabs['SoftwareInfo'] =  HSplit([
-            #self.myparent.getTitledText(title =_("Client URI"), name='clientUri', value=self.data.get('clientUri',''),style='green'),
-            #self.myparent.getTitledText(title =_("Policy URI"), name='policyUri', value=self.data.get('policyUri',''),style='green'),
-            #self.myparent.getTitledText(title =_("Logo URI"), name='logoUri', value=self.data.get('logoUri',''),style='green'),
-            #self.myparent.getTitledText(title =_("Term of service URI"), name='tosUri', value=self.data.get('tosUri',''),style='green'),
+            # self.myparent.getTitledText(title =_("Client URI"), name='clientUri', value=str(self.data.get('clientUri',{}).get('value','')),style='green'),
+            # self.myparent.getTitledText(title =_("Policy URI"), name='policyUri', value=str(self.data.get('policyUri',{}).get('value','')),style='green'),
+            # self.myparent.getTitledText(title =_("Logo URI"), name='logoUri', value=str(self.data.get('logoUri',{}).get('value','')),style='green'),
+            # self.myparent.getTitledText(title =_("Term of service URI"), name='tosUri', value=str(self.data.get('tosUri',{}).get('value','')),style='green'),
+
+            # self.myparent.getTitledText(title =_("Client URI"), name='clientUri', value=str(self.data.get('clientUri','')).replace('{','').replace('}',''),style='green'),
+            # self.myparent.getTitledText(title =_("Policy URI"), name='policyUri', value=str(self.data.get('policyUri','')).replace('{','').replace('}',''),style='green'),
+            # self.myparent.getTitledText(title =_("Logo URI"), name='logoUri', value=str(self.data.get('logoUri','')).replace('{','').replace('}',''),style='green'),
+            # self.myparent.getTitledText(title =_("Term of service URI"), name='tosUri', value=str(self.data.get('tosUri','')).replace('{','').replace('}',''),style='green'),
+
 
             self.myparent.getTitledText(_("Contacts"),              ### height =3 insted of the <+> button
                             name='contacts',
