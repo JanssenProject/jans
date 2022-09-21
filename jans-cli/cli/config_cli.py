@@ -1217,7 +1217,7 @@ class JCA_CLI:
                 if op_mode_endpoint in tabular_dataset:
                     tab_data = api_response_unmapped_ext[tabular_dataset[op_mode_endpoint]]
                 self.tabular_data(tab_data, op_mode_endpoint)
-                item_counters = [str(i + 1) for i in range(len(api_response_unmapped))]
+                item_counters = [str(i + 1) for i in range(len(api_response_unmapped)+1)]
                 tabulated = True
             else:
                 self.print_colored_output(api_response_unmapped)
