@@ -1587,12 +1587,10 @@ class JCA_CLI:
             model = getattr(swagger_client.models, 'PatchRequest')
 
         parent_schema = {}
-        for m in endpoint.parent:
-            if m.method == 'get':
-                schema_ref = m.info.get('responses', {}).get('200', {}).get('content', {}).get('application/json', {}).get('schema', {}).get('$ref')
-                if schema_ref:
-                    parent_schema = self.get_schema_from_reference(schema_ref)
-                break
+ 
+        schema_ref = endpoint.info.get('responses', {}).get('200', {}).get('content', {}).get('application/json', {}).get('schema', {}).get('$ref')
+        if schema_ref:
+            parent_schema = self.get_schema_from_reference(schema_ref)
 
         url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
