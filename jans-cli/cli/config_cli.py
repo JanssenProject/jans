@@ -29,6 +29,7 @@ config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+log_dir = os.environ.get('cli_log_dir', cur_dir)
 sys.path.append(cur_dir)
 
 from pylib.tabulate.tabulate import tabulate
@@ -73,8 +74,6 @@ client_id = os.environ.get(my_op_mode + 'jca_client_id')
 client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
 access_token = None
 debug = os.environ.get('jans_client_debug')
-debug_log_file = os.environ.get('jans_debug_log_file')
-error_log_file = os.path.join(cur_dir, 'error.log')
 
 def encode_decode(s, decode=False):
     cmd = '/opt/jans/bin/encode.py '
@@ -114,7 +113,6 @@ parser.add_argument("--client-secret", "--client_secret", help="Jans Config Api 
 parser.add_argument("--access-token", help="JWT access token or path to file containing JWT access token")
 parser.add_argument("--plugins", help="Available plugins separated by comma")
 parser.add_argument("-debug", help="Run in debug mode", action='store_true')
-parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
 parser.add_argument("--operation-id", help="Operation ID to be done")
 parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
@@ -136,6 +134,8 @@ parser.add_argument("--patch-add", help="Colon delimited key:value pair for add 
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
 parser.add_argument("--no-suggestion", help="Do not use prompt toolkit to display word completer", action='store_true')
+parser.add_argument("-log-dir", help="Do not use prompt toolkit to display word completer", default=log_dir)
+
 
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
@@ -165,7 +165,6 @@ if not(host and (client_id and client_secret or access_token)):
     client_id = args.client_id
     client_secret = args.client_secret
     debug = args.debug
-    debug_log_file = args.debug_log_file
 
     access_token = args.access_token
     if access_token and os.path.isfile(access_token):
@@ -194,7 +193,8 @@ if not(host and (client_id and client_secret or access_token)):
             client_secret = encode_decode(client_secret_enc, decode=True)
 
         debug = config['DEFAULT'].get('debug')
-        debug_log_file = config['DEFAULT'].get('debug_log_file')
+        log_dir = config['DEFAULT'].get('log_dir', log_dir)
+
     else:
         config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net',
                              'jca_client_id': 'your jans config api client id',
@@ -309,7 +309,7 @@ class JCA_CLI:
 
         self.swagger_configuration.debug = debug
         if self.swagger_configuration.debug:
-            self.swagger_configuration.logger_file = debug_log_file
+            self.swagger_configuration.logger_file = os.path.join(log_dir, 'swagger.log')
 
         self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
 
@@ -2321,7 +2321,7 @@ class JCA_CLI:
 def main():
 
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
-
+    error_log_file = os.path.join(log_dir, 'error.log')
     try:
         if not access_token:
             cli_object.check_connection()
