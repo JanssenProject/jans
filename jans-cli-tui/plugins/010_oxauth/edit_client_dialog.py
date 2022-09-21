@@ -506,12 +506,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         try :
             rsponse = self.myparent.cli_object.process_command_by_id(
-                        operation_id='get-oauth-uma-resources',
-                        url_suffix='',
-                        endpoint_args=endpoint_args,
-                        data_fn=None,
-                        data={}
-                        )
+                operation_id='get-oauth-uma-resources-by-clientid',
+                url_suffix='clientId:{}'.format(self.data.get('inum','')),
+                endpoint_args='',
+                data_fn=None,
+                data={}
+                )
 
         except Exception as e:
             self.myparent.show_message(_("Error getting clients"), str(e))
