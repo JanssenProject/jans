@@ -335,24 +335,24 @@ y = ...
 z = [ 3.1416, 2.71828 ]
 
 Match car.model to
-    x
-        //Code in this block will be executed if car.model is equal to the value of x
-       ...
+   x
+      //Code in this block will be executed if car.model is equal to the value of x
+      ...
 
-    -y //Here we use minus y
-       ...  
+   -y //Here we use minus y
+      ...  
 
-    z[0]
-       ...
+   z[0]
+      ...
 
-    1.618 //Literal values can be used too for matching
-       ...  
+   1.618 //Literal values can be used too for matching
+      ...  
 
-    null
-        ...
+   null
+      ...
 
 Otherwise    //optional block
-    //Instructions here are executed if there was no match at all 
+   //Instructions here are executed if there was no match at all 
 ```
 
 ## Flow finish
@@ -472,7 +472,7 @@ result = RFAC map.twitter.loginUrl
 ```
 
 </td>
-		<td>Redirects to the given location. Once the user browser is taken to the callback URL by the external site, the data included in the query string or payload is stored in <code>result</code> (a _map_) for further processing</td>
+		<td>Redirects to the given location. Once the user browser is taken to the callback URL by the external site, the data included in the query string or payload is stored in <code>result</code> (a map) for further processing</td>
 	</tr>
 </table>
 
@@ -938,7 +938,8 @@ x["1"]
 ```
 
 </td>
-<td>
+</tr><tr>
+<td colspan="3">
 
 ```
 x[ z[0] ]
@@ -946,7 +947,8 @@ x[ z[0] ]
 ```
 
 </td>
-<td>
+</tr><tr>
+<td colspan="3">
 
 ```
 x[obj.property]
