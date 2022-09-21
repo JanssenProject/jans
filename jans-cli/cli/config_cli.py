@@ -1563,7 +1563,6 @@ class JCA_CLI:
             self.display_menu(endpoint.parent)
 
     def process_patch(self, endpoint):
-
         if endpoint.info['operationId'] == 'patch-user-by-inum':
             schema = self.cfg_yml['components']['schemas']['CustomAttribute'].copy()
             schema['__schema_name__'] = 'CustomAttribute'
@@ -1579,6 +1578,14 @@ class JCA_CLI:
             schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
             schema['__schema_name__'] = 'PatchRequest'
             model = getattr(swagger_client.models, 'PatchRequest')
+
+        parent_schema = {}
+        for m in endpoint.parent:
+            if m.method == 'get':
+                schema_ref = m.info.get('responses', {}).get('200', {}).get('content', {}).get('application/json', {}).get('schema', {}).get('$ref')
+                if schema_ref:
+                    parent_schema = self.get_schema_from_reference(schema_ref)
+                break
 
         url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
@@ -1601,6 +1608,11 @@ class JCA_CLI:
                 if my_op_mode == 'scim':
                     data.path = data.path.replace('/', '.')
 
+                if parent_schema and 'properties' in parent_schema:
+                    for prop_ in parent_schema['properties']:
+                        if data.path.lstrip('/') == prop_:
+                            if parent_schema['properties'][prop_]['type'] == 'array':
+                                data.value = data.value.split('_,')
             body.append(data)
             selection = self.get_input(text='Another patch operation?', values=['y', 'n'])
             if selection == 'n':
