@@ -5288,6 +5288,12 @@ components:
         forceIdTokenHintPrecense:
           type: boolean
           description: Boolean value specifying whether force id_token_hint parameter presence.
+        rejectEndSessionIfIdTokenExpired:
+          type: boolean
+          description: default value false. If true and id_token is not found in db, request is rejected.
+        allowEndSessionWithUnmatchedSid:
+          type: boolean
+          description: default value false. If true, sid check will be skipped.
         forceOfflineAccessScopeToEnableRefreshToken:
           type: boolean
           description: Boolean value specifying whether force offline_access scope to enable refresh_token grant type.

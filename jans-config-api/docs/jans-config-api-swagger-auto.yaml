@@ -4329,6 +4329,10 @@ components:
           type: boolean
         forceIdTokenHintPrecense:
           type: boolean
+        rejectEndSessionIfIdTokenExpired:
+          type: boolean
+        allowEndSessionWithUnmatchedSid:
+          type: boolean
         forceOfflineAccessScopeToEnableRefreshToken:
           type: boolean
         errorReasonEnabled:
