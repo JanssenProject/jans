@@ -1484,6 +1484,7 @@ class JCA_CLI:
                 if not field in required_fields:
                     optional_fields.append(field)
 
+            optional_fields.sort()
             if optional_fields:
                 fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
                 fields_numbers = []
