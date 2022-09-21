@@ -181,6 +181,15 @@ Janssen Project documentation uses Markdown. Guidelines below are intended to br
 
     [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](developer/testing.md#documentation-local-testing) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
 
+### Document Title
+
+The document title summarises what the document aims to achieve and at the same time, it plays a critical role in making the document easy to find via search. Below are a few guidelines to write good titles for documents.
+
+- Every document **must** start with a title. Meaning, `#<space><title text>`
+- Title should summarise what the document is trying to achieve. For examples: `Integrating with the Apache mod_auth_openidc module`, `Integrating DUO's Universal Prompt as an authentication method`, `Install using Ubuntu Linux Package`
+- Title should include its context. For example, the document under `Installation`>`VM Installation`>`Ubuntu` should not be titled as just `Ubuntu` but it should have a more detailed title similar to  `Install using Ubuntu Linux Package`. When required, to keep the title from becoming too long, assume that `Janssen Server` is already understood as context.
+- Titles should be written using [title case](https://en.wikipedia.org/wiki/Title_case)
+
 ### General Text
  - Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line
  - Keep explanations short and clear
