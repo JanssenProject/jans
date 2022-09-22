@@ -130,6 +130,25 @@ def _transform_auth_dynamic_config(conf):
             conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
             should_update = True
 
+        if "accessTokenSigningAlgValuesSupported" not in conf:
+            conf["accessTokenSigningAlgValuesSupported"] = [
+                "none",
+                "HS256",
+                "HS384",
+                "HS512",
+                "RS256",
+                "RS384",
+                "RS512",
+                "ES256",
+                "ES384",
+                "ES512",
+                "ES512",
+                "PS256",
+                "PS384",
+                "PS512"
+            ]
+            should_update = True
+
     if "forceSignedRequestObject" not in conf:
         conf["forceSignedRequestObject"] = False
         should_update = True
@@ -609,9 +628,9 @@ class Upgrade:
         if not entry:
             return
 
-        # add jansAdminUIRole to default admin user
         should_update = False
 
+        # add jansAdminUIRole to default admin user
         if self.user_backend.type == "sql" and not entry.attrs["jansAdminUIRole"]["v"]:
             entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
             should_update = True
@@ -622,6 +641,11 @@ class Upgrade:
             if "jansAdminUIRole" not in entry.attrs:
                 entry.attrs["jansAdminUIRole"] = ["api-admin"]
                 should_update = True
+
+        # set lowercased jansStatus
+        if entry.attrs["jansStatus"] == "ACTIVE":
+            entry.attrs["jansStatus"] = "active"
+            should_update = True
 
         if should_update:
             self.user_backend.modify_entry(entry.id, entry.attrs, **kwargs)
