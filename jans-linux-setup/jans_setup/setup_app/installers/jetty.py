@@ -369,11 +369,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         tree = ET.parse(xml_fn)
         root = tree.getroot()
-        path_list = []
 
         for app_set in root.findall("Set"):
             if app_set.get('name') == 'extraClasspath':
-                path_list = [cp.strip() for cp in app_set.text.split(',')]
                 break
         else:
             app_set = ET.Element("Set")
