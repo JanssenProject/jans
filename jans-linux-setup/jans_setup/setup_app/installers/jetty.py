@@ -355,15 +355,23 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         return self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)
 
     def add_extra_class(self, class_path, xml_fn=None):
+        current_plugins = self.get_plugins(xml_fn, paths=True)
+        for cp in class_path.split(','):
+            if os.path.basename(cp) not in ','.join(current_plugins):
+                current_plugins.append(cp.strip())
+
+        self.set_class_path(current_plugins, xml_fn)
+
+    def set_class_path(self, paths, xml_fn=None):
+
         if not xml_fn:
             xml_fn = self.web_app_xml_fn
+
         tree = ET.parse(xml_fn)
         root = tree.getroot()
-        path_list = []
 
         for app_set in root.findall("Set"):
             if app_set.get('name') == 'extraClasspath':
-                path_list = [cp.strip() for cp in app_set.text.split(',')]
                 break
         else:
             app_set = ET.Element("Set")
@@ -371,11 +379,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
             root.append(app_set)
 
-        for cp in class_path.split(','):
-            if os.path.basename(cp) not in ','.join(path_list):
-                path_list.append(cp.strip())
-
-        app_set.text = ','.join(path_list)
+        app_set.text = ','.join(paths)
 
         with open(xml_fn, 'wb') as f:
             f.write(b'<?xml version="1.0" encoding="ISO-8859-1"?>\n')
@@ -383,21 +387,26 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             f.write(ET.tostring(root, method='xml'))
 
 
-    def get_plugins(self):
+    def get_plugins(self, xml_fn=None, paths=False):
         plugins = []
-        webapps_xml_fn = os.path.join(self.jetty_base, self.service_name, WEBAPPS, self.service_name+'.xml')
+        if not xml_fn:
+            xml_fn = self.web_app_xml_fn
 
-        if os.path.exists(webapps_xml_fn):
+        if os.path.exists(xml_fn):
 
-            tree = ET.parse(webapps_xml_fn)
+            tree = ET.parse(xml_fn)
             root = tree.getroot()
 
             for app_set in root.findall("Set"):
                 if app_set.get('name') == 'extraClasspath':
-                    for plugin_path in app_set.text.split(','):
+                    path_list = app_set.text.split(',')
+                    if paths:
+                        return path_list
+
+                    for plugin_path in path_list:
                         base_name = os.path.basename(plugin_path)
-                        n = base_name.rfind('plugin')
-                        plugins.append(base_name[:n].rstrip('-'))
+                        fname, fext = os.path.splitext(base_name)
+                        plugins.append(fname.rstrip('plugin').rstrip('-'))
 
         return plugins
 
