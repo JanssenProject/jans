@@ -130,6 +130,25 @@ def _transform_auth_dynamic_config(conf):
             conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
             should_update = True
 
+        if "accessTokenSigningAlgValuesSupported" not in conf:
+            conf["accessTokenSigningAlgValuesSupported"] = [
+                "none",
+                "HS256",
+                "HS384",
+                "HS512",
+                "RS256",
+                "RS384",
+                "RS512",
+                "ES256",
+                "ES384",
+                "ES512",
+                "ES512",
+                "PS256",
+                "PS384",
+                "PS512"
+            ]
+            should_update = True
+
     if "forceSignedRequestObject" not in conf:
         conf["forceSignedRequestObject"] = False
         should_update = True
