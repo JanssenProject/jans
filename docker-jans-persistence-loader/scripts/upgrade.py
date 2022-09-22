@@ -628,9 +628,9 @@ class Upgrade:
         if not entry:
             return
 
-        # add jansAdminUIRole to default admin user
         should_update = False
 
+        # add jansAdminUIRole to default admin user
         if self.user_backend.type == "sql" and not entry.attrs["jansAdminUIRole"]["v"]:
             entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
             should_update = True
@@ -641,6 +641,11 @@ class Upgrade:
             if "jansAdminUIRole" not in entry.attrs:
                 entry.attrs["jansAdminUIRole"] = ["api-admin"]
                 should_update = True
+
+        # set lowercased jansStatus
+        if entry.attrs["jansStatus"] == "ACTIVE":
+            entry.attrs["jansStatus"] = "active"
+            should_update = True
 
         if should_update:
             self.user_backend.modify_entry(entry.id, entry.attrs, **kwargs)
