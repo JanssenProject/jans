@@ -190,6 +190,30 @@ The document title summarises what the document aims to achieve and at the same 
 - Title should include its context. For example, the document under `Installation`>`VM Installation`>`Ubuntu` should not be titled as just `Ubuntu` but it should have a more detailed title similar to  `Install using Ubuntu Linux Package`. When required, to keep the title from becoming too long, assume that `Janssen Server` is already understood as context.
 - Titles should be written using [title case](https://en.wikipedia.org/wiki/Title_case)
 
+### Document Tags
+
+Janssen Project documentation uses [tags](https://squidfunk.github.io/mkdocs-material/setup/setting-up-tags/#adding-tags) to make the search more accurate and add context to search results. Following are guidelines and examples to follow while adding tags to a document.
+
+- Maximum 6 tags
+- First three should establish the context of the section hierarchy under which the document belongs. See the example below.
+- Remaining tags can be based on the content of the document.
+- Each tag should be a single word (no spaces, hyphens or commas, etc)
+- All tags should be in lowercase
+
+Example:
+
+Let's look at how to add tags to a document that is located on [documentation site](https://docs.jans.io/) at path `Administration -> Installation -> VM installation`. Also, assume that the document describes the steps to install Janssen Project on the Ubuntu platform. Tags below would be recommended:
+
+```json
+---
+tags:
+ - administration
+ - installation
+ - vm
+ - ubuntu
+---
+```
+
 ### General Text
  - Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line
  - Keep explanations short and clear
