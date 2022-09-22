@@ -16,7 +16,7 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
-
+import io.jans.configapi.core.model.PersistenceConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigResource extends ConfigBaseResource {
-    
+
     private static final String AGAMACONFIGURATION = "agamaConfiguration";
 
     @Inject
@@ -49,44 +49,34 @@ public class ConfigResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
 
-    
-    @Operation(summary = "Gets all Jans authorization server configuration properties.",
-    description= "Gets all Jans authorization server configuration properties.",
-    operationId = "get-properties",
-    tags = {"Configuration – Properties"},
-    security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.readonly"}))    
-    @ApiResponses(value = { 
-    @ApiResponse(responseCode = "200", description = "Ok",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON,
-            schema = @Schema(implementation = AppConfiguration.class))),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @Operation(summary = "Gets all Jans authorization server configuration properties.", description = "Gets all Jans authorization server configuration properties.", operationId = "get-properties", tags = {
+            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly" }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
-        log.debug("ConfigResource::getAppConfiguration() appConfiguration:{}",appConfiguration);
+        log.debug("ConfigResource::getAppConfiguration() appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
-    @Operation(summary = "Partially modifies Jans authorization server Application configuration properties.",
-            description= "Partially modifies Jans authorization server AppConfiguration properties.",
-            operationId = "patch-properties",
-            tags = {"Configuration – Properties"},
-            security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.write"})) 
-            @RequestBody( description="String representing patch-document.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON,
-                            array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))                    
-            @ApiResponses(value = { 
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                           schema = @Schema(implementation = AppConfiguration.class))),
+    @Operation(summary = "Partially modifies Jans authorization server Application configuration properties.", description = "Partially modifies Jans authorization server AppConfiguration properties.", operationId = "patch-properties", tags = {
+            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/properties.write" }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
-    public Response patchAppConfigurationProperty (@NotNull String jsonPatchString) throws JsonPatchException, IOException {
+    public Response patchAppConfigurationProperty(@NotNull String jsonPatchString)
+            throws JsonPatchException, IOException {
         log.debug("AUTH CONF details to patch - jsonPatchString:{} ", jsonPatchString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = configurationService.find();
@@ -94,55 +84,47 @@ public class ConfigResource extends ConfigBaseResource {
         appConfiguration = Jackson.applyPatch(jsonPatchString, conf.getDynamic());
         log.debug("AUTH CONF details BEFORE patch merge - appConfiguration:{}", appConfiguration);
         conf.setDynamic(appConfiguration);
-        
-        //validate Agama Configuration
-        if(jsonPatchString.contains(AGAMACONFIGURATION)){
+
+        // validate Agama Configuration
+        if (jsonPatchString.contains(AGAMACONFIGURATION)) {
             validateAgamaConfiguration(appConfiguration.getAgamaConfiguration());
         }
-        
+
         configurationService.merge(conf);
         appConfiguration = configurationService.find();
         log.debug("AUTH CONF details AFTER patch merge - appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
-    @Operation(summary = "Returns persistence type configured for Jans authorization server.",
-    description= "Returns persistence type configured for Jans authorization server.",
-    operationId = "get-properties-persistence",
-    tags = {"Configuration – Properties"},
-    security = @SecurityRequirement(name = "oauth2" , scopes = {"https://jans.io/oauth/jans-auth-server/config/properties.readonly"}))    
-    @ApiResponses(value = { 
-    @ApiResponse(responseCode = "200", description = "Jans Authorization Server config properties",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON,
-            schema =  @Schema(
-                    name = "persistenceType",
-                    type = "string",
-                    description = "Jans Auth Server persistence type"
-                    ))),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @Operation(summary = "Returns persistence type configured for Jans authorization server.", description = "Returns persistence type configured for Jans authorization server.", operationId = "get-properties-persistence", tags = {
+            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly" }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Jans Authorization Server persistence type", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersistenceConfiguration.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
         String persistenceType = configurationService.getPersistenceType();
         log.debug("ConfigResource::getPersistenceDetails() - persistenceType:{}", persistenceType);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("persistenceType", persistenceType);
-        log.debug("ConfigResource::getPersistenceDetails() - jsonObject:{}", jsonObject );
-        return Response.ok(jsonObject.toString()).build();
+        PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration();
+        persistenceConfiguration.setPersistenceType(persistenceType);
+        log.debug("ConfigResource::getPersistenceDetails() - persistenceConfiguration:{}", persistenceConfiguration);
+        return Response.ok(persistenceConfiguration).build();
     }
 
-    
     private void validateAgamaConfiguration(EngineConfig engineConfig) {
         log.debug("engineConfig:{}", engineConfig);
-        
-        if(engineConfig == null) {
+
+        if (engineConfig == null) {
             return;
         }
-        
-        if(engineConfig.getMaxItemsLoggedInCollections()<1) {
-            thorwBadRequestException("maxItemsLoggedInCollections should be greater than zero -> " + engineConfig.getMaxItemsLoggedInCollections());
+
+        if (engineConfig.getMaxItemsLoggedInCollections() < 1) {
+            thorwBadRequestException("maxItemsLoggedInCollections should be greater than zero -> "
+                    + engineConfig.getMaxItemsLoggedInCollections());
         }
     }
 }
