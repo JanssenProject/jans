@@ -10887,6 +10887,33 @@ The flow consists of creating a new branch, cherry-picking the changes of the or
 <p class="admonition-title">Testing</p>
 <p><a href="https://docs.jans.io">Janssen Project documentation site</a> is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and <a href="https://docs.jans.io">Janssen Project documentation site</a>. Hence it is critical to <a href="../developer/testing/#documentation-local-testing">test documentation</a> changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.</p>
 </div>
+<h3 id="document-title">Document Title<a class="headerlink" href="#document-title" title="Permanent link">#</a></h3>
+<p>The document title summarises what the document aims to achieve and at the same time, it plays a critical role in making the document easy to find via search. Below are a few guidelines to write good titles for documents.</p>
+<ul>
+<li>Every document <strong>must</strong> start with a title. Meaning, <code>#&lt;space&gt;&lt;title text&gt;</code></li>
+<li>Title should summarise what the document is trying to achieve. For examples: <code>Integrating with the Apache mod_auth_openidc module</code>, <code>Integrating DUO's Universal Prompt as an authentication method</code>, <code>Install using Ubuntu Linux Package</code></li>
+<li>Title should include its context. For example, the document under <code>Installation</code>&gt;<code>VM Installation</code>&gt;<code>Ubuntu</code> should not be titled as just <code>Ubuntu</code> but it should have a more detailed title similar to  <code>Install using Ubuntu Linux Package</code>. When required, to keep the title from becoming too long, assume that <code>Janssen Server</code> is already understood as context.</li>
+<li>Titles should be written using <a href="https://en.wikipedia.org/wiki/Title_case">title case</a></li>
+</ul>
+<h3 id="document-tags">Document Tags<a class="headerlink" href="#document-tags" title="Permanent link">#</a></h3>
+<p>Janssen Project documentation uses <a href="https://squidfunk.github.io/mkdocs-material/setup/setting-up-tags/#adding-tags">tags</a> to make the search more accurate and add context to search results. Following are guidelines and examples to follow while adding tags to a document.</p>
+<ul>
+<li>Maximum 6 tags</li>
+<li>First three should establish the context of the section hierarchy under which the document belongs. See the example below.</li>
+<li>Remaining tags can be based on the content of the document.</li>
+<li>Each tag should be a single word (no spaces, hyphens or commas, etc)</li>
+<li>All tags should be in lowercase</li>
+</ul>
+<p>Example:</p>
+<p>Let's look at how to add tags to a document that is located on <a href="https://docs.jans.io/">documentation site</a> at path <code>Administration -&gt; Installation -&gt; VM installation</code>. Also, assume that the document describes the steps to install Janssen Project on the Ubuntu platform. Tags below would be recommended:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">---</span><span class="w"></span>
+<span class="kc">ta</span><span class="err">gs</span><span class="p">:</span><span class="w"></span>
+<span class="w"> </span><span class="mi">-</span><span class="w"> </span><span class="err">admi</span><span class="kc">n</span><span class="err">is</span><span class="kc">trat</span><span class="err">io</span><span class="kc">n</span><span class="w"></span>
+<span class="w"> </span><span class="mi">-</span><span class="w"> </span><span class="err">i</span><span class="kc">nstallat</span><span class="err">io</span><span class="kc">n</span><span class="w"></span>
+<span class="w"> </span><span class="mi">-</span><span class="w"> </span><span class="err">vm</span><span class="w"></span>
+<span class="w"> </span><span class="mi">-</span><span class="w"> </span><span class="err">ubu</span><span class="kc">ntu</span><span class="w"></span>
+<span class="mi">---</span><span class="w"></span>
+</code></pre></div>
 <h3 id="general-text">General Text<a class="headerlink" href="#general-text" title="Permanent link">#</a></h3>
 <ul>
 <li>Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line</li>
@@ -11126,7 +11153,7 @@ docs: no docs modification
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-25T16:42:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-22T11:02:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-22</span>
       
         <br>
         Created:
