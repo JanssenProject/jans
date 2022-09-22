@@ -16,13 +16,16 @@ import io.jans.configapi.util.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
+import org.apache.commons.lang.StringUtils;
+
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -63,18 +66,26 @@ public class AcrsResource extends ConfigBaseResource {
     @Operation(summary = "Updates default authentication method.", description = "Updates default authentication method.", operationId = "put-acrs", tags = {
             "Default Authentication Method" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/acrs.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuthenticationMethod.class)))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuthenticationMethod.class), examples = @ExampleObject(name = "Request json example", value = "{\"defaultAcr\": \"simple_password_auth\"}")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuthenticationMethod.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS })
-    public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
+    public Response updateDefaultAuthenticationMethod(@NotNull AuthenticationMethod authenticationMethod) {
         log.debug("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
-        final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
-        gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
-        configurationService.merge(gluuConfiguration);
+
+        if (authenticationMethod == null || StringUtils.isBlank(authenticationMethod.getDefaultAcr())) {
+            thorwBadRequestException("Default authentication method should not be null or empty !");
+        }
+
+        if (authenticationMethod != null) {
+            final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
+            gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
+            configurationService.merge(gluuConfiguration);
+        }
         return Response.ok(authenticationMethod).build();
     }
 

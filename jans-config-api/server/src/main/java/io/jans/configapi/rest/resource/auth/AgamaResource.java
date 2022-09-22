@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -114,7 +115,7 @@ public class AgamaResource extends ConfigBaseResource {
     @Operation(summary = "Create a new agama flow", description = "Create a new agama flow", operationId = "post-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/oauth/config/agama.write" }))
-    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class)))
+    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Request json example" , value ="{\"source\":\"Flow test\\n\\tBasepath \\\"hello\\\"\\n\\nin = { name: \\\"John\\\" }\\nRRF \\\"index.ftlh\\\" in\\n\\nLog \\\"Done!\\\"\\nFinish \\\"john_doe\\\"\",\"qname\":\"test\"}")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -148,6 +149,7 @@ public class AgamaResource extends ConfigBaseResource {
     @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
