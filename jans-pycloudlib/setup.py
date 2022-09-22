@@ -46,6 +46,8 @@ setup(
         "google-cloud-spanner>=3.3.0",
         "Click>=6.7",
         "ldif>=4.1.1",
+        # handle CVE-2022-36087
+        "oauthlib>=3.2.1",
     ],
     classifiers=[
         "Intended Audience :: Developers",
