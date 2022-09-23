@@ -1,1 +1,1 @@
-This folder contains Agama scripts maintained by community developers.
+This folder contains Agama projects maintained by community developers.
