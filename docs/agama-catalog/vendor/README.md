@@ -1,0 +1,1 @@
+This folder contains Agama scripts maintained by third party vendors.
