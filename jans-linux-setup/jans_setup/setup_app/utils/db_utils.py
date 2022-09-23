@@ -564,6 +564,12 @@ class DBUtils:
                 tbl = self.get_spanner_table_for_dn(dn)
                 self.spanner.exec_sql('DELETE from {} WHERE dn="{}"'.format(tbl, dn))
 
+            elif backend_location == BackendTypes.COUCHBASE:
+                key = ldif_utils.get_key_from(dn)
+                bucket =self.get_bucket_for_key(key)
+                n1ql = 'DELETE FROM `{}` USE KEYS "{}"'.format(bucket, key)
+                self.cbm.exec_query(n1ql)
+
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
 
