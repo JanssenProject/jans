@@ -25,6 +25,9 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         log.debug("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
 
         String[] targetArray = new String[] { searchRequest.getFilter() };
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
+            searchRequest.getFilterAssertionValue().toArray();
+        }
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {

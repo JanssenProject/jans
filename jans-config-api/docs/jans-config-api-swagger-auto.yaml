@@ -142,8 +142,7 @@ paths:
               Request json example:
                 description: Request json example
                 value:
-                  id: basic
-                externalValue: swagger/defaultAcr.json
+                  defaultAcr: simple_password_auth
       responses:
         "200":
           description: Ok
@@ -229,7 +228,10 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                externalValue: swagger/agama.json
+                value:
+                  source: "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\"\
+                    \ }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\""
+                  qname: test
       responses:
         "201":
           description: Created
@@ -3326,17 +3328,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        userCanEdit:
+          type: boolean
         adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
+        userCanAccess:
+          type: boolean
         adminCanAccess:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -3665,6 +3667,8 @@ components:
           format: int32
         displayName:
           type: string
+        tokenBindingSupported:
+          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3676,8 +3680,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        tokenBindingSupported:
-          type: boolean
         baseDn:
           type: string
         inum:
@@ -4469,15 +4471,8 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4504,8 +4499,15 @@ components:
             - METRIC
             - STAT
             - PAR
-        fapi:
-          type: boolean
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -4795,13 +4797,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
