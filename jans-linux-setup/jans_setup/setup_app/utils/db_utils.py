@@ -555,9 +555,9 @@ class DBUtils:
                 recursive_delete(dn)
 
             elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
-                sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
-                if sqlalchemyObj:
-                    self.session.delete(sqlalchemyObj)
+                sqlalchemy_obj = self.get_sqlalchObj_for_dn(dn)
+                if sqlalchemy_obj:
+                    self.session.delete(sqlalchemy_obj)
                     self.session.commit()
 
             elif backend_location == BackendTypes.SPANNER:
