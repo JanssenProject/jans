@@ -33,7 +33,7 @@
     </test>
 
 <!--	 Application Type Restriction (embedded) -->
-	<test name="Application Type Restriction (embedded)" enabled="true">
+	<test name="Application Type Restriction (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ApplicationTypeRestrictionEmbeddedTest" />
 		</classes>
