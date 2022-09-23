@@ -1,0 +1,1 @@
+This folder contains Agama scripts maintained by community developers.
