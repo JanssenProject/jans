@@ -542,6 +542,18 @@ class DBUtils:
 
         return  ','.join(value2)
 
+    def delete_dn(self, dn):
+        if self.dn_exists(dn):
+            backend_location = self.get_backend_location_for_dn(dn)
+            if backend_location == BackendTypes.LDAP:
+                def recursive_delete(dn):
+                    self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL)
+                    for entry in self.ldap_conn.response:
+                        recursive_delete(entry['dn'])
+                    self.ldap_conn.delete(dn)
+                recursive_delete(dn)
+
+
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
 
