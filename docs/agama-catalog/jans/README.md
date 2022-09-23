@@ -1,0 +1,1 @@
+This folder contains Agama scripts maintained by the Jans core team.
