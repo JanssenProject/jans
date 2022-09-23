@@ -2221,6 +2221,31 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/agama-catalog/community/</loc>
+         <lastmod>2022-09-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama-catalog/jans/</loc>
+         <lastmod>2022-09-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama-catalog/jans/inboundID/</loc>
+         <lastmod>2022-09-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama-catalog/jans/inboundID/apple/</loc>
+         <lastmod>2022-09-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama-catalog/vendor/</loc>
+         <lastmod>2022-09-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/assets/</loc>
          <lastmod>2022-09-23</lastmod>
          <changefreq>daily</changefreq>
@@ -2332,16 +2357,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/governance/triage/</loc>
-         <lastmod>2022-09-23</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/script-catalog/agama/inboundID/</loc>
-         <lastmod>2022-09-23</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/script-catalog/agama/inboundID/apple/</loc>
          <lastmod>2022-09-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
