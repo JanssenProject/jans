@@ -552,7 +552,11 @@ class DBUtils:
                         recursive_delete(entry['dn'])
                     self.ldap_conn.delete(dn)
                 recursive_delete(dn)
-
+            elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+                sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
+                if sqlalchemyObj:
+                    self.session.delete(sqlalchemyObj)
+                    self.session.commit()
 
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
