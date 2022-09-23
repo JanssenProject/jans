@@ -35,13 +35,16 @@ public class Util {
             return Collections.emptyList();
         }
         
-        StringTokenizer tokenizer = new StringTokenizer(str, format);
-        log.debug("tokenizer:{}", tokenizer);
-        if( tokenizer==null || tokenizer.countTokens()<=0) {
+        log.debug("str.contains(format):{}", str.contains(format));
+        if( !str.contains(format)) {
             ArrayList<String> list = new ArrayList();
             list.add(str);
+            log.debug(" Not tokenized - list:{}", list);
             return (list);
         }
+        
+        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
+                .collect(Collectors.toList()));
         return Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());
     }

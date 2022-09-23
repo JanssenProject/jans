@@ -36,7 +36,7 @@ public class BaseResource {
 
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
     public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
-    public static final String TOKEN_FORMAT = "|";
+    public static final String TOKEN_FORMAT = ";";
     
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
