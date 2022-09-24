@@ -49,7 +49,6 @@ tabulate_endpoints = {
 tabular_dataset = {'scim.get-users': 'Resources'}
 excluded_operations = {'scim': ['search-user'], 'jca':[]}
 
-
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
 swagger_client = importlib.import_module(my_op_mode + '.swagger_client')
@@ -142,9 +141,6 @@ parser.add_argument("--no-suggestion", help="Do not use prompt toolkit to displa
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
-
-if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
-    excluded_operations['jca'] += ['get-user', 'post-user', 'put-user', 'get-user-by-inum', 'delete-user', 'patch-user-by-inum']
 
 if not args.no_suggestion:
     from prompt_toolkit import prompt, HTML
