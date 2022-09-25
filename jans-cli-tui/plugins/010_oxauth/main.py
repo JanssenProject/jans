@@ -76,8 +76,8 @@ class Plugin():
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
                         self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_scopes),
-                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search")),
-                        self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button")),
+                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope),
+                        self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button"), handler=self.add_scope),
                         ],
                         padding=3,
                         width=D(),
@@ -204,19 +204,30 @@ class Plugin():
 
     def oauth_get_clients(self):
         """Method to get the clients data from server
-        """
+        """ 
         self.oauth_data_container['clients'] = HSplit([Label(_("Please wait while getting clients"))], width=D())
         t = threading.Thread(target=self.oauth_update_clients, daemon=True)
         t.start()
 
-    def oauth_update_scopes(self, start_index=0):
+    def oauth_update_scopes(self, start_index=0, pattern=''):
         """update the current Scopes data to server
 
         Args:
             start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
         """
+        endpoint_args ='limit:10'
+        if pattern:
+            endpoint_args +=',pattern:'+pattern
         try :
-            rsponse = self.app.cli_object.process_command_by_id('get-oauth-scopes', '', 'limit:10', {})
+            rsponse = self.app.cli_object.process_command_by_id(
+                operation_id='get-oauth-scopes',
+                url_suffix='',
+                endpoint_args=endpoint_args,
+                data_fn=None,
+                data={}
+                        )
+        
+        
         except Exception as e:
             self.app.show_message(_("Error getting scopes"), str(e))
             return
@@ -238,37 +249,45 @@ class Plugin():
                 [
                 d['id'],
                 d['description'],
-                d['scopeType']
+                d['scopeType'],
+                d['inum']
                 ]
             )
+        
+        if data:
 
-        scopes = JansVerticalNav(
-                myparent=self.app,
-                headers=['id', 'Description', 'Type'],
-                preferred_size= [0,0,30,0],
-                data=data,
-                on_enter=self.edit_scope_dialog,
-                on_display=self.app.data_display_dialog,
-                # selection_changed=self.data_selection_changed,
-                selectes=0,
-                headerColor='green',
-                entriesColor='white',
-                all_data=result
-            )
+            scopes = JansVerticalNav(
+                    myparent=self.app,
+                    headers=['id', 'Description', 'Type','inum'],
+                    preferred_size= [25,50,30,30],
+                    data=data,
+                    on_enter=self.edit_scope_dialog,
+                    on_display=self.app.data_display_dialog,
+                    on_delete=self.delete_scope,
+                    # selection_changed=self.data_selection_changed,
+                    selectes=0,
+                    headerColor='green',
+                    entriesColor='white',
+                    all_data=result
+                )
 
-        buttons = []
-        if start_index > 0:
-            buttons.append(Button(_("Prev")))
-        if len(result) >= 10:
-            buttons.append(Button(_("Next")))
+            buttons = []
+            if start_index > 0:
+                buttons.append(Button(_("Prev")))
+            if len(result) >= 10:
+                buttons.append(Button(_("Next")))
 
-        self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
-        self.oauth_data_container['scopes'] = HSplit([
-            scopes,
-            VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-        ])
+            self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
+            self.oauth_data_container['scopes'] = HSplit([
+                scopes,
+                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
+            ])
 
-        get_app().invalidate()
+            get_app().invalidate()
+
+        else:
+            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['scopes'])
+
 
     def oauth_get_scopes(self):
         """Method to get the Scopes data from server
@@ -318,6 +337,43 @@ class Plugin():
 
         self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
 
+
+    def save_scope(self, dialog):
+        """This method to save the client data to server
+
+        Args:
+            dialog (_type_): the main dialog to save data in
+
+        Returns:
+            _type_: bool value to check the status code response
+        """
+
+        self.app.logger.debug('Saved scope DATA: '+str(dialog.data))
+
+        response = self.app.cli_object.process_command_by_id(
+            operation_id='put-oauth-scopes' if dialog.data.get('inum') else 'post-oauth-scopes',
+            url_suffix='',
+            endpoint_args='',
+            data_fn='',
+            data=dialog.data
+        )
+
+        self.app.logger.debug(response.text)
+
+        if response.status_code in (200, 201):
+            self.oauth_get_scopes()
+            return True
+
+        self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
+
+    def search_scope(self, tbuffer):
+        if not len(tbuffer.text) > 2:
+            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['scopes'])
+            return
+
+        t = threading.Thread(target=self.oauth_update_scopes, args=(0,tbuffer.text), daemon=True)
+        t.start()
+
     def search_clients(self, tbuffer):
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['clients'])
@@ -325,6 +381,13 @@ class Plugin():
 
         t = threading.Thread(target=self.oauth_update_clients, args=(tbuffer.text,), daemon=True)
         t.start()
+
+    def add_scope(self):
+        """Method to display the dialog of clients
+        """
+        dialog = EditScopeDialog(self.app, title=_("Add scope"), data={}, save_handler=self.save_scope)
+        result = self.app.show_jans_dialog(dialog)
+
 
     def add_client(self):
         """Method to display the dialog of clients
@@ -366,10 +429,47 @@ class Plugin():
 
         ensure_future(coroutine())
 
+
+    def delete_scope(self, selected, event):
+        """This method for the deletion of the clients data
+
+        Args:
+            selected (_type_): The selected Client
+            event (_type_): _description_
+
+        Returns:
+            str: The server response
+        """
+
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete scope inum:")+"\n {} ?".format(selected[3]))
+        async def coroutine():
+            focused_before = self.app.layout.current_window
+            result = await self.app.show_dialog_as_float(dialog)
+            try:
+                self.app.layout.focus(focused_before)
+            except:
+                self.app.layout.focus(self.app.center_frame)
+
+            if result.lower() == 'yes':
+                result = self.app.cli_object.process_command_by_id(
+                    operation_id='delete-oauth-scopes-by-inum',
+                    url_suffix='inum:{}'.format(selected[3]),
+                    endpoint_args='',
+                    data_fn='',
+                    data={}
+                )
+            
+                self.app.logger.debug('result: %s', str(result))
+
+                self.oauth_get_scopes()
+            return result
+
+        ensure_future(coroutine())
+
     def edit_scope_dialog(self, **params):
         
         selected_line_data = params['data']  
         title = _("Edit Scopes")
 
-        dialog = EditScopeDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client)
+        dialog = EditScopeDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
