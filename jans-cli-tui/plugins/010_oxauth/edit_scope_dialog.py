@@ -1,7 +1,7 @@
 import json
 from asyncio import Future
 from typing import OrderedDict
-
+import prompt_toolkit
 from prompt_toolkit.widgets import Button, TextArea
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
@@ -69,9 +69,13 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
         self.data = data
+        self.id = ''
+        self.displayName = ''
+        self.description  = '' 
         self.prepare_tabs()
 
         def save():
+            self.change_similar_entries()
 
             self.data = self.make_data_from_dialog()
             
@@ -110,11 +114,36 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
                    )
-    
 
+    def change_similar_entries(self):
+        for tab in self.tabs:
+
+            for item in self.tabs[tab].children:
+                if hasattr(item, 'me'):
+                    me = item.me
+                    key_ = me.window.jans_name
+                    if isinstance(me, prompt_toolkit.widgets.base.TextArea):
+                        if key_ == 'id' :
+                            if  me.text :
+                                self.id = me.text 
+                            else :
+                                me.text = self.id    
+                        elif key_ == 'displayName' :
+                            if  me.text :
+                                self.displayName = me.text 
+                            else :
+                                me.text = self.displayName    
+                        elif key_ == 'description' :
+                            if  me.text :
+                                self.description = me.text 
+                            else :
+                                me.text = self.description   
+
+      
     def prepare_tabs(self):
         """Prepare the tabs for Edil scope Dialogs
         """
+        self.myparent.logger.debug('Data: '+str(self.data))
 
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope')
 
@@ -138,116 +167,117 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         ],width=D(),
                     )
 
-        # self.tabs['OpenID'] = HSplit([
-        #                self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
-        #                self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
-        #                self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
-        #                self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
+        self.tabs['OpenID'] = HSplit([
+                       self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
+                       self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
+                       self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
+                       self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
 
-        #                 self.myparent.getTitledCheckBox(_("Default Scope"),
-        #                 name='defaultScope',
-        #                 checked=self.data.get('defaultScope'),
-        #                 style='green'),
+                        self.myparent.getTitledCheckBox(_("Default Scope"),
+                        name='defaultScope',
+                        checked=self.data.get('defaultScope'),
+                        style='green'),
 
-        #                 self.myparent.getTitledCheckBox(_("Show in configuration endpoint"),
-        #                 name='showInConfigurationEndpoint',
-        #                 checked=self.data.get('showInConfigurationEndpoint'),
-        #                 style='green'),
+                        self.myparent.getTitledCheckBox(_("Show in configuration endpoint"),
+                        name='showInConfigurationEndpoint',
+                        checked=self.data.get('showInConfigurationEndpoint'),
+                        style='green'),
 
-        #                 VSplit([
+                        VSplit([
                         
-        #                 self.myparent.getTitledText(_("Claims"),
-        #                     name='claims',
-        #                     value='\n'.join(self.data.get('claims', [])),
-        #                     height=3, 
-        #                     style='green'),
-        #                 self.myparent.getTitledText(_("Search"), name='oauth:scopes:openID:claims:search',style='fg:green',width=10,jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_clients
+                        self.myparent.getTitledText(_("Claims"),
+                            name='claims',
+                            value='\n'.join(self.data.get('claims', [])),
+                            height=3, 
+                            style='green'),
+                        self.myparent.getTitledText(_("Search"), name='oauth:scopes:openID:claims:search',style='fg:green',width=10,jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_clients
 
-        #                 ]),
+                        ]),
 
 
 
-        #                 # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
+                        # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
 
-        #                 ],width=D(),
-        #             )
+                        ],width=D(),
+                    )
 
-        # self.tabs['Dynamic'] = HSplit([
-        #                self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
-        #                self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True),
-        #                self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
-        #                self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
+        self.tabs['Dynamic'] = HSplit([
+                       self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
+                       self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True),
+                       self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
+                       self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
                         
-        #                 # Label(text=_("Dynamic Scope Script"),style='red'),  ## name = dynamicScopeScripts TODO  
+                        # Label(text=_("Dynamic Scope Script"),style='red'),  ## name = dynamicScopeScripts TODO  
                         
-        #                 self.myparent.getTitledText(_("Dynamic Scope Script"),
-        #                     name='dynamicScopeScripts',
-        #                     value='\n'.join(self.data.get('dynamicScopeScripts', [])),
-        #                     height=3, 
-        #                     style='green'),
+                        self.myparent.getTitledText(_("Dynamic Scope Script"),
+                            name='dynamicScopeScripts',
+                            value='\n'.join(self.data.get('dynamicScopeScripts', [])),
+                            height=3, 
+                            style='green'),
 
 
-        #                 self.myparent.getTitledCheckBox(_("Allow for dynamic registration"),
-        #                 name='defaultScope',
-        #                 checked=self.data.get('defaultScope'),
-        #                 style='green'),
+                        self.myparent.getTitledCheckBox(_("Allow for dynamic registration"),
+                        name='defaultScope',
+                        checked=self.data.get('defaultScope'),
+                        style='green'),
 
-        #                 self.myparent.getTitledCheckBox(_("Show in configuration endpoint"),
-        #                 name='showInConfigurationEndpoint',
-        #                 checked=self.data.get('showInConfigurationEndpoint'),
-        #                 style='green'),
+                        self.myparent.getTitledCheckBox(_("Show in configuration endpoint"),
+                        name='showInConfigurationEndpoint',
+                        checked=self.data.get('showInConfigurationEndpoint'),
+                        style='green'),
 
-        #                  self.myparent.getTitledText(_("Claims"),
-        #                     name='claims',
-        #                     value='\n'.join(self.data.get('claims', [])),
-        #                     height=3, 
-        #                     style='green'),
+                         self.myparent.getTitledText(_("Claims"),
+                            name='claims',
+                            value='\n'.join(self.data.get('claims', [])),
+                            height=3, 
+                            style='green'),
 
-        #                 # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
+                        # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
 
-        #                 ],width=D(),
-        #             )
+                        ],width=D(),
+                    )
 
-        # # self.tabs['Spontaneous'] = HSplit([
-        # #             self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green',read_only=True,),
-        # #             self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
-        # #             self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green',read_only=True,),
-        # #             self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green',read_only=True,),
-        # #             self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='green',read_only=True,height=3,),## Not fount
-        # #             self.myparent.getTitledText(_("Creationg time"), name='creationDate', value=self.data.get('creationDate',''), style='green',read_only=True,),
-                        
-                        
-        # #                                         ],width=D(),
-        # #             )
-
-        # self.tabs['UMA'] = HSplit([
-        #             self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
+        # self.tabs['Spontaneous'] = HSplit([
+        #             self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green',read_only=True,),
         #             self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
-        #             self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
-        #             self.myparent.getTitledText(_("IconURL"), name='description', value=self.data.get('description',''), style='green'),
-                    
-        #             self.myparent.getTitledWidget(
-        #                     _("Authorization Policies"),
-        #                     name='umaAuthorizationPolicies',
-        #                     widget=DropDownWidget(
-        #                         values=   self.data.get('umaAuthorizationPolicies',[]),
-        #                        # value=self.data.get('tokenEndpointAuthMethodsSupported')
-        #                         ),
-        #                     jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethodsSupported'),
-        #                     style='green'
-        #                     ),
-
-        #             self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='green',read_only=True,height=3,), ## Not fount
-        #             self.myparent.getTitledText(_("Creationg time"), name='description', value=self.data.get('description',''), style='green',read_only=True,),
-        #             self.myparent.getTitledText(_("Creator"), name='Creator', value=self.data.get('Creator',''), style='green',read_only=True,),
+        #             self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green',read_only=True,),
+        #             self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green',read_only=True,),
+        #             self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='green',read_only=True,height=3,),## Not fount
+        #             self.myparent.getTitledText(_("Creationg time"), name='creationDate', value=self.data.get('creationDate',''), style='green',read_only=True,),
+                        
                         
         #                                         ],width=D(),
         #             )
+
+        self.tabs['UMA'] = HSplit([
+                    self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
+                    self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
+                    self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
+                    self.myparent.getTitledText(_("IconURL"), name='iconUrl', value=self.data.get('iconUrl',''), style='green'),
+                    
+                    self.myparent.getTitledWidget(
+                            _("Authorization Policies"),
+                            name='umaAuthorizationPolicies',
+                            widget=DropDownWidget(
+                                values=   self.data.get('umaAuthorizationPolicies',[]),
+                               # value=self.data.get('tokenEndpointAuthMethodsSupported')
+                                ),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethodsSupported'),
+                            style='green'
+                            ),
+
+                    self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='green',read_only=True,height=3,), ## Not fount
+                    self.myparent.getTitledText(_("Creationg time"), name='description', value=self.data.get('description',''), style='green',read_only=True,),
+                    self.myparent.getTitledText(_("Creator"), name='Creator', value=self.data.get('Creator',''), style='green',read_only=True,),
+                        
+                                                ],width=D(),
+                    )
         
         self.left_nav = list(self.tabs.keys())[0]
 
     
     def scope_dialog_nav_selection_changed(self, selection):
+        self.change_similar_entries()
         self.left_nav = selection
 
     def __pt_container__(self):
