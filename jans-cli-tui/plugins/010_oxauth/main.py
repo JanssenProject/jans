@@ -300,7 +300,7 @@ class Plugin():
         pass
 
     def edit_client_dialog(self, **params):
-        self.app.logger.debug('selected_line_data: '+str(params['data']))
+        # self.app.logger.debug('selected_line_data: '+str(params['data']))
 
         
         selected_line_data = params['data']  
@@ -319,7 +319,7 @@ class Plugin():
             _type_: bool value to check the status code response
         """
 
-        self.app.logger.debug('Saved DATA: '+str(dialog.data))
+        # self.app.logger.debug('Saved DATA: '+str(dialog.data))
 
         response = self.app.cli_object.process_command_by_id(
             operation_id='put-oauth-openid-clients' if dialog.data.get('inum') else 'post-oauth-openid-clients',
@@ -329,7 +329,7 @@ class Plugin():
             data=dialog.data
         )
 
-        self.app.logger.debug(response.text)
+        # self.app.logger.debug(response.text)
 
         if response.status_code in (200, 201):
             self.oauth_get_clients()
@@ -348,7 +348,7 @@ class Plugin():
             _type_: bool value to check the status code response
         """
 
-        self.app.logger.debug('Saved scope DATA: '+str(dialog.data))
+        # self.app.logger.debug('Saved scope DATA: '+str(dialog.data))
 
         response = self.app.cli_object.process_command_by_id(
             operation_id='put-oauth-scopes' if dialog.data.get('inum') else 'post-oauth-scopes',
@@ -358,7 +358,7 @@ class Plugin():
             data=dialog.data
         )
 
-        self.app.logger.debug(response.text)
+        # self.app.logger.debug(response.text)
 
         if response.status_code in (200, 201):
             self.oauth_get_scopes()
@@ -459,7 +459,7 @@ class Plugin():
                     data={}
                 )
             
-                self.app.logger.debug('result: %s', str(result))
+                # self.app.logger.debug('result: %s', str(result))
 
                 self.oauth_get_scopes()
             return result
