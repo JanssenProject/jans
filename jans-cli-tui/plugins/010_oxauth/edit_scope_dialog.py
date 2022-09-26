@@ -72,6 +72,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.id = ''
         self.displayName = ''
         self.description  = '' 
+        
         self.showInConfigurationEndpoint = self.data.get('attributes',{}).get('showInConfigurationEndpoint','')
         self.defaultScope = self.data.get('defaultScope','')
         self.prepare_tabs()
@@ -116,6 +117,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
                    )
+        self.change_similar_entries()
 
     def change_similar_entries(self):
         
@@ -126,20 +128,34 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     key_ = me.window.jans_name
                     if isinstance(me, prompt_toolkit.widgets.base.TextArea):
                         if key_ == 'id' :
+                            self.myparent.logger.debug('tab: '+str(tab))
+                            self.myparent.logger.debug('self.side_nav_bar.cur_tab: '+str(self.side_nav_bar.cur_tab))
                             if  me.text :
-                                self.id = me.text 
+                                # if tab == self.side_nav_bar.cur_tab:
+                                self.id = me.text
+                                # else :
+                                #     me.text = self.id   
                             else :
                                 me.text = self.id    
+
                         elif key_ == 'displayName' :
                             if  me.text :
-                                self.displayName = me.text 
+                                # if tab == self.side_nav_bar.cur_tab:
+                                    self.displayName = me.text
+                                # else :
+                                #     me.text = self.displayName                                           
                             else :
                                 me.text = self.displayName    
                         elif key_ == 'description' :
                             if  me.text :
-                                self.description = me.text 
+                                # if tab == self.side_nav_bar.cur_tab:
+                                    self.description = me.text
+                                # else :
+                                    # me.text = self.description                                
+                                 
                             else :
                                 me.text = self.description   
+
                     elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
                         if key_ == 'attributes' :
                             if self.showInConfigurationEndpoint != me.checked :
@@ -300,8 +316,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
     
     def scope_dialog_nav_selection_changed(self, selection):
-        self.change_similar_entries()
+        
         self.left_nav = selection
+        self.change_similar_entries()
 
     def __pt_container__(self):
         return self.dialog
