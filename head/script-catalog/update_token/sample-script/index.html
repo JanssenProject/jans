@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#flow" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -10195,15 +10195,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#flow" class="md-nav__link">
-    Flow
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#pre-requisites" class="md-nav__link">
-    Pre-requisites
+  <a href="#flow" class="md-nav__link">
+    Flow
   </a>
   
 </li>
@@ -10216,11 +10216,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-write-the-custom-script" class="md-nav__link">
-    How to write the custom script
+  <a href="#associate-an-update-token-script-to-a-client-rp-optional-step" class="md-nav__link">
+    Associate an Update Token script to a client (RP) [optional step]
   </a>
   
-    <nav class="md-nav" aria-label="How to write the custom script">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-an-update-token-script-pseudo-code-for-potential-usecases" class="md-nav__link">
+    Writing an Update token script (Pseudo code for potential usecases)
+  </a>
+  
+    <nav class="md-nav" aria-label="Writing an Update token script (Pseudo code for potential usecases)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -10228,10 +10235,37 @@
     1. Mandatory methods:
   </a>
   
+    <nav class="md-nav" aria-label="1. Mandatory methods:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#c-modify-claims-in-an-access-token" class="md-nav__link">
+    c. Modify claims in an access token:
+  </a>
+  
 </li>
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introspectiontype-script-vs-updatetokentype-script" class="md-nav__link">
+    IntrospectionType script vs UpdateTokenType script
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    Testing
+  </a>
   
 </li>
       
@@ -10780,15 +10814,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#flow" class="md-nav__link">
-    Flow
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#pre-requisites" class="md-nav__link">
-    Pre-requisites
+  <a href="#flow" class="md-nav__link">
+    Flow
   </a>
   
 </li>
@@ -10801,11 +10835,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-write-the-custom-script" class="md-nav__link">
-    How to write the custom script
+  <a href="#associate-an-update-token-script-to-a-client-rp-optional-step" class="md-nav__link">
+    Associate an Update Token script to a client (RP) [optional step]
   </a>
   
-    <nav class="md-nav" aria-label="How to write the custom script">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-an-update-token-script-pseudo-code-for-potential-usecases" class="md-nav__link">
+    Writing an Update token script (Pseudo code for potential usecases)
+  </a>
+  
+    <nav class="md-nav" aria-label="Writing an Update token script (Pseudo code for potential usecases)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -10813,10 +10854,37 @@
     1. Mandatory methods:
   </a>
   
+    <nav class="md-nav" aria-label="1. Mandatory methods:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#c-modify-claims-in-an-access-token" class="md-nav__link">
+    c. Modify claims in an access token:
+  </a>
+  
 </li>
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introspectiontype-script-vs-updatetokentype-script" class="md-nav__link">
+    IntrospectionType script vs UpdateTokenType script
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    Testing
+  </a>
   
 </li>
       
@@ -10840,34 +10908,30 @@
 
   <h1>Update Token</h1>
 
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java"><code>UpdateTokenType</code></a> inside a custom script you can</p>
 <ol>
-<li>
-<p>Add a custom claim to an Access Token, Refresh Token or ID token
- <br/>Example use-case:  As per the open banking standard, the access token should contain claim <code>openbanking_intent_id</code> and the same value should also reflect in the <code>sub</code> claim. </p>
+<li>Enable transformation of claims and values in id_token and Access token e.g. add a custom claim to an <code>id_token</code>, change a token expiry, change the <code>sub</code> value, or remove the <code>nonce</code>.
+   <br/>Example use-case:  <ul>
+<li>As per the open banking standard, the id_token should contain claim <code>openbanking_intent_id</code> and the same value should also reflect in the <code>sub</code> claim. </li>
+<li>As specified in the <a href="https://openid.net/specs/openid-financial-api-part-1-1_0.html">FAPI Baseline Specification</a> the <code>sub</code> claim should have the user id. </li>
+</ul>
 </li>
-<li>
-<p>Modify values of Registered (header claims), public or private claims.
- <br/>Example use-case: An expectation required to be fulfilled by the FAPI-RW standard where the <code>sub</code> claim should have the user id. </p>
-</li>
-<li>
-<p>Tweak the functionality of the AS to return a token only if a condition (check) is fulfilled. 
- <br/>Example use-case: Return an Access Token only if organization's account balance is greater than x.</p>
-</li>
+<li>Set a specific token lifetime </li>
+<li>Perform extra business logic like adding or removing scopes.</li>
+<li>Add an extra audit log for each token response.</li>
 </ol>
 <h2 id="flow">Flow<a class="headerlink" href="#flow" title="Permanent link">#</a></h2>
-<pre class="mermaid"><code>sequenceDiagram
+<pre class="mermaid"><code>
+sequenceDiagram
 title UpdateToken script
 autonumber 1
-RP-&gt;Jans AS:Request token (Access Token, Refresh Token or ID token)
-Jans AS-&gt;Jans AS:check if UpdateToken script is enabled
-Jans AS-&gt;Jans AS: modifyIdToken(), modifyRefreshToken(), \n modifyAccessToken() called from the custom script
-Jans AS-&gt;RP: return token reflecting relevant claims</code></pre>
-<h2 id="pre-requisites">Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permanent link">#</a></h2>
-<ul>
-<li>A Janssen Authorization Server installation</li>
-<li><a href="https://github.com/JanssenProject/jans-setup/blob/openbank/static/extension/update_token/UpdateToken.py">Update Token script</a> - this is just an example that is present in Janssen's OpenBanking distribution</li>
-</ul>
+RP-&gt;&gt;Jans AS: Request token 
+Jans AS-&gt;&gt;Jans AS: Is UpdateToken script is associated with client? &lt;br/&gt;(or is there a script that applies to all clients? )
+Jans AS-&gt;&gt;Jans AS: do stuff 
+note  right of Jans AS: do stuff&lt;br/&gt;1. Enable transformation of claims and values in id_token &lt;br/&gt; OR 2. set token expiry &lt;br/&gt; or 3. add / remove scopes. &lt;br/&gt; or 4. perform audit logs 
+Jans AS-&gt;&gt;RP: return token(s) (Access token, ID token or Refresh Token) reflecting step 3
+</code></pre>
 <h2 id="adding-the-custom-script-to-jans-server">Adding the custom script to Jans server<a class="headerlink" href="#adding-the-custom-script-to-jans-server" title="Permanent link">#</a></h2>
 <ol>
 <li>Create cs.json with the contents of a CUSTOM script. To do that, run the following command.
@@ -10882,7 +10946,7 @@ Jans AS-&gt;RP: return token reflecting relevant claims</code></pre>
 <li>Configure any parameters that the script may use.</li>
 <li><code>name</code> field should reflect the use case</li>
 <li><code>script_type</code> should be <code>UPDATE_TOKEN</code></li>
-<li><code>script.py</code> can have contents similar to <a href="https://github.com/JanssenProject/jans-setup/blob/openbank/static/extension/update_token/UpdateToken.py">Sample Script</a></li>
+<li><code>script.py</code> can have contents similar to <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/update_token/sample-script/sample_script.py">Sample Script</a>) and is present in jans-cli's host machine.</li>
 </ol>
 <p><div class="highlight"><pre><span></span><code>{
   &quot;dn&quot;: null,
@@ -10926,10 +10990,24 @@ Jans AS-&gt;RP: return token reflecting relevant claims</code></pre>
   &quot;internal&quot;: false
 }
 </code></pre></div>
-3. Add the custom script. Save the response, it will contain the inum of the newly added script.
+ - Add the custom script. Save the response, it will contain the inum of the newly added script.
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
 </code></pre></div></p>
-<h2 id="how-to-write-the-custom-script">How to write the custom script<a class="headerlink" href="#how-to-write-the-custom-script" title="Permanent link">#</a></h2>
+<h2 id="associate-an-update-token-script-to-a-client-rp-optional-step">Associate an Update Token script to a client (RP) [optional step]<a class="headerlink" href="#associate-an-update-token-script-to-a-client-rp-optional-step" title="Permanent link">#</a></h2>
+<p>📝 Note: If the Update token script is not associated with a client, then it will be applicable to all clients registered in the Jans Server. Which implies that all tokens obtained using the Jans server will reflect modifications as per the script.
+<br/>
+To Associate an Update Token script to a client (RP), execute the command below with appropriate values for:
+ - inum of the client 
+ - inum of the update_token script</p>
+<p><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client
+  --data '[
+     {
+    "op": "add",
+    "path": "updateTokenScriptDns",
+    "value":  ["inum={SCRIPT_ID},ou=scripts,o=jans"]
+     }
+     ]'</code></p>
+<h2 id="writing-an-update-token-script-pseudo-code-for-potential-usecases">Writing an Update token script (Pseudo code for potential usecases)<a class="headerlink" href="#writing-an-update-token-script-pseudo-code-for-potential-usecases" title="Permanent link">#</a></h2>
 <h3 id="1-mandatory-methods">1. Mandatory methods:<a class="headerlink" href="#1-mandatory-methods" title="Permanent link">#</a></h3>
 <p><div class="highlight"><pre><span></span><code>class UpdateToken(UpdateTokenType):
 
@@ -10965,16 +11043,24 @@ Pseudocode and example :
 <span class="k">return</span><span class="w"> </span><span class="n">True</span><span class="w"></span>
 </code></pre></div>
 
-<p><div class="highlight"><pre><span></span><code>### 3.  modifyRefreshToken() :  Used to modify claims in a Refresh Token
+<p><div class="highlight"><pre><span></span><code>![Inspecting a modified ID token](https://github.com/JanssenProject/jans/blob/main/docs/assets/update-id-token.png)
 
-### 4.  modifyAccessToken():  Used to modify claims in a Access Token
+### 3.  modifyAccessToken():  
+#### a. Granularity of access control:
+An UpdateTokenType script is great for adding scopes or removing scopes to/from the Access token. By doing so you can tailor build the granularity of access control according to business need.
+
+[`context.overwriteAccessTokenScopes`](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalUpdateTokenContext.java) is ready to use method of the `context` variable
+</code></pre></div>
+    def modifyAccessToken(self, accessToken, context):
+              context.overwriteAccessTokenScopes(accessToken, Sets.newHashSet("openid", "mynewscope"))
+<div class="highlight"><pre><span></span><code>#### b.  Perform business check before returning AT
 
 Pseudo code and example - Issue Access token only if account balance is greater than 0
 </code></pre></div>
     # Returns boolean, true - indicates that script applied changes 
-    # jsonWebResponse - is JwtHeader, you can use any method to manipulate JWT
+    # accessToken - is JwtHeader, you can use any method to manipulate JWT
     # context is reference of io.jans.oxauth.service.external.context.ExternalUpdateTokenContext 
-    def modifyAccessToken(self, jsonWebResponse, context):</p>
+    def modifyAccessToken(self, accessToken, context):</p>
 <div class="codehilite"><pre><span></span><code><span class="w">     </span>#<span class="nv">read</span><span class="w"> </span><span class="nv">from</span><span class="w"> </span><span class="nv">session</span><span class="w"> </span>
 <span class="nv">sessionIdService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">CdiUtil</span>.<span class="nv">bean</span><span class="ss">(</span><span class="nv">SessionIdService</span><span class="ss">)</span><span class="w"></span>
 <span class="nv">sessionId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">sessionIdService</span>.<span class="nv">getSessionByDn</span><span class="ss">(</span><span class="nv">context</span>.<span class="nv">getGrant</span><span class="ss">()</span>.<span class="nv">getSessionDn</span><span class="ss">())</span><span class="w"> </span>#<span class="w"> </span><span class="nv">fetch</span><span class="w"> </span><span class="nv">from</span><span class="w"> </span><span class="nv">persistence</span><span class="w"></span>
@@ -10985,35 +11071,99 @@ Pseudo code and example - Issue Access token only if account balance is greater 
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nv">balance</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span>:<span class="w"></span>
 <span class="w">       </span><span class="k">return</span><span class="w"> </span><span class="nv">True</span><span class="w"></span>
 <span class="w">    </span><span class="k">else</span>:<span class="w"></span>
-<span class="w">       </span><span class="k">return</span><span class="w"> </span><span class="nv">False</span><span class="w"> </span>#<span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">this</span><span class="w"> </span><span class="nv">case</span><span class="w"> </span><span class="nv">an</span><span class="w"> </span><span class="nv">AT</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">issued</span><span class="w"></span>
+<span class="w">       </span><span class="k">return</span><span class="w"> </span><span class="nv">False</span><span class="w"> </span>#<span class="w"> </span><span class="nv">forbid</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">creation</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">AT</span><span class="w"></span>
 </code></pre></div>
 
-<div class="highlight"><pre><span></span><code>## Associate an Update Token script to a client
-Until this section of the document, we have going by the assumption that the UpdateToken script will apply to requests from all RPs (clients) registered with Janssen&#39;s Authentication server.
-However, in a real scenario, you may want to modify claims, or perform checks only when specific RPs (clients ) request for tokens.
+<p>```</p>
+<h4 id="c-modify-claims-in-an-access-token">c. Modify claims in an access token:<a class="headerlink" href="#c-modify-claims-in-an-access-token" title="Permanent link">#</a></h4>
+<p>```
+    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
+    # accessToken is reference of io.jans.as.server.model.common.AccessToken (note authorization grant can be taken as context.getGrant())
+    # context is reference of io.jans.oxauth.service.external.context.ExternalUpdateTokenContext 
+    def modifyAccessToken(self, accessToken, context):</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">#</span><span class="w"> </span><span class="n">header</span><span class="w"> </span><span class="n">claims</span><span class="w"></span>
+<span class="w">    </span><span class="n">accessToken</span><span class="p">.</span><span class="n">getHeader</span><span class="p">().</span><span class="n">setClaim</span><span class="p">(</span><span class="s">&quot;header_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;header_value&quot;</span><span class="p">)</span><span class="w"></span>
 
+<span class="w">    </span><span class="p">#</span><span class="n">custom</span><span class="w"> </span><span class="n">claims</span><span class="w"></span>
+<span class="w">    </span><span class="n">accessToken</span><span class="p">.</span><span class="n">getClaims</span><span class="p">().</span><span class="n">setClaim</span><span class="p">(</span><span class="s">&quot;claim_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;claimValue&quot;</span><span class="p">)</span><span class="w"></span>
 
-To associate the script with a client execute the command below with appropriate values for
-1. inum of the client 
-2. inum of the update_token script
+<span class="w">    </span><span class="p">#</span><span class="n">regular</span><span class="w"> </span><span class="n">claims</span><span class="w">        </span>
+<span class="w">    </span><span class="n">accessToken</span><span class="p">.</span><span class="n">getClaims</span><span class="p">().</span><span class="n">setClaim</span><span class="p">(</span><span class="s">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">claimValue</span><span class="p">)</span><span class="w"></span>
 
- ```
- /opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client
-  --data &#39;[
-     {
-    &quot;op&quot;: &quot;add&quot;,
-    &quot;path&quot;: &quot;updateTokenScriptDns&quot;,
-    &quot;value&quot;:  [&quot;inum={SCRIPT_ID},ou=scripts,o=jans&quot;]
-     }
-     ]&#39; 
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">True</span><span class="w"></span>
 </code></pre></div>
+
+<p><div class="highlight"><pre><span></span><code>### 5. Modify a specific token lifetime based on the context:
+1. Refresh token lifetime:
+</code></pre></div>
+    def getRefreshTokenLifetimeInSeconds(self, context):
+        return 24 * 60 * 60 # one day
+<div class="highlight"><pre><span></span><code>2. ID token lifetime:
+</code></pre></div>
+    def getIdTokenLifetimeInSeconds(self, context):
+        return 10 * 60 * 60 # 10 hours
+<div class="highlight"><pre><span></span><code>3. Access token lifetime:
+</code></pre></div>
+    def getAccessTokenLifetimeInSeconds(self, context):
+        return 10 * 60 * 60 # 10 hours
+<div class="highlight"><pre><span></span><code>### 6. modifyRefreshToken() :  
+Used to modify claims in a Refresh Token
+</code></pre></div>
+    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
+    # refreshToken is reference of io.jans.as.server.model.common.RefreshToken (note authorization grant can be taken as context.getGrant())
+    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
+    def modifyRefreshToken(self, refreshToken, context):
+        return True</p>
+<p>```</p>
+<h2 id="introspectiontype-script-vs-updatetokentype-script">IntrospectionType script vs UpdateTokenType script<a class="headerlink" href="#introspectiontype-script-vs-updatetokentype-script" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java"><code>IntrospectionType</code></a></th>
+<th><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java"><code>UpdateTokenType</code></a></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client configuration parameter</td>
+<td>Introspection script is invoked only when <strong><code>accessTokenAsJwt</code>=<code>true</code></strong></td>
+<td>Update token script is invoked irrespective of whether <code>accessTokenAsJwt</code> is <code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td>Core Purpose</td>
+<td>Used to return access token meta information like current validity, approved scopes, and information about the context in which the token was issued when a Resource Server which queries the <a href="https://datatracker.ietf.org/doc/html/rfc7662">Introspection endpoint</a></td>
+<td>used to enable transformation of claims and values in id_token and Access token, set a specific token lifetime, change granularity of access control (up-scoping, down-scoping), audit logging for each token response, forbid the creation of AT based on a criteria.</td>
+</tr>
+<tr>
+<td>Functionality</td>
+<td>1. Can be used to modify claims of an Access token as JWT, however this it is recommended to use UpdateToken script instead.</td>
+<td>1. Used to modify id_token, refresh token and access token</td>
+</tr>
+<tr>
+<td></td>
+<td>2. Introspection script cannot change scope of AT</td>
+<td>2. UpdateToken can change scope of AT and modify AT object in persistence irrespective of the value of <code>accessTokenAsJwt</code> as <code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td>Script Invocation sequence</td>
+<td>2. <strong>After</strong> an Access token is generated</td>
+<td>2. <strong>Before</strong> the creation of AT, id_token and refresh_token</td>
+</tr>
+</tbody>
+</table>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h2>
+<ol>
+<li>Use this: <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java">Reference for testing</a></li>
+<li>Inspect the tokens. Use <a href="jwt.io">jwt.io</a> to inspect the contents of a JWT. </li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-13T16:57:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-26T11:49:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-26</span>
       
         <br>
         Created:
