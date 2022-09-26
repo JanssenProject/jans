@@ -542,6 +542,34 @@ class DBUtils:
 
         return  ','.join(value2)
 
+    def delete_dn(self, dn):
+        if self.dn_exists(dn):
+            backend_location = self.get_backend_location_for_dn(dn)
+
+            if backend_location == BackendTypes.LDAP:
+                def recursive_delete(dn):
+                    self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL)
+                    for entry in self.ldap_conn.response:
+                        recursive_delete(entry['dn'])
+                    self.ldap_conn.delete(dn)
+                recursive_delete(dn)
+
+            elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+                sqlalchemy_obj = self.get_sqlalchObj_for_dn(dn)
+                if sqlalchemy_obj:
+                    self.session.delete(sqlalchemy_obj)
+                    self.session.commit()
+
+            elif backend_location == BackendTypes.SPANNER:
+                tbl = self.get_spanner_table_for_dn(dn)
+                self.spanner.exec_sql('DELETE from {} WHERE dn="{}"'.format(tbl, dn))
+
+            elif backend_location == BackendTypes.COUCHBASE:
+                key = ldif_utils.get_key_from(dn)
+                bucket =self.get_bucket_for_key(key)
+                n1ql = 'DELETE FROM `{}` USE KEYS "{}"'.format(bucket, key)
+                self.cbm.exec_query(n1ql)
+
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
 
