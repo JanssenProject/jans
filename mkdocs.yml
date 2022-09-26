@@ -418,7 +418,6 @@ nav:
             - 'SCIM': 'admin/reference/json/scim.md'
             - 'Client API': 'admin/reference/json/client-api.md'
             - 'Config API': 'admin/reference/json/config-api.md'
-        - 'Javadocs': 'admin/reference/javadocs.md'
         - 'Kubernetes':
             - 'admin/reference/kubernetes/README.md'
             - 'Helm Chart': 'admin/reference/kubernetes/helm-chart.md'
