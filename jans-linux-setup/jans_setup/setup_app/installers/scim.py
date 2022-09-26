@@ -34,7 +34,8 @@ class ScimInstaller(JettyInstaller):
         self.ldif_scopes_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.jans_scim_openapi_fn = os.path.join(Config.data_dir, 'jans-scim-openapi.yaml')
 
-        self.extract_files()
+        if not base.argsp.shell:
+            self.extract_files()
 
 
     def extract_files(self):

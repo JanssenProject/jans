@@ -46,10 +46,10 @@ class ConfigApiInstaller(JettyInstaller):
         self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
         self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
 
-        self.extract_files()
+        if not base.argsp.shell:
+            self.extract_files()
 
     def install(self):
-
         self.copyFile(self.source_files[1][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)

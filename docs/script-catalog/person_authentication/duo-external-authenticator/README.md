@@ -28,11 +28,12 @@ end
 Jans AS->>RP: 10. write Jans session cookie
 ```
 
-## Prerequisites
-- A Janssen Server 
+## Administrator prerequisites
 - [Duo interception script](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - An account with [Duo Security](https://duo.com/).   
-- Users should download the DUO mobile app
+
+## User prerequisites
+- Users should download the [DUO mobile app](https://duo.com/product/multi-factor-authentication-mfa/duo-mobile-app)
 
 ## Configure Duo Account
 

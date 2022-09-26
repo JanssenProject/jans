@@ -2873,7 +2873,6 @@ paths:
           name: month
           description: Month for which the stat report is to be fetched. The parameter is mandatory if start_month and end_month parameters are not present.
           example:  202012 (2020 Dec) 202101 (2021 Jan))
-          required: true
         - schema:
             type: string
           in: query
