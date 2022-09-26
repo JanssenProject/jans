@@ -28,7 +28,7 @@ curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jan
 ```
 2. Enable the script
 ```
-curl https://<your.jans.server>//jans-config-api/api/v1/config/scripts/name/name_of_the_script \ 
+curl https://<your.jans.server>/jans-config-api/api/v1/config/scripts/name/name_of_the_script \ 
     -H "Authorization: Bearer put_access_token_here"
 ```
 Examples of `name_of_the_script` ( Authentication methods that are present in the Janssen server.)
