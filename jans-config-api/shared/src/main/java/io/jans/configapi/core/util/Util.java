@@ -30,12 +30,12 @@ public class Util {
     }
     
     public List<String> getTokens(String str, String format) {
-        log.debug(" String to get tokens - str:{}, format:{}", str, format);
+        log.error(" String to get tokens - str:{}, format:{}", str, format);
         if (StringUtils.isBlank(str)) {
             return Collections.emptyList();
         }
         
-        log.debug("str.contains(format):{}", str.contains(format));
+        log.error("str.contains(format):{}", str.contains(format));
         if( !str.contains(format)) {
             ArrayList<String> list = new ArrayList();
             list.add(str);
@@ -43,7 +43,7 @@ public class Util {
             return (list);
         }
         
-        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
+        log.error("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
                 .collect(Collectors.toList()));
         return Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());

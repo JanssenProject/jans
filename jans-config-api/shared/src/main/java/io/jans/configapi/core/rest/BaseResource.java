@@ -36,7 +36,7 @@ public class BaseResource {
 
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
     public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
-    public static final String TOKEN_FORMAT = ";";
+    public static final String TOKEN_DELIMITER = ",";
     
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
@@ -151,17 +151,21 @@ public class BaseResource {
                     escapeLog(maximumRecCount));
         }
         SearchRequest searchRequest = new SearchRequest();
-
+        log.error(
+                "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}",
+                schemas, filter, sortBy, sortOrder,
+                startIndex, count, attrsList, excludedAttrsList,
+                maximumRecCount);
         // Validation
         checkNotEmpty(schemas, "Schema");
         int maxCount = maximumRecCount;
-        log.debug(" count:{}, maxCount:{}", count, maxCount);
+        log.error(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
             thorwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;
-        log.debug(" count:{} ", count);
+        log.error(" count:{} ", count);
         // Per spec, a negative value SHALL be interpreted as "0" for count
         if (count < 0) {
             count = 0;
@@ -173,7 +177,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-
+        log.error(" util.getTokens(filter,TOKEN_DELIMITER):{} ", util.getTokens(filter,TOKEN_DELIMITER));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -183,7 +187,7 @@ public class BaseResource {
         searchRequest.setStartIndex(startIndex);
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
-        searchRequest.setFilterAssertionValue(util.getTokens(filter,TOKEN_FORMAT));
+        searchRequest.setFilterAssertionValue(util.getTokens(filter,TOKEN_DELIMITER));
         return searchRequest;
 
     }

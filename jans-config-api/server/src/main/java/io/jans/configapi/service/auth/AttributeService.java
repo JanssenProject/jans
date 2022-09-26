@@ -22,14 +22,17 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     }
 
     public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
-        log.debug("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
+        log.error("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
 
-        String[] targetArray = new String[] { searchRequest.getFilter() };
-        log.debug("Search GluuAttributes with targetArray:{}", targetArray);
+        String[] targetArray = null;
+        
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
             targetArray = searchRequest.getFilterAssertionValue().stream().toArray(String[]::new);
         }
-        log.debug("Search final targetArray:{}", targetArray);
+        else {
+            targetArray = new String[] { searchRequest.getFilter() };
+        }
+        log.error("Search final targetArray:{}", targetArray);
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
@@ -50,7 +53,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
                     Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter), activeFilter);
         }
 
-        log.debug("GluuAttributes to be fetched with searchFilter:{}", searchFilter);
+        log.error("GluuAttributes to be fetched with searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForAttribute(null), GluuAttribute.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
