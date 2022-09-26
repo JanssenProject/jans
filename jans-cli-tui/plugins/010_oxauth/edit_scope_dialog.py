@@ -72,6 +72,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.id = ''
         self.displayName = ''
         self.description  = '' 
+        self.showInConfigurationEndpoint = self.data.get('attributes',{}).get('showInConfigurationEndpoint','')
+        self.defaultScope = self.data.get('defaultScope','')
         self.prepare_tabs()
 
         def save():
@@ -116,8 +118,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                    )
 
     def change_similar_entries(self):
+        
         for tab in self.tabs:
-
             for item in self.tabs[tab].children:
                 if hasattr(item, 'me'):
                     me = item.me
@@ -138,7 +140,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 self.description = me.text 
                             else :
                                 me.text = self.description   
-
+                    elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
+                        if key_ == 'attributes' :
+                            if self.showInConfigurationEndpoint != me.checked :
+                                # self.showInConfigurationEndpoint = me.checked
+                                me.checked= self.showInConfigurationEndpoint
+                        elif key_ == 'defaultScope' :
+                            if self.defaultScope != me.checked :
+                                # self.showInConfigurationEndpoint = me.checked
+                                me.checked= self.defaultScope
       
     def prepare_tabs(self):
         """Prepare the tabs for Edil scope Dialogs
@@ -149,6 +159,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         self.tabs = OrderedDict()
 
+
+
+        def save_showInConfigurationEndpoint_on_change(cb):
+                self.showInConfigurationEndpoint = cb.checked 
+
+        def save_defaultScope_on_change(cb):
+                self.defaultScope = cb.checked 
+
         self.tabs['OAuth'] = HSplit([
                        self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
                        self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
@@ -158,13 +176,17 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledCheckBox(_("Default Scope"),
                         name='defaultScope',
                         checked=self.data.get('defaultScope'),
-                        style='green'),
+                        style='green',
+                        on_selection_changed =save_defaultScope_on_change),
 
                         self.myparent.getTitledCheckBox(_("Show in configuration endpoint"),
                         name='attributes',
                         checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
-                        style='green'),
+                        style='green',
+                        on_selection_changed = save_showInConfigurationEndpoint_on_change
+                        ),
                         ],width=D(),
+                        
                     )
 
         self.tabs['OpenID'] = HSplit([
@@ -176,12 +198,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledCheckBox(_("Default Scope"),
                         name='defaultScope',
                         checked=self.data.get('defaultScope'),
-                        style='green'),
+                        style='green',
+                        on_selection_changed =save_defaultScope_on_change),
 
                         self.myparent.getTitledCheckBox(_("Show in configuration endpoint"),
-                        name='showInConfigurationEndpoint',
-                        checked=self.data.get('showInConfigurationEndpoint'),
-                        style='green'),
+                        name='attributes',
+                        checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
+                        style='green',
+                        on_selection_changed = save_showInConfigurationEndpoint_on_change
+                        ),
 
                         VSplit([
                         
@@ -218,13 +243,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
                         self.myparent.getTitledCheckBox(_("Allow for dynamic registration"),
                         name='defaultScope',
-                        checked=self.data.get('defaultScope'),
+                        checked=self.data.get('defaultScope'), ## TODO get the yaml value
                         style='green'),
 
                         self.myparent.getTitledCheckBox(_("Show in configuration endpoint"),
-                        name='showInConfigurationEndpoint',
-                        checked=self.data.get('showInConfigurationEndpoint'),
-                        style='green'),
+                        name='attributes',
+                        checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
+                        style='green',
+                        on_selection_changed = save_showInConfigurationEndpoint_on_change
+                        ),
 
                          self.myparent.getTitledText(_("Claims"),
                             name='claims',
@@ -255,16 +282,12 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
                     self.myparent.getTitledText(_("IconURL"), name='iconUrl', value=self.data.get('iconUrl',''), style='green'),
                     
-                    self.myparent.getTitledWidget(
-                            _("Authorization Policies"),
+
+                    self.myparent.getTitledText(_("Authorization Policies"),
                             name='umaAuthorizationPolicies',
-                            widget=DropDownWidget(
-                                values=   self.data.get('umaAuthorizationPolicies',[]),
-                               # value=self.data.get('tokenEndpointAuthMethodsSupported')
-                                ),
-                            jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethodsSupported'),
-                            style='green'
-                            ),
+                            value='\n'.join(self.data.get('umaAuthorizationPolicies', [])),
+                            height=3, 
+                            style='green'),
 
                     self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='green',read_only=True,height=3,), ## Not fount
                     self.myparent.getTitledText(_("Creationg time"), name='description', value=self.data.get('description',''), style='green',read_only=True,),
