@@ -164,9 +164,10 @@ class Plugin():
             return
 
 
+
         data =[]
 
-        for d in result:
+        for d in result.get('entries', []):
             data.append(
                 [
                 d['inum'],
@@ -189,7 +190,7 @@ class Plugin():
                 selectes=0,
                 headerColor='green',
                 entriesColor='white',
-                all_data=result
+                all_data=result['entries']
             )
 
             self.app.layout.focus(clients)
@@ -244,7 +245,7 @@ class Plugin():
 
 
         data =[]
-        for d in result: 
+        for d in result.get('entries', []): 
             data.append(
                 [
                 d['id'],
@@ -268,7 +269,7 @@ class Plugin():
                     selectes=0,
                     headerColor='green',
                     entriesColor='white',
-                    all_data=result
+                    all_data=result['entries']
                 )
 
             buttons = []
@@ -385,7 +386,7 @@ class Plugin():
     def add_scope(self):
         """Method to display the dialog of clients
         """
-        dialog = EditScopeDialog(self.app, title=_("Add scope"), data={}, save_handler=self.save_scope)
+        dialog = EditScopeDialog(self.app, data={}, save_handler=self.save_scope)
         result = self.app.show_jans_dialog(dialog)
 
 

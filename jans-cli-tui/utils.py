@@ -9,28 +9,36 @@ from wui_components.jans_data_picker import DateSelectWidget
 
 class DialogUtils:
 
+
+    def get_item_data(self, item):
+        if hasattr(item, 'me'):
+            me = item.me
+            key_ = me.window.jans_name
+            if isinstance(me, prompt_toolkit.widgets.base.TextArea):
+                value_ = me.text
+            elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
+                value_ = me.checked
+            elif isinstance(me, prompt_toolkit.widgets.base.CheckboxList):
+                value_ = me.current_values
+            elif isinstance(me, prompt_toolkit.widgets.base.RadioList):
+                value_ = me.current_value
+            elif isinstance(me, DropDownWidget):
+                value_ = me.value
+            elif isinstance(me,DateSelectWidget):
+                value_ = me.value
+
+            return {'key':key_, 'value':value_}
+
+
     def make_data_from_dialog(self):
         data = {}
         for tab in self.tabs:
 
             for item in self.tabs[tab].children:
-                if hasattr(item, 'me'):
-                    me = item.me
-                    key_ = me.window.jans_name
-                    if isinstance(me, prompt_toolkit.widgets.base.TextArea):
-                        value_ = me.text
-                    elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
-                        value_ = me.checked
-                    elif isinstance(me, prompt_toolkit.widgets.base.CheckboxList):
-                        value_ = me.current_values
-                    elif isinstance(me, prompt_toolkit.widgets.base.RadioList):
-                        value_ = me.current_value
-                    elif isinstance(me, DropDownWidget):
-                        value_ = me.value
-                    elif isinstance(me,DateSelectWidget):
-                        value_ = me.value
+                item_data = self.get_item_data(item)
+                if item_data:
+                    data[item_data['key']] = item_data['value']
 
-                    data[key_] = value_
         return data
 
 

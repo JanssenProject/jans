@@ -155,11 +155,11 @@ class JansCliApp(Application):
 
     @property
     def dialog_width(self):
-        return int(self.output.get_size().rows*0.8)
+        return int(self.output.get_size().columns*0.8)
 
     @property
     def dialog_height(self):
-        return int(self.output.get_size().columns*0.9)
+        return int(self.output.get_size().rows*0.9)
 
     def init_logger(self):
         self.logger = logging.getLogger('JansCli')
@@ -396,7 +396,7 @@ class JansCliApp(Application):
 
         return v
 
-    def getTitledRadioButton(self, title, name, values, current_value=None, jans_help='', style=''):
+    def getTitledRadioButton(self, title, name, values, current_value=None, on_selection_changed=None, jans_help='', style=''):
         title += ': '
         if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
             values = [(o,o) for o in values]
@@ -406,6 +406,14 @@ class JansCliApp(Application):
         rl.window.jans_name = name
         rl.window.jans_help = jans_help
         #li, rl2, width = self.handle_long_string(title, values, rl)
+
+        handler_org = rl._handle_enter
+        def custom_handler():
+            handler_org()
+            on_selection_changed(rl)
+
+        if on_selection_changed:
+            rl._handle_enter = custom_handler
 
         v = VSplit([Label(text=title, width=len(title), style=style), rl])
         v.me = rl
