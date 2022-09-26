@@ -34,14 +34,13 @@ class ScimInstaller(JettyInstaller):
         self.ldif_scopes_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.jans_scim_openapi_fn = os.path.join(Config.data_dir, 'jans-scim-openapi.yaml')
 
-        self.extract_files()
-
 
     def extract_files(self):
         base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', Config.data_dir)
 
 
     def install(self):
+        self.extract_files()
         self.logIt("Copying scim.war into jetty webapps folder...")
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
