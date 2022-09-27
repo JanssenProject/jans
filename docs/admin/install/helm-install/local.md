@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - installation
+  - helm
+---
+
 # Install Janssen Server Locally with minikube and MicroK8s
 
 ## System Requirements

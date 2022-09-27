@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - installation
+  - vm
+---
+
 # Install Janssen Server using Dynamic Download
 
 Dynamic download installs the latest development version of Janssen Server. This installation method is suitable for setting up development environments.
