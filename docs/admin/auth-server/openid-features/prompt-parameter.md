@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - auth-server
+  - openidc
+  - feature
+---
+
 # Prompt NONE
 
 The OpenID Connect protocol supports a prompt=none parameter on the authentication request that allows applications to indicate that the authorization server must not display any user interaction (such as authentication, consent, or MFA). Janssen will either return the requested response back to the application, or return an error if the user is not already authenticated or if some type of consent or prompt is required before proceeding.
