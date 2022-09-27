@@ -94,6 +94,8 @@ class Config:
             self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
+        self.default_store_type = 'JKS'
+
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(LOG_DIR, 'progress-bar.log')
         class DummyProgress:

@@ -402,3 +402,6 @@ def extract_subdir(zip_fn, sub_dir, target_dir):
 
 current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
+
+def as_bool(val):
+    return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')
