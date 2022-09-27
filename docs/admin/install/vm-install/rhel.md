@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - installation
+  - vm
+---
+
 # Install Janssen Server using Enterprise Linux Package
 
 ## Supported versions

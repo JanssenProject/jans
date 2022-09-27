@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - configuration
+  - cli
+  - commandline
+---
+
 # Command Line Interface
 
 We will refer to this mode as **CL**. Using this mode is difficult compared to IM. The first is to get help, so type:

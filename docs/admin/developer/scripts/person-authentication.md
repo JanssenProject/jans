@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - scripts
+---
+
 # Person Authentication scripts
 The Jans-Auth Server leverages interception scripts of [PersonAuthenticationType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java) which when implemented can facilitate complex multi-step, multi-factor authentication workflows. The authentication flow in the Jans Server is driven by the openID spec. The authorization request to the OP (Jans server) contains an optional query parameter called `acr_values` which is used by the OP to pick an interception script which will be run when `/authorize` endpoint (Authentication flow) is invoked. The name of each script corresponds with its `acr` value in the Jans-Auth Server.
 
