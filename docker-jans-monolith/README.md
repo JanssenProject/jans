@@ -40,7 +40,7 @@ The following environment variables are supported by the container:
 ## How to run
 
 ```bash
-docker compose -f mysql-docker-compose.yml up -d
+docker compose -f jans-mysql-compose.yml up -d
 ```
 
 ## Clean up
