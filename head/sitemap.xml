@@ -2251,6 +2251,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/developer/</loc>
+         <lastmod>2022-09-27</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/developer/developer-faq/</loc>
          <lastmod>2022-09-27</lastmod>
          <changefreq>daily</changefreq>
@@ -2342,6 +2347,11 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/technical-overview-template/</loc>
+         <lastmod>2022-09-27</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/governance/</loc>
          <lastmod>2022-09-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
