@@ -115,7 +115,6 @@ public class ApiApplication extends Application {
         classes.add(ClientsResource.class);
         classes.add(ConfigResource.class);
         classes.add(ConfigSmtpResource.class);
-        classes.add(CouchbaseConfigurationResource.class);
         classes.add(CustomScriptResource.class);
         classes.add(JwksResource.class);
         classes.add(LdapConfigurationResource.class);
@@ -125,7 +124,6 @@ public class ApiApplication extends Application {
         classes.add(StatResource.class);
         classes.add(HealthCheckResource.class);
         classes.add(OrganizationResource.class);
-        classes.add(SqlConfigurationResource.class);
         classes.add(AgamaResource.class);
         classes.add(SessionResource.class);
 
