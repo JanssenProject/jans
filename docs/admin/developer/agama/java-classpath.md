@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # Java classpath
 
 Any public method from a public class or static method from a public interface that belongs to the classpath of jans-auth webapp can be used in Agama flows. This means a class/interface is accessible as long as it is part of:

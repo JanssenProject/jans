@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - installation
+  - helm
+---
+
 # Install Janssen Server Using Rancher Marketplace
 
 For this quick start we will use a [single node Kubernetes install in docker with a self-signed certificate](https://rancher.com/docs/rancher/v2.6/en/installation/other-installation-methods/single-node-docker/).

@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - configuration
+  - cli
+  - commandline
+---
+
 # Group Resources
 
 > Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)

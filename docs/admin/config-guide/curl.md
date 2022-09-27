@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - configuration
+  - cli
+  - curl
+---
+
 # Most useful configurations and operations on Jans server using CURL 
 ## Configuring the Janssen server
 

@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # Development lifecycle
 
 In this page an overview of the flow development process is presented. In short, the following are the steps required to build a flow:

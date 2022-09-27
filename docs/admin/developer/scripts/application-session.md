@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - scripts
+---
+
 # Application Session Script Guide
 
 ## Overview
