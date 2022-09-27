@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # Quick start
 
 In this page a high-level overview of the flow development process is presented. Readers will be able to take a peep at the overall experience through a simple "hello world" example.

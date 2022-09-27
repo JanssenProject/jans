@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # Writing UI pages
 
 Creating the pages that make up an Agama flow is rather straightforward for a developer. Depending on the sophistication required for the UI/UX, more effort might be demanded, however with Agama, developers focus more on writing HTML markup than dealing with complexities of a UI framework. Here, there is considerably less wrestling in comparison to using big frameworks like JSF.

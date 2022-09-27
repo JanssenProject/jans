@@ -1,3 +1,9 @@
+---
+tags:
+  - administration
+  - recipes
+---
+
 ## Social Login with Apple 
 
 An out-of-the-box feature, the Sign-in with Apple Authentication script is a `PersonAuthenticationType` script which enables a user to sign-in using Apple credentials. After users authenticate using their Apple credentials, their Apple credentials are provisioned into the Jans-auth server.

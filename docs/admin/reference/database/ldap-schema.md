@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - reference
+  - database
+---
+
 ``` mermaid
 graph LR
     A[ou=jans] --> B(ou=agama)

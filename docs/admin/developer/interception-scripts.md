@@ -1,3 +1,9 @@
+---
+tags:
+  - administration
+  - developer
+---
+
 # Interception Scripts (or custom scripts)
 
 Interception scripts (or custom scripts)  allow you to define custom business logic for various features offered by the OpenID Provider (Jans-auth server). Some examples of features which can be customized are - implementing a 2FA authentication method, consent gathering, client registration, adding business specific claims to ID token or Access token etc.
