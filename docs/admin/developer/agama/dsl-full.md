@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 ## Agama DSL reference
 
 This document surveys the different constructs of the Agama domain-specific language.

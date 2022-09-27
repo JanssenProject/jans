@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # Hello world flow: a closer look
 
 This document revisits the hello world flow of the [quick start guide](./quick-start.md) using an approach that serves as an introduction to the Agama engine internals. The course of this flow, and generally of any other, can be studied in three stages:
