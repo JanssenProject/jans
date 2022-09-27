@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - auth-server
+  - oauth
+  - feature
+---
+
 # OAuth 2.0 Device Authorization Grant
 
 This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that  are **input-constrained** or **browser-less** . The authorization flow defined by this [RFC 8628](https://tools.ietf.org/html/rfc8628), sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.
