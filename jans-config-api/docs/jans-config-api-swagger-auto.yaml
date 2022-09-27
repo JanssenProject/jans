@@ -142,8 +142,7 @@ paths:
               Request json example:
                 description: Request json example
                 value:
-                  id: basic
-                externalValue: swagger/defaultAcr.json
+                  defaultAcr: simple_password_auth
       responses:
         "200":
           description: Ok
@@ -229,7 +228,10 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                externalValue: swagger/agama.json
+                value:
+                  source: "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\"\
+                    \ }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\""
+                  qname: test
       responses:
         "201":
           description: Created
@@ -1324,200 +1326,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/smtp.readonly
-  /api/v1/config/database/couchbase:
-    get:
-      tags:
-      - Database - Couchbase configuration
-      summary: Gets list of existing Couchbase configurations
-      description: Gets list of existing Couchbase configurations
-      operationId: get-config-database-couchbase
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/couchbase.readonly
-    put:
-      tags:
-      - Database - Couchbase configuration
-      summary: Updates Couchbase configuration
-      description: Updates Couchbase configuration
-      operationId: put-config-database-couchbase
-      requestBody:
-        description: CouchbaseConnectionConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/couchbase.write
-    post:
-      tags:
-      - Database - Couchbase configuration
-      summary: Adds a new Couchbase configuration
-      description: Adds a new Couchbase configuration
-      operationId: post-config-database-couchbase
-      requestBody:
-        description: CouchbaseConnectionConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/couchbase.write
-  /api/v1/config/database/couchbase/{name}:
-    get:
-      tags:
-      - Database - Couchbase configuration
-      summary: Gets a Couchbase configurations by name
-      description: Gets a Couchbase configurations by name
-      operationId: get-config-database-couchbase-by-name
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: CouchbaseConnectionConfiguration
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/couchbase.readonly
-    delete:
-      tags:
-      - Database - Couchbase configuration
-      summary: Deletes a Couchbase configurations by name
-      description: Deletes a Couchbase configurations by name
-      operationId: delete-config-database-couchbase-by-name
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/couchbase.delete
-    patch:
-      tags:
-      - Database - Couchbase configuration
-      summary: Patches a Couchbase configurations by name
-      description: Patches a Couchbase configurations by name
-      operationId: patch-config-database-couchbase-by-name
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: JsonPatch object
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/JsonPatch'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/couchbase.write
-  /api/v1/config/database/couchbase/test:
-    post:
-      tags:
-      - Database - Couchbase configuration
-      summary: Tests a Couchbase configuration
-      description: Tests a Couchbase configuration
-      operationId: post-config-database-couchbase-test
-      requestBody:
-        description: CouchbaseConnectionConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CouchbaseConnectionConfiguration'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: boolean
-                description: boolean value true if successful
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/couchbase.readonly
   /api/v1/config/scripts:
     get:
       tags:
@@ -2639,195 +2447,6 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
         - revoke_session
-  /api/v1/config/database/sql:
-    get:
-      tags:
-      - Database - Sql configuration
-      summary: Gets list of existing sql configurations
-      description: Gets list of existing sql configurations
-      operationId: get-config-database-sql
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SqlConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/sql.readonly
-    put:
-      tags:
-      - Database - Sql configuration
-      summary: Updates Sql configuration
-      description: Updates Sql configuration
-      operationId: put-config-database-sql
-      requestBody:
-        description: SqlConnectionConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SqlConnectionConfiguration'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SqlConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/sql.write
-    post:
-      tags:
-      - Database - Sql configuration
-      summary: Adds a new Sql configuration
-      description: Adds a new Sql configuration
-      operationId: post-config-database-sql
-      requestBody:
-        description: SqlConnectionConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SqlConnectionConfiguration'
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SqlConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/sql.write
-  /api/v1/config/database/sql/{name}:
-    get:
-      tags:
-      - Database - Sql configuration
-      summary: Gets a Sql configurations by name
-      description: Gets a Sql configurations by name
-      operationId: get-config-database-sql-by-name
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SqlConnectionConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/sql.readonly
-    delete:
-      tags:
-      - Database - Sql configuration
-      summary: Updates Sql configuration
-      description: Updates Sql configuration
-      operationId: delete-config-database-sql-by-name
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/sql.delete
-    patch:
-      tags:
-      - Database - Sql configuration
-      summary: Patch Sql configuration
-      description: Patch Sql configuration
-      operationId: patch-config-database-sql-by-name
-      parameters:
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: String representing patch-document.
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/JsonPatch'
-            example: "[ {op:replace, path: maxConnections, value: 8 } ]"
-      responses:
-        "200":
-          description: Ok
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/sql.write
-  /api/v1/config/database/sql/test:
-    post:
-      tags:
-      - Database - Sql configuration
-      summary: Tests a Sql configuration
-      description: Tests a Sql configuration
-      operationId: post-config-database-sql-test
-      requestBody:
-        description: SqlConnectionConfiguration object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SqlConnectionConfiguration'
-      responses:
-        "200":
-          description: Test status
-          content:
-            application/json:
-              schema:
-                type: boolean
-                description: boolean value true if successful
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/database/sql.readonly
   /api/v1/stat:
     get:
       tags:
@@ -3326,17 +2945,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanEdit:
+        userCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -4469,15 +4088,8 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4504,8 +4116,15 @@ components:
             - METRIC
             - STAT
             - PAR
-        fapi:
-          type: boolean
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -4674,54 +4293,6 @@ components:
           type: string
         password:
           type: string
-    CouchbaseConnectionConfiguration:
-      type: object
-      properties:
-        configId:
-          type: string
-        userName:
-          type: string
-        userPassword:
-          type: string
-        servers:
-          type: array
-          items:
-            type: string
-        defaultBucket:
-          type: string
-        buckets:
-          type: array
-          items:
-            type: string
-        passwordEncryptionMethod:
-          type: string
-        connectTimeout:
-          type: integer
-          format: int32
-        mutationTokensEnabled:
-          type: boolean
-        kvTimeout:
-          type: integer
-          format: int32
-        queryTimeout:
-          type: integer
-          format: int32
-        useSSL:
-          type: boolean
-        sslTrustStoreFile:
-          type: string
-        sslTrustStorePin:
-          type: string
-        sslTrustStoreType:
-          type: string
-        binaryAttributes:
-          type: array
-          items:
-            type: string
-        certificateAttributes:
-          type: array
-          items:
-            type: string
     CustomScript:
       type: object
       properties:
@@ -4795,13 +4366,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -5273,64 +4844,6 @@ components:
           type: string
         baseDn:
           type: string
-    SqlConnectionConfiguration:
-      type: object
-      properties:
-        configId:
-          type: string
-        userName:
-          type: string
-        userPassword:
-          type: string
-        connectionUri:
-          type: array
-          items:
-            type: string
-        schemaName:
-          type: string
-        serverTimezone:
-          type: string
-        useServerPrepStmts:
-          type: integer
-          format: int32
-        prepStmtCacheSqlLimit:
-          type: integer
-          format: int32
-        cachePrepStmts:
-          type: boolean
-        cacheResultSetMetadata:
-          type: boolean
-        metadataCacheSize:
-          type: integer
-          format: int32
-        passwordEncryptionMethod:
-          type: string
-        connectionPoolMaxTotal:
-          type: integer
-          format: int32
-        connectionPoolMaxIdle:
-          type: integer
-          format: int32
-        connectionPoolMinIdle:
-          type: integer
-          format: int32
-        createMaxWaitTimeMillis:
-          type: integer
-          format: int32
-        maxWaitTimeMillis:
-          type: integer
-          format: int32
-        minEvictableIdleTimeMillis:
-          type: integer
-          format: int32
-        binaryAttributes:
-          type: array
-          items:
-            type: string
-        certificateAttributes:
-          type: array
-          items:
-            type: string
     UmaResource:
       required:
       - name
