@@ -3330,17 +3330,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        userCanAccess:
           type: boolean
         userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -3667,8 +3667,6 @@ components:
           format: int32
         displayName:
           type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3680,6 +3678,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
         baseDn:
           type: string
         inum:
@@ -3769,9 +3769,9 @@ components:
           type: array
           items:
             type: string
-        displayValue:
-          type: string
         value:
+          type: string
+        displayValue:
           type: string
     LocalizedString:
       type: object
@@ -3780,13 +3780,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        value:
+          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
-        value:
-          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4480,8 +4480,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4508,6 +4506,8 @@ components:
             - METRIC
             - STAT
             - PAR
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -4797,13 +4797,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -5180,10 +5180,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     SessionId:
       type: object
       properties:
