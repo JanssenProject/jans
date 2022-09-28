@@ -79,7 +79,7 @@ class EditScopeDialog(DialogUtils):
         self.prepare_tabs()
 
         self.create_window()
-        self.sope_type = 'oauth'
+        self.sope_type = self.data.get('scopeType') or 'oauth'
 
     def scope_selection_changed(self, cb):
         self.sope_type = cb.current_value
