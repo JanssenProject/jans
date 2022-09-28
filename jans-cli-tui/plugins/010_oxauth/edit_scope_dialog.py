@@ -121,7 +121,7 @@ class EditScopeDialog(DialogUtils):
             title=self.title,
             body = HSplit([
                         self.myparent.getTitledRadioButton(
-                                _("Scope Type")+'\n \n \n \n',  ## TODO need to be handled
+                                _("Scope Type"),  ## TODO need to be handled
                                 name='scopeType', 
                                 current_value=self.data.get('scopeType'),
                                 values=[('oauth', 'Auth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
