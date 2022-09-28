@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # Logging
 
 There are two sources of log data that may be of interest to flow developers: the [engine](./index.md#agama-engine) and the flows themselves. The engine logs information related to the processing of flows plus tasks that run in the background. This usually provides low-level information and only deserve to be inspected when an error or unexpected behavior occurs. On the other hand, flows add data by means of the `Log` instruction used in the definition (source code) of flows.

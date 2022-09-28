@@ -9,8 +9,10 @@ package io.jans.configapi.core.rest;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.SearchRequest;
+import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
@@ -26,12 +28,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BaseResource {
+    
+    @Inject
+    Util util;
 
     private static Logger log = LoggerFactory.getLogger(BaseResource.class);
-    // Custom CODE
+
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
     public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
-
+    public static final String TOKEN_DELIMITER = ",";
+    
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
             throw new NotFoundException(getNotFoundError(objectName));
@@ -167,7 +173,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-
+        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} ", util.getTokens(filter,TOKEN_DELIMITER));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -177,7 +183,7 @@ public class BaseResource {
         searchRequest.setStartIndex(startIndex);
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
-
+        searchRequest.setFilterAssertionValue(util.getTokens(filter,TOKEN_DELIMITER));
         return searchRequest;
 
     }

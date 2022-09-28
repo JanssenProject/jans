@@ -1,3 +1,9 @@
+---
+tags:
+  - administration
+  - developer
+---
+
 ## Ready-to-use code in Custom script:  
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans some of which are listed below:
 

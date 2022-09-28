@@ -7,7 +7,7 @@ Docker monolith image packaging for Janssen.This image packs janssen services in
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-monolith/releases) for stable versions. This image should never be used in production.
-For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.2_dev`.
+For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.3_dev`.
 
 ## Environment Variables
 
@@ -40,7 +40,7 @@ The following environment variables are supported by the container:
 ## How to run
 
 ```bash
-docker compose -f mysql-docker-compose.yml up -d
+docker compose -f jans-mysql-compose.yml up -d
 ```
 
 ## Clean up
@@ -54,7 +54,7 @@ docker compose -f mysql-docker-compose.yml down && rm -rf jans-*
 ## Test
 
 ```bash
-docker exec -ti docker-jans-monolith_jans_1 bash
+docker exec -ti docker-jans-monolith-jans-1 bash
 ```
 
 Run 
@@ -80,5 +80,5 @@ After adding the record you can hit endpoints such as https://demoexample.jans.i
 Grab a fresh ubuntu 22.04 lts VM and run:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssendemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```

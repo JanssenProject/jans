@@ -1,3 +1,9 @@
+---
+tags:
+  - administration
+  - reference
+---
+
 # API Reference
 
 Janssen Server components publish REST API using OpenAPI specification and Java API using javadoc. 

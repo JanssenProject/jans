@@ -1,3 +1,9 @@
+---
+tags:
+  - administration
+  - recipes
+---
+
 ## Social Login with Google 
 
 An out-of-the-box feature, the Google Authentication script is a `PersonAuthenticationType` script which enables a user to sign-in using Google credentials. Google's OAuth 2.0 APIs are used for this. After users authenticate using their Google credentials, their Google credentials are provisioned into the Jans-auth server.

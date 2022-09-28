@@ -251,11 +251,6 @@ public class ComplexSearchUserTest extends UserBaseTest {
             String exId1=users[i-1].getExternalId();
             String exId2=users[i].getExternalId();
 
-            if (exId2!=null)
-                assertNotNull(exId1);
-            if (exId1==null)
-                assertNull(exId2);
-
             if (exId1!=null && exId2!=null)     //In descending order exId1 must be higher than exId2
                 assertFalse(exId1.compareTo(exId2)<0);
         }
