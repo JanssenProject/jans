@@ -58,6 +58,10 @@ public class ErrorMessages {
     @XmlElement(name = "error")
     private List<ErrorMessage> backchannelAuthentication;
 
+    @XmlElementWrapper(name = "ssa")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> ssa;
+
     public List<ErrorMessage> getAuthorize() {
         return authorize;
     }
@@ -136,5 +140,13 @@ public class ErrorMessages {
 
     public void setBackchannelAuthentication(List<ErrorMessage> backchannelAuthentication) {
         this.backchannelAuthentication = backchannelAuthentication;
+    }
+
+    public List<ErrorMessage> getSsa() {
+        return ssa;
+    }
+
+    public void setSsa(List<ErrorMessage> ssa) {
+        this.ssa = ssa;
     }
 }

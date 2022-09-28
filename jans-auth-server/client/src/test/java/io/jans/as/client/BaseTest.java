@@ -101,6 +101,7 @@ public abstract class BaseTest {
     protected String backchannelAuthenticationEndpoint;
     protected String revokeSessionEndpoint;
     protected String parEndpoint;
+    protected String ssaEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
     protected String issuer;
     protected String sharedKey;
@@ -235,6 +236,14 @@ public abstract class BaseTest {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public String getSsaEndpoint() {
+        return ssaEndpoint;
+    }
+
+    public void setSsaEndpoint(String ssaEndpoint) {
+        this.ssaEndpoint = ssaEndpoint;
     }
 
     public String getBackchannelAuthenticationEndpoint() {
@@ -835,6 +844,7 @@ public abstract class BaseTest {
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
             issuer = response.getIssuer();
+            ssaEndpoint = response.getSsaEndpoint();
         } else {
             showTitle("Loading configuration endpoints from properties file");
 
@@ -854,6 +864,7 @@ public abstract class BaseTest {
             revokeSessionEndpoint = context.getCurrentXmlTest().getParameter("revokeSessionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
             issuer = context.getCurrentXmlTest().getParameter("issuer");
+            ssaEndpoint = context.getCurrentXmlTest().getParameter("ssaEndpoint");
         }
 
         authorizationPageEndpoint = determineAuthorizationPageEndpoint(authorizationEndpoint);
