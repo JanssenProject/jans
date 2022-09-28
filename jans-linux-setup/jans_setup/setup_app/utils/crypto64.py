@@ -158,9 +158,7 @@ class Crypto64:
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
-        # Remove extension_path when all scripts are moved to script_catalog_dir
-        extension_path = Path(Config.extensionFolder)
-        catalog_path = Path(Config.script_catalog_dir)
+        # Remove extensionFolder when all scripts are moved to script_catalog_dir
         for path_ in (Config.extensionFolder, Config.script_catalog_dir):
             extension_path = Path(path_)
             for ep in extension_path.glob("**/*"):
