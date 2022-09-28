@@ -129,6 +129,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
+        self.extract_scripts()
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -522,3 +523,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if inums:
             for inum in inums:
                 self.dbUtils.enable_script(inum, enable)
+
+    def extract_scripts(self):
+        base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
