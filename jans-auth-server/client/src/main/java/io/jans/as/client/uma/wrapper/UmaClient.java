@@ -221,16 +221,15 @@ public class UmaClient {
 
         try {
             String tmpKeyId = keyId;
-            if (StringHelper.isEmpty(tmpKeyId)) {
+            if (StringHelper.isEmpty(keyId)) {
                 // Get first key
-                List<String> aliases = cryptoProvider.getKeys();
-                if (!aliases.isEmpty()) {
-                    tmpKeyId = aliases.get(0);
-                }
-            }
+            	tmpKeyId = cryptoProvider.getKeys().stream().filter(k -> k.contains("_sig_")).findFirst().orElse(null);
 
-            if (StringHelper.isEmpty(tmpKeyId)) {
-                throw new UmaException("UMA keyId is empty");
+                if (StringHelper.isEmpty(tmpKeyId)) {
+                    throw new UmaException("Unable to find a key in the keystore with use = sig");
+                }
+            } else if (keyId.contains("_enc_")) {
+                throw new UmaException("Encryption keys not allowed. Supply a key having use = sig");
             }
 
             SignatureAlgorithm algorithm = cryptoProvider.getSignatureAlgorithm(tmpKeyId);
