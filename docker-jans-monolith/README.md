@@ -54,7 +54,7 @@ docker compose -f mysql-docker-compose.yml down && rm -rf jans-*
 ## Test
 
 ```bash
-docker exec -ti docker-jans-monolith_jans_1 bash
+docker exec -ti docker-jans-monolith-jans-1 bash
 ```
 
 Run 
