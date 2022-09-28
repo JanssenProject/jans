@@ -3,6 +3,7 @@ import sys
 
 import threading
 from asyncio import ensure_future
+from functools import partial
 
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
@@ -216,7 +217,11 @@ class Plugin():
         Args:
             start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
         """
-        endpoint_args ='limit:10'
+
+        def get_next(start_index, pattern=''):
+            self.oauth_update_scopes(start_index, pattern='')
+
+        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
         if pattern:
             endpoint_args +=',pattern:'+pattern
         try :
@@ -227,8 +232,7 @@ class Plugin():
                 data_fn=None,
                 data={}
                         )
-        
-        
+
         except Exception as e:
             self.app.show_message(_("Error getting scopes"), str(e))
             return
@@ -249,7 +253,7 @@ class Plugin():
             data.append(
                 [
                 d['id'],
-                d['description'],
+                d.get('description', ''),
                 d['scopeType'],
                 d['inum']
                 ]
@@ -274,9 +278,15 @@ class Plugin():
 
             buttons = []
             if start_index > 0:
-                buttons.append(Button(_("Prev")))
-            if len(result) >= 10:
-                buttons.append(Button(_("Next")))
+                handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
+                prev_button = Button(_("Prev"), handler=handler_partial)
+                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                buttons.append(prev_button)
+            if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
+                handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
+                next_button = Button(_("Next"), handler=handler_partial)
+                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                buttons.append(next_button)
 
             self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
             self.oauth_data_container['scopes'] = HSplit([

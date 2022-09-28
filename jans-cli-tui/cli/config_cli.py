@@ -948,9 +948,6 @@ class JCA_CLI:
         if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
 
-        if params:
-            url += '?' + urlencode(params)
-
         response = requests.get(
             url = url,
             headers=self.get_request_header({'Accept': 'application/json'}),

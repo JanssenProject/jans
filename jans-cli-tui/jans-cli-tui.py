@@ -80,6 +80,7 @@ class JansCliApp(Application):
         self._plugins = []
         self._load_plugins()
         self.set_keybindings()
+        self.entries_per_page = 20 # we can make this configurable
         # -------------------------------------------------------------------------------- #
 
         self.not_implemented = Frame(
