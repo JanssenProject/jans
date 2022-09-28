@@ -30,20 +30,20 @@ public class Util {
     }
     
     public List<String> getTokens(String str, String format) {
-        log.error(" String to get tokens - str:{}, format:{}", str, format);
+        log.debug(" String to get tokens - str:{}, format:{}", str, format);
         if (StringUtils.isBlank(str)) {
             return Collections.emptyList();
         }
         
-        log.error("str.contains(format):{}", str.contains(format));
+        log.debug("str.contains(format):{}", str.contains(format));
         if( !str.contains(format)) {
-            ArrayList<String> list = new ArrayList();
+            ArrayList<String> list = new ArrayList<>();
             list.add(str);
             log.debug(" Not tokenized - list:{}", list);
             return (list);
         }
         
-        log.error("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
+        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
                 .collect(Collectors.toList()));
         return Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());
