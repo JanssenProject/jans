@@ -143,7 +143,10 @@ parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
 if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
-    excluded_operations['jca'] += ['get-user', 'post-user', 'put-user', 'get-user-by-inum', 'delete-user', 'patch-user-by-inum']
+    excluded_operations['jca'] += [
+                    'get-user', 'post-user', 'put-user', 'get-user-by-inum', 'delete-user', 'patch-user-by-inum',
+                    'get-properties-fido2', 'put-properties-fido2', 'get-registration-entries-fido2',
+                    ]
 
 if not args.no_suggestion:
     from prompt_toolkit import prompt, HTML
