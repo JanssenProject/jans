@@ -248,6 +248,7 @@ class Config:
         self.staticFolder = os.path.join(self.install_dir, 'static')
 
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
+        self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
 
         self.encoded_ldapTrustStorePass = None
 
