@@ -130,16 +130,19 @@ class Plugin():
         else:
             self.oauth_main_area = self.app.not_implemented
 
-    def oauth_update_clients(self, pattern=''):
+    def oauth_update_clients(self, start_index=0, pattern=''):
         """update the current clients data to server
 
         Args:
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
-        endpoint_args ='limit:10'
+
+        def get_next(start_index, pattern=''):
+            self.oauth_update_clients(start_index, pattern='')
+
+        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
         if pattern:
             endpoint_args +=',pattern:'+pattern
-
         try :
             rsponse = self.app.cli_object.process_command_by_id(
                         operation_id='get-oauth-openid-clients',
@@ -193,16 +196,38 @@ class Plugin():
                 entriesColor='white',
                 all_data=result['entries']
             )
+            buttons = []
+            if start_index > 0:
+                handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
+                prev_button = Button(_("Prev"), handler=handler_partial)
+                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                buttons.append(prev_button)
+            if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
+                handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
+                next_button = Button(_("Next"), handler=handler_partial)
+                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                buttons.append(next_button)
 
-            self.app.layout.focus(clients)
+            self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
             self.oauth_data_container['clients'] = HSplit([
-                clients
+                clients,
+                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
             ])
+
             get_app().invalidate()
 
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
-            # self.app.layout.focus(self.oauth_containers['clients'])
+
+        #     self.app.layout.focus(clients)
+        #     self.oauth_data_container['clients'] = HSplit([
+        #         clients
+        #     ])
+        #     get_app().invalidate()
+
+        # else:
+        #     self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
+        #     # self.app.layout.focus(self.oauth_containers['clients'])
 
     def oauth_get_clients(self):
         """Method to get the clients data from server
@@ -217,7 +242,6 @@ class Plugin():
         Args:
             start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
         """
-
         def get_next(start_index, pattern=''):
             self.oauth_update_scopes(start_index, pattern='')
 
@@ -246,15 +270,15 @@ class Plugin():
         except Exception:
             self.app.show_message(_("Error getting scopes"), str(rsponse.text))
             return
-
-
+        
         data =[]
+        
         for d in result.get('entries', []): 
             data.append(
                 [
                 d['id'],
                 d.get('description', ''),
-                d['scopeType'],
+                d.get('scopeType',''),   ## some scopes have no scopetypr
                 d['inum']
                 ]
             )
