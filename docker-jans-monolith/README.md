@@ -7,7 +7,7 @@ Docker monolith image packaging for Janssen.This image packs janssen services in
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-monolith/releases) for stable versions. This image should never be used in production.
-For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.2_dev`.
+For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.3_dev`.
 
 ## Environment Variables
 
@@ -80,5 +80,5 @@ After adding the record you can hit endpoints such as https://demoexample.jans.i
 Grab a fresh ubuntu 22.04 lts VM and run:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssendemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
