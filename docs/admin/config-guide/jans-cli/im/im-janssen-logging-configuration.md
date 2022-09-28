@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - configuration
+  - cli
+  - interactive
+---
+
 # Log Management
 
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)

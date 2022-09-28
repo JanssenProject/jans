@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - installation
+  - vm
+---
+
 # VM System Requirements
 
 Janssen Server needs below-mentioned minimal resources on VM.

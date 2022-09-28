@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - customization
+---
+
 All web pages are **xhtml** files. 
 
 ### Default pages bundled in the `jans-auth.war` are: 

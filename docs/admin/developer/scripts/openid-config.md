@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - scripts
+---
+
 # OpenID Configuration Script Guide
 
 ## Overview

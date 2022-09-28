@@ -113,6 +113,7 @@ public class FullUserTest extends UserBaseTest {
         String scapedBkSlash = String.valueOf(new char[]{backslash, backslash});
         //Used to generate a random Unicode char
         String rnd = UUID.randomUUID().toString().substring(0, 4);
+        logger.debug("Using random unicode character (HEX): {}", rnd);
         String unicodeStr = String.valueOf(Character.toChars(Integer.parseInt(rnd, 16)));
 
         Name name = user.getName();

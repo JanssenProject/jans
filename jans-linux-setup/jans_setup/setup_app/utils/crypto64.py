@@ -190,7 +190,10 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def import_key_cert_into_keystore(self, suffix, keystore_fn, keystore_pw, in_key, in_cert, alias=None):
+    def import_key_cert_into_keystore(self, suffix, keystore_fn, keystore_pw, in_key, in_cert, alias=None, store_type=None):
+
+        if not store_type:
+            store_type = Config.default_store_type
 
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
@@ -212,7 +215,7 @@ class Crypto64:
                   '-srcstoretype', 'PKCS12',
                   '-destkeystore', keystore_fn,
                   '-deststorepass', keystore_pw,
-                  '-deststoretype', 'JKS',
+                  '-deststoretype', store_type,
                   '-noprompt'
                   ]
         if alias:

@@ -43,7 +43,7 @@ git clone --filter blob:none --no-checkout https://github.com/janssenproject/jan
     && cd "$WORKING_DIRECTORY"
 
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
-  docker compose -f /tmp/jans/docker-jans-monolith/mysql-docker-compose.yml up -d
+  docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml up -d
 fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 echo "Waiting for the Janssen server to come up. Depending on the  resources it may take 3-5 mins for the services to be up."

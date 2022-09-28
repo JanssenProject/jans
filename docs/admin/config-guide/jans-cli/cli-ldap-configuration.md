@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - configuration
+  - cli
+  - commandline
+---
+
 
 # Lightweight Directory Active Protocol (LDAP) Configuration
 
