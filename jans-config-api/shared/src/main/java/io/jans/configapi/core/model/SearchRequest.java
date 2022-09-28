@@ -19,7 +19,8 @@ public class SearchRequest {
     private Integer startIndex;
     private Integer count;
     private int maxCount;
-    private List<String> filterAttributes;
+    private List<String> filterAttributeName;
+    private List<String> filterAssertionValue;
 
     @JsonIgnore
     private String attributesStr;
@@ -123,21 +124,28 @@ public class SearchRequest {
         this.maxCount = maxCount;
     }
 
-    public List<String> getFilterAttributes() {
-        return filterAttributes;
+    public List<String> getFilterAttributeName() {
+        return filterAttributeName;
     }
 
-    public void setFilterAttributes(List<String> filterAttributes) {
-        this.filterAttributes = filterAttributes;
+    public void setFilterAttributeName(List<String> filterAttributeName) {
+        this.filterAttributeName = filterAttributeName;
+    }
+
+    public List<String> getFilterAssertionValue() {
+        return filterAssertionValue;
+    }
+
+    public void setFilterAssertionValue(List<String> filterAssertionValue) {
+        this.filterAssertionValue = filterAssertionValue;
     }
 
     @Override
     public String toString() {
         return "SearchRequest [schemas=" + schemas + ", attributes=" + attributes + ", excludedAttributes="
                 + excludedAttributes + ", filter=" + filter + ", sortBy=" + sortBy + ", sortOrder=" + sortOrder
-                + ", startIndex=" + startIndex + ", count=" + count + ", maxCount=" + maxCount + ", filterAttributes="
-                + filterAttributes + ", attributesStr=" + attributesStr + ", excludedAttributesStr="
-                + excludedAttributesStr + "]";
+                + ", startIndex=" + startIndex + ", count=" + count + ", maxCount=" + maxCount
+                + ", filterAttributeName=" + filterAttributeName + ", filterAssertionValue=" + filterAssertionValue
+                + ", attributesStr=" + attributesStr + ", excludedAttributesStr=" + excludedAttributesStr + "]";
     }
-
 }

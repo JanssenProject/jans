@@ -9,6 +9,8 @@ import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -24,8 +26,6 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
         log.debug("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
 
-        String[] targetArray = new String[] { searchRequest.getFilter() };
-
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
             activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active");
@@ -33,16 +33,26 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
             activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "inactive");
         }
 
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                null);
-        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
-                null);
-        Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ATTR_NAME, null, targetArray, null);
-        Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
+        Filter searchFilter = null;
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
+           
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                        targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                        targetArray, null);
+                Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ATTR_NAME, null, targetArray,
+                        null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
+        }
 
+        
         if (activeFilter != null) {
-            searchFilter = Filter.createANDFilter(
-                    Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter), activeFilter);
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters), activeFilter);
         }
 
         log.debug("GluuAttributes to be fetched with searchFilter:{}", searchFilter);
