@@ -129,7 +129,7 @@ public class ScopesResource extends ConfigBaseResource {
     public Response getScopeByClientId(@NotNull @PathParam(ApiConstants.CREATORID) String creatorId) {
         log.debug("SCOPES to be fetched by creatorId:{}", creatorId);
         SearchRequest searchReq = new SearchRequest();
-        searchReq.setFilterAttributes(Arrays.asList("creatorId"));
+        searchReq.setFilterAttributeName(Arrays.asList("creatorId"));
         searchReq.setFilter(creatorId);
         List<CustomScope> scopes = scopeService.searchScope(searchReq);
         return Response.ok(scopes).build();
@@ -149,7 +149,7 @@ public class ScopesResource extends ConfigBaseResource {
     public Response getScopeByType(@NotNull @PathParam(ApiConstants.TYPE) String type) {
         log.debug("SCOPES to be fetched by type:{}", type);
         SearchRequest searchReq = new SearchRequest();
-        searchReq.setFilterAttributes(Arrays.asList("jansScopeTyp"));
+        searchReq.setFilterAttributeName(Arrays.asList("jansScopeTyp"));
         searchReq.setFilter(type);
         List<CustomScope> scopes = scopeService.searchScope(searchReq);
         return Response.ok(scopes).build();

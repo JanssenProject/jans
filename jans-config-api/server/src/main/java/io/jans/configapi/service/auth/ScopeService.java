@@ -188,12 +188,12 @@ public class ScopeService {
     public List<CustomScope> searchScope(SearchRequest searchRequest) {
         logger.debug("Search Scope with searchRequest:{}", searchRequest);
 
-        if (searchRequest != null && searchRequest.getFilterAttributes() != null
-                && !searchRequest.getFilterAttributes().isEmpty()) {
+        if (searchRequest != null && searchRequest.getFilterAttributeName() != null
+                && !searchRequest.getFilterAttributeName().isEmpty()) {
 
             ArrayList<Filter> searchFilters = new ArrayList<>();
 
-            for (String filterAttribute : searchRequest.getFilterAttributes()) {
+            for (String filterAttribute : searchRequest.getFilterAttributeName()) {
                 Filter filter = Filter.createEqualityFilter(filterAttribute, searchRequest.getFilter());
                 searchFilters.add(filter);
             }
