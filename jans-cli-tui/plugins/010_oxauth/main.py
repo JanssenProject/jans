@@ -386,7 +386,7 @@ class Plugin():
     def add_scope(self):
         """Method to display the dialog of clients
         """
-        dialog = EditScopeDialog(self.app, data={}, save_handler=self.save_scope)
+        dialog = EditScopeDialog(self.app, title="Add New Scope",data={}, save_handler=self.save_scope)
         result = self.app.show_jans_dialog(dialog)
 
 
