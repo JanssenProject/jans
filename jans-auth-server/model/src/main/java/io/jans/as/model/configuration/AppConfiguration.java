@@ -13,6 +13,7 @@ import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
+import io.jans.as.model.ssa.SsaConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -323,6 +324,8 @@ public class AppConfiguration implements Configuration {
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
     
     private EngineConfig agamaConfiguration;
+
+    private SsaConfiguration ssaConfiguration;
 
     public Boolean getRequireRequestObjectEncryption() {
         if (requireRequestObjectEncryption == null) requireRequestObjectEncryption = false;
@@ -2569,5 +2572,13 @@ public class AppConfiguration implements Configuration {
 
     public void setAgamaConfiguration(EngineConfig agamaConfiguration) {
         this.agamaConfiguration = agamaConfiguration;
+    }
+
+    public SsaConfiguration getSsaConfiguration() {
+        return ssaConfiguration;
+    }
+
+    public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
+        this.ssaConfiguration = ssaConfiguration;
     }
 }

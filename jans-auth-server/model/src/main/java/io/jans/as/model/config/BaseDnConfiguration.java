@@ -59,6 +59,8 @@ public class BaseDnConfiguration {
     private String stat;
     @XmlElement(name = "par")
     private String par;
+    @XmlElement(name = "ssa")
+    private String ssa;
 
     public String getStat() {
         return stat;
@@ -202,5 +204,13 @@ public class BaseDnConfiguration {
 
     public void setCiba(String ciba) {
         this.ciba = ciba;
+    }
+
+    public String getSsa() {
+        return ssa;
+    }
+
+    public void setSsa(String ssa) {
+        this.ssa = ssa;
     }
 }
