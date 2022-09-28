@@ -24,7 +24,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     }
 
     public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
-        log.error("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
+        log.debug("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
@@ -55,7 +55,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters), activeFilter);
         }
 
-        log.error("GluuAttributes to be fetched with searchFilter:{}", searchFilter);
+        log.debug("GluuAttributes to be fetched with searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForAttribute(null), GluuAttribute.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
