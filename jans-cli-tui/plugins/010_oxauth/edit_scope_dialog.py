@@ -124,7 +124,7 @@ class EditScopeDialog(DialogUtils):
                                 _("Scope Type"),  ## TODO need to be handled
                                 name='scopeType', 
                                 current_value=self.data.get('scopeType'),
-                                values=[('oauth', 'Auth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
+                                values=[('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
                                 on_selection_changed=self.scope_selection_changed,
                                 style='green'),
 
