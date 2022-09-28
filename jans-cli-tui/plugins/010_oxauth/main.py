@@ -219,16 +219,6 @@ class Plugin():
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
 
-        #     self.app.layout.focus(clients)
-        #     self.oauth_data_container['clients'] = HSplit([
-        #         clients
-        #     ])
-        #     get_app().invalidate()
-
-        # else:
-        #     self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
-        #     # self.app.layout.focus(self.oauth_containers['clients'])
-
     def oauth_get_clients(self):
         """Method to get the clients data from server
         """ 
@@ -323,7 +313,6 @@ class Plugin():
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['scopes'])
 
-
     def oauth_get_scopes(self):
         """Method to get the Scopes data from server
         """
@@ -335,9 +324,6 @@ class Plugin():
         pass
 
     def edit_client_dialog(self, **params):
-        # self.app.logger.debug('selected_line_data: '+str(params['data']))
-
-        
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
 
@@ -371,7 +357,6 @@ class Plugin():
             return True
 
         self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
-
 
     def save_scope(self, dialog):
         """This method to save the client data to server
@@ -423,7 +408,6 @@ class Plugin():
         dialog = EditScopeDialog(self.app, title="Add New Scope",data={}, save_handler=self.save_scope)
         result = self.app.show_jans_dialog(dialog)
 
-
     def add_client(self):
         """Method to display the dialog of clients
         """
@@ -464,7 +448,6 @@ class Plugin():
 
         ensure_future(coroutine())
 
-
     def delete_scope(self, selected, event):
         """This method for the deletion of the clients data
 
@@ -501,8 +484,7 @@ class Plugin():
 
         ensure_future(coroutine())
 
-    def edit_scope_dialog(self, **params):
-        
+    def edit_scope_dialog(self, **params): 
         selected_line_data = params['data']  
         title = _("Edit Scopes")
 
