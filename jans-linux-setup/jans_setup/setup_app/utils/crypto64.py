@@ -158,19 +158,21 @@ class Crypto64:
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
-        extension_path = Path(Config.extensionFolder)
-        for ep in extension_path.glob("**/*"):
-            if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
-                extension_type = ep.relative_to(Config.extensionFolder).parent.as_posix().lower().replace(os.path.sep, '_')
-                extension_name = ep.stem.lower()
-                extension_script_name = '{}_{}'.format(extension_type, extension_name)
+        # Remove extensionFolder when all scripts are moved to script_catalog_dir
+        for path_ in (Config.extensionFolder, Config.script_catalog_dir):
+            extension_path = Path(path_)
+            for ep in extension_path.glob("**/*"):
+                if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
+                    extension_type = ep.relative_to(path_).parent.as_posix().lower().replace(os.path.sep, '_').replace('-','_')
+                    extension_name = ep.stem.lower()
+                    extension_script_name = '{}_{}'.format(extension_type, extension_name)
 
-                if extensions and extension_script_name in extensions:
-                    continue
+                    if extensions and extension_script_name in extensions:
+                        continue
 
-                # Prepare key for dictionary
-                base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
-                Config.templateRenderingDict[extension_script_name] = base64_script_file
+                    # Prepare key for dictionary
+                    base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
+                    Config.templateRenderingDict[extension_script_name] = base64_script_file
 
 
     def generate_base64_file(self, fn, num_spaces):
