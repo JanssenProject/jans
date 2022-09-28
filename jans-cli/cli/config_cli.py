@@ -29,6 +29,7 @@ config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+log_dir = os.environ.get('cli_log_dir', cur_dir)
 sys.path.append(cur_dir)
 
 from pylib.tabulate.tabulate import tabulate
@@ -43,6 +44,7 @@ tabulate_endpoints = {
     'jca.get-all-attribute': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
     'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
     'jca.get-oauth-scopes': ['dn', 'id', 'scopeType'],
+    'jca.get-oauth-uma-resources': ['dn', 'name', 'expirationDate'],
     'scim.get-users': ['id', 'userName', 'displayName', 'active']
 }
 
@@ -73,8 +75,6 @@ client_id = os.environ.get(my_op_mode + 'jca_client_id')
 client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
 access_token = None
 debug = os.environ.get('jans_client_debug')
-debug_log_file = os.environ.get('jans_debug_log_file')
-error_log_file = os.path.join(cur_dir, 'error.log')
 
 def encode_decode(s, decode=False):
     cmd = '/opt/jans/bin/encode.py '
@@ -114,7 +114,6 @@ parser.add_argument("--client-secret", "--client_secret", help="Jans Config Api 
 parser.add_argument("--access-token", help="JWT access token or path to file containing JWT access token")
 parser.add_argument("--plugins", help="Available plugins separated by comma")
 parser.add_argument("-debug", help="Run in debug mode", action='store_true')
-parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
 parser.add_argument("--operation-id", help="Operation ID to be done")
 parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
@@ -136,11 +135,18 @@ parser.add_argument("--patch-add", help="Colon delimited key:value pair for add 
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
 parser.add_argument("--no-suggestion", help="Do not use prompt toolkit to display word completer", action='store_true')
+parser.add_argument("-log-dir", help="Do not use prompt toolkit to display word completer", default=log_dir)
+
 
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
+if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
+    excluded_operations['jca'] += [
+                    'get-user', 'post-user', 'put-user', 'get-user-by-inum', 'delete-user', 'patch-user-by-inum',
+                    'get-properties-fido2', 'put-properties-fido2', 'get-registration-entries-fido2',
+                    ]
 
 if not args.no_suggestion:
     from prompt_toolkit import prompt, HTML
@@ -165,7 +171,6 @@ if not(host and (client_id and client_secret or access_token)):
     client_id = args.client_id
     client_secret = args.client_secret
     debug = args.debug
-    debug_log_file = args.debug_log_file
 
     access_token = args.access_token
     if access_token and os.path.isfile(access_token):
@@ -194,7 +199,8 @@ if not(host and (client_id and client_secret or access_token)):
             client_secret = encode_decode(client_secret_enc, decode=True)
 
         debug = config['DEFAULT'].get('debug')
-        debug_log_file = config['DEFAULT'].get('debug_log_file')
+        log_dir = config['DEFAULT'].get('log_dir', log_dir)
+
     else:
         config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net',
                              'jca_client_id': 'your jans config api client id',
@@ -309,7 +315,7 @@ class JCA_CLI:
 
         self.swagger_configuration.debug = debug
         if self.swagger_configuration.debug:
-            self.swagger_configuration.logger_file = debug_log_file
+            self.swagger_configuration.logger_file = os.path.join(log_dir, 'swagger.log')
 
         self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
 
@@ -793,10 +799,14 @@ class JCA_CLI:
             print(' ' * spacing, self.colored_text('«{}»'.format(help_text), 244), sep='')
 
         if example:
+            join_char = '_,' if itype == 'array' else ', '
             if isinstance(example, list):
-                example_str = ', '.join(example)
+                example_str = join_char.join(example)
             else:
                 example_str = str(example)
+            if join_char == '_,':
+                example_str = example_str.replace(' ', join_char)
+
             print(' ' * spacing, self.colored_text('Example: {}'.format(example_str), 244), sep='')
 
         if not default is None:
@@ -820,6 +830,11 @@ class JCA_CLI:
                 selection = prompt(HTML(' ' * spacing + text + ' '), completer=html_completer)
 
             selection = selection.strip()
+
+            if selection == '_b':
+                self.display_menu(self.current_menu)
+                break
+
             if selection.startswith('_file '):
                 fname = selection.split()[1]
                 if os.path.isfile(fname):
@@ -1190,24 +1205,24 @@ class JCA_CLI:
                                 elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
                                     entry[attrib['name']] = attrib['values'][0]
 
-                elif endpoint.info['operationId'] == 'get-all-attribute':
-                    if 'data' in api_response_unmapped_ext:
-                        api_response_unmapped_ext = api_response_unmapped_ext['data']
 
-                elif endpoint.info['operationId'] == 'get-oauth-openid-clients':
+                if 'entries' in api_response_unmapped_ext:
+                    api_response_unmapped_ext = api_response_unmapped_ext['entries']
+
+                if endpoint.info['operationId'] == 'get-oauth-openid-clients':
                     for entry in api_response_unmapped_ext:
-                        if entry.get('displayName'):
-                            break
                         for custom_attrib in entry.get('customAttributes', []):
                             if custom_attrib.get('name') == 'displayName':
                                 entry['displayName'] = custom_attrib.get('value') or custom_attrib.get('values',['?'])[0]
                                 break
+                        if isinstance(entry['clientName'], dict) and 'value' in entry['clientName']:
+                            entry['clientName'] = entry['clientName']['value']
 
                 tab_data = api_response_unmapped_ext
                 if op_mode_endpoint in tabular_dataset:
                     tab_data = api_response_unmapped_ext[tabular_dataset[op_mode_endpoint]]
                 self.tabular_data(tab_data, op_mode_endpoint)
-                item_counters = [str(i + 1) for i in range(len(api_response_unmapped))]
+                item_counters = [str(i + 1) for i in range(len(tab_data))]
                 tabulated = True
             else:
                 self.print_colored_output(api_response_unmapped)
@@ -1230,8 +1245,8 @@ class JCA_CLI:
             elif selection in item_counters:
                 if my_op_mode == 'scim' and 'Resources' in api_response_unmapped:
                     items = api_response_unmapped['Resources'] 
-                elif my_op_mode == 'jca' and 'data' in api_response_unmapped:
-                    items = api_response_unmapped['data']
+                elif my_op_mode == 'jca' and 'entries' in api_response_unmapped:
+                    items = api_response_unmapped['entries']
                 self.pretty_print(items[int(selection) - 1])
 
     def get_schema_from_reference(self, ref):
@@ -1480,6 +1495,7 @@ class JCA_CLI:
                 if not field in required_fields:
                     optional_fields.append(field)
 
+            optional_fields.sort()
             if optional_fields:
                 fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
                 fields_numbers = []
@@ -1559,7 +1575,6 @@ class JCA_CLI:
             self.display_menu(endpoint.parent)
 
     def process_patch(self, endpoint):
-
         if endpoint.info['operationId'] == 'patch-user-by-inum':
             schema = self.cfg_yml['components']['schemas']['CustomAttribute'].copy()
             schema['__schema_name__'] = 'CustomAttribute'
@@ -1575,6 +1590,12 @@ class JCA_CLI:
             schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
             schema['__schema_name__'] = 'PatchRequest'
             model = getattr(swagger_client.models, 'PatchRequest')
+
+        parent_schema = {}
+ 
+        schema_ref = endpoint.info.get('responses', {}).get('200', {}).get('content', {}).get('application/json', {}).get('schema', {}).get('$ref')
+        if schema_ref:
+            parent_schema = self.get_schema_from_reference(schema_ref)
 
         url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
@@ -1597,6 +1618,11 @@ class JCA_CLI:
                 if my_op_mode == 'scim':
                     data.path = data.path.replace('/', '.')
 
+                if parent_schema and 'properties' in parent_schema:
+                    for prop_ in parent_schema['properties']:
+                        if data.path.lstrip('/') == prop_:
+                            if parent_schema['properties'][prop_]['type'] == 'array':
+                                data.value = data.value.split('_,')
             body.append(data)
             selection = self.get_input(text='Another patch operation?', values=['y', 'n'])
             if selection == 'n':
@@ -2304,7 +2330,7 @@ class JCA_CLI:
 def main():
 
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
-
+    error_log_file = os.path.join(log_dir, 'error.log')
     try:
         if not access_token:
             cli_object.check_connection()
