@@ -1167,4 +1167,11 @@
             <class name="io.jans.as.client.ws.rs.AuthorizationAcrValuesTest"/>
         </classes>
     </test>
+
+    <!-- SSA -->
+    <test name="SSA test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.SsaRestWebServiceHttpTest"/>
+        </classes>
+    </test>
 </suite>

@@ -30,7 +30,8 @@ public enum FeatureFlagType {
     DEVICE_AUTHZ("device_authz"),
     METRIC("metric"),
     STAT("stat"),
-    PAR("par");
+    PAR("par"),
+    SSA("ssa");
 
     private final String value;
 

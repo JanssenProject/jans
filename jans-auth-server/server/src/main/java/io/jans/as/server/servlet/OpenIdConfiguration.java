@@ -283,6 +283,11 @@ public class OpenIdConfiguration extends HttpServlet {
             // CIBA Configuration
             cibaConfigurationService.processConfiguration(jsonObj);
 
+            // SSA
+            if (appConfiguration.isFeatureEnabled(FeatureFlagType.SSA)) {
+                jsonObj.put(SSA_ENDPOINT, appConfiguration.getSsaConfiguration().getSsaEndpoint());
+            }
+
             filterOutKeys(jsonObj, appConfiguration);
             localResponseCache.putDiscoveryResponse(jsonObj);
 

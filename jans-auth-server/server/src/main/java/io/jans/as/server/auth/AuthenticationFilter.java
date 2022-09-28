@@ -89,7 +89,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
                 "/restv1/bc-authorize",
                 "/restv1/par",
                 "/restv1/device_authorization",
-                "/restv1/register"
+                "/restv1/register",
+                "/restv1/ssa"
         },
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
@@ -163,6 +164,7 @@ public class AuthenticationFilter implements Filter {
             boolean deviceAuthorizationEndpoint = requestUrl.endsWith("/device_authorization");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             boolean isParEndpoint = requestUrl.endsWith("/par");
+            boolean ssaEndpoint = requestUrl.endsWith("/ssa");
             String authorizationHeader = httpRequest.getHeader(Constants.AUTHORIZATION);
             String dpopHeader = httpRequest.getHeader("DPoP");
 
@@ -176,7 +178,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint) {
+            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint || ssaEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
