@@ -48,6 +48,8 @@ import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.model.custom.script.type.session.DummyApplicationSessionType;
 import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
+import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
+import io.jans.model.custom.script.type.ssa.ModifySsaResponseType;
 import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.model.custom.script.type.uma.UmaClaimsGatheringType;
@@ -99,7 +101,9 @@ public enum CustomScriptType implements AttributeEnum {
     IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType()),
     DISCOVERY("discovery", "Discovery", DiscoveryType.class, CustomScript.class, "Discovery", new DummyDiscoveryType()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
-    CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType());
+    CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
+    MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),
+    ;
 
     private String value;
     private String displayName;

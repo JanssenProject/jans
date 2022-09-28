@@ -21,6 +21,7 @@ import io.jans.as.server.revoke.RevokeSessionRestWebService;
 import io.jans.as.server.session.ws.rs.CheckSessionStatusRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.SessionRestWebService;
+import io.jans.as.server.ssa.ws.rs.SsaRestWebServiceImpl;
 import io.jans.as.server.token.ws.rs.TokenRestWebServiceImpl;
 import io.jans.as.server.uma.ws.rs.UmaGatheringWS;
 import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
@@ -80,6 +81,8 @@ public class ResteasyInitializer extends Application {
         classes.add(BackchannelDeviceRegistrationRestWebServiceImpl.class);
 
         classes.add(StatWS.class);
+
+        classes.add(SsaRestWebServiceImpl.class);
 
         return classes;
     }
