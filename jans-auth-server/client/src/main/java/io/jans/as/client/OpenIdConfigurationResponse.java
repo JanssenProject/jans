@@ -89,6 +89,9 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
     private Boolean backchannelUserCodeParameterSupported;
 
+    // SSA
+    private String ssaEndpoint;
+
     public OpenIdConfigurationResponse() {
     }
 
@@ -1186,6 +1189,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.mltsAliases = mltsAliases;
     }
 
+    public String getSsaEndpoint() {
+        return ssaEndpoint;
+    }
+
+    public void setSsaEndpoint(String ssaEndpoint) {
+        this.ssaEndpoint = ssaEndpoint;
+    }
+
     @Override
     public String toString() {
         return "OpenIdConfigurationResponse{" +
@@ -1246,6 +1257,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", backchannelAuthenticationRequestSigningAlgValuesSupported=" + backchannelAuthenticationRequestSigningAlgValuesSupported + '\'' +
                 ", backchannelUserCodeParameterSupported=" + backchannelUserCodeParameterSupported + '\'' +
                 ", mltsAliases=" + mltsAliases + '\'' +
+                ", ssaEndpoint=" + ssaEndpoint + '\'' +
                 '}';
     }
 }
