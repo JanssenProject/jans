@@ -144,7 +144,7 @@ nav:
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
-            - 'Quick Start Installation': 'admin/install/quick-start-install.md'
+            - 'Quick Start Installation': 'admin/install/vm-install/quick-start-install.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
             - 'Suse': 'admin/install/vm-install/suse.md'
