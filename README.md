@@ -73,7 +73,7 @@ For development and testing purposes, the Janssen Server can be quickly installe
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
 
-Full featured Janssen Server is now installed and ready to be used. See [Quick-Start Guide]() to know how to access and start configuring.
+Full featured Janssen Server is now installed and ready to be used. See [Quick-Start Guide](https://docs.jans.io/head/admin/install/vm-install/quick-start-install/) to know how to access and start configuring.
 
 
 ### Installation
