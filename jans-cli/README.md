@@ -83,7 +83,7 @@ If you would like to build `jans-cli` manually, you can go through the following
     Thus we can execute CLI as:
     
     ```sh
-    python3 config-cli.pyz --host snap.gluu.org --client-id 2000.09b47f56-1b9e-4443-bebd-bdf970406a15 --client-secret T68kLUz4YXnR
+    python3 config-cli.pyz --host demoexmple.gluu.org --client-id 2000.09b47f56-1b9e-4443-bebd-bdf970406a15 --client-secret T68kLUz4YXnR
     ```
 
 
