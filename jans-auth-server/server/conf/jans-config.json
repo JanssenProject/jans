@@ -400,6 +400,11 @@
         "PS384",
         "PS512"
     ],
+    "ssaConfiguration": {
+        "ssaEndpoint":"${config.oxauth.contextPath}/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "backchannelClientId": "123-123-123",
     "backchannelRedirectUri": "https://ce.gluu.info:8443/ciba/home.htm",
     "backchannelUserCodeParameterSupported": true,
