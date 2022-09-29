@@ -14,10 +14,13 @@
 
 	<build>
 		<finalName>fido2-server</finalName>
-
+		<filters>
+			<filter>profiles/default/config-build.properties</filter>
+		</filters>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
 				<includes>
 					<include>**/*.xml</include>
 					<include>**/*.properties</include>
