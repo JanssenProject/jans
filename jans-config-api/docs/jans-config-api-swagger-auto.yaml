@@ -2945,19 +2945,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        adminCanAccess:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -3386,9 +3386,9 @@ components:
           type: array
           items:
             type: string
-        displayValue:
-          type: string
         value:
+          type: string
+        displayValue:
           type: string
     LocalizedString:
       type: object
@@ -3397,13 +3397,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        value:
+          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
-        value:
-          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4088,6 +4088,8 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
+        ssaConfiguration:
+          $ref: '#/components/schemas/SsaConfiguration'
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4114,6 +4116,9 @@ components:
             - METRIC
             - STAT
             - PAR
+            - SSA
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -4123,8 +4128,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -4264,6 +4267,20 @@ components:
           type: object
           additionalProperties:
             type: string
+    SsaConfiguration:
+      type: object
+      properties:
+        ssaEndpoint:
+          type: string
+        ssaCustomAttributes:
+          type: array
+          items:
+            type: string
+        ssaSigningAlg:
+          type: string
+        ssaExpirationInDays:
+          type: integer
+          format: int32
     PersistenceConfiguration:
       type: object
       properties:
@@ -4339,6 +4356,7 @@ components:
           - discovery
           - update_token
           - config_api_auth
+          - modify_ssa_response
         programmingLanguage:
           type: string
           enum:
@@ -4749,10 +4767,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     SessionId:
       type: object
       properties:
