@@ -1,20 +1,26 @@
-package io.jans.as.server.service;
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
+package io.jans.fido2.service.app;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import io.jans.fido2.service.mds.TocService;
 import io.jans.service.cdi.async.Asynchronous ;
-import io.jans.service.cdi.event;.Scheduled;
-import io.jans.service.timer.event;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
@@ -24,6 +30,7 @@ import org.slf4j.Logger;
  */
 @ApplicationScoped
 @Named
+
 public class MDS3UpdateTimer {
 
 	private static final int DEFAULT_INTERVAL = 60 *60*24; // every 24 hours
