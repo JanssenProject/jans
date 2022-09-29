@@ -62,11 +62,29 @@ If you would like to build `jans-cli` manually, you can go through the following
     make zipapp
     ```
 
-You can verify with the following command line if everything is done successfully.
+    You can verify with the following command line if everything is done successfully.
 
-```
-python3 config-cli.pyz -h
-```
+    ```
+    python3 config-cli.pyz -h
+    ```
+
+5. Executing config-cli.pyz Remotely
+  Login your Jans Server. Execute the following command to find **client-id** and **client-secret**:
+    ```sh
+    cat /opt/jans/jans-setup/setup.properties.last | grep "role_based_client"
+    ```
+    It will output like this:
+    ```sh
+    role_based_client_encoded_pw=+U3XiW2uM/rnidqZ2mv9sw\=\=
+    role_based_client_id=2000.09b47f56-1b9e-4443-bebd-bdf970406a15
+    role_based_client_pw=T68kLUz4YXnR
+    ```
+    **client-id** is the value of **role_based_client_id** and **client-secret** is the value of **role_based_client_pw**
+    Thus we can execute CLI as:
+    
+    ```sh
+    python3 config-cli.pyz --host demoexmple.gluu.org --client-id 2000.09b47f56-1b9e-4443-bebd-bdf970406a15 --client-secret T68kLUz4YXnR
+    ```
 
 
 ### Standard Python package
