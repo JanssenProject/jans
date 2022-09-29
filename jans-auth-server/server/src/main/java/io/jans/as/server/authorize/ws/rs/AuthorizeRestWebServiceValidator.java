@@ -9,6 +9,8 @@ package io.jans.as.server.authorize.ws.rs;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
@@ -21,27 +23,15 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.RedirectUriResponse;
-import io.jans.as.server.service.RedirectionUriService;
-import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -49,11 +39,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
+import java.util.*;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 import static io.jans.as.model.crypto.signature.SignatureAlgorithm.NONE;
@@ -353,8 +345,11 @@ public class AuthorizeRestWebServiceValidator {
 
     public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, @Nullable String state,
                                       @Nullable String deviceAuthzUserCode, @Nullable HttpServletRequest httpRequest, @NotNull AuthorizeErrorResponseType error) {
-        if (appConfiguration.isFapi()) {
-            return redirectUri; // FAPI validator will check it in the request object.
+        if (appConfiguration.isFapi() && StringUtils.isNotBlank(redirectUri) && StringUtils.isBlank(redirectionUriService.validateRedirectionUri(client, redirectUri))) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(error, state, ""))
+                    .build());
         }
 
         if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
