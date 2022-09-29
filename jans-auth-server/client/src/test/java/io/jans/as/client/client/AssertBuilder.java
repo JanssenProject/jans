@@ -55,4 +55,7 @@ public class AssertBuilder {
         return new JweAssertBuilder(jwe);
     }
 
+    public static SsaResponseAssertBuilder ssaResponse(SsaRequest request, SsaResponse response) {
+        return new SsaResponseAssertBuilder(request, response);
+    }
 }

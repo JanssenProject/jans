@@ -191,6 +191,11 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         if (jsonObj.has(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED)) {
             response.setBackchannelUserCodeParameterSupported(jsonObj.getBoolean(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED));
         }
+
+        // SSA
+        if (jsonObj.has(SSA_ENDPOINT)) {
+            response.setSsaEndpoint(jsonObj.optString(SSA_ENDPOINT));
+        }
     }
 
     public static OpenIdConfigurationResponse parse(String json) {
