@@ -5,7 +5,7 @@
  */
 
 package io.jans.as.server.service;
-import package io.jans.as.server.service.MDS3UpdateEvent;
+
 import com.google.common.collect.Lists;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.EncryptionService;
@@ -147,9 +147,6 @@ public class AppInitializer {
 
     @Inject
     private CleanerTimer cleanerTimer;
-    
-    @Inject
-	private MDS3UpdateTimer mds3UpdateTimer;
 
     @Inject
     private KeyGeneratorTimer keyGeneratorTimer;
@@ -240,7 +237,6 @@ public class AppInitializer {
         expirationNotificatorTimer.initTimer();
         initTimer();
         initCibaRequestsProcessor();
-        mds3UpdateTimer.initTimer();
 
         // Set default authentication method after
         setDefaultAuthenticationMethod(newConfiguration);

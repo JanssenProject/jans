@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import io.jans.fido2.service.mds.TocService;
-import io.jans.service.cdi.async.Asynchronous ;
+import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 
 public class MDS3UpdateTimer {
 
-	private static final int DEFAULT_INTERVAL = 60 *60*24; // every 24 hours
+	private static final int DEFAULT_INTERVAL = 60 * 60 * 24; // every 24 hours
 
 	@Inject
 	private Logger log;
@@ -47,8 +47,8 @@ public class MDS3UpdateTimer {
 	public void initTimer() {
 		log.info("Initializing MDS3 Update Timer");
 
-		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new MDS3UpdateEvent() {},
-				Scheduled.Literal.INSTANCE));
+		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new MDS3UpdateEvent() {
+		}, Scheduled.Literal.INSTANCE));
 
 		log.info("Initialized MDS3 Update Timer");
 	}
@@ -67,7 +67,7 @@ public class MDS3UpdateTimer {
 			}
 			tocService.refresh();
 		} else {
-			log.info( "{} more days for MDS3 Update",LocalDate.now().until(nextUpdate, ChronoUnit.DAYS) );
+			log.info("{} more days for MDS3 Update", LocalDate.now().until(nextUpdate, ChronoUnit.DAYS));
 		}
 	}
 

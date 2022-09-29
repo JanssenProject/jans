@@ -81,18 +81,19 @@ public class AttestationCertificateService {
         this.rootCertificatesMap = certificateService.getCertificatesMap(authenticatorCertsFolder);
 	}
 
-	public List<X509Certificate> getAttestationRootCertificates(JsonNode metadataNode, List<X509Certificate> attestationCertificates) {
+	public List<X509Certificate> getAttestationRootCertificates(JsonNode metadataNode,
+			List<X509Certificate> attestationCertificates) {
 		JsonNode metaDataStatement = null;
 		try {
-			 metaDataStatement = dataMapperService
-					.readTree(metadataNode.get("metadataStatement").toPrettyString());
+			metaDataStatement = dataMapperService.readTree(metadataNode.get("metadataStatement").toPrettyString());
 		} catch (IOException e) {
 			log.error("Error parsing the metadata statement", e);
 		}
-		
+
 		if (metaDataStatement == null || !metaDataStatement.has("attestationRootCertificates")) {
-            List<X509Certificate> selectedRootCertificate = certificateService.selectRootCertificates(rootCertificatesMap, attestationCertificates);
-            
+			List<X509Certificate> selectedRootCertificate = certificateService
+					.selectRootCertificates(rootCertificatesMap, attestationCertificates);
+
 			return selectedRootCertificate;
 		}
 

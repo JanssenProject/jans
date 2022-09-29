@@ -74,51 +74,51 @@ public class MdsService {
         this.mdsEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
     }
 
-    public JsonNode fetchMetadata(byte[] aaguidBuffer) {
-        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-        if (fido2Configuration == null) {
-            throw new Fido2RuntimeException("Fido2 configuration not exists");
-        }
+	public JsonNode fetchMetadata(byte[] aaguidBuffer) {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		if (fido2Configuration == null) {
+			throw new Fido2RuntimeException("Fido2 configuration not exists");
+		}
 
-		
+		String aaguid = deconvert(aaguidBuffer);
 
-        String aaguid = deconvert(aaguidBuffer);
-        
-        JsonNode mdsEntry = mdsEntries.get(aaguid);
-        if (mdsEntry != null) {
-            log.debug("Get MDS by aaguid {} from cache", aaguid);
-            return mdsEntry;
-        }
+		JsonNode mdsEntry = mdsEntries.get(aaguid);
+		if (mdsEntry != null) {
+			log.debug("Get MDS by aaguid {} from cache", aaguid);
+			return mdsEntry;
+		}
 
-        JsonNode tocEntry = tocService.getAuthenticatorsMetadata(aaguid);
-        if (tocEntry == null) {
-            throw new Fido2RuntimeException("Authenticator not in TOC aaguid " + aaguid);
-        }
+		JsonNode tocEntry = tocService.getAuthenticatorsMetadata(aaguid);
+		if (tocEntry == null) {
+			throw new Fido2RuntimeException("Authenticator not in TOC aaguid " + aaguid);
+		}
 
-        verifyTocEntryStatus(aaguid, tocEntry);
-        
-        return tocEntry;
-    }
+		verifyTocEntryStatus(aaguid, tocEntry);
+
+		return tocEntry;
+	}
 
 	
 
-    private void verifyTocEntryStatus(String aaguid, JsonNode tocEntry) {
-        JsonNode statusReports = tocEntry.get("statusReports");
+	private void verifyTocEntryStatus(String aaguid, JsonNode tocEntry) {
+		JsonNode statusReports = tocEntry.get("statusReports");
 
-        Iterator<JsonNode> iter = statusReports.elements();
-        while (iter.hasNext()) {
-            JsonNode statusReport = iter.next();
-            AuthenticatorCertificationStatus authenticatorStatus = AuthenticatorCertificationStatus.valueOf(statusReport.get("status").asText());
-            String authenticatorEffectiveDate = statusReport.get("effectiveDate").asText();
-            log.debug("Authenticator AAGUID {} status {} effective date {}", aaguid, authenticatorStatus, authenticatorEffectiveDate);
-            verifyStatusAcceptable(aaguid, authenticatorStatus);
-        }
-    }
+		Iterator<JsonNode> iter = statusReports.elements();
+		while (iter.hasNext()) {
+			JsonNode statusReport = iter.next();
+			AuthenticatorCertificationStatus authenticatorStatus = AuthenticatorCertificationStatus
+					.valueOf(statusReport.get("status").asText());
+			String authenticatorEffectiveDate = statusReport.get("effectiveDate").asText();
+			log.debug("Authenticator AAGUID {} status {} effective date {}", aaguid, authenticatorStatus,
+					authenticatorEffectiveDate);
+			verifyStatusAcceptable(aaguid, authenticatorStatus);
+		}
+	}
 
-    private String deconvert(byte[] aaguidBuffer) {
-        return Hex.encodeHexString(aaguidBuffer).replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)",
-                "$1-$2-$3-$4-$5");
-    }
+	private String deconvert(byte[] aaguidBuffer) {
+		return Hex.encodeHexString(aaguidBuffer).replaceFirst(
+				"([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
+	}
 
     private void verifyStatusAcceptable(String aaguid, AuthenticatorCertificationStatus status) {
         final List<AuthenticatorCertificationStatus> undesiredAuthenticatorStatus = Arrays

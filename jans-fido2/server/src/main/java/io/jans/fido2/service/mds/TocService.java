@@ -101,44 +101,45 @@ public class TocService {
         tocEntries.putAll(parseTOCs());
     }
     
-    private Map<String, JsonNode> parseTOCs() {
-        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-        if (fido2Configuration == null) {
-            log.warn("Fido2 configuration not exists");
-            return new HashMap<String, JsonNode>();
-        }
+	private Map<String, JsonNode> parseTOCs() {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		if (fido2Configuration == null) {
+			log.warn("Fido2 configuration not exists");
+			return new HashMap<String, JsonNode>();
+		}
 
-        String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
-        String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
-        if (StringHelper.isEmpty(mdsTocRootCertsFolder) || StringHelper.isEmpty(mdsTocFilesFolder)) {
-            log.warn("Fido2 MDS cert and TOC properties should be set");
-            return new HashMap<String, JsonNode>();
-        }
-        log.info("Populating TOC entries from {}", mdsTocFilesFolder);
+		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
+		String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
+		if (StringHelper.isEmpty(mdsTocRootCertsFolder) || StringHelper.isEmpty(mdsTocFilesFolder)) {
+			log.warn("Fido2 MDS cert and TOC properties should be set");
+			return new HashMap<String, JsonNode>();
+		}
+		log.info("Populating TOC entries from {}", mdsTocFilesFolder);
 
-        Path path = FileSystems.getDefault().getPath(mdsTocFilesFolder);
-        List<Map<String, JsonNode>> maps = new ArrayList<>();
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
-            Iterator<Path> iter = directoryStream.iterator();
-            while (iter.hasNext()) {
-                Path filePath = iter.next();
-                try {
-                    Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, filePath);
-                    log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(), result.getFirst());
-                    
-                    maps.add(result.getSecond());
-                } catch (IOException e) {
-                    log.warn("Can't access or open path: {}", filePath, e);
-                } catch (ParseException e) {
-                    log.warn("Can't parse path: {}", filePath, e);
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Something wrong with path", e);
-        }
+		Path path = FileSystems.getDefault().getPath(mdsTocFilesFolder);
+		List<Map<String, JsonNode>> maps = new ArrayList<>();
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
+			Iterator<Path> iter = directoryStream.iterator();
+			while (iter.hasNext()) {
+				Path filePath = iter.next();
+				try {
+					Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, filePath);
+					log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(),
+							result.getFirst());
 
-        return mergeAndResolveDuplicateEntries(maps);
-    }
+					maps.add(result.getSecond());
+				} catch (IOException e) {
+					log.warn("Can't access or open path: {}", filePath, e);
+				} catch (ParseException e) {
+					log.warn("Can't parse path: {}", filePath, e);
+				}
+			}
+		} catch (Exception e) {
+			log.warn("Something wrong with path", e);
+		}
+
+		return mergeAndResolveDuplicateEntries(maps);
+	}
 
     private Map<String, JsonNode> parseTOC(String mdsTocRootCertFile, String mdsTocFileLocation) {
         try {
@@ -226,7 +227,6 @@ public class TocService {
 							log.info("Added TOC entry {} ", aaguid);
 							tocEntries.put(aaguid, metadataEntry);
 						}
-						
 
 					} catch (IOException e) {
 						log.error("Error parsing the metadata statement", e);
