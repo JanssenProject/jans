@@ -141,6 +141,7 @@ nav:
         - 'FAQ': 'admin/deployment/faq.md'
     - 'Installation':
         - 'admin/install/README.md'
+        - 'Quick Start Installation': 'admin/install/quick-start-install.md'
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
