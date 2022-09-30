@@ -188,7 +188,7 @@ paths:
         in: query
         schema:
           type: string
-          default: qname
+          default: agFlowQname
       - name: sortOrder
         in: query
         schema:
@@ -2945,7 +2945,9 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
@@ -2955,9 +2957,7 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -4117,8 +4117,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -4128,6 +4126,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
