@@ -22,7 +22,7 @@ import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientMetadataService;
 import io.jans.as.server.service.ScopeService;
-import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.StringHelper;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -403,7 +403,10 @@ public class RegisterService {
             try {
                 boolean processed = processApplicationAttributes(client, attr, parameterValues);
                 if (!processed) {
-                    client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
+                    final CustomObjectAttribute customAttribute = new CustomObjectAttribute();
+                    customAttribute.setName(attr);
+                    customAttribute.setValues(new ArrayList<>(parameterValues));
+                    client.getCustomAttributes().add(customAttribute);
                 }
             } catch (Exception e) {
                 log.debug(e.getMessage(), e);
