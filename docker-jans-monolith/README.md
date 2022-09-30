@@ -48,7 +48,7 @@ docker compose -f jans-mysql-compose.yml up -d
 Remove setup and volumes
 
 ```
-docker compose -f mysql-docker-compose.yml down && rm -rf jans-*
+docker compose -f jans-mysql-compose.yml down && rm -rf jans-*
 ```
 
 ## Test
