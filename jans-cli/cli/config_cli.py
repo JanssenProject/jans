@@ -18,6 +18,7 @@ import traceback
 import ast
 import base64
 import pprint
+import copy
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -1193,9 +1194,12 @@ class JCA_CLI:
                 api_response_unmapped = data_dict
 
             op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
-            import copy
+
             if op_mode_endpoint in tabulate_endpoints:
                 api_response_unmapped_ext = copy.deepcopy(api_response_unmapped)
+                if 'entries' in api_response_unmapped_ext:
+                    api_response_unmapped_ext = api_response_unmapped_ext['entries']
+                
                 if endpoint.info['operationId'] == 'get-user':
                     for entry in api_response_unmapped_ext:
                         if entry.get('customAttributes'):
@@ -1204,10 +1208,6 @@ class JCA_CLI:
                                     entry['mail'] = ', '.join(attrib['values'])
                                 elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
                                     entry[attrib['name']] = attrib['values'][0]
-
-
-                if 'entries' in api_response_unmapped_ext:
-                    api_response_unmapped_ext = api_response_unmapped_ext['entries']
 
                 if endpoint.info['operationId'] == 'get-oauth-openid-clients':
                     for entry in api_response_unmapped_ext:
