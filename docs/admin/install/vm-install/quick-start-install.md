@@ -73,3 +73,20 @@ And then use CLI tools to configure Janssen Server as needed.
 #or
 /opt/jans/jans-cli/scim-cli.py
 ```
+
+## Uninstall / Remove the Janssen Server
+
+This docker based installation uses `docker compose` under the hood to create containers. Hence to uninstalling Janssen server involves invoking `docker compose` with appropriate yml file. Run command below to stop and remove containers.
+
+```
+docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf jans-*
+```
+
+Console messages like below confirms the successful removal.
+
+```
+[+] Running 3/3
+ ⠿ Container docker-jans-monolith-jans-1      Removed                   10.5s
+ ⠿ Container docker-jans-monolith-mysql-1     Removed                    0.9s
+ ⠿ Network docker-jans-monolith_cloud_bridge  Removed                    0.1s
+```
