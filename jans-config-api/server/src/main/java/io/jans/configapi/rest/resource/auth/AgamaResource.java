@@ -71,7 +71,7 @@ public class AgamaResource extends ConfigBaseResource {
     public Response getFlows(@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @DefaultValue("qname") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @DefaultValue("agFlowQname") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
 
