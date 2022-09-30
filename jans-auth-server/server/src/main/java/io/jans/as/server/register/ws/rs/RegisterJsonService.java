@@ -19,22 +19,18 @@ import io.jans.as.server.ciba.CIBARegisterClientResponseService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.model.GluuAttribute;
-import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.security.StringEncrypter;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
 import static io.jans.as.model.register.RegisterRequestParam.*;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import static io.jans.as.model.register.RegisterResponseParam.*;
 import static io.jans.as.model.util.StringUtils.implode;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -181,12 +177,12 @@ public class RegisterJsonService {
 
     private void putCustomAttributesInResponse(Client client, JSONObject responseJsonObject) {
         final List<String> allowedCustomAttributeNames = appConfiguration.getDynamicRegistrationCustomAttributes();
-        final List<CustomAttribute> customAttributes = client.getCustomAttributes();
+        final List<CustomObjectAttribute> customAttributes = client.getCustomAttributes();
         if (allowedCustomAttributeNames == null || allowedCustomAttributeNames.isEmpty() || customAttributes == null) {
             return;
         }
 
-        for (CustomAttribute attribute : customAttributes) {
+        for (CustomObjectAttribute attribute : customAttributes) {
             if (!allowedCustomAttributeNames.contains(attribute.getName()))
                 continue;
 
