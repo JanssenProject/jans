@@ -38,8 +38,19 @@ If you would like to build `jans-cli` manually, you can go through the following
 
 1. Install dependencies
 
+   * On Ubuntu 20
     ```sh
     apt install -y wget unzip python3-pip python3-dev
+    ```
+   * On CentOS Stream 8
+   ```sh
+   yum install -y  wget unzip python3-pip python3-devel make 
+   pip3 install --upgrade pip
+   ```
+   
+   Install Shiv
+    
+    ```sh
     pip3 install shiv
     ```
 
