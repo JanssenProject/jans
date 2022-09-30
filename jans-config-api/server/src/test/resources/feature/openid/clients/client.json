@@ -46,5 +46,10 @@
   "includeClaimsInIdToken": false,
   "rptAsJwt": false,
   "subjectType": "pairwise",
-  "tokenEndpointAuthMethod": "client_secret_basic"   
+  "tokenEndpointAuthMethod": "client_secret_basic",
+  "dynamicRegistrationCustomObjectClass": "MyDynamicRegistrationCustomObject", 
+  "dynamicRegistrationCustomAttributes": [
+    "jansTrustedClnt",
+    "myAttr1"
+  ]  
 }

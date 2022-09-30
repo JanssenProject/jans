@@ -2304,7 +2304,7 @@ paths:
           description: The 1-based index of the first query result.
         - schema:
             type: string
-            default: qname
+            default: agFlowQname
           in: query
           name: sortBy
           description: Attribute whose value will be used to order the returned response.
