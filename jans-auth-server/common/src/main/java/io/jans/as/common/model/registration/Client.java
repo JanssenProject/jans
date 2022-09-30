@@ -13,7 +13,7 @@ import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.model.base.DeletableEntity;
 import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
@@ -190,8 +190,8 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansAccessTknLife")
     private Integer accessTokenLifetime;
 
-    @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<>();
+    @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
+    private List<CustomObjectAttribute> customAttributes = new ArrayList<>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -1199,11 +1199,11 @@ public class Client extends DeletableEntity implements Serializable {
         this.accessTokenLifetime = accessTokenLifetime;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+    public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
