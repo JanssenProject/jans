@@ -1,64 +1,44 @@
-import json
-from asyncio import Future
 from typing import OrderedDict
-import prompt_toolkit
-from prompt_toolkit.widgets import Button, TextArea
-from prompt_toolkit.application.current import get_app
+
 from prompt_toolkit.layout.dimension import D
-from static import DialogResult
-from wui_components.jans_dialog import JansDialog
-
 from prompt_toolkit.layout.containers import (
-    VSplit,
-    DynamicContainer,
-)
-from prompt_toolkit.widgets import (
-    Button,
-    Label,
-    TextArea,
-    Dialog,
-
-)
-
-from cli import config_cli
-from prompt_toolkit.layout.containers import (
-    ConditionalContainer,
-    Float,
     HSplit,
     VSplit,
-    VerticalAlign,
     DynamicContainer,
-    FloatContainer,
     Window
 )
 from prompt_toolkit.widgets import (
     Box,
     Button,
-    Frame,
     Label,
-    RadioList,
-    TextArea,
-    CheckboxList,
-    Shadow,
 )
-
+from prompt_toolkit.application.current import get_app
+from prompt_toolkit.widgets import (
+    Button,
+    Dialog,
+    VerticalLine,
+    HorizontalLine
+)
+from cli import config_cli
+from static import DialogResult
+from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
-from utils import DialogUtils
-
 from wui_components.jans_cli_dialog import JansGDialog
-
 from wui_components.jans_drop_down import DropDownWidget
+from wui_components.jans_data_picker import DateSelectWidget
+from utils import DialogUtils
+from wui_components.jans_vetrical_nav import JansVerticalNav
+from view_uma_dialog import ViewUMADialog
+import threading
 
 from multi_lang import _
 
-
-class EditScopeDialog(DialogUtils):
-    """The Main scope Dialog that contain every thing related to The scope
+class EditScopeDialog(JansGDialog, DialogUtils):
+    """The Main Scope Dialog that contain every thing related to The Scope
     """
-    def __init__(self, parent, title, data, save_handler=None):
-        """init for `EditscopeDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
+    def __init__(self, parent, title, data, buttons=[], save_handler=None):
+        """init for `EditScopeDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
-        JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
         
         Args:
@@ -66,33 +46,25 @@ class EditScopeDialog(DialogUtils):
             title (str): The Main dialog title
             data (list): selected line data 
             button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
-            save_handler (method, optional): handler after closing the dialog. Defaults to None.
+            save_handler (method, optional): handler invoked when closing the dialog. Defaults to None.
         """
-        self.myparent = parent
+        super().__init__(parent, title, buttons)
         self.save_handler = save_handler
         self.data = data
         self.title=title
-        self.future = Future()
-
         self.showInConfigurationEndpoint = self.data.get('attributes',{}).get('showInConfigurationEndpoint','')
         self.defaultScope = self.data.get('defaultScope','')
         self.prepare_tabs()
-
         self.create_window()
         self.sope_type = self.data.get('scopeType') or 'oauth'
 
-    def scope_selection_changed(self, cb):
-        self.sope_type = cb.current_value
-
-    def cancel(self):
-        self.future.set_result(DialogResult.CANCEL)
 
     def save(self):
         self.myparent.logger.debug('SAVE SCOPE')
 
         data = {}
 
-        for item in self.dialog.body.children + self.alt_tabs[self.sope_type].children:
+        for item in self.dialog.content.children + self.alt_tabs[self.sope_type].children:
             item_data = self.get_item_data(item)
             if item_data:
                 data[item_data['key']] = item_data['value']
@@ -109,19 +81,16 @@ class EditScopeDialog(DialogUtils):
             close_me = self.save_handler(self)
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
+    
+    def cancel(self):
+        self.future.set_result(DialogResult.CANCEL)
+
 
     def create_window(self):
-        """This method creat the dialog it self
-        Todo:
-            * Change `max_data_str` to be dynamic 
-        """
 
-
-        self.dialog = Dialog(
-            title=self.title,
-            body = HSplit([
+        self.body = HSplit([
                         self.myparent.getTitledRadioButton(
-                                _("Scope Type"),  ## TODO need to be handled
+                                _("Scope Type"),  
                                 name='scopeType', 
                                 current_value=self.data.get('scopeType'),
                                 values=[('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
@@ -136,18 +105,41 @@ class EditScopeDialog(DialogUtils):
 
                         ], width=self.myparent.dialog_width
                     ),
-            buttons = [Button(_("Save"), handler=self.save), Button(_("Cancel"), self.cancel)],
-        )
+        
+        self.dialog = JansDialogWithNav(
+            title=self.title,
+            content= HSplit([
+                self.myparent.getTitledRadioButton(
+                                _("Scope Type"),  
+                                name='scopeType', 
+                                current_value=self.data.get('scopeType'),
+                                values=[('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
+                                on_selection_changed=self.scope_selection_changed,
+                                style='green'),
+        
+                self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
+                self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
+                self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
+                self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
+                DynamicContainer(lambda: self.alt_tabs[self.sope_type]),    
+            ]),  #DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
+             button_functions=[
+                (self.save, _("Save")),
+                (self.cancel, _("Cancel"))
+            ],
+            height=self.myparent.dialog_height,
+            width=self.myparent.dialog_width,
+                   )
+
+    def scope_selection_changed(self, cb):
+        self.sope_type = cb.current_value
 
     def set_scope_type(self, scope_type):
         self.sope_type = scope_type
 
     def prepare_tabs(self):
-        """Prepare the tabs for Edil scope Dialogs
+        """Prepare the tabs for Edil Scope Dialogs
         """
-        self.myparent.logger.debug('Data: '+str(self.data))
-
-
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope')
 
         self.alt_tabs = {}
@@ -167,7 +159,7 @@ class EditScopeDialog(DialogUtils):
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
                                     style='green',
                             )
-                        ])
+                        ],width=D(),)
 
         self.alt_tabs['openid'] = HSplit([
 
@@ -185,6 +177,12 @@ class EditScopeDialog(DialogUtils):
                                     style='green',
                             ),
 
+                            # HorizontalLine(),
+                            self.myparent.getTitledText(
+                                    _("Search"), 
+                                    name='oauth:scopes:openID:claims:search',
+                                    style='fg:green',width=10,
+                                    jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_scopes
 
                             self.myparent.getTitledText(
                                     _("Claims"),
@@ -193,15 +191,7 @@ class EditScopeDialog(DialogUtils):
                                     height=3, 
                                     style='green'),
 
-                            self.myparent.getTitledText(
-                                    _("Search"), 
-                                    name='oauth:scopes:openID:claims:search',
-                                    style='fg:green',width=10,
-                                    jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_clients
-
-
-
-                            ])
+                            ],width=D(),)
 
         self.alt_tabs['dynamic'] = HSplit([
                         
@@ -210,13 +200,20 @@ class EditScopeDialog(DialogUtils):
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
                             height=3, 
                             style='green'),
+                        
+                        # Window(char='-', height=1),
+                        self.myparent.getTitledText(
+                                _("Search"), 
+                                name='oauth:scopes:openID:claims:search',
+                                style='fg:green',width=10,
+                                jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_scopes
 
-
-                         self.myparent.getTitledText(_("Claims"),
-                            name='claims',
-                            value='\n'.join(self.data.get('claims', [])),
-                            height=3, 
-                            style='green'),
+                        self.myparent.getTitledText(
+                                _("Claims"),
+                                name='claims',
+                                value='\n'.join(self.data.get('claims', [])),
+                                height=3, 
+                                style='green'),
 
                         # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
 
@@ -246,7 +243,8 @@ class EditScopeDialog(DialogUtils):
                         
                                                 ],width=D(),
                     )
-        
+ 
 
     def __pt_container__(self):
         return self.dialog
+
