@@ -485,13 +485,24 @@ class JCA_CLI:
             if tag:
                 for path_name in self.cfg_yml['paths']:
                     path = self.cfg_yml['paths'][path_name]
+                    path_parameters = []
+                    if 'parameters' in path:
+                        for pparam in path['parameters']:
+                            if pparam.get('in') == 'path':
+                                path_parameters.append(dict(pparam))
+
                     for method_name in path:
                         method = path[method_name]
+
+
+
                         if hasattr(method, 'get') and method.get('operationId') in excluded_operations[my_op_mode]:
                             continue
                         if 'tags' in method and tag in method['tags'] and 'operationId' in method:
                             if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
                                 continue
+                            if path_parameters:
+                                method['__path_parameters__'] = path_parameters
                             method['__method_name__'] = method_name
                             method['__path_name__'] = path_name
                             methods.append(method)
@@ -997,9 +1008,12 @@ class JCA_CLI:
         if 'parameters' in endpoint.info:
             endpoint_parameters = endpoint.info['parameters']
 
-        end_point_param = self.get_endpiont_url_param(endpoint)
-        if end_point_param and not end_point_param in endpoint_parameters:
-            endpoint_parameters.insert(0, end_point_param)
+
+        if '__path_parameters__' in endpoint.info:
+            end_point_param = endpoint.info['__path_parameters__'][0]
+
+            if end_point_param and not end_point_param in endpoint_parameters:
+                endpoint_parameters.insert(0, end_point_param)
 
         n = 1 if single else len(endpoint_parameters)
 
@@ -1199,7 +1213,7 @@ class JCA_CLI:
                 api_response_unmapped_ext = copy.deepcopy(api_response_unmapped)
                 if 'entries' in api_response_unmapped_ext:
                     api_response_unmapped_ext = api_response_unmapped_ext['entries']
-                
+
                 if endpoint.info['operationId'] == 'get-user':
                     for entry in api_response_unmapped_ext:
                         if entry.get('customAttributes'):
@@ -1526,12 +1540,34 @@ class JCA_CLI:
             selection = 'y'
             model = None
 
+
+        path_vals = {}
+        if '__path_parameters__' in endpoint.info:
+            for pparam in endpoint.info['__path_parameters__']:
+                swagger_var = self.make_swagger_var(pparam['name'])
+                path_vals[swagger_var] = self.get_input(
+                                                    values=pparam['schema'].get('enum', []),
+                                                    text=pparam['name'],
+                                                    itype=pparam['schema']['type'],
+                                                    help_text= pparam.get('description'),
+                                                    enforce='__true__',
+                                                )
+
+
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
 
             try:
-                api_response = api_caller(body=model) if model else api_caller()
+                if model:
+                    if path_vals:
+                        api_response = api_caller(**path_vals, body=model)
+                    else:
+                        api_response = api_caller(body=model) 
+                        
+                else:
+                    api_response = api_caller(**path_vals)
+
             except Exception as e:
                 api_response = None
                 self.print_exception(e)
