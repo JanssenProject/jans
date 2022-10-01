@@ -32,7 +32,6 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 
-from edit_client_dialog2 import EditClientDialog2
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 
