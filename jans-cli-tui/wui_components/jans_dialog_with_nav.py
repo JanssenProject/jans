@@ -19,7 +19,7 @@ from prompt_toolkit.application.current import get_app
 class JansDialogWithNav():
     """This is a custom dialog Widget with side Navigation Bar (Used for Client/Scope dialogs)
     """
-    def __init__(self,content, height=None, width=None, title=None, button_functions=[], navbar=None):
+    def __init__(self,content,width, height=None, title=None, button_functions=[], navbar=None):
         """init for JansDialogWithNav
 
         Args:
@@ -64,14 +64,20 @@ class JansDialogWithNav():
         self.dialog = Dialog(
             title=self.title,
             body=VSplit([
+                VSplit([
                     HSplit([
-                        self.navbar
+                        self.navbar 
                         ], width= (max_data_str )),
-                    VerticalLine(),
+                    VerticalLine(),  
+
+                ]) if self.navbar else VSplit([]),
+
+
+
                     VSplit([
-                        ScrollablePane(content=self.content, height=height),
+                        ScrollablePane(content=self.content, height=height,display_arrows=False),
                     ],key_bindings=self.get_nav_bar_key_bindings()) 
-                ], width=120, padding=1),
+                ], width=self.width, padding=1),
 
             buttons=[
                 Button(
