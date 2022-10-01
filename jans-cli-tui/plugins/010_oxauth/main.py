@@ -32,6 +32,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 
+from edit_client_dialog2 import EditClientDialog2
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 
@@ -323,6 +324,14 @@ class Plugin():
     def display_scope(self):
         pass
 
+
+    def edit_scope_dialog(self, **params): 
+        selected_line_data = params['data']  
+
+        dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data,save_handler=self.save_scope)
+        self.app.show_jans_dialog(dialog)
+
+
     def edit_client_dialog(self, **params):
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
@@ -405,7 +414,7 @@ class Plugin():
     def add_scope(self):
         """Method to display the dialog of clients
         """
-        dialog = EditScopeDialog(self.app, title="Add New Scope",data={}, save_handler=self.save_scope)
+        dialog = EditScopeDialog(self.app, title=_("Add New Scope"), data={}, save_handler=self.save_scope)
         result = self.app.show_jans_dialog(dialog)
 
     def add_client(self):
@@ -483,10 +492,3 @@ class Plugin():
             return result
 
         ensure_future(coroutine())
-
-    def edit_scope_dialog(self, **params): 
-        selected_line_data = params['data']  
-        title = _("Edit Scopes")
-
-        dialog = EditScopeDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_scope)
-        self.app.show_jans_dialog(dialog)
