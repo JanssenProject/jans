@@ -354,7 +354,7 @@ class JansCliApp(Application):
 
         #li, cd, width = self.handle_long_string(title,[1]*num_lines,ta)
 
-        v = VSplit([Label(text=title+'\n'*(height-1), width=len(title), style=style), ta], padding=1)
+        v = VSplit([Label(text=title, width=len(title), style=style), ta], padding=1)
         v.me = ta
 
         return v
@@ -369,7 +369,7 @@ class JansCliApp(Application):
         cbl.window.jans_help = jans_help
         #li, cd, width = self.handle_long_string(title, values, cbl)
 
-        v = VSplit([Label(text=title+'\n'*(len(values)-1), width=len(title), style=style, wrap_lines=False), cbl])
+        v = VSplit([Label(text=title, width=len(title), style=style, wrap_lines=False), cbl])
         v.me = cbl
 
         return v
@@ -416,7 +416,7 @@ class JansCliApp(Application):
         if on_selection_changed:
             rl._handle_enter = custom_handler
 
-        v = VSplit([Label(text=title+'\n'*(len(values)-1), width=len(title), style=style), rl])
+        v = VSplit([Label(text=title, width=len(title), style=style), rl])
         v.me = rl
 
         return v
