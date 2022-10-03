@@ -21,7 +21,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
         self.service_name = 'jython'
         self.install_var = 'installJython'
         self.app_type = AppType.APPLICATION
-        self.install_type = InstallOption.MONDATORY
+        self.install_type = InstallOption.MANDATORY
         if not base.snap:
             self.register_progess()
 
