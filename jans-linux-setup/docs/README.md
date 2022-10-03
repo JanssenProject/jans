@@ -219,7 +219,7 @@ class SampleInstaller(JettyInstaller):
                                           # services, for example, systemctl start application
 
         self.app_type = static.AppType.SERVICE   # enumartiation for application type, etiher APPLICATION or SERVICE
-        self.install_type = static.InstallOption.OPTONAL # enumartiation for installation type, etiher MONDATORY or OPTONAL
+        self.install_type = static.InstallOption.OPTONAL # enumartiation for installation type, etiher MANDATORY or OPTONAL
         self.install_var = 'installApplication' # variale defined in Config to determine if thi application is going to be installed or not
         self.register_progess() # we need to register to progress indicator so that it will shows status of installation during installation process
 
