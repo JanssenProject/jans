@@ -63,20 +63,62 @@ result = cli_object.process_command_by_id(
 
 """
 
-# result = cli_object.process_command_by_id(
-#         'get-oauth-uma-resources', '', 'limit:10', {})
-endpoint_args='limit:2,startIndex:0'
 
+endpoint_args ='limit:1,pattern:hasdaeat' ### limit the responce and wrong pattern
+data = {}
+data['inum'] = 'a5f45938-97d6-408b-965a-229afb0552fa'  ## this user has 3 UMA
 result = cli_object.process_command_by_id(
-                operation_id='get-oauth-scopes',
-                url_suffix='',
+                operation_id='get-oauth-uma-resources-by-clientid',
+                url_suffix='clientId:{}'.format(data['inum']),
                 endpoint_args=endpoint_args,
                 data_fn=None,
                 data={}
-                        )
-print(result.text)
+                )
+print(result.text)  ### expected None
 
 
+
+# endpoint_args ='limit:1,pattern:hasdaeat'
+# endpoint_args ='limit:5,startIndex:0,pattern:sagasg'
+
+# result = cli_object.process_command_by_id(
+#                         operation_id='get-oauth-openid-clients',
+#                         url_suffix='',
+#                         endpoint_args=endpoint_args,
+#                         data_fn=None,
+#                         data={}
+#                         )
+# print(result.text)
+
+
+
+
+
+
+
+
+
+'''
+[
+{"dn":"jansId=5635e18b-67b9-4997-a786-a6b2cdb84355,ou=resources,ou=uma,o=jans",
+"id":"5635e18b-67b9-4997-a786-a6b2cdb84355",
+"name":"[GET] /document",
+"scopes":["inum=40a48740-4892-4fce-b30f-81c5c45670f4,ou=scopes,o=jans"],
+"clients":["inum=a5f45938-97d6-408b-965a-229afb0552fa,ou=clients,o=jans"],
+"creationDate":"2022-09-15T09:03:14",
+"expirationDate":"2022-10-05T09:03:14",
+"deletable":true},
+
+{"dn":"jansId=9b473b72-496b-4414-828c-a4d2bebca97b,ou=resources,ou=uma,o=jans"
+,"id":"9b473b72-496b-4414-828c-a4d2bebca97b",
+"name":"[GET] /photo",
+"scopes":["inum=40a48740-4892-4fce-b30f-81c5c45670f4,ou=scopes,o=jans"],
+"clients":["inum=a5f45938-97d6-408b-965a-229afb0552fa,ou=clients,o=jans"],
+"creationDate":"2022-09-15T09:03:13",
+"expirationDate":"2022-10-05T09:03:13",
+"deletable":true}
+]
+'''
 
 
 '''
