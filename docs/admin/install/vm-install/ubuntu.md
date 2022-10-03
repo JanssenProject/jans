@@ -18,7 +18,7 @@ Janssen Server can be installed using Linux package for Ubuntu
 
 ## System Requirements
 
---8<--- "snippets/vm-system-requirements-dev.md"
+System should meet [minimum VM system requirements](vm-requirements.md)
 
 ## Prerequisites
 
@@ -38,7 +38,7 @@ Unpack/install the installer package
 apt install -y /tmp/jans.ubuntu20.04_amd64.deb
 ```
 
-Initiate setup process using command below. Setup process will prompt for user for inputs and whether optional modules should be installed or not as shown in example below.
+Initiate setup process using command below. Setup process will prompt for user for inputs and also choose to install optional modules.
 
 ```
 sudo python3 /opt/jans/jans-setup/setup.py
@@ -57,9 +57,20 @@ After the successful completion of setup process, [verify the system health]().
 
 ## Uninstall 
 
+Uninstall process involves two steps
+
+1. Uninstall Janssen Server
+2. Remove and purge `jans` package
+
+### Uninstall Janssen Server 
+
+Use command below to uninstall Janssen server
+
 ```commandline
 sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
+
+Console output like below will confirm the successful uninstallation of Janssen Server
 
 ```text
 This process is irreversible.
@@ -97,7 +108,9 @@ Removing /etc/apache2/sites-available/https_jans.conf
 
 ```
 
-Now remove the linux package
+### Remove the linux package
+
+Use command below to remove and purge `jans` package
 
 ```text
 sudo apt-get --purge remove jans
