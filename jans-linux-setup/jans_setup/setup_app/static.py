@@ -38,7 +38,7 @@ class AppType:
     SERVICE     = 2
 
 class InstallOption:
-    MONDATORY = 1
+    MANDATORY = 1
     OPTONAL   = 2
 
 class SetupProfiles:

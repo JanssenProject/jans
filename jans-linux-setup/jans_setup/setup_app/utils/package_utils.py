@@ -48,24 +48,24 @@ class PackageUtils(SetupUtils):
 
         install_command, update_command, query_command, check_text = self.get_install_commands()
 
-        install_list = {'mondatory': [], 'optional': []}
+        install_list = {'mandatory': [], 'optional': []}
 
         package_list = base.get_os_package_list()
 
         os_type_version = base.os_type + ' ' + base.os_version
 
         if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
-            package_list[os_type_version]['mondatory'] += ' mysql-server'
+            package_list[os_type_version]['mandatory'] += ' mysql-server'
         if base.argsp.local_rdbm == 'pgsql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql'):
-            package_list[os_type_version]['mondatory'] += ' postgresql python3-psycopg2'
+            package_list[os_type_version]['mandatory'] += ' postgresql python3-psycopg2'
             if base.clone_type == 'deb':
-                package_list[os_type_version]['mondatory'] += ' postgresql-contrib'
+                package_list[os_type_version]['mandatory'] += ' postgresql-contrib'
 
         for pypackage in package_list[os_type_version]['python']:
             try:
                 importlib.import_module(pypackage)
             except:
-                package_list[os_type_version]['mondatory'] += ' ' + package_list[os_type_version]['python'][pypackage]
+                package_list[os_type_version]['mandatory'] += ' ' + package_list[os_type_version]['python'][pypackage]
 
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
@@ -80,20 +80,20 @@ class PackageUtils(SetupUtils):
                     self.logIt('Package {0} was not installed'.format(package_query))
                     install_list[install_type].append(package_query)
 
-        install = {'mondatory': True, 'optional': False}
+        install = {'mandatory': True, 'optional': False}
 
         for install_type in install_list:
             if install_list[install_type]:
                 packages = " ".join(install_list[install_type])
 
-                if install_type == 'mondatory':
+                if install_type == 'mandatory':
                     print("The following packages are required for Janssen Server")
                     print(packages)
                     if not base.argsp.n:
                         r = input("Do you want to install these now? [Y/n] ")
                         if r and r.lower()=='n':
                             install[install_type] = False
-                            if install_type == 'mondatory':
+                            if install_type == 'mandatory':
                                 print("Can not proceed without installing required packages. Exiting ...")
                                 sys.exit()
 
