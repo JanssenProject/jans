@@ -29,6 +29,8 @@ public class DocumentStoreConfiguration implements Serializable {
 
     private WebDavDocumentStoreConfiguration webDavConfiguration;
 
+    private DBDocumentStoreConfiguration dbConfiguration;
+
     public DocumentStoreType getDocumentStoreType() {
 		return documentStoreType;
 	}
@@ -59,6 +61,14 @@ public class DocumentStoreConfiguration implements Serializable {
 
 	public void setWebDavConfiguration(WebDavDocumentStoreConfiguration webDavConfiguration) {
 		this.webDavConfiguration = webDavConfiguration;
+	}
+
+	public DBDocumentStoreConfiguration getDbConfiguration() {
+		return dbConfiguration;
+	}
+
+	public void setDbConfiguration(DBDocumentStoreConfiguration dbConfiguration) {
+		this.dbConfiguration = dbConfiguration;
 	}
 
 	@Override
