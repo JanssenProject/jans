@@ -22,37 +22,35 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 ## Prerequisites
 
-- `curl` should be instlled. This can be easily installed using command `apt install wget curl`
+- `curl` should be instlled. This can be easily installed using command below
+
+ ```
+ apt install curl
+ ```
 
 ## Install
 
-Download the installer from Janssen Project site using command below
+- Download the installer from Janssen Project site using command below
 
 ```
 wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*ubuntu20.04_amd64.deb' | head -n 1) -O /tmp/jans.ubuntu20.04_amd64.deb
 ```
 
-Unpack/install the installer package
+- Unpack/install the installer package
 
 ```
 apt install -y /tmp/jans.ubuntu20.04_amd64.deb
 ```
 
-Initiate setup process using command below. Setup process will prompt for user for inputs and also choose to install optional modules.
+- Initiate setup process using command below. Setup process will prompt for user for inputs.
 
 ```
-sudo python3 /opt/jans/jans-setup/setup.py
-```
-
-Sample user prompts: 
-
-```commandline
-
+python3 /opt/jans/jans-setup/setup.py
 ```
 
 ## Verify the Installation
 
-After the successful completion of setup process, [verify the system health]().
+After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
 
 ## Uninstall 
@@ -67,7 +65,7 @@ Uninstall process involves two steps
 Use command below to uninstall Janssen server
 
 ```commandline
-sudo python3 /opt/jans/jans-setup/install.py -uninstall
+python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 Console output like below will confirm the successful uninstallation of Janssen Server
@@ -113,7 +111,7 @@ Removing /etc/apache2/sites-available/https_jans.conf
 Use command below to remove and purge `jans` package
 
 ```text
-sudo apt-get --purge remove jans
+apt-get --purge remove jans
 ```
 
 Successful removal will provide output as below:
