@@ -1,0 +1,3 @@
+- 4 GB RAM
+- 2 CPU
+- 20 GB Disk
