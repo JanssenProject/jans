@@ -12,7 +12,6 @@ Janssen Server can be installed using Linux package for Ubuntu
 
 ## Supported Versions
 - Ubuntu 20.04
-- Ubuntu 22.04
 
 !!! note
     [SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
