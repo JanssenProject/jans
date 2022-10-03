@@ -1052,9 +1052,50 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation-steps" class="md-nav__link">
-    Installation Steps
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-the-installation" class="md-nav__link">
+    Verify the Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    Uninstall
+  </a>
+  
+    <nav class="md-nav" aria-label="Uninstall">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uninstall-janssen-server" class="md-nav__link">
+    Uninstall Janssen Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-the-linux-package" class="md-nav__link">
+    Remove the linux package
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -10766,9 +10807,50 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation-steps" class="md-nav__link">
-    Installation Steps
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-the-installation" class="md-nav__link">
+    Verify the Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    Uninstall
+  </a>
+  
+    <nav class="md-nav" aria-label="Uninstall">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uninstall-janssen-server" class="md-nav__link">
+    Uninstall Janssen Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-the-linux-package" class="md-nav__link">
+    Remove the linux package
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -10805,37 +10887,122 @@
         <span class="md-tag">vm</span>
       
     
+      
+        <span class="md-tag">ubuntu</span>
+      
+    
   </nav>
 
 
 
 <h1 id="install-janssen-server-using-ubuntu-linux-package">Install Janssen Server using Ubuntu Linux Package<a class="headerlink" href="#install-janssen-server-using-ubuntu-linux-package" title="Permanent link">#</a></h1>
+<p>Janssen Server can be installed using Linux package for Ubuntu</p>
 <h2 id="supported-versions">Supported Versions<a class="headerlink" href="#supported-versions" title="Permanent link">#</a></h2>
 <ul>
 <li>Ubuntu 20.04</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>SELinux should be disabled</p>
+<p><a href="https://wiki.ubuntu.com/SELinux">SELinux</a> should be disabled</p>
 </div>
 <h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
 <p>System should meet <a href="../vm-requirements/">minimum VM system requirements</a></p>
-<h2 id="installation-steps">Installation Steps<a class="headerlink" href="#installation-steps" title="Permanent link">#</a></h2>
-<p><div class="highlight"><pre><span></span><code>apt install wget curl
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<ul>
+<li><code>curl</code> should be instlled. This can be easily installed using command below</li>
+</ul>
+<div class="highlight"><pre><span></span><code>apt install curl
 </code></pre></div>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
+<ul>
+<li>Download the installer from Janssen Project site using command below</li>
+</ul>
 <div class="highlight"><pre><span></span><code>wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*ubuntu20.04_amd64.deb&#39; | head -n 1) -O /tmp/jans.ubuntu20.04_amd64.deb
 </code></pre></div>
+<ul>
+<li>Unpack/install the installer package</li>
+</ul>
 <div class="highlight"><pre><span></span><code>apt install -y /tmp/jans.ubuntu20.04_amd64.deb
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>sudo python3 /opt/jans/jans-setup/setup.py
-</code></pre></div></p>
+<ul>
+<li>Initiate setup process using command below. Setup process will prompt for user for inputs.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py
+</code></pre></div>
+<h2 id="verify-the-installation">Verify the Installation<a class="headerlink" href="#verify-the-installation" title="Permanent link">#</a></h2>
+<p>After the successful completion of setup process, <a href="../../install-faq/#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running">verify the system health</a>.</p>
+<h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
+<p>Uninstall process involves two steps</p>
+<ol>
+<li>Uninstall Janssen Server</li>
+<li>Remove and purge <code>jans</code> package</li>
+</ol>
+<h3 id="uninstall-janssen-server">Uninstall Janssen Server<a class="headerlink" href="#uninstall-janssen-server" title="Permanent link">#</a></h3>
+<p>Use command below to uninstall Janssen server</p>
+<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/install.py -uninstall
+</code></pre></div>
+<p>Console output like below will confirm the successful uninstallation of Janssen Server</p>
+<div class="highlight"><pre><span></span><code>This process is irreversible.
+You will lose all data related to Janssen Server.
+
+
+
+Are you sure to uninstall Janssen Server? [yes/N] yes
+
+Uninstalling Jannsen Server...
+Removing /etc/default/jans-config-api
+Stopping jans-config-api
+Removing /etc/default/jans-scim
+Stopping jans-scim
+Removing /etc/default/jans-fido2
+Stopping jans-fido2
+Removing /etc/default/jans-auth
+Stopping jans-auth
+Removing /etc/default/jans-client-api
+Stopping jans-client-api
+Stopping OpenDj Server
+sh: 1: /opt/opendj/bin/stop-ds: not found
+Executing rm -r -f /etc/certs
+Executing rm -r -f /etc/jans
+Executing rm -r -f /opt/jans
+Executing rm -r -f /opt/amazon-corretto*
+Executing rm -r -f /opt/jre
+Executing rm -r -f /opt/node*
+Executing rm -r -f /opt/jetty*
+Executing rm -r -f /opt/jython*
+Executing rm -r -f /opt/opendj
+Executing rm -r -f /opt/dist
+Removing /etc/apache2/sites-enabled/https_jans.conf
+Removing /etc/apache2/sites-available/https_jans.conf
+</code></pre></div>
+<h3 id="remove-the-linux-package">Remove the linux package<a class="headerlink" href="#remove-the-linux-package" title="Permanent link">#</a></h3>
+<p>Use command below to remove and purge <code>jans</code> package</p>
+<div class="highlight"><pre><span></span><code>apt-get --purge remove jans
+</code></pre></div>
+<p>Successful removal will provide output as below:</p>
+<div class="highlight"><pre><span></span><code>Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  apache2 apache2-bin apache2-data apache2-utils libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap liblua5.2-0 python3-distutils python3-ldap3 python3-lib2to3 python3-prompt-toolkit
+  python3-pyasn1 python3-pygments python3-pymysql python3-ruamel.yaml python3-wcwidth
+Use &#39;sudo apt autoremove&#39; to remove them.
+The following packages will be REMOVED:
+  jans*
+0 upgraded, 0 newly installed, 1 to remove and 124 not upgraded.
+After this operation, 1,257 MB disk space will be freed.
+Do you want to continue? [Y/n] y
+(Reading database ... 166839 files and directories currently installed.)
+Removing jans (1.0.2~ubuntu20.04) ...
+Checking to make sure service is down...
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-03T17:59:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-03</span>
       
         <br>
         Created:
