@@ -96,3 +96,30 @@ Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
 
 ```
+
+Now remove the linux package
+
+```text
+sudo apt-get --purge remove jans
+```
+
+Successful removal will provide output as below:
+
+```text
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  apache2 apache2-bin apache2-data apache2-utils libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap liblua5.2-0 python3-distutils python3-ldap3 python3-lib2to3 python3-prompt-toolkit
+  python3-pyasn1 python3-pygments python3-pymysql python3-ruamel.yaml python3-wcwidth
+Use 'sudo apt autoremove' to remove them.
+The following packages will be REMOVED:
+  jans*
+0 upgraded, 0 newly installed, 1 to remove and 124 not upgraded.
+After this operation, 1,257 MB disk space will be freed.
+Do you want to continue? [Y/n] y
+(Reading database ... 166839 files and directories currently installed.)
+Removing jans (1.0.2~ubuntu20.04) ...
+Checking to make sure service is down...
+
+```
