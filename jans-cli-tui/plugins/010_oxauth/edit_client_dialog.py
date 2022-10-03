@@ -32,7 +32,7 @@ from multi_lang import _
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
     """
-    def __init__(self, parent, title, data, buttons=[], save_handler=None):
+    def __init__(self, parent, title, data, buttons=[], save_handler=None, delete_UMAresource=None):
         """init for `EditClientDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
@@ -47,6 +47,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         """
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
+        self.delete_UMAresource=delete_UMAresource
         self.data = data
         self.prepare_tabs()
 
@@ -82,7 +83,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 if ditem in self.data and self.data[ditem] is None:
                     self.data.pop(ditem)
 
-            self.myparent.logger.debug('DATA: '+str(self.data))
+            # self.myparent.logger.debug('DATA: '+str(self.data))
 
             close_me = True
             if save_handler:
@@ -480,6 +481,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
 
 
+
     def oauth_get_uma_resources(self):
         """Method to get the clients data from server
         """
@@ -505,16 +507,24 @@ class EditClientDialog(JansGDialog, DialogUtils):
         endpoint_args ='limit:10'
         if pattern:
             endpoint_args +=',pattern:'+pattern
-
+        
+        
+        self.myparent.logger.debug('DATA endpoint_args: '+str(endpoint_args))
         try :
             rsponse = self.myparent.cli_object.process_command_by_id(
                 operation_id='get-oauth-uma-resources-by-clientid',
-                url_suffix='clientId:{}'.format(self.data.get('inum','')),
-                endpoint_args='',
+                url_suffix='clientId:{}'.format(self.data['inum']),
+                endpoint_args=endpoint_args,
                 data_fn=None,
                 data={}
                 )
-
+            # rsponse = self.myparent.cli_object.process_command_by_id(
+            #     operation_id='get-oauth-uma-resources',
+            #     url_suffix='',
+            #     endpoint_args='',
+            #     data_fn=None,
+            #     data={}
+            #     )
         except Exception as e:
             self.myparent.show_message(_("Error getting clients"), str(e))
             return
@@ -529,18 +539,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.show_message(_("Error getting clients"), str(rsponse.text))
             #press_tab
             return
-
         data =[]
+        
 
         for d in result:
             data.append(
                 [
-                str(d['id']),
+                d.get('id'),
                 str(d.get('description', '')),
                 str(d.get('scopes', [''])[0] )
                 ]
             )
-        
 
         if data :
             self.uma_resources = HSplit([
@@ -551,6 +560,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     data=data,
                                     on_enter=self.view_uma_resources,
                                     on_display=self.myparent.data_display_dialog,
+                                    on_delete=self.delete_UMAresource,
                                     # selection_changed=self.data_selection_changed,
                                     selectes=0,
                                     headerColor='green',
@@ -559,14 +569,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             ),
             ])
         
-            # self.uma_result = result
-            
-            # return result
             get_app().invalidate()
+
         else:
             self.myparent.show_message(_("Oops"), _("No matching result"))  
-            
-
+          
     def client_dialog_nav_selection_changed(self, selection):
         self.left_nav = selection
 
@@ -575,12 +582,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
         selected_line_data = params['data']    ##self.uma_result 
         title = _("Edit user Data (Clients)")
 
-        dialog = ViewUMADialog(self.myparent, title=title, data=selected_line_data, save_handler=self.save_client)
+        dialog = ViewUMADialog(self.myparent, title=title, data=selected_line_data, deleted_uma=self.delete_UMAresource)
         
         self.myparent.show_jans_dialog(dialog)
 
-    def save_client(self, dialog):
-        pass
+
     def __pt_container__(self):
         return self.dialog
 

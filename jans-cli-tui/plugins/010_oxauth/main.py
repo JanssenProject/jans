@@ -22,6 +22,7 @@ from prompt_toolkit.widgets import (
     Label,
     Frame
 )
+from static import DialogResult
 
 from cli import config_cli
 from wui_components.jans_nav_bar import JansNavBar
@@ -130,7 +131,7 @@ class Plugin():
         else:
             self.oauth_main_area = self.app.not_implemented
 
-    def oauth_update_clients(self, start_index=0, pattern=''):
+    def oauth_update_clients(self,start_index=0, pattern=''):
         """update the current clients data to server
 
         Args:
@@ -323,7 +324,7 @@ class Plugin():
     def display_scope(self):
         pass
 
-
+  
     def edit_scope_dialog(self, **params): 
         selected_line_data = params['data']  
 
@@ -335,8 +336,8 @@ class Plugin():
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
 
-        dialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client)
-        self.app.show_jans_dialog(dialog)
+        self.EditClientDialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client,delete_UMAresource=self.delete_UMAresource)
+        self.app.show_jans_dialog(self.EditClientDialog)
 
     def save_client(self, dialog):
         """This method to save the client data to server
@@ -407,7 +408,7 @@ class Plugin():
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['clients'])
             return
 
-        t = threading.Thread(target=self.oauth_update_clients, args=(tbuffer.text,), daemon=True)
+        t = threading.Thread(target=self.oauth_update_clients, args=(0,tbuffer.text), daemon=True)
         t.start()
 
     def add_scope(self):
@@ -488,6 +489,31 @@ class Plugin():
                 # self.app.logger.debug('result: %s', str(result))
 
                 self.oauth_get_scopes()
+            return result
+
+        ensure_future(coroutine())
+
+    def delete_UMAresource(self, selected, event=None):
+        self.app.logger.debug('delete_UMAresource: '+str(selected))
+
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(selected[0]))
+        async def coroutine():
+            focused_before = self.app.layout.current_window
+            result = await self.app.show_dialog_as_float(dialog)
+            try:
+                self.app.layout.focus(focused_before)
+            except:
+                self.app.layout.focus(self.EditClientDialog)
+
+            if result.lower() == 'yes':
+                result = self.app.cli_object.process_command_by_id(
+                    operation_id='delete-oauth-uma-resources-by-id',
+                    url_suffix='id:{}'.format(selected[0]),
+                    endpoint_args='',
+                    data_fn=None,
+                    data={}
+                    )
+                self.EditClientDialog.oauth_get_uma_resources()
             return result
 
         ensure_future(coroutine())

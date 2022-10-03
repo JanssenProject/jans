@@ -19,6 +19,8 @@ from prompt_toolkit.widgets import (
     TextArea,
 
 )
+from asyncio import ensure_future
+
 from prompt_toolkit.widgets import (
     Button,
     Dialog,
@@ -59,7 +61,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details
     """
 
-    def __init__(self, parent, title, data, buttons=[], save_handler=None):
+    def __init__(self, parent, title, data, buttons=[], deleted_uma=None):
         """init for `ViewUMADialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
@@ -74,15 +76,18 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         """
 
         super().__init__(parent, title, buttons)
-        self.save_handler = save_handler
         self.data = data
+        self.myparent= parent
+        self.deleted_uma = deleted_uma
         self.UMA_containers = {}
         self.UMA_prepare_containers()
 
 
         def delete():
-            self.myparent.show_again()
-            # self.future.set_result(DialogResult.CANCEL)
+            selected = [data.get('id'),data.get('description', ''),data.get('scopes', [''])[0]]
+            self.deleted_uma(selected)
+            
+            
 
         def cancel():
             self.future.set_result(DialogResult.CANCEL)
@@ -163,6 +168,8 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             with_background=False,
             # width=140,
         )
+
+
 
     def UMA_prepare_containers(self):
         """Prepare the containers for UMA Dialog
