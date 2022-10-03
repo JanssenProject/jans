@@ -568,12 +568,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     all_data=result,
                             ),
             ])
-        
+
             get_app().invalidate()
 
         else:
             self.myparent.show_message(_("Oops"), _("No matching result"))  
-          
+
+        self.myparent.layout.focus(self.resources)
+
+
     def client_dialog_nav_selection_changed(self, selection):
         self.left_nav = selection
 

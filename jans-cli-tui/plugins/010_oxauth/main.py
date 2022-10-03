@@ -452,6 +452,7 @@ class Plugin():
                     data_fn='',
                     data={}
                 )
+                # TODO Need to do `self.oauth_get_clients()` only if clients list is not empty
                 self.oauth_get_clients()
             return result
 
@@ -486,7 +487,7 @@ class Plugin():
                     data={}
                 )
             
-                # self.app.logger.debug('result: %s', str(result))
+                # TODO Need to do `self.oauth_get_scopes()` only if scopes is not empty
 
                 self.oauth_get_scopes()
             return result
@@ -494,7 +495,7 @@ class Plugin():
         ensure_future(coroutine())
 
     def delete_UMAresource(self, selected, event=None):
-        self.app.logger.debug('delete_UMAresource: '+str(selected))
+        
 
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(selected[0]))
         async def coroutine():
@@ -513,7 +514,11 @@ class Plugin():
                     data_fn=None,
                     data={}
                     )
+                # TODO Need to do `self.oauth_get_uma_resources()` only if UMA-res list is not empty
                 self.EditClientDialog.oauth_get_uma_resources()
+                
             return result
 
+
         ensure_future(coroutine())
+        

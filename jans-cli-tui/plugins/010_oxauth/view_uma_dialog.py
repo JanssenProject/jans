@@ -84,8 +84,9 @@ class ViewUMADialog(JansGDialog, DialogUtils):
 
 
         def delete():
+            
             selected = [data.get('id'),data.get('description', ''),data.get('scopes', [''])[0]]
-            self.deleted_uma(selected)
+            self.deleted_uma(selected,self.future.set_result(DialogResult.CANCEL))
             
             
 
