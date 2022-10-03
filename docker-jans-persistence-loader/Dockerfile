@@ -24,8 +24,9 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=8128244d16f212b9c687540ded6cb349abe4aafc
+ENV JANS_SOURCE_VERSION=4fa83fcc3f298d91be3cb459bca52417aacd368e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -33,7 +34,8 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout set ${JANS_SETUP_DIR}
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR}
 
 RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj
 
@@ -46,7 +48,8 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
-    && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json
+    && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
+    && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog
 
 RUN mkdir -p /app/templates/jans-config-api
 
