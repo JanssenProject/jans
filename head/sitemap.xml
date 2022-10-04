@@ -1536,6 +1536,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/recipes/inbound-oidc/</loc>
+         <lastmod>2022-10-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/recipes/inbound-saml/</loc>
          <lastmod>2022-10-04</lastmod>
          <changefreq>daily</changefreq>
