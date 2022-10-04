@@ -10,7 +10,6 @@ This is a guide for user authentication at any external Social Providers(Google,
 
 ## Components
 
-- A Janssen auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))
 - The [Passport Social authentication script](../../script-catalog/person_authentication/passport/passport-social-jans-script.py)
 - The [Passport JS Project](#setup-passport-js-project)
 
