@@ -292,10 +292,14 @@ public class Util {
     }
 
     public static int parseIntSilently(String intString) {
+        return parseIntSilently(intString, -1);
+    }
+
+    public static int parseIntSilently(String intString, int defaultValue) {
         try {
             return Integer.parseInt(intString);
         } catch (Exception e) {
-            return -1;
+            return defaultValue;
         }
     }
 

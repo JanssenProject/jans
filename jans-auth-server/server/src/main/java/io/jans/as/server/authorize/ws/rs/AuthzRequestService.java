@@ -220,6 +220,7 @@ public class AuthzRequestService {
                     prompts.clear();
                     prompts.addAll(Lists.newArrayList(jwtRequest.getPrompts()));
                     authzRequest.setPrompt(implode(prompts, " "));
+                    authzRequest.setPromptFromJwt(true);
                 }
                 if (jwtRequest.getResponseMode() != null) {
                     authzRequest.setResponseMode(jwtRequest.getResponseMode().getValue());
