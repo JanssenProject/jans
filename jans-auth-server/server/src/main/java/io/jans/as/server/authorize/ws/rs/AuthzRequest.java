@@ -54,6 +54,15 @@ public class AuthzRequest {
     private RedirectUriResponse redirectUriResponse;
     private Client client;
     private OAuth2AuditLog auditLog;
+    private boolean promptFromJwt;
+
+    public boolean isPromptFromJwt() {
+        return promptFromJwt;
+    }
+
+    public void setPromptFromJwt(boolean promptFromJwt) {
+        this.promptFromJwt = promptFromJwt;
+    }
 
     public OAuth2AuditLog getAuditLog() {
         return auditLog;
