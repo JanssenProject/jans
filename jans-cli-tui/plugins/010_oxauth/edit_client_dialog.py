@@ -584,6 +584,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     headerColor='green',
                                     entriesColor='blue',
                                     all_data=result,
+                                    underline_headings=False,
                             ),
             ])
 

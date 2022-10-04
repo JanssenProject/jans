@@ -68,7 +68,7 @@ class JansDialogWithNav():
                     HSplit([
                         self.navbar 
                         ], width= (max_data_str )),
-                    VerticalLine(),  
+                    VerticalLine(),
 
                 ]) if self.navbar else VSplit([]),
 

@@ -4,14 +4,14 @@ from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.dimension import D
-
+from prompt_toolkit.widgets import HorizontalLine
 
 class JansVerticalNav():
     """This is a Vertical Navigation bar Widget with many values used in <Get clients>/<Get scopes>
     """
 
     def __init__(self, myparent, headers, selectes, on_enter, on_display, on_delete=None,
-                all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white'):
+                all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white', underline_headings=True):
         """init for JansVerticalNav
 
         Args:
@@ -26,6 +26,7 @@ class JansVerticalNav():
             data (List, optional): Data to be displayed. Defaults to None.
             headerColor (str, optional): Color for the Headers. Defaults to 'green'.
             entriesColor (str, optional): Color for the Entries. Defaults to 'white'.
+            underline_headings (str, optional): Put a line under headings
         
         Examples:
             clients = JansVerticalNav(
@@ -58,6 +59,7 @@ class JansVerticalNav():
         self.on_display = on_display
         self.mod_data = data
         self.all_data=all_data
+        self.underline_headings = underline_headings
         self.view_data()
         self.handle_header_spaces()
         self.handle_data_spaces()
@@ -81,38 +83,40 @@ class JansVerticalNav():
         self.mod_data = result
 
     def create_window(self):
-        """This method creat the dialog it self     
+        """This method creat the dialog it self
         """
-        self.container = FloatContainer(
-            content=HSplit([
-                Window(
-                    content=FormattedTextControl(
-                        text=self._get_head_text,
-                        focusable=False,
-                        key_bindings=self._get_key_bindings(),
-                        style=self.headerColor,
-                    ),
-                    style='class:select-box',
-                    height=D(preferred=1, max=1),
-                    cursorline=False,
-                ),
-                Window(height=1),
-                Window(
-                    content=FormattedTextControl(
-                        text=self._get_formatted_text,
-                        focusable=True,
-                        key_bindings=self._get_key_bindings(),
-                        style=self.entriesColor,
-                    ),
-                    style='class:select-box',
-                    height=D(preferred=len(self.data), max=len(self.data)),
-                    cursorline=True,
-                    right_margins=[ScrollbarMargin(display_arrows=True), ],
-                ),
-                Window(height=2),
-            ]
-            ),
+        container_content = [
+                        Window(
+                            content=FormattedTextControl(
+                                text=self._get_head_text,
+                                focusable=False,
+                                key_bindings=self._get_key_bindings(),
+                                style=self.headerColor,
+                            ),
+                            style='class:select-box',
+                            height=D(preferred=1, max=1),
+                            cursorline=False,
+                        ),
+                        Window(
+                            content=FormattedTextControl(
+                                text=self._get_formatted_text,
+                                focusable=True,
+                                key_bindings=self._get_key_bindings(),
+                                style=self.entriesColor,
+                            ),
+                            style='class:select-box',
+                            height=D(preferred=len(self.data), max=len(self.data)),
+                            cursorline=True,
+                            right_margins=[ScrollbarMargin(display_arrows=True), ],
+                        ),
+                        Window(height=2),
+                    ]
 
+        if self.underline_headings:
+            container_content.insert(1, HorizontalLine())
+
+        self.container = FloatContainer(
+            content=HSplit(container_content),
             floats=[
             ],
         )
