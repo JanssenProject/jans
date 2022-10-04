@@ -1310,8 +1310,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#use-the-janssen-server-cli-tool" class="md-nav__link">
-    Use the Janssen Server CLI Tool
+  <a href="#use-the-janssen-server-health-check-endpoint" class="md-nav__link">
+    Use the Janssen Server Health Check endpoint
   </a>
   
 </li>
@@ -10821,8 +10821,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#use-the-janssen-server-cli-tool" class="md-nav__link">
-    Use the Janssen Server CLI Tool
+  <a href="#use-the-janssen-server-health-check-endpoint" class="md-nav__link">
+    Use the Janssen Server Health Check endpoint
   </a>
   
 </li>
@@ -10918,41 +10918,37 @@
 
 
 <h1 id="janssen-server-installation-faqs">Janssen Server Installation FAQs<a class="headerlink" href="#janssen-server-installation-faqs" title="Permanent link">#</a></h1>
+<hr />
 <h2 id="after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running">After installation, how do I verify that the Janssen Server is up and running?<a class="headerlink" href="#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running" title="Permanent link">#</a></h2>
 <p>Health and status of Janssen Server and its various processes can be verified in multiple ways:</p>
-<h3 id="use-the-janssen-server-cli-tool">Use the Janssen Server CLI Tool<a class="headerlink" href="#use-the-janssen-server-cli-tool" title="Permanent link">#</a></h3>
-<p>Janssen Server CLI tool provides health checks for Authentication module:</p>
-<ul>
-<li>Invoke CLI tool
-    <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py
-</code></pre></div></li>
-<li>From presented list of options, select <code>Auth Server Health</code> option</li>
-<li>From presented list of options, select <code>Check</code> option</li>
-<li>From presented list of options, select <code>Returns auth server health status</code> option. For a healthy server, this option will return output as below:
-  <div class="highlight"><pre><span></span><code>Please wait while retrieving data ...
+<h3 id="use-the-janssen-server-health-check-endpoint">Use the Janssen Server Health Check endpoint<a class="headerlink" href="#use-the-janssen-server-health-check-endpoint" title="Permanent link">#</a></h3>
+<p>Janssen Server provides a health check endpoint for Authentication module. It can be invoked from commandline using CURL as below:</p>
+<div class="highlight"><pre><span></span><code>curl -k https://janssen-host-name/jans-auth/sys/health-check
+</code></pre></div>
+<p>For a healthy server, this option will return output as below:</p>
+<div class="highlight"><pre><span></span><code>Please wait while retrieving data ...
 
 {
 &quot;status&quot;: &quot;running&quot;,
 &quot;db_status&quot;: &quot;online&quot;
 }
-</code></pre></div></li>
-</ul>
+</code></pre></div>
 <h3 id="access-well-known-endpoints">Access .well-known endpoints<a class="headerlink" href="#access-well-known-endpoints" title="Permanent link">#</a></h3>
-<p>Janssen Server exposes <code>.well-known</code> endpoint for openid configuration. Health and responsiveness of Janssen Server can be verified by accessing this endpoint. </p>
-<p>From command-line interface, use CURL to access these endpoints. For example:</p>
-<div class="highlight"><pre><span></span><code>curl https://&lt;server-ip&gt;/jans-auth/.well-known/openid-configuration
+<p>Janssen Server exposes <code>.well-known</code> endpoint for openid configuration as per the <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenIDConnect RFC</a>. Successful response from this endpoint is also an indicator of healthy authentication module. </p>
+<p>From command-line interface, use CURL to access this endpoint. For example:</p>
+<div class="highlight"><pre><span></span><code>curl https://janssen-host-name/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p>This should return JSON response from Janssen Server as per OpenId 
 specification. Sample below:</p>
 <div class="highlight"><pre><span></span><code>{
   &quot;request_parameter_supported&quot; : true,
-  &quot;pushed_authorization_request_endpoint&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/restv1/par&quot;,
-  &quot;introspection_endpoint&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/restv1/introspection&quot;,
+  &quot;pushed_authorization_request_endpoint&quot; : &quot;https://janssen-host-name/jans-auth/restv1/par&quot;,
+  &quot;introspection_endpoint&quot; : &quot;https://janssen-host-name/jans-auth/restv1/introspection&quot;,
   &quot;claims_parameter_supported&quot; : false,
-  &quot;issuer&quot; : &quot;https://jans.ubuntupackage.op.io&quot;,
+  &quot;issuer&quot; : &quot;https://janssen-host-name&quot;,
   &quot;userinfo_encryption_enc_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
   &quot;id_token_encryption_enc_values_supported&quot; : [ &quot;A128CBC+HS256&quot;, &quot;A256CBC+HS512&quot;, &quot;A128GCM&quot;, &quot;A256GCM&quot; ],
-  &quot;authorization_endpoint&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/restv1/authorize&quot;,
+  &quot;authorization_endpoint&quot; : &quot;https://janssen-host-name/jans-auth/restv1/authorize&quot;,
   &quot;service_documentation&quot; : &quot;http://jans.org/docs&quot;,
   &quot;authorization_encryption_alg_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
   &quot;claims_supported&quot; : [ &quot;street_address&quot;, &quot;country&quot;, &quot;zoneinfo&quot;, &quot;birthdate&quot;, &quot;role&quot;, &quot;gender&quot;, &quot;user_name&quot;, &quot;formatted&quot;, &quot;phone_mobile_number&quot;, &quot;preferred_username&quot;, &quot;inum&quot;, &quot;locale&quot;, &quot;updated_at&quot;, &quot;post_office_box&quot;, &quot;nickname&quot;, &quot;preferred_language&quot;, &quot;email&quot;, &quot;website&quot;, &quot;email_verified&quot;, &quot;profile&quot;, &quot;locality&quot;, &quot;room_number&quot;, &quot;phone_number_verified&quot;, &quot;given_name&quot;, &quot;middle_name&quot;, &quot;picture&quot;, &quot;name&quot;, &quot;phone_number&quot;, &quot;postal_code&quot;, &quot;region&quot;, &quot;family_name&quot;, &quot;jansAdminUIRole&quot; ],
@@ -10960,7 +10956,7 @@ specification. Sample below:</p>
   &quot;tls_client_certificate_bound_access_tokens&quot; : true,
   &quot;response_modes_supported&quot; : [ &quot;FORM_POST&quot;, &quot;QUERY_JWT&quot;, &quot;FRAGMENT_JWT&quot;, &quot;FORM_POST_JWT&quot;, &quot;QUERY&quot;, &quot;FRAGMENT&quot;, &quot;JWT&quot; ],
   &quot;backchannel_logout_session_supported&quot; : true,
-  &quot;token_endpoint&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/restv1/token&quot;,
+  &quot;token_endpoint&quot; : &quot;https://janssen-host-name/jans-auth/restv1/token&quot;,
   &quot;response_types_supported&quot; : [ &quot;id_token token&quot;, &quot;id_token&quot;, &quot;code&quot;, &quot;code token&quot;, &quot;id_token code token&quot;, &quot;id_token code&quot;, &quot;token&quot; ],
   &quot;authorization_encryption_enc_values_supported&quot; : [ &quot;A128CBC+HS256&quot;, &quot;A256CBC+HS512&quot;, &quot;A128GCM&quot;, &quot;A256GCM&quot; ],
   &quot;backchannel_token_delivery_modes_supported&quot; : [ &quot;poll&quot;, &quot;ping&quot;, &quot;push&quot; ],
@@ -10969,18 +10965,18 @@ specification. Sample below:</p>
   &quot;backchannel_user_code_parameter_supported&quot; : false,
   &quot;grant_types_supported&quot; : [ &quot;RESOURCE_OWNER_PASSWORD_CREDENTIALS&quot;, &quot;CLIENT_CREDENTIALS&quot;, &quot;OXAUTH_UMA_TICKET&quot;, &quot;AUTHORIZATION_CODE&quot;, &quot;DEVICE_CODE&quot;, &quot;REFRESH_TOKEN&quot;, &quot;IMPLICIT&quot; ],
   &quot;ui_locales_supported&quot; : [ &quot;en&quot;, &quot;bg&quot;, &quot;de&quot;, &quot;es&quot;, &quot;fr&quot;, &quot;it&quot;, &quot;ru&quot;, &quot;tr&quot; ],
-  &quot;userinfo_endpoint&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/restv1/userinfo&quot;,
+  &quot;userinfo_endpoint&quot; : &quot;https://janssen-host-name/jans-auth/restv1/userinfo&quot;,
   &quot;op_tos_uri&quot; : &quot;http://www.jans.io/doku.php?id=jans:tos&quot;,
   &quot;require_request_uri_registration&quot; : false,
   &quot;id_token_encryption_alg_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
   &quot;frontchannel_logout_session_supported&quot; : true,
   &quot;authorization_signing_alg_values_supported&quot; : [ &quot;HS256&quot;, &quot;HS384&quot;, &quot;HS512&quot;, &quot;RS256&quot;, &quot;RS384&quot;, &quot;RS512&quot;, &quot;ES256&quot;, &quot;ES384&quot;, &quot;ES512&quot;, &quot;ES512&quot;, &quot;PS256&quot;, &quot;PS384&quot;, &quot;PS512&quot; ],
   &quot;claims_locales_supported&quot; : [ &quot;en&quot; ],
-  &quot;clientinfo_endpoint&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/restv1/clientinfo&quot;,
+  &quot;clientinfo_endpoint&quot; : &quot;https://janssen-host-name/jans-auth/restv1/clientinfo&quot;,
   &quot;request_object_signing_alg_values_supported&quot; : [ &quot;none&quot;, &quot;HS256&quot;, &quot;HS384&quot;, &quot;HS512&quot;, &quot;RS256&quot;, &quot;RS384&quot;, &quot;RS512&quot;, &quot;ES256&quot;, &quot;ES384&quot;, &quot;ES512&quot;, &quot;ES512&quot;, &quot;PS256&quot;, &quot;PS384&quot;, &quot;PS512&quot; ],
   &quot;request_object_encryption_alg_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
-  &quot;session_revocation_endpoint&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/restv1/revoke_session&quot;,
-  &quot;check_session_iframe&quot; : &quot;https://jans.ubuntupackage.op.io/jans-auth/opiframe.htm&quot;,
+  &quot;session_revocation_endpoint&quot; : &quot;https://janssen-host-name/jans-auth/restv1/revoke_session&quot;,
+  &quot;check_session_iframe&quot; : &quot;https://janssen-host-name/jans-auth/opiframe.htm&quot;,
   &quot;scopes_supported&quot; : [ &quot;https://jans.io/scim/all-resources.search&quot;, &quot;address&quot;, &quot;user_name&quot;, &quot;clientinfo&quot;, &quot;openid&quot;, &quot;https://jans.io/scim/fido2.write&quot;, &quot;profile&quot;, &quot;uma_protection&quot;, &quot;permission&quot;, &quot;https://jans.io/scim/fido.read&quot;, &quot;https://jans.io/scim/users.write&quot;, &quot;https://jans.io/scim/groups.read&quot;, &quot;revoke_session&quot;, &quot;https://jans.io/scim/fido.write&quot;, &quot;https://jans.io/scim/bulk&quot;, &quot;https://jans.io/scim/users.read&quot;, &quot;phone&quot;, &quot;mobile_phone&quot;, &quot;offline_access&quot;, &quot;https://jans.io/scim/groups.write&quot;, &quot;email&quot;, &quot;https://jans.io/scim/fido2.read&quot;, &quot;jans_client_api&quot; ],
   &quot;backchannel_logout_supported&quot; : true,
   &quot;acr_values_supported&quot; : [ &quot;simple_password_auth&quot; ],
@@ -10992,6 +10988,7 @@ specification. Sample below:</p>
 <p>Check the OS platform <a href="#how-can-i-see-status-of-janssen-os-platform-services">Janssen Services and their status</a></p>
 <h3 id="check-logs">Check Logs<a class="headerlink" href="#check-logs" title="Permanent link">#</a></h3>
 <p>Check <a href="#where-can-i-find-janssen-server-logs">logs</a> for errors</p>
+<hr />
 <h2 id="how-can-i-see-status-of-janssen-os-platform-services">How can I see status of Janssen OS platform services?<a class="headerlink" href="#how-can-i-see-status-of-janssen-os-platform-services" title="Permanent link">#</a></h2>
 <h3 id="ubuntu">Ubuntu<a class="headerlink" href="#ubuntu" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>systemctl list-units --all &quot;jans*&quot;
@@ -11014,6 +11011,7 @@ SUB    = The low-level unit activation state, values depend on unit type.
 <p class="admonition-title">Note</p>
 <p>Some process listed above may not be available in every installation based on options selected during installation.</p>
 </div>
+<hr />
 <h2 id="where-can-i-find-janssen-server-logs">Where can I find Janssen Server logs?<a class="headerlink" href="#where-can-i-find-janssen-server-logs" title="Permanent link">#</a></h2>
 <p>During installation, Janssen Server produces setup logs under following location:</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-setup/logs/
@@ -11027,7 +11025,7 @@ SUB    = The low-level unit activation state, values depend on unit type.
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-03T17:59:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-04T09:43:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-04</span>
       
         <br>
         Created:
