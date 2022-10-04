@@ -263,10 +263,12 @@ public class AssertionService {
 		allowedFido2Registrations.forEach((value) -> {
 			log.debug("attestation request:" + value.getRegistrationData().getAttenstationRequest());
 		});
+		
+		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
 		List<JsonNode> allowedFido2Keys = allowedFido2Registrations.parallelStream()
 				.map(f -> dataMapperService.convertValue(new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(),
-						(f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt()) || f
-								.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()))
+						((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null && 
+								f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
 
 										? new String[] { "internal" }
 										: new String[] { "usb", "ble", "nfc" },

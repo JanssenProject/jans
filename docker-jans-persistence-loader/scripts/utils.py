@@ -156,20 +156,21 @@ def merge_extension_ctx(ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     :param ctx: A key-value pairs of existing contexts.
     :returns: Merged contexts.
     """
-    basedir = "/app/static/extension"
-
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        basedir = "/app/openbanking/static/extension"
+        basedirs = ["/app/openbanking/static/extension"]
+    else:
+        basedirs = ["/app/static/extension", "/app/script-catalog"]
 
-    filepath = Path(basedir)
-    for ext_path in filepath.glob("**/*"):
-        if not ext_path.is_file() or ext_path.suffix.lower() not in (".py", ".java"):
-            continue
+    for basedir in basedirs:
+        filepath = Path(basedir)
+        for ext_path in filepath.glob("**/*"):
+            if not ext_path.is_file() or ext_path.suffix.lower() not in (".py", ".java"):
+                continue
 
-        ext_type = ext_path.relative_to(filepath).parent.as_posix().lower().replace(os.path.sep, "_")
-        ext_name = ext_path.stem.lower()
-        script_name = f"{ext_type}_{ext_name}"
-        ctx[script_name] = generate_base64_contents(ext_path.read_text())
+            ext_type = ext_path.relative_to(filepath).parent.as_posix().lower().replace(os.path.sep, "_").replace("-", "_")
+            ext_name = ext_path.stem.lower()
+            script_name = f"{ext_type}_{ext_name}"
+            ctx[script_name] = generate_base64_contents(ext_path.read_text())
     return ctx
 
 

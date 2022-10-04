@@ -330,7 +330,7 @@ def main():
         service_name = 'post-setup'
         install_var = 'installPostSetup'
         app_type = static.AppType.APPLICATION
-        install_type = static.InstallOption.MONDATORY
+        install_type = static.InstallOption.MANDATORY
 
 
     jansProgress.register(PostSetup)
