@@ -263,9 +263,7 @@ public class ScopesResource extends ConfigBaseResource {
     }
 
     private PagedResult<CustomScope> doSearch(SearchRequest searchReq, String type, boolean withAssociatedClients) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("CustomScope search params - searchReq:{} ", escapeLog(searchReq));
-        }
+            logger.debug("CustomScope search params - searchReq:{}, type:{}, withAssociatedClients:{} ", searchReq, type, withAssociatedClients);
 
         PagedResult<CustomScope> pagedResult = scopeService.getScopeResult(searchReq, type, withAssociatedClients);
         if (logger.isTraceEnabled()) {
