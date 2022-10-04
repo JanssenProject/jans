@@ -173,7 +173,6 @@ class JansVerticalNav():
             y += self.headers[k] + ' ' * \
                 (self.spaces[k] - len(self.headers[k]) + 5)
         result.append(y)
-        result.append('\n')
 
         return merge_formatted_text(result)
 
