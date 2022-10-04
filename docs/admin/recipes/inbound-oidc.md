@@ -135,7 +135,7 @@ rp->>browser: Page is accessed
 ### 2. Login Page Setup
 
 - OIDC Script needs a login page
-- Download [oidc-jans-login.xhtml from here](../../assets/oidc-jans-login.xhtml) 
+- Download [oidc-jans-login.xhtml from here](../../script-catalog/person_authentication/oidc/oidc-jans-login.xhtml) 
 - Place it here `/opt/jans/jetty/jans-auth/custom/pages/auth/oidc/`. If folders are not there then create them in the same order. Rename it to `oidc.xhtml`.
 - Restart jans-auth server `service jans-auth restart`
 - Check [here](https://jans.io/docs/admin/developer/customization/customize-web-pages) for more details on custom login page.
