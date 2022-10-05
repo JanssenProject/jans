@@ -29,13 +29,13 @@ public class SsaJsonService {
         JsonApplier.getInstance().apply(ssa, responseJsonObject);
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, ORG_ID.toString(), ssa.getOrgId());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, EXPIRATION.toString(), ssa.getExpiration());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, EXPIRATION.toString(), ssa.getExpirationDate());
         Util.addToJSONObjectIfNotNull(responseJsonObject, DESCRIPTION.toString(), ssa.getDescription());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_ID.toString(), ssa.getSoftwareId());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_ROLES.toString(), ssa.getSoftwareRoles());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), ssa.getGrantTypes());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, ONE_TIME_USE.toString(), ssa.getOneTimeUse());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, ROTATE_SSA.toString(), ssa.getRotateSsa());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_ID.toString(), ssa.getAttributes().getSoftwareId());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_ROLES.toString(), ssa.getAttributes().getSoftwareRoles());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), ssa.getAttributes().getGrantTypes());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ONE_TIME_USE.toString(), ssa.getAttributes().getOneTimeUse());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ROTATE_SSA.toString(), ssa.getAttributes().getRotateSsa());
         return responseJsonObject;
     }
 
