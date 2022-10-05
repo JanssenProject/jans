@@ -5,7 +5,7 @@ from prompt_toolkit.layout.containers import Float, HSplit, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
-from prompt_toolkit.key_binding.bindings.focus import focus_next
+from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import Float, FloatContainer, HSplit, Window, VSplit
 from prompt_toolkit.widgets import Button, Label, TextArea
@@ -23,6 +23,7 @@ from prompt_toolkit.layout.containers import (
 import calendar
 import time
 import datetime
+import cli_style
 
 class JansSelectDate:
     """_summary_
@@ -71,7 +72,7 @@ class JansSelectDate:
                 Button(text='<',left_symbol='',right_symbol='',width=1),
                DynamicContainer(lambda: self.year_label),
                 Button(text='>',left_symbol='',right_symbol='',width=1  )
-            ],style="bg:#1e51fa",padding=1),
+            ],style="class:date-picker-monthandyear",padding=1),  ### Month and year window style
             #DynamicContainer(lambda: self.depug),
 
         Window(
@@ -81,7 +82,7 @@ class JansSelectDate:
             height=5,
             cursorline=False,
             # width=D(),  #15,
-            style="bg:#D3D3D3",
+            style="class:date-picker-day",  ### days window style
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True,
             
@@ -94,7 +95,7 @@ class JansSelectDate:
             height=2,
             cursorline=False,
             # width=D(),  #15,
-            style="bg:#bab1b1",
+            style="class:date-picker-time",  ### time window style
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True
         ),
@@ -117,7 +118,7 @@ class JansSelectDate:
 
         hours_list = [hours,minuts,seconds]
 
-        time_line.append(HTML('<b><blue>        H : M : S </blue></b>'))
+        time_line.append(HTML('<b><{}>        H : M : S </{}></b>'.format(cli_style.date_picker_TimeTitle,cli_style.date_picker_TimeTitle)))
         time_line.append("\n")
 
         for i, time_element in enumerate(hours_list):
@@ -129,9 +130,9 @@ class JansSelectDate:
                 space_, colon_ = 0, ':'
 
             if i == self.cord_x and not self.change_date:
-                time_line.append(HTML('{}<style fg="ansiwhite" bg="#777777"><blue>{}</blue>{}</style>'.format(' '*space_, self.adjust_sizes(time_element), colon_)))
+                time_line.append(HTML('{}<style bg="#777777"><{}>{}</{}>{}</style>'.format(' '*space_,cli_style.date_picker_TimeSelected, self.adjust_sizes(time_element),cli_style.date_picker_TimeSelected, colon_)))
             else :
-                time_line.append(HTML('{}<b><blue>{}</blue>{}</b>'.format(' '*space_, self.adjust_sizes(time_element), colon_)))
+                time_line.append(HTML('{}<b><{}>{}</{}>{}</b>'.format(' '*space_, cli_style.date_picker_Time ,self.adjust_sizes(time_element), cli_style.date_picker_Time, colon_)))
 
             result= (time_line)
 
@@ -177,11 +178,11 @@ class JansSelectDate:
         for i, week in enumerate(self.entries): 
             for day in range(len(week)):
                 if i == self.cord_y and day == self.cord_x and self.change_date:
-                    week_line.append(HTML('<style fg="ansiwhite" bg="#777777"><black>{}</black></style>'.format(self.adjust_sizes(week[day]))))
+                    week_line.append(HTML('<style bg="#777777"><{}>{}</{}></style>'.format(cli_style.date_picker_calenderSelected,self.adjust_sizes(week[day]),cli_style.date_picker_calenderSelected)))
                 elif i == self.selected_cord[1] and day == self.selected_cord[0] and not self.change_date:
-                    week_line.append(HTML('<black><b>{}</b></black>'.format(self.adjust_sizes(week[day]))))
+                    week_line.append(HTML('<{}><b>{}</b></{}>'.format(cli_style.date_picker_calender_prevSelected, self.adjust_sizes(week[day]), cli_style.date_picker_calender_prevSelected)))
                 else:
-                    week_line.append(HTML('<black>{}</black>'.format(self.adjust_sizes(week[day]))))
+                    week_line.append(HTML('<{}>{}</{}>'.format(cli_style.date_picker_calenderNSelected, self.adjust_sizes(week[day]), cli_style.date_picker_calenderNSelected)))
 
             result= (week_line)
 
@@ -284,7 +285,6 @@ class JansSelectDate:
                 pass
             else :
                 self.cord_x = (self.cord_x - 1) #% 7
-                #self.depug=Label(text="cord_y = "+str(self.cord_y)+':',)
 
     def next(self):
         self.change_date = not self.change_date
@@ -397,6 +397,9 @@ class DateSelectWidget:
         def _focus_next(event):
             focus_next(event)
 
+        def _focus_pre(event):
+            focus_previous(event)
+
         @kb.add("enter")
         def _enter(event) -> None:
             if self.select_box_float not in get_app().layout.container.floats:
@@ -447,6 +450,14 @@ class DateSelectWidget:
                 self.select_box.next()
             else :
                 _focus_next(event)
+
+        @kb.add("s-tab")
+        def _tab(event):
+            if self.select_box_float in get_app().layout.container.floats:
+                self.select_box.next()
+            else :
+                _focus_pre(event)
+
 
         @kb.add("escape")
         def _escape(event):
