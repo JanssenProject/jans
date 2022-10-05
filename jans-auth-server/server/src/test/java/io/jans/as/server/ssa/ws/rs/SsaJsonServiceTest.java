@@ -40,33 +40,33 @@ public class SsaJsonServiceTest {
 
         Ssa ssa = new Ssa();
         ssa.setId(UUID.randomUUID().toString());
-        ssa.setOrgId(1L);
-        ssa.setExpiration(calendar.getTime());
+        ssa.setOrgId("1");
+        ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("Test description");
-        ssa.setSoftwareId("scan-api-test");
-        ssa.setSoftwareRoles(Collections.singletonList("passwurd"));
-        ssa.setGrantTypes(Collections.singletonList("client_credentials"));
-        ssa.setOneTimeUse(true);
-        ssa.setRotateSsa(true);
+        ssa.getAttributes().setSoftwareId("scan-api-test");
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
+        ssa.getAttributes().setOneTimeUse(true);
+        ssa.getAttributes().setRotateSsa(true);
 
         JSONObject jsonObject = ssaJsonService.getJSONObject(ssa);
         assertNotNull(jsonObject, "jsonObject response is null");
         assertTrue(jsonObject.has(ORG_ID.toString()));
         assertEquals(jsonObject.get(ORG_ID.toString()), ssa.getOrgId());
         assertTrue(jsonObject.has(EXPIRATION.toString()));
-        assertEquals(jsonObject.get(EXPIRATION.toString()), ssa.getExpiration());
+        assertEquals(jsonObject.get(EXPIRATION.toString()), ssa.getExpirationDate());
         assertTrue(jsonObject.has(DESCRIPTION.toString()));
         assertEquals(jsonObject.get(DESCRIPTION.toString()), ssa.getDescription());
         assertTrue(jsonObject.has(SOFTWARE_ID.toString()));
-        assertEquals(jsonObject.get(SOFTWARE_ID.toString()), ssa.getSoftwareId());
+        assertEquals(jsonObject.get(SOFTWARE_ID.toString()), ssa.getAttributes().getSoftwareId());
         assertTrue(jsonObject.has(SOFTWARE_ROLES.toString()));
-        assertEquals(jsonObject.get(SOFTWARE_ROLES.toString()), ssa.getSoftwareRoles());
+        assertEquals(jsonObject.get(SOFTWARE_ROLES.toString()), ssa.getAttributes().getSoftwareRoles());
         assertTrue(jsonObject.has(GRANT_TYPES.toString()));
-        assertEquals(jsonObject.get(GRANT_TYPES.toString()), ssa.getGrantTypes());
+        assertEquals(jsonObject.get(GRANT_TYPES.toString()), ssa.getAttributes().getGrantTypes());
         assertTrue(jsonObject.has(ONE_TIME_USE.toString()));
-        assertEquals(jsonObject.get(ONE_TIME_USE.toString()), ssa.getOneTimeUse());
+        assertEquals(jsonObject.get(ONE_TIME_USE.toString()), ssa.getAttributes().getOneTimeUse());
         assertTrue(jsonObject.has(ROTATE_SSA.toString()));
-        assertEquals(jsonObject.get(ROTATE_SSA.toString()), ssa.getRotateSsa());
+        assertEquals(jsonObject.get(ROTATE_SSA.toString()), ssa.getAttributes().getRotateSsa());
     }
 
     @Test

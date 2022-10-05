@@ -8,16 +8,12 @@ package io.jans.as.common.model.ssa;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.JsonObject;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.as.model.common.CreatorType;
+import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.DeletableEntity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 @DataEntry(sortBy = {"creationDate"})
 @ObjectClass(value = "jansSsa")
@@ -30,39 +26,62 @@ public class Ssa extends DeletableEntity implements Serializable {
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String id;
 
-    @AttributeName(name = "orgId")
-    private Long orgId;
+    @AttributeName(name = "jansAttrs")
+    @JsonObject
+    private SsaAttributes attributes;
 
-    @AttributeName(name = "expiration")
-    private Date expiration;
+    @AttributeName(name = "o")
+    private String orgId;
 
     @AttributeName(name = "description")
     private String description;
 
-    @AttributeName(name = "softwareId")
-    private String softwareId;
-
-    @AttributeName(name = "softwareRoles")
-    private List<String> softwareRoles;
-
-    @AttributeName(name = "grantTypes")
-    private List<String> grantTypes;
-
-    @JsonObject
-    @AttributeName(name = "customAttributes")
-    private Map<String, String> customAttributes;
-
     @AttributeName(name = "creationDate")
     private Date creationDate = new Date();
 
-    @AttributeName(name = "clientDn")
-    private String clientDn;
+    @AttributeName(name = "creatorId")
+    private String creatorId;
 
-    @AttributeName(name = "oneTimeUse")
-    private Boolean oneTimeUse;
+    @AttributeName(name = "creatorTyp")
+    private CreatorType creatorType;
 
-    @AttributeName(name = "rotateSsa")
-    private Boolean rotateSsa;
+    @Expiration
+    private Integer ttl;
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
+    }
+
+    public SsaAttributes getAttributes() {
+        if (attributes == null) {
+            attributes = new SsaAttributes();
+        }
+        return attributes;
+    }
+
+    public void setAttributes(SsaAttributes attributes) {
+        this.attributes = attributes;
+    }
+
+    public String getCreatorId() {
+        return creatorId;
+    }
+
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public CreatorType getCreatorType() {
+        return creatorType;
+    }
+
+    public void setCreatorType(CreatorType creatorType) {
+        this.creatorType = creatorType;
+    }
 
     public String getId() {
         return id;
@@ -72,20 +91,12 @@ public class Ssa extends DeletableEntity implements Serializable {
         this.id = id;
     }
 
-    public Long getOrgId() {
+    public String getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(Long orgId) {
+    public void setOrgId(String orgId) {
         this.orgId = orgId;
-    }
-
-    public Date getExpiration() {
-        return expiration;
-    }
-
-    public void setExpiration(Date expiration) {
-        this.expiration = expiration;
     }
 
     public String getDescription() {
@@ -96,38 +107,6 @@ public class Ssa extends DeletableEntity implements Serializable {
         this.description = description;
     }
 
-    public String getSoftwareId() {
-        return softwareId;
-    }
-
-    public void setSoftwareId(String softwareId) {
-        this.softwareId = softwareId;
-    }
-
-    public List<String> getSoftwareRoles() {
-        return softwareRoles;
-    }
-
-    public void setSoftwareRoles(List<String> softwareRoles) {
-        this.softwareRoles = softwareRoles;
-    }
-
-    public List<String> getGrantTypes() {
-        return grantTypes;
-    }
-
-    public void setGrantTypes(List<String> grantTypes) {
-        this.grantTypes = grantTypes;
-    }
-
-    public Map<String, String> getCustomAttributes() {
-        return customAttributes;
-    }
-
-    public void setCustomAttributes(Map<String, String> customAttributes) {
-        this.customAttributes = customAttributes;
-    }
-
     public Date getCreationDate() {
         return creationDate;
     }
@@ -136,45 +115,16 @@ public class Ssa extends DeletableEntity implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public String getClientDn() {
-        return clientDn;
-    }
-
-    public void setClientDn(String clientDn) {
-        this.clientDn = clientDn;
-    }
-
-    public Boolean getOneTimeUse() {
-        return oneTimeUse;
-    }
-
-    public void setOneTimeUse(Boolean oneTimeUse) {
-        this.oneTimeUse = oneTimeUse;
-    }
-
-    public Boolean getRotateSsa() {
-        return rotateSsa;
-    }
-
-    public void setRotateSsa(Boolean rotateSsa) {
-        this.rotateSsa = rotateSsa;
-    }
-
     @Override
     public String toString() {
         return "Ssa{" +
                 "id='" + id + '\'' +
-                ", orgId=" + orgId +
-                ", expiration=" + expiration +
+                ", attributes=" + attributes +
+                ", orgId='" + orgId + '\'' +
                 ", description='" + description + '\'' +
-                ", softwareId='" + softwareId + '\'' +
-                ", softwareRoles=" + softwareRoles +
-                ", grantTypes=" + grantTypes +
-                ", customAttributes=" + customAttributes +
                 ", creationDate=" + creationDate +
-                ", clientDn='" + clientDn + '\'' +
-                ", oneTimeUse=" + oneTimeUse +
-                ", rotateSsa=" + rotateSsa +
-                '}';
+                ", creatorId='" + creatorId + '\'' +
+                ", creatorType=" + creatorType +
+                "} " + super.toString();
     }
 }
