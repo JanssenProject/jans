@@ -43,3 +43,7 @@ Use external key? [Y|n] : y
 ```
  /opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
 ```
+
+### Test
+
+Janssen Server open-banking is ready for testing. Visit [testing]() instructions to know more. 
