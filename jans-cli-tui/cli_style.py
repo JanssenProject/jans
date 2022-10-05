@@ -99,9 +99,34 @@ style = Style.from_dict(
         "outh-uma-dropdown":"green",
         "outh-uma-widget":"green",
 
+
+
+
+        ### WUI Componenets
+        ## jans_data_picker
+        "date-picker-monthandyear":"bg:#1e51fa",
+        "date-picker-day":"bg:#D3D3D3",
+        "date-picker-time":"bg:#bab1b1",
+
+
     }
 )
 
 ## jans nav bar
 main_navbar_bgcolor = "#00ff44"
 outh_navbar_bgcolor = "#66d9ef"
+
+
+### WUI Componenets
+## jans_data_picker
+date_picker_TimeTitle = "yellow"  ## only color >> HTML '<blue></blue>'
+date_picker_Time = "green"       ## only color
+date_picker_TimeSelected = "black"
+
+date_picker_calender_prevSelected = "red" #>black >> defult bold
+date_picker_calenderNSelected = "blue"#>black
+date_picker_calenderSelected = "red"
+
+## jans_drop_down
+drop_down_hover = '#'
+drop_down_itemSelect = '#ADD8E6'
