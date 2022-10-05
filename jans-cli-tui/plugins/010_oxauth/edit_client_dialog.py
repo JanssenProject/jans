@@ -565,7 +565,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 except Exception as e:
                     pass
                 display_name = scope_result.get('displayName') or scope_result.get('inum')
-                scopes_of_resource.append(display_name)
+                scopes_of_resource.append(str(display_name))
+            
 
             data.append(
                 [
