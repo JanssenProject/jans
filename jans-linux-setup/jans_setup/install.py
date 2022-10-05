@@ -75,7 +75,7 @@ def check_install_dependencies():
             print("Can't continue...")
             sys.exit()
 
-        os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
+    os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
 def download_jans_acrhieve():
@@ -272,7 +272,7 @@ def do_install():
 
 def main():
 
-    if not argsp.uninstall:
+    if not argsp.uninstall or argsp.download_exit:
         check_install_dependencies()
 
     if not (argsp.use_downloaded or argsp.uninstall):
