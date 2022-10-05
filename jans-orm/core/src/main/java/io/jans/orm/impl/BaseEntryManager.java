@@ -1673,6 +1673,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
         List<AttributeData> listAttributes = new ArrayList<>();
 
         AttributeData attributeData = new AttributeData(ldapAttributeName, localizedString.getValues());
+        attributeData.setMultiValued(true);
         listAttributes.add(attributeData);
 
         return listAttributes;
