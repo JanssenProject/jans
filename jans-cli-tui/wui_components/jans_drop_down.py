@@ -7,7 +7,7 @@ from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.key_binding.bindings.focus import focus_next
 from prompt_toolkit.layout.dimension import D
-
+import cli_style
 
 class JansSelectBox:
     """_summary_
@@ -72,7 +72,7 @@ class JansSelectBox:
         for i, entry in enumerate(self.values):
             if i == self.selected_line:
                 result.append(
-                    HTML('<style fg="ansired" bg="{}">{}</style>'.format('#ADD8E6', entry[1])))
+                    HTML('<style fg="ansired" bg="{}">{}</style>'.format(cli_style.drop_down_itemSelect, entry[1])))
             else:
                 result.append(HTML('<b>{}</b>'.format(entry[1])))
             result.append("\n")
@@ -178,7 +178,7 @@ class DropDownWidget:
             str: The selected value
         """
         if get_app().layout.current_window is self.window:
-            return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format('#00FF00', self.text))
+            return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format(cli_style.drop_down_hover, self.text))
         return '> {} <'.format(self.text)
 
     def _get_key_bindings(self):
