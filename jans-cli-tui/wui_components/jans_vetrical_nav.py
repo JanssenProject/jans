@@ -10,7 +10,7 @@ class JansVerticalNav():
     """This is a Vertical Navigation bar Widget with many values used in <Get clients>/<Get scopes>
     """
 
-    def __init__(self, myparent, headers, selectes, on_enter, on_display, on_delete=None,
+    def __init__(self, myparent, headers, selectes, on_display, on_enter=None, on_delete=None,
                 all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white'):
         """init for JansVerticalNav
 
@@ -209,7 +209,8 @@ class JansVerticalNav():
         def _(event):
             passed = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
-            self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
+            if self.on_enter :
+                self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
 
 
         @kb.add('d')
