@@ -11,6 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
+import io.jans.as.model.common.CreatorType;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
@@ -97,20 +98,28 @@ public class SsaCreateAction {
             Client client = ssaRestWebServiceValidator.validateClient();
             ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
 
+            final Date creationDate = new Date();
+            final Date expirationDate = getExpiration(ssaRequest);
+
             final Ssa ssa = new Ssa();
             ssa.setDn("inum=" + inum + "," + ssaBaseDN);
             ssa.setId(inum);
             ssa.setDeletable(true);
-            ssa.setOrgId(ssaRequest.getOrgId());
-            ssa.setExpiration(getExpiration(ssaRequest));
+            ssa.setOrgId(ssaRequest.getOrgId() != null ? ssaRequest.getOrgId().toString() : null); // should orgId be long or string? e.g. guid as orgId sounds common
+            ssa.setExpirationDate(expirationDate);
+            ssa.setTtl(ServerUtil.calculateTtl(creationDate, expirationDate));
             ssa.setDescription(ssaRequest.getDescription());
-            ssa.setSoftwareId(ssaRequest.getSoftwareId());
-            ssa.setSoftwareRoles(ssaRequest.getSoftwareRoles());
-            ssa.setGrantTypes(ssaRequest.getGrantTypes());
-            ssa.setCustomAttributes(getCustomAttributes(jsonRequest));
-            ssa.setClientDn(client.getDn());
-            ssa.setOneTimeUse(ssaRequest.getOneTimeUse());
-            ssa.setRotateSsa(ssaRequest.getRotateSsa());
+            ssa.getAttributes().setSoftwareId(ssaRequest.getSoftwareId());
+            ssa.getAttributes().setSoftwareRoles(ssaRequest.getSoftwareRoles());
+            ssa.getAttributes().setGrantTypes(ssaRequest.getGrantTypes());
+            ssa.getAttributes().setCustomAttributes(getCustomAttributes(jsonRequest));
+            ssa.getAttributes().setClientDn(client.getDn());
+            ssa.getAttributes().setOneTimeUse(ssaRequest.getOneTimeUse());
+            ssa.getAttributes().setRotateSsa(ssaRequest.getRotateSsa());
+            ssa.setCreatorType(CreatorType.CLIENT);
+            ssa.setCreatorId(client.getClientId());
+
+            ssa.setCreationDate(creationDate);
             ssaService.persist(ssa);
             log.info("Ssa created: {}", ssa);
 
