@@ -32,6 +32,7 @@ from view_uma_dialog import ViewUMADialog
 import threading
 
 from multi_lang import _
+import re
 
 class EditScopeDialog(JansGDialog, DialogUtils):
     """The Main Scope Dialog that contain every thing related to The Scope
@@ -54,9 +55,11 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.title=title
         self.showInConfigurationEndpoint = self.data.get('attributes',{}).get('showInConfigurationEndpoint','')
         self.defaultScope = self.data.get('defaultScope','')
+        self.tbuffer = None
         self.prepare_tabs()
         self.create_window()
         self.sope_type = self.data.get('scopeType') or 'oauth'
+        
 
 
     def save(self):
@@ -87,25 +90,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
     def create_window(self):
-
-        self.body = HSplit([
-                        self.myparent.getTitledRadioButton(
-                                _("Scope Type"),  
-                                name='scopeType', 
-                                current_value=self.data.get('scopeType'),
-                                values=[('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
-                                on_selection_changed=self.scope_selection_changed,
-                                style='green'),
-
-                        self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
-                        self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
-                        self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
-                        self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
-                        DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
-
-                        ], width=self.myparent.dialog_width
-                    ),
-        
+                
         self.dialog = JansDialogWithNav(
             title=self.title,
             content= HSplit([
@@ -115,14 +100,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 current_value=self.data.get('scopeType'),
                                 values=[('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
                                 on_selection_changed=self.scope_selection_changed,
-                                style='green'),
+                                style='class:outh-scope-radiobutton'),
         
-                self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='green'),
-                self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='green',read_only=True,),
-                self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='green'),
-                self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
+                self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='class:outh-scope-text'),
+                self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='class:outh-scope-text',read_only=True,),
+                self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:outh-scope-text'),
+                self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-scope-text'),
                 DynamicContainer(lambda: self.alt_tabs[self.sope_type]),    
-            ]),  #DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
+            ],style='class:outh-scope-tabs'), 
              button_functions=[
                 (self.save, _("Save")),
                 (self.cancel, _("Cancel"))
@@ -137,6 +122,73 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     def set_scope_type(self, scope_type):
         self.sope_type = scope_type
 
+    def nothing(self):
+        pass
+
+    def get_openID_claims(self):
+        if self.tbuffer :
+            tbuffer = self.tbuffer
+        else:
+            tbuffer = None
+        self.myparent.logger.debug('tbuffer: ' + str(tbuffer))
+        #-----------------------------------------------------------------------#
+        #-----------------------------------------------------------------------#
+        #-----------------------------------------------------------------------#
+        if self.data.get('claims', []) != [] :
+            data =[]
+
+            if tbuffer == None :
+                for claim_line in self.data.get('claims'): 
+                    data.append(
+                        [
+                        claim_line
+                        ]
+                    )
+            else :
+                for claim_line in self.data.get('claims'): 
+                    result = [ re.search(tbuffer,str) for str in claim_line]
+                    self.myparent.logger.debug('result: ' + str(result))
+                    if result[0]:
+                        self.myparent.logger.debug('claim_line: ' + str(claim_line))
+                        data.append(
+                            [
+                            claim_line
+                            ]
+                        )   
+
+
+            if not data :
+                self.myparent.show_message(_("Oops"), _("No matching result"),tobefocused = self)
+                return
+                          
+
+            self.myparent.logger.debug('DATA: ' + str(data))
+
+            self.openID_claims = JansVerticalNav(
+                    myparent=self.myparent,
+                    headers=['claims'],
+                    preferred_size= [0],
+                    data=data,
+                    on_display=self.myparent.data_display_dialog,
+                    selectes=0,
+                    headerColor='class:outh-client-navbar-headcolor',
+                    entriesColor='class:outh-client-navbar-entriescolor',
+                    all_data=data
+                )
+        else :
+            self.openID_claims = HSplit([
+                                        self.myparent.getTitledText(
+                                                _("Claims"),
+                                                name='claims',
+                                                value='This Scope Contain No Claims',
+                                                style='class:outh-scope-text',read_only=True),
+
+                                        ])
+
+    def search_openID_claims(self,tbuffer):
+        self.tbuffer = tbuffer.text 
+        self.get_openID_claims()
+
     def prepare_tabs(self):
         """Prepare the tabs for Edil Scope Dialogs
         """
@@ -144,20 +196,21 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         self.alt_tabs = {}
 
+        self.get_openID_claims()
 
         self.alt_tabs['oauth'] = HSplit([
                             self.myparent.getTitledCheckBox(
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
-                                    style='green',
+                                    style='class:outh-scope-checkbox',
                             ),
 
                             self.myparent.getTitledCheckBox(
                                     _("Show in configuration endpoint"),
                                     name='showInConfigurationEndpoint',
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
-                                    style='green',
+                                    style='class:outh-scope-checkbox',
                             )
                         ],width=D(),)
 
@@ -167,29 +220,30 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
-                                    style='green',
+                                    style='class:outh-scope-checkbox',
                             ),
 
                             self.myparent.getTitledCheckBox(
                                     _("Show in configuration endpoint"),
                                     name='showInConfigurationEndpoint',
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
-                                    style='green',
+                                    style='class:outh-scope-checkbox',
                             ),
+
+                            # Window(char='-', height=1),
 
                             # HorizontalLine(),
                             self.myparent.getTitledText(
                                     _("Search"), 
                                     name='oauth:scopes:openID:claims:search',
-                                    style='fg:green',width=10,
-                                    jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_scopes
+                                    style='class:outh-scope-textsearch',width=10,
+                                    jans_help=_("Press enter to perform search"),
+                                    accept_handler=self.search_openID_claims),
 
-                            self.myparent.getTitledText(
-                                    _("Claims"),
-                                    name='claims',
-                                    value='\n'.join(self.data.get('claims', [])),
-                                    height=3, 
-                                    style='green'),
+
+                            ####################################################
+                            self.openID_claims,
+                            ###################################################
 
                             ],width=D(),)
 
@@ -199,13 +253,13 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             name='dynamicScopeScripts',
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
                             height=3, 
-                            style='green'),
+                            style='class:outh-scope-text'),
                         
                         # Window(char='-', height=1),
                         self.myparent.getTitledText(
                                 _("Search"), 
                                 name='oauth:scopes:openID:claims:search',
-                                style='fg:green',width=10,
+                                style='class:outh-scope-textsearch',width=10,
                                 jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_scopes
 
                         self.myparent.getTitledText(
@@ -213,7 +267,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 name='claims',
                                 value='\n'.join(self.data.get('claims', [])),
                                 height=3, 
-                                style='green'),
+                                style='class:outh-scope-text'),
 
                         # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
 
@@ -221,25 +275,25 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     )
 
         self.alt_tabs['spontaneous'] = HSplit([
-                    self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='green',read_only=True,height=3,),## Not fount
-                    self.myparent.getTitledText(_("Creationg time"), name='creationDate', value=self.data.get('creationDate',''), style='green',read_only=True,),
+                    self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='class:outh-scope-text',read_only=True,height=3,),## Not fount
+                    self.myparent.getTitledText(_("Creationg time"), name='creationDate', value=self.data.get('creationDate',''), style='class:outh-scope-text',read_only=True,),
 
                                                 ],width=D(),
                     )
 
         self.alt_tabs['uma'] = HSplit([
-                    self.myparent.getTitledText(_("IconURL"), name='iconUrl', value=self.data.get('iconUrl',''), style='green'),
+                    self.myparent.getTitledText(_("IconURL"), name='iconUrl', value=self.data.get('iconUrl',''), style='class:outh-scope-text'),
                     
 
                     self.myparent.getTitledText(_("Authorization Policies"),
                             name='umaAuthorizationPolicies',
                             value='\n'.join(self.data.get('umaAuthorizationPolicies', [])),
                             height=3, 
-                            style='green'),
+                            style='class:outh-scope-text'),
 
-                    self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='green',read_only=True,height=3,), ## Not fount
-                    self.myparent.getTitledText(_("Creationg time"), name='description', value=self.data.get('description',''), style='green',read_only=True,),
-                    self.myparent.getTitledText(_("Creator"), name='Creator', value=self.data.get('Creator',''), style='green',read_only=True,),
+                    self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='class:outh-scope-text',read_only=True,height=3,), ## Not fount
+                    self.myparent.getTitledText(_("Creationg time"), name='description', value=self.data.get('description',''), style='class:outh-scope-text',read_only=True,),
+                    self.myparent.getTitledText(_("Creator"), name='Creator', value=self.data.get('Creator',''), style='class:outh-scope-text',read_only=True,),
                         
                                                 ],width=D(),
                     )

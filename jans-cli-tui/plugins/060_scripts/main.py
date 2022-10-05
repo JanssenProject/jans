@@ -6,7 +6,11 @@ from prompt_toolkit.layout.containers import (
     DynamicContainer,
     Window
 )
-
+from prompt_toolkit.widgets import (
+    Button,
+    Dialog,
+    VerticalLine,
+)
 from prompt_toolkit.layout.containers import HSplit
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame
@@ -14,7 +18,7 @@ from prompt_toolkit.widgets import Button, Label, Frame
 from wui_components.jans_side_nav_bar import JansSideNavBar
 
 from multi_lang import _
-
+import cli_style
 
 class Plugin():
     """This is a general class for plugins 
@@ -55,6 +59,7 @@ class Plugin():
                        'Update Token'],
                     selection_changed=self.script_nav_selection_changed,
                     select=0,
+                    entries_color='class:script-navbar-bgcolor' 
                     )
 
     def script_nav_selection_changed(self, selection):
@@ -85,45 +90,45 @@ class Plugin():
 
         self.script_containers['Person Authentication'] = Frame(
         body=HSplit([
-            self.app.getTitledCheckBox(_("Enabled"), name='enabled', checked= not self.data.get('enabled'), style='green'),
-            self.app.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='green'),
-            self.app.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
+            self.app.getTitledCheckBox(_("Enabled"), name='enabled', checked= not self.data.get('enabled'), style='class:script-checkbox'),
+            self.app.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='class:script-titledtext'),
+            self.app.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:script-titledtext'),
             VSplit([
-                Label(text=_("Location"),style='green',width=len(_("Location"))),
+                Label(text=_("Location"),style='class:script-label',width=len(_("Location"))),
                 HSplit([
-                    self.app.getTitledCheckBox(_("Database"), name='database', checked= not self.data.get('database'), style='green'),
+                    self.app.getTitledCheckBox(_("Database"), name='database', checked= not self.data.get('database'), style='class:script-checkbox'),
                     VSplit([
-                        self.app.getTitledCheckBox(_("File System"), name='filesystem', checked= not self.data.get('filesystem'), style='green'),
-                        self.app.getTitledText(_(""), name='filesystem', value=self.data.get('filesystem',''), style='green'),
+                        self.app.getTitledCheckBox(_("File System"), name='filesystem', checked= not self.data.get('filesystem'), style='class:script-checkbox'),
+                        self.app.getTitledText(_(""), name='filesystem', value=self.data.get('filesystem',''), style='class:script-titledtext'),
                         ]),
                     ]),
                 ],
                 padding=3,
                 width=D(),
             ),
-            Label(text=_("Level"),style='blue',width=len(_("Level"))),
-            Label(text=_("Properties"),style='blue',width=len(_("Properties"))),
-            Label(text=_("Script"),style='blue',width=len(_("Script"))),
+            Label(text=_("Level"),style='class:script-label',width=len(_("Level"))),
+            Label(text=_("Properties"),style='class:script-label',width=len(_("Properties"))),
+            Label(text=_("Script"),style='class:script-label',width=len(_("Script"))),
             ],height=D(),width=D(),),
 
                     height=D())
         
         HSplit([
-            self.app.getTitledCheckBox(_("Enabled"), name='enabled', checked= not self.data.get('enabled'), style='green'),
-            self.app.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='green'),
-            self.app.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='green'),
+            self.app.getTitledCheckBox(_("Enabled"), name='enabled', checked= not self.data.get('enabled'), style='class:script-checkbox'),
+            self.app.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='class:script-titledtext'),
+            self.app.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:script-titledtext'),
             VSplit([
                 Label(text=_("Location"),style='bold',width=len(_("Location"))),
                 HSplit([
-                    self.app.getTitledCheckBox(_("Database"), name='database', checked= not self.data.get('database'), style='green'),
+                    self.app.getTitledCheckBox(_("Database"), name='database', checked= not self.data.get('database'), style='class:script-checkbox'),
                     VSplit([
-                        self.app.getTitledCheckBox(_("File System"), name='filesystem', checked= not self.data.get('filesystem'), style='green'),
-                        self.app.getTitledText(_(""), name='filesystem', value=self.data.get('filesystem',''), style='green'),
+                        self.app.getTitledCheckBox(_("File System"), name='filesystem', checked= not self.data.get('filesystem'), style='class:script-checkbox'),
+                        self.app.getTitledText(_(""), name='filesystem', value=self.data.get('filesystem',''), style='class:script-titledtext'),
                         ]),
                 ]),
-            Label(text=_("Level"),style='bold',width=len(_("Level"))),
-            Label(text=_("Properties"),style='bold',width=len(_("Properties"))),
-            Label(text=_("Script"),style='bold',width=len(_("Script"))),
+            Label(text=_("Level"),style='class:script-label',width=len(_("Level"))),
+            Label(text=_("Properties"),style='class:script-label',width=len(_("Properties"))),
+            Label(text=_("Script"),style='class:script-label',width=len(_("Script"))),
                 ],
                 padding=3,
                 width=D(),
@@ -133,20 +138,19 @@ class Plugin():
 
 
         self.script_main_container = Frame(
-            body=HSplit([
-                    VSplit([
-                        self.script_navbar,
-                        DynamicContainer(lambda: self.script_main_area),
+            body=VSplit([
+                        HSplit([self.script_navbar,],style='class:script-sidenav'),
+                        
+                        Window(
+                            char="\u2502", style="class:line,vertical-line", width=1
+                        ),
+                        HSplit([DynamicContainer(lambda: self.script_main_area),],style='class:script-mainarea'),
+                        
                         ],
+                        style='class:script_maincontainer',
                     height=D(),
-                    )
-                
-                
-                    ], ),
-                height=D())
-        
-        
-    
-        
-        
+                    
+                    ))
+
+
                                 

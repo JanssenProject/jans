@@ -55,7 +55,7 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 
 from multi_lang import _
-
+import cli_style
 
 class ViewUMADialog(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details
@@ -98,7 +98,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                     entries=[('scope', 'scope'), ('expression', 'scope expression'), ],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
-                    bgcolor='#8a8a8a'
+                    bgcolor=cli_style.outh_navbar_bgcolor  ### it is not a style > only color
                     )
 
 
@@ -112,7 +112,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='id',
                                 value=self.data.get('id',''),
                                 read_only=True,
-                                style='green',
+                                style='class:outh-uma-text',
                             ),
 
             self.myparent.getTitledText(
@@ -120,20 +120,20 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='name',
                                 value=self.data.get('name',''),
                                 read_only=True,
-                                style='green'),
+                                style='class:outh-uma-text'),
 
             self.myparent.getTitledText(
                                 _("IconURL"),
                                 name='iconUri',
                                 value=self.data.get('iconUri',''),
                                 read_only=True,
-                                style='green'),    
+                                style='class:outh-uma-text'),    
 
 
             VSplit([
-            Label(text=_("Scope Selection"),style='green bold',width=len(_("Scope Selection"))), ## TODO dont know what is that
+            Label(text=_("Scope Selection"),style='class:outh-uma-label',width=len(_("Scope Selection"))), ## TODO dont know what is that
 
-            Box(self.side_nav_bar.nav_window, style='fg:#4D4D4D bg:#ffffff', height=1),
+            Box(self.side_nav_bar.nav_window, style='class:outh-uma-navbar', height=1),
 
             ]),
             
@@ -144,16 +144,16 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='clients',
                                 value=self.data.get('clients',''),
                                 read_only=True,
-                                style='green'), 
+                                style='class:outh-uma-text'), 
 
             self.myparent.getTitledText(
                                 _("Creation time"),
                                 name='creationDate',
                                 value=self.data.get('creationDate',''),
                                 read_only=True,
-                                style='green'), 
+                                style='class:outh-uma-text'), 
 
-        ], padding=1,width=100,
+        ], padding=1,width=100,style='class:outh-uma-tabs'
         # key_bindings=self.get_uma_dialog_key_bindings()
         ),
         buttons=[
@@ -181,7 +181,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='scope',
                                 value=self.data.get('scope',[]),
                                 read_only=True,
-                                style='green',
+                                style='class:outh-uma-text',
                             )
 
         ],width=D())
@@ -194,7 +194,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='expression',
                                 value=self.data.get('expression',[]),
                                 read_only=True,
-                                style='green',
+                                style='class:outh-uma-text',
                             ),
 
         ],width=D())

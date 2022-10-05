@@ -37,7 +37,7 @@ from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 
 from multi_lang import _
-
+import cli_style
 class Plugin():
     """This is a general class for plugins 
     """
@@ -78,19 +78,19 @@ class Plugin():
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
                         self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_scopes),
-                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope),
+                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button"), handler=self.add_scope),
                         ],
                         padding=3,
                         width=D(),
                     ),
                     DynamicContainer(lambda: self.oauth_data_container['scopes'])
-                    ])
+                    ],style='class:outh_containers_scopes')
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
                         self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first 10 OpenID Connect clients"), handler=self.oauth_get_clients),
-                        self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_clients),
+                        self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
                         self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
                         
                         ],
@@ -98,14 +98,14 @@ class Plugin():
                         width=D(),
                         ),
                         DynamicContainer(lambda: self.oauth_data_container['clients'])
-                    ]
-                    )
+                     ],style='class:outh_containers_clients')
 
         self.oauth_main_container = HSplit([
-                                        Box(self.oauth_navbar.nav_window, style='fg:#f92672 bg:#4D4D4D', height=1),
+                                        Box(self.oauth_navbar.nav_window, style='class:outh-navbar', height=1),
                                         DynamicContainer(lambda: self.oauth_main_area),
                                         ],
                                     height=D(),
+                                    style='class:outh_maincontainer'
                                     )
 
     def oauth_prepare_navbar(self):
@@ -116,7 +116,7 @@ class Plugin():
                     entries=[('clients', 'Clients'), ('scopes', 'Scopes'), ('keys', 'Keys'), ('defaults', 'Defaults'), ('properties', 'Properties'), ('logging', 'Logging')],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
-                    bgcolor='#66d9ef'
+                    bgcolor=cli_style.outh_navbar_bgcolor  ### it is not a style > only color
                     )
 
     def oauth_nav_selection_changed(self, selection):
@@ -168,8 +168,6 @@ class Plugin():
             #press_tab
             return
 
-
-
         data =[]
 
         for d in result.get('entries', []):
@@ -193,8 +191,8 @@ class Plugin():
                 on_delete=self.delete_client,
                 # selection_changed=self.data_selection_changed,
                 selectes=0,
-                headerColor='green',
-                entriesColor='white',
+                headerColor='class:outh-verticalnav-headcolor',
+                entriesColor='class:outh-verticalnav-entriescolor',
                 all_data=result['entries']
             )
             buttons = []
@@ -223,7 +221,7 @@ class Plugin():
     def oauth_get_clients(self):
         """Method to get the clients data from server
         """ 
-        self.oauth_data_container['clients'] = HSplit([Label(_("Please wait while getting clients"))], width=D())
+        self.oauth_data_container['clients'] = HSplit([Label(_("Please wait while getting clients"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_clients, daemon=True)
         t.start()
 
@@ -286,8 +284,8 @@ class Plugin():
                     on_delete=self.delete_scope,
                     # selection_changed=self.data_selection_changed,
                     selectes=0,
-                    headerColor='green',
-                    entriesColor='white',
+                    headerColor='class:outh-verticalnav-headcolor',
+                    entriesColor='class:outh-verticalnav-entriescolor',
                     all_data=result['entries']
                 )
 
@@ -317,7 +315,7 @@ class Plugin():
     def oauth_get_scopes(self):
         """Method to get the Scopes data from server
         """
-        self.oauth_data_container['scopes'] = HSplit([Label(_("Please wait while getting Scopes"))], width=D())
+        self.oauth_data_container['scopes'] = HSplit([Label(_("Please wait while getting Scopes"),style='class:outh-waitscopedata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_scopes, daemon=True)
         t.start()
 
