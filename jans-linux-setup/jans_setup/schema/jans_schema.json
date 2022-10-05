@@ -3342,6 +3342,31 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "inum",
+        "o",
+        "jansAttrs",
+        "description",
+        "exp",
+        "del",
+        "creatorId",
+        "creatorTyp",
+        "creationDate"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansSsa"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
         "c",
         "ou",
         "description",
