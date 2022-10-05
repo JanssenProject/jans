@@ -90,24 +90,24 @@ public class SsaCreateActionTest {
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 24);
         ssa = new Ssa();
-        ssa.setOrgId(1L);
-        ssa.setExpiration(calendar.getTime());
+        ssa.setOrgId("1");
+        ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("test description");
-        ssa.setSoftwareId("gluu-scan-api");
-        ssa.setSoftwareRoles(Collections.singletonList("passwurd"));
-        ssa.setGrantTypes(Collections.singletonList("client_credentials"));
-        ssa.setOneTimeUse(true);
-        ssa.setRotateSsa(true);
+        ssa.getAttributes().setSoftwareId("gluu-scan-api");
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
+        ssa.getAttributes().setOneTimeUse(true);
+        ssa.getAttributes().setRotateSsa(true);
 
         requestJson = new JSONObject();
         requestJson.put(ORG_ID.toString(), ssa.getOrgId());
-        requestJson.put(EXPIRATION.toString(), ssa.getExpiration().getTime() / 1000L);
+        requestJson.put(EXPIRATION.toString(), ssa.getExpirationDate().getTime() / 1000L);
         requestJson.put(DESCRIPTION.toString(), ssa.getDescription());
-        requestJson.put(SOFTWARE_ID.toString(), ssa.getSoftwareId());
-        requestJson.put(SOFTWARE_ROLES.toString(), ssa.getSoftwareRoles());
-        requestJson.put(GRANT_TYPES.toString(), ssa.getGrantTypes());
-        requestJson.put(ONE_TIME_USE.toString(), ssa.getOneTimeUse());
-        requestJson.put(ROTATE_SSA.toString(), ssa.getRotateSsa());
+        requestJson.put(SOFTWARE_ID.toString(), ssa.getAttributes().getSoftwareId());
+        requestJson.put(SOFTWARE_ROLES.toString(), ssa.getAttributes().getSoftwareRoles());
+        requestJson.put(GRANT_TYPES.toString(), ssa.getAttributes().getGrantTypes());
+        requestJson.put(ONE_TIME_USE.toString(), ssa.getAttributes().getOneTimeUse());
+        requestJson.put(ROTATE_SSA.toString(), ssa.getAttributes().getRotateSsa());
     }
 
     @Test
@@ -163,16 +163,16 @@ public class SsaCreateActionTest {
         assertEquals(ssaAux.getOrgId(), ssa.getOrgId());
         assertNotNull(ssaAux.getDescription(), "ssa description is null");
         assertEquals(ssaAux.getDescription(), ssa.getDescription());
-        assertNotNull(ssaAux.getSoftwareId(), "ssa software_id is null");
-        assertEquals(ssaAux.getSoftwareId(), ssa.getSoftwareId());
-        assertNotNull(ssaAux.getSoftwareRoles(), "ssa software_roles is null");
-        assertEquals(ssaAux.getSoftwareRoles(), ssa.getSoftwareRoles());
-        assertNotNull(ssaAux.getGrantTypes(), "ssa grant_types is null");
-        assertEquals(ssaAux.getGrantTypes(), ssa.getGrantTypes());
-        assertNotNull(ssaAux.getOneTimeUse(), "ssa one_time_use is null");
-        assertEquals(ssaAux.getOneTimeUse(), ssa.getOneTimeUse());
-        assertNotNull(ssaAux.getRotateSsa(), "ssa rotate_ssa is null");
-        assertEquals(ssaAux.getRotateSsa(), ssa.getRotateSsa());
+        assertNotNull(ssaAux.getAttributes().getSoftwareId(), "ssa software_id is null");
+        assertEquals(ssaAux.getAttributes().getSoftwareId(), ssa.getAttributes().getSoftwareId());
+        assertNotNull(ssaAux.getAttributes().getSoftwareRoles(), "ssa software_roles is null");
+        assertEquals(ssaAux.getAttributes().getSoftwareRoles(), ssa.getAttributes().getSoftwareRoles());
+        assertNotNull(ssaAux.getAttributes().getGrantTypes(), "ssa grant_types is null");
+        assertEquals(ssaAux.getAttributes().getGrantTypes(), ssa.getAttributes().getGrantTypes());
+        assertNotNull(ssaAux.getAttributes().getOneTimeUse(), "ssa one_time_use is null");
+        assertEquals(ssaAux.getAttributes().getOneTimeUse(), ssa.getAttributes().getOneTimeUse());
+        assertNotNull(ssaAux.getAttributes().getRotateSsa(), "ssa rotate_ssa is null");
+        assertEquals(ssaAux.getAttributes().getRotateSsa(), ssa.getAttributes().getRotateSsa());
     }
 
     @Test
