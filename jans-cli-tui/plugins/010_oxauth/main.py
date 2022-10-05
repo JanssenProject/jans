@@ -493,8 +493,6 @@ class Plugin():
         ensure_future(coroutine())
 
     def delete_UMAresource(self, selected, event=None):
-        
-
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(selected[0]))
         async def coroutine():
             focused_before = self.app.layout.current_window
