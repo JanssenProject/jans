@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#developer-faqs" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -10601,10 +10606,77 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Developer FAQ
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Developer FAQ
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-install-janssen-server-openbanking-for-testing" class="md-nav__link">
+    How to install Janssen Server OpenBanking for testing?
+  </a>
+  
+    <nav class="md-nav" aria-label="How to install Janssen Server OpenBanking for testing?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#download-installer" class="md-nav__link">
+    Download Installer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execute-installer" class="md-nav__link">
+    Execute Installer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-certificate" class="md-nav__link">
+    Configure Certificate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test" class="md-nav__link">
+    Test
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10718,6 +10790,57 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-install-janssen-server-openbanking-for-testing" class="md-nav__link">
+    How to install Janssen Server OpenBanking for testing?
+  </a>
+  
+    <nav class="md-nav" aria-label="How to install Janssen Server OpenBanking for testing?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#download-installer" class="md-nav__link">
+    Download Installer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execute-installer" class="md-nav__link">
+    Execute Installer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-certificate" class="md-nav__link">
+    Configure Certificate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test" class="md-nav__link">
+    Test
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -10736,18 +10859,55 @@
 
   
 
+  <nav class="md-tags" >
+    
+      
+        <span class="md-tag">developer</span>
+      
+    
+      
+        <span class="md-tag">faq</span>
+      
+    
+  </nav>
 
 
-  <h1>Developer FAQ</h1>
 
-<p>This file is a placeholder.</p>
+<h1 id="developer-faqs">Developer FAQs<a class="headerlink" href="#developer-faqs" title="Permanent link">#</a></h1>
+<hr />
+<h2 id="how-to-install-janssen-server-openbanking-for-testing">How to install Janssen Server OpenBanking for testing?<a class="headerlink" href="#how-to-install-janssen-server-openbanking-for-testing" title="Permanent link">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li>Use this installation for testing only</li>
+<li>Good understanding of Janssen Server installation process in general is a prerequisite. Here we are just highlighting steps without a lot of details. Visit <a href="../../admin/install/">installation</a> documentation for complete understanding.</li>
+</ul>
+</div>
+<p>This installation uses Gluu Testing certificate.</p>
+<h3 id="download-installer">Download Installer<a class="headerlink" href="#download-installer" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O install.py
+</code></pre></div>
+<h3 id="execute-installer">Execute Installer<a class="headerlink" href="#execute-installer" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>python3 install.py --profile=openbanking --args=&quot;-ob-key-fn=/opt/jans/jans-setup/openbanking/static/ob-gluu-test.key -static-kid=ob-gluu-test -jwks-uri=https://ox.gluu.org/icrby8xcvbcv/ob/ob-gluu-test.jwks --disable-ob-auth-script -ob-alias=ob-gluu-test&quot;
+</code></pre></div>
+<p>Please enter defaults for the following questions (press just enter key), it will download certificate from <strong>jwksUri</strong></p>
+<div class="highlight"><pre><span></span><code>Use external key? [Y|n] : y
+  Openbanking Key File [/opt/jans/jans-setup/openbanking/static/ob-gluu-test.key] : 
+  Openbanking Certificate File [/root/obsigning.pem] : 
+  Openbanking Key Alias [ob-gluu-test] : 
+</code></pre></div>
+<h3 id="configure-certificate">Configure Certificate<a class="headerlink" href="#configure-certificate" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code> /opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+</code></pre></div>
+<h3 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h3>
+<p>Janssen Server open-banking is ready for testing. Visit <a href="">testing</a> instructions to know more. </p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-06-15T08:30:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-06-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-05T14:47:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-05</span>
       
         <br>
         Created:
