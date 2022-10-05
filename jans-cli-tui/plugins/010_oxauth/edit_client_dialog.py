@@ -549,11 +549,29 @@ class EditClientDialog(JansGDialog, DialogUtils):
         
 
         for d in result:
+            scopes_of_resource = []
+            for scope_dn in d.get('scopes', []):
+                inum = scope_dn.split(',')[0].split('=')[1]
+                scope_result = {}
+                try :
+                    scope_response = self.myparent.cli_object.process_command_by_id(
+                        operation_id='get-oauth-scopes-by-inum',
+                        url_suffix='inum:{}'.format(inum),
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
+                        )
+                    scope_result = scope_response.json()
+                except Exception as e:
+                    pass
+                display_name = scope_result.get('displayName') or scope_result.get('inum')
+                scopes_of_resource.append(display_name)
+
             data.append(
                 [
                 d.get('id'),
                 str(d.get('description', '')),
-                str(d.get('scopes', [''])[0] )
+                ','.join(scopes_of_resource)
                 ]
             )
 
@@ -572,6 +590,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     headerColor='class:outh-client-navbar-headcolor',
                                     entriesColor='class:outh-client-navbar-entriescolor',
                                     all_data=result,
+                                    underline_headings=False,
                             ),
             ])
 
