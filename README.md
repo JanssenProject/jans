@@ -65,9 +65,22 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 ## Getting Started
 
+### Quick Start
+
+For development and testing purposes, the Janssen Server can be quickly installed on an Ubuntu 22.04 VM by running the command below:
+
+```
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
+```
+
+Full featured Janssen Server is now installed and ready to be used. See [Quick-Start Guide](https://docs.jans.io/head/admin/install/vm-install/quick-start-install/) to know how to access and start configuring.
+
+
 ### Installation
 
-Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Documentation](https://docs.jans.io/head/admin/install/) to know all the installation options
+For production environment, Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Documentation](https://docs.jans.io/head/admin/install/) to know all the installation options
+
+
 
 ## Users and Community
 

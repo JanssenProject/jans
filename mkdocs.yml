@@ -144,6 +144,7 @@ nav:
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
+            - 'Quick Start Installation': 'admin/install/vm-install/quick-start-install.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
             - 'Suse': 'admin/install/vm-install/suse.md'
@@ -519,6 +520,7 @@ nav:
         - 'Impersonation': 'admin/recipes/impersonation.md'
         - 'Social Login': 'admin/recipes/social-login.md'
         - 'Inbound SAML': 'admin/recipes/inbound-saml.md'
+        - 'Inbound OIDC': 'admin/recipes/inbound-oidc.md'
         - 'Registration': 'admin/recipes/registration.md'
         - 'Password Expirations': 'admin/recipes/password-expirations.md'
         - 'Locking or Disabling Accounts': 'admin/recipes/locking-accounts.md'
