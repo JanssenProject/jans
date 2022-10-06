@@ -97,6 +97,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             scope_types.insert(3, ('spontaneous', 'Spontaneous'))
             buttons.pop(0)
 
+        if self.data.get('scopeType') == 'uma':
+            buttons.pop(0)
+
         self.dialog = JansDialogWithNav(
             title=self.title,
             content= HSplit([
