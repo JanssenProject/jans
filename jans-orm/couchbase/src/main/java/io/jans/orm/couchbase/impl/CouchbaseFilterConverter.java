@@ -237,7 +237,8 @@ public class CouchbaseFilterConverter {
 
 			StringBuilder like = new StringBuilder();
             if (currentGenericFilter.getSubInitial() != null) {
-            	String variableExpressionInitial = buildVariableExpression(internalAttribute + "_i", multiValued, currentGenericFilter.getSubInitial(), queryParameters);
+            	String subInital = currentGenericFilter.getSubInitial() + "%";
+            	String variableExpressionInitial = buildVariableExpression(internalAttribute + "_i", multiValued, subInital, queryParameters);
             	filterParameters.add(variableExpressionInitial);
                 like.append("$" + variableExpressionInitial);
             }
@@ -255,7 +256,8 @@ public class CouchbaseFilterConverter {
             }
 
             if (currentGenericFilter.getSubFinal() != null) {
-            	String variableExpressionFinal = buildVariableExpression(internalAttribute + "_f", multiValued, currentGenericFilter.getSubFinal(), queryParameters);
+            	String subFinal = "%" + currentGenericFilter.getSubFinal();
+            	String variableExpressionFinal = buildVariableExpression(internalAttribute + "_f", multiValued, subFinal, queryParameters);
             	filterParameters.add(variableExpressionFinal);
                 like.append("$" + variableExpressionFinal);
             }
