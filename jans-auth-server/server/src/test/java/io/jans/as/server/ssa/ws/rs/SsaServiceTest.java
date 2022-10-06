@@ -126,14 +126,14 @@ public class SsaServiceTest {
         calendar.add(Calendar.HOUR, 24);
         ssa = new Ssa();
         ssa.setId(UUID.randomUUID().toString());
-        ssa.setOrgId(1L);
-        ssa.setExpiration(calendar.getTime());
+        ssa.setOrgId("1");
+        ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("Test description");
-        ssa.setSoftwareId("scan-api-test");
-        ssa.setSoftwareRoles(Collections.singletonList("passwurd"));
-        ssa.setGrantTypes(Collections.singletonList("client_credentials"));
-        ssa.setOneTimeUse(true);
-        ssa.setRotateSsa(true);
+        ssa.getAttributes().setSoftwareId("scan-api-test");
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
+        ssa.getAttributes().setOneTimeUse(true);
+        ssa.getAttributes().setRotateSsa(true);
     }
 
     @Test
@@ -235,11 +235,11 @@ public class SsaServiceTest {
         assertNotNull(jwtClaims.getClaim("org_id"), "The org_id in jwt is null");
         assertEquals(jwtClaims.getClaim("org_id"), ssa.getOrgId());
         assertNotNull(jwtClaims.getClaim("software_id"), "The software_id in jwt is null");
-        assertEquals(jwtClaims.getClaim("software_id"), ssa.getSoftwareId());
+        assertEquals(jwtClaims.getClaim("software_id"), ssa.getAttributes().getSoftwareId());
         assertNotNull(jwtClaims.getClaim("software_roles"), "The software_roles in jwt is null");
-        assertEquals(jwtClaims.getClaim("software_roles"), ssa.getSoftwareRoles());
+        assertEquals(jwtClaims.getClaim("software_roles"), ssa.getAttributes().getSoftwareRoles());
         assertNotNull(jwtClaims.getClaim("grant_types"), "The grant_types in jwt is null");
-        assertEquals(jwtClaims.getClaim("grant_types"), ssa.getGrantTypes());
+        assertEquals(jwtClaims.getClaim("grant_types"), ssa.getAttributes().getGrantTypes());
 
         assertNotNull(jwtClaims.getClaim("jti"), "The jti in jwt is null");
         assertEquals(jwtClaims.getClaim("jti"), ssa.getId());
@@ -248,7 +248,7 @@ public class SsaServiceTest {
         assertNotNull(jwtClaims.getClaim("iat"), "The iat in jwt is null");
         assertEquals(jwtClaims.getClaim("iat"), ssa.getCreationDate());
         assertNotNull(jwtClaims.getClaim("exp"), "The exp in jwt is null");
-        assertEquals(jwtClaims.getClaim("exp"), ssa.getExpiration());
+        assertEquals(jwtClaims.getClaim("exp"), ssa.getExpirationDate());
     }
 
     private static void assertSsaWithAux(Ssa ssa, Ssa ssaAux) {
@@ -257,19 +257,19 @@ public class SsaServiceTest {
         assertEquals(ssaAux.getId(), ssa.getId());
         assertNotNull(ssaAux.getOrgId(), "ssa org_id is null");
         assertEquals(ssaAux.getOrgId(), ssa.getOrgId());
-        assertNotNull(ssaAux.getExpiration(), "ssa expiration is null");
-        assertEquals(ssaAux.getExpiration(), ssa.getExpiration());
+        assertNotNull(ssaAux.getExpirationDate(), "ssa expiration is null");
+        assertEquals(ssaAux.getExpirationDate(), ssa.getExpirationDate());
         assertNotNull(ssaAux.getDescription(), "ssa description is null");
         assertEquals(ssaAux.getDescription(), ssa.getDescription());
-        assertNotNull(ssaAux.getSoftwareId(), "ssa software_id is null");
-        assertEquals(ssaAux.getSoftwareId(), ssa.getSoftwareId());
-        assertNotNull(ssaAux.getSoftwareRoles(), "ssa software_roles is null");
-        assertEquals(ssaAux.getSoftwareRoles(), ssa.getSoftwareRoles());
-        assertNotNull(ssaAux.getGrantTypes(), "ssa grant_types is null");
-        assertEquals(ssaAux.getGrantTypes(), ssa.getGrantTypes());
-        assertNotNull(ssaAux.getOneTimeUse(), "ssa one_time_use is null");
-        assertEquals(ssaAux.getOneTimeUse(), ssa.getOneTimeUse());
-        assertNotNull(ssaAux.getRotateSsa(), "ssa rotate_ssa is null");
-        assertEquals(ssaAux.getRotateSsa(), ssa.getRotateSsa());
+        assertNotNull(ssaAux.getAttributes().getSoftwareId(), "ssa software_id is null");
+        assertEquals(ssaAux.getAttributes().getSoftwareId(), ssa.getAttributes().getSoftwareId());
+        assertNotNull(ssaAux.getAttributes().getSoftwareRoles(), "ssa software_roles is null");
+        assertEquals(ssaAux.getAttributes().getSoftwareRoles(), ssa.getAttributes().getSoftwareRoles());
+        assertNotNull(ssaAux.getAttributes().getGrantTypes(), "ssa grant_types is null");
+        assertEquals(ssaAux.getAttributes().getGrantTypes(), ssa.getAttributes().getGrantTypes());
+        assertNotNull(ssaAux.getAttributes().getOneTimeUse(), "ssa one_time_use is null");
+        assertEquals(ssaAux.getAttributes().getOneTimeUse(), ssa.getAttributes().getOneTimeUse());
+        assertNotNull(ssaAux.getAttributes().getRotateSsa(), "ssa rotate_ssa is null");
+        assertEquals(ssaAux.getAttributes().getRotateSsa(), ssa.getAttributes().getRotateSsa());
     }
 }
