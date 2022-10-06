@@ -41,6 +41,7 @@ import io.jans.orm.sql.operation.SqlOperationService;
 import io.jans.orm.sql.operation.SupportedDbType;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * Filter to SQL query convert
@@ -63,6 +64,8 @@ public class SqlFilterConverter {
 	private Path<Long> longDocAlias = ExpressionUtils.path(Long.class, "doc");
 	private Path<Date> dateDocAlias = ExpressionUtils.path(Date.class, "doc");
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
+	
+	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}" };
 
 
     public SqlFilterConverter(SqlOperationService operationService) {
@@ -177,7 +180,7 @@ public class SqlFilterConverter {
             }
         }
 
-        boolean multiValued = isMultiValue(currentGenericFilter, propertiesAnnotationsMap);
+        boolean multiValued = isMultiValue(tableMapping, currentGenericFilter, propertiesAnnotationsMap);
     	Expression columnExpression = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
 
     	if (FilterType.EQUALITY == type) {
@@ -201,7 +204,7 @@ public class SqlFilterConverter {
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, type, columnExpression);
+							currentGenericFilter, columnExpression);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -233,7 +236,7 @@ public class SqlFilterConverter {
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, type, columnExpression);
+							currentGenericFilter, columnExpression);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -295,17 +298,26 @@ public class SqlFilterConverter {
         }
 
         if (FilterType.SUBSTRING == type) {
+        	String matchChar = multiValued && (SupportedDbType.POSTGRESQL == this.dbType) ? ".*" : "%";
         	StringBuilder like = new StringBuilder();
             if (currentGenericFilter.getSubInitial() != null) {
                 like.append(currentGenericFilter.getSubInitial());
             }
-            like.append("%");
+            like.append(matchChar);
 
             String[] subAny = currentGenericFilter.getSubAny();
             if ((subAny != null) && (subAny.length > 0)) {
                 for (String any : subAny) {
-                    like.append(any);
-                    like.append("%");
+        			if (SupportedDbType.POSTGRESQL == this.dbType) {
+        				if (multiValued) {
+        					like.append(escapeRegex(any));
+        				} else {
+        					like.append(any);
+        				}
+        			} else {
+        				like.append(any);
+        			}
+                    like.append(matchChar);
                 }
             }
 
@@ -316,8 +328,10 @@ public class SqlFilterConverter {
             Expression expression;
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
+    				String likeString = "\"" + StringEscapeUtils.escapeJava(like.toString()) + "\"";
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, type, columnExpression);
+							currentGenericFilter, columnExpression, Expressions.constant("like_regex"),
+							likeString);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -351,19 +365,41 @@ public class SqlFilterConverter {
 	}
 
 	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
-			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter, FilterType type,
+			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter,
 			Expression columnExpression) throws SearchException {
+		Object typedArrayExpressionValue = prepareTypedArrayExpressionValue(tableMapping, currentGenericFilter);		
+		return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes, currentGenericFilter, columnExpression,
+				Expressions.constant(currentGenericFilter.getType().getSign()), typedArrayExpressionValue);
+	}
+
+	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
+			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter, Expression columnExpression, Expression operationExpession, Object expressionValue) {
+		Expression<?> typedArrayExpression = expressionValue == null ? Expressions.nullExpression() : Expressions.constant(expressionValue); 
+
 		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_NOT_EMPTY_ARRAY,
 				ExpressionUtils.predicate(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY,
-				columnExpression, Expressions.constant(type.getSign()),
-				Expressions.constant(prepareTypedArrayExpressionValue(tableMapping, currentGenericFilter))));
+				columnExpression, operationExpession,
+				typedArrayExpression));
 		return ConvertedExpression.build(operation, jsonAttributes);
 	}
 
-	protected Boolean isMultiValue(Filter currentGenericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
-		Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
-		if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
-			return true;
+	protected Boolean isMultiValue(TableMapping tableMapping, Filter filter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+		String attributeName = filter.getAttributeName();
+		AttributeType attributeType = null;
+		if (StringHelper.isNotEmpty(attributeName)) {
+			attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+			if (attributeType == null) {
+				if (tableMapping != null) {
+					throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+				}
+			}
+		}
+
+		Boolean isMultiValuedDetected = determineMultiValuedByType(filter.getAttributeName(), propertiesAnnotationsMap);
+		if ((Boolean.TRUE.equals(filter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected))) {
+			if ((attributeType != null) && Boolean.TRUE.equals(attributeType.getMultiValued())) {
+				return true;
+			}
 		}
 
 		return false;
@@ -409,7 +445,9 @@ public class SqlFilterConverter {
 	}
 
 	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter) throws SearchException {
-		return Expressions.constant(prepareTypedExpressionValue(tableMapping, filter));
+		Object expressionValue = prepareTypedExpressionValue(tableMapping, filter);
+		Expression<?> expression = expressionValue == null ? Expressions.nullExpression() : Expressions.constant(expressionValue); 
+		return expression;
 	}
 
 	private Expression buildTypedArrayExpression(TableMapping tableMapping, Filter filter) throws SearchException {
@@ -547,6 +585,15 @@ public class SqlFilterConverter {
 			LOG.error("Failed to convert '{}' to json value:", propertyValue, ex);
 			throw new SearchException(String.format("Failed to convert '%s' to json value", propertyValue));
 		}
+	}
+
+	private Object escapeRegex(String str) {
+		String result = str;
+		for (String ch : SPECIAL_REGEX_CHARACTERS) {
+			result = result.replace(ch, "\\" + ch);
+		}
+
+		return result;
 	}
 
 }

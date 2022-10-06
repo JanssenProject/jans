@@ -892,12 +892,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         // Add ending Z if necessary
         String dateZ = date.endsWith("Z") ? date : date + "Z";
         try {
-            SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SqlOperationService.SQL_DATA_FORMAT);
-            return jsonDateFormat.parse(date);
-        } catch (ParseException ex) {
+            return new Date(Instant.parse(dateZ).toEpochMilli());
+        } catch (DateTimeParseException ex) {
 	        try {
-	            return new Date(Instant.parse(dateZ).toEpochMilli());
-	        } catch (DateTimeParseException ex2) {
+	            SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SqlOperationService.SQL_DATA_FORMAT);
+	            return jsonDateFormat.parse(date);
+	        } catch (ParseException ex2) {
 	        	if (!silent) {
 		            LOG.error("Failed to decode generalized time '{}'", date, ex2);
 	        	}
