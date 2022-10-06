@@ -485,15 +485,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
-
-
-
     def oauth_get_uma_resources(self):
         """Method to get the clients data from server
         """
         t = threading.Thread(target=self.oauth_update_uma_resources, daemon=True)
         t.start()
-
 
     def search_uma_resources(self, tbuffer):
         if not len(tbuffer.text) > 2:
@@ -502,7 +498,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         t = threading.Thread(target=self.oauth_update_uma_resources, args=(tbuffer.text,), daemon=True)
         t.start()
-
 
     def oauth_update_uma_resources (self, pattern=''): 
         """update the current uma_resources  data to server
@@ -524,13 +519,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 data_fn=None,
                 data={}
                 )
-            # rsponse = self.myparent.cli_object.process_command_by_id(
-            #     operation_id='get-oauth-uma-resources',
-            #     url_suffix='',
-            #     endpoint_args='',
-            #     data_fn=None,
-            #     data={}
-            #     )
+
         except Exception as e:
             self.myparent.show_message(_("Error getting clients"), str(e))
             return
@@ -539,6 +528,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.show_message(_("Error getting clients"), str(rsponse.text))
             return
 
+        result = {}
         try:
             result = rsponse.json()
         except Exception:
@@ -546,11 +536,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
             #press_tab
             return
         data =[]
-        
+        self.myparent.logger.debug('result: '+str(result))
+        self.myparent.logger.debug('len result: '+str(len(result)))
 
         for d in result:
             scopes_of_resource = []
             for scope_dn in d.get('scopes', []):
+                
                 inum = scope_dn.split(',')[0].split('=')[1]
                 scope_result = {}
                 try :
@@ -563,9 +555,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         )
                     scope_result = scope_response.json()
                 except Exception as e:
+                    display_name = 'None'
                     pass
                 display_name = scope_result.get('displayName') or scope_result.get('inum')
-                scopes_of_resource.append(str(display_name))
+                
+                if display_name:
+                    scopes_of_resource.append(display_name)
+                else:
+                    scopes_of_resource.append(str(d.get('scopes', [''])[0] ))
+
             
 
             data.append(
@@ -596,13 +594,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
             ])
 
             get_app().invalidate()
+            self.myparent.layout.focus(self.uma_resources) 
 
         else:
-            self.myparent.show_message(_("Oops"), _("No matching result"))  
+            self.uma_resources = HSplit([],width=D())
+            self.myparent.show_message(_("Oops"), _("No matching result"),tobefocused=self.resources.children[0].children[0])  
 
-        self.myparent.layout.focus(self.resources)
 
 
+        
     def client_dialog_nav_selection_changed(self, selection):
         self.left_nav = selection
 
