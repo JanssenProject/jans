@@ -90,7 +90,13 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
     def create_window(self):
-                
+
+        scope_types = [('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('uma', 'UMA')]
+        buttons = [(self.save, _("Save")), (self.cancel, _("Cancel"))]
+        if self.data and self.data.get('scopeType') == 'spontaneous':
+            scope_types.insert(3, ('spontaneous', 'Spontaneous'))
+            buttons.pop(0)
+
         self.dialog = JansDialogWithNav(
             title=self.title,
             content= HSplit([
@@ -98,20 +104,17 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 _("Scope Type"),  
                                 name='scopeType', 
                                 current_value=self.data.get('scopeType'),
-                                values=[('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('spontaneous', 'Spontaneous'), ('uma', 'UMA')], 
+                                values=scope_types,
                                 on_selection_changed=self.scope_selection_changed,
                                 style='class:outh-scope-radiobutton'),
-        
+
                 self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='class:outh-scope-text'),
                 self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='class:outh-scope-text',read_only=True,),
                 self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:outh-scope-text'),
                 self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-scope-text'),
                 DynamicContainer(lambda: self.alt_tabs[self.sope_type]),    
-            ],style='class:outh-scope-tabs'), 
-             button_functions=[
-                (self.save, _("Save")),
-                (self.cancel, _("Cancel"))
-            ],
+            ], style='class:outh-scope-tabs'), 
+             button_functions=buttons,
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
                    )
