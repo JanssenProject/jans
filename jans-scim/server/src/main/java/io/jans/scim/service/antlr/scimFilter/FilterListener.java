@@ -4,7 +4,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import io.jans.scim.model.scim2.AttributeDefinition.Type;
+import io.jans.model.GluuAttribute;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.util.StringHelper;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.annotations.Attribute;
 import io.jans.scim.model.scim2.extensions.ExtensionField;
@@ -21,6 +23,7 @@ import io.jans.util.Pair;
 import javax.lang.model.type.NullType;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -34,12 +37,14 @@ public class FilterListener extends ScimFilterBaseListener {
     private String error;
     private SubFilterGenerator subFilterGenerator;
     private ExtensionService extService;
+    private Map<String, GluuAttribute> attributesMap;
     private boolean ldapBackend;
-
-    public FilterListener(Class<? extends BaseScimResource> resourceClass, boolean ldapBackend) {
+	
+    public FilterListener(Class<? extends BaseScimResource> resourceClass, Map<String, GluuAttribute> attributesMap, boolean ldapBackend) {
         filter = new ArrayDeque<>();
         extService = CdiUtil.bean(ExtensionService.class);
         this.resourceClass = resourceClass;
+        this.attributesMap = attributesMap;
         this.ldapBackend = ldapBackend;
 
         subFilterGenerator =  new SubFilterGenerator(ldapBackend);
@@ -166,6 +171,14 @@ public class FilterListener extends ScimFilterBaseListener {
  	private Boolean computeMultivaluedForCoreAttribute(String path, Attribute attrAnnot, String dbAttribute) {
 		
  		Boolean multiValued;
+		// Determine attribute multivalued from ou=attributes
+		String dbAttributeLower = StringHelper.toLowerCase(dbAttribute);
+		GluuAttribute gluuAttribute = attributesMap.get(dbAttributeLower);
+		if (gluuAttribute != null) {
+			multiValued = (gluuAttribute.getOxMultiValuedAttribute() != null) && gluuAttribute.getOxMultiValuedAttribute();
+			return multiValued;
+
+		}
  		
  		if (!ldapBackend && (dbAttribute.equals("mail") || dbAttribute.equals("jansPPID"))) {
  			multiValued = null;
