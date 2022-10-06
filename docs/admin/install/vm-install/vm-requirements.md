@@ -25,10 +25,12 @@ Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary base
 
 ## VM Setup Guidelines
 
-- Janssen Server must be deployed on a server or VM with static IP address
+- Janssen Server must be deployed on a server or VM with static IP address. For instance, on an Ubuntu based desktop 
+  or server, [these instructions](https://linuxize.com/post/how-to-configure-static-ip-address-on-ubuntu-20-04/#configuring-static-ip-address-on-ubuntu-server) can help setup static ip.   
 - Static IP address should resolve to a hostname. `localhost` is not supported. This can be achieved by adding entry 
   to `/etc/hosts` file on an Ubuntu system for example.
 - For local testing and development purposes, VM can be setup using VMWare Workstation player
+- Janssen Server requires setting the `file descriptors` to 65k. Take guidance from steps listed [here](https://gluu.org/docs/gluu-server/4.4/installation-guide/#file-descriptors-fd)
 
 ## Ports
 
@@ -74,3 +76,4 @@ ufw allow <port>
 ```
 
 Ports 443, 80, and 22 must be accessible.
+
