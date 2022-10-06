@@ -21,6 +21,8 @@ import io.jans.as.server.service.MetricService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
+import io.jans.util.StringHelper;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -259,7 +261,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (tokenEntity != null) {
             final AuthorizationGrantType grantType = AuthorizationGrantType.fromString(tokenEntity.getGrantType());
             if (grantType != null) {
-                final User user = userService.getUser(tokenEntity.getUserId());
+            	String userId = tokenEntity.getUserId();
+            	User user = null;
+            	if (StringHelper.isNotEmpty(userId)) {
+                    user = userService.getUser(userId);
+            	}
                 final Client client = clientService.getClient(tokenEntity.getClientId());
                 final Date authenticationTime = tokenEntity.getAuthenticationTime();
                 final String nonce = tokenEntity.getNonce();
