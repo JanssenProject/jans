@@ -93,12 +93,17 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         scope_types = [('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('uma', 'UMA')]
         buttons = [(self.save, _("Save")), (self.cancel, _("Cancel"))]
-        if self.data and self.data.get('scopeType') == 'spontaneous':
-            scope_types.insert(3, ('spontaneous', 'Spontaneous'))
-            buttons.pop(0)
+        if self.data:
+            if self.data.get('scopeType') == 'spontaneous':
+                scope_types.insert(3, ('spontaneous', 'Spontaneous'))
+                buttons.pop(0)
 
-        if self.data.get('scopeType') == 'uma':
-            buttons.pop(0)
+            if self.data.get('scopeType') == 'uma':
+                buttons.pop(0)
+            else:
+                for stype in scope_types[:]:
+                    if stype[0] == 'uma':
+                        scope_types.remove(stype)
 
         self.dialog = JansDialogWithNav(
             title=self.title,
