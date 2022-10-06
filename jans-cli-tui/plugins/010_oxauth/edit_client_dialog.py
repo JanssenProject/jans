@@ -538,6 +538,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         data =[]
         self.myparent.logger.debug('result: '+str(result))
         self.myparent.logger.debug('len result: '+str(len(result)))
+        self.result_len = len(result)
 
         for d in result:
             scopes_of_resource = []

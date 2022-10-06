@@ -214,6 +214,7 @@ class Plugin():
             ])
 
             get_app().invalidate()
+            self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
 
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
@@ -308,6 +309,7 @@ class Plugin():
             ])
 
             get_app().invalidate()
+            self.app.layout.focus(scopes)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
 
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['scopes'])
@@ -510,7 +512,6 @@ class Plugin():
                     data_fn=None,
                     data={}
                     )
-                # TODO Need to do `self.oauth_get_uma_resources()` only if UMA-res list is not empty
                 self.EditClientDialog.oauth_get_uma_resources()
                 
             return result
