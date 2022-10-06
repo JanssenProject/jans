@@ -60,25 +60,8 @@ class JansVerticalNav():
         self.on_display = on_display
         self.all_data=all_data
         self.underline_headings = underline_headings
-        self.view_data()
         self.handle_header_spaces()
-        self.handle_data_spaces()
         self.create_window()
-
-    def view_data(self):
-        self.mod_data = []
-        for i, entry in enumerate(self.data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
-            mod_entry = []
-            for col in range(len(entry)) :
-                if self.preferred_size[col] == 0:
-                    mod_entry.append(entry[col])
-                else :
-                    if self.preferred_size[col] >= len(entry[col]):
-                        mod_entry.append(entry[col])
-                    else :
-                        mod_entry.append(entry[col][:self.preferred_size[col]]+'...')
-
-            self.mod_data.append(mod_entry)
 
 
     def create_window(self):
@@ -124,9 +107,9 @@ class JansVerticalNav():
         """Make header evenlly spaced
         """
         datalen = []
-        for dataline in range(len(self.mod_data )):
+        for dataline in range(len(self.data )):
             line = []
-            for i in self.mod_data[dataline]:
+            for i in self.data[dataline]:
                 line.append(len(i))
             datalen.append(line)
         tmp_dict = {}
@@ -148,16 +131,17 @@ class JansVerticalNav():
 
         self.spaces[-1] =  self.myparent.output.get_size()[1] - sum(self.spaces) + sum(len(s) for s in self.headers)    ## handle last head spaces (add space to the end of ter. width to remove the white line)
 
-    def handle_data_spaces(self):
+    def get_spaced_data(self):
         """Make entries evenlly spaced
         """
-        for i in range(len(self.mod_data)):
-            for k in range(len(self.spaces)):
-                if len(self.mod_data[i][k]) != self.spaces[k]:
-                    self.mod_data[i][k] = (
-                        self.mod_data[i][k] + " " * (self.spaces[k] - len(self.mod_data[i][k])))
-                else:
-                    pass
+        spaced_data = []
+        for d in self.data:
+            spaced_line_list = []
+            for i, space in enumerate(self.spaces):
+                spaced_line_list.append(d[i] + ' ' * (space - len(d[i])))
+            spaced_data.append(spaced_line_list)
+
+        return spaced_data
 
     def _get_head_text(self):
         """Get all headers entries
@@ -181,10 +165,10 @@ class JansVerticalNav():
         Returns:
             merge_formatted_text: Merge (Concatenate) several pieces of formatted text together. 
         """
-        self.view_data()
-        self.handle_data_spaces()
+
         result = []
-        for i, entry in enumerate(self.mod_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
+        spaced_data = self.get_spaced_data()
+        for i, entry in enumerate(spaced_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
             if i == self.selectes:
                 result.append([('[SetCursorPosition]', '')])
             
