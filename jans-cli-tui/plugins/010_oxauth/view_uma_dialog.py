@@ -178,10 +178,11 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         self.oauth_main_area =  self.UMA_containers['scope'] = HSplit([
         self.myparent.getTitledText(
                                 _("Scopes"),
-                                name='scope',
-                                value=self.data.get('scope',[]),
+                                name='scopes',
+                                value='\n'.join(self.data.get('scopes',[])),
                                 read_only=True,
                                 style='class:outh-uma-text',
+                                height=3,
                             )
 
         ],width=D())
@@ -191,10 +192,11 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         self.UMA_containers['expression'] = HSplit([
         self.myparent.getTitledText(
                                 _("Expression"),
-                                name='expression',
-                                value=self.data.get('expression',[]),
+                                name='scopeExpression',
+                                value='\n'.join(self.data.get('scopeExpression',[])),
                                 read_only=True,
                                 style='class:outh-uma-text',
+                                 height=3,
                             ),
 
         ],width=D())
