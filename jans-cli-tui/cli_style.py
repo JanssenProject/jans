@@ -128,5 +128,5 @@ date_picker_calenderNSelected = "blue"#>black
 date_picker_calenderSelected = "red"
 
 ## jans_drop_down
-drop_down_hover = '#'
+drop_down_hover = '#00FF00'
 drop_down_itemSelect = '#ADD8E6'
