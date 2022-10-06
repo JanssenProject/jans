@@ -77,3 +77,67 @@ ufw allow <port>
 
 Ports 443, 80, and 22 must be accessible.
 
+## Setting Up Static IP Address
+
+Janssen Server must be deployed on a server or VM with static IP address. Steps listed below show how to setup 
+static IP address on an Ubuntu Server. Steps and commands to setup static IP on various operating systems differ.
+
+### Select the network interface
+
+```text
+ip link
+```
+
+Above command shows lists all the existing network interfaces in format below:
+
+```text
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: enp4s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether 8c:8c:aa:6a:bf:b5 brd ff:ff:ff:ff:ff:ff
+```
+
+here we are going to configure the `enp4s0` network interface.
+
+### Locate the configuration file
+
+Network interface configuration can be changed using `YAML` configuration files located under
+
+```text
+/etc/netplan
+```
+
+Above directory will contain one or more `YAML` files. Open the file that has configuration for `enp4s0` network 
+interface. Create one if it doesn't exist.
+
+### Update the configuration
+
+Set the yaml file configuration as shown in example below. Values for gateway, nameservers should be set 
+appropriately. `addresses` should be set to desired static IP.
+
+```text
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp4s0:
+      dhcp4: no
+      addresses:
+        - 192.168.123.212/24
+      gateway4: 192.168.123.1
+      nameservers:
+          addresses: [8.8.8.8, 1.1.1.1]
+```
+
+### Apply the change
+
+```text
+sudo netplan apply
+```
+
+### Verify the new configuration
+
+```text
+ip addr show dev enp4s0
+```
+Newly assigned IP address can be seen in the output
