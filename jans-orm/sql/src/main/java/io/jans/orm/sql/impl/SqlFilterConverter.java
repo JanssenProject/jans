@@ -394,6 +394,10 @@ public class SqlFilterConverter {
 				}
 			}
 		}
+		
+		if ((attributeType == null) && (filter.getMultiValued() != null)) {
+			return filter.getMultiValued();
+		}
 
 		Boolean isMultiValuedDetected = determineMultiValuedByType(filter.getAttributeName(), propertiesAnnotationsMap);
 		if ((Boolean.TRUE.equals(filter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected))) {

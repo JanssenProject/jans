@@ -153,35 +153,35 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionLe1 = simpleConverter.convertToSqlFilter(null, filterLe1, null);
 
 		String queryLe1 = toSelectSQL(expressionLe1);
-		assertEquals(queryLe1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' <= '[\"test\"]'");
+		assertEquals(queryLe1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' <= 'test'");
 
 		// LE -- Integer
 		Filter filterLe2 = Filter.createLessOrEqualFilter("age", 23).multiValued();
 		ConvertedExpression expressionLe2 = simpleConverter.convertToSqlFilter(null, filterLe2, null);
 
 		String queryLe2 = toSelectSQL(expressionLe2);
-		assertEquals(queryLe2, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' <= '[23]'");
+		assertEquals(queryLe2, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' <= 23");
 
 		// LE -- Long
 		Filter filterLe3 = Filter.createLessOrEqualFilter("age", 23L).multiValued();
 		ConvertedExpression expressionLe3 = simpleConverter.convertToSqlFilter(null, filterLe3, null);
 
 		String queryLe3 = toSelectSQL(expressionLe3);
-		assertEquals(queryLe3, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' <= '[23]'");
+		assertEquals(queryLe3, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' <= 23");
 
 		// LE -- Date
 		Filter filterLe4 = Filter.createLessOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued();
 		ConvertedExpression expressionLe4 = simpleConverter.convertToSqlFilter(null, filterLe4, null);
 
 		String queryLe4 = toSelectSQL(expressionLe4);
-		assertEquals(queryLe4, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' <= '[\"2020-12-16T14:58:18.398\"]'");
+		assertEquals(queryLe4, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' <= (timestamp '2020-12-16 17:58:18')");
 
 		// LE -- Date
 		Filter filterLe5 = Filter.createLessOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued(3);
 		ConvertedExpression expressionLe5 = simpleConverter.convertToSqlFilter(null, filterLe5, null);
 
 		String queryLe5 = toSelectSQL(expressionLe5);
-		assertEquals(queryLe5, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' <= '[\"2020-12-16T14:58:18.398\"]' or doc.added->'$.v[1]' <= '[\"2020-12-16T14:58:18.398\"]' or doc.added->'$.v[2]' <= '[\"2020-12-16T14:58:18.398\"]'");
+		assertEquals(queryLe5, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' <= (timestamp '2020-12-16 17:58:18') or doc.added->'$.v[1]' <= (timestamp '2020-12-16 17:58:18') or doc.added->'$.v[2]' <= (timestamp '2020-12-16 17:58:18')");
 	}
 
 	@Test
@@ -222,35 +222,35 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionGe1 = simpleConverter.convertToSqlFilter(null, filterGe1, null);
 
 		String queryGe1 = toSelectSQL(expressionGe1);
-		assertEquals(queryGe1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' >= '[\"test\"]'");
+		assertEquals(queryGe1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' >= 'test'");
 
 		// GE -- Integer
 		Filter filterGe2 = Filter.createGreaterOrEqualFilter("age", 23).multiValued();
 		ConvertedExpression expressionGe2 = simpleConverter.convertToSqlFilter(null, filterGe2, null);
 
 		String queryGe2 = toSelectSQL(expressionGe2);
-		assertEquals(queryGe2, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' >= '[23]'");
+		assertEquals(queryGe2, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' >= 23");
 
 		// GE -- Long
 		Filter filterGe3 = Filter.createGreaterOrEqualFilter("age", 23L).multiValued();
 		ConvertedExpression expressionGe3 = simpleConverter.convertToSqlFilter(null, filterGe3, null);
 
 		String queryGe3 = toSelectSQL(expressionGe3);
-		assertEquals(queryGe3, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' >= '[23]'");
+		assertEquals(queryGe3, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' >= 23");
 
 		// GE -- Date
 		Filter filterGe4 = Filter.createGreaterOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued();
 		ConvertedExpression expressionGe4 = simpleConverter.convertToSqlFilter(null, filterGe4, null);
 
 		String queryGe4 = toSelectSQL(expressionGe4);
-		assertEquals(queryGe4, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' >= '[\"2020-12-16T14:58:18.398\"]'");
+		assertEquals(queryGe4, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' >= (timestamp '2020-12-16 17:58:18')");
 
 		// GE -- Date
 		Filter filterGe5 = Filter.createGreaterOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued(3);
 		ConvertedExpression expressionGe5 = simpleConverter.convertToSqlFilter(null, filterGe5, null);
 
 		String queryGe5 = toSelectSQL(expressionGe5);
-		assertEquals(queryGe5, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' >= '[\"2020-12-16T14:58:18.398\"]' or doc.added->'$.v[1]' >= '[\"2020-12-16T14:58:18.398\"]' or doc.added->'$.v[2]' >= '[\"2020-12-16T14:58:18.398\"]'");
+		assertEquals(queryGe5, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' >= (timestamp '2020-12-16 17:58:18') or doc.added->'$.v[1]' >= (timestamp '2020-12-16 17:58:18') or doc.added->'$.v[2]' >= (timestamp '2020-12-16 17:58:18')");
 	}
 
 	@Test
