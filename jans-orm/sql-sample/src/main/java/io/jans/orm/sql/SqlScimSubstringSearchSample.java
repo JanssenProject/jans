@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Gluu
  */
 
-package SqlScimSubstringSearchSample;
+package io.jans.orm.sql;
 
 import java.util.List;
 
