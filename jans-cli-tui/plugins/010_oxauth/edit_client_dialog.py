@@ -83,8 +83,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 if ditem in self.data and self.data[ditem] is None:
                     self.data.pop(ditem)
 
-            # self.myparent.logger.debug('DATA: '+str(self.data))
-
             close_me = True
             if save_handler:
                 close_me = self.save_handler(self)
@@ -536,9 +534,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             #press_tab
             return
         data =[]
-        self.myparent.logger.debug('result: '+str(result))
-        self.myparent.logger.debug('len result: '+str(len(result)))
-        self.result_len = len(result)
 
         for d in result:
             scopes_of_resource = []
@@ -564,9 +559,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     scopes_of_resource.append(display_name)
                 else:
                     scopes_of_resource.append(str(d.get('scopes', [''])[0] ))
-
-            
-
             data.append(
                 [
                 d.get('id'),
