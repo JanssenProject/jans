@@ -30,7 +30,7 @@ Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary base
   to `/etc/hosts` file on an Ubuntu system for example.
 - For local testing and development purposes, VM can be setup using VMWare Workstation player
 
-### Ports
+## Ports
 
 Janssen Server requires following ports to be open for incoming connections
 
@@ -39,3 +39,38 @@ Janssen Server requires following ports to be open for incoming connections
 | 80   | TCP      | Forwards to 443 |
 | 443  | TCP      | apache2/httpd   |
 | 22   | TCP      | ssh             |
+
+Ensuring above ports are open on an Ubuntu system can be done by following below mentioned steps:
+
+1. To check the status of these ports in Ubuntu, use the following commands (other OS have similar commands)
+
+  ```
+  ufw status verbose
+  ```
+
+2. If the status is found to be inactive, enable it using 
+
+  ```
+  ufw enable
+  ```
+
+3. The default for ufw is to deny incoming and allow outgoing. To reset your setting to default :
+
+```
+ufw default deny incoming
+ufw default allow outgoing
+```
+
+4. Reset ufw
+
+```
+ufw reset
+```
+
+5. If for any reason the ports are closed, allow connections by:
+
+```
+ufw allow <port>
+```
+
+Ports 443, 80, and 22 must be accessible.
