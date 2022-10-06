@@ -97,17 +97,20 @@ class JansDialogWithNav():
         """
         kb = KeyBindings()
 
+
         @kb.add('pageup', eager=True)  ###  eager neglect any other keybinding 
         def _go_up(event) -> None:
-            app = get_app()
-            self.navbar.go_up()
-            app.layout.focus(self.navbar)
+            if self.navbar : 
+                app = get_app()
+                self.navbar.go_up()
+                app.layout.focus(self.navbar)
 
         @kb.add('pagedown', eager=True)
         def _go_up(event) -> None:
-            app = get_app()
-            self.navbar.go_down()
-            app.layout.focus(self.navbar)
+            if self.navbar:
+                app = get_app()
+                self.navbar.go_down()
+                app.layout.focus(self.navbar)
     
         return kb
 
