@@ -1,4 +1,5 @@
 from typing import OrderedDict
+from asyncio import ensure_future
 
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
@@ -109,8 +110,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             title=self.title,
             content= HSplit([
                 self.myparent.getTitledRadioButton(
-                                _("Scope Type"),  
-                                name='scopeType', 
+                                _("Scope Type"),
+                                name='scopeType',
                                 current_value=self.data.get('scopeType'),
                                 values=scope_types,
                                 on_selection_changed=self.scope_selection_changed,
@@ -120,7 +121,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='class:outh-scope-text',read_only=True,),
                 self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:outh-scope-text'),
                 self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-scope-text'),
-                DynamicContainer(lambda: self.alt_tabs[self.sope_type]),    
+                DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
             ], style='class:outh-scope-tabs'), 
              button_functions=buttons,
             height=self.myparent.dialog_height,
@@ -136,69 +137,50 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     def nothing(self):
         pass
 
-    def get_openID_claims(self):
-        if self.tbuffer :
-            tbuffer = self.tbuffer
-        else:
-            tbuffer = None
-        self.myparent.logger.debug('tbuffer: ' + str(tbuffer))
-        #-----------------------------------------------------------------------#
-        #-----------------------------------------------------------------------#
-        #-----------------------------------------------------------------------#
-        if self.data.get('claims', []) != [] :
-            data =[]
+    def get_scopes(self):
 
-            if tbuffer == None :
-                for claim_line in self.data.get('claims'): 
-                    data.append(
-                        [
-                        claim_line
-                        ]
-                    )
-            else :
-                for claim_line in self.data.get('claims'): 
-                    result = [ re.search(tbuffer,str) for str in claim_line]
-                    self.myparent.logger.debug('result: ' + str(result))
-                    if result[0]:
-                        self.myparent.logger.debug('claim_line: ' + str(claim_line))
-                        data.append(
-                            [
-                            claim_line
-                            ]
-                        )   
+        data = [[claim] for claim in self.data.get('claims', [])]
+
+        self.claims_container = JansVerticalNav(
+                myparent=self.myparent,
+                headers=['claims'],
+                preferred_size= [0],
+                data=data,
+                on_display=self.myparent.data_display_dialog,
+                on_delete=self.delete_claim,
+                selectes=0,
+                headerColor='class:outh-client-navbar-headcolor',
+                entriesColor='class:outh-client-navbar-entriescolor',
+                all_data=data
+            )
+
+        return self.claims_container
+
+    def delete_claim(self, selected, event):
+        """This method for the deletion of claim
+
+        Args:
+            selected (_type_): The selected claim
+            event (_type_): _description_
+
+        """
+
+        dialog = self.myparent.get_confirm_dialog(_("Are you sure want to delete claim dn:")+"\n {} ?".format(selected[0]))
+        async def coroutine():
+            focused_before = self.myparent.layout.current_window
+            result = await self.myparent.show_dialog_as_float(dialog)
+            try:
+                self.myparent.layout.focus(focused_before)
+            except:
+                self.myparent.layout.focus(self.app.center_frame)
+
+            if result.lower() == 'yes':
+                self.data['claims'].remove(selected[0])
+                self.claims_container.data.remove(selected)
 
 
-            if not data :
-                self.myparent.show_message(_("Oops"), _("No matching result"),tobefocused = self)
-                return
-                          
+        ensure_future(coroutine())
 
-            self.myparent.logger.debug('DATA: ' + str(data))
-
-            self.openID_claims = JansVerticalNav(
-                    myparent=self.myparent,
-                    headers=['claims'],
-                    preferred_size= [0],
-                    data=data,
-                    on_display=self.myparent.data_display_dialog,
-                    selectes=0,
-                    headerColor='class:outh-client-navbar-headcolor',
-                    entriesColor='class:outh-client-navbar-entriescolor',
-                    all_data=data
-                )
-        else :
-            self.openID_claims = HSplit([
-                                        self.myparent.getTitledText(
-                                                _("Claims"),
-                                                name='claims',
-                                                value='This Scope Contain No Claims',
-                                                style='class:outh-scope-text',read_only=True),
-
-                                        ])
-
-    def search_openID_claims(self,tbuffer):
-        self.tbuffer = tbuffer.text 
-        self.get_openID_claims()
 
     def prepare_tabs(self):
         """Prepare the tabs for Edil Scope Dialogs
@@ -207,7 +189,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         self.alt_tabs = {}
 
-        self.get_openID_claims()
 
         self.alt_tabs['oauth'] = HSplit([
                             self.myparent.getTitledCheckBox(
@@ -249,11 +230,12 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     name='oauth:scopes:openID:claims:search',
                                     style='class:outh-scope-textsearch',width=10,
                                     jans_help=_("Press enter to perform search"),
-                                    accept_handler=self.search_openID_claims),
+                                    #accept_handler=self.search_openID_claims
+                                    ),
 
 
                             ####################################################
-                            self.openID_claims,
+                            self.get_scopes(),
                             ###################################################
 
                             ],width=D(),)

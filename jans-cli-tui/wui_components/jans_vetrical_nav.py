@@ -58,7 +58,6 @@ class JansVerticalNav():
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
-        self.mod_data = data
         self.all_data=all_data
         self.underline_headings = underline_headings
         self.view_data()
@@ -67,8 +66,8 @@ class JansVerticalNav():
         self.create_window()
 
     def view_data(self):
-        result = []
-        for i, entry in enumerate(self.mod_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
+        self.mod_data = []
+        for i, entry in enumerate(self.data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
             mod_entry = []
             for col in range(len(entry)) :
                 if self.preferred_size[col] == 0:
@@ -79,9 +78,8 @@ class JansVerticalNav():
                     else :
                         mod_entry.append(entry[col][:self.preferred_size[col]]+'...')
 
-            result.append(mod_entry)
- 
-        self.mod_data = result
+            self.mod_data.append(mod_entry)
+
 
     def create_window(self):
         """This method creat the dialog it self
@@ -183,6 +181,8 @@ class JansVerticalNav():
         Returns:
             merge_formatted_text: Merge (Concatenate) several pieces of formatted text together. 
         """
+        self.view_data()
+        self.handle_data_spaces()
         result = []
         for i, entry in enumerate(self.mod_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
             if i == self.selectes:
@@ -192,7 +192,11 @@ class JansVerticalNav():
             result.append('\n')
 
         return merge_formatted_text(result)
-    
+
+
+    def remove_item(self, item):
+        self.data.remove(item)
+
     def _get_key_bindings(self):
         """All key binding for the Dialog with Navigation bar
 

@@ -234,7 +234,7 @@ class Plugin():
         def get_next(start_index, pattern=''):
             self.oauth_update_scopes(start_index, pattern='')
 
-        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
+        endpoint_args ='withAssociatedClients:true,limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
         if pattern:
             endpoint_args +=',pattern:'+pattern
         try :
