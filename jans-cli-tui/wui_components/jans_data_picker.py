@@ -161,7 +161,7 @@ class JansSelectDate:
         week_index = self.entries.index(dum_week)
         self.cord_y = week_index 
         self.cord_x = day_index 
-        self.selected_cord = (self.cord_y, self.cord_x)
+        self.selected_cord = (self.cord_x, self.cord_y)
  
     def adjust_sizes(self,day):
         if str(day) != '0':
