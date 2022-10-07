@@ -9,9 +9,9 @@ tags:
 
 Janssen Server can be installed on any of the supported operating systems mentioned below:
 
-- [Ubuntu (versions: 20.04)](#vm-requirements-for-ubuntu)
-- [SUSE Linux Enterprise Server (versions: 15)](#vm-requirements-for-suse-linux-enterprise-server)
-- [RedHat Enterprise Linux (versions: 7,8)](#vm-requirements-for-redhat-enterprise-linux)
+- Ubuntu (versions: 20.04)
+- SUSE Linux Enterprise Server (versions: 15)
+- RedHat Enterprise Linux (versions: 7,8)
 
 ## Hardware Requirements
 
@@ -31,11 +31,9 @@ Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary base
 
 ## VM Setup Guidelines
 
-- Required ports should be open
-- Janssen Server must be deployed on a server or VM with static IP address. For instance, on an Ubuntu based desktop
-  or server, [these instructions](https://linuxize.com/post/how-to-configure-static-ip-address-on-ubuntu-20-04/#configuring-static-ip-address-on-ubuntu-server) can help setup static ip.
-- Static IP address should resolve to a hostname. `localhost` is not supported. This can be achieved by adding entry
-  to `/etc/hosts` file on an Ubuntu system for example.
+- Required ports should be open. Refer to [Port Setup](#port-setup) section for OS specific steps.
+- Janssen Server must be deployed on a server or VM with static IP address. Refer to [Configure Static IP Address](#configure-static-ip-address) section for OS specific steps.
+- Static IP address should resolve to a hostname. `localhost` is not supported. Refer to [Hostname Setup](#port-setup) section for OS specific steps.
 - For local testing and development purposes, VM can be setup using VMWare Workstation player
 - Janssen Server requires setting the `file descriptors` to 65k. Take guidance from steps listed [here](https://gluu.org/docs/gluu-server/4.4/installation-guide/#file-descriptors-fd)
 
@@ -87,13 +85,13 @@ ufw allow <port>
 
 Ports 443, 80, and 22 must be accessible.
 
-## Setting Up Static IP Address
+## Static IP Address Configuration
 
 Janssen Server must be deployed on a server or VM with static IP address. 
 
 ### Ubuntu 
 
-Steps listed below show how to setup static IP address on an Ubuntu Server.
+Steps listed below show how to set up static IP address on an Ubuntu Server.
 
 #### Select the network interface
 
@@ -154,3 +152,21 @@ sudo netplan apply
 ip addr show dev enp4s0
 ```
 Newly assigned IP address can be seen in the output
+
+## Hostname Configuration
+
+### Ubuntu
+
+In Ubuntu systems, IP can be mapped to a hostname(FQDN) using entries into `/etc/hosts` file. Run command below to configure a hostname for IP address.
+
+```text
+vi /etc/hosts
+```
+
+Make an entry similar to one below in this file. IP could be a static IP assigned to the server or VM.
+
+```text
+192.168.0.1 jans.op.io
+```
+
+## File Descriptor Configuration
