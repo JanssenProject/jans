@@ -6,9 +6,9 @@ tags:
 - docker
 ---
 
-# Quick Start Installation
+# Docker Based Quick Start Installation
 
-The quickest way to get a Janssen Server up and running is to install a Docker container-based fully featured Janssen Server on an Ubuntu 22.04 system.
+The quickest way to get a Janssen Server up and running is to install a Docker container-based fully featured Janssen Server.
 
 !!! Note
 
@@ -44,6 +44,7 @@ Testing openid-configuration endpoint..
 As can be seen, the install script also accesses the well-known endpoints to varify that Janssen Server is responsive.
 
 ## Verify Installation By Accessing Standard Endpoints
+
 
 To access Janssen Server standard endpoints from outside of the Docker container, systems `/etc/hosts` file needs to be updated. Open the file and add the IP domain record which should be the IP of the instance docker is installed. And the domain used in the env above `CN_HOSTNAME`.
 
