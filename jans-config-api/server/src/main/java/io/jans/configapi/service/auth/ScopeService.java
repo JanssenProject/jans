@@ -265,16 +265,9 @@ public class ScopeService {
                                 && umaResource.getScopes().contains(getDnForScope(customScope.getInum()))))
                         .collect(Collectors.toList());
                 logger.trace("Associated clients search - umaRes():{}", umaRes);
-                for (UmaResource res : umaRes) {
-                    logger.debug(
-                            "Associated clients match for UMA - customScope.getScopeType():{}, customScopegetInum():{}, client.getClientId():{}, res.getInum():{}, res.getClients():{}, res.getClients().contains(clientService.getDnForClient(client.getClientId()):{}",
-                            customScope.getScopeType(), customScope.getInum(), client.getClientId(), res.getInum(),
-                            res.getClients(),
-                            res.getClients().contains(clientService.getDnForClient(client.getClientId())));
-
-                    if (res.getClients().contains(clientService.getDnForClient(client.getClientId()))) {
-                        customScope.getClients().add(client);
-                    }
+                if (umaRes.stream().anyMatch(
+                        ele -> ele.getClients().contains(clientService.getDnForClient(client.getClientId())))) {
+                    customScope.getClients().add(client);
 
                 }
             } else if ((customScope.getScopeType() == ScopeType.SPONTANEOUS)
