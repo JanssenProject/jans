@@ -7,17 +7,23 @@ tags:
 
 # VM System Requirements
 
+Janssen Server can be installed on any of the supported operating systems mentioned below:
+
+- [Ubuntu (versions: 20.04)](#vm-requirements-for-ubuntu)
+- [SUSE Linux Enterprise Server (versions: 15)](#vm-requirements-for-suse-linux-enterprise-server)
+- [RedHat Enterprise Linux (versions: 7,8)](#vm-requirements-for-redhat-enterprise-linux)
+
 ## Hardware Requirements
 
 Janssen Server needs below-mentioned minimal resources on VM when data store is installed separately on a different VM.
 Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary based on size data and type of data store.
 
-### Development and Test Environments 
+### Development and Test Environments
 - 4 GB RAM
 - 2 CPU
 - 20 GB Disk
 
-### Production Environments 
+### Production Environments
 - 8 GB RAM
 - 4 CPU
 - 4 GB swap space
@@ -25,14 +31,15 @@ Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary base
 
 ## VM Setup Guidelines
 
-- Janssen Server must be deployed on a server or VM with static IP address. For instance, on an Ubuntu based desktop 
-  or server, [these instructions](https://linuxize.com/post/how-to-configure-static-ip-address-on-ubuntu-20-04/#configuring-static-ip-address-on-ubuntu-server) can help setup static ip.   
-- Static IP address should resolve to a hostname. `localhost` is not supported. This can be achieved by adding entry 
+- Required ports should be open
+- Janssen Server must be deployed on a server or VM with static IP address. For instance, on an Ubuntu based desktop
+  or server, [these instructions](https://linuxize.com/post/how-to-configure-static-ip-address-on-ubuntu-20-04/#configuring-static-ip-address-on-ubuntu-server) can help setup static ip.
+- Static IP address should resolve to a hostname. `localhost` is not supported. This can be achieved by adding entry
   to `/etc/hosts` file on an Ubuntu system for example.
 - For local testing and development purposes, VM can be setup using VMWare Workstation player
 - Janssen Server requires setting the `file descriptors` to 65k. Take guidance from steps listed [here](https://gluu.org/docs/gluu-server/4.4/installation-guide/#file-descriptors-fd)
 
-## Ports
+## Port Configuration
 
 Janssen Server requires following ports to be open for incoming connections
 
@@ -41,6 +48,9 @@ Janssen Server requires following ports to be open for incoming connections
 | 80   | TCP      | Forwards to 443 |
 | 443  | TCP      | apache2/httpd   |
 | 22   | TCP      | ssh             |
+
+
+### Ubuntu
 
 Ensuring above ports are open on an Ubuntu system can be done by following below mentioned steps:
 
@@ -79,10 +89,13 @@ Ports 443, 80, and 22 must be accessible.
 
 ## Setting Up Static IP Address
 
-Janssen Server must be deployed on a server or VM with static IP address. Steps listed below show how to setup 
-static IP address on an Ubuntu Server. Steps and commands to setup static IP on various operating systems differ.
+Janssen Server must be deployed on a server or VM with static IP address. 
 
-### Select the network interface
+### Ubuntu 
+
+Steps listed below show how to setup static IP address on an Ubuntu Server.
+
+#### Select the network interface
 
 ```text
 ip link
@@ -99,7 +112,7 @@ Above command shows lists all the existing network interfaces in format below:
 
 here we are going to configure the `enp4s0` network interface.
 
-### Locate the configuration file
+#### Locate the configuration file
 
 Network interface configuration can be changed using `YAML` configuration files located under
 
@@ -110,7 +123,7 @@ Network interface configuration can be changed using `YAML` configuration files 
 Above directory will contain one or more `YAML` files. Open the file that has configuration for `enp4s0` network 
 interface. Create one if it doesn't exist.
 
-### Update the configuration
+#### Update the configuration
 
 Set the yaml file configuration as shown in example below. Values for gateway, nameservers should be set 
 appropriately. `addresses` should be set to desired static IP.
@@ -129,13 +142,13 @@ network:
           addresses: [8.8.8.8, 1.1.1.1]
 ```
 
-### Apply the change
+#### Apply the change
 
 ```text
 sudo netplan apply
 ```
 
-### Verify the new configuration
+#### Verify the new configuration
 
 ```text
 ip addr show dev enp4s0
