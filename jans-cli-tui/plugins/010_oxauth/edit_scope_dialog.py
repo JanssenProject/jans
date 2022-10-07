@@ -137,11 +137,41 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     def nothing(self):
         pass
 
+
+    def get_claimsName(self,claims_list):
+        self.myparent.logger.debug('claims_list: ' + str(claims_list))
+        try :
+            responce = self.myparent.cli_object.process_command_by_id(
+                        operation_id='get-all-attribute',
+                        url_suffix='',
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
+                        )
+        except Exception as e:
+                    self.app.show_message(_("Error getting scopes"), str(e))
+                    return
+                    
+        result = responce.json()
+        # self.myparent.logger.debug('result: ' + str(result["entries"]))
+
+        calims_names=[]
+        for i in result["entries"] :
+            for claim in claims_list:
+                if claim[0] == i['dn']:
+                    calims_names.append([i['claimName']])
+
+        return calims_names
+
+
     def get_scopes(self):
 
-        data = [[claim] for claim in self.data.get('claims', [])]
+        claims_list = [[claim] for claim in self.data.get('claims', [])]
+        # inum=2B29,ou=attributes,o=jans
+
+        data = self.get_claimsName(claims_list)
         self.myparent.logger.debug('datadata: ' + str(data))
-        
+
         self.claims_container = JansVerticalNav(
                 myparent=self.myparent,
                 headers=['claims'],
