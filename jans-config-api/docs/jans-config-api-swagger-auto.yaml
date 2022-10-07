@@ -2945,19 +2945,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
         adminCanView:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -4117,8 +4117,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -4128,6 +4126,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -4384,13 +4384,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

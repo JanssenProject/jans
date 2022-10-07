@@ -6,7 +6,6 @@
 
 package io.jans.configapi.service.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
@@ -97,9 +96,8 @@ public class ScopeService {
         try {
             CustomScope scope = persistenceEntryManager.find(CustomScope.class, getDnForScope(inum));
             if (withAssociatedClients) {
-                List<Client> clients = clientService.getAllClients();
-                List<UmaResource> umaResources = umaResourceService.getAllResources();
-                return setClients(scope, clients, umaResources);
+
+                return setClients(scope);
             }
             return scope;
         } catch (Exception e) {
@@ -206,43 +204,85 @@ public class ScopeService {
         return Collections.emptyList();
     }
 
-    private CustomScope setClients(Scope scope, List<Client> clients, List<UmaResource> umaResources) {
-        logger.debug("Search Scope with associated clients - scope:{}, clients:{}, umaResources:{}", scope, clients,
-                umaResources);
+    public List<Scope> getAllScopesList() {
+        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 
-        ObjectMapper mapper = new ObjectMapper();
-        CustomScope customScope = mapper.convertValue(scope, CustomScope.class);
+        return persistenceEntryManager.findEntries(scopesBaseDN, Scope.class, Filter.createPresenceFilter("inum"));
+    }
+
+    public List<String> getDefaultScopesDn() {
+        List<String> defaultScopes = new ArrayList<>();
+
+        for (Scope scope : getAllScopesList()) {
+            if (Boolean.TRUE.equals(scope.isDefaultScope())) {
+                defaultScopes.add(scope.getDn());
+            }
+        }
+
+        return defaultScopes;
+    }
+
+    public List<String> getScopesDn(List<String> scopeDnList) {
+        List<String> scopes = new ArrayList<>();
+
+        for (String scopeDn : scopeDnList) {
+            Scope scope = getScopeByDn(scopeDn);
+            if (scope != null) {
+                scopes.add(scope.getDn());
+            }
+        }
+
+        return scopes;
+    }
+
+    private CustomScope setClients(CustomScope customScope) {
+        logger.debug("Getting associated-clients for scope - customScope:{}", customScope);
+
+        List<Client> clients = clientService.getAllClients();
+        List<UmaResource> umaResources = umaResourceService.getAllResources();
+        logger.debug("Verifying associated-clients using clients:{}, umaResources:{}", clients, umaResources);
         customScope.setClients(Lists.newArrayList());
 
         for (Client client : clients) {
             logger.debug(
-                    "Associated clients serach - scope.getScopeType():{}, scope.getInum():{}, scope.getCreatorId():{}, client.getClientId():{}, clientService.getDnForClient(client.getClientId()):{}, client.getScopes():{}, client.getClientId().equals(scope.getCreatorId()):{}",
-                    scope.getScopeType(), scope.getInum(), scope.getCreatorId(), client.getClientId(),
+                    "Associated clients search - customScope.getScopeType():{}, customScope.getInum():{}, customScope.getCreatorId():{}, client.getClientId():{}, clientService.getDnForClient(client.getClientId()):{}, client.getScopes():{}, client.getClientId().equals(customScope.getCreatorId()):{}",
+                    customScope.getScopeType(), customScope.getInum(), customScope.getCreatorId(), client.getClientId(),
                     clientService.getDnForClient(client.getClientId()), client.getScopes(),
-                    client.getClientId().equals(scope.getCreatorId()));
+                    client.getClientId().equals(customScope.getCreatorId()));
 
-            if (scope.getScopeType() == ScopeType.OPENID || scope.getScopeType() == ScopeType.OAUTH
-                    || scope.getScopeType() == ScopeType.DYNAMIC) {
+            if (customScope.getScopeType() == ScopeType.OPENID || customScope.getScopeType() == ScopeType.OAUTH
+                    || customScope.getScopeType() == ScopeType.DYNAMIC) {
                 if (client.getScopes() != null
-                        && Arrays.asList(client.getScopes()).contains(getDnForScope(scope.getInum()))) {
+                        && Arrays.asList(client.getScopes()).contains(getDnForScope(customScope.getInum()))) {
+                    logger.debug(
+                            "Associated clients match for OOD - customScope.getScopeType():{}, customScope.getInum():{},client.getClientId():{}",
+                            customScope.getScopeType(), customScope.getInum(), client.getClientId());
                     customScope.getClients().add(client);
                 }
-            } else if (scope.getScopeType() == ScopeType.UMA) {
+            } else if (customScope.getScopeType() == ScopeType.UMA) {
                 List<UmaResource> umaRes = umaResources.stream()
                         .filter(umaResource -> (umaResource.getScopes() != null
-                                && umaResource.getScopes().contains(getDnForScope(scope.getInum()))))
+                                && umaResource.getScopes().contains(getDnForScope(customScope.getInum()))))
                         .collect(Collectors.toList());
-                logger.trace("Associated clients serach - umaRes():{}", umaRes);
+                logger.trace("Associated clients search - umaRes():{}", umaRes);
                 for (UmaResource res : umaRes) {
-                    logger.trace(
-                            " client.getDn():{}, res.getInum():{}, res.getClients():{}, res.getClients().contains(clientService.getDnForClient(client.getClientId()):{}",
-                            client.getDn(), res.getInum(), res.getClients(),
+                    logger.debug(
+                            "Associated clients match for UMA - customScope.getScopeType():{}, customScopegetInum():{}, client.getClientId():{}, res.getInum():{}, res.getClients():{}, res.getClients().contains(clientService.getDnForClient(client.getClientId()):{}",
+                            customScope.getScopeType(), customScope.getInum(), client.getClientId(), res.getInum(),
+                            res.getClients(),
                             res.getClients().contains(clientService.getDnForClient(client.getClientId())));
-                    customScope.getClients().add(client);
+
+                    if (res.getClients().contains(clientService.getDnForClient(client.getClientId()))) {
+                        customScope.getClients().add(client);
+                    }
 
                 }
-            } else if ((scope.getScopeType() == ScopeType.SPONTANEOUS)
-                    && (client.getClientId().equals(scope.getCreatorId()))) {
+            } else if ((customScope.getScopeType() == ScopeType.SPONTANEOUS)
+                    && (client.getClientId().equals(customScope.getCreatorId()))) {
+                logger.debug(
+                        "Associated clients match for SPONTANEOUS - customScope.getScopeType():{}, customScope.getInum():{},customScope.getCreatorId():{}, client.getClientId():{}",
+                        customScope.getScopeType(), customScope.getInum(), customScope.getCreatorId(),
+                        client.getClientId());
                 customScope.getClients().add(client);
             }
         }
@@ -254,9 +294,14 @@ public class ScopeService {
         if (scopes == null) {
             return scopes;
         }
-        List<Client> clients = clientService.getAllClients();
-        List<UmaResource> umaResources = umaResourceService.getAllResources();
-        return (scopes.stream().map(scope -> setClients(scope, clients, umaResources)).collect(Collectors.toList()));
+
+        List<CustomScope> scopeList = Lists.newArrayList();
+        for (CustomScope scope : scopes) {
+            scopeList.add(setClients(scope));
+        }
+
+        logger.debug("Getting associatedClients for scopeList:{}", scopeList);
+        return scopeList;
 
     }
 
