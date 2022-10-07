@@ -27,7 +27,7 @@ class JansGDialog:
         self.myparent = parent
 
         if not width:
-            width = int(parent.output.get_size().columns * 0.85)
+            width = parent.dialog_width
 
         if not buttons:
             buttons = [Button(text=_("OK"))]

@@ -18,7 +18,8 @@ from prompt_toolkit.widgets import (
     Button,
     Dialog,
     VerticalLine,
-    HorizontalLine
+    HorizontalLine,
+    CheckboxList,
 )
 from cli import config_cli
 from static import DialogResult
@@ -138,7 +139,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         pass
 
 
-    def get_claimsName(self,claims_list):
+    def get_named_claims(self, claims_list):
         self.myparent.logger.debug('claims_list: ' + str(claims_list))
         try :
             responce = self.myparent.cli_object.process_command_by_id(
@@ -149,32 +150,28 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         data={}
                         )
         except Exception as e:
-                    self.app.show_message(_("Error getting scopes"), str(e))
+                    self.app.show_message(_("Error getting claims"), str(e))
                     return
-                    
+
         result = responce.json()
-        # self.myparent.logger.debug('result: ' + str(result["entries"]))
+        self.myparent.logger.debug('result: ' + str(result["entries"]))
 
         calims_names=[]
-        for i in result["entries"] :
+        for entry in result["entries"] :
             for claim in claims_list:
-                if claim[0] == i['dn']:
-                    calims_names.append([i['claimName']])
+                if claim == entry['dn']:
+                    calims_names.append([entry['dn'], entry['displayName']])
 
         return calims_names
 
 
-    def get_scopes(self):
+    def get_claims(self):
 
-        claims_list = [[claim] for claim in self.data.get('claims', [])]
-        # inum=2B29,ou=attributes,o=jans
-
-        data = self.get_claimsName(claims_list)
-        self.myparent.logger.debug('datadata: ' + str(data))
+        data = self.get_named_claims(self.data.get('claims', []))
 
         self.claims_container = JansVerticalNav(
                 myparent=self.myparent,
-                headers=['claims'],
+                headers=['dn', 'Display Name'],
                 preferred_size= [0],
                 data=data,
                 on_display=self.myparent.data_display_dialog,
@@ -184,7 +181,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 entriesColor='class:outh-client-navbar-entriescolor',
                 all_data=data
                 )
-                
+
         return self.claims_container
 
     def delete_claim(self, selected, event):
@@ -204,6 +201,10 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 self.myparent.layout.focus(focused_before)
             except:
                 self.myparent.layout.focus(self.app.center_frame)
+
+            self.myparent.logger.debug('claims to delete: ' + str(selected))
+
+            self.myparent.logger.debug('claims before delete: ' + str(self.data['claims']))
 
             if result.lower() == 'yes':
                 self.data['claims'].remove(selected[0])
@@ -262,12 +263,12 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     name='oauth:scopes:openID:claims:search',
                                     style='class:outh-scope-textsearch',width=10,
                                     jans_help=_("Press enter to perform search"),
-                                    #accept_handler=self.search_openID_claims
+                                    accept_handler=self.search_claims,
                                     ),
 
 
                             ####################################################
-                            self.get_scopes(),
+                            self.get_claims(),
                             ###################################################
 
                             ],width=D(),)
@@ -331,7 +332,42 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     ],
                     width=D(),
                     )
- 
+
+    def search_claims(self, textbuffer):
+
+        try :
+            responce = self.myparent.cli_object.process_command_by_id(
+                        operation_id='get-all-attribute',
+                        url_suffix='',
+                        endpoint_args='pattern:{}'.format(textbuffer.text),
+                        data_fn=None,
+                        data={}
+                        )
+        except Exception as e:
+                    self.myparent.show_message(_("Error searching claims"), str(e))
+                    return
+
+        result = responce.json()
+        self.myparent.logger.debug('result: ' + str(result))
+
+        if not result.get('entries'):
+            self.myparent.show_message(_("Ooops"), _("Can't find any claim for ʹ%sʹ.") % textbuffer.text)
+            return
+
+
+        def add_selected_claims(dialog):
+            if 'claims' not in self.data:
+                self.data['claims'] = []
+
+            for item in dialog.body.current_values:
+                self.claims_container.add_item(item)
+                self.data['claims'].append(item[0])
+
+        check_box_list = CheckboxList(values=[([claim['dn'], claim['displayName']], claim['displayName']) for claim in result['entries']])
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_selected_claims)]
+        dialog = JansGDialog(self.myparent, title=_("Select claims to add"), body=check_box_list, buttons=buttons)
+        self.myparent.show_jans_dialog(dialog)
+
 
     def __pt_container__(self):
         return self.dialog

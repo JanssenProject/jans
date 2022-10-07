@@ -50,14 +50,13 @@ class JansVerticalNav():
         self.myparent = myparent            # ListBox parent class
         self.headers = headers              # ListBox headers
         self.selectes = selectes            # ListBox initial selection
-        if data:
-            self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
-        else:
-            self.data=[['No items']]
+
+        self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
+
         self.preferred_size = preferred_size
         self.headerColor = headerColor
         self.entriesColor = entriesColor
-        self.spaces = []
+
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
@@ -70,7 +69,7 @@ class JansVerticalNav():
     def create_window(self):
         """This method creat the dialog it self
         """
-        container_content = [
+        self.container_content = [
                         Window(
                             content=FormattedTextControl(
                                 text=self._get_head_text,
@@ -94,14 +93,13 @@ class JansVerticalNav():
                             cursorline=True,
                             right_margins=[ScrollbarMargin(display_arrows=True), ],
                         ),
-                        Window(height=2),
                     ]
 
         if self.underline_headings:
-            container_content.insert(1, HorizontalLine())
+            self.container_content.insert(1, HorizontalLine())
 
         self.container = FloatContainer(
-            content=HSplit(container_content),
+            content=HSplit(self.container_content+[Window(height=1)]),
             floats=[
             ],
         )
@@ -109,29 +107,33 @@ class JansVerticalNav():
     def handle_header_spaces(self):
         """Make header evenlly spaced
         """
-        datalen = []
-        for dataline in range(len(self.data )):
-            line = []
-            for i in self.data[dataline]:
-                line.append(len(i))
-            datalen.append(line)
-        tmp_dict = {}
-        for num in range(len(datalen[0])):
-            tmp_dict[num] = []
+        self.spaces = []
+        data_length_list = []
+        for row in self.data:
+            column_length_list = []
+            for col in row:
+                column_length_list.append(len(col))
+            data_length_list.append(column_length_list)
 
-        for k in range(len(datalen)):
-            for i in range(len(datalen[k])):
-                tmp_dict[i].append(datalen[k][i])
 
-        for i in tmp_dict:
-            self.spaces.append(max(tmp_dict[i]))
+        if data_length_list:
+            tmp_dict = {}
+            for num in range(len(data_length_list[0])):
+                tmp_dict[num] = []
 
-        for i in range(len(self.spaces)):                                                                               ## handle header collesion (when the headers length is greater that the tallest data index length)
+            for k in range(len(data_length_list)):
+                for i in range(len(data_length_list[k])):
+                    tmp_dict[i].append(data_length_list[k][i])
 
-            if self.spaces[i] < len(self.headers[i]):
-                self.spaces[i] = self.spaces[i] + \
-                    (len(self.headers[i]) - self.spaces[i])
+            for i in tmp_dict:
+                self.spaces.append(max(tmp_dict[i]))
 
+            for i, space in enumerate(self.spaces):
+                if space < len(self.headers[i]):
+                    self.spaces[i] = space + (len(self.headers[i]) - space)
+        else:
+            self.spaces = [len(header) + 2 for header in self.headers]
+            
         self.spaces[-1] =  self.myparent.output.get_size()[1] - sum(self.spaces) + sum(len(s) for s in self.headers)    ## handle last head spaces (add space to the end of ter. width to remove the white line)
 
     def get_spaced_data(self):
@@ -183,6 +185,12 @@ class JansVerticalNav():
 
     def remove_item(self, item):
         self.data.remove(item)
+        self.handle_header_spaces()
+
+    def add_item(self, item):
+        self.data.append(item)
+        self.handle_header_spaces()
+        self.container_content[-1].height = len(self.data)
 
     def _get_key_bindings(self):
         """All key binding for the Dialog with Navigation bar
@@ -194,42 +202,45 @@ class JansVerticalNav():
 
         @kb.add('up')
         def _go_up(event) -> None:
+            if not self.data:
+                return
             self.selectes = (self.selectes - 1) % len(self.data)
 
         @kb.add('down')
         def _go_up(event) -> None:
+            if not self.data:
+                return
             self.selectes = (self.selectes + 1) % len(self.data)
 
         @kb.add('enter')
         def _(event):
-            if self.data!= [['No items']]:
-                passed = [i.strip() for i in self.data[self.selectes]]
-                size = self.myparent.output.get_size()
-                if self.on_enter :
-                    self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
+            if not self.data:
+                return
+            passed = [i.strip() for i in self.data[self.selectes]]
+            size = self.myparent.output.get_size()
+            if self.on_enter :
+                self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
 
 
         @kb.add('d')
         def _(event):
-            if self.data!= [['No items']]:
-                selected_line = [i.strip() for i in self.data[self.selectes]]
-                size = self.myparent.output.get_size()
-                self.on_display(
-                    selected=selected_line, 
-                    headers=self.headers, 
-                    event=event,
-                    size=size, 
-                    data=self.all_data[self.selectes])
+            if not self.data:
+                return
+            selected_line = [i.strip() for i in self.data[self.selectes]]
+            size = self.myparent.output.get_size()
+            self.on_display(
+                selected=selected_line, 
+                headers=self.headers, 
+                event=event,
+                size=size, 
+                data=self.all_data[self.selectes])
 
 
         @kb.add('delete')
         def _(event):
-            if self.data!= [['No items']]:
-                if self.on_delete:
-                    selected_line = [i.strip() for i in self.data[self.selectes]]
-                    self.on_delete(
-                        selected=selected_line, 
-                        event=event)
+            if self.data and self.on_delete:
+                selected_line = [i.strip() for i in self.data[self.selectes]]
+                self.on_delete(selected=selected_line, event=event)
 
         return kb
 
