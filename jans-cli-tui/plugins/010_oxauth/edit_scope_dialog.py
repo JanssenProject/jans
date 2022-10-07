@@ -141,22 +141,20 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         data = [[claim] for claim in self.data.get('claims', [])]
         self.myparent.logger.debug('datadata: ' + str(data))
-        if data != []:
-            self.claims_container = JansVerticalNav(
-                    myparent=self.myparent,
-                    headers=['claims'],
-                    preferred_size= [0],
-                    data=data,
-                    on_display=self.myparent.data_display_dialog,
-                    on_delete=self.delete_claim,
-                    selectes=0,
-                    headerColor='class:outh-client-navbar-headcolor',
-                    entriesColor='class:outh-client-navbar-entriescolor',
-                    all_data=data
+        
+        self.claims_container = JansVerticalNav(
+                myparent=self.myparent,
+                headers=['claims'],
+                preferred_size= [0],
+                data=data,
+                on_display=self.myparent.data_display_dialog,
+                on_delete=self.delete_claim,
+                selectes=0,
+                headerColor='class:outh-client-navbar-headcolor',
+                entriesColor='class:outh-client-navbar-entriescolor',
+                all_data=data
                 )
-        else:
-            self.claims_container = HSplit([],width=D()) ## Error happended here in JansVerticalNav if no data
-
+                
         return self.claims_container
 
     def delete_claim(self, selected, event):
