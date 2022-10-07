@@ -206,7 +206,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     name='showInConfigurationEndpoint',
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
                                     style='class:outh-scope-checkbox',
-                            )
+                            ),
+
                         ],width=D(),)
 
         self.alt_tabs['openid'] = HSplit([
@@ -277,6 +278,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                                 ],width=D(),
                     )
 
+        uma_creator = self.data.get('creatorId','') or self.myparent.cli_object.get_user_info().get('inum','')
+
+
         self.alt_tabs['uma'] = HSplit([
                     self.myparent.getTitledText(_("IconURL"), name='iconUrl', value=self.data.get('iconUrl',''), style='class:outh-scope-text'),
                     
@@ -289,9 +293,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
                     self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='class:outh-scope-text',read_only=True,height=3,), ## Not fount
                     self.myparent.getTitledText(_("Creationg time"), name='description', value=self.data.get('description',''), style='class:outh-scope-text',read_only=True,),
-                    self.myparent.getTitledText(_("Creator"), name='Creator', value=self.data.get('Creator',''), style='class:outh-scope-text',read_only=True,),
-                        
-                                                ],width=D(),
+                    self.myparent.getTitledText(
+                                    _("Creator"), 
+                                    name='Creator',
+                                    style='class:outh-scope-text',
+                                    read_only=True,
+                                    value=uma_creator
+                                    ),
+                    ],
+                    width=D(),
                     )
  
 

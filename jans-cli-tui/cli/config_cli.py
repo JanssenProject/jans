@@ -259,6 +259,19 @@ class JCA_CLI:
                 self.client_id = client_id_data.replace("'","")
                 self.client_secret = client_secret_data.replace("'","")
 
+    def get_user_info(self):
+        user_info = {}
+        if 'user_data' in config['DEFAULT']:
+            user_info = jwt.decode(config['DEFAULT']['user_data'],
+                                    options={
+                                            'verify_signature': False,
+                                            'verify_exp': True,
+                                            'verify_aud': False
+                                             }
+                                    )
+        return user_info
+
+
     def set_logging(self):
         if debug:
             self.cli_logger = logging.getLogger("urllib3")
@@ -568,7 +581,7 @@ class JCA_CLI:
             self.raise_error("Unable to get access token")
 
         result = response.text
-
+        config['DEFAULT']['user_data'] = result
 
         """
         STEP 4: Get access token for config-api endpoints
