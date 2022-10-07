@@ -141,7 +141,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         data = [[claim] for claim in self.data.get('claims', [])]
         self.myparent.logger.debug('datadata: ' + str(data))
-        
+        ##        
         self.claims_container = JansVerticalNav(
                 myparent=self.myparent,
                 headers=['claims'],
@@ -154,7 +154,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 entriesColor='class:outh-client-navbar-entriescolor',
                 all_data=data
                 )
-                
+        ##
         return self.claims_container
 
     def delete_claim(self, selected, event):

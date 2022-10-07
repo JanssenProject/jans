@@ -50,7 +50,10 @@ class JansVerticalNav():
         self.myparent = myparent            # ListBox parent class
         self.headers = headers              # ListBox headers
         self.selectes = selectes            # ListBox initial selection
-        self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
+        if data:
+            self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
+        else:
+            self.data=[['No items']]
         self.preferred_size = preferred_size
         self.headerColor = headerColor
         self.entriesColor = entriesColor
@@ -199,31 +202,34 @@ class JansVerticalNav():
 
         @kb.add('enter')
         def _(event):
-            passed = [i.strip() for i in self.data[self.selectes]]
-            size = self.myparent.output.get_size()
-            if self.on_enter :
-                self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
+            if self.data!= [['No items']]:
+                passed = [i.strip() for i in self.data[self.selectes]]
+                size = self.myparent.output.get_size()
+                if self.on_enter :
+                    self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
 
 
         @kb.add('d')
         def _(event):
-            selected_line = [i.strip() for i in self.data[self.selectes]]
-            size = self.myparent.output.get_size()
-            self.on_display(
-                selected=selected_line, 
-                headers=self.headers, 
-                event=event,
-                size=size, 
-                data=self.all_data[self.selectes])
+            if self.data!= [['No items']]:
+                selected_line = [i.strip() for i in self.data[self.selectes]]
+                size = self.myparent.output.get_size()
+                self.on_display(
+                    selected=selected_line, 
+                    headers=self.headers, 
+                    event=event,
+                    size=size, 
+                    data=self.all_data[self.selectes])
 
 
         @kb.add('delete')
         def _(event):
-            if self.on_delete:
-                selected_line = [i.strip() for i in self.data[self.selectes]]
-                self.on_delete(
-                    selected=selected_line, 
-                    event=event)
+            if self.data!= [['No items']]:
+                if self.on_delete:
+                    selected_line = [i.strip() for i in self.data[self.selectes]]
+                    self.on_delete(
+                        selected=selected_line, 
+                        event=event)
 
         return kb
 
