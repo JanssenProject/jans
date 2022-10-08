@@ -74,13 +74,13 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             if item_data:
                 data[item_data['key']] = item_data['value']
 
-        self.myparent.logger.debug('DATA: ' + str(data))
+        # self.myparent.logger.debug('DATA: ' + str(data))
         self.data = data    
         if 'attributes' in self.data.keys():    
             self.data['attributes'] = {'showInConfigurationEndpoint':self.data['attributes']}
 
 
-        self.myparent.logger.debug('handler: '+str(self.save_handler))
+        # self.myparent.logger.debug('handler: '+str(self.save_handler))
         close_me = True
         if self.save_handler:
             close_me = self.save_handler(self)
@@ -140,7 +140,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
     def get_named_claims(self, claims_list):
-        self.myparent.logger.debug('claims_list: ' + str(claims_list))
+        # self.myparent.logger.debug('claims_list: ' + str(claims_list))
         try :
             responce = self.myparent.cli_object.process_command_by_id(
                         operation_id='get-all-attribute',
@@ -154,7 +154,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     return
 
         result = responce.json()
-        self.myparent.logger.debug('result: ' + str(result["entries"]))
+        # self.myparent.logger.debug('result: ' + str(result["entries"]))
 
         calims_names=[]
         for entry in result["entries"] :
@@ -348,7 +348,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     return
 
         result = responce.json()
-        self.myparent.logger.debug('result: ' + str(result))
+        # self.myparent.logger.debug('result: ' + str(result))
 
         if not result.get('entries'):
             self.myparent.show_message(_("Ooops"), _("Can't find any claim for ʹ%sʹ.") % textbuffer.text)
@@ -363,7 +363,27 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 self.claims_container.add_item(item)
                 self.data['claims'].append(item[0])
 
-        check_box_list = CheckboxList(values=[([claim['dn'], claim['displayName']], claim['displayName']) for claim in result['entries']])
+        current_data = self.get_named_claims(self.data.get('claims', []))
+
+        for i in range(len(current_data)):
+            current_data[i] = current_data[i][0]
+
+        values = [([claim['dn'], claim['displayName']], claim['displayName']) for claim in result['entries']]
+        values_uniqe = []
+
+        for k in values:
+            if k[0][0] in current_data:
+                pass
+            else:
+                values_uniqe.append(k)
+
+        if not values_uniqe:
+            self.myparent.show_message(_("Ooops"), _("Can't find any New claim for ʹ%sʹ.") % textbuffer.text)
+            return
+
+        check_box_list = CheckboxList(
+            values=values_uniqe,
+            )
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_selected_claims)]
         dialog = JansGDialog(self.myparent, title=_("Select claims to add"), body=check_box_list, buttons=buttons)
         self.myparent.show_jans_dialog(dialog)
