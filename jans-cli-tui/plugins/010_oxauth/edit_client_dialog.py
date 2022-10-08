@@ -317,7 +317,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             height=3,
                             style='class:outh-client-text'),
                             
-                    self.resources,
+                    self.resources if self.data.get('inum','') else  HSplit([],width=D())
 
                         ],width=D(),style='class:outh-client-tabs'
                             )
