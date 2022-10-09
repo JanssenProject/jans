@@ -64,17 +64,24 @@ result = cli_object.process_command_by_id(
 """
 
 
-endpoint_args ='limit:1,pattern:hasdaeat' ### limit the responce and wrong pattern
+# endpoint_args ='pattern:2B29' ### limit the responce and wrong pattern
 data = {}
-data['inum'] = 'a5f45938-97d6-408b-965a-229afb0552fa'  ## this user has 3 UMA
+inum = '40a48740-4892-4fce-b30f-81c5c45670f4'  ## this user has 3 UMA
 result = cli_object.process_command_by_id(
-                operation_id='get-oauth-uma-resources-by-clientid',
-                url_suffix='clientId:{}'.format(data['inum']),
-                endpoint_args=endpoint_args,
-                data_fn=None,
-                data={}
-                )
-print(result.text)  ### expected None
+                        operation_id='get-all-attribute',
+                        url_suffix='',
+                        endpoint_args="pattern:phone",
+                        data_fn=None,
+                        data={}
+                        )
+
+x = result.json()  
+print(x)
+# print(len(x["entries"]))
+# print(x["entries"])
+# for i in x["entries"]:
+#         if i['inum'] == '08E2':
+#                 print(i['claimName'])
 
 
 
@@ -175,3 +182,4 @@ print(result.text)  ### expected None
 {"dn":"inum=C4F6,ou=scopes,o=jans","inum":"C4F6","displayName":"refresh_token","id":"offline_access","description":"This scope value requests that an OAuth 2.0 Refresh Token be issued.","scopeType":"openid","defaultScope":true,"attributes":{"showInConfigurationEndpoint":true},"creationDate":"2022-09-24T07:07:19","umaType":false,"baseDn":"inum=C4F6,ou=scopes,o=jans"}]
 
 '''
+
