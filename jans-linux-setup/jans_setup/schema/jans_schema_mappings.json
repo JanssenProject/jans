@@ -244,6 +244,7 @@
     "oxAuthSectorIdentifierURI": "jansSectorIdentifierURI",
     "oxAuthSessionAttribute": "jansSessAttr",
     "oxAuthSessionId": "jansSessId",
+    "oxAuthSsa": "jansSsa",
     "oxAuthSignedResponseAlg": "jansSignedRespAlg",
     "oxAuthSubjectType": "jansSubjectTyp",
     "oxAuthTokenEndpointAuthMethod": "jansTknEndpointAuthMethod",
