@@ -61,7 +61,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.prepare_tabs()
         self.create_window()
         self.sope_type = self.data.get('scopeType') or 'oauth'
-        
 
 
     def save(self):
@@ -74,13 +73,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             if item_data:
                 data[item_data['key']] = item_data['value']
 
-        # self.myparent.logger.debug('DATA: ' + str(data))
-        self.data = data    
-        if 'attributes' in self.data.keys():    
+        if data['scopeType'] in ('openid', 'dynamic') and hasattr(self, 'claims_container'):
+            claims = [claim[0] for claim in self.claims_container.data]
+            data['claims'] = claims
+
+        self.myparent.logger.debug('DATA: ' + str(data))
+        self.data = data
+        if 'attributes' in self.data.keys():
             self.data['attributes'] = {'showInConfigurationEndpoint':self.data['attributes']}
 
-
-        # self.myparent.logger.debug('handler: '+str(self.save_handler))
         close_me = True
         if self.save_handler:
             close_me = self.save_handler(self)
@@ -123,7 +124,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:outh-scope-text'),
                 self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-scope-text'),
                 DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
-            ], style='class:outh-scope-tabs'), 
+            ], style='class:outh-scope-tabs'),
              button_functions=buttons,
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
