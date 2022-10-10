@@ -169,4 +169,41 @@ Make an entry similar to one below in this file. IP could be a static IP assigne
 192.168.0.1 jans.op.io
 ```
 
-## File Descriptor Configuration
+## File Descriptor Configuration (FD)
+
+Janssen Server requires setting the `file descriptors` to 65k. Follow the steps below to set value for file descriptors. These steps are applicable to SUSE Linux Enterprise, Ubuntu Server and RedHat Enterprise Linux.
+
+First, check the current file descriptor limit using command below. If the existing FD limit is higher than 65535, then continue with the same.
+
+```text
+# cat /proc/sys/fs/file-max
+```
+
+In case existing FD limit is less than 65535, then follow the steps below to set the value.
+
+1) Set soft and hard limits by adding the following lines in the `/etc/security/limits.conf` file
+
+```text
+* soft nofile 65535
+* hard nofile 262144
+```
+
+2) Add the following lines to `/etc/pam.d/login` if not already present
+
+```text
+session required pam_limits.so
+```
+
+3) Increase the FD limit in `/proc/sys/fs/file-max`
+
+```text
+echo 65535 > /proc/sys/fs/file-max**
+```
+
+4) Use the `ulimit` command to set the FD limit to the hard limit specified in `/etc/security/limits.conf`. If setting to hard limit doesn't work, then try to set it to soft limit.
+
+```text
+ulimit -n 262144
+```
+
+5) Restart the system
