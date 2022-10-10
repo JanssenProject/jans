@@ -80,7 +80,7 @@ public class ClientService implements Serializable {
     }
 
     public void addClient(Client client) {
-        setClientDefaultAttributes(client, false);
+        updateClient(client, false);
         persistenceEntryManager.persist(client);
     }
 
@@ -191,39 +191,40 @@ public class ClientService implements Serializable {
         return newInum;
     }
 
-    public Client setClientDefaultAttributes(Client client, boolean update) {
-        logger.debug("Client data - client:{}", client);
+    public Client updateClient(Client client, boolean update) {
+        logger.debug("Prepare Client data - client:{}", client);
         if (client == null) {
             return client;
         }
 
         logger.debug(
-                "client.getApplicationType:{}, client.getRedirectUris():{}, client.getClaimRedirectUris():{}",
+                "Prepare Client data - client.getApplicationType:{}, client.getRedirectUris():{}, client.getClaimRedirectUris():{}",
                 client.getApplicationType(), client.getRedirectUris(), client.getClaimRedirectUris());
-
-        List<String> redirectUris = Arrays.asList(client.getRedirectUris());
-        if (redirectUris != null && !redirectUris.isEmpty()) {
-            redirectUris = new ArrayList<>(new HashSet<>(redirectUris)); // Remove repeated elements
-            client.setRedirectUris(redirectUris.toArray(new String[0]));
-        }
-        List<String> claimsRedirectUris = Arrays.asList(client.getClaimRedirectUris());
-        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
-            claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
-            client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
-        }
 
         client.setApplicationType(
                 client.getApplicationType() != null ? client.getApplicationType() : ApplicationType.WEB);
-
-        if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
-            client.setSectorIdentifierUri(client.getSectorIdentifierUri());
+        String[] redirectUris = client.getRedirectUris();
+        if (redirectUris != null && redirectUris.length > 0) {
+            Set<String> set = new HashSet<>(Arrays.asList(redirectUris)); // Remove repeated elements
+            client.setRedirectUris(set.toArray(new String[0]));
         }
 
-        logger.debug("client.getResponseTypes():{}, client.getGrantTypes():{}", client.getResponseTypes(), client.getGrantTypes());
+        String[] claimRedirectUris = client.getClaimRedirectUris();
+        if (claimRedirectUris != null && claimRedirectUris.length > 0) {
+            Set<String> set = new HashSet<>(Arrays.asList(claimRedirectUris)); // Remove repeated elements
+            client.setClaimRedirectUris(set.toArray(new String[0]));
+        }
+
+        logger.debug(
+                "Prepare Client data - client.getResponseTypes():{}, client.getGrantTypes():{}, client.getClaimRedirectUris():{}",
+                client.getResponseTypes(), client.getGrantTypes(), client.getClaimRedirectUris());
         Set<ResponseType> responseTypeSet = new HashSet<>(Arrays.asList(client.getResponseTypes()));
         Set<GrantType> grantTypeSet = new HashSet<>(Arrays.asList(client.getGrantTypes()));
 
-        if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
+        logger.debug(
+                "Verifying responseTypeSet:{}, grantTypeSet:{}, appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled():{}, appConfiguration.getClientRegDefaultToCodeFlowWithRefresh():{}",
+                responseTypeSet, grantTypeSet, appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled(), appConfiguration.getClientRegDefaultToCodeFlowWithRefresh());
+        if (!update && isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
             if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
                 if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
                     responseTypeSet.add(ResponseType.CODE);
@@ -243,68 +244,67 @@ public class ClientService implements Serializable {
             if (grantTypeSet.contains(GrantType.IMPLICIT)) {
                 responseTypeSet.add(ResponseType.TOKEN);
             }
+
+            responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
+            grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
+
+            Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
+            grantTypeSet.retainAll(dynamicGrantTypeDefault);
         }
 
-        responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
-        grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
+        logger.debug("Setting responseTypeSet:{}, grantTypeSet:{}",responseTypeSet, grantTypeSet);
+        client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
+        client.setGrantTypes(grantTypeSet.toArray(new GrantType[0]));
 
-        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
-        grantTypeSet.retainAll(dynamicGrantTypeDefault);
-
-        if (!update || !Arrays.asList(client.getResponseTypes()).isEmpty()) {
-            client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
-        }
-        if (!update || (isTrue(appConfiguration.getEnableClientGrantTypeUpdate())
-                && !Arrays.asList(client.getGrantTypes()).isEmpty())) {
-            client.setGrantTypes(grantTypeSet.toArray(new GrantType[0]));
+        Set<String> contactsSet = new HashSet<>(Arrays.asList(client.getContacts()));
+        logger.debug("Setting client.getContacts():{}, contactsSet:{}",client.getContacts(), contactsSet);
+        if (contactsSet != null && !contactsSet.isEmpty()) {
+            client.setContacts(contactsSet.toArray(new String[0]));
         }
 
-        logger.debug("Set client.getResponseTypes():{}, client.getGrantTypes():{}", client.getResponseTypes(), client.getGrantTypes());
-        List<String> contacts = Arrays.asList(client.getContacts());
-        if (contacts != null && !contacts.isEmpty()) {
-            contacts = new ArrayList<>(new HashSet<>(contacts)); // Remove repeated elements
-            client.setContacts(contacts.toArray(new String[0]));
-        }
-
-        logger.debug("client.getTokenEndpointAuthMethod():{}", client.getTokenEndpointAuthMethod());
+        logger.debug("Setting client.getTokenEndpointAuthMethod():{}",client.getTokenEndpointAuthMethod());
         if (StringUtils.isBlank(client.getTokenEndpointAuthMethod())) {
             // If omitted, the default is client_secret_basic
             client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
 
-        logger.debug("client.getDefaultAcrValues():{}", client.getDefaultAcrValues());
-        List<String> defaultAcrValues = Arrays.asList(client.getDefaultAcrValues());
-        if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            defaultAcrValues = new ArrayList<>(new HashSet<>(defaultAcrValues)); // Remove repeated elements
-            client.setDefaultAcrValues(defaultAcrValues.toArray(new String[defaultAcrValues.size()]));
+        logger.debug("Verifying client.getDefaultAcrValues():{}",client.getDefaultAcrValues());
+        Set<String> defaultAcrSet = new HashSet<>(Arrays.asList(client.getDefaultAcrValues()));
+        if (defaultAcrSet != null && !defaultAcrSet.isEmpty()) {
+            client.setDefaultAcrValues(defaultAcrSet.toArray(new String[defaultAcrSet.size()]));
+        }
+        logger.debug("Final client.getDefaultAcrValues():{}",client.getDefaultAcrValues());
+        
+        logger.debug("Verifying client.getGroups():{}",client.getGroups());
+        Set<String> groupSet = new HashSet<>(Arrays.asList(client.getGroups()));
+        if (groupSet != null && !groupSet.isEmpty()) {
+            client.setGroups(new HashSet<>(groupSet).toArray(new String[0])); // remove duplicates
+        }
+        logger.debug("Final client.getDefaultAcrValues():{}",client.getGroups());
+
+        logger.debug("Verifying client.getPostLogoutRedirectUris():{}",client.getPostLogoutRedirectUris());
+        Set<String> postLogoutRedirectUriSet = new HashSet<>(Arrays.asList(client.getPostLogoutRedirectUris()));
+        if (postLogoutRedirectUriSet != null && !postLogoutRedirectUriSet.isEmpty()) {
+            client.setPostLogoutRedirectUris(
+                    postLogoutRedirectUriSet.toArray(new String[postLogoutRedirectUriSet.size()]));
+        }
+        logger.debug("Final client.getPostLogoutRedirectUris():{}",client.getPostLogoutRedirectUris());
+
+        Set<String> requestUriSet = new HashSet<>(Arrays.asList(client.getRequestUris()));
+        if (requestUriSet != null && !requestUriSet.isEmpty()) {
+            client.setRequestUris(requestUriSet.toArray(new String[requestUriSet.size()]));
         }
 
-        logger.debug("client.getGroups():{}", client.getGroups());
-        final List<String> groups = Arrays.asList(client.getGroups());
-        if (groups != null && !groups.isEmpty()) {
-            client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
+        logger.debug("Verifying client.getAuthorizedOrigins():{}",client.getAuthorizedOrigins());
+        Set<String> authorizedOriginSet = new HashSet<>(Arrays.asList(client.getAuthorizedOrigins()));
+        if (authorizedOriginSet != null && !authorizedOriginSet.isEmpty()) {
+            client.setAuthorizedOrigins(authorizedOriginSet.toArray(new String[authorizedOriginSet.size()]));
         }
-
-        logger.debug("client.getGroups():{}", client.getGroups(), client.getPostLogoutRedirectUris());
-        List<String> postLogoutRedirectUris = Arrays.asList(client.getPostLogoutRedirectUris());
-        if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            postLogoutRedirectUris = new ArrayList<>(new HashSet<>(postLogoutRedirectUris)); // Remove repeated elements
-            client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
-        }
-
-        List<String> requestUris = Arrays.asList(client.getRequestUris());
-        if (requestUris != null && !requestUris.isEmpty()) {
-            requestUris = new ArrayList<>(new HashSet<>(requestUris)); // Remove repeated elements
-            client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
-        }
-
-        List<String> authorizedOrigins = Arrays.asList(client.getAuthorizedOrigins());
-        if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            authorizedOrigins = new ArrayList<>(new HashSet<>(authorizedOrigins)); // Remove repeated elements
-            client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
-        }
-
-        List<String> scopes = Arrays.asList(client.getScopes());
+        logger.debug("Final  client.getAuthorizedOrigins():{}",client.getAuthorizedOrigins());
+        
+        logger.debug("Verifying client.getScopes():{}",client.getScopes());
+        String[] scopeArr = client.getScopes();
+        List<String> scopes = Arrays.asList(scopeArr);
         if (grantTypeSet.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
                 && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
             scopes = Lists.newArrayList(scopes);
@@ -329,20 +329,26 @@ public class ClientService implements Serializable {
             scopesDn = scopeService.getDefaultScopesDn();
             client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
         }
-
+        logger.debug("Final client.getScopes():{}",client.getScopes());
+        
+        logger.debug("Verifying client.getClaims():{}",client.getClaims());
         List<String> claims = Arrays.asList(client.getClaims());
         if (claims != null && !claims.isEmpty()) {
             List<String> claimsDn = attributeService.getAttributesDn(claims);
             client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
         }
+        logger.debug("Final client.getClaims():{}",client.getClaims());
 
-        List<String> authorizedAcrValues = client.getAttributes().getAuthorizedAcrValues();
-        if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
-            authorizedAcrValues = new ArrayList<>(new HashSet<>(authorizedAcrValues)); // Remove repeated elements
-            client.getAttributes().setAuthorizedAcrValues(authorizedAcrValues);          
+        logger.debug("Final client.getAttributes().getAuthorizedAcrValues():{}",client.getAttributes().getAuthorizedAcrValues());
+        if (client.getAttributes().getAuthorizedAcrValues() != null
+                && client.getAttributes().getAuthorizedAcrValues().isEmpty()) {
+            List<String> authorizedAcrValues = client.getAttributes().getAuthorizedAcrValues();
+            if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
+                authorizedAcrValues = new ArrayList<>(new HashSet<>(authorizedAcrValues)); // Remove repeated elements
+                client.getAttributes().setAuthorizedAcrValues(authorizedAcrValues);
+            }
         }
-        logger.debug("Final client.getAttributes().getAuthorizedAcrValues():{}",
-                client.getAttributes().getAuthorizedAcrValues());
+        logger.debug("Final client.getAttributes().getAuthorizedAcrValues():{}",client.getAttributes().getAuthorizedAcrValues());
         return client;
     }
 }
