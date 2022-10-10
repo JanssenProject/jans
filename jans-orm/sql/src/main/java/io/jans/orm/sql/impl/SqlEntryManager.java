@@ -497,9 +497,21 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         } catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s'", key), ex);
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s', expression: '%s'", key, convertedExpression), ex);
+            throw new EntryPersistenceException(String.format("Failed to find entries with key: '%s', expression: '%s'", key, toExpressionForException(convertedExpression, searchFilter)), ex);
         }
     }
+
+	private String toExpressionForException(ConvertedExpression convertedExpression, Filter searchFilter) {
+		String result = searchFilter.toString();
+		try {
+			result = convertedExpression.toString();
+		} catch (Exception ex) {
+			// QueryDSL can't convert filter
+			LOG.error(String.format("QueryDSL can't build query based on filter: '%s'", result));
+		}
+
+		return result;
+	}
 
 	@Override
     protected <T> boolean contains(String baseDN, String[] objectClasses, Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Filter filter, String[] ldapReturnAttributes) {
