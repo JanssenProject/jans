@@ -1,13 +1,13 @@
 ---
 tags:
-  - administration
-  - installation
-  - vm
+- administration
+- installation
+- vm
 ---
 
 # VM System Requirements
 
-Janssen Server can be installed on any of the supported operating systems mentioned below:
+Janssen Server can be installed on a VM with any of the supported operating systems mentioned below:
 
 - Ubuntu (versions: 20.04)
 - SUSE Linux Enterprise Server (versions: 15)
@@ -15,8 +15,7 @@ Janssen Server can be installed on any of the supported operating systems mentio
 
 ## Hardware Requirements
 
-Janssen Server needs below-mentioned minimal resources on VM when data store is installed separately on a different VM.
-Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary based on size data and type of data store.
+Janssen Server needs the below-mentioned minimum resources on VM when the data store is installed separately on a different VM.
 
 ### Development and Test Environments
 - 4 GB RAM
@@ -29,17 +28,21 @@ Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary base
 - 4 GB swap space
 - 50 GB Disk
 
+Requirements for VM hosting the data store (i.e LDAP, RDBMS, etc.) can vary based on the size of the data and type of the data store.
+
 ## VM Setup Guidelines
 
-- Required ports should be open. Refer to [Port Setup](#port-setup) section for OS specific steps.
-- Janssen Server must be deployed on a server or VM with static IP address. Refer to [Configure Static IP Address](#configure-static-ip-address) section for OS specific steps.
-- Static IP address should resolve to a hostname. `localhost` is not supported. Refer to [Hostname Setup](#port-setup) section for OS specific steps.
-- For local testing and development purposes, VM can be setup using VMWare Workstation player
-- Janssen Server requires setting the `file descriptors` to 65k. Take guidance from steps listed [here](https://gluu.org/docs/gluu-server/4.4/installation-guide/#file-descriptors-fd)
+Ensure that VM hosting the Janssen Server is configured based on the following guidelines:
+
+- Required ports should be open. Refer to [Port Configuration](#port-configuration) section for OS specific steps.
+- Janssen Server must be deployed on a server or VM with a static IP address. Refer to [Static IP Address Configuration](#static-ip-address-configuration) section for OS specific instructions.
+- Static IP address should resolve to a hostname. `localhost` is not supported. Refer to [Hostname Configuration](#hostname-configuration) section for OS specific instructions.
+- For local testing and development purposes, VM can be set up using VMWare Workstation player. Often, VM tools keep the IP address of the VM consistent across restarts. And most of the VM ports are also accessible. Hence some of the configuration described in this document may not be required for local testing and development.
+- Janssen Server requires setting the `file descriptors` to 65k. Refer to [File Descriptor Configuration](#file-descriptor-configuration-fd) section for OS specific instructions.
 
 ## Port Configuration
 
-Janssen Server requires following ports to be open for incoming connections
+Janssen Server requires the following ports to be open for incoming connections.
 
 | Port | Protocol | Notes           |
 |------|----------|-----------------|
@@ -50,44 +53,30 @@ Janssen Server requires following ports to be open for incoming connections
 
 ### Ubuntu
 
-Ensuring above ports are open on an Ubuntu system can be done by following below mentioned steps:
+Ensuring the above ports are open on an Ubuntu system can be done by below mentioned steps:
 
-1. To check the status of these ports in Ubuntu, use the following commands (other OS have similar commands)
+1) Check the status of these ports
 
   ```
   ufw status verbose
   ```
 
-2. If the status is found to be inactive, enable it using 
+2) If the ufw status is `inactive`, enable it using
 
   ```
   ufw enable
   ```
 
-3. The default for ufw is to deny incoming and allow outgoing. To reset your setting to default :
 
-```
-ufw default deny incoming
-ufw default allow outgoing
-```
-
-4. Reset ufw
-
-```
-ufw reset
-```
-
-5. If for any reason the ports are closed, allow connections by:
+3) If the ports are closed, allow connections by:
 
 ```
 ufw allow <port>
 ```
 
-Ports 443, 80, and 22 must be accessible.
-
 ### SLES and RHEL
 
-SUSE Linux Enterprise Server and Red Hat Enterprise Linux use `Firewalld` to controll network access. Use commands below to configure ports.
+SUSE Linux Enterprise Server and Red Hat Enterprise Linux use `Firewalld` to control the network access. Use the commands below to configure the ports.
 
 1) Get zone for the network interface
 
@@ -98,7 +87,7 @@ firewall-cmd --get-zone-of-interface=<your-network-interface>
 2) Add port
 
 ```text
-firewall-cmd --permanent --add-port 443/tcp
+firewall-cmd --zone <zone-name> --permanent --add-port 443/tcp
 ```
 
 3) Restart firewalld
@@ -110,17 +99,17 @@ systemctl start firewalld
 
 ## Static IP Address Configuration
 
-Janssen Server must be deployed on a server or VM with static IP address.
+Janssen Server must be deployed on a server or VM with a static IP address.
 
-This section describes steps required to set static IP for supported platforms. Commands and steps mentioned here might have changed at the time of use, if so please refer to respective OS documentation for most up-to-date steps to setup static IP. 
+This section describes the steps required to set static IP for supported OS platforms. Commands and steps mentioned here might have changed at the time of use, if so please refer to respective OS documentation for the most up-to-date steps to set up static IP.
 
-First, Select the network interface for which static IP needs to be set. On any Linux based OS platform, run command below:
+First, Select the network interface for which static IP needs to be set. On any Linux based OS platform, run the command below:
 
 ```text
 ip link
 ```
 
-Above command shows lists all the existing network interfaces in format below:
+The above command lists all the existing network interfaces in format below:
 
 ```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
@@ -131,9 +120,9 @@ Above command shows lists all the existing network interfaces in format below:
 
 here we are going to configure the `enp4s0` network interface.
 
-### Ubuntu 
+### Ubuntu
 
-Steps listed below show how to set up static IP address on an Ubuntu Server.
+The steps listed below show how to set up a static IP address on an Ubuntu Server.
 
 1) Locate the configuration file
 
@@ -143,12 +132,12 @@ Network interface configuration can be changed using `YAML` configuration files 
 /etc/netplan
 ```
 
-Above directory will contain one or more `YAML` files. Open the file that has configuration for `enp4s0` network 
+Above directory will contain one or more `YAML` files. Open the file that has the configuration for `enp4s0` network
 interface. Create one if it doesn't exist.
 
 2) Update the configuration
 
-Set the yaml file configuration as shown in example below. Values for gateway, nameservers should be set 
+Set the yaml file configuration as shown in the example below. Values for the gateway and the nameservers should be set
 appropriately. `addresses` should be set to desired static IP.
 
 ```text
@@ -176,11 +165,11 @@ sudo netplan apply
 ```text
 ip addr show dev enp4s0
 ```
-Newly assigned IP address can be seen in the output
+The newly assigned IP address can be seen in the output
 
 ### SUSE Linux Enterprise Server
 
-SLES provides [YaST](https://yast.opensuse.org/) tool to manage the system configuration. YaST is a 
+SLES provides [YaST](https://yast.opensuse.org/) tool to manage the system configuration.
 
 1) Open YaST
 
@@ -188,17 +177,17 @@ SLES provides [YaST](https://yast.opensuse.org/) tool to manage the system confi
 yast
 ```
 
-2) Navigate to `System` -> `Network Settings` and select the network interface that needs to be set to static IP. 
+2) Navigate to `System` -> `Network Settings` and select the network interface that needs to be set to static IP.
 
 ![](../../../assets/suse-staticIP-yast-select-network.png)
 
-3) Hit `F4` to enter edit mode as shown in the image below. Select `Statically Assiged IP Address` instead of `DHCP`. Also provide required details for `IP address`, `Subnet Mask` and `Hostname`.
+3) Hit `F4` to enter edit mode as shown in the image below. Select `Statically Assiged IP Address` instead of `DHCP`. Also provide the required details for `IP address`, `Subnet Mask`, and `Hostname`.
 
 ![](../../../assets/suse-staticIP-yast-edit-network.png)
 
 ### RedHat Enterprise Linux
 
-RHEL provides `Nmcli` tool to configure and manage network.
+RHEL provides `Nmcli` tool to configure and manage the VM network.
 
 1) Set IP address for selected network interface
 
@@ -206,7 +195,7 @@ RHEL provides `Nmcli` tool to configure and manage network.
 nmcli con mod enp4s0 ipv4.addresses <static-IP>/24
 ```
 
-2) Set appropriate gateway
+2) Set the appropriate gateway
 
 ```text
 nmcli con mod enp4s0 ipv4.gateway <gateway-IP>
@@ -225,7 +214,7 @@ nmcli con mod enp4s0 ipv4.dns "<dns-IP>"
 nmcli con up enp4s0 
 ```
 
-5) See configuration being reflected at
+5) See the configuration being reflected at
 
 ```text
 cat /etc/sysconfig/network-scripts/ifcfg-enp4s0
@@ -233,7 +222,7 @@ cat /etc/sysconfig/network-scripts/ifcfg-enp4s0
 
 ## Hostname Configuration
 
-IP can be mapped to a hostname(FQDN) using entries into `/etc/hosts` file. Run command below to configure a hostname for IP address.
+IP can be mapped to a hostname(FQDN) using entries into `/etc/hosts` file. Run the command below to configure a hostname for the IP address.
 
 ```text
 vi /etc/hosts
@@ -242,20 +231,20 @@ vi /etc/hosts
 Make an entry similar to one below in this file. IP should be a static IP assigned to the server or VM.
 
 ```text
-192.168.0.1 jans.op.io
+<static-IP> jans.op.io
 ```
 
 ## File Descriptor Configuration (FD)
 
-Janssen Server requires setting the `file descriptors` to 65k. Follow the steps below to set value for file descriptors. These steps are applicable to SUSE Linux Enterprise, Ubuntu Server and RedHat Enterprise Linux.
+Janssen Server requires setting the `file descriptors` to 65k. Follow the steps below to set the value for file descriptors. These steps apply to SUSE Linux Enterprise, Ubuntu Server, and RedHat Enterprise Linux.
 
-First, check the current file descriptor limit using command below. If the existing FD limit is higher than 65535, then continue with the same.
+First, check the current file descriptor limit using command below. If the existing FD limit exceeds 65535, then continue with the same.
 
 ```text
 # cat /proc/sys/fs/file-max
 ```
 
-In case existing FD limit is less than 65535, then follow the steps below to set the value.
+In case the existing FD limit is less than 65535, then follow the steps below to set the value.
 
 1) Set soft and hard limits by adding the following lines in the `/etc/security/limits.conf` file
 
@@ -276,7 +265,7 @@ session required pam_limits.so
 echo 65535 > /proc/sys/fs/file-max**
 ```
 
-4) Use the `ulimit` command to set the FD limit to the hard limit specified in `/etc/security/limits.conf`. If setting to hard limit doesn't work, then try to set it to soft limit.
+4) Use the `ulimit` command to set the FD limit to the hard limit specified in `/etc/security/limits.conf`. If setting to hard limit doesn't work, then try to set it to the soft limit.
 
 ```text
 ulimit -n 262144
