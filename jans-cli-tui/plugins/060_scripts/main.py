@@ -136,7 +136,7 @@ class Plugin():
                 d.get('description',''),   ## some scopes have no scopetypr
                 ]
             )
-        
+
         if data:
 
             scripts = JansVerticalNav(
@@ -175,11 +175,17 @@ class Plugin():
             get_app().invalidate()
 
         else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['scopes'])
+            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.scripts_main_area)
 
 
-    def search_scripts(self):
-        pass
+    def search_scripts(self, tbuffer):
+        if not len(tbuffer.text) > 2:
+            self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.scripts_main_area)
+            return
+
+        t = threading.Thread(target=self.scripts_update_list, args=(1, tbuffer.text), daemon=True)
+        t.start()
+
 
     def add_script(self):
         pass
