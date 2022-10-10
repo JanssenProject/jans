@@ -278,7 +278,7 @@ class Plugin():
             scopes = JansVerticalNav(
                     myparent=self.app,
                     headers=['id', 'Description', 'Type','inum'],
-                    preferred_size= [25,50,30,30],
+                    preferred_size= [30,40,8,12],
                     data=data,
                     on_enter=self.edit_scope_dialog,
                     on_display=self.app.data_display_dialog,
