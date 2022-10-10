@@ -85,6 +85,29 @@ ufw allow <port>
 
 Ports 443, 80, and 22 must be accessible.
 
+### SLES and RHEL
+
+SUSE Linux Enterprise Server and Red Hat Enterprise Linux use `Firewalld` to controll network access. Use commands below to configure ports.
+
+1) Get zone for the network interface
+
+```text
+firewall-cmd --get-zone-of-interface=<your-network-interface>
+```
+
+2) Add port
+
+```text
+firewall-cmd --permanent --add-port 443/tcp
+```
+
+3) Restart firewalld
+
+```text
+systemctl stop firewalld
+systemctl start firewalld
+```
+
 ## Static IP Address Configuration
 
 Janssen Server must be deployed on a server or VM with static IP address.
