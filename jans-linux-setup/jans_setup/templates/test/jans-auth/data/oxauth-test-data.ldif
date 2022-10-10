@@ -228,6 +228,16 @@ jansScopeTyp: uma
 objectClass: jansScope
 objectClass: top
 
+dn: inum=SSA1-AD01,ou=scopes,o=jans
+displayName: SSA Admin
+inum: SSA1-AD01
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansId: https://jans.io/auth/ssa.admin
+jansScopeTyp: openid
+objectClass: jansScope
+jansDefScope: true
+objectClass: top
+
 dn: jansId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans
 jansId: a55ede29-8f5a-461d-b06e-76caee8d40b5
 jansRedirectURI: https://www.jans.org
