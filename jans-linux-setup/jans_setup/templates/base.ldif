@@ -138,3 +138,7 @@ objectClass: top
 objectClass: organizationalUnit
 ou: trustRelationships
 
+dn: ou=ssa,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: ssa

@@ -2,6 +2,7 @@ package io.jans.as.common.model.ssa;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -80,6 +81,9 @@ public class SsaAttributes {
     }
 
     public Map<String, String> getCustomAttributes() {
+        if (customAttributes == null) {
+            customAttributes = new HashMap<>();
+        }
         return customAttributes;
     }
 
