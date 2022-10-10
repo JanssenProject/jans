@@ -261,7 +261,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             # HorizontalLine(),
                             self.myparent.getTitledText(
                                     _("Search"), 
-                                    name='oauth:scopes:openID:claims:search',
+                                    name='__search_claims__',
                                     style='class:outh-scope-textsearch',width=10,
                                     jans_help=_("Press enter to perform search"),
                                     accept_handler=self.search_claims,
@@ -285,7 +285,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         # Window(char='-', height=1),
                         self.myparent.getTitledText(
                                 _("Search"), 
-                                name='oauth:scopes:openID:claims:search',
+                                name='__search_claims__',
                                 style='class:outh-scope-textsearch',width=10,
                                 jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_scopes
 

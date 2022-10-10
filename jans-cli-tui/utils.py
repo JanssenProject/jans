@@ -14,6 +14,8 @@ class DialogUtils:
         if hasattr(item, 'me'):
             me = item.me
             key_ = me.window.jans_name
+            if key_.startswith('__') and key_.endswith('__'):
+                return
             if isinstance(me, prompt_toolkit.widgets.base.TextArea):
                 value_ = me.text
             elif isinstance(me, prompt_toolkit.widgets.base.Checkbox):
