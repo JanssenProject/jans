@@ -62,9 +62,27 @@ class JansVerticalNav():
         self.on_display = on_display
         self.all_data=all_data
         self.underline_headings = underline_headings
+         
+
         self.handle_header_spaces()
         self.create_window()
 
+    def view_data(self,data):
+        result = []
+        for i, entry in enumerate(data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
+            mod_entry = []
+            for col in range(len(entry)) :
+                if self.preferred_size[col] == 0:
+                    mod_entry.append(entry[col])
+                else :
+                    if self.preferred_size[col] >= len(entry[col]):
+                        mod_entry.append(entry[col])
+                    else :
+                        mod_entry.append(entry[col][:self.preferred_size[col]]+'...')
+
+            result.append(mod_entry)
+ 
+        return result
 
     def create_window(self):
         """This method creat the dialog it self
@@ -107,9 +125,11 @@ class JansVerticalNav():
     def handle_header_spaces(self):
         """Make header evenlly spaced
         """
+
+        data = self.view_data(self.data)
         self.spaces = []
         data_length_list = []
-        for row in self.data:
+        for row in data:
             column_length_list = []
             for col in row:
                 column_length_list.append(len(col))
@@ -139,8 +159,10 @@ class JansVerticalNav():
     def get_spaced_data(self):
         """Make entries evenlly spaced
         """
+        data = self.view_data(self.data)
+
         spaced_data = []
-        for d in self.data:
+        for d in data:
             spaced_line_list = []
             for i, space in enumerate(self.spaces):
                 spaced_line_list.append(d[i] + ' ' * (space - len(d[i])))
