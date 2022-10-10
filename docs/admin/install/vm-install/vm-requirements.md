@@ -87,13 +87,11 @@ Ports 443, 80, and 22 must be accessible.
 
 ## Static IP Address Configuration
 
-Janssen Server must be deployed on a server or VM with static IP address. 
+Janssen Server must be deployed on a server or VM with static IP address.
 
-### Ubuntu 
+This section describes steps required to set static IP for supported platforms. Commands and steps mentioned here might have changed at the time of use, if so please refer to respective OS documentation for most up-to-date steps to setup static IP. 
 
-Steps listed below show how to set up static IP address on an Ubuntu Server.
-
-#### Select the network interface
+First, Select the network interface for which static IP needs to be set. On any Linux based OS platform, run command below:
 
 ```text
 ip link
@@ -110,7 +108,11 @@ Above command shows lists all the existing network interfaces in format below:
 
 here we are going to configure the `enp4s0` network interface.
 
-#### Locate the configuration file
+### Ubuntu 
+
+Steps listed below show how to set up static IP address on an Ubuntu Server.
+
+1) Locate the configuration file
 
 Network interface configuration can be changed using `YAML` configuration files located under
 
@@ -121,7 +123,7 @@ Network interface configuration can be changed using `YAML` configuration files 
 Above directory will contain one or more `YAML` files. Open the file that has configuration for `enp4s0` network 
 interface. Create one if it doesn't exist.
 
-#### Update the configuration
+2) Update the configuration
 
 Set the yaml file configuration as shown in example below. Values for gateway, nameservers should be set 
 appropriately. `addresses` should be set to desired static IP.
@@ -140,30 +142,81 @@ network:
           addresses: [8.8.8.8, 1.1.1.1]
 ```
 
-#### Apply the change
+3) Apply the change
 
 ```text
 sudo netplan apply
 ```
 
-#### Verify the new configuration
+4) Verify the new configuration
 
 ```text
 ip addr show dev enp4s0
 ```
 Newly assigned IP address can be seen in the output
 
+### SUSE Linux Enterprise Server
+
+SLES provides [YaST](https://yast.opensuse.org/) tool to manage the system configuration. YaST is a 
+
+1) Open YaST
+
+```text
+yast
+```
+
+2) Navigate to `System` -> `Network Settings` and select the network interface that needs to be set to static IP. 
+
+![](../../../assets/suse-staticIP-yast-select-network.png)
+
+3) Hit `F4` to enter edit mode as shown in the image below. Select `Statically Assiged IP Address` instead of `DHCP`. Also provide required details for `IP address`, `Subnet Mask` and `Hostname`.
+
+![](../../../assets/suse-staticIP-yast-edit-network.png)
+
+### RedHat Enterprise Linux
+
+RHEL provides `Nmcli` tool to configure and manage network.
+
+1) Set IP address for selected network interface
+
+```text
+nmcli con mod enp4s0 ipv4.addresses <static-IP>/24
+```
+
+2) Set appropriate gateway
+
+```text
+nmcli con mod enp4s0 ipv4.gateway <gateway-IP>
+nmcli con mod enp4s0 ipv4.method manual
+```
+
+3) Configure DNS
+
+```text
+nmcli con mod enp4s0 ipv4.dns "<dns-IP>"
+```
+
+4) Reload configuration
+
+```text
+nmcli con up enp4s0 
+```
+
+5) See configuration being reflected at
+
+```text
+cat /etc/sysconfig/network-scripts/ifcfg-enp4s0
+```
+
 ## Hostname Configuration
 
-### Ubuntu
-
-In Ubuntu systems, IP can be mapped to a hostname(FQDN) using entries into `/etc/hosts` file. Run command below to configure a hostname for IP address.
+IP can be mapped to a hostname(FQDN) using entries into `/etc/hosts` file. Run command below to configure a hostname for IP address.
 
 ```text
 vi /etc/hosts
 ```
 
-Make an entry similar to one below in this file. IP could be a static IP assigned to the server or VM.
+Make an entry similar to one below in this file. IP should be a static IP assigned to the server or VM.
 
 ```text
 192.168.0.1 jans.op.io
