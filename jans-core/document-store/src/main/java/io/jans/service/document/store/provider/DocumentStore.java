@@ -8,6 +8,7 @@ package io.jans.service.document.store.provider;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import io.jans.service.document.store.conf.DocumentStoreType;
 
@@ -24,12 +25,12 @@ public interface DocumentStore<T> {
 	/**
 	 * Save document into store
 	 */
-	boolean saveDocument(String path, String documentContent, Charset charset);
+	boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList);
 
 	/**
 	 * Save document stream into store
 	 */
-	boolean saveDocumentStream(String path, InputStream documentStream);
+	boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList);
 
 	/**
 	 * Load document from store
