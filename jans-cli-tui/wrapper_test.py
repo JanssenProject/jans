@@ -70,7 +70,7 @@ inum = '40a48740-4892-4fce-b30f-81c5c45670f4'  ## this user has 3 UMA
 result = cli_object.process_command_by_id(
                         operation_id='get-all-attribute',
                         url_suffix='',
-                        endpoint_args="pattern:phone",
+                        endpoint_args="pattern:3B47\,3692\,E7BC\,11AA",
                         data_fn=None,
                         data={}
                         )

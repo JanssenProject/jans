@@ -1127,7 +1127,8 @@ class JCA_CLI:
         args_dict = {}
 
         if args:
-            for arg in args.split(','):
+            tokens = self.unescaped_split(args, ',')
+            for arg in tokens:
                 neq = arg.find(':')
                 if neq > 1:
                     arg_name = arg[:neq].strip()
@@ -1399,6 +1400,26 @@ class JCA_CLI:
                 sample_schema[prop_name]='string'
 
         print(json.dumps(sample_schema, indent=2))
+
+
+    def unescaped_split(self, s, delimeter, escape_char='\\'):
+        ret_val = []
+        cur_list = []
+        iter_ = iter(s)
+        for char_ in iter_:
+            if char_ == escape_char:
+                try:
+                    cur_list.append(next(iter_))
+                except StopIteration:
+                    pass
+            elif char_ == delimeter:
+                ret_val.append(''.join(cur_list))
+                cur_list = []
+            else:
+                cur_list.append(char_)
+        ret_val.append(''.join(cur_list))
+
+        return ret_val
 
 
 
