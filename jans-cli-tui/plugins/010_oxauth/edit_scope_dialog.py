@@ -172,7 +172,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.claims_container = JansVerticalNav(
                 myparent=self.myparent,
                 headers=['dn', 'Display Name'],
-                preferred_size= [0],
+                preferred_size= [0,0],
                 data=data,
                 on_display=self.myparent.data_display_dialog,
                 on_delete=self.delete_claim,
