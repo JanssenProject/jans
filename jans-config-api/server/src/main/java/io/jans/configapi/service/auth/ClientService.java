@@ -24,9 +24,9 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -104,16 +104,24 @@ public class ClientService implements Serializable {
         if (logger.isDebugEnabled()) {
             logger.debug("Search Clients with searchRequest:{}", escapeLog(searchRequest));
         }
+
         Filter searchFilter = null;
-        if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
-            String[] targetArray = new String[] { searchRequest.getFilter() };
-            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                    null);
-            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
-                    null);
-            Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
+
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                        targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                        targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
         }
+
+        logger.debug("Clients searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),

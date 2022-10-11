@@ -2945,19 +2945,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
+        adminCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -3284,8 +3284,6 @@ components:
           format: int32
         displayName:
           type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3297,6 +3295,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
         baseDn:
           type: string
         inum:
@@ -4090,6 +4090,15 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
         fapi:
           type: boolean
         enabledFeatureFlags:
@@ -4119,15 +4128,6 @@ components:
             - STAT
             - PAR
             - SSA
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
     AuthenticationFilter:
       required:
       - baseDn
