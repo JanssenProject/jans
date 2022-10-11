@@ -457,7 +457,7 @@ public class ConfigurationFactory {
             if (!dn.contains("_test")) {
                 ex.printStackTrace();
             }
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(), ex);
         }
 
         return null;
