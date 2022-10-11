@@ -1,4 +1,5 @@
 from typing import OrderedDict
+from urllib import response
 
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
@@ -12,7 +13,19 @@ from prompt_toolkit.widgets import (
     Button,
     Label,
 )
+from prompt_toolkit.widgets import (
+    Button,
+    Frame,
+    Label,
+    RadioList,
+    TextArea,
+    CheckboxList,
+    Checkbox,
+)
+from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
+
 from prompt_toolkit.application.current import get_app
+from asyncio import Future, ensure_future
 
 from cli import config_cli
 from static import DialogResult
@@ -25,7 +38,7 @@ from utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
 import threading
-
+import json
 from multi_lang import _
 import cli_style
 
@@ -393,7 +406,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         VSplit([   ## TODO what the functionality would be?
                                 Label(text=_("Spontaneous scopes"),style='class:outh-client-label',width=len(_("Spontaneous scopes")*2)), ## TODO
-                                Button(_("View current"), handler=self.myparent.show_again,left_symbol='<',right_symbol='>',width=len(_("View current"))+2)
+                                Button(_("View current"), handler=self.show_client_scopes,left_symbol='<',right_symbol='>',width=len(_("View current"))+2)
                         ]),
 
                         self.myparent.getTitledText(_("Initial Login URI"), name='initiateLoginUri', value=self.data.get('initiateLoginUri',''),style='class:outh-client-text'),
@@ -482,6 +495,90 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         )
 
         self.left_nav = list(self.tabs.keys())[0]
+
+
+    def show_client_scopes(self):
+        client_scopes = self.data.get('scopes')  
+        self.myparent.logger.debug('client_scopes: '+str(client_scopes))
+        data = []
+        for i in client_scopes :
+            try :
+                inum = i.split(',')[0][5:]
+                rsponse = self.myparent.cli_object.process_command_by_id(
+                    operation_id='get-oauth-scopes-by-inum',
+                    url_suffix='inum:{}'.format(inum),
+                    endpoint_args="",
+                    data_fn=None,
+                    data={}
+                    )
+
+            except Exception as e:
+                # self.myparent.show_message(_("Error getting clients"), str(e))
+                pass
+
+            if rsponse.status_code not in (200, 201):
+                # self.myparent.show_message(_("Error getting clients"), str(rsponse.text))
+                pass
+            if rsponse.json().get('scopeType','') == 'spontaneous':
+                data.append(rsponse.json())
+            
+
+            self.myparent.logger.debug('datadata: '+str(data))
+        if not data :
+            data = "No Scope of type: Spontaneous"
+
+        body = HSplit([
+                TextArea(
+                    lexer=DynamicLexer(lambda: PygmentsLexer.from_filename('.json', sync_from_start=True)),
+                    scrollbar=True,
+                    line_numbers=True,
+                    multiline=True,
+                    read_only=True,
+                    text=str(json.dumps(data, indent=2)),
+                    style='class:jans-main-datadisplay.text'
+                )
+            ],style='class:jans-main-datadisplay')
+
+        dialog = JansGDialog(self.myparent, title='View Scopes', body=body)
+
+        self.myparent.show_jans_dialog(dialog)
+
+            
+
+        # body=HSplit([
+        #     self.myparent.getTitledText(_("dn"),name='dn',value=client_scopes.get('dn',''),style='class:outh-client-text'),
+        #     self.myparent.getTitledText(_("inum"),name='inum',value=client_scopes.get('inum',''),style='class:outh-client-text'),
+        #     self.myparent.getTitledText(_("displayName"),name='displayName',value=client_scopes.get('displayName',''),style='class:outh-client-text'),
+        #     self.myparent.getTitledText(_("id"),name='id',value=client_scopes.get('id',''),style='class:outh-client-text'),
+        #     self.myparent.getTitledText(_("description"),name='description',value=client_scopes.get('description',''),style='class:outh-client-text'),
+        #     self.myparent.getTitledText(_("scopeType"),name='scopeType',value=client_scopes.get('scopeType',''),style='class:outh-client-text'),
+        #     self.myparent.getTitledCheckBox(_("attributes"), name='attributes',
+        #      checked= not self.data.get('attributes')['showInConfigurationEndpoint'], style='class:outh-client-checkbox'),
+
+        #     self.myparent.getTitledText(_("creationDate"),name='creationDate',value=client_scopes.get('creationDate',''),style='class:outh-client-text'),
+            
+        #     self.myparent.getTitledCheckBox(_("umaType"), name='umaType',
+        #      checked= not self.data.get('umaType'), style='class:outh-client-checkbox'),
+            
+        #     self.myparent.getTitledText(_("baseDn"),name='baseDn',value=client_scopes.get('baseDn',''),style='class:outh-client-text'),
+            
+        #     ],style='class:jans-main-usercredintial')
+
+        # # buttons = [Button(_("Save"), handler=self.save_creds)]
+        # dialog = JansGDialog(self.myparent, title=_("Janssen Config Api Client Credidentials"), body=body, buttons=[])
+
+        # async def coroutine():
+        #     app = get_app()
+        #     focused_before = app.layout.current_window
+        #     result = await self.myparent.show_dialog_as_float(dialog)
+        #     try:
+        #         app.layout.focus(focused_before)
+        #     except:
+        #         app.layout.focus(self.tabs['Advanced Client Properties'])
+            
+
+        # ensure_future(coroutine())
+
 
     def oauth_get_uma_resources(self):
         """Method to get the clients data from server
