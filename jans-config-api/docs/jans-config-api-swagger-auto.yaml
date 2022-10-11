@@ -2945,19 +2945,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -4090,6 +4090,8 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -4126,8 +4128,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
