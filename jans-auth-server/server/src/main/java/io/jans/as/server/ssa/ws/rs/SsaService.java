@@ -49,7 +49,7 @@ public class SsaService {
             jwt.getClaims().setIssuedAt(ssa.getCreationDate());
             jwt.getClaims().setExpirationTime(ssa.getExpirationDate());
             jwt.getClaims().setClaim("software_id", ssa.getAttributes().getSoftwareId());
-            jwt.getClaims().setClaim("org_id", ssa.getOrgId());
+            jwt.getClaims().setClaim("org_id", Long.parseLong(ssa.getOrgId()));
             jwt.getClaims().setClaim("software_roles", ssa.getAttributes().getSoftwareRoles());
             jwt.getClaims().setClaim("grant_types", ssa.getAttributes().getGrantTypes());
 
