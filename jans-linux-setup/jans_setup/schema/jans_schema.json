@@ -4304,14 +4304,14 @@
         "inum",
         "ou",
         "displayName",
-		"description",
-		"document",
-		"creationDate",
-		"jansModuleProperty",
-		"jansLevel",
-		"jansRevision",
-		"jansEnabled",
-		"jansAlias"				
+        "description",
+        "document",
+        "creationDate",
+        "jansModuleProperty",
+        "jansLevel",
+        "jansRevision",
+        "jansEnabled",
+        "jansAlias"				
       ],
       "must": [
         "objectclass"
@@ -4319,7 +4319,7 @@
       "names": [
         "jansDocument"
       ],
-      "oid": "oxObjectClass",
+      "oid": "jansObjClass",
       "sup": [
         "top"
       ],
