@@ -2947,17 +2947,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -3386,10 +3386,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -3397,13 +3397,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        value:
+          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
-        value:
-          type: string
     AppConfiguration:
       type: object
       properties:
