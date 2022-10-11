@@ -1,8 +1,10 @@
 ---
 tags:
-  - administration
-  - installation
-  - vm
+- administration
+- installation
+- vm
+- RHEL
+- RedHat
 ---
 
 # Install Janssen Server using Enterprise Linux Package
@@ -12,7 +14,7 @@ tags:
 - CentOS 8
 
 !!! note
-    SELinux should be disabled
+[SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
 
 ## System Requirements
 
