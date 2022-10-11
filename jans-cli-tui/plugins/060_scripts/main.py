@@ -34,8 +34,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 
-from edit_client_dialog import EditClientDialog
-from edit_scope_dialog import EditScopeDialog
+from edit_script_dialog import EditScriptDialog
 
 from multi_lang import _
 import cli_style
@@ -72,7 +71,7 @@ class Plugin():
                     VSplit([
                         self.app.getButton(text=_("Get Scripts"), name='scripts:get', jans_help=_("Retreive first %d Scripts") % (20), handler=self.scrips_get_scripts),
                         self.app.getTitledText(_("Search: "), name='scripts:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scripts, style='class:outh_containers_scopes.text'),
-                        self.app.getButton(text=_("Add Sscript"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script),
+                        self.app.getButton(text=_("Add Sscript"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script_dialog),
                         ],
                         padding=3,
                         width=D(),
@@ -144,7 +143,7 @@ class Plugin():
                     headers=['inum', 'Name', 'Description'],
                     preferred_size= [12, 25, 0],
                     data=data,
-                    #on_enter=self.edit_scope_dialog,
+                    on_enter=self.add_script_dialog,
                     on_display=self.app.data_display_dialog,
                     #on_delete=self.delete_scope,
                     # selection_changed=self.data_selection_changed,
@@ -187,5 +186,44 @@ class Plugin():
         t.start()
 
 
-    def add_script(self):
-        pass
+    def add_script_dialog(self, **kwargs):
+        """Method to display the edit script dialog
+        """
+        if kwargs:
+            data = kwargs.get('data', {})
+        else:
+            data = {}
+
+        title = _("Edit Script") if data else _("Add Script")
+
+        dialog = EditScriptDialog(self.app, title=title, data=data, save_handler=self.save_script)
+        result = self.app.show_jans_dialog(dialog)
+
+
+    def save_script(self, dialog):
+        """This method to save the script data to server
+
+        Args:
+            dialog (_type_): the main dialog to save data in
+
+        Returns:
+            _type_: bool value to check the status code response
+        """
+
+        # self.app.logger.debug('Saved DATA: '+str(dialog.data))
+
+        response = self.app.cli_object.process_command_by_id(
+            operation_id='put-config-scripts' if dialog.data.get('inum') else 'post-config-scripts',
+            url_suffix='',
+            endpoint_args='',
+            data_fn='',
+            data=dialog.data
+        )
+
+        # self.app.logger.debug(response.text)
+
+        if response.status_code in (200, 201):
+            self.scrips_get_scripts()
+            return True
+
+        self.app.show_message(_("Error!"), _("An error ocurred while saving script:\n") + str(response.text))

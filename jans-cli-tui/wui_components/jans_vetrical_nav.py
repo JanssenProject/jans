@@ -12,7 +12,8 @@ class JansVerticalNav():
 
 
     def __init__(self, myparent, headers, selectes,  on_display, on_enter=None, on_delete=None,
-                all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white', underline_headings=True):
+                all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white', 
+                underline_headings=True, max_width=None):
         """init for JansVerticalNav
 
         Args:
@@ -27,7 +28,8 @@ class JansVerticalNav():
             data (List, optional): Data to be displayed. Defaults to None.
             headerColor (str, optional): Color for the Headers. Defaults to 'green'.
             entriesColor (str, optional): Color for the Entries. Defaults to 'white'.
-            underline_headings (str, optional): Put a line under headings
+            underline_headings (str, optional): Put a line under headings.
+            max_width (int, optional): Maximum width of container.
         
         Examples:
             clients = JansVerticalNav(
@@ -50,7 +52,7 @@ class JansVerticalNav():
         self.myparent = myparent            # ListBox parent class
         self.headers = headers              # ListBox headers
         self.selectes = selectes            # ListBox initial selection
-
+        self.max_width = max_width
         self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
 
         self.preferred_size = preferred_size
@@ -62,7 +64,6 @@ class JansVerticalNav():
         self.on_display = on_display
         self.all_data=all_data
         self.underline_headings = underline_headings
-         
 
         self.handle_header_spaces()
         self.create_window()
@@ -117,9 +118,8 @@ class JansVerticalNav():
             self.container_content.insert(1, HorizontalLine())
 
         self.container = FloatContainer(
-            content=HSplit(self.container_content+[Window(height=1)]),
-            floats=[
-            ],
+            content=HSplit(self.container_content+[Window(height=1)], width=D(max=self.max_width)),
+            floats=[],
         )
 
     def handle_header_spaces(self):
@@ -214,6 +214,10 @@ class JansVerticalNav():
         self.handle_header_spaces()
         self.container_content[-1].height = len(self.data)
 
+    def replace_item(self, item_index, item):
+        self.data[item_index] = item
+        self.handle_header_spaces()
+
     def _get_key_bindings(self):
         """All key binding for the Dialog with Navigation bar
 
@@ -241,7 +245,7 @@ class JansVerticalNav():
             passed = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
             if self.on_enter :
-                self.on_enter(passed=passed,event=event,size=size,data=self.all_data[self.selectes])
+                self.on_enter(passed=passed, event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes)
 
 
         @kb.add('d')

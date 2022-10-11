@@ -125,7 +125,7 @@ class DropDownWidget:
     """This is a Combobox widget (drop down) to select single from multi choices
     """
 
-    def __init__(self, values=[], value=None):
+    def __init__(self, values=[], value=None, on_value_changed=None):
         """init for DropDownWidget
         Args:
             values (list, optional): List of values to select one from them. Defaults to [].
@@ -137,6 +137,7 @@ class DropDownWidget:
                 value=self.data.get('tokenEndpointAuthMethodsSupported'))
         """
         self.values = values
+        self.on_value_changed = on_value_changed
         values.insert(0, (None, 'Select One'))
         for val in values:
             if val[0] == value:
@@ -170,6 +171,8 @@ class DropDownWidget:
     @value.setter
     def value(self, value):
         self.select_box.set_value(value)
+        if self.on_value_changed:
+            self.on_value_changed(value)
 
     def _get_text(self):
         """To get The selected value

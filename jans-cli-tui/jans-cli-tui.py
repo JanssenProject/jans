@@ -278,19 +278,36 @@ class JansCliApp(Application):
             if prop == jans_name:
                 return schema['properties'][jans_name].get('description', '')
 
-    def getTitledText(self, title, name, value='', height=1, jans_help='', accept_handler=None, read_only=False, focusable=None, width=None, style=''):
+    def getTitledText(
+            self,
+            title,
+            name,
+            value='',
+            height=1,
+            jans_help='',
+            accept_handler=None,
+            read_only=False,
+            focusable=None,
+            width=None,
+            style='',
+            scrollbar=False,
+            line_numbers=False,
+            lexer=None
+            ):
         title += ': '
         ta = TextArea(
-            text=str(value),
-            multiline=height > 1,
-            height=height,
-            width=width,
-            read_only=read_only,
-            style=self.styles['textarea-readonly'] if read_only else self.styles['textarea'],
-            accept_handler=accept_handler,
-            focusable=not read_only if focusable is None else focusable,
+                text=str(value),
+                multiline=height > 1,
+                height=height,
+                width=width,
+                read_only=read_only,
+                style=self.styles['textarea-readonly'] if read_only else self.styles['textarea'],
+                accept_handler=accept_handler,
+                focusable=not read_only if focusable is None else focusable,
+                scrollbar=scrollbar,
+                line_numbers=line_numbers,
+                lexer=lexer,
             )
-
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 

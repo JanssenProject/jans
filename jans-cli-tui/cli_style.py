@@ -99,7 +99,7 @@ style = Style.from_dict(
         "outh-uma-dropdown":"green",
         "outh-uma-widget":"green",
 
-
+        "script-label":"fg:green",
 
 
         ### WUI Componenets
