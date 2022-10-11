@@ -3139,6 +3139,17 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Save Document in DB",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "document"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Transpiled code of an agama flow",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -4282,6 +4293,33 @@
         "agmFlow"
       ],
       "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+       "kind": "STRUCTURAL",
+       "may": [
+        "inum",
+        "ou",
+        "displayName",
+		"description",
+		"document",
+		"creationDate",
+		"jansModuleProperty",
+		"jansLevel",
+		"jansRevision",
+		"jansEnabled",
+		"jansAlias"				
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansDocument"
+      ],
+      "oid": "oxObjectClass",
       "sup": [
         "top"
       ],

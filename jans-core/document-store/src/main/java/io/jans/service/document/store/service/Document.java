@@ -20,9 +20,9 @@ import io.jans.orm.model.base.Entry;
 
 
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "oxDocument")
+@ObjectClass(value = "jansDocument")
 @JsonInclude(Include.NON_NULL)
-public class OxDocument extends Entry implements Serializable {
+public class Document extends Entry implements Serializable {
 
 	private static final long serialVersionUID = -2812480357430436503L;
 
@@ -45,19 +45,19 @@ public class OxDocument extends Entry implements Serializable {
 	private Date creationDate;
 	
 	@AttributeName
-	private List<String> oxModuleProperty;
+	private List<String> jansModuleProperty;
 
 	@AttributeName
-	private String oxLevel;
+	private String jansLevel;
 
 	@AttributeName
-	private String oxRevision;
+	private String jansRevision;
 	
 	@AttributeName
-	private String oxEnabled;
+	private String jansEnabled;
 	
 	@AttributeName
-	private String oxAlias;
+	private String jansAliass;
 
 	public String getInum() {
 		return inum;
@@ -99,52 +99,60 @@ public class OxDocument extends Entry implements Serializable {
 		this.document = document;
 	}
 
-	public List<String> getOxModuleProperty() {
-		return oxModuleProperty;
-	}
-
-	public void setOxModuleProperty(List<String> oxModuleProperty) {
-		this.oxModuleProperty = oxModuleProperty;
-	}
-
-	public String getOxLevel() {
-		return oxLevel;
-	}
-
-	public void setOxLevel(String oxLevel) {
-		this.oxLevel = oxLevel;
-	}
-
-	public String getOxRevision() {
-		return oxRevision;
-	}
-
-	public void setOxRevision(String oxRevision) {
-		this.oxRevision = oxRevision;
-	}
-
-	public String getOxEnabled() {
-		return oxEnabled;
-	}
-
-	public void setOxEnabled(String oxEnabled) {
-		this.oxEnabled = oxEnabled;
-	}
-
-	public String getOxAlias() {
-		return oxAlias;
-	}
-
-	public void setOxAlias(String oxAlias) {
-		this.oxAlias = oxAlias;
-	}
-
 	public Date getCreationDate() {
 		return creationDate;
 	}
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public List<String> getJansModuleProperty() {
+		return jansModuleProperty;
+	}
+
+	public void setJansModuleProperty(List<String> jansModuleProperty) {
+		this.jansModuleProperty = jansModuleProperty;
+	}
+
+	public String getJansLevel() {
+		return jansLevel;
+	}
+
+	public void setJansLevel(String jansLevel) {
+		this.jansLevel = jansLevel;
+	}
+
+	public String getJansRevision() {
+		return jansRevision;
+	}
+
+	public void setJansRevision(String jansRevision) {
+		this.jansRevision = jansRevision;
+	}
+
+	public String getJansEnabled() {
+		return jansEnabled;
+	}
+
+	public void setJansEnabled(String jansEnabled) {
+		this.jansEnabled = jansEnabled;
+	}
+
+	public String getJansAliass() {
+		return jansAliass;
+	}
+
+	public void setJansAliass(String jansAliass) {
+		this.jansAliass = jansAliass;
+	}
+
+	@Override
+	public String toString() {
+		return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
+				+ ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
+				+ jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
+				+ jansEnabled + ", jansAliass=" + jansAliass + "]";
 	}
 
 }

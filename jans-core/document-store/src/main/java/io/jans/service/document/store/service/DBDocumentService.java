@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 /**
- * Provides operations with OxDocument
+ * Provides operations with Document
  * 
  * @author Shekhar L. Date : 29 Sep 2022
  */
@@ -56,53 +56,53 @@ public class DBDocumentService implements Serializable {
 	}
 
 	/**
-	 * Add new OxDocument entry
+	 * Add new Document entry
 	 * 
-	 * @param OxDocument
-	 *            OxDocument
+	 * @param Document
+	 *            Document
 	 */
-	public void addOxDocument(OxDocument oxDocument) throws Exception {
-		oxDocument.setCreationDate(new Date());
-		persistenceEntryManager.persist(oxDocument);
+	public void addDocument(Document document) throws Exception {
+		document.setCreationDate(new Date());
+		persistenceEntryManager.persist(document);
 	}
 
 	/**
-	 * Remove OxDocument entry
+	 * Remove Document entry
 	 * 
-	 * @param OxDocument
-	 *            OxDocument
+	 * @param Document
+	 *            Document
 	 */
-	public void removeOxDocument(OxDocument oxDocument) throws Exception {
+	public void removeDocument(Document document) throws Exception {
 
-		persistenceEntryManager.remove(oxDocument);
+		persistenceEntryManager.remove(document);
 	}
 
 	/**
-	 * Get OxDocument by inum
+	 * Get Document by inum
 	 * 
 	 * @param inum
-	 *            OxDocument Inum
-	 * @return OxDocument
+	 *            Document Inum
+	 * @return Document
 	 */
-	public OxDocument getOxDocumentByInum(String inum) throws Exception {
-		OxDocument result = null;
+	public Document getDocumentByInum(String inum) throws Exception {
+		Document result = null;
 		try {
-			result = persistenceEntryManager.find(OxDocument.class, getDnForOxDocument(inum));
+			result = persistenceEntryManager.find(Document.class, getDnForDocument(inum));
 		} catch (Exception e) {
-			logger.error("Not able to find the oxDocument. Here is the exception message ", e);
+			logger.error("Not able to find the document. Here is the exception message ", e);
 		}
 		return result;
 	}
 
 	/**
-	 * Build DN string for OxDocument
+	 * Build DN string for Document
 	 * 
 	 * @param inum
-	 *            OxDocument Inum
-	 * @return DN string for specified scope or DN for OxDocument branch if inum is null
+	 *            Document Inum
+	 * @return DN string for specified scope or DN for Document branch if inum is null
 	 * @throws Exception
 	 */
-	public String getDnForOxDocument(String inum) throws Exception {
+	public String getDnForDocument(String inum) throws Exception {
 		if (StringHelper.isEmpty(inum)) {
 			return String.format("ou=document,%s", "o=gluu");
 		}
@@ -110,27 +110,27 @@ public class DBDocumentService implements Serializable {
 	}
 
 	/**
-	 * Update OxDocument entry
+	 * Update Document entry
 	 * 
-	 * @param OxDocument
-	 *            OxDocument
+	 * @param Document
+	 *            Document
 	 */
-	public void updateOxDocument(OxDocument oxDocument) throws Exception {
-		persistenceEntryManager.merge(oxDocument);
+	public void updateDocument(Document document) throws Exception {
+		persistenceEntryManager.merge(document);
 	}
 
 	/**
-	 * Generate new inum for OxDocument
+	 * Generate new inum for Document
 	 * 
-	 * @return New inum for OxDocument
+	 * @return New inum for Document
 	 */
-	public String generateInumForNewOxDocument() throws Exception {
-		OxDocument oxDocument = new OxDocument();
+	public String generateInumForNewDocument() throws Exception {
+		Document document = new Document();
 		String newInum = null;
 		String newDn = null;
-		newInum = generateInumForNewOxDocumentImpl();
-		newDn = getDnForOxDocument(newInum);
-		oxDocument.setDn(newDn);
+		newInum = generateInumForNewDocumentImpl();
+		newDn = getDnForDocument(newInum);
+		document.setDn(newDn);
 		return newInum;
 	}
 
@@ -141,10 +141,10 @@ public class DBDocumentService implements Serializable {
 	 *            Pattern
 	 * @param sizeLimit
 	 *            Maximum count of results
-	 * @return List of OxDocument
+	 * @return List of Document
 	 * @throws Exception
 	 */
-	public List<OxDocument> searchOxDocuments(String pattern, int sizeLimit) {
+	public List<Document> searchDocuments(String pattern, int sizeLimit) {
 		Filter searchFilter = null;
 		if (StringHelper.isNotEmpty(pattern)) {
 			String[] targetArray = new String[] { pattern };
@@ -154,59 +154,59 @@ public class DBDocumentService implements Serializable {
 					null);
 			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
 		}
-		List<OxDocument> result = new ArrayList<>();
+		List<Document> result = new ArrayList<>();
 		try {
-			result = persistenceEntryManager.findEntries(getDnForOxDocument(null), OxDocument.class, searchFilter, sizeLimit);
+			result = persistenceEntryManager.findEntries(getDnForDocument(null), Document.class, searchFilter, sizeLimit);
 			return result;
 		} catch (Exception e) {
-			logger.error("Failed to find OxDocument : ", e);
+			logger.error("Failed to find Document : ", e);
 		}
 		return result;
 	}
 
 	/**
-	 * Generate new inum for oxDocument
+	 * Generate new inum for document
 	 * 
-	 * @return New inum for oxDocument
+	 * @return New inum for document
 	 * @throws Exception
 	 */
-	private String generateInumForNewOxDocumentImpl() throws Exception {
+	private String generateInumForNewDocumentImpl() throws Exception {
 		return UUID.randomUUID().toString();
 	}
 
-	public List<OxDocument> getAllOxDocumentsList(int size) {
+	public List<Document> getAllDocumentsList(int size) {
 		try {
-			List<OxDocument> oxDocuments = persistenceEntryManager.findEntries(getDnForOxDocument(null), OxDocument.class, null, size);
-			return oxDocuments;
+			List<Document> documents = persistenceEntryManager.findEntries(getDnForDocument(null), Document.class, null, size);
+			return documents;
 		} catch (Exception e) {
-			logger.error("Failed to find OxDocument: ", e);
+			logger.error("Failed to find Document: ", e);
 			return new ArrayList<>();
 		}
 	}
 
 	/**
-	 * returns oxDocuments by Dn
+	 * returns documents by Dn
 	 * 
-	 * @return oxDocuments
+	 * @return documents
 	 */
 
-	public OxDocument getOxDocumentByDn(String Dn) throws Exception {
-		return persistenceEntryManager.find(OxDocument.class, Dn);
+	public Document getDocumentByDn(String Dn) throws Exception {
+		return persistenceEntryManager.find(Document.class, Dn);
 	}
 
 	/**
-	 * Get oxDocuments by DisplayName
+	 * Get documents by DisplayName
 	 * 
 	 * @param DisplayName
-	 * @return oxDocuments
+	 * @return documents
 	 */
-	public OxDocument getOxDocumentByDisplayName(String DisplayName) throws Exception {
-		OxDocument oxDocument = new OxDocument();
-		oxDocument.setDisplayName(DisplayName);
-		oxDocument.setDn(getDnForOxDocument(null));;
-		List<OxDocument> oxDocuments = persistenceEntryManager.findEntries(oxDocument);
-		if ((oxDocuments != null) && (oxDocuments.size() > 0)) {
-			return oxDocuments.get(0);
+	public Document getDocumentByDisplayName(String DisplayName) throws Exception {
+		Document document = new Document();
+		document.setDisplayName(DisplayName);
+		document.setDn(getDnForDocument(null));;
+		List<Document> documents = persistenceEntryManager.findEntries(document);
+		if ((documents != null) && (documents.size() > 0)) {
+			return documents.get(0);
 		}
 		return null;
 	}

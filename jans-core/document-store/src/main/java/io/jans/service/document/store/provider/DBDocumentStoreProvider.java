@@ -17,7 +17,7 @@ import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.DBDocumentService;
-import io.jans.service.document.store.service.OxDocument;
+import io.jans.service.document.store.service.Document;
 import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -73,9 +73,9 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		if (StringHelper.isEmpty(DisplayName)) {
 			throw new IllegalArgumentException("Specified path should not be empty!");
 		}		
-		OxDocument oxDocument = null;
+		Document oxDocument = null;
 		try {
-			oxDocument = documentService.getOxDocumentByDisplayName(DisplayName);
+			oxDocument = documentService.getDocumentByDisplayName(DisplayName);
 		} catch (Exception e) {
 			log.error("Failed to check if path '" + DisplayName + "' exists in repository", e);
 		}
@@ -86,18 +86,18 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	@Override
 	public boolean saveDocument(String name, String documentContent, Charset charset, List<String> moduleList) {
 		log.debug("Save document: '{}'", name);
-		OxDocument oxDocument = new OxDocument();
+		Document oxDocument = new Document();
 		oxDocument.setDocument(documentContent);
 		oxDocument.setDisplayName(name);		
 		try {
 			try {
-				oxDocument.setInum(documentService.generateInumForNewOxDocument());	
+				oxDocument.setInum(documentService.generateInumForNewDocument());	
 				String dn = "inum="+ oxDocument.getInum() +",ou=document,o=gluu";
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(name);
-				oxDocument.setOxEnabled("true");
-				oxDocument.setOxModuleProperty(moduleList);	  
-				documentService.addOxDocument(oxDocument);
+				oxDocument.setJansEnabled("true");
+				oxDocument.setJansModuleProperty(moduleList);	  
+				documentService.addDocument(oxDocument);
 				return true;
 			} finally {
 			}
@@ -111,24 +111,22 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	@Override
 	public boolean saveDocumentStream(String name, InputStream documentStream, List <String> moduleList) {
 		
-		OxDocument oxDocument = new OxDocument();
+		Document oxDocument = new Document();
 		oxDocument.setDisplayName(name);
 		
 		 try {
 			String documentContent = Base64.getEncoder().encodeToString(IOUtils.toByteArray(documentStream));
 			oxDocument.setDocument(documentContent);
-			String inum = documentService.generateInumForNewOxDocument();
+			String inum = documentService.generateInumForNewDocument();
 			oxDocument.setInum(inum);	
 			String dn = "inum="+ oxDocument.getInum() +",ou=document,o=gluu";
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(name);
-			oxDocument.setOxEnabled("true");
-			oxDocument.setOxModuleProperty(moduleList);
-			documentService.addOxDocument(oxDocument);
+			oxDocument.setJansEnabled("true");
+			oxDocument.setJansModuleProperty(moduleList);
+			documentService.addDocument(oxDocument);
 			return true;
-		} catch (IOException e) {
-			log.error("Failed to write document from stream to file '{}'", name, e);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			log.error("Failed to write document from stream to file '{}'", name, e);
 		}	
 
@@ -139,9 +137,9 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	@Override
 	public String readDocument(String name, Charset charset) {
 		log.debug("Read document: '{}'", name);		
-		OxDocument oxDocument;
+		Document oxDocument;
 		try {
-			oxDocument = documentService.getOxDocumentByDisplayName(name);
+			oxDocument = documentService.getDocumentByDisplayName(name);
 			if(oxDocument != null) {
 				return oxDocument.getDocument();
 			}
@@ -167,16 +165,16 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	@Override
 	public boolean renameDocument(String currentDisplayName, String destinationDisplayName) {
 		log.debug("Rename document: '{}' -> '{}'", currentDisplayName, destinationDisplayName);
-		OxDocument oxDocument;
+		Document oxDocument;
 		try {
-			oxDocument = documentService.getOxDocumentByDisplayName(currentDisplayName);
+			oxDocument = documentService.getDocumentByDisplayName(currentDisplayName);
 			if (oxDocument == null) {
 				log.error("Document doesn't Exist with the name  '{}'", currentDisplayName);
 				return false;
 			}
 			oxDocument.setDisplayName(destinationDisplayName);
-			documentService.updateOxDocument(oxDocument);
-			OxDocument oxDocumentDestination = documentService.getOxDocumentByDisplayName(destinationDisplayName);
+			documentService.updateDocument(oxDocument);
+			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationDisplayName);
 			if(oxDocumentDestination == null) {
 				log.error("Failed to rename to destination file '{}'", destinationDisplayName);
 				return false;
@@ -190,17 +188,17 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	@Override
 	public boolean removeDocument(String inum) {
 		log.debug("Remove document: '{}'", inum);
-		OxDocument oxDocument;
+		Document oxDocument;
 		try {
-			oxDocument = documentService.getOxDocumentByInum(inum);
+			oxDocument = documentService.getDocumentByInum(inum);
 			if(oxDocument == null) {
 				log.error(" document not exist file '{}'", inum);
 				return false;
 			}
 			
-			documentService.removeOxDocument(oxDocument);
-			OxDocument checkOxDocument = documentService.getOxDocumentByInum(inum);
-			if(checkOxDocument == null) {
+			documentService.removeDocument(oxDocument);
+			Document checkDocument = documentService.getDocumentByInum(inum);
+			if(checkDocument == null) {
 				return true;
 			}
 			return false;
