@@ -53,3 +53,8 @@ yum install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/ja
 ```
 sudo python3 /opt/jans/jans-setup/setup.py
 ```
+
+## Verify the Installation
+
+After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
+
