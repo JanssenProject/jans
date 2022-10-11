@@ -411,7 +411,7 @@ public class AppConfiguration implements Configuration {
         this.featureFlags = featureFlags;
     }
 
-    public Boolean getUseNestedJwtDuringEncryption() {
+    public Boolean isUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
         return useNestedJwtDuringEncryption;
     }
