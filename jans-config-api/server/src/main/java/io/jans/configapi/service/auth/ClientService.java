@@ -8,7 +8,6 @@ package io.jans.configapi.service.auth;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.service.common.InumService;
@@ -19,7 +18,6 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
@@ -33,15 +31,11 @@ import jakarta.inject.Inject;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
@@ -71,10 +65,10 @@ public class ClientService implements Serializable {
     AttributeService attributeService;
 
     @Inject
-    private ScopeService scopeService;
+    transient ScopeService scopeService;
 
     @Inject
-    AppConfiguration appConfiguration;
+    transient AppConfiguration appConfiguration;
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);
@@ -295,7 +289,7 @@ public class ClientService implements Serializable {
             client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
         }
 
-        logger.debug("client.getGroups():{}", client.getGroups(), client.getPostLogoutRedirectUris());
+        logger.debug("client.getGroups():{}, client.getPostLogoutRedirectUris():{}", client.getGroups(), client.getPostLogoutRedirectUris());
         List<String> postLogoutRedirectUris = client.getPostLogoutRedirectUris() != null
                 ? Arrays.asList(client.getPostLogoutRedirectUris())
                 : null;
@@ -358,7 +352,36 @@ public class ClientService implements Serializable {
         logger.debug("Final client.getAttributes().getAuthorizedAcrValues():{}",
                 client.getAttributes().getAuthorizedAcrValues());
 
+        // Custom params
+        updateCustomAttributes(client);
+
         return client;
     }
 
+    private void updateCustomAttributes(Client client) {
+        logger.debug(
+                "ClientService::updateCustomAttributes() - client:{}, appConfiguration.getDynamicRegistrationCustomObjectClass():{},appConfiguration.getDynamicRegistrationCustomAttributes():{} ",
+                client, appConfiguration.getDynamicRegistrationCustomObjectClass(),
+                appConfiguration.getDynamicRegistrationCustomAttributes());
+
+        // custom object class
+        final String customOC = appConfiguration.getDynamicRegistrationCustomObjectClass();
+        if (StringUtils.isNotBlank(customOC)) {
+            client.setCustomObjectClasses(new String[] { customOC });
+        }
+
+        // custom attributes (custom attributes must be in custom object class)
+        final List<String> attrList = appConfiguration.getDynamicRegistrationCustomAttributes();
+        if (attrList == null || attrList.isEmpty()) {
+            return;
+        }
+
+        logger.debug("ClientService::updateCustomAttributes() - client.getCustomAttributes():{}, attrList:{}",
+                client.getCustomAttributes(), attrList);
+        for (String attr : attrList) {
+            logger.debug(
+                    "ClientService::updateCustomAttributes() - attr:{}",      attr);
+
+        }
+    }
 }
