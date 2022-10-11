@@ -51,6 +51,13 @@
             <artifactId>jans-orm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
 
 		<!-- CDI -->
 		<dependency>

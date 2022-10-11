@@ -30,6 +30,7 @@ import javax.jcr.nodetype.NodeType;
 import javax.jcr.version.VersionException;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -129,7 +130,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset) {
+	public boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
 		log.debug("Save document: '{}'", path);
 		
 		String normalizedPath = getNormalizedPath(path);
@@ -153,7 +154,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream) {
+	public boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
 		log.debug("Save document from stream: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
