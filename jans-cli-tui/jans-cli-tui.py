@@ -76,12 +76,13 @@ def do_exit(*c):
 class JansCliApp(Application):
     
     def __init__(self):
+        self.set_keybindings()
         self.init_logger()
         self.status_bar_text = ''
         self.styles = dict(style.style_rules)
         self._plugins = []
         self._load_plugins()
-        self.set_keybindings()
+        
         self.entries_per_page = 20 # we can make this configurable
         # -------------------------------------------------------------------------------- #
 

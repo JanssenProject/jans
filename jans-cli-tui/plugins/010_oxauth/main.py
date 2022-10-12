@@ -112,8 +112,8 @@ class Plugin():
         """prepare the navbar for the current Plugin 
         """
         self.oauth_navbar = JansNavBar(
-                    self,
-                    entries=[('clients', 'Clients'), ('scopes', 'Scopes'), ('keys', 'Keys'), ('defaults', 'Defaults'), ('properties', 'Properties'), ('logging', 'Logging')],
+                    self.app,
+                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging')],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     bgcolor=cli_style.outh_navbar_bgcolor  ### it is not a style > only color
