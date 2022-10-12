@@ -22,7 +22,7 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 ## Prerequisites
 
-- `curl` should be instlled. This can be easily installed using the command below
+- `curl` should be installed. This can be easily installed using the command below
 
  ```
  apt install curl
