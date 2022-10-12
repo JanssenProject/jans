@@ -1,9 +1,0 @@
-# exclude everything
-*
-
-# include required files/directories
-!scripts
-!conf
-!LICENSE
-!requirements.txt
-!jetty
