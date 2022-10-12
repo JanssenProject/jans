@@ -71,12 +71,6 @@ class FidoInstaller(JettyInstaller):
             src = os.path.join(Config.install_dir, 'static/fido2/authenticator_cert/', f)
             self.copyFile(src, target_dir)
 
-        # Fido2 MDS TOC cert
-        self.copyFile(
-            os.path.join(Config.install_dir, 'static/fido2/mds_toc_cert/metadata-root-ca.cer'),
-            os.path.join(self.fido2ConfigFolder, 'mds/cert')
-            )
-
         #copy fido2 server metadata
         src_dir = os.path.join(Config.install_dir, 'static/fido2/server_metadata')
         trgt_dir = os.path.join(self.fido2ConfigFolder, 'server_metadata')
