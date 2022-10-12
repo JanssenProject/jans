@@ -29,7 +29,7 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 ```
 
-- `curl` should be instlled. This can be easily installed using command below
+- `curl` should be instlled. This can be easily installed using the command below
 
  ```
  yum install curl
@@ -43,19 +43,19 @@ yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarc
 yum module enable mod_auth_openidc
 ```
 
-- Download and Install Janssen Server Linux package
+- Download and Install the Janssen Server Linux package
 
 ```
 yum install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*el8.x86_64.rpm' | head -n 1)
 ```
 
-- Initiate setup process using command below. Setup process will prompt for user for inputs.
+- Initiate the setup process using the command below. The setup process will prompt for user for inputs.
 
 ```
 sudo python3 /opt/jans/jans-setup/setup.py
 ```
 
-Installer should confirm successful installation with message similar to the one shown below:
+The installer should confirm successful installation with a message similar to the one shown below:
 
 ![](../../../assets/image-jans-install-success.png)
 
@@ -65,13 +65,13 @@ After the successful completion of setup process, [verify the system health](../
 
 ### Uninstall Janssen Server
 
-Use command below to uninstall Janssen server
+Use the command below to uninstall the Janssen server
 
 ```commandline
 python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
-Console output like below will confirm the successful uninstallation of Janssen Server
+Console output like below will confirm the successful uninstallation of the Janssen Server
 
 ```text
 This process is irreversible.
@@ -111,11 +111,11 @@ Removing /etc/apache2/sites-available/https_jans.conf
 
 ### Remove the linux package
 
-Use command below to remove and purge `jans` package
+Use the command below to remove and purge `jans` package
 
 ```text
 yum remove jans.x86_64
 ```
 
-Successful removal will remove Janssen Server package along with removal of all the unused dependencies.
+Successful removal will remove the Janssen Server package along with the removal of all the unused dependencies.
 
