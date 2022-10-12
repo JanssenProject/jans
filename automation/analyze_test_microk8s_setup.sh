@@ -17,11 +17,7 @@ collect_logs() {
   echo "Found $POD_NAME built on $BUILD"
   t=0
   while true; do
-    if [[ $SERVICE == "client-api" ]];then
-      kubectl cp -n jans "$POD_NAME":opt/client-api/logs/ jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ && t=120 || t=$(( t + 60 ))
-    else
-      kubectl cp -n jans "$POD_NAME":opt/jans/jetty/jans-"$SERVICE"/logs jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ && t=120 || t=$(( t + 60 ))
-    fi
+    kubectl cp -n jans "$POD_NAME":opt/jans/jetty/jans-"$SERVICE"/logs jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ && t=120 || t=$(( t + 60 ))
     if [[ $t == 120 ]];then
       break
     else
@@ -46,7 +42,7 @@ echo "--------------------------------------Outputting configurator logs--------
 kubectl logs -l APP_NAME=configurator -c config -n jans
 echo "--------------------------------------------------------------------------------------------------------------"
 
-SERVICES="auth-server client-api fido2 scim"
+SERVICES="auth-server fido2 scim"
 for SERVICE in $SERVICES; do
   kubectl -n jans wait --for=condition=available --timeout=30s deploy/janssen-"$SERVICE" || collect_logs "${SERVICE%-server}" "$1" "$2" "$3"
 done
