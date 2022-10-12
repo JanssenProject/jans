@@ -16,7 +16,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'config_api'
-        self.name = 'Config-API'
+        self.name = '[C]onfig-API'
 
     def process(self):
         pass

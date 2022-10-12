@@ -103,8 +103,6 @@ class JansCliApp(Application):
         self.nav_bar = JansNavBar(
                     self,
                     entries=[(plugin.pid, plugin.name) for plugin in self._plugins], 
-                    #('oauth', 'Auth Server'), ('fido', 'FDIO'), ('scim', 'SCIM'), ('config_api', 'Config-API'), ('client_api', 'Client-API'), ('scripts', 'Scripts')],
-                    #selection_changed=self.main_nav_selection_changed,
                     selection_changed=self.main_nav_selection_changed,
                     select=0,
                     bgcolor=cli_style.main_navbar_bgcolor
@@ -269,9 +267,8 @@ class JansCliApp(Application):
         self.bindings.add('s-tab')(self.focus_previous)
         self.bindings.add('c-c')(do_exit)
         self.bindings.add('f1')(self.help)
-        # self.bindings.add('f2')(self.save_dialog)
         self.bindings.add('escape')(self.escape)
-        
+
 
     def help(self,ev):
         self.show_message(_("Help"),'''<Enter> {} \n<j> {}\n<d> {}'''.format(_("Edit current selection"),_("Display current item in JSON format"),_("Delete current selection")))

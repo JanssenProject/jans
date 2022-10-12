@@ -1,13 +1,16 @@
+import re
+import os 
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 
+shortcut_re = re.compile(r'\[(.*?)\]')
 
 class JansNavBar():
     """This is a horizontal Navigation bar Widget used in Main screen ('clients', 'scopes', 'keys', 'defaults', 'properties', 'logging')
     """
-    def __init__(self, myparent, entries, selection_changed, select=0, bgcolor='#00ff44'):
+    def __init__(self, myparent, entries, selection_changed, select=0, bgcolor='DimGray'):
         """init for JansNavBar
 
         Args:
@@ -47,19 +50,44 @@ class JansNavBar():
                             cursorline=False,
                         )
 
+    def _go_tab(self, ev):
+        self.myparent.layout.focus(self.nav_window)
+        for i, entry in enumerate(self.navbar_entries):
+            re_search = shortcut_re.search(entry[1])
+            if re_search and re_search.group(1).lower() == ev.data:
+                self.cur_navbar_selection = i
+                self._set_selection()
+                break
+
+    def add_key_binding(self, shorcut_key):
+        r = os.urandom(3).hex()
+        for binding in self.myparent.bindings.bindings:
+            if len(binding.keys) == 2 and binding.keys[0].value == 'escape' and binding.keys[1].lower() == shorcut_key:
+                return
+        self.myparent.bindings.add('escape', shorcut_key.lower())(self._go_tab)
+
+
     def get_navbar_entries(self):
         """Get all selective entries
 
         Returns:
             merge_formatted_text: Merge (Concatenate) several pieces of formatted text together. 
         """
-
+        
         result = []
         for i, entry in enumerate(self.navbar_entries):
+            display_text = entry[1]
+            re_search = shortcut_re.search(display_text)
+            if re_search:
+                sc, ec = re_search.span()
+                shorcut_key = re_search.group(1)
+                display_text = display_text[:sc]+ '<style fg="OrangeRed">' + shorcut_key + '</style>' +display_text[ec:]
+                self.add_key_binding(shorcut_key.lower())
+
             if i == self.cur_navbar_selection:
-                result.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format(self.bgcolor, entry[1])))
+                result.append(HTML('<style fg="LightYellow" bg="{}">{}</style>'.format(self.bgcolor, display_text)))
             else:
-                result.append(HTML('<b>{}</b>'.format(entry[1])))
+                result.append(HTML('<b>{}</b>'.format(display_text)))
             result.append("   ")
 
         return merge_formatted_text(result)

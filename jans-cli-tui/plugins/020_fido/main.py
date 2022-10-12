@@ -16,7 +16,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'fido'
-        self.name = 'FIDO'
+        self.name = '[F]IDO'
 
     def process(self):
         pass

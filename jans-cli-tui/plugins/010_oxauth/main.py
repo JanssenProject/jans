@@ -49,7 +49,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'oxauth'
-        self.name = 'Auth Server'
+        self.name = '[A]uth Server'
 
         self.oauth_containers = {}
         self.oauth_prepare_navbar()

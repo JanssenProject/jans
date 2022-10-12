@@ -113,7 +113,7 @@ style = Style.from_dict(
 )
 
 ## jans nav bar
-main_navbar_bgcolor = "#00ff44"
+main_navbar_bgcolor = "DimGray"
 outh_navbar_bgcolor = "#66d9ef"
 
 

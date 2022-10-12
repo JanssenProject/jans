@@ -49,7 +49,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'scripts'
-        self.name = 'Scripts'
+        self.name = 'Sc[r]ipts'
 
         self.scripts_prepare_containers()
 

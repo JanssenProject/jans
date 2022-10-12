@@ -16,7 +16,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'scim'
-        self.name = 'SCIM'
+        self.name = '[S]CIM'
 
     def process(self):
         pass

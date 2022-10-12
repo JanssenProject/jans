@@ -16,7 +16,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'client_api'
-        self.name = 'Client-API'
+        self.name = 'Client-A[P]I'
 
     def process(self):
         pass
