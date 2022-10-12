@@ -273,21 +273,10 @@ class JansCliApp(Application):
 
     def help(self,ev):
         self.show_message(_("Help"),'''<Enter> {} \n<j> {}\n<d> {}'''.format(_("Edit current selection"),_("Display current item in JSON format"),_("Delete current selection")))
-
-    # def save_dialog(self,ev):
-    #     try:
-    #         if get_app().layout.container.floats[0]:  ### if there is a dialog
-    #             self.logger.debug(self.root_layout.floats)
-    #             self.logger.debug(self.root_layout.floats[-1].content)
-    #             self.logger.debug(self.root_layout.floats[-1].content.get_children()[0].get_children())
-    #             self.logger.debug(self.root_layout.floats[-1].content.get_children()[-1].get_children()[-1].get_children())
         
-    #     except Exception as e:
-    #         self.logger.debug('ERROR'+str(e))
-
     def escape(self,ev):
         try:
-            if get_app().layout.container.floats[0]:
+            if get_app().layout.container.floats:
                 if len(get_app().layout.container.floats) >=2 :
                     get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
                     get_app().layout.focus(get_app().layout.container.floats[-1].content)
