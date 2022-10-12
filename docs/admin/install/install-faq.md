@@ -114,7 +114,6 @@ Command above should list services along with its current status.
 ```commandline
 UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
 jans-auth.service       loaded active running Janssen OAauth service    
-jans-client-api.service loaded active running Janssen Client API service
 jans-config-api.service loaded active running Janssen Config API service
 jans-fido2.service      loaded active running Janssen Fido2 Service     
 jans-scim.service       loaded active running Janssen Scim service      
