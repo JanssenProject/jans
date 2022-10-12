@@ -15,7 +15,7 @@ Janssen Server can be installed using the Linux package for SLES
 - SUSE Linux Enterprise Server (SLES) 15
 
 !!! note
-[SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
+    [SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
 
 ## System Requirements
 
