@@ -22,19 +22,20 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 ## Prerequisites
 
-- `curl` should be instlled. This can be easily installed using command below
-
- ```
- apt install curl
- ```
-
-## Install
-
+- System should be registered and attached with Red Hat. This is required to run commands that install packages like `mod_auth_openidc`
 - Install Extra Packages for Enterprise Linux (EPEL)
 
 ```
 yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 ```
+
+- `curl` should be instlled. This can be easily installed using command below
+
+ ```
+ yum install curl
+ ```
+
+## Install
 
 - Enable the `mod_auth_openidc` module
 
@@ -53,6 +54,10 @@ yum install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/ja
 ```
 sudo python3 /opt/jans/jans-setup/setup.py
 ```
+
+Installer should confirm successful installation with message similar to the one shown below:
+
+![](../../../assets/image-jans-install-success.png)
 
 ## Verify the Installation
 
@@ -103,3 +108,14 @@ Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
 
 ```
+
+### Remove the linux package
+
+Use command below to remove and purge `jans` package
+
+```text
+yum remove jans.x86_64
+```
+
+Successful removal will remove Janssen Server package along with removal of all the unused dependencies.
+
