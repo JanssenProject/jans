@@ -62,49 +62,55 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.save_handler = save_handler
         self.delete_UMAresource=delete_UMAresource
         self.data = data
+        self.title=title
         self.prepare_tabs()
+        self.create_window()
 
-        def save():
 
-            self.data = self.make_data_from_dialog()
-            self.data['disabled'] = not self.data['disabled']
-            for list_key in (
-                            'redirectUris',
-                            'scopes',
-                            'postLogoutRedirectUris',
-                            'contacts',
-                            'authorizedOrigins',
-                            'umaAuthorizationPolicies',
-                            #'rptClaimsScripts',
-                            #'claimRedirectUris',
-                             ):
-                if self.data[list_key]:
-                    self.data[list_key] = self.data[list_key].splitlines()
 
-            if 'accessTokenAsJwt' in self.data:
-                self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
+    def save(self):
 
-            if 'rptAsJwt' in self.data:
-                self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
+        self.data = self.make_data_from_dialog()
+        self.data['disabled'] = not self.data['disabled']
+        for list_key in (
+                        'redirectUris',
+                        'scopes',
+                        'postLogoutRedirectUris',
+                        'contacts',
+                        'authorizedOrigins',
+                        'umaAuthorizationPolicies',
+                        #'rptClaimsScripts',
+                        #'claimRedirectUris',
+                            ):
+            if self.data[list_key]:
+                self.data[list_key] = self.data[list_key].splitlines()
 
-            cfr = self.check_required_fields()
-            self.myparent.logger.debug('CFR: '+str(cfr))
-            if not cfr:
-                return
+        if 'accessTokenAsJwt' in self.data:
+            self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
 
-            for ditem in self.drop_down_select_first:
-                if ditem in self.data and self.data[ditem] is None:
-                    self.data.pop(ditem)
+        if 'rptAsJwt' in self.data:
+            self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
 
-            close_me = True
-            if save_handler:
-                close_me = self.save_handler(self)
-            if close_me:
-                self.future.set_result(DialogResult.ACCEPT)
+        cfr = self.check_required_fields()
+        self.myparent.logger.debug('CFR: '+str(cfr))
+        if not cfr:
+            return
 
-        def cancel():
-            self.future.set_result(DialogResult.CANCEL)
+        for ditem in self.drop_down_select_first:
+            if ditem in self.data and self.data[ditem] is None:
+                self.data.pop(ditem)
 
+        close_me = True
+        if self.save_handler:
+            close_me = self.save_handler(self)
+        if close_me:
+            self.future.set_result(DialogResult.ACCEPT)
+
+    def cancel(self):
+        self.future.set_result(DialogResult.CANCEL)
+
+
+    def create_window(self):
         self.side_nav_bar = JansSideNavBar(myparent=self.myparent,
             entries=list(self.tabs.keys()),
             selection_changed=(self.client_dialog_nav_selection_changed) ,
@@ -112,17 +118,18 @@ class EditClientDialog(JansGDialog, DialogUtils):
             entries_color='class:outh-client-navbar')
 
         self.dialog = JansDialogWithNav(
-            title=title,
+            title=self.title,
             navbar=self.side_nav_bar,
             content=DynamicContainer(lambda: self.tabs[self.left_nav]),
              button_functions=[
-                (save, _("Save")),
-                (cancel, _("Cancel"))
+                (self.save, _("Save")),
+                (self.cancel, _("Cancel"))
             ],
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
                    )
-    
+
+
     def prepare_tabs(self):
         """Prepare the tabs for Edil Client Dialogs
         """
