@@ -63,7 +63,7 @@ All pages are **xhtml** files. The Jans-auth server comes with a default set of 
 This [article](https://github.com/maduvena/jans-docs/wiki/Writing-UI-pages) covers all the details you need to write your own web page. 
 
 ## Building business logic in Custom script:  
-Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this [article](../developer/managed-beans)
+Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this [article](../managed-beans.md)
 
 ## Adding libraries for use in the custom script
 Java or Python libraries to be imported and used very easily. Remember incase you opt for a python library, it should be written in "pure python" only.
