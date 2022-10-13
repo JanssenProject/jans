@@ -1,7 +1,7 @@
 ---
 tags:
   - administration
-  - deployment
+  - planning
 ---
 
 # Project Goals

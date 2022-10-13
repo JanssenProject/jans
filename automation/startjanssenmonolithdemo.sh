@@ -3,6 +3,7 @@ set -eo pipefail
 
 JANS_FQDN=$1
 JANS_PERSISTENCE=$2
+EXT_IP=$3
 
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
@@ -46,18 +47,29 @@ if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml up -d
 fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
-echo "Waiting for the Janssen server to come up. Depending on the  resources it may take 3-5 mins for the services to be up."
+jans_status="unhealthy"
+while true; do
+    jans_status=$(docker inspect --format='{{json .State.Health.Status}}' docker-jans-monolith-jans-1) || echo "unhealthy"
+    echo "$jans_status"
+    if [ "$jans_status" == '"healthy"' ]; then
+        break
+    fi
+    sleep 10
+    echo "Waiting for the Janssen server to come up. Depending on the  resources it may take 3-5 mins for the services to be up."
+done
+echo "Will be ready in exactly 3 mins"
 sleep 180
 cat << EOF > testendpoints.sh
 echo -e "Testing openid-configuration endpoint.. \n"
-curl -k https://$JANS_FQDN/.well-known/openid-configuration
+docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/openid-configuration
 echo -e "Testing scim-configuration endpoint.. \n"
-curl -k https://$JANS_FQDN/.well-known/scim-configuration
+docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/scim-configuration
 echo -e "Testing fido2-configuration endpoint.. \n"
-curl -k https://$JANS_FQDN/.well-known/fido2-configuration
+docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
+docker exec docker-jans-monolith-jans-1 /opt/jans/jans-cli/config-cli.py --operation-id get-config-health
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
 echo -e "Add the following record to your local computers' hosts file to engage with the services $EXT_IP $JANS_FQDN"
 echo -e "To clean up run:"
-echo -e "docker compose -f /tmp/jans/docker-jans-monolith/mysql-docker-compose.yml down && rm -rf /tmp/jans"
+echo -e "docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf /tmp/jans"
