@@ -67,12 +67,12 @@ Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most
 
 ## Adding libraries for use in the custom script
 Java or Python libraries to be imported and used very easily. Remember incase you opt for a python library, it should be written in "pure python" only.
-More details of this mentioned [here](../interception-scripts/#using-python-libraries-in-a-script)
+More details of this mentioned [here](../interception-scripts.md#using-python-libraries-in-a-script)
 
 ## Uses of Person Authentication script
 
 ### A. Implementing 2FA authentication mechanisms
-1. [FIDO2](/../../../script-catalog/person_authentication/fido2-external-authenticator/README) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
+1. [FIDO2](../../../script-catalog/person_authentication/fido2-external-authenticator/README) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
 2. SMS OTP :  
 3. Email OTP 
 
@@ -80,7 +80,7 @@ More details of this mentioned [here](../interception-scripts/#using-python-libr
 1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here an example of how the number of steps can be varied depending on the context or business requirement. 
 
 ### C. Implementing Social logins 
-You can use a `PersonAuthenticationType` script to allow users to sign using credentials from popular **Social Identity providers** or **Inbound Identity Providers** like Facebook, Google and Apple. After users authenticate, thier Social Identity Provider credentials are provisioned into the Jans-auth server. More on this topic in this [article](../recipes/social-login/)
+You can use a `PersonAuthenticationType` script to allow users to sign using credentials from popular **Social Identity providers** or **Inbound Identity Providers** like Facebook, Google and Apple. After users authenticate, thier Social Identity Provider credentials are provisioned into the Jans-auth server. More on this topic in this [article](../../recipes/social-login.md)
 
 ### D. Proactively perform fraud detection
 1. Impossible travel
