@@ -1117,15 +1117,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-linux-distributions" class="md-nav__link">
-    Supported Linux Distributions
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation-steps" class="md-nav__link">
-    Installation Steps
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    Uninstall
   </a>
   
 </li>
@@ -10791,15 +10798,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-linux-distributions" class="md-nav__link">
-    Supported Linux Distributions
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation-steps" class="md-nav__link">
-    Installation Steps
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    Uninstall
   </a>
   
 </li>
@@ -10837,45 +10851,58 @@
         <span class="md-tag">vm</span>
       
     
+      
+        <span class="md-tag">Dynamic</span>
+      
+    
   </nav>
 
 
 
 <h1 id="install-janssen-server-using-dynamic-download">Install Janssen Server using Dynamic Download<a class="headerlink" href="#install-janssen-server-using-dynamic-download" title="Permanent link">#</a></h1>
-<p>Dynamic download installs the latest development version of Janssen Server. This installation method is suitable for setting up development environments.</p>
+<p>The dynamic download installs the latest development version of the Janssen Server.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method of installation is suitable only for testing, development, or feature exploration purposes. Not for production deployments.</p>
+</div>
 <h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
 <p>System should meet <a href="../vm-requirements/">minimum VM system requirements</a></p>
-<h2 id="supported-linux-distributions">Supported Linux Distributions<a class="headerlink" href="#supported-linux-distributions" title="Permanent link">#</a></h2>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li>Enterprise Linux 8 (CentOS 8 and Red Hat 8)</li>
-<li>Ubuntu 20</li>
-<li>SUSE 15</li>
+<li><code>curl</code> should be installed</li>
 </ul>
-<h2 id="installation-steps">Installation Steps<a class="headerlink" href="#installation-steps" title="Permanent link">#</a></h2>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
 <ol>
 <li>
-<p>Download installer
+<p>Download the installer
 <div class="highlight"><pre><span></span><code>curl https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py &gt; install.py
 </code></pre></div></p>
 </li>
 <li>
-<p>Execute installer
+<p>Execute Installer</p>
+<p>The installer can be invoked using various options to tailor the installation process. Invoke the commands below to know about all the available options.</p>
+<div class="highlight"><pre><span></span><code>install.py --help
+setup.py --help
+</code></pre></div>
+<p>One particularly useful option for development environments is the one below which installs the Janssen Server with test data loaded.</p>
+<div class="highlight"><pre><span></span><code>python3 install.py --args=&quot;-t&quot;
+</code></pre></div>
+<p>To install without test data loaded, run the command below:</p>
 <div class="highlight"><pre><span></span><code>python3 install.py
-</code></pre></div></p>
-</li>
-<li>
-<p>Uninstalling Janssen Server
-<div class="highlight"><pre><span></span><code>python3 install.py -uninstall
-</code></pre></div></p>
+</code></pre></div>
 </li>
 </ol>
+<h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
+<p>Use the command below to uninstall the Janssen Server</p>
+<div class="highlight"><pre><span></span><code>python3 install.py -uninstall
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T12:17:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
       
         <br>
         Created:
