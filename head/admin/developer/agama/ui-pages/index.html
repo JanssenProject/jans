@@ -10921,7 +10921,7 @@
 </ul>
 <p>As you will see, the task boils down to produce the desired markup plus adding some placeholders for information that is dynamic.</p>
 <h2 id="data-model">Data model<a class="headerlink" href="#data-model" title="Permanent link">#</a></h2>
-<p>In Agama, every template is generally "injected" some data, see <a href="../dsl/#rrf">RRF</a>. This data in FreeMarker terms is known as "data-model". In practice, this will be an agama <a href="../dsl/#maps">map</a> which can be accessed from the templates using standard FreeMarker notation. This <em>map</em> is attached a couple of additional keys for developer's convenience:</p>
+<p>In Agama, every template is generally "injected" some data, see <a href="../dsl/#rrf">RRF</a>. This data in FreeMarker terms is known as "data-model". In practice, this will be an agama <a href="../dsl/">map</a> which can be accessed from the templates using standard FreeMarker notation. This <em>map</em> is attached a couple of additional keys for developer's convenience:</p>
 <ul>
 <li>
 <p><code>webCtx</code>. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect <a href="https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java">here</a>. Take a look at the getters; writing <code>${webCtx.contextPath}</code> in a template will insert the result of calling method <code>getContextPath</code> - normally the string <code>/jans-auth</code>.</p>
@@ -11064,7 +11064,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T09:25:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
       
         <br>
         Created:
