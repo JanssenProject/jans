@@ -77,16 +77,31 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         data = {}
 
-        for item in self.dialog.content.children + self.alt_tabs[self.sope_type].children:
+        for item in self.edit_dialog_content:
             item_data = self.get_item_data(item)
             if item_data:
                 data[item_data['key']] = item_data['value']
 
-        if data['scopeType'] in ('openid', 'dynamic') and hasattr(self, 'claims_container'):
-            claims = [claim[0] for claim in self.claims_container.data]
-            data['claims'] = claims
+        if self.properties_container.data:
+            data['configurationProperties'] = []
+            for key_, val_, hide_ in self.properties_container.data:
+                if key_:
+                    prop_ = {'value1': key_}
+                    if val_:
+                        prop_['value2'] = val_
+                    prop_['hide'] = hide_
+                    data['configurationProperties'].append(prop_)
+
+        if data['location'] == 'db':
+            data['locationType'] = 'ldap'
+        else:
+            data['locationType'] = 'file'
+
+        del data['location']
 
         self.myparent.logger.debug('DATA: ' + str(data))
+
+        """
         self.data = data
         if 'attributes' in self.data.keys():
             self.data['attributes'] = {'showInConfigurationEndpoint':self.data['attributes']}
@@ -96,7 +111,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             close_me = self.save_handler(self)
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
-    
+        """
+
     def cancel(self):
         self.future.set_result(DialogResult.CANCEL)
 
@@ -174,9 +190,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 )
 
 
-        self.dialog = JansDialogWithNav(
-            title=self.title,
-            content= HSplit([
+        self.edit_dialog_content = [
                     self.myparent.getTitledWidget(
                                 _("Script Type"),
                                 name='scriptType',
@@ -193,7 +207,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
                     self.myparent.getTitledRadioButton(
                             _("Location"),
-                            name='accessTokenAsJwt',
+                            name='location',
                             values=[('db', _("Database")), ('file', _("File System"))],
                             current_value= 'file' if self.data.get('locationPath') else 'db',
                             jans_help=_("Where to save script"),
@@ -216,7 +230,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
                     self.myparent.getTitledWidget(
                                 _("Level"),
-                                name='scriptType',
+                                name='level',
                                 widget=Spinner(
                                     value=self.data.get('level', 0)
                                     ),
@@ -231,7 +245,13 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             ]),
 
                     self.script_widget,
-                    ],
+                    ]
+
+
+        self.dialog = JansDialogWithNav(
+            title=self.title,
+            content= HSplit(
+                self.edit_dialog_content,
                 width=D(),
                 height=D()
                 ),
@@ -269,7 +289,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 self.properties_container.add_item([key_, val_, hide_])
             else:
                 self.properties_container.replace_item(kwargs['selected'], [key_, val_, hide_])
-
 
         body = HSplit([key_widget, val_widget, hide_widget])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_property)]

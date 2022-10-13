@@ -4,6 +4,7 @@ import prompt_toolkit
 from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
+from wui_components.jans_spinner import Spinner
 
 
 
@@ -26,8 +27,12 @@ class DialogUtils:
                 value_ = me.current_value
             elif isinstance(me, DropDownWidget):
                 value_ = me.value
-            elif isinstance(me,DateSelectWidget):
+            elif isinstance(me, DateSelectWidget):
                 value_ = me.value
+            elif isinstance(me, Spinner):
+                value_ = me.value
+            else:
+                return
 
             return {'key':key_, 'value':value_}
 
