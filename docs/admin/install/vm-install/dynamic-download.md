@@ -1,14 +1,14 @@
 ---
 tags:
-  - administration
-  - installation
-  - vm
-  - Dynamic
+- administration
+- installation
+- vm
+- Dynamic
 ---
 
 # Install Janssen Server using Dynamic Download
 
-Dynamic download installs the latest development version of Janssen Server. 
+The dynamic download installs the latest development version of the Janssen Server.
 
 !!! Note
 
@@ -31,28 +31,28 @@ curl https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup
 
 1. Execute Installer
 
-    Installer can be invoked using various options to tailor the installation process. Invoke commands below to know about all the available options.
+    The installer can be invoked using various options to tailor the installation process. Invoke the commands below to know about all the available options.
 
     ```
     install.py --help
     setup.py --help
     ```
-    
+
     One particularly useful option for development environments is the one below which installs the Janssen Server with test data loaded.
-    
-    ```    
-    python3 install.py --args="-t"
-    ```
-    
+
+     ```    
+     python3 install.py --args="-t"
+     ```
+
     To install without test data loaded, run the command below:
-    
-    ```text
-    python3 install.py
-    ```
+
+     ```text
+     python3 install.py
+     ```
 
 ## Uninstall
 
-Use command below to uninstall the Janssen Server
+Use the command below to uninstall the Janssen Server
 
 ```
 python3 install.py -uninstall
