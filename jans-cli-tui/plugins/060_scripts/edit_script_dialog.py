@@ -155,12 +155,12 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         properties_data = []
         for prop in self.data.get('configurationProperties', []):
-            properties_data.append([prop['value1'], prop['value2']])
+            properties_data.append([prop['value1'], prop.get('value2', ''), prop.get('hide', False)])
 
         self.properties_container = JansVerticalNav(
                 myparent=self.myparent,
-                headers=['Key', 'Value'],
-                preferred_size=[20, 20],
+                headers=['Key', 'Value', 'Hide'],
+                preferred_size=[20, 20, 5],
                 data=properties_data,
                 on_enter=self.edit_property,
                 on_delete=self.delete_property,
@@ -170,7 +170,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 entriesColor='class:outh-client-navbar-entriescolor',
                 all_data=properties_data,
                 underline_headings=False,
-                max_width=44
+                max_width=49
                 )
 
 
@@ -256,20 +256,22 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
     def edit_property(self, **kwargs):
 
-        key, val = kwargs.get('data', ('',''))
+        key, val, hide = kwargs.get('data', ('','', False))
         key_widget = self.myparent.getTitledText(_("Key"), name='property_key', value=key, style='class:script-titledtext', jans_help=_("Script propery Key"))
         val_widget = self.myparent.getTitledText(_("Value"), name='property_val', value=val, style='class:script-titledtext', jans_help=_("Script property Value"))
+        hide_widget = self.myparent.getTitledCheckBox(_("Hide"), name='property_hide', checked=hide, style='class:script-titledtext', jans_help=_("Hide script property?"))
 
         def add_property(dialog):
             key_ = key_widget.me.text
             val_ = val_widget.me.text
+            hide_ = hide_widget.me.checked
             if not kwargs.get('data'):
-                self.properties_container.add_item([key_, val_])
+                self.properties_container.add_item([key_, val_, hide_])
             else:
-                self.properties_container.replace_item(kwargs['selected'], [key_, val_])
+                self.properties_container.replace_item(kwargs['selected'], [key_, val_, hide_])
 
 
-        body = HSplit([key_widget, val_widget])
+        body = HSplit([key_widget, val_widget, hide_widget])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_property)]
         dialog = JansGDialog(self.myparent, title=_("Enter script properties"), body=body, buttons=buttons, width=self.myparent.dialog_width-20)
         self.myparent.show_jans_dialog(dialog)

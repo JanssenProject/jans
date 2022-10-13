@@ -76,7 +76,7 @@ class JansVerticalNav():
                 if self.preferred_size[col] == 0:
                     mod_entry.append(entry[col])
                 else :
-                    if self.preferred_size[col] >= len(entry[col]):
+                    if self.preferred_size[col] >= len(str(entry[col])):
                         mod_entry.append(entry[col])
                     else :
                         mod_entry.append(entry[col][:self.preferred_size[col]]+'...')
@@ -132,7 +132,7 @@ class JansVerticalNav():
         for row in data:
             column_length_list = []
             for col in row:
-                column_length_list.append(len(col))
+                column_length_list.append(len(str(col)))
             data_length_list.append(column_length_list)
 
 
@@ -165,7 +165,7 @@ class JansVerticalNav():
         for d in data:
             spaced_line_list = []
             for i, space in enumerate(self.spaces):
-                spaced_line_list.append(d[i] + ' ' * (space - len(d[i])))
+                spaced_line_list.append(str(d[i]) + ' ' * (space - len(str(d[i]))))
             spaced_data.append(spaced_line_list)
 
         return spaced_data
@@ -242,20 +242,19 @@ class JansVerticalNav():
         def _(event):
             if not self.data:
                 return
-            passed = [i.strip() for i in self.data[self.selectes]]
             size = self.myparent.output.get_size()
             if self.on_enter :
-                self.on_enter(passed=passed, event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes)
+                self.on_enter(passed=self.data[self.selectes], event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes)
 
 
         @kb.add('d')
         def _(event):
             if not self.data:
                 return
-            selected_line = [i.strip() for i in self.data[self.selectes]]
+
             size = self.myparent.output.get_size()
             self.on_display(
-                selected=selected_line, 
+                selected=self.data[self.selectes], 
                 headers=self.headers, 
                 event=event,
                 size=size, 
