@@ -450,6 +450,11 @@
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEnabled": false,
+    "ssaConfiguration": {
+        "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
         "authDomain": "",
