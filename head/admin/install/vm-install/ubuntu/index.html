@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-janssen-server-using-ubuntu-linux-package" class="md-skip">
+        <a href="#install-janssen-server-using-the-ubuntu-linux-package" class="md-skip">
           Skip to content
         </a>
       
@@ -10927,27 +10927,27 @@
 
 
 
-<h1 id="install-janssen-server-using-ubuntu-linux-package">Install Janssen Server using Ubuntu Linux Package<a class="headerlink" href="#install-janssen-server-using-ubuntu-linux-package" title="Permanent link">#</a></h1>
-<p>Janssen Server can be installed using Linux package for Ubuntu</p>
+<h1 id="install-janssen-server-using-the-ubuntu-linux-package">Install Janssen Server using the Ubuntu Linux Package<a class="headerlink" href="#install-janssen-server-using-the-ubuntu-linux-package" title="Permanent link">#</a></h1>
+<p>Janssen Server can be installed using the Linux package for Ubuntu</p>
 <h2 id="supported-versions">Supported Versions<a class="headerlink" href="#supported-versions" title="Permanent link">#</a></h2>
 <ul>
 <li>Ubuntu 20.04</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><a href="https://wiki.ubuntu.com/SELinux">SELinux</a> should be disabled</p>
 </div>
+<p><a href="https://wiki.ubuntu.com/SELinux">SELinux</a> should be disabled</p>
 <h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
 <p>System should meet <a href="../vm-requirements/">minimum VM system requirements</a></p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li><code>curl</code> should be instlled. This can be easily installed using command below</li>
+<li><code>curl</code> should be installed. This can be easily installed using the command below</li>
 </ul>
 <div class="highlight"><pre><span></span><code>apt install curl
 </code></pre></div>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
 <ul>
-<li>Download the installer from Janssen Project site using command below</li>
+<li>Download the installer from the Janssen Project site using the command below</li>
 </ul>
 <div class="highlight"><pre><span></span><code>wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*ubuntu20.04_amd64.deb&#39; | head -n 1) -O /tmp/jans.ubuntu20.04_amd64.deb
 </code></pre></div>
@@ -10957,7 +10957,7 @@
 <div class="highlight"><pre><span></span><code>apt install -y /tmp/jans.ubuntu20.04_amd64.deb
 </code></pre></div>
 <ul>
-<li>Initiate setup process using command below. Setup process will prompt for user for inputs.</li>
+<li>Initiate the setup process using the command below. The setup process will prompt for user for inputs.</li>
 </ul>
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py
 </code></pre></div>
@@ -10967,13 +10967,13 @@
 <p>Uninstall process involves two steps</p>
 <ol>
 <li>Uninstall Janssen Server</li>
-<li>Remove and purge <code>jans</code> package</li>
+<li>Remove and purge the <code>jans</code> package</li>
 </ol>
 <h3 id="uninstall-janssen-server">Uninstall Janssen Server<a class="headerlink" href="#uninstall-janssen-server" title="Permanent link">#</a></h3>
-<p>Use command below to uninstall Janssen server</p>
+<p>Use the command below to uninstall the Janssen server</p>
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/install.py -uninstall
 </code></pre></div>
-<p>Console output like below will confirm the successful uninstallation of Janssen Server</p>
+<p>Console output like below will confirm the successful uninstallation of the Janssen Server</p>
 <div class="highlight"><pre><span></span><code>This process is irreversible.
 You will lose all data related to Janssen Server.
 
@@ -11008,10 +11008,10 @@ Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
 </code></pre></div>
 <h3 id="remove-the-linux-package">Remove the linux package<a class="headerlink" href="#remove-the-linux-package" title="Permanent link">#</a></h3>
-<p>Use command below to remove and purge <code>jans</code> package</p>
+<p>Use the command below to remove and purge the <code>jans</code> package</p>
 <div class="highlight"><pre><span></span><code>apt-get --purge remove jans
 </code></pre></div>
-<p>Successful removal will provide output as below:</p>
+<p>Successful removal will provide the output as below:</p>
 <div class="highlight"><pre><span></span><code>Reading package lists... Done
 Building dependency tree       
 Reading state information... Done
@@ -11034,7 +11034,7 @@ Checking to make sure service is down...
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-03T17:59:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T06:46:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
       
         <br>
         Created:
