@@ -490,9 +490,13 @@ class JansCliApp(Application):
             config_cli.config['DEFAULT'][prop_name] = prop_val
             config_cli.write_config()
 
+        config_cli.config['DEFAULT']['user_data'] = ''
+        config_cli.write_config()
+
         config_cli.host = config_cli.config['DEFAULT']['jans_host']
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
         config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
+        config_cli.access_token = None
 
     def show_message(self, title, message, buttons=[],tobefocused=None):
         body = HSplit([Label(message)])
