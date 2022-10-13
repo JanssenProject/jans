@@ -4,6 +4,7 @@ from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.application.current import get_app
 
 shortcut_re = re.compile(r'\[(.*?)\]')
 
@@ -51,11 +52,17 @@ class JansNavBar():
                         )
 
     def _go_tab(self, ev):
-        self.myparent.layout.focus(self.nav_window)
+
+        if get_app().layout.container.floats:
+            return
         for i, entry in enumerate(self.navbar_entries):
             re_search = shortcut_re.search(entry[1])
             if re_search and re_search.group(1).lower() == ev.data:
                 self.cur_navbar_selection = i
+                try: 
+                    self.myparent.layout.focus(self.nav_window)
+                except:
+                    pass
                 self._set_selection()
                 break
 
@@ -70,7 +77,7 @@ class JansNavBar():
     def get_navbar_entries(self):
         """Get all selective entries
 
-        Returns:
+        Returns:    
             merge_formatted_text: Merge (Concatenate) several pieces of formatted text together. 
         """
         

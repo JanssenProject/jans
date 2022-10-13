@@ -26,6 +26,7 @@ class JansGDialog:
         self.body = body
         self.myparent = parent
 
+
         if not width:
             width = parent.dialog_width
 
