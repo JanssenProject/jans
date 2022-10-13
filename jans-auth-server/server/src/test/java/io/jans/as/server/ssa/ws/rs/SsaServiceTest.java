@@ -233,7 +233,7 @@ public class SsaServiceTest {
 
         JwtClaims jwtClaims = jwt.getClaims();
         assertNotNull(jwtClaims.getClaim("org_id"), "The org_id in jwt is null");
-        assertEquals(jwtClaims.getClaim("org_id"), ssa.getOrgId());
+        assertEquals(jwtClaims.getClaim("org_id"), Long.parseLong(ssa.getOrgId()));
         assertNotNull(jwtClaims.getClaim("software_id"), "The software_id in jwt is null");
         assertEquals(jwtClaims.getClaim("software_id"), ssa.getAttributes().getSoftwareId());
         assertNotNull(jwtClaims.getClaim("software_roles"), "The software_roles in jwt is null");

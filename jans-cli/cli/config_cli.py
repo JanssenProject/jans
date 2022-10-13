@@ -1003,7 +1003,7 @@ class JCA_CLI:
 
     def obtain_parameters(self, endpoint, single=False):
         parameters = {}
-
+        end_point_param = {}
         endpoint_parameters = []
         if 'parameters' in endpoint.info:
             endpoint_parameters = endpoint.info['parameters']

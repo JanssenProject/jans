@@ -70,15 +70,22 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
         if (logger.isDebugEnabled()) {
             logger.debug("Search Users with searchRequest:{}", escapeLog(searchRequest));
         }
+
         Filter searchFilter = null;
-        if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
-            String[] targetArray = new String[] { searchRequest.getFilter() };
-            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                    null);
-            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
-                    null);
-            Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
+
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                        targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                        targetArray, null);
+                Filter uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, uidFilter, inumFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
         }
 
         return persistenceEntryManager.findPagedEntries(getPeopleBaseDn(), User.class, searchFilter, null,

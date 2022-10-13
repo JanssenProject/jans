@@ -236,6 +236,6 @@ Used to modify claims in a Refresh Token
 ## Testing
 
 1. Use this: [Reference for testing](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java)
-2. Inspect the tokens. Use [jwt.io](jwt.io) to inspect the contents of a JWT. 
+2. Inspect the tokens. Use [jwt.io](https://jwt.io) to inspect the contents of a JWT. 
 
 
