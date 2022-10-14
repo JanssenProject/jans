@@ -13,7 +13,7 @@ class JansVerticalNav():
 
     def __init__(self, myparent, headers, selectes,  on_display, on_enter=None, on_delete=None,
                 all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white', 
-                underline_headings=True, max_width=None):
+                underline_headings=True, max_width=None, jans_name='', resize_after_edit=False):
         """init for JansVerticalNav
 
         Args:
@@ -30,6 +30,7 @@ class JansVerticalNav():
             entriesColor (str, optional): Color for the Entries. Defaults to 'white'.
             underline_headings (str, optional): Put a line under headings.
             max_width (int, optional): Maximum width of container.
+            jans_name (str, optional): Widget name
         
         Examples:
             clients = JansVerticalNav(
@@ -54,10 +55,11 @@ class JansVerticalNav():
         self.selectes = selectes            # ListBox initial selection
         self.max_width = max_width
         self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
-
+        self.jans_name = jans_name
         self.preferred_size = preferred_size
         self.headerColor = headerColor
         self.entriesColor = entriesColor
+        self.resize_after_edit = resize_after_edit
 
         self.on_enter = on_enter
         self.on_delete = on_delete
@@ -181,7 +183,7 @@ class JansVerticalNav():
         y = ''
         for k in range(len(self.headers)):
             y += self.headers[k] + ' ' * \
-                (self.spaces[k] - len(self.headers[k]) + 5)
+                (self.spaces[k] - len(self.headers[k]) + 3)
         result.append(y)
 
         return merge_formatted_text(result)
@@ -198,8 +200,8 @@ class JansVerticalNav():
         for i, entry in enumerate(spaced_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
             if i == self.selectes:
                 result.append([('[SetCursorPosition]', '')])
-            
-            result.append('     '.join(entry))
+
+            result.append('   '.join(entry))
             result.append('\n')
 
         return merge_formatted_text(result)
@@ -208,11 +210,15 @@ class JansVerticalNav():
     def remove_item(self, item):
         self.data.remove(item)
         self.handle_header_spaces()
+        if self.resize_after_edit:
+            self.container_content[-1].height = len(self.data)
+
 
     def add_item(self, item):
         self.data.append(item)
         self.handle_header_spaces()
-        self.container_content[-1].height = len(self.data)
+        if self.resize_after_edit:
+            self.container_content[-1].height = len(self.data)
 
     def replace_item(self, item_index, item):
         self.data[item_index] = item
@@ -244,7 +250,7 @@ class JansVerticalNav():
                 return
             size = self.myparent.output.get_size()
             if self.on_enter :
-                self.on_enter(passed=self.data[self.selectes], event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes)
+                self.on_enter(passed=self.data[self.selectes], event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes, jans_name=self.jans_name)
 
 
         @kb.add('d')
