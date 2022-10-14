@@ -15,11 +15,23 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import org.eclipse.microprofile.openapi.OASFactory;
-import org.eclipse.microprofile.openapi.OASFilter;
-import org.eclipse.microprofile.openapi.models.Components;
-import org.eclipse.microprofile.openapi.models.OpenAPI;
-import org.eclipse.microprofile.openapi.models.examples.Example;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
+import io.swagger.v3.oas.models.examples.Example;
+//import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.v3.jaxrs2.Reader;
+import io.swagger.v3.jaxrs2.ReaderListener;
+
+import io.swagger.v3.oas.integration.api.OpenApiReader;
+import io.swagger.v3.oas.models.OpenAPI;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,55 +54,37 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
 import java.nio.charset.StandardCharsets;
-/*
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;*/
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-@Provider
-public class OASSchemaFileReader implements OASFilter {
+//@SwaggerDefinition
+public class ConfigReaderListener implements ReaderListener {
 
     @Inject
     Logger log;
 
    
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final CloseableHttpClient httpClient = HttpClients.createDefault();
+    @Override
+    public void beforeScan(OpenApiReader paramOpenApiReader, OpenAPI paramOpenAPI) {
+        log.error("ConfigReaderListener::beforeScan() - paramOpenApiReader:{}, paramOpenAPI:{} ", paramOpenApiReader, paramOpenAPI);
+    }
 
     @Override
-
-    public void filterOpenAPI(OpenAPI openAPI) {
-        //log.debug("\n\n OASSchemaFileReader:filterOpenAPI() - openAPI:{}, params:{}, cookies:{}, headers:{}", openAPI, params, cookies, headers);
-		log.debug("\n\n OASSchemaFileReader:filterOpenAPI() - openAPI:{}", openAPI);
-        Components defaultComponents = OASFactory.createComponents();
-        if (openAPI.getComponents() == null) {
-            openAPI.setComponents(defaultComponents);
-        }
-
-        try {
-            //generateExamples().forEach(openAPI.getComponents()::addExample);
-            generateExamples().entrySet().forEach(ex -> openAPI.getPaths().getPathItem("/api/generate").getPOST().getRequestBody().getContent().getMediaType(MediaType.APPLICATION_JSON).addExample(ex.getKey(), ex.getValue()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void afterScan(OpenApiReader paramOpenApiReader, OpenAPI paramOpenAPI) {
+        log.error("ConfigReaderListener::afterScan() - paramOpenApiReader:{}, paramOpenAPI:{} ", paramOpenApiReader, paramOpenAPI);
     }
 
     Map<String, Example> generateExamples() throws Exception {
         final Map<String, Example> examples = new LinkedHashMap<>();
-        getFolderData(examples, "PLACE YOUR URL HERE");
+        //getFolderData(examples, "PLACE YOUR URL HERE");
         //getExamples(examples);
         return examples;
     }
 
     //If user has provided the folder then recursively loop over it to get the files and their contents
-    private void getFolderData(final Map<String, Example> examples, final String inputURL) throws IOException {
+ /*   private void getFolderData(final Map<String, Example> examples, final String inputURL) throws IOException {
         //Make the request to provided folder path and get the folder/files from it.
         final CloseableHttpResponse folderResponse = httpClient.execute(new HttpGet(inputURL));
         final String responseBody = EntityUtils.toString(folderResponse.getEntity(), StandardCharsets.UTF_8);
@@ -132,6 +126,6 @@ public class OASSchemaFileReader implements OASFilter {
             //if direct file provided then add its content
             examples.put(inputURL.substring(inputURL.lastIndexOf("/")), OASFactory.createExample().value(objectMapper.readValue(responseBody, ObjectNode.class)));
         }
-    }
+    }*/
 
 }
