@@ -131,52 +131,53 @@ class ClientRegistration(ClientRegistrationType):
 ### Script Type: Java
 
 ```java
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.service.ScopeService;
+import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
-import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
-import io.jans.as.server.service.ScopeService;
-import io.jans.as.persistence.model.Scope;
 import io.jans.orm.util.ArrayHelper;
-import io.jans.service.custom.script.CustomScriptManager;
-import io.jans.as.common.model.registration.Client;
-
+import io.jans.service.cdi.util.CdiUtil;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-
-import org.json.JSONObject;
+import java.util.Map;
 
 public class ClientRegistration implements ClientRegistrationType {
-    private static final Logger log = LoggerFactory.getLogger(Introspection.class);
-    private static final java.util.logging.Logger scriptLogger = LoggerFactory.getLogger(CustomScriptManager.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientRegistration.class);
 
-    private ArrayList<String> scope_list = null;
+    JSONArray json_array = null;
 
     @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-        log.info("Client registration. Initialization.");
-        scriptLogger.info("Client registration. Initialization.");
-        scriptLogger.info(configurationAttributes.toString());
         if (!configurationAttributes.containsKey("scope_list")) {
-            scriptLogger.info("Client registration. Initialization failed. Scope List not found.");
+            log.info("Client registration. Initialization failed. Scope List not found.");
             return false;
         }
-        String scope_list = configurationAttributes.get("Scope_list").getValue2();
-        JSONObject scope_list_json = new JSONObject(scope_list);
+        String scope_list = configurationAttributes.get("scope_list").getValue2();
+        json_array = new JSONArray(scope_list);
         return true;
     }
 
     @Override
     public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
-        scriptLogger.info("Client registration. Initialization.");
+        log.info("Client registration. Initialization.");
+        log.info(configurationAttributes.toString());
+        if (!configurationAttributes.containsKey("scope_list")) {
+            log.info("Client registration. Initialization failed. Scope List not found.");
+            return false;
+        }
+        String scope_list = configurationAttributes.get("scope_list").getValue2();
+        json_array = new JSONArray(scope_list);
         return true;
     }
 
     @Override
     public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
-        scriptLogger.info("Client registration. Destroy.");
+        log.info("Client registration. Destroy.");
         return true;
     }
 
@@ -187,26 +188,26 @@ public class ClientRegistration implements ClientRegistrationType {
 
     @Override
     public boolean createClient(Object context) {
-        scriptLogger.info("Client registration. CreateClient method");
+        log.info("Client registration. CreateClient method");
         DynamicClientRegistrationContext regContext = (DynamicClientRegistrationContext) context;
         Client client = regContext.getClient();
-        ScopeService scopeService;
+        ScopeService scopeService = CdiUtil.bean(ScopeService.class);
 
         String[] currentScopes = client.getScopes();
         String[] newScopes = currentScopes.clone();
-        
-        for(int i = 0; i < scope_list.size(); i++) {
-            String scopeName = scope_list.get(i);
+
+        for (int i = 0; i < json_array.length(); i++) {
+            String scopeName = (String) json_array.get(i);
             Scope foundScope = scopeService.getScopeById(scopeName);
             if (foundScope == null) {
-                scriptLogger.info("Client registration. Scope not found");
+                log.info("Client registration. Scope not found");
                 return false;
             }
             newScopes = ArrayHelper.addItemToStringArray(newScopes, foundScope.getDn());
         }
 
         client.setScopes(newScopes);
-        scriptLogger.info("Client registration. Scopes added.");
+        log.info("Client registration. Scopes added.");
 
         return true;
     }
@@ -216,14 +217,31 @@ public class ClientRegistration implements ClientRegistrationType {
         return true;
     }
 
+    // This method needs to be overridden if client is providing an SSA with HMAC
     @Override
     public String getSoftwareStatementHmacSecret(Object context) {
         return "";
     }
 
+    // This method needs to be overridden if client is providing an SSA and RS256 validation
     @Override
     public String getSoftwareStatementJwks(Object context) {
         return "";
+    }
+
+    @Override
+    public String getDcrHmacSecret(Object o) {
+        return "";
+    }
+
+    @Override
+    public String getDcrJwks(Object o) {
+        return "";
+    }
+
+    @Override
+    public boolean isCertValidForClient(Object o, Object o1) {
+        return false;
     }
 
     @Override
@@ -241,4 +259,5 @@ public class ClientRegistration implements ClientRegistrationType {
         return true;
     }
 }
+
 ```
