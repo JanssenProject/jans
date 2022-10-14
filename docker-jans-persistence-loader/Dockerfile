@@ -49,7 +49,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
-    && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog
+    && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
+    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/
 
 RUN mkdir -p /app/templates/jans-config-api
 
