@@ -528,7 +528,7 @@ class SqlClient(SqlSchemaMixin):
             for table_name, column_mapping in self._data_from_ldif(dst.name):
                 self.insert_into(table_name, column_mapping)
 
-    def get_server_version(self):
+    def get_server_version(self) -> tuple[int, ...]:
         """Get server version as tuple."""
         # major and minor format
         version = [0, 0]
