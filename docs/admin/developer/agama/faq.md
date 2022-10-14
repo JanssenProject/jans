@@ -102,7 +102,7 @@ If you require AJAX to consume a resource (service) residing in the same domain 
 
 ### I want/need to understand the internals, where to start?
 
-The quick start guide is a must, followed by [Hello world flow for project maintainers](./hello-world-maintainer.md). In the end a complete sweep over all the docs is needed.
+The quick start guide is a must, followed by [A closer look to Hello world flow](./hello-world-closer.md). In the end a complete sweep over all the docs is needed.
 
 ## Miscellaneous
 
