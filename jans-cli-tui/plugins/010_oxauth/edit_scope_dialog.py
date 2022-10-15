@@ -151,11 +151,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         data={}
                         )
         except Exception as e:
-                    self.app.show_message(_("Error getting claims"), str(e))
+                    self.myparent.show_message(_("Error getting claims"), str(e))
                     return
 
+        if responce.status_code not in (200, 201):
+            self.myparent.show_message(_("Error getting clients"), str(responce.text))
+            return 
+
+
         result = responce.json()
-        # self.myparent.logger.debug('result: ' + str(result["entries"]))
 
         calims_names=[]
         for entry in result["entries"] :
@@ -169,19 +173,21 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     def get_claims(self):
 
         data = self.get_named_claims(self.data.get('claims', []))
-
-        self.claims_container = JansVerticalNav(
-                myparent=self.myparent,
-                headers=['dn', 'Display Name'],
-                preferred_size= [0,0],
-                data=data,
-                on_display=self.myparent.data_display_dialog,
-                on_delete=self.delete_claim,
-                selectes=0,
-                headerColor='class:outh-client-navbar-headcolor',
-                entriesColor='class:outh-client-navbar-entriescolor',
-                all_data=data
-                )
+        if data :
+            self.claims_container = JansVerticalNav(
+                    myparent=self.myparent,
+                    headers=['dn', 'Display Name'],
+                    preferred_size= [0,0],
+                    data=data,
+                    on_display=self.myparent.data_display_dialog,
+                    on_delete=self.delete_claim,
+                    selectes=0,
+                    headerColor='class:outh-client-navbar-headcolor',
+                    entriesColor='class:outh-client-navbar-entriescolor',
+                    all_data=data
+                    )
+        else:
+            self.claims_container=HSplit([],width=D())
 
         return self.claims_container
 
@@ -201,7 +207,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             try:
                 self.myparent.layout.focus(focused_before)
             except:
-                self.myparent.layout.focus(self.app.center_frame)
+                self.myparent.layout.focus(self.myparent.center_frame) ##
 
             self.myparent.logger.debug('claims to delete: ' + str(selected))
 
@@ -269,7 +275,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
                             ####################################################
-                            self.get_claims(),
+                            self.get_claims(), 
                             ###################################################
 
                             ],width=D(),)
