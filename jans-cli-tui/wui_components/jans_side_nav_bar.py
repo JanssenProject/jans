@@ -12,7 +12,7 @@ from prompt_toolkit.key_binding import KeyBindings
 class JansSideNavBar():
     """This is a Vertical Navigation bar Widget with one value used in clients/scopes dialogs
     """
-    def __init__(self, entries, selection_changed, myparent=None, select=0, entries_color='#00ff44'):
+    def __init__(self, entries, selection_changed, save_handler=None, myparent=None, select=0, entries_color='#00ff44'):
         """init for JansSideNavBar
 
         Args:
@@ -34,6 +34,7 @@ class JansSideNavBar():
         self.navbar_entries = entries  # ListBox entries
         self.cur_navbar_selection = select  # ListBox initial selection
         self.entries_color = entries_color
+        self.save_handler=save_handler
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.selection_changed = selection_changed
         self.create_window()
@@ -123,9 +124,10 @@ class JansSideNavBar():
                 self.cur_navbar_selection + 1) % len(self.navbar_entries)
             self.update_selection()
 
-        # @kb.add("enter")
-        # def _(event):
-        #     pass
+        @kb.add('f2', eager=True)
+        def _go_up(event) -> None:
+            if self.save_handler:
+                self.save_handler()
 
         return kb
 

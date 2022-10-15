@@ -71,9 +71,6 @@ class JansDialogWithNav():
                     VerticalLine(),
 
                 ]) if self.navbar else VSplit([]),
-
-
-
                     VSplit([
                         ScrollablePane(content=self.content, height=height,display_arrows=False),
                     ],key_bindings=self.get_nav_bar_key_bindings()) 
@@ -99,19 +96,26 @@ class JansDialogWithNav():
 
 
         @kb.add('pageup', eager=True)  ###  eager neglect any other keybinding 
-        def _go_up(event) -> None:
+        def _go_pageup(event) -> None:
             if self.navbar : 
                 app = get_app()
                 self.navbar.go_up()
                 app.layout.focus(self.navbar)
 
         @kb.add('pagedown', eager=True)
-        def _go_up(event) -> None:
+        def _go_pagedown(event) -> None:
             if self.navbar:
                 app = get_app()
                 self.navbar.go_down()
                 app.layout.focus(self.navbar)
-    
+
+        @kb.add('f2', eager=True)
+        def _go_up(event) -> None:
+            if self.button_functions:
+                for k in range(len(self.button_functions)):
+                    if str(self.button_functions[k][1]).lower() == 'save':
+                        self.button_functions[k][0]()
+
         return kb
 
     def __pt_container__(self):

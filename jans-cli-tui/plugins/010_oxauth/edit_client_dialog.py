@@ -115,7 +115,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
             entries=list(self.tabs.keys()),
             selection_changed=(self.client_dialog_nav_selection_changed) ,
             select=0,
-            entries_color='class:outh-client-navbar')
+            entries_color='class:outh-client-navbar',
+            save_handler=self.save)
 
         self.dialog = JansDialogWithNav(
             title=self.title,
