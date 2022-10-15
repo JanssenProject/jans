@@ -5,7 +5,7 @@ from prompt_toolkit.layout.containers import Float, HSplit, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
-from prompt_toolkit.key_binding.bindings.focus import focus_next
+from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.dimension import D
 import cli_style
 
@@ -195,6 +195,9 @@ class DropDownWidget:
         def _focus_next(event):
             focus_next(event)
 
+        def _focus_previous(event):
+            focus_previous(event)
+
         @kb.add("enter")
         def _enter(event) -> None:
             if self.select_box_float not in get_app().layout.container.floats:
@@ -220,6 +223,13 @@ class DropDownWidget:
                 get_app().layout.container.floats.remove(self.select_box_float)
 
             _focus_next(event)
+
+        @kb.add('s-tab')
+        def _(event):
+            if self.select_box_float in get_app().layout.container.floats:
+                get_app().layout.container.floats.remove(self.select_box_float)
+
+            _focus_previous(event)
 
         return kb
 
