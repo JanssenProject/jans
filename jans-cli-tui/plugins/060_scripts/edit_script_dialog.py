@@ -45,13 +45,6 @@ import threading
 from multi_lang import _
 import re
 
-LEXERS = {
-        'PYTHON': PygmentsLexer(PythonLexer),
-        'JAVA': PygmentsLexer(JavaLexer)
-        }
-
-
-
 class EditScriptDialog(JansGDialog, DialogUtils):
     """This Script editing dialog
     """
@@ -72,6 +65,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.save_handler = save_handler
         self.data = data
         self.title=title
+        self.cur_lang = self.data.get('programmingLanguage', 'PYTHON')
         self.create_window()
         self.script = self.data.get('script','')
 
@@ -83,7 +77,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             item_data = self.get_item_data(item)
             if item_data:
                 data[item_data['key']] = item_data['value']
-
 
         for prop_container in (self.config_properties_container, self.module_properties_container):
 
@@ -101,32 +94,32 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             prop['hide'] = prop_[2]
                         data[prop_container.jans_name].append(prop)
 
-        if data['location'] == 'db':
-            data['locationType'] = 'ldap'
-        else:
-            data['locationType'] = 'file'
+        
+        data['locationType'] = 'LDAP' if data['location'] == 'db' else 'FILE'
+        data['internal'] = self.data.get('internal', False)
+        data['modified'] = self.data.get('modified', False)
+        data['revision'] = self.data.get('revision', 0) + 1
+        data['script'] = self.script
 
         del data['location']
 
-        data['script'] = self.script
+        if not data['inum']:
+            del data['inum']
 
-        self.myparent.logger.debug('DATA: ' + str(data))
+        if self.data.get('baseDn'):
+            data['baseDn'] = self.data['baseDn']
 
-        """
-        self.data = data
-        if 'attributes' in self.data.keys():
-            self.data['attributes'] = {'showInConfigurationEndpoint':self.data['attributes']}
+        self.new_data = data
 
         close_me = True
         if self.save_handler:
             close_me = self.save_handler(self)
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
-        """
+
 
     def cancel(self):
         self.future.set_result(DialogResult.CANCEL)
-
 
 
     def create_window(self):
@@ -162,18 +155,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                         ['DISCOVERY', 'Discovery'],
                         ]
 
-        self.script_widget = self.myparent.getTitledText(
-                                    _("Script"), 
-                                    name='script', 
-                                    value=self.data.get('script',''),
-                                    style='class:script-titledtext', 
-                                    jans_help=self.myparent.get_help_from_schema(schema, 'script'),
-                                    height=12,
-                                    scrollbar=True,
-                                    line_numbers=True,
-                                    lexer=LEXERS[self.data.get('programmingLanguage', 'PYTHON')],
-                                    )
-
         self.location_widget = self.myparent.getTitledText(_("          Path"), name='locationPath', value=self.data.get('locationPath',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'locationPath'))
         self.set_location_widget_state(self.data.get('locationPath') == 'file')
 
@@ -192,7 +173,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 data=config_properties_data,
                 on_enter=self.edit_property,
                 on_delete=self.delete_config_property,
-                on_display=self.display_property,
+                on_display=self.myparent.data_display_dialog,
                 selectes=0,
                 headerColor='class:outh-client-navbar-headcolor',
                 entriesColor='class:outh-client-navbar-entriescolor',
@@ -200,9 +181,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 underline_headings=False,
                 max_width=52,
                 jans_name='configurationProperties',
-                resize_after_edit=False
+                max_height=False
                 )
-
 
         module_properties_data = []
         for prop in self.data.get('moduleProperties', []):
@@ -215,7 +195,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 data=module_properties_data,
                 on_enter=self.edit_property,
                 on_delete=self.delete_config_property,
-                on_display=self.display_property,
+                on_display=self.myparent.data_display_dialog,
                 selectes=0,
                 headerColor='class:outh-client-navbar-headcolor',
                 entriesColor='class:outh-client-navbar-entriescolor',
@@ -223,7 +203,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 underline_headings=False,
                 max_width=44,
                 jans_name='moduleProperties',
-                resize_after_edit=False
+                max_height=3
                 )
 
         open_editor_button_title = _("Edit Script")
@@ -263,7 +243,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                 name='programmingLanguage',
                                 widget=DropDownWidget(
                                     values=[['PYTHON', 'Python'], ['JAVA', 'Java']],
-                                    value=self.data.get('programmingLanguage', 'PYTHON'),
+                                    value=self.cur_lang,
                                     on_value_changed=self.script_lang_changed,
                                     ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'programmingLanguage'),
@@ -302,8 +282,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                              height=5
                             ),
                     VSplit([open_editor_button, Window(width=D())]),
-
-                    #self.script_widget,
                     ]
 
 
@@ -321,7 +299,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
 
     def script_lang_changed(self, value):
-        self.script_widget.me.lexer = LEXERS[value]
+        self.cur_lang = value
 
     def set_location_widget_state(self, state):
         self.location_widget.me.read_only = not state
@@ -373,11 +351,11 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.myparent.show_jans_dialog(dialog)
 
 
-    def delete_config_property(self, **data):
-        pass
-
-    def display_property(self, **data):
-        pass
+    def delete_config_property(self, **kwargs):
+        if kwargs['jans_name'] == 'configurationProperties':
+            self.config_properties_container.remove_item(kwargs['selected'])
+        else:
+            self.module_properties_container.remove_item(kwargs['selected'])
 
 
     def edit_script_dialog(self):
@@ -390,7 +368,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 focusable=True,
                 scrollbar=True,
                 line_numbers=True,
-                lexer=LEXERS[self.data.get('programmingLanguage', 'PYTHON')],
+                lexer=PygmentsLexer(PythonLexer if self.cur_lang == 'PYTHON' else JavaLexer),
             )
 
         def modify_script(arg):

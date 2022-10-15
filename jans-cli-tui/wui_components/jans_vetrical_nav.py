@@ -13,7 +13,7 @@ class JansVerticalNav():
 
     def __init__(self, myparent, headers, selectes,  on_display, on_enter=None, on_delete=None,
                 all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white', 
-                underline_headings=True, max_width=None, jans_name='', resize_after_edit=False):
+                underline_headings=True, max_width=None, jans_name='', max_height=None):
         """init for JansVerticalNav
 
         Args:
@@ -31,6 +31,7 @@ class JansVerticalNav():
             underline_headings (str, optional): Put a line under headings.
             max_width (int, optional): Maximum width of container.
             jans_name (str, optional): Widget name
+            max_height (int, optional): Maximum hegight of container
         
         Examples:
             clients = JansVerticalNav(
@@ -59,7 +60,7 @@ class JansVerticalNav():
         self.preferred_size = preferred_size
         self.headerColor = headerColor
         self.entriesColor = entriesColor
-        self.resize_after_edit = resize_after_edit
+        self.max_height = max_height
 
         self.on_enter = on_enter
         self.on_delete = on_delete
@@ -210,15 +211,13 @@ class JansVerticalNav():
     def remove_item(self, item):
         self.data.remove(item)
         self.handle_header_spaces()
-        if self.resize_after_edit:
-            self.container_content[-1].height = len(self.data)
-
+        if self.max_height:
+            self.container_content[-1].height = self.max_height if self.max_height else len(self.data)
 
     def add_item(self, item):
         self.data.append(item)
         self.handle_header_spaces()
-        if self.resize_after_edit:
-            self.container_content[-1].height = len(self.data)
+        self.container_content[-1].height = self.max_height if self.max_height else len(self.data)
 
     def replace_item(self, item_index, item):
         self.data[item_index] = item
@@ -270,8 +269,8 @@ class JansVerticalNav():
         @kb.add('delete')
         def _(event):
             if self.data and self.on_delete:
-                selected_line = [i.strip() for i in self.data[self.selectes]]
-                self.on_delete(selected=selected_line, event=event)
+                selected_line = self.data[self.selectes]
+                self.on_delete(selected=selected_line, event=event, jans_name=self.jans_name)
 
         return kb
 

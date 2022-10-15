@@ -213,11 +213,11 @@ class Plugin():
         # self.app.logger.debug('Saved DATA: '+str(dialog.data))
 
         response = self.app.cli_object.process_command_by_id(
-            operation_id='put-config-scripts' if dialog.data.get('inum') else 'post-config-scripts',
+            operation_id='put-config-scripts' if dialog.new_data.get('inum') else 'post-config-scripts',
             url_suffix='',
             endpoint_args='',
             data_fn='',
-            data=dialog.data
+            data=dialog.new_data
         )
 
         # self.app.logger.debug(response.text)
