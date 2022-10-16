@@ -52,7 +52,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         data:list,
         buttons: Optional[Sequence[Button]]= [],
         save_handler: Callable= None,
-        ):
+        )-> Dialog:
         """init for `EditScopeDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New

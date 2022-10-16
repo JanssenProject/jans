@@ -38,6 +38,11 @@ from utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
 import threading
+from prompt_toolkit.widgets import (
+    Button,
+    Dialog,
+    VerticalLine,
+)
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
@@ -61,7 +66,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         buttons: Optional[Sequence[Button]]= [],
         save_handler: Callable= None, 
         delete_UMAresource: Callable= None,
-        ):
+        )-> Dialog:
         """init for `EditClientDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar

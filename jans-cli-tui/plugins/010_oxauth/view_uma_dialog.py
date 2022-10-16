@@ -74,7 +74,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         title: AnyFormattedText= "",
         buttons: Optional[Sequence[Button]]= [],
         deleted_uma: Callable= None,
-        ):
+        )-> Dialog:
         """init for `ViewUMADialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
