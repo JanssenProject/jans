@@ -415,7 +415,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         VSplit([   ## TODO what the functionality would be?
                                 Label(text=_("Spontaneous scopes"),style='class:outh-client-label',width=len(_("Spontaneous scopes")*2)), ## TODO
                                 Button(_("View current"), handler=self.show_client_scopes,left_symbol='<',right_symbol='>',width=len(_("View current"))+2)
-                        ]),
+                        ])  if self.data.get('inum','') else  HSplit([],width=D()),
 
                         self.myparent.getTitledText(_("Initial Login URI"), name='initiateLoginUri', value=self.data.get('initiateLoginUri',''),style='class:outh-client-text'),
 
