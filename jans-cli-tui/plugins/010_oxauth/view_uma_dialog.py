@@ -53,7 +53,13 @@ from utils import DialogUtils
 from wui_components.jans_cli_dialog import JansGDialog
 
 from wui_components.jans_drop_down import DropDownWidget
-
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.layout.dimension import AnyDimension
+from typing import Optional, Sequence, Union
+from typing import TypeVar, Callable
 from multi_lang import _
 import cli_style
 
@@ -61,7 +67,14 @@ class ViewUMADialog(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details
     """
 
-    def __init__(self, parent, title, data, buttons=[], deleted_uma=None):
+    def __init__(
+        self,
+        parent,
+        data:list,
+        title: AnyFormattedText= "",
+        buttons: Optional[Sequence[Button]]= [],
+        deleted_uma: Callable= None,
+        ):
         """init for `ViewUMADialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
@@ -170,8 +183,6 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             # width=140,
         )
 
-
-
     def UMA_prepare_containers(self):
         """Prepare the containers for UMA Dialog
         """
@@ -210,11 +221,6 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         if selection in self.UMA_containers:
             self.oauth_main_area = self.UMA_containers[selection]
         
-        
-
-    def save(self):
-        pass
-
     def __pt_container__(self):
         return self.dialog
 

@@ -32,14 +32,27 @@ from utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
 import threading
-
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.layout.dimension import AnyDimension
+from typing import Optional, Sequence, Union
+from typing import TypeVar, Callable
 from multi_lang import _
 import re
 
 class EditScopeDialog(JansGDialog, DialogUtils):
     """The Main Scope Dialog that contain every thing related to The Scope
     """
-    def __init__(self, parent, title, data, buttons=[], save_handler=None):
+    def __init__(
+        self,
+        parent,
+        title: AnyFormattedText,
+        data:list,
+        buttons: Optional[Sequence[Button]]= [],
+        save_handler: Callable= None,
+        ):
         """init for `EditScopeDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
@@ -61,7 +74,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.prepare_tabs()
         self.create_window()
         self.sope_type = self.data.get('scopeType') or 'oauth'
-
 
     def save(self):
         self.myparent.logger.debug('SAVE SCOPE')
@@ -90,7 +102,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     
     def cancel(self):
         self.future.set_result(DialogResult.CANCEL)
-
 
     def create_window(self):
 
@@ -139,7 +150,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     def nothing(self):
         pass
 
-
     def get_named_claims(self, claims_list):
         # self.myparent.logger.debug('claims_list: ' + str(claims_list))
         try :
@@ -168,7 +178,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     calims_names.append([entry['dn'], entry['displayName']])
 
         return calims_names
-
 
     def get_claims(self):
 
@@ -219,7 +228,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
         ensure_future(coroutine())
-
 
     def prepare_tabs(self):
         """Prepare the tabs for Edil Scope Dialogs
@@ -394,7 +402,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_selected_claims)]
         dialog = JansGDialog(self.myparent, title=_("Select claims to add"), body=check_box_list, buttons=buttons)
         self.myparent.show_jans_dialog(dialog)
-
 
     def __pt_container__(self):
         return self.dialog

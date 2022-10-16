@@ -38,6 +38,14 @@ from utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
 import threading
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.layout.dimension import AnyDimension
+from typing import Optional, Sequence, Union
+from typing import TypeVar, Callable
+
 import json
 from multi_lang import _
 import cli_style
@@ -45,7 +53,15 @@ import cli_style
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
     """
-    def __init__(self, parent, title, data, buttons=[], save_handler=None, delete_UMAresource=None):
+    def __init__(
+        self,
+        parent,
+        data:list,
+        title: AnyFormattedText= "",
+        buttons: Optional[Sequence[Button]]= [],
+        save_handler: Callable= None, 
+        delete_UMAresource: Callable= None,
+        ):
         """init for `EditClientDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
@@ -65,8 +81,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.title=title
         self.prepare_tabs()
         self.create_window()
-
-
 
     def save(self):
 
@@ -120,7 +134,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
     def cancel(self):
         self.future.set_result(DialogResult.CANCEL)
 
-
     def create_window(self):
         self.side_nav_bar = JansSideNavBar(myparent=self.myparent,
             entries=list(self.tabs.keys()),
@@ -140,7 +153,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
                    )
-
 
     def prepare_tabs(self):
         """Prepare the tabs for Edil Client Dialogs
@@ -509,7 +521,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
-
     def show_client_scopes(self):
         client_scopes = self.data.get('scopes')  
         self.myparent.logger.debug('client_scopes: '+str(client_scopes))
@@ -556,43 +567,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.myparent.show_jans_dialog(dialog)
 
-            
-
-        # body=HSplit([
-        #     self.myparent.getTitledText(_("dn"),name='dn',value=client_scopes.get('dn',''),style='class:outh-client-text'),
-        #     self.myparent.getTitledText(_("inum"),name='inum',value=client_scopes.get('inum',''),style='class:outh-client-text'),
-        #     self.myparent.getTitledText(_("displayName"),name='displayName',value=client_scopes.get('displayName',''),style='class:outh-client-text'),
-        #     self.myparent.getTitledText(_("id"),name='id',value=client_scopes.get('id',''),style='class:outh-client-text'),
-        #     self.myparent.getTitledText(_("description"),name='description',value=client_scopes.get('description',''),style='class:outh-client-text'),
-        #     self.myparent.getTitledText(_("scopeType"),name='scopeType',value=client_scopes.get('scopeType',''),style='class:outh-client-text'),
-        #     self.myparent.getTitledCheckBox(_("attributes"), name='attributes',
-        #      checked= not self.data.get('attributes')['showInConfigurationEndpoint'], style='class:outh-client-checkbox'),
-
-        #     self.myparent.getTitledText(_("creationDate"),name='creationDate',value=client_scopes.get('creationDate',''),style='class:outh-client-text'),
-            
-        #     self.myparent.getTitledCheckBox(_("umaType"), name='umaType',
-        #      checked= not self.data.get('umaType'), style='class:outh-client-checkbox'),
-            
-        #     self.myparent.getTitledText(_("baseDn"),name='baseDn',value=client_scopes.get('baseDn',''),style='class:outh-client-text'),
-            
-        #     ],style='class:jans-main-usercredintial')
-
-        # # buttons = [Button(_("Save"), handler=self.save_creds)]
-        # dialog = JansGDialog(self.myparent, title=_("Janssen Config Api Client Credidentials"), body=body, buttons=[])
-
-        # async def coroutine():
-        #     app = get_app()
-        #     focused_before = app.layout.current_window
-        #     result = await self.myparent.show_dialog_as_float(dialog)
-        #     try:
-        #         app.layout.focus(focused_before)
-        #     except:
-        #         app.layout.focus(self.tabs['Advanced Client Properties'])
-            
-
-        # ensure_future(coroutine())
-
-
     def oauth_get_uma_resources(self):
         """Method to get the clients data from server
         """
@@ -607,7 +581,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         t = threading.Thread(target=self.oauth_update_uma_resources, args=(tbuffer.text,), daemon=True)
         t.start()
 
-    def oauth_update_uma_resources (self, pattern=''): 
+    def oauth_update_uma_resources (self, pattern: str= ''): 
         """update the current uma_resources  data to server
 
         Args:
@@ -703,9 +677,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.uma_resources = HSplit([],width=D())
             self.myparent.show_message(_("Oops"), _("No matching result"),tobefocused=self.resources.children[0].children[0])  
 
-
-
-        
     def client_dialog_nav_selection_changed(self, selection):
         self.left_nav = selection
 
