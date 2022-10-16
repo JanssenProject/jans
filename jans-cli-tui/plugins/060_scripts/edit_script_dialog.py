@@ -38,6 +38,13 @@ from wui_components.jans_data_picker import DateSelectWidget
 from utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_spinner import Spinner
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.layout.dimension import AnyDimension
+from typing import Optional, Sequence, Union
+from typing import TypeVar, Callable
 
 from view_uma_dialog import ViewUMADialog
 import threading
@@ -48,7 +55,14 @@ import re
 class EditScriptDialog(JansGDialog, DialogUtils):
     """This Script editing dialog
     """
-    def __init__(self, parent, title, data, buttons=[], save_handler=None):
+    def __init__(
+        self,
+        parent,
+        data:list,
+        title: AnyFormattedText= "",
+        buttons: Optional[Sequence[Button]]= [],
+        save_handler: Callable= None,
+        )-> Dialog:
         """init for `EditScriptDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
@@ -117,10 +131,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
 
-
     def cancel(self):
         self.future.set_result(DialogResult.CANCEL)
-
 
     def create_window(self):
 
@@ -297,7 +309,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
             )
 
-
     def script_lang_changed(self, value):
         self.cur_lang = value
 
@@ -350,13 +361,11 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         dialog = JansGDialog(self.myparent, title=title, body=body, buttons=buttons, width=self.myparent.dialog_width-20)
         self.myparent.show_jans_dialog(dialog)
 
-
     def delete_config_property(self, **kwargs):
         if kwargs['jans_name'] == 'configurationProperties':
             self.config_properties_container.remove_item(kwargs['selected'])
         else:
             self.module_properties_container.remove_item(kwargs['selected'])
-
 
     def edit_script_dialog(self):
 
