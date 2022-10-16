@@ -3,13 +3,24 @@ from functools import partial
 from prompt_toolkit.widgets import Button, Dialog, Label
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
-
+from typing import Optional, Sequence, Union
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.layout.dimension import AnyDimension
+from prompt_toolkit.formatted_text import AnyFormattedText
 from multi_lang import _
 
 class JansMessageDialog:
     """This is a Dialog to show Message
     """
-    def __init__(self, title, body, buttons=[], focus_on_exit=None):
+    def __init__(
+        self,
+        title,
+        body: AnyContainer,
+        buttons:Optional[Sequence[Button]] = [],
+        focus_on_exit:AnyContainer =None
+        )-> Dialog: 
         """init for JansMessageDialog
 
         Args:

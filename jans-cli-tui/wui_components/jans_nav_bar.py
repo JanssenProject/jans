@@ -5,13 +5,22 @@ from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.application.current import get_app
+from typing import TypeVar, Callable
 
 shortcut_re = re.compile(r'\[(.*?)\]')
 
 class JansNavBar():
     """This is a horizontal Navigation bar Widget used in Main screen ('clients', 'scopes', 'keys', 'defaults', 'properties', 'logging')
     """
-    def __init__(self, myparent, entries, selection_changed, select=0, bgcolor='DimGray'):
+    def __init__(
+        self, 
+        myparent, 
+        entries: list, 
+        selection_changed: Callable, 
+        select: int= 0, 
+        bgcolor: str= "DimGray",
+        ) -> Window:
+
         """init for JansNavBar
 
         Args:

@@ -5,15 +5,30 @@ from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import HorizontalLine
+from typing import TypeVar, Callable
+from prompt_toolkit.layout.dimension import AnyDimension
 
 class JansVerticalNav():
     """This is a Vertical Navigation bar Widget with many values used in <Get clients>/<Get scopes>
     """
-
-
-    def __init__(self, myparent, headers, selectes,  on_display, on_enter=None, on_delete=None,
-                all_data=None, preferred_size=[], data=None, headerColor='green', entriesColor='white', 
-                underline_headings=True, max_width=None, jans_name='', max_height=None):
+    def __init__(
+        self,
+        myparent,
+        headers: list,
+        on_display: Callable, 
+        selectes: int=0,
+        on_enter: Callable= None,
+        on_delete: Callable= None,
+        all_data: list= [],
+        preferred_size: list= [],
+        data: list= [],
+        headerColor: str= "green",
+        entriesColor: str= "white",
+        underline_headings: bool= True, 
+        max_width: AnyDimension = None,
+        jans_name: str= '',
+        max_height: AnyDimension = None,
+        )->FloatContainer :
         """init for JansVerticalNav
 
         Args:

@@ -2,14 +2,26 @@ import json
 from functools import partial
 from asyncio import Future
 from prompt_toolkit.widgets import Button, Dialog
-from prompt_toolkit.layout.dimension import D
-
+from typing import Optional, Sequence, Union
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.layout.dimension import AnyDimension
+from prompt_toolkit.formatted_text import AnyFormattedText
 from multi_lang import _
 
 class JansGDialog:
     """This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
     """
-    def __init__(self, parent, title, body, buttons=[], width=None):
+    def __init__(
+        self, 
+        parent, 
+        body: AnyContainer,
+        title: AnyFormattedText= "",
+        buttons: Optional[Sequence[Button]]= [],
+        width: AnyDimension= None
+        )-> Dialog:  
+        
         """init for JansGDialog
 
         Args:

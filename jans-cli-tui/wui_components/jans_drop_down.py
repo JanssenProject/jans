@@ -7,13 +7,27 @@ from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.layout.dimension import AnyDimension
+from typing import Optional, Sequence, Union
+from typing import TypeVar, Callable
+
 import cli_style
 
 class JansSelectBox:
     """_summary_
     """
 
-    def __init__(self, values=[], value=None, height=4, rotatable_up=True, rotatable_down=True):
+    def __init__(
+        self,
+        values: list= [],
+        value: str= '',
+        height: AnyDimension= 4,
+        rotatable_up: Optional[bool] = True,
+        rotatable_down: Optional[bool] = True,
+        ) -> AnyContainer:
         """_summary_
 
         Args:
@@ -125,7 +139,12 @@ class DropDownWidget:
     """This is a Combobox widget (drop down) to select single from multi choices
     """
 
-    def __init__(self, values=[], value=None, on_value_changed=None):
+    def __init__(
+        self,
+        values: list= [],
+        value: str= '',
+        on_value_changed: Callable= None, 
+        ):
         """init for DropDownWidget
         Args:
             values (list, optional): List of values to select one from them. Defaults to [].

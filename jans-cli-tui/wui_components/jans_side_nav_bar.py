@@ -7,12 +7,21 @@ from prompt_toolkit.layout.containers import (
 from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.key_binding import KeyBindings
+from typing import TypeVar, Callable
 
 
 class JansSideNavBar():
     """This is a Vertical Navigation bar Widget with one value used in clients/scopes dialogs
     """
-    def __init__(self, entries, selection_changed, save_handler=None, myparent=None, select=0, entries_color='#00ff44'):
+    def __init__(
+        self,
+        entries: list, 
+        selection_changed: Callable, 
+        save_handler: Callable= None, 
+        myparent=None,
+        select: int= 0,
+        entries_color: str= "#00ff44",
+        ) -> FloatContainer:
         """init for JansSideNavBar
 
         Args:

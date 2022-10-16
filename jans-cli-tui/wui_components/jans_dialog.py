@@ -2,13 +2,29 @@ from prompt_toolkit.widgets import (
     Button,
     Dialog,
 )
+from typing import Optional, Sequence, Union
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.layout.dimension import AnyDimension
+from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.containers import HSplit
 
 
 class JansDialog():
     """NOt Used
     """
-    def __init__(self,only_view=False,height=None,width=None,title=None, button_functions=[], entries_list=[], entries_color='#00ff44'):
+    def __init__( #,
+        self,
+        only_view: Optional[bool] = False,
+        height: AnyDimension = None,
+        width: AnyDimension = None,
+        title: AnyFormattedText = "",
+        button_functions: Optional[list] = [],
+        entries_list: Optional[list] = [],
+        entries_color: str="#00ff44",
+        )-> Dialog:
+        
         self.entries_list = entries_list
         self.button_functions = button_functions
         self.entries_color = entries_color

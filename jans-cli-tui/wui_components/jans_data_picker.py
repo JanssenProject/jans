@@ -20,6 +20,9 @@ from prompt_toolkit.layout.containers import (
     FloatContainer,
     Window
 )
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
 import calendar
 import time
 import datetime
@@ -29,7 +32,13 @@ class JansSelectDate:
     """_summary_
     """
    
-    def __init__(self, date='',months=[],mytime=[]):  
+    def __init__(
+        self,
+        date: str= '',
+        months: list= [],
+        mytime: list= [],
+        )-> AnyContainer:  
+        
         """_summary_
 
         Args:
@@ -302,7 +311,12 @@ class JansSelectDate:
 class DateSelectWidget:
     """This is a Dape Picker widget to select exact time and date
     """
-    def __init__(self, value,parent):  # ex: value = "2023-11-27T14:05:35"
+    def __init__(
+        self,
+        parent,
+        value:str,
+        ) -> Window:  
+        # ex: value = "2023-11-27T14:05:35"
         """init for DateSelectWidget
 
         Args:
