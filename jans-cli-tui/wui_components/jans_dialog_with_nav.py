@@ -27,8 +27,8 @@ class JansDialogWithNav():
     def __init__(
         self,
         content: AnyContainer,
-        navbar: AnyContainer,
         width: AnyDimension,
+        navbar: AnyContainer=None,
         height: AnyDimension= None,
         title: AnyFormattedText= "",
         button_functions: list= [],
