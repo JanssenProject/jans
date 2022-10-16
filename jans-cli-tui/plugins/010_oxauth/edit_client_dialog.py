@@ -76,11 +76,22 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         'redirectUris',
                         'scopes',
                         'postLogoutRedirectUris',
+                        'backchannelLogoutUri',
                         'contacts',
                         'authorizedOrigins',
                         'umaAuthorizationPolicies',
-                        #'rptClaimsScripts',
-                        #'claimRedirectUris',
+                        'requestUris',
+                        'defaultAcrValues',
+                        'jansAuthorizedAcr',
+                        'x5c',
+                        'claimRedirectUris',
+                        'spontaneousScopes',
+                        'spontaneousScopeScriptDns',
+                        'updateTokenScriptDns',
+                        'postAuthnScripts',
+                        'introspectionScripts',
+                        'dynamicRegistrationAllowedPasswordGrantScopes',
+                        'consentGatheringScripts',
                             ):
             if self.data[list_key]:
                 self.data[list_key] = self.data[list_key].splitlines()
@@ -218,10 +229,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='includeClaimsInIdToken',
                             checked=self.data.get('includeClaimsInIdToken'),
                             style='class:outh-client-checkbox'),
+
                         self.myparent.getTitledCheckBox(
                             _("Run introspection script before JWT access token creation"),
-                            name='runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims',
-                            checked=self.data.get('runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims'),
+                            name='runIntrospectionScriptBeforeJwtCreation',
+                            checked=self.data.get('runIntrospectionScriptBeforeJwtCreation'),
                             style='class:outh-client-checkbox'),
 
                         self.myparent.getTitledText(
@@ -246,7 +258,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             
                         self.myparent.getTitledText(_("Front channel logout URI"), name='frontChannelLogoutUri', value=self.data.get('frontChannelLogoutUri',''), style='class:outh-client-text'),
                         self.myparent.getTitledText(_("Post logout redirect URIs"), name='postLogoutRedirectUris', value='\n'.join(self.data.get('postLogoutRedirectUris',[])), height=3, style='class:outh-client-text'),
-                        self.myparent.getTitledText(_("Back channel logout URI"), name='backchannelLogoutUri', value=self.data.get('backchannelLogoutUri',''),style='class:outh-client-text'),
+                        self.myparent.getTitledText(_("Back channel logout URI"), name='backchannelLogoutUri', value='\n'.join(self.data.get('backchannelLogoutUri','')), height=3, style='class:outh-client-text'),
                         self.myparent.getTitledCheckBox(_("Back channel logout session required"), name='backchannelLogoutSessionRequired', checked=self.data.get('backchannelLogoutSessionRequired'),style='class:outh-client-checkbox'),
                         self.myparent.getTitledCheckBox(_("Front channel logout session required"), name='frontChannelLogoutSessionRequired', checked=self.data.get('frontChannelLogoutSessionRequired'),style='class:outh-client-checkbox'),
 
@@ -317,20 +329,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             current_value='jwt' if self.data.get('rptAsJwt') else 'reference',
                             style='class:outh-client-radiobutton'),
 
-                        self.myparent.getTitledText(title =_("Claims redirect URI"), name='claimRedirectUris', value=self.data.get('claimRedirectUris',''),style='class:outh-client-text'),
-
-                        # self.myparent.getTitledText(_("RPT Mofification Script"),
-                        #     name='rptClaimsScripts',
-                        #     value='\n'.join(self.data.get('rptClaimsScripts', [])), 
-                        #     height=3,
-                        #     style='green'),
-
-                        # self.myparent.getTitledText(_("Claims Gathering Script"),
-                        #     name='claimRedirectUris',
-                        #     value='\n'.join(self.data.get('claimRedirectUris', [])), 
-                        #     height=3,
-                        #     style='green'),
-
+                        self.myparent.getTitledText(
+                            title =_("Claims redirect URI"),
+                             name='claimRedirectUris',
+                              value='\n'.join(self.data.get('claimRedirectUris','')),
+                              height=3,
+                              style='class:outh-client-text'),
 
                         self.myparent.getTitledText(_("UMA Authorization Policies"),
                             name='umaAuthorizationPolicies',
@@ -396,16 +400,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.spontaneous_scopes = self.myparent.getTitledText(
                     _("Spontaneos scopes validation regex"),
-                    name='spontaneousScopes',
-                    value=self.data.get('spontaneousScopes',''),
+                    name='spontaneousScopeScriptDns',
+                    value='\n'.join(self.data.get('spontaneousScopeScriptDns',[])),
                     read_only=False if 'allowSpontaneousScopes' in self.data and self.data['allowSpontaneousScopes'] else True,
                     focusable=True,
+                    height=3,
                     style='class:outh-client-text')
 
 
         self.tabs['Advanced Client Properties'] = HSplit([
 
-                        self.myparent.getTitledCheckBox(_("Default Prompt login"), name='defaultPromptLogin', checked=self.data.get('defaultPromptLogin'), style='class:outh-client-checkbox'),
+                        self.myparent.getTitledCheckBox(_("Default Prompt login"), name='jansDefaultPromptLogin', checked=self.data.get('jansDefaultPromptLogin'), style='class:outh-client-checkbox'),
                         self.myparent.getTitledCheckBox(_("Persist Authorizations"), name='persistClientAuthorizations', checked=self.data.get('persistClientAuthorizations'), style='class:outh-client-checkbox'),
                         self.myparent.getTitledCheckBox(_("Allow spontaneos scopes"), name='allowSpontaneousScopes', checked=self.data.get('allowSpontaneousScopes'), on_selection_changed=allow_spontaneous_changed, style='class:outh-client-checkbox'),
 
@@ -432,14 +437,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             style='class:outh-client-text'),
 
                         self.myparent.getTitledText(_("Allowed  ACR"), ### height =3 insted of the <+> button
-                            name='authorizedAcrValues',
-                            value='\n'.join(self.data.get('authorizedAcrValues', [])), 
+                            name='jansAuthorizedAcr',
+                            value='\n'.join(self.data.get('jansAuthorizedAcr', [])), 
                             height=3,
                             style='class:outh-client-text'),
 
 
 
-                        self.myparent.getTitledText(_("TLS Subject DN"), name='x5c', value=self.data.get('x5c',''),style='class:outh-client-text'),
+                        self.myparent.getTitledText(_("TLS Subject DN"), name='x5c', value='\n'.join(self.data.get('x5c','')), height=3, style='class:outh-client-text'),
 
                         self.myparent.getTitledWidget(
                                 _("Client Expiration Date"),
