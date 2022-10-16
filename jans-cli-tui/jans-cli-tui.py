@@ -43,6 +43,15 @@ from prompt_toolkit.widgets import (
     Checkbox,
 )
 
+from typing import Optional, Sequence, Union
+from prompt_toolkit.layout.containers import (
+    AnyContainer,
+)
+from prompt_toolkit.layout.dimension import AnyDimension
+from prompt_toolkit.formatted_text import AnyFormattedText
+from typing import TypeVar, Callable
+from prompt_toolkit.widgets import Button, Dialog, Label
+
 # -------------------------------------------------------------------------- #
 from cli import config_cli
 from wui_components.jans_cli_dialog import JansGDialog
@@ -270,7 +279,6 @@ class JansCliApp(Application):
         self.bindings.add('f1')(self.help)
         self.bindings.add('escape')(self.escape)
 
-
     def help(self,ev):
         self.show_message(_("Help"),'''<Enter> {} \n<j> {}\n<d> {}'''.format(_("Edit current selection"),_("Display current item in JSON format"),_("Delete current selection")))
         
@@ -286,7 +294,6 @@ class JansCliApp(Application):
         except Exception as e:
             pass
 
-
     def get_help_from_schema(self, schema, jans_name):
         for prop in schema.get('properties', {}):
             if prop == jans_name:
@@ -294,20 +301,20 @@ class JansCliApp(Application):
 
     def getTitledText(
             self,
-            title,
-            name,
-            value='',
-            height=1,
-            jans_help='',
-            accept_handler=None,
-            read_only=False,
-            focusable=None,
-            width=None,
-            style='',
-            scrollbar=False,
-            line_numbers=False,
-            lexer=None
-            ):
+            title: AnyFormattedText= "",
+            name: AnyFormattedText= "",
+            value: AnyFormattedText= "",
+            height: int= 1,
+            jans_help: AnyFormattedText= "",
+            accept_handler: Callable= None,
+            read_only: Optional[bool] = False,
+            focusable: Optional[bool] = None,
+            width: AnyDimension= None,
+            style: AnyFormattedText= "",
+            scrollbar: Optional[bool] = False,
+            line_numbers: Optional[bool] = False,
+            lexer: PygmentsLexer= None
+            ) -> AnyContainer:
         title += ': '
         ta = TextArea(
                 text=str(value),
@@ -332,7 +339,16 @@ class JansCliApp(Application):
 
         return v
  
-    def getTitledCheckBoxList(self, title, name, values, current_values=[], jans_help='', style=''):
+    def getTitledCheckBoxList(
+        self,
+        title: AnyFormattedText,
+        name: AnyFormattedText,
+        values: list= [],
+        current_values: list= [],
+        jans_help: AnyFormattedText= "",
+        style: AnyFormattedText= "",
+        ) -> AnyContainer:
+
         title += ': '
         if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
             values = [(o,o) for o in values]
@@ -347,7 +363,17 @@ class JansCliApp(Application):
 
         return v
 
-    def getTitledCheckBox(self, title, name, text='', checked=False, on_selection_changed=None, jans_help='', style=''):
+    def getTitledCheckBox(
+        self, 
+        title: AnyFormattedText,
+        name: AnyFormattedText, 
+        text: AnyFormattedText= "",
+        checked: Optional[bool] = False, 
+        on_selection_changed: Callable= None, 
+        jans_help: AnyFormattedText= "",
+        style: AnyFormattedText= "",
+        ) -> AnyContainer:
+
         title += ': '
         cb = Checkbox(text)
         cb.checked = checked
@@ -369,7 +395,17 @@ class JansCliApp(Application):
 
         return v
 
-    def getTitledRadioButton(self, title, name, values, current_value=None, on_selection_changed=None, jans_help='', style=''):
+    def getTitledRadioButton(
+        self, 
+        title: AnyFormattedText, 
+        name: AnyFormattedText,
+        values: list= [],
+        current_value: AnyFormattedText= "", 
+        on_selection_changed: Callable= None,  
+        jans_help: AnyFormattedText= "", 
+        style: AnyFormattedText= "",
+        ) -> AnyContainer:
+
         title += ': '
         if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
             values = [(o,o) for o in values]
@@ -393,7 +429,14 @@ class JansCliApp(Application):
 
         return v
 
-    def getTitledWidget(self, title, name, widget, jans_help='', style=''):
+    def getTitledWidget(
+        self, 
+        title: AnyFormattedText,  
+        name: AnyFormattedText,  
+        widget:AnyContainer, 
+        jans_help: AnyFormattedText= "",
+        style: AnyFormattedText= "",
+        )-> AnyContainer:
         title += ': '
         widget.window.jans_name = name
         widget.window.jans_help = jans_help
@@ -404,7 +447,14 @@ class JansCliApp(Application):
 
         return v
 
-    def getButton(self, text, name, jans_help, handler=None):
+    def getButton(
+        self, 
+        text: AnyFormattedText, 
+        name: AnyFormattedText, 
+        jans_help: AnyFormattedText, 
+        handler: Callable= None, 
+        ) -> AnyContainer:
+
         b = Button(text=text, width=len(text)+2)
         b.window.jans_name = name
         b.window.jans_help = jans_help
@@ -433,7 +483,7 @@ class JansCliApp(Application):
         plugin = self.get_plugin_by_id(selection)
         plugin.set_center_frame()
 
-    async def show_dialog_as_float(self, dialog):
+    async def show_dialog_as_float(self, dialog:Dialog):
         'Coroutine.'
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
@@ -450,7 +500,7 @@ class JansCliApp(Application):
 
         return result
 
-    def show_jans_dialog(self, dialog):
+    def show_jans_dialog(self, dialog:Dialog):
 
         async def coroutine():
             focused_before = self.layout.current_window
@@ -482,7 +532,7 @@ class JansCliApp(Application):
 
         self.show_jans_dialog(dialog)
 
-    def save_creds(self, dialog):
+    def save_creds(self, dialog:Dialog):
 
         for child in dialog.body.children:
             prop_name = child.children[1].jans_name
@@ -498,7 +548,13 @@ class JansCliApp(Application):
         config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
         config_cli.access_token = None
 
-    def show_message(self, title, message, buttons=[],tobefocused=None):
+    def show_message(
+        self, 
+        title: AnyFormattedText,  
+        message: AnyFormattedText,  
+        buttons:Optional[Sequence[Button]] = [],
+        tobefocused: AnyContainer= None
+        ):
         body = HSplit([Label(message)])
         dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
 
@@ -516,7 +572,7 @@ class JansCliApp(Application):
     def show_again(self): ## nasted dialog Button
         self.show_message(_("Again"), _("Nasted Dialogs"),)
 
-    def get_confirm_dialog(self, message):
+    def get_confirm_dialog(self, message: AnyFormattedText):
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
         buttons = [Button(_("No")), Button(_("Yes"))]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons)
