@@ -563,7 +563,7 @@ def test_render_sql_properties(monkeypatch, tmpdir, gmanager, dialect, port, sch
 
     monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(passwd))
     monkeypatch.setenv("CN_SQL_DB_DIALECT", dialect)
-    monkeypatch.setenv("CN_SQL_DB_PORT", port)
+    monkeypatch.setenv("CN_SQL_DB_PORT", str(port))
 
     tmpl = """
 db.schema.name=%(rdbm_schema)s
