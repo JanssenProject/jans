@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=1a87dee13ea55ad28ff75c00e240499dae797a6c
+ARG JANS_SOURCE_VERSION=e74ea8e27e59d35ff6e3c6f997e6c1df6a04ec83
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
