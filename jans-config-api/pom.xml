@@ -335,6 +335,7 @@
 				<scope>provided</scope>
 			</dependency>
 
+
 			<!-- Testing -->
 			<dependency>
 				<groupId>io.rest-assured</groupId>
