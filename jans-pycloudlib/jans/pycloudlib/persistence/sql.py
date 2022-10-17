@@ -5,12 +5,15 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import typing as _t
+import warnings
 from collections import defaultdict
 from functools import cached_property
 from tempfile import NamedTemporaryFile
 
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.exc import SAWarning
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import func
@@ -28,6 +31,8 @@ if _t.TYPE_CHECKING:  # pragma: no cover
     from jans.pycloudlib.manager import Manager
 
 logger = logging.getLogger(__name__)
+
+SERVER_VERSION_RE = re.compile(r"\d+(.\d+)+")
 
 
 def get_sql_password(manager: Manager) -> str:
@@ -272,8 +277,20 @@ class SqlClient(SqlSchemaMixin):
     @cached_property
     def metadata(self) -> MetaData:
         """Lazy init of metadata."""
-        metadata = MetaData(bind=self.engine)
-        metadata.reflect()
+        with warnings.catch_warnings():
+            # postgresql driver will show warnings about unsupported reflection
+            # on expression-based index, i.e. `lower(uid::text)`; but we don't
+            # want to clutter the logs with these warnings, hence we suppress the
+            # warnings
+            warnings.filterwarnings(
+                "ignore",
+                message="Skipped unsupported reflection of expression-based index",
+                category=SAWarning,
+            )
+
+            # do reflection on database table
+            metadata = MetaData(bind=self.engine)
+            metadata.reflect()
         return metadata
 
     def connected(self) -> bool:
@@ -427,7 +444,7 @@ class SqlClient(SqlSchemaMixin):
         type_ = type_.get(self.dialect) or type_["mysql"]
         data_type = type_.get("type", "")
 
-        if data_type in ("SMALLINT", "BOOL",):
+        if data_type in ("SMALLINT", "BOOL", "BOOLEAN"):
             if values[0].lower() in ("1", "on", "true", "yes", "ok"):
                 return 1 if data_type == "SMALLINT" else True
             return 0 if data_type == "SMALLINT" else False
@@ -453,6 +470,9 @@ class SqlClient(SqlSchemaMixin):
 
         if data_type == "JSON":
             return {"v": values}
+
+        if data_type == "JSONB":
+            return values
 
         # fallback
         return values[0]
@@ -508,6 +528,16 @@ class SqlClient(SqlSchemaMixin):
             for table_name, column_mapping in self._data_from_ldif(dst.name):
                 self.insert_into(table_name, column_mapping)
 
+    def get_server_version(self) -> tuple[int, ...]:
+        """Get server version as tuple."""
+        # major and minor format
+        version = [0, 0]
+
+        pattern = SERVER_VERSION_RE.search(self.server_version)
+        if pattern:
+            version = [int(comp) for comp in pattern.group().split(".")]
+        return tuple(version)
+
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to SQL database server.
@@ -521,9 +551,21 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         txt = f.read()
 
     with open(dest, "w") as f:
+        db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
+        db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
+
+        # In MySQL, physically, a schema is synonymous with a database
+        if db_dialect == "mysql":
+            default_schema = db_name
+        else:  # likely postgres
+            # by default, PostgreSQL creates schema called `public` upon database creation
+            default_schema = "public"
+        db_schema = os.environ.get("CN_SQL_DB_SCHEMA", "") or default_schema
+
         rendered_txt = txt % {
-            "rdbm_db": os.environ.get("CN_SQL_DB_NAME", "jans"),
-            "rdbm_type": os.environ.get("CN_SQL_DB_DIALECT", "mysql"),
+            "rdbm_db": db_name,
+            "rdbm_schema": db_schema,
+            "rdbm_type": "postgresql" if db_dialect == "pgsql" else "mysql",
             "rdbm_host": os.environ.get("CN_SQL_DB_HOST", "localhost"),
             "rdbm_port": os.environ.get("CN_SQL_DB_PORT", 3306),
             "rdbm_user": os.environ.get("CN_SQL_DB_USER", "jans"),

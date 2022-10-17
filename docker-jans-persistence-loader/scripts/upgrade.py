@@ -645,8 +645,11 @@ class Upgrade:
         should_update = False
 
         # add jansAdminUIRole to default admin user
-        if self.user_backend.type == "sql" and not entry.attrs["jansAdminUIRole"]["v"]:
+        if self.user_backend.type == "sql" and self.user_backend.client.dialect == "mysql" and not entry.attrs["jansAdminUIRole"]["v"]:
             entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
+            should_update = True
+        if self.user_backend.type == "sql" and self.user_backend.client.dialect == "pgsql" and not entry.attrs["jansAdminUIRole"]:
+            entry.attrs["jansAdminUIRole"] = ["api-admin"]
             should_update = True
         elif self.user_backend.type == "spanner" and not entry.attrs["jansAdminUIRole"]:
             entry.attrs["jansAdminUIRole"] = ["api-admin"]
@@ -688,7 +691,7 @@ class Upgrade:
             hostname = self.manager.config.get("hostname")
             scopes = [JANS_SCIM_USERS_READ_SCOPE_DN, JANS_SCIM_USERS_WRITE_SCOPE_DN, JANS_STAT_SCOPE_DN]
 
-            if self.backend.type == "sql":
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
                 if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]["v"]:
                     entry.attrs["jansRedirectURI"]["v"].append(f"https://{hostname}/admin")
                     should_update = True
