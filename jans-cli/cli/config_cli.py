@@ -1003,7 +1003,7 @@ class JCA_CLI:
 
     def obtain_parameters(self, endpoint, single=False):
         parameters = {}
-
+        end_point_param = {}
         endpoint_parameters = []
         if 'parameters' in endpoint.info:
             endpoint_parameters = endpoint.info['parameters']
@@ -2019,8 +2019,13 @@ class JCA_CLI:
                                 schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
                                 print('  Schema: Array of {}'.format(schema_path[1:]))
                             else:
-                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                print('  Schema: {}'.format(schema_path[1:]))
+                                spparent = path['requestBody']['content'][apptype]['schema']
+                                schema_path = spparent.get('$ref')
+                                if schema_path:
+                                    print('  Schema: {}'.format(schema_path[1:]))
+                                else:
+                                    print('  Data type: {}'.format(spparent.get('type')))
+
 
         if schema_path:
             print()

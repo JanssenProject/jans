@@ -35,7 +35,7 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.3-SNAPSHOT
-ENV CN_BUILD_DATE='2022-10-03 08:16'
+ENV CN_BUILD_DATE='2022-10-14 16:32'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -54,7 +54,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=8128244d16f212b9c687540ded6cb349abe4aafc
+ENV JANS_SOURCE_VERSION=1a87dee13ea55ad28ff75c00e240499dae797a6c
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -76,7 +76,6 @@ RUN mkdir -p /etc/jans/conf \
 # sync static files from linux-setup
 RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/fido2/authenticator_cert /etc/jans/conf/fido2/authenticator_cert \
-    && cp ${JANS_SETUP_DIR}/static/fido2/mds_toc_cert/metadata-root-ca.cer /etc/jans/conf/fido2/mds/cert/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \

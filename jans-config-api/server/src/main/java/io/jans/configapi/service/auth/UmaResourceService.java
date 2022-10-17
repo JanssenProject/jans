@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -141,12 +142,23 @@ public class UmaResourceService {
     public PagedResult<UmaResource> searchUmaResource(SearchRequest searchRequest) {
         logger.debug("Search UmaResource with searchRequest:{}", searchRequest);
 
-        String[] targetArray = new String[] { searchRequest.getFilter() };
-        Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                null);
-        Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
-        logger.debug("Search UmaResources with searchFilter:{}", searchFilter);
+        Filter searchFilter = null;
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
+
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                        targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                        targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ID, null, targetArray, null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
+        }
+
+        logger.debug("UmaResources searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getBaseDnForResource(), UmaResource.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),

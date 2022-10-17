@@ -18,4 +18,11 @@ public class CustomScope extends Scope {
 
     private List<Client> clients;
 
+    @Override
+    public String toString() {
+        return "CustomScope [clients=" + clients + "]";
+    }
+    
+    
+
 }

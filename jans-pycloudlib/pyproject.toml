@@ -18,9 +18,9 @@ show_error_codes = true
 module = [
     "consul",
     "hvac",
-    # "kubernetes.*",
+    "kubernetes.*",
     # "urllib3",
-    # "docker.*",
+    "docker.*",
     # "google.cloud",
     "ldap3.*",
     "ldif",

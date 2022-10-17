@@ -47,11 +47,11 @@ public class SsaService {
             Jwt jwt = jwtSigner.newJwt();
             jwt.getClaims().setJwtId(ssa.getId());
             jwt.getClaims().setIssuedAt(ssa.getCreationDate());
-            jwt.getClaims().setExpirationTime(ssa.getExpiration());
-            jwt.getClaims().setClaim("software_id", ssa.getSoftwareId());
-            jwt.getClaims().setClaim("org_id", ssa.getOrgId());
-            jwt.getClaims().setClaim("software_roles", ssa.getSoftwareRoles());
-            jwt.getClaims().setClaim("grant_types", ssa.getGrantTypes());
+            jwt.getClaims().setExpirationTime(ssa.getExpirationDate());
+            jwt.getClaims().setClaim("software_id", ssa.getAttributes().getSoftwareId());
+            jwt.getClaims().setClaim("org_id", Long.parseLong(ssa.getOrgId()));
+            jwt.getClaims().setClaim("software_roles", ssa.getAttributes().getSoftwareRoles());
+            jwt.getClaims().setClaim("grant_types", ssa.getAttributes().getGrantTypes());
 
             Jwt jwr = jwtSigner.sign();
             if (executionContext.getPostProcessor() != null) {

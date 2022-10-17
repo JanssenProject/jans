@@ -7,6 +7,7 @@ from collections import namedtuple
 
 from ldif import LDIFParser
 
+from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import CouchbaseClient
 from jans.pycloudlib.persistence import LdapClient
 from jans.pycloudlib.persistence import SpannerClient
@@ -23,6 +24,8 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
+
+manager = get_manager()
 
 
 #: ID of base entry
@@ -191,6 +194,15 @@ def _transform_auth_dynamic_config(conf):
             "localhost",
             "127.0.0.1",
         ]
+        should_update = True
+
+    if "ssaConfiguration" not in conf:
+        hostname = manager.config.get("hostname")
+        conf["ssaConfiguration"] = {
+            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
+            "ssaSigningAlg": "RS256",
+            "ssaExpirationInDays": 30
+        }
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not
@@ -430,6 +442,8 @@ class Upgrade:
             self.backend.update_misc()
 
         self.update_auth_dynamic_config()
+        self.update_auth_errors_config()
+        self.update_auth_static_config()
         self.update_attributes_entries()
         self.update_scripts_entries()
         self.update_admin_ui_config()
@@ -631,8 +645,11 @@ class Upgrade:
         should_update = False
 
         # add jansAdminUIRole to default admin user
-        if self.user_backend.type == "sql" and not entry.attrs["jansAdminUIRole"]["v"]:
+        if self.user_backend.type == "sql" and self.user_backend.client.dialect == "mysql" and not entry.attrs["jansAdminUIRole"]["v"]:
             entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
+            should_update = True
+        if self.user_backend.type == "sql" and self.user_backend.client.dialect == "pgsql" and not entry.attrs["jansAdminUIRole"]:
+            entry.attrs["jansAdminUIRole"] = ["api-admin"]
             should_update = True
         elif self.user_backend.type == "spanner" and not entry.attrs["jansAdminUIRole"]:
             entry.attrs["jansAdminUIRole"] = ["api-admin"]
@@ -674,7 +691,7 @@ class Upgrade:
             hostname = self.manager.config.get("hostname")
             scopes = [JANS_SCIM_USERS_READ_SCOPE_DN, JANS_SCIM_USERS_WRITE_SCOPE_DN, JANS_STAT_SCOPE_DN]
 
-            if self.backend.type == "sql":
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
                 if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]["v"]:
                     entry.attrs["jansRedirectURI"]["v"].append(f"https://{hostname}/admin")
                     should_update = True
@@ -830,6 +847,64 @@ class Upgrade:
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def update_auth_errors_config(self):
+        # default to ldap persistence
+        kwargs = {}
+        id_ = JANS_AUTH_CONFIG_DN
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if self.backend.type != "couchbase":
+            entry.attrs["jansConfErrors"] = json.loads(entry.attrs["jansConfErrors"])
+
+        conf, should_update = _transform_auth_errors_config(entry.attrs["jansConfErrors"])
+
+        if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansConfErrors"] = json.dumps(conf)
+
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_auth_static_config(self):
+        # default to ldap persistence
+        kwargs = {}
+        id_ = JANS_AUTH_CONFIG_DN
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if self.backend.type != "couchbase":
+            entry.attrs["jansConfStatic"] = json.loads(entry.attrs["jansConfStatic"])
+
+        conf, should_update = _transform_auth_static_config(entry.attrs["jansConfStatic"])
+
+        if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansConfStatic"] = json.dumps(conf)
+
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 def _transform_api_dynamic_config(conf):
     should_update = False
@@ -859,5 +934,44 @@ def _transform_api_dynamic_config(conf):
                 "enabled",
             ],
         }
+        should_update = True
+    return conf, should_update
+
+
+def _transform_auth_errors_config(conf):
+    should_update = False
+
+    if "ssa" not in conf:
+        conf["ssa"] = [
+            {
+                "id": "invalid_request",
+                "description": "The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed.",
+                "uri": None,
+            },
+            {
+                "id": "unauthorized_client",
+                "description": "The Client is not authorized to use this authentication flow.",
+                "uri": None,
+            },
+            {
+                "id": "invalid_client",
+                "description": "The Client is not authorized to use this authentication flow.",
+                "uri": None,
+            },
+            {
+                "id": "unknown_error",
+                "description": "Unknown or not found error.",
+                "uri": None,
+            },
+        ]
+        should_update = True
+    return conf, should_update
+
+
+def _transform_auth_static_config(conf):
+    should_update = False
+
+    if "ssa" not in conf["baseDn"]:
+        conf["baseDn"]["ssa"] = "ou=ssa,o=jans"
         should_update = True
     return conf, should_update

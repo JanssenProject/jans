@@ -34,5 +34,6 @@ High-level steps involve:
 2. Install required plugins
 3. [Preview as you write](https://squidfunk.github.io/mkdocs-material/creating-your-site/#previewing-as-you-write)
 
+# Open Banking
 
-
+We are working on developing this content under [issue 2548](https://github.com/JanssenProject/jans/issues/2548). If you’d like to contribute the content, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation) 

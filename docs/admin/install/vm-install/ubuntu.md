@@ -1,20 +1,20 @@
 ---
 tags:
-  - administration
-  - installation
-  - vm
-  - ubuntu
+- administration
+- installation
+- vm
+- ubuntu
 ---
 
-# Install Janssen Server using Ubuntu Linux Package
+# Install Janssen Server using the Ubuntu Linux Package
 
-Janssen Server can be installed using Linux package for Ubuntu
+Janssen Server can be installed using the Linux package for Ubuntu
 
 ## Supported Versions
 - Ubuntu 20.04
 
 !!! note
-    [SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
+[SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
 
 ## System Requirements
 
@@ -22,7 +22,7 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 ## Prerequisites
 
-- `curl` should be instlled. This can be easily installed using command below
+- `curl` should be installed. This can be easily installed using the command below
 
  ```
  apt install curl
@@ -30,7 +30,7 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 ## Install
 
-- Download the installer from Janssen Project site using command below
+- Download the installer from the Janssen Project site using the command below
 
 ```
 wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*ubuntu20.04_amd64.deb' | head -n 1) -O /tmp/jans.ubuntu20.04_amd64.deb
@@ -42,7 +42,7 @@ wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases
 apt install -y /tmp/jans.ubuntu20.04_amd64.deb
 ```
 
-- Initiate setup process using command below. Setup process will prompt for user for inputs.
+- Initiate the setup process using the command below. The setup process will prompt for user for inputs.
 
 ```
 python3 /opt/jans/jans-setup/setup.py
@@ -53,22 +53,22 @@ python3 /opt/jans/jans-setup/setup.py
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
 
-## Uninstall 
+## Uninstall
 
 Uninstall process involves two steps
 
 1. Uninstall Janssen Server
-2. Remove and purge `jans` package
+2. Remove and purge the `jans` package
 
-### Uninstall Janssen Server 
+### Uninstall Janssen Server
 
-Use command below to uninstall Janssen server
+Use the command below to uninstall the Janssen server
 
 ```commandline
 python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
-Console output like below will confirm the successful uninstallation of Janssen Server
+Console output like below will confirm the successful uninstallation of the Janssen Server
 
 ```text
 This process is irreversible.
@@ -108,13 +108,13 @@ Removing /etc/apache2/sites-available/https_jans.conf
 
 ### Remove the linux package
 
-Use command below to remove and purge `jans` package
+Use the command below to remove and purge the `jans` package
 
 ```text
 apt-get --purge remove jans
 ```
 
-Successful removal will provide output as below:
+Successful removal will provide the output as below:
 
 ```text
 Reading package lists... Done
