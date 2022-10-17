@@ -1,17 +1,9 @@
-db.schema.name=%(rdbm_db)s
+db.schema.name=%(rdbm_schema)s
 
-connection.uri=jdbc:%(rdbm_type)s://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s?enabledTLSProtocols=TLSv1.2
+connection.uri=jdbc:postgresql://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s
 
-connection.driver-property.serverTimezone=%(server_time_zone)s
 # Prefix connection.driver-property.key=value will be coverterd to key=value JDBC driver properties
 #connection.driver-property.driverProperty=driverPropertyValue
-
-#connection.driver-property.useServerPrepStmts=false
-connection.driver-property.cachePrepStmts=false
-connection.driver-property.cacheResultSetMetadata=true
-connection.driver-property.metadataCacheSize=500
-#connection.driver-property.prepStmtCacheSize=500
-#connection.driver-property.prepStmtCacheSqlLimit=1024
 
 auth.userName=%(rdbm_user)s
 auth.userPassword=%(rdbm_password_enc)s

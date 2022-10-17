@@ -46,7 +46,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.0.3-SNAPSHOT
-ENV CN_BUILD_DATE='2022-09-21 21:47'
+ENV CN_BUILD_DATE='2022-10-14 18:41'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -64,7 +64,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=8128244d16f212b9c687540ded6cb349abe4aafc
+ENV JANS_SOURCE_VERSION=1a87dee13ea55ad28ff75c00e240499dae797a6c
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
