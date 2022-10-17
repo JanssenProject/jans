@@ -13,7 +13,6 @@ on:
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
-      - 'jans-client-api/**'
       - 'jans-scim/**'
       - 'jans-core/**'
       - 'jans-notify/**'
@@ -36,7 +35,6 @@ on:
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
-      - 'jans-client-api/**'
       - 'jans-scim/**'
       - 'jans-core/**'
       - 'jans-notify/**'
@@ -58,13 +56,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-client-api, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
+        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
     env:
       JVM_PROJECTS: |
         jans-auth-server
         jans-orm
         jans-config-api
-        jans-client-api
         jans-scim
         jans-core
         jans-notify
@@ -141,8 +138,6 @@ jobs:
           cd ${{ matrix.module }}
           case ${{ matrix.module }} in
             "jans-auth-server")
-                    ;&
-            "jans-client-api")
                     ;&
             "jans-scim")
                     ;&
