@@ -363,11 +363,19 @@ class SqlClient(SqlSchemaMixin):
 
         for column in table.c:
             unmapped = column.name not in column_mapping
-            is_json = column.type.__class__.__name__.lower() == "json"
+
+            if self.dialect == "mysql":
+                json_type = "json"
+                json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
+            else:
+                json_type = "jsonb"
+                json_default_values = []
+
+            is_json = bool(column.type.__class__.__name__.lower() == json_type)
 
             if not all([unmapped, is_json]):
                 continue
-            column_mapping[column.name] = {"v": []}
+            column_mapping[column.name] = json_default_values
 
         query = table.insert().values(column_mapping)
         with self.engine.connect() as conn:
