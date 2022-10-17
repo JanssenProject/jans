@@ -31,7 +31,6 @@ OPTIONAL_SCOPES = (
 
     # these scopes are no longer needed; not removed for backward-compat
     "fido2",
-    "client-api",
     "casa",
     "scim",
 )

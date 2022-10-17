@@ -73,7 +73,6 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     CN_INSTALL_CONFIG_API="true" \
     CN_INSTALL_SCIM="true" \
     CN_INSTALL_FIDO2="true" \
-    CN_INSTALL_CLIENT_API="true" \
     MYSQL_DATABASE="jans" \
     MYSQL_USER="jans" \
     MYSQL_PASSWORD=""

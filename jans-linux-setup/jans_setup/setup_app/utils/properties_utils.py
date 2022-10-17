@@ -606,23 +606,6 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_config_api')
 
 
-    def prompt_for_client_api(self):
-
-        prompt = self.getPrompt("Install Jans Client API?", 
-                            self.getDefaultOption(Config.install_client_api)
-                            )[0].lower()
-
-        Config.install_client_api = prompt == 'y'
-
-        if Config.installed_instance and Config.install_client_api:
-            Config.addPostSetupService.append('install_client_api')
-
-        if Config.install_client_api:
-            prompt = self.getPrompt("  Use Jans Storage for Client API?", 'y')[0].lower()
-            if prompt == 'n':
-                Config.client_api_storage_type = 'h2'
-
-
     def prompt_for_rdbm(self):
         while True:
             Config.rdbm_type = self.getPrompt("RDBM Type", Config.rdbm_type)
@@ -947,7 +930,6 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             #self.promptForEleven()
-            self.prompt_for_client_api()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()
 

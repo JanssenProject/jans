@@ -15,7 +15,6 @@ on:
       - 'jans-notify/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
-      - 'jans-client-api/**'
 
   push:
    branches:
@@ -31,7 +30,6 @@ on:
       - 'jans-notify/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
-      - 'jans-client-api/**'
 jobs:
   build:
     name: Build wars
@@ -40,7 +38,7 @@ jobs:
     strategy:
       max-parallel: 11
       matrix:
-        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-notify','jans-auth-server','jans-orm','jans-config-api','jans-scim','jans-client-api']
+        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-notify','jans-auth-server','jans-orm','jans-config-api','jans-scim']
     steps:
     - name : Variables
       run: |
