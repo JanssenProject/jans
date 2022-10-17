@@ -491,56 +491,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/client-api/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/config/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/key-mgt/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/logs/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/monitoring/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/oauth-features/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/oidc-features/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/sdks/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/siop-features/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/client-api/uma-features/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/config-api/</loc>
          <lastmod>2022-10-17</lastmod>
          <changefreq>daily</changefreq>
@@ -1996,11 +1946,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/reference/json/client-api/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/reference/json/config-api/</loc>
          <lastmod>2022-10-17</lastmod>
          <changefreq>daily</changefreq>
@@ -2037,11 +1982,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/image-cert-mgr/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/reference/kubernetes/image-client-api/</loc>
          <lastmod>2022-10-17</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -2312,11 +2252,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-cli/</loc>
-         <lastmod>2022-10-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/developer/implementation-design/jans-client-api/</loc>
          <lastmod>2022-10-17</lastmod>
          <changefreq>daily</changefreq>
     </url>
