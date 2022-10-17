@@ -57,7 +57,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command: ["python3", "/app/scripts/deregister_peer.py"]
+              command: ["/bin/sh", "-c", "python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"]
         envFrom:
         - configMapRef:
             name: {{ $.Release.Name }}-config-cm
