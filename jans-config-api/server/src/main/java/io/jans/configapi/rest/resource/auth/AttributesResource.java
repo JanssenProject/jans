@@ -60,7 +60,8 @@ public class AttributesResource extends ConfigBaseResource {
     AttributeService attributeService;
 
     @Operation(summary = "Gets a list of Gluu attributes.", description = "Gets a list of Gluu attributes.", operationId = "get-attributes", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2"))
+            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "https://jans.io/oauth/config/attributes.readonly" }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
