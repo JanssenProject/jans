@@ -80,7 +80,7 @@ The load command can be used either to generate or restore config and secret for
 
     - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `client-api`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
+    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
     - `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
     - `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
     - `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
