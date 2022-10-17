@@ -250,6 +250,11 @@ public class SessionIdService {
     public boolean reinitLogin(SessionId session, boolean force) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
+        if (log.isTraceEnabled()) {
+            log.trace("sessionAttributes: {}", sessionAttributes);
+            log.trace("currentSessionAttributes: {}", currentSessionAttributes);
+            log.trace("shouldReinitSession: {}, force: {}", shouldReinitSession(sessionAttributes, currentSessionAttributes), force);
+        }
 
         if (force || shouldReinitSession(sessionAttributes, currentSessionAttributes)) {
             sessionAttributes.putAll(currentSessionAttributes);
@@ -276,6 +281,9 @@ public class SessionIdService {
             boolean updateResult = updateSessionId(session, true, true, true);
             if (!updateResult) {
                 log.debug("Failed to update session entry: '{}'", session.getId());
+            }
+            if (log.isTraceEnabled()) {
+                log.trace("sessionAttributes after update: {}, ", session.getSessionAttributes());
             }
             return updateResult;
         }
@@ -314,13 +322,17 @@ public class SessionIdService {
         // Update from request
         final Map<String, String> currentSessionAttributes = new HashMap<>(sessionAttributes);
 
-        Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-        Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+        Map<String, String> requestParameters = externalContext.getRequestParameterMap();
+        Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(requestParameters);
         for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
             String name = newRequestParameterMapEntry.getKey();
             if (!StringHelper.equalsIgnoreCase(name, io.jans.as.model.config.Constants.AUTH_STEP)) {
                 currentSessionAttributes.put(name, newRequestParameterMapEntry.getValue());
             }
+        }
+        if (!requestParameters.containsKey(AuthorizeRequestParam.CODE_CHALLENGE) || !requestParameters.containsKey(AuthorizeRequestParam.CODE_CHALLENGE_METHOD)) {
+            currentSessionAttributes.remove(AuthorizeRequestParam.CODE_CHALLENGE);
+            currentSessionAttributes.remove(AuthorizeRequestParam.CODE_CHALLENGE_METHOD);
         }
 
         return currentSessionAttributes;
