@@ -3084,17 +3084,6 @@
         "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Relying Party Id for jans-client-api",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "rpId"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Details of a running agama flow instance",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3132,6 +3121,17 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "agFlowMeta"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Save Document in DB",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "document"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4096,27 +4096,6 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "rpId",
-        "dat",
-        "iat",
-        "exp",
-        "jansTyp"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "rpExpiredObject"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
         "jansId",
         "dat"
       ],
@@ -4280,6 +4259,33 @@
       ],
       "names": [
         "agmFlow"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+       "kind": "STRUCTURAL",
+       "may": [
+        "inum",
+        "ou",
+        "displayName",
+        "description",
+        "document",
+        "creationDate",
+        "jansModuleProperty",
+        "jansLevel",
+        "jansRevision",
+        "jansEnabled",
+        "jansAlias"				
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansDocument"
       ],
       "oid": "jansObjClass",
       "sup": [

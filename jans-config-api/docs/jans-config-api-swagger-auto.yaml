@@ -2947,17 +2947,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string

@@ -128,7 +128,6 @@ from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 # from setup_app.installers.oxd import OxdInstaller
-from setup_app.installers.client_api import ClientApiInstaller
 
 
 if base.snap:
@@ -242,7 +241,7 @@ if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
-    client_api_installer = ClientApiInstaller()
+
 jansCliInstaller = JansCliInstaller()
 
 # oxdInstaller = OxdInstaller()
@@ -413,10 +412,6 @@ def main():
                 if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
-
-                if (Config.installed_instance and client_api_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(client_api_installer.install_var)):
-                    client_api_installer.start_installation()
 
 
             if Config.install_jans_cli:

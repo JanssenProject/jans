@@ -1,1 +1,0 @@
-<% out.print("Jans Client - Api"); %>

@@ -15,7 +15,7 @@ This document revisits the hello world flow of the [quick start guide](./quick-s
 
 ## Stage 1
 
-In normal circumstances the flow is launched through a web browser via an [OIDC authentication request](./quick-start.md#craft-an-authentication-request) which in turn activates the Agama [bridge](./index.md#agama-engine) script. Its associated (facelet) page is `agama.xhtml` that invokes the `prepareForStep` method of that script. This method performs some initialization and makes a redirection to the URL `/jans-auth/fl/agama.fls` to hand the control to the Agama engine.
+In normal circumstances the flow is launched through a web browser via an [OIDC authentication request](./quick-start.md#craft-an-authentication-request) which in turn activates the Agama [bridge](README.md#agama-engine) script. Its associated (facelet) page is `agama.xhtml` that invokes the `prepareForStep` method of that script. This method performs some initialization and makes a redirection to the URL `/jans-auth/fl/agama.fls` to hand the control to the Agama engine.
 
 ## Stage 2
 

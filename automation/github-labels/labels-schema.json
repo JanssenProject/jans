@@ -89,15 +89,6 @@
       "title-prefixes": []
     }
   },
-  "comp-docker-jans-client-api": {
-    "color": "0052CC",
-    "description": "Touching folder /docker-jans-client-api",
-    "auto-label": {
-      "branch": "",
-      "paths": ["docker-jans-client-api"],
-      "title-prefixes": []
-    }
-  },
   "comp-docker-jans-config-api": {
     "color": "0052CC",
     "description": "Touching folder /docker-jans-config-api",
@@ -167,15 +158,6 @@
     "auto-label": {
       "branch": "",
       "paths": ["jans-cli"],
-      "title-prefixes": []
-    }
-  },
-  "comp-jans-client-api": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-client-api",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-client-api"],
       "title-prefixes": []
     }
   },

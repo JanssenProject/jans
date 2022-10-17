@@ -83,7 +83,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        maven: [ "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-client-api", "jans-bom", "jans-auth-server", "agama" ]
+        maven: [ "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -120,7 +120,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-client-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith" ]
+        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3

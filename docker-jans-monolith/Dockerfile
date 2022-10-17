@@ -38,7 +38,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=960b87ff5ace40c63aada576816cae648e82d65c
+ENV JANS_SOURCE_VERSION=e74ea8e27e59d35ff6e3c6f997e6c1df6a04ec83
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -73,7 +73,6 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     CN_INSTALL_CONFIG_API="true" \
     CN_INSTALL_SCIM="true" \
     CN_INSTALL_FIDO2="true" \
-    CN_INSTALL_CLIENT_API="true" \
     MYSQL_DATABASE="jans" \
     MYSQL_USER="jans" \
     MYSQL_PASSWORD=""

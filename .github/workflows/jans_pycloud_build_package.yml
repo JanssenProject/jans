@@ -48,7 +48,7 @@ jobs:
         if: github.actor != 'mo-auto'
         id: build_stable_reqs
         run: |
-          dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
+          dockerimages="auth-server certmanager config-api configurator fido2 persistence-loader scim"
           for image in $dockerimages; do
             sed -i '/git+https/c\git+https://github.com/${{ github.repository }}@${{ github.sha }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done

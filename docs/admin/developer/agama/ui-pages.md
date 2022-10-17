@@ -24,7 +24,7 @@ As you will see, the task boils down to produce the desired markup plus adding s
 
 ## Data model
 
-In Agama, every template is generally "injected" some data, see [RRF](./dsl.md#rrf). This data in FreeMarker terms is known as "data-model". In practice, this will be an agama [map](./dsl.md#maps) which can be accessed from the templates using standard FreeMarker notation. This _map_ is attached a couple of additional keys for developer's convenience:
+In Agama, every template is generally "injected" some data, see [RRF](./dsl.md#rrf). This data in FreeMarker terms is known as "data-model". In practice, this will be an Agama [map](./dsl-full.md#maps) which can be accessed from the templates using standard FreeMarker notation. This _map_ is attached a couple of additional keys for developer's convenience:
 
 - `webCtx`. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect [here](https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java). Take a look at the getters; writing `${webCtx.contextPath}` in a template will insert the result of calling method `getContextPath` - normally the string `/jans-auth`.
 

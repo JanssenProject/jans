@@ -19,7 +19,6 @@ This documentation explains technical design, architecture and interactions of v
 | Service | REST API | Java API |  
 | --- | --- | --- |  
 | Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/docs/swagger.yaml)| [Javadoc](https://jenkins.jans.io/javadocs/jans-auth/main/)|  
-| Jans Client API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-client-api/server/src/main/resources/swagger.yaml)| [Javadoc](https://jenkins.jans.io/javadocs/jans-client-api/main/)|  
 | Jans Config API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml)| |  
 | Jans Core | | [Javadoc](https://jenkins.jans.io/javadocs/jans-core/main/)|  
 | Jans FIDO 2 | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-fido2/docs/jansFido2Swagger.yaml) | |  
