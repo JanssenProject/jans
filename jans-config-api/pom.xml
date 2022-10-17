@@ -335,7 +335,6 @@
 				<scope>provided</scope>
 			</dependency>
 
-
 			<!-- Testing -->
 			<dependency>
 				<groupId>io.rest-assured</groupId>
@@ -349,11 +348,11 @@
 				<version>${karate.version}</version>
 				<scope>test</scope>
 				<exclusions>
-					<exclusion>
-						<artifactId>snakeyaml</artifactId>
-						<groupId>*</groupId>
-					</exclusion>
-				</exclusions>
+                  	<exclusion>
+                        <artifactId>snakeyaml</artifactId>
+                        <groupId>*</groupId>
+                    </exclusion>
+                </exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.intuit.karate</groupId>
