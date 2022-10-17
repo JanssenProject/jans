@@ -348,22 +348,22 @@
 				<version>${karate.version}</version>
 				<scope>test</scope>
 				<exclusions>
-                  	<exclusion>
-                        <artifactId>snakeyaml</artifactId>
-                        <groupId>*</groupId>
-                    </exclusion>
-                </exclusions>
+					<exclusion>
+						<artifactId>snakeyaml</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.intuit.karate</groupId>
 				<artifactId>karate-apache</artifactId>
 				<version>${karate.version}</version>
 				<scope>test</scope>
-			</dependency>		
+			</dependency>
 			<dependency>
-			    <groupId>org.yaml</groupId>
-			    <artifactId>snakeyaml</artifactId>
-			    <version>${snake.version}</version>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snake.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
