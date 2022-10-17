@@ -10500,11 +10500,31 @@
   <nav class="md-tags" >
     
       
-        <span class="md-tag">administration</span>
+        <span class="md-tag">planning</span>
       
     
       
-        <span class="md-tag">deployment</span>
+        <span class="md-tag">LDAP</span>
+      
+    
+      
+        <span class="md-tag">MySQL</span>
+      
+    
+      
+        <span class="md-tag">Couchbase</span>
+      
+    
+      
+        <span class="md-tag">Aurora</span>
+      
+    
+      
+        <span class="md-tag">Spanner</span>
+      
+    
+      
+        <span class="md-tag">Postgres</span>
       
     
   </nav>
@@ -10513,14 +10533,77 @@
 
   <h1>Persistence</h1>
 
-<p>This is a placeholder</p>
+<p>The performance of the web tier is derived from the performance of the
+persistence tier. While memory-caching short lived entities to reduce
+persistence is an option, there are still long lived objects that need to be
+written to the disk.</p>
+<p>Picking the right database has a huge impact on the operational burden of a
+digital identity infrastructure. All database administration requires some
+black art--every platform has some secret knobs and levers that are critical
+to tuning, availability and rapid diagnosis. So beyond the performance
+requirements that determine the right choice for a database, you also need to
+consider operational concerns.</p>
+<p>Janssen's strategy is to provide optionality for persistence. There is no one
+size fits all solution for databases. The following section will detail some of
+the pros and cons of the various databases we currently support.</p>
+<ol>
+<li>
+<p><strong>OpenDJ (LDAP)</strong> Janssen supports Gluu's distribution of OpenDJ, and probably any
+other similar distributions like ForgeRock OpenDJ, Ping Directory Server, or
+Oracle Unified Directory. LDAP in general and OpenDJ in particular have been<br />
+successfully backing authentication service for more then 20 years. People tend
+to think of the LDAP tree structure as fast for reads, and slow for writes.
+That's just not true anymore--OpenDJ is able to perform quite well for write
+operations as well. OpenDJ has mature replication support, excellent command
+line tools for administration, and excellent stability. The main disadvantage
+of OpenDJ is scaling large datasets for high concurrency. While you can get
+around this shortcoming with a global LDAP proxy, such a topology gets
+complicated and costly to operate, as you have to break up the data and
+configure multiple replicated topologies. As a rule of thumb, if concurrency of
+more then 120 OpenID code flow authentications per second are needed, you should
+consider another database. But for concurrency less then this, OpenDJ is an
+excellent choice.</p>
+</li>
+<li>
+<p><strong>MySQL</strong> You know it... you love it. That's the biggest advantage.
+Performance is great out of the box. But if you have high concurrency,
+you'll have to figure out a plan for replication, and horizontal scaling.</p>
+</li>
+<li>
+<p><strong>Postgres</strong> Same as MySQL above, but there are some great commercial
+distributions of Postgres like <a href="https://www.enterprisedb.com/">EnterpriseDB</a>.</p>
+</li>
+<li>
+<p><strong>Couchbase</strong> A JSON NoSQL database that supports automatic distribution
+of data for auto-scaling multi-region sharded cloud native deployments. Janssen
+only supports the commercial distribution--but the previously mentioned database
+properties are enterprise class. If you need to host your own database, and you
+need infinite horizontal scalability, Couchbase should be your goto choice.</p>
+</li>
+<li>
+<p><strong>Aurora</strong> So you want MySQL, but you want Amazon to handle some of the care
+and feeding? Aurora enables you to consume database as a cloud service.
+Scalability is excellent and multi-region deployments are <a href="https://aws.amazon.com/blogs/database/deploy-multi-region-amazon-aurora-applications-with-a-failover-blueprint/">possible</a>.
+The main catch is that write operations are limited to one region, with the
+ability failover to another region. But to accomplish this, you need a cloud
+engineer to implement it.</p>
+</li>
+<li>
+<p><strong>Spanner</strong> Google's multi-region cloud database as a service, Spanner
+was purpose built for auto-scaling, multi-region persistence. It has it's own
+API, although recently Google added support for MySQL and Postgres drivers.</p>
+</li>
+<li>
+<p><strong>MariaDB</strong> Coming soon! Similar to MySQL but more cutting edge.</p>
+</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T16:08:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-17T19:13:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-17</span>
       
         <br>
         Created:

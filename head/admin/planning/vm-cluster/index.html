@@ -10518,13 +10518,12 @@ an option? You could cluster Janssen using VM's, but you'll have to do
 some legwork, because we don't publish tools for this task. This planning
 guide will cover some of the things you'll need to consider.</p>
 <ol>
-<li><strong>Hostname</strong></li>
-</ol>
-<p>Remember when you run the linux setup to use the hostname of the cluster,
-not the hostname of the individual server.  This is important because the
-OpenID Provider metadata needs to use the public hostname (i.e. the URL's
+<li>
+<p><strong>Hostname</strong> Remember when you run the linux setup to use the hostname of the
+cluster,not the hostname of the individual server.  This is important because
+the OpenID Provider metadata needs to use the public hostname (i.e. the URL's
 you'll find at <code>/.well-known/openid-configuration</code>)</p>
-<ol>
+</li>
 <li>
 <p><strong>Load Balancing / SSL</strong> As Auth Server and FIDO (the two Internet facing
 components) are stateless,  you can use any load balancer routing algorithm,
@@ -10552,7 +10551,7 @@ the metadata, but retrieve it from the OpenID configuration endpoint.</p>
 </li>
 <li>
 <p><strong>Customizations</strong> You must copy any libraries, xhtml pages, CSS or
-javascript must be available on all servers. </p>
+javascript must be available on all servers.</p>
 </li>
 </ol>
 
@@ -10561,7 +10560,7 @@ javascript must be available on all servers. </p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-17T14:58:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-17</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-17T19:13:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-17</span>
       
         <br>
         Created:
