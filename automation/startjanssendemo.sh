@@ -128,11 +128,6 @@ global:
       scriptLogLevel: "$LOG_LEVEL"
       auditStatsLogTarget: "$LOG_TARGET"
       auditStatsLogLevel: "$LOG_LEVEL"
-  client-api:
-    enabled: true
-    appLoggers:
-      clientApiLogTarget: "$LOG_TARGET"
-      clientApiLogLevel: "$LOG_LEVEL"
   config-api:
     enabled: true
     appLoggers:
