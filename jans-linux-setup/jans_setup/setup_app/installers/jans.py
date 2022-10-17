@@ -74,7 +74,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Jans Client API'.ljust(30) + repr(Config.install_client_api).rjust(35) + (' *' if 'install_client_api' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven:

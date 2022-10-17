@@ -90,8 +90,5 @@ Create optional scopes list
 {{- if .Values.global.scim.enabled}}
 {{ $newList = append $newList ("scim" | quote) }}
 {{- end}}
-{{- if index .Values "global" "client-api" "enabled"}}
-{{ $newList = append $newList ("client-api" |quote) }}
-{{- end}}
 {{ toJson $newList }}
 {{- end }}

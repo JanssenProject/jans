@@ -148,22 +148,6 @@ Supported services:
     - `subj-alt-name`: Subject Alternative Name (SAN) for certificate (default to `localhost`)
     - `valid-to`: Validity length in days (default to `365`)
 
-4. `client-api`
-
-    Re-generate:
-
-    - `/etc/certs/client_api_application.crt`
-    - `/etc/certs/client_api_application.key`
-    - `/etc/certs/client_api_application.keystore`
-    - `/etc/certs/client_api_admin.crt`
-    - `/etc/certs/client_api_admin.key`
-    - `/etc/certs/client_api_admin.keystore`
-
-    Options:
-
-    - `application-cn`: Subject alternative name for application certificate (default to `localhost`)
-    - `admin-cn`: Subject alternative name for admin certificate (default to `localhost`)
-    - `valid-to`: Validity length in days (default to `365`)
 
 #### prune
 

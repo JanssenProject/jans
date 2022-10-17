@@ -66,9 +66,6 @@ dependencies:
   - name: auth-server-key-rotation
     condition: global.auth-server-key-rotation.enabled
     version: 1.0.3-dev
-  - name: client-api
-    condition: global.client-api.enabled
-    version: 1.0.3-dev
   - name: persistence
     condition: global.persistence.enabled
     version: 1.0.3-dev
