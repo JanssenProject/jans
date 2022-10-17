@@ -80,7 +80,7 @@ def encode_decode(s, decode=False):
 
 my_op_mode
 
-debug_json = 'swagger_yaml.json'
+debug_json = os.path.join(cur_dir, 'swagger_yaml.json')
 if os.path.exists(debug_json):
     with open(debug_json) as f:
         cfg_yml = json.load(f, object_pairs_hook=OrderedDict)
