@@ -66,6 +66,13 @@ The following environment variables are supported by the container:
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
+- `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
+- `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
+- `CN_SQL_DB_NAME`: SQL database name (default to `jans`).
+- `CN_SQL_DB_USER`: User name to access the SQL database (default to `jans`).
+- `CN_SQL_DB_DIALECT`: Dialect name of the SQL (`mysql` for MySQL  or `pgsql` for PostgreSQL; default to `mysql`).
+- `CN_SQL_DB_TIMEZONE`: Timezone used by the SQL database (default to `UTC`).
+- `CN_SQL_DB_SCHEMA`: Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`).
 
 ## Usage
 
