@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author Javier Rojas Blum
- * @version April 26, 2022
+ * @version October 17, 2022
  */
 public class LocalizedString implements Serializable {
 
@@ -69,6 +69,11 @@ public class LocalizedString implements Serializable {
                 LANG_SEPARATOR + LANG_PREFIX + LANG_JOINER + languageTag : EMPTY_LANG_TAG);
     }
 
+    public String removeLdapLanguageTag(String value, String ldapAttributeName) {
+        return value.replaceAll("(?i)" + ldapAttributeName, "")
+                .replace(LANG_SEPARATOR + LANG_PREFIX + LANG_JOINER, "");
+    }
+
     private String getLanguageTag(Locale locale) {
         List<String> keyParts = new ArrayList<>();
         keyParts.add(locale.getLanguage());
@@ -103,6 +108,17 @@ public class LocalizedString implements Serializable {
                             .append(StringUtils.isNotBlank(languageTag) ? LANG_CLAIM_SEPARATOR + languageTag : EMPTY_LANG_TAG);
                     jsonObj.put(keyStringBuilder.toString(), getValue(languageTag));
                 });
+    }
+
+    public void loadFromJson(JSONObject jsonObject, String ldapAttributeName) {
+        if (jsonObject == null) {
+            return;
+        }
+
+        jsonObject.keySet().forEach((localeStr) -> {
+            String languageTag = removeLdapLanguageTag(localeStr, ldapAttributeName);
+            setValue(jsonObject.getString(localeStr), Locale.forLanguageTag(languageTag));
+        });
     }
 
     @Override
