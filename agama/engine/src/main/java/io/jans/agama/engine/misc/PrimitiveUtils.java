@@ -66,7 +66,7 @@ public class PrimitiveUtils {
         return p != null;
     }
 
-    public static Object primitiveNumberFrom(Double value, Class destination) {
+    public static Object primitiveNumberFrom(Number value, Class destination) {
         
         Primitive prim = Primitive.fromWrapperOrPrimitiveClass(destination);
         if (prim != null) {
