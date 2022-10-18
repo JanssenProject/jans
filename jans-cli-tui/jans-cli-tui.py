@@ -557,12 +557,12 @@ class JansCliApp(Application):
         config_cli.access_token = None
 
     def show_message(
-        self, 
-        title: AnyFormattedText,  
-        message: AnyFormattedText,  
-        buttons:Optional[Sequence[Button]] = [],
-        tobefocused: AnyContainer= None
-        ):
+            self, 
+            title: AnyFormattedText,  
+            message: AnyFormattedText,  
+            buttons:Optional[Sequence[Button]] = [],
+            tobefocused: AnyContainer= None
+            ) -> None:
         body = HSplit([Label(message)])
         dialog = JansMessageDialog(title=title, body=body, buttons=buttons)
 

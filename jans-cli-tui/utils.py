@@ -1,5 +1,6 @@
-import prompt_toolkit
+from typing import Optional
 
+import prompt_toolkit
 
 from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
@@ -37,11 +38,16 @@ class DialogUtils:
             return {'key':key_, 'value':value_}
 
 
-    def make_data_from_dialog(self):
-        data = {}
-        for tab in self.tabs:
+    def make_data_from_dialog(
+            self, 
+            tabs: Optional[dict]={}
+            ) -> dict:
 
-            for item in self.tabs[tab].children:
+        data = {}
+        process_tabs = tabs or self.tabs
+
+        for tab in process_tabs:
+            for item in process_tabs[tab].children:
                 item_data = self.get_item_data(item)
                 if item_data:
                     data[item_data['key']] = item_data['value']

@@ -3,7 +3,7 @@ import sys
 import time
 
 import threading
-from asyncio import ensure_future
+from asyncio import Future, ensure_future
 from functools import partial
 from typing import Optional
 
@@ -28,6 +28,7 @@ from prompt_toolkit.widgets import (
 from static import DialogResult
 
 from cli import config_cli
+from utils import DialogUtils
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -35,13 +36,15 @@ from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
+from wui_components.jans_cli_dialog import JansGDialog
 
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 
 from multi_lang import _
 import cli_style
-class Plugin():
+
+class Plugin(DialogUtils):
     """This is a general class for plugins 
     """
     def __init__(self, app):
@@ -61,6 +64,13 @@ class Plugin():
 
 
     def init_plugin(self):
+
+        self.get_appconfiguration()
+        self.schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
+        self.oauth_logging()
+
+
+    def get_appconfiguration(self) -> None:
         try:
             response = self.app.cli_object.process_command_by_id(
                         operation_id='get-properties',
@@ -80,8 +90,6 @@ class Plugin():
 
         self.app_configuration = response.json()
 
-        self.schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
-        self.oauth_logging()
 
     def process(self):
         pass
@@ -167,7 +175,7 @@ class Plugin():
         Args:
             selection (str): the current selected tab
         """
-        self.app.logger.debug('OXUATH NAV: %s', selection)
+
         if selection in self.oauth_containers:
             self.oauth_main_area = self.oauth_containers[selection]
         else:
@@ -676,5 +684,32 @@ class Plugin():
                      ], style='class:outh_containers_clients', width=D())
 
 
-    def save_logging(self):
-        pass
+    def save_logging(self) -> None:
+        mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})
+        pathches = []
+        for key_ in mod_data:
+            if self.app_configuration.get(key_) != mod_data[key_]:
+                pathches.append({'op':'replace', 'path': key_, 'value': mod_data[key_]})
+
+        if pathches:
+            response = self.app.cli_object.process_command_by_id(
+                operation_id='patch-properties',
+                url_suffix='',
+                endpoint_args='',
+                data_fn=None,
+                data=pathches
+                )
+            self.schema = response
+            body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
+
+            buttons = [Button(_("Ok"))]
+            dialog = JansGDialog(self.app, title=_("Confirmation"), body=body, buttons=buttons)
+            async def coroutine():
+                focused_before = self.app.layout.current_window
+                result = await self.app.show_dialog_as_float(dialog)
+                try:
+                    self.app.layout.focus(focused_before)
+                except:
+                    self.app.layout.focus(self.app.center_frame) ##
+
+            ensure_future(coroutine())

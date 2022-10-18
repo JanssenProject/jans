@@ -1317,7 +1317,10 @@ class JCA_CLI:
 
         response = self.patch_requests(endpoint, suffix_param, data)
 
-        self.print_response(response)
+        if self.wrapped:
+            return response
+        else:
+            self.print_response(response)
 
 
     def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
