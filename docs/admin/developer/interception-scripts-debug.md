@@ -225,17 +225,59 @@ Once complete, start the PyDev debug server:
 
 1. From the menu: go to `Pydev` > `Start Debug Server`. Now the server should have started at port `5678`. Take a note of the ip of the computer running Liclipse and save it for later use. Remember that the auth server pod must be able to communicate with this ip. If you have followed the instructions above and installed minikube on your local computer which is the same computer Liclipse is operating on you should be able to reach it from within the pods.
 
-### Development & Debugging
+## Development & Debugging
 
 Now we are ready to perform script development and debugging. Here is a quick overview:
 
-1. Instruct the auth server to load the script from the file system *instead* of LDAP. Follow the example scenario below to learn how to do this.
+1. Enable remote debugging on the `jans-auth` service.
 
-1. Add debug instructions to the script, as specified in the next section
+1. Instruct the auth server to load the script from the file system *instead* of LDAP.
 
-1. Execute the script
+1. Add debug instructions to the script.
 
-### Enable Remote Debug in Custom Script
+1. Execute the script.
+
+### Enable Remote Debugging in jans-auth
+
+In order to enable remote debugging in the `jans-auth` process, open `/etc/default/jans-auth` in your favorite text editor. The default `JAVA_OPTIONS` variable is as follows:
+
+```
+JAVA_OPTIONS="-server 
+    -Xms256m -Xmx928m -XX:+DisableExplicitGC 
+    -Djans.base=/etc/jans -Dserver.base=/opt/jans/jetty/jans-auth 
+    -Dlog.base=/opt/jans/jetty/jans-auth -Dpython.home=/opt/jython"
+```
+
+Modify to this:
+
+```
+JAVA_OPTIONS="-server -Xms256m -Xmx928m -XX:+DisableExplicitGC 
+    -Djans.base=/etc/jans -Dserver.base=/opt/jans/jetty/jans-auth 
+    -Dlog.base=/opt/jans/jetty/jans-auth -Dpython.home=/opt/jython 
+    -Dorg.eclipse.jetty.server.Request.maxFormContentSize=50000000 
+    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+```
+
+The last line will enable remote debug on port 5005. Now restart the `jans-auth` service.
+
+```bash
+# To list all jans processes
+systemctl list-units --all "jans*"
+# On Ubuntu, the service name is jans-auth.service
+systemctl restart jans-auth.service
+```
+
+If you are running Jans on a local VM or anywhere that is not the same as the machine that will be debugging, you will need to set up an SSH tunnel on port 5005. Execute the following command:
+
+```
+ssh -L 5005:localhost:5005 <username>@<host>
+```
+
+This will cause your local host's port 5005 to listen on the remote server's port 5005. Now you can use your favorite IDE and set up the remote debugger to connect to `localhost:5005`.
+
+### Enable remote debug in Jython Custom Script
+
+For Jython scripts, we need additional steps to enable breakpoints.
 
 1. After the import section, add:   
   
@@ -361,15 +403,16 @@ Now we are ready to perform script development and debugging. Here is a quick ov
     ```bash
     kubectl port-forward jans-opendj-0 -n <jans-namespace> 1636:1636 --address 0.0.0.0
     ```
+
 1. Create a connection to the ldap browser. The default password will be `Test1234#` if not changed in the helm install command.
  
-   ![LDAP browser connection](../../assets/ldap_browser_connection.png)
+    ![LDAP browser connection](../../assets/ldap_browser_connection.png)
 
 1. Inside the browser navigate to `o=jans, ou=scripts`. Right click on `ou=scripts` and click on `Quick Search`. Inside the pop up box that appears fill `Returning Attributes` with `displayName`, and press `Apply and Close`
 
 1. In the results that appear click on the `Dn` that has a `displayName` of `basic`.
 
-   ![LDAP basic script ](../../assets/basic_script.png)
+    ![LDAP basic script ](../../assets/basic_script.png)
    
 1. Choose to load the script from file instead of ldap. Inside the browser change `jansModuleProperty` with value `{"value1":"location_type","value2":"ldap","description":""}` to `{"value1":"location_type","value2":"file","description":""}`
 
@@ -377,7 +420,7 @@ Now we are ready to perform script development and debugging. Here is a quick ov
   
 1. Enable the script by settings `jansEnabled` to `true`. The following is an example of how the basic script entry should look.  
 
-   ![LDAP basic script ](../../assets/basic_script_enabled.png)
+    ![LDAP basic script ](../../assets/basic_script_enabled.png)
 
 1. Check the following log inside the the auth-server container to verify that auth server loaded the script properly: `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`. It should look like this:    
 
