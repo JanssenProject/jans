@@ -41,13 +41,15 @@ style = Style.from_dict(
         ## main
         "outh_maincontainer":"",  
         "outh_containers_scopes":"",  
-        "outh_containers_scopes.text":"green",  
+        "outh_containers_scopes.text":"green",
         "outh_containers_clients":"",  
-        "outh_containers_clients.text":"green",  
+        "outh_containers_clients.text":"green",
 
-        "outh-navbar":"fg:#f92672 bg:#4D4D4D",  
-        "outh-verticalnav-headcolor":'green' ,  
-        "outh-verticalnav-entriescolor":'white' , 
+        "sub-navbar": "fg:Silver bg:MidnightBlue",
+
+        "outh-navbar":"fg:#f92672 bg:#4D4D4D",
+        "outh-verticalnav-headcolor":'green',
+        "outh-verticalnav-entriescolor":'white',
 
         "outh-waitclientdata":'' , 
         "outh-waitclientdata.label":'' , 
@@ -114,7 +116,10 @@ style = Style.from_dict(
 
 ## jans nav bar
 main_navbar_bgcolor = "DimGray"
-outh_navbar_bgcolor = "#66d9ef"
+outh_navbar_bgcolor = "#ADD8E6"
+sub_navbar_selected_bgcolor = "Navy"
+sub_navbar_selected_fgcolor = "OldLace"
+shorcut_color= 'OrangeRed'
 
 
 ### WUI Componenets

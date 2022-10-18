@@ -151,7 +151,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
-                                        Box(self.oauth_navbar.nav_window, style='class:outh-navbar', height=1),
+                                        Box(self.oauth_navbar.nav_window, style='class:sub-navbar', height=1),
                                         DynamicContainer(lambda: self.oauth_main_area),
                                         ],
                                     height=D(),
@@ -165,8 +165,7 @@ class Plugin(DialogUtils):
                     self.app,
                     entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging')],
                     selection_changed=self.oauth_nav_selection_changed,
-                    select=0,
-                    bgcolor=cli_style.outh_navbar_bgcolor  ### it is not a style > only color
+                    select=0
                     )
 
     def oauth_nav_selection_changed(self, selection):
@@ -710,6 +709,6 @@ class Plugin(DialogUtils):
                 try:
                     self.app.layout.focus(focused_before)
                 except:
-                    self.app.layout.focus(self.app.center_frame) ##
+                    self.app.layout.focus(self.app.center_frame)
 
             ensure_future(coroutine())

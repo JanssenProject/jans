@@ -115,8 +115,7 @@ class JansCliApp(Application):
                     self,
                     entries=[(plugin.pid, plugin.name) for plugin in self._plugins], 
                     selection_changed=self.main_nav_selection_changed,
-                    select=0,
-                    bgcolor=cli_style.main_navbar_bgcolor
+                    select=0
                     )
 
         self.center_frame = FloatContainer(content=

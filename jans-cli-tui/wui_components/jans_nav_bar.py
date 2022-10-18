@@ -7,6 +7,9 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.application.current import get_app
 from typing import TypeVar, Callable
 
+import cli_style
+
+
 shortcut_re = re.compile(r'\[(.*?)\]')
 
 class JansNavBar():
@@ -18,7 +21,6 @@ class JansNavBar():
         entries: list, 
         selection_changed: Callable, 
         select: int= 0, 
-        bgcolor: str= "DimGray",
         ) -> Window:
 
         """init for JansNavBar
@@ -42,7 +44,6 @@ class JansNavBar():
         self.myparent = myparent
         self.navbar_entries = entries
         self.cur_navbar_selection = select
-        self.bgcolor = bgcolor
         self.selection_changed = selection_changed
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.create_window()
@@ -97,11 +98,11 @@ class JansNavBar():
             if re_search:
                 sc, ec = re_search.span()
                 shorcut_key = re_search.group(1)
-                display_text = display_text[:sc]+ '<style fg="OrangeRed">' + shorcut_key + '</style>' +display_text[ec:]
+                display_text = display_text[:sc]+ '<style fg="{}">'.format(cli_style.shorcut_color) + shorcut_key + '</style>' +display_text[ec:]
                 self.add_key_binding(shorcut_key.lower())
 
             if i == self.cur_navbar_selection:
-                result.append(HTML('<style fg="LightYellow" bg="{}">{}</style>'.format(self.bgcolor, display_text)))
+                result.append(HTML('<style fg="{}" bg="{}">{}</style>'.format(cli_style.sub_navbar_selected_bgcolor, cli_style.sub_navbar_selected_fgcolor, display_text)))
             else:
                 result.append(HTML('<b>{}</b>'.format(display_text)))
             result.append("   ")
