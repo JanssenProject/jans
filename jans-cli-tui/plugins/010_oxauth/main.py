@@ -16,6 +16,7 @@ from prompt_toolkit.layout.containers import (
     VSplit,
     HorizontalAlign,
     DynamicContainer,
+    Window,
 )
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import (
@@ -58,6 +59,30 @@ class Plugin():
         self.oauth_prepare_containers()
         self.oauth_nav_selection_changed(self.oauth_navbar.navbar_entries[0][0])
 
+
+    def init_plugin(self):
+        try:
+            response = self.app.cli_object.process_command_by_id(
+                        operation_id='get-properties',
+                        url_suffix='',
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
+                        )
+
+        except Exception as e:
+            self.app.show_message(_("Error getting Jans configuration"), str(e))
+            return
+
+        if response.status_code not in (200, 201):
+            self.app.show_message(_("Error getting Jans configuration"), str(response.text))
+            return
+
+        self.app_configuration = response.json()
+
+        self.schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
+        self.oauth_logging()
+
     def process(self):
         pass
 
@@ -74,6 +99,7 @@ class Plugin():
             'clients': HSplit([],width=D()),
             'scopes': HSplit([],width=D()),
             'keys': HSplit([],width=D()),
+            'logging': HSplit([],width=D()),
         }
 
         self.oauth_main_area = HSplit([],width=D())
@@ -114,7 +140,7 @@ class Plugin():
                         DynamicContainer(lambda: self.oauth_data_container['keys'])
                      ], style='class:outh_containers_clients')
 
-
+        self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
                                         Box(self.oauth_navbar.nav_window, style='class:outh-navbar', height=1),
@@ -401,11 +427,10 @@ class Plugin():
 
             self.oauth_data_container['keys'] = HSplit([keys])
             get_app().invalidate()
-            self.app.layout.focus(keys)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+            self.app.layout.focus(keys)
 
         else:
             self.app.show_message(_("Oops"), _("Nothing to display"), tobefocused=self.oauth_containers['keys'])
-
 
 
     def oauth_get_keys(self) -> None:
@@ -597,9 +622,59 @@ class Plugin():
                     data={}
                     )
                 self.EditClientDialog.oauth_get_uma_resources()
-                
+
             return result
 
-
         ensure_future(coroutine())
-        
+
+    def oauth_logging(self) -> None:
+        self.oauth_data_container['logging'] = HSplit([
+                        self.app.getTitledWidget(
+                                _('Log Level'),
+                                name='loggingLevel',
+                                widget=DropDownWidget(
+                                    values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'), ('ERROR', 'ERROR'), ('FATAL', 'FATAL'), ('OFF', 'OFF')],
+                                    value=self.app_configuration.get('loggingLevel')
+                                    ),
+                                jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
+                                ),
+                        self.app.getTitledWidget(
+                                _('Log Layout'),
+                                name='loggingLayout',
+                                widget=DropDownWidget(
+                                    values=[('text', 'text'), ('json', 'json')],
+                                    value=self.app_configuration.get('loggingLayout')
+                                    ),
+                                jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'),
+                                ),
+                        self.app.getTitledCheckBox(
+                            _("Enable HTTP Logging"), 
+                            name='httpLoggingEnabled',
+                            checked=self.app_configuration.get('httpLoggingEnabled'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'httpLoggingEnabled'),
+                            style='class:outh-client-checkbox'
+                            ),
+                        self.app.getTitledCheckBox(
+                            _("Disable JDK Logger"), 
+                            name='disableJdkLogger',
+                            checked=self.app_configuration.get('disableJdkLogger'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'disableJdkLogger'),
+                            style='class:outh-client-checkbox'
+                            ),
+                        self.app.getTitledCheckBox(
+                            _("Enable Oauth Audit Logging"), 
+                            name='enabledOAuthAuditLogging',
+                            checked=self.app_configuration.get('enabledOAuthAuditLogging'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'enabledOAuthAuditLogging'),
+                            style='class:outh-client-checkbox'
+                            ),
+                        Window(height=1),
+                        HSplit([
+                            self.app.getButton(text=_("Save Logging"), name='oauth:logging:save', jans_help=_("Save Auth Server logging configuration"), handler=self.save_logging),
+                            Window(width=100),
+                            ])
+                     ], style='class:outh_containers_clients', width=D())
+
+
+    def save_logging(self):
+        pass

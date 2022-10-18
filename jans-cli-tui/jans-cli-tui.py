@@ -155,6 +155,8 @@ class JansCliApp(Application):
         # ----------------------------------------------------------------------------- #
         self.check_jans_cli_ini()
 
+        self.init_plugins()
+
     def _load_plugins(self):
 
         plugin_dir = os.path.join(cur_dir, 'plugins')
@@ -164,6 +166,11 @@ class JansCliApp(Application):
             plugin = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(plugin)
             self._plugins.append(plugin.Plugin(self))
+
+    def init_plugins(self):
+        for plugin in self._plugins:
+            if hasattr(plugin, 'init_plugin'):
+                plugin.init_plugin()
 
     @property
     def dialog_width(self):
@@ -449,12 +456,12 @@ class JansCliApp(Application):
         return v
 
     def getButton(
-        self, 
-        text: AnyFormattedText, 
-        name: AnyFormattedText, 
-        jans_help: AnyFormattedText, 
-        handler: Callable= None, 
-        ) -> AnyContainer:
+                self, 
+                text: AnyFormattedText, 
+                name: AnyFormattedText, 
+                jans_help: AnyFormattedText, 
+                handler: Callable= None, 
+                ) -> Button:
 
         b = Button(text=text, width=len(text)+2)
         b.window.jans_name = name
