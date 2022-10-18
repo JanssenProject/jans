@@ -39,8 +39,19 @@ class Plugin():
                     select=0,
                     )
 
-    def nav_selection_changed(self, entry):
-        pass
+    def nav_selection_changed(self, selection) -> None:
+        open("/tmp/fido.txt", "a").write(str(selection)+'\n')
+        """This method for the selection change
+
+        Args:
+            selection (str): the current selected tab
+        """
+
+        #if selection in self.oauth_containers:
+        #    self.oauth_main_area = self.oauth_containers[selection]
+        #else:
+        #    self.oauth_main_area = self.app.not_implemented
+
 
     def set_center_frame(self):
         """center frame content

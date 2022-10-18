@@ -93,6 +93,7 @@ class JansCliApp(Application):
         self.styles = dict(style.style_rules)
         self._plugins = []
         self._load_plugins()
+        self.cli_object_ok = False
 
         # -------------------------------------------------------------------------------- #
 
@@ -147,14 +148,10 @@ class JansCliApp(Application):
 
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
-        # Since first module is oauth, set center frame to my oauth main container.
-        #self.oauth_set_center_frame()
-
-
-        # ----------------------------------------------------------------------------- #
+        self.plugins_initialised = False
         self.check_jans_cli_ini()
-
-        self.init_plugins()
+        if self.cli_object_ok:
+            self.init_plugins()
 
     def _load_plugins(self):
 
@@ -170,6 +167,7 @@ class JansCliApp(Application):
         for plugin in self._plugins:
             if hasattr(plugin, 'init_plugin'):
                 plugin.init_plugin()
+        self.plugins_initialised = True
 
     @property
     def dialog_width(self):
@@ -194,7 +192,6 @@ class JansCliApp(Application):
         self.keyboard.release(Key.tab)
 
     def create_cli(self):
-        conn_ok = False
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
                 host=config_cli.host, 
@@ -238,8 +235,15 @@ class JansCliApp(Application):
                             err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
                             await self.show_dialog_as_float(err_dialog)
                             self.create_cli()
-
+                        self.cli_object_ok = True
+                        if not self.plugins_initialised:
+                            self.init_plugins()
                     ensure_future(coroutine())
+
+            else:
+                self.cli_object_ok = True
+                if not self.plugins_initialised:
+                    self.init_plugins()
 
     def check_jans_cli_ini(self):
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):

@@ -65,6 +65,7 @@ class JansNavBar():
 
         if get_app().layout.container.floats:
             return
+
         for i, entry in enumerate(self.navbar_entries):
             re_search = shortcut_re.search(entry[1])
             if re_search and re_search.group(1).lower() == ev.data:
