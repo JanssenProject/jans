@@ -84,6 +84,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.delete_UMAresource=delete_UMAresource
         self.data = data
         self.title=title
+        self.myparent.logger.debug('self.data in init: '+str(self.data))
         self.prepare_tabs()
         self.create_window()
 
@@ -107,7 +108,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
         if 'accessTokenAsJwt' in self.data:
             self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
 
-        if 'rptAsJwt' in self.data:  ## TODO AppConfiguration
+        self.myparent.logger.debug('self.data: '+str(self.data))
+
+        if 'rptAsJwt' in self.data: 
             self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
 
         self.data['attributes'] = {}
@@ -135,13 +138,19 @@ class EditClientDialog(JansGDialog, DialogUtils):
         for list_key in (
                     'runIntrospectionScriptBeforeJwtCreation',
                     'backchannelLogoutSessionRequired', 
-                    'backchannelUserCodeParameterSupported', ## TODO AppConfiguration
-                    'sessionIdRequestParameterEnabled',  ## TODO AppConfiguration
                     'jansDefaultPromptLogin',
                     'allowSpontaneousScopes',
                             ):
             if self.data[list_key]:
                 self.data['attributes'][list_key] = self.data[list_key]
+
+
+        # for list_key in (
+        #             'backchannelUserCodeParameterSupported', ## TODO AppConfiguration
+        #             'sessionIdRequestParameterEnabled',  ## TODO AppConfiguration
+        #                     ):
+        #     if self.data[list_key]:
+        #         self.data['attributes'][list_key] = self.data[list_key]
 
 
         cfr = self.check_required_fields()
@@ -205,8 +214,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-client-text'),
                         
                         self.myparent.getTitledText(_("Authn Method token endpoint"),
-                            name='tokenEndpointAuthMethodsSupported',
-                            value='\n'.join(self.data.get('tokenEndpointAuthMethodsSupported', [])),
+                            name='tokenEndpointAuthMethodsSupported',  ## TODO AppConfiguration
+                            value='\n'.join(self.data.get('tokenEndpointAuthMethodsSupported', [])),## TODO Not in attributes >> in get-properties
                             height=3, 
                             style='class:outh-client-text'),
                             
@@ -366,7 +375,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledCheckBox(
                             _("Require user code param"), 
                             name='backchannelUserCodeParameterSupported',   ## TODO AppConfiguration
-                            checked=self.data.get('attributes', {}).get('backchannelUserCodeParameterSupported'),
+                            checked=self.data.get('attributes', {}).get('backchannelUserCodeParameterSupported'),## TODO Not in attributes >> in get-properties
                             style='class:outh-client-checkbox'
                             ),
                         
@@ -381,7 +390,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledCheckBox(
                             _("Request PAR"), 
                             name='sessionIdRequestParameterEnabled', ## TODO AppConfiguration
-                            checked=self.data.get('attributes', {}).get('sessionIdRequestParameterEnabled'),
+                            checked=self.data.get('attributes', {}).get('sessionIdRequestParameterEnabled'),## TODO Not in attributes >> in get-properties
                             style='class:outh-client-checkbox'
                             ),
 
@@ -389,7 +398,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         self.myparent.getTitledRadioButton(
                             _("PRT token type"),
-                            name='rptAsJwt!',  ## TODO AppConfiguration
+                            name='rptAsJwt',  
                             values=[('jwt', 'JWT'), ('reference', 'Reference')], 
                             current_value='jwt' if self.data.get('rptAsJwt') else 'reference',
                             style='class:outh-client-radiobutton'),
