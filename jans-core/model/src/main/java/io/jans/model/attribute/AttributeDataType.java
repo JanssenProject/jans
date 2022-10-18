@@ -6,6 +6,7 @@
 
 package io.jans.model.attribute;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ public enum AttributeDataType implements AttributeEnum {
         this.displayName = displayName;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }
