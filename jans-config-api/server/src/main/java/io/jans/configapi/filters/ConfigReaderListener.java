@@ -15,7 +15,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -54,7 +55,12 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -67,18 +73,46 @@ public class ConfigReaderListener implements ReaderListener {
 
    
     @Override
-    public void beforeScan(OpenApiReader paramOpenApiReader, OpenAPI paramOpenAPI) {
-        log.error("ConfigReaderListener::beforeScan() - paramOpenApiReader:{}, paramOpenAPI:{} ", paramOpenApiReader, paramOpenAPI);
+    public void beforeScan(OpenApiReader openApiReader, OpenAPI openAPI) {
+        log.error("ConfigReaderListener::beforeScan() - openApiReader:{}, openAPI:{} ", openApiReader, openAPI);
+        log.error("ConfigReaderListener::beforeScan() - openAPI.getComponents():{} ", openAPI.getComponents());
+        log.error("ConfigReaderListener::beforeScan() - openAPI.getPaths():{} ", openAPI.getPaths());
+        
+        if(openAPI.getPaths()!=null && openAPI.getPaths().size()>0) {
+            
+          Map<String,PathItem> map = openAPI.getPaths().entrySet().stream()
+                  .filter(k -> (k.getValue() == null))
+                  .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+          log.error("ConfigReaderListener::beforeScan() - map:{}", map);
+          if(map==null || map.isEmpty()) {
+              log.error("ConfigReaderListener::beforeScan() - map is null");              
+          }
+            
+        }
     }
 
     @Override
-    public void afterScan(OpenApiReader paramOpenApiReader, OpenAPI paramOpenAPI) {
-        log.error("ConfigReaderListener::afterScan() - paramOpenApiReader:{}, paramOpenAPI:{} ", paramOpenApiReader, paramOpenAPI);
+    public void afterScan(OpenApiReader openApiReader, OpenAPI openAPI) {
+        log.error("ConfigReaderListener::afterScan() - openApiReader:{}, openAPI:{} ", openApiReader, openAPI);
+        log.error("ConfigReaderListener::afterScan() - openAPI.getComponents():{} ", openAPI.getComponents());
+        log.error("ConfigReaderListener::afterScan() - openAPI.getPaths():{} ", openAPI.getPaths());
+        
+        if(openAPI.getPaths()!=null && openAPI.getPaths().size()>0) {
+            
+          Map<String,PathItem> map = openAPI.getPaths().entrySet().stream()
+                  .filter(k -> (k.getValue() == null))
+                  .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+          log.error("ConfigReaderListener::afterScan() - map:{}", map);
+          if(map==null || map.isEmpty()) {
+              log.error("ConfigReaderListener::afterScan() - map is null");              
+          }
+            
+        }
     }
-
+/
     Map<String, Example> generateExamples() throws Exception {
         final Map<String, Example> examples = new LinkedHashMap<>();
-        //getFolderData(examples, "PLACE YOUR URL HERE");
+        /getFolderData(examples, "PLACE YOUR URL HERE");
         //getExamples(examples);
         return examples;
     }
