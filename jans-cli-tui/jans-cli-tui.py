@@ -83,7 +83,9 @@ def do_exit(*c):
 
 
 class JansCliApp(Application):
-    
+
+    entries_per_page = 20 # we can make this configurable
+
     def __init__(self):
         self.set_keybindings()
         self.init_logger()
@@ -91,8 +93,7 @@ class JansCliApp(Application):
         self.styles = dict(style.style_rules)
         self._plugins = []
         self._load_plugins()
-        
-        self.entries_per_page = 20 # we can make this configurable
+
         # -------------------------------------------------------------------------------- #
 
         self.not_implemented = Frame(

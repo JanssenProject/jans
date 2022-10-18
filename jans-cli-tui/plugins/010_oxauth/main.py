@@ -1,9 +1,11 @@
 import os
 import sys
+import time
 
 import threading
 from asyncio import ensure_future
 from functools import partial
+from typing import Optional
 
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
@@ -69,10 +71,11 @@ class Plugin():
         """
 
         self.oauth_data_container = {
-            'clients' :HSplit([],width=D()),
-            'scopes' :HSplit([],width=D()),
+            'clients': HSplit([],width=D()),
+            'scopes': HSplit([],width=D()),
+            'keys': HSplit([],width=D()),
+        }
 
-        } 
         self.oauth_main_area = HSplit([],width=D())
 
         self.oauth_containers['scopes'] = HSplit([
@@ -99,6 +102,19 @@ class Plugin():
                         ),
                         DynamicContainer(lambda: self.oauth_data_container['clients'])
                      ],style='class:outh_containers_clients')
+
+
+        self.oauth_containers['keys'] = HSplit([
+                    VSplit([
+                        self.app.getButton(text=_("Get Keys"), name='oauth:keys:get', jans_help=_("Retreive Auth Server keys"), handler=self.oauth_get_keys),
+                        ],
+                        padding=3,
+                        width=D(),
+                        ),
+                        DynamicContainer(lambda: self.oauth_data_container['keys'])
+                     ], style='class:outh_containers_clients')
+
+
 
         self.oauth_main_container = HSplit([
                                         Box(self.oauth_navbar.nav_window, style='class:outh-navbar', height=1),
@@ -324,6 +340,81 @@ class Plugin():
     def display_scope(self):
         pass
 
+
+
+
+    def oauth_update_keys(self) -> None:
+
+        """update the current Keys fromserver
+        """
+
+        try :
+            rsponse = self.app.cli_object.process_command_by_id(
+                operation_id='get-config-jwks',
+                url_suffix='',
+                endpoint_args='',
+                data_fn=None,
+                data={}
+                        )
+        except Exception as e:
+            self.app.show_message(_("Error getting keys"), str(e))
+            return
+
+        if rsponse.status_code not in (200, 201):
+            self.app.show_message(_("Error getting keys"), str(rsponse.text))
+            return
+
+        try:
+            result = rsponse.json()
+        except Exception:
+            self.app.show_message(_("Error getting keys"), str(rsponse.text))
+            return
+
+        data =[]
+
+        for d in result.get('keys', []): 
+            try:
+                gmt = time.gmtime(int(d['exp'])/1000)
+                exps = time.strftime("%d %b %Y %H:%M:%S", gmt)
+            except Exception:
+                exps = d.get('exp', '')
+            data.append(
+                [
+                d['name'],
+                exps,
+                ]
+            )
+
+        if data:
+
+            keys = JansVerticalNav(
+                    myparent=self.app,
+                    headers=['Name', 'Expiration'],
+                    data=data,
+                    preferred_size=[0,0],
+                    on_display=self.app.data_display_dialog,
+                    selectes=0,
+                    headerColor='class:outh-verticalnav-headcolor',
+                    entriesColor='class:outh-verticalnav-entriescolor',
+                    all_data=result['keys']
+                )
+
+            self.oauth_data_container['keys'] = HSplit([keys])
+            get_app().invalidate()
+            self.app.layout.focus(keys)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+
+        else:
+            self.app.show_message(_("Oops"), _("Nothing to display"), tobefocused=self.oauth_containers['keys'])
+
+
+
+    def oauth_get_keys(self) -> None:
+        """Method to get the Keys from server
+        """
+        self.oauth_data_container['keys'] = HSplit([Label(_("Please wait while getting Keys"), style='class:outh-waitscopedata.label')], width=D(), style='class:outh-waitclientdata')
+        t = threading.Thread(target=self.oauth_update_keys, daemon=True)
+        t.start()
+
   
     def edit_scope_dialog(self, **params): 
         selected_line_data = params['data']  
@@ -377,8 +468,6 @@ class Plugin():
             _type_: bool value to check the status code response
         """
 
-        # self.app.logger.debug('Saved scope DATA: '+str(dialog.data))
-
         response = self.app.cli_object.process_command_by_id(
             operation_id='put-oauth-scopes' if dialog.data.get('inum') else 'post-oauth-scopes',
             url_suffix='',
@@ -386,8 +475,6 @@ class Plugin():
             data_fn='',
             data=dialog.data
         )
-
-        # self.app.logger.debug(response.text)
 
         if response.status_code in (200, 201):
             self.oauth_get_scopes()
@@ -486,9 +573,6 @@ class Plugin():
                     data_fn='',
                     data={}
                 )
-            
-                # TODO Need to do `self.oauth_get_scopes()` only if scopes is not empty
-
                 self.oauth_get_scopes()
             return result
 
