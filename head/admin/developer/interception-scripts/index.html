@@ -10524,33 +10524,37 @@
 <p>Interception scripts (or custom scripts)  allow you to define custom business logic for various features offered by the OpenID Provider (Jans-auth server). Some examples of features which can be customized are - implementing a 2FA authentication method, consent gathering, client registration, adding business specific claims to ID token or Access token etc.
 Scripts can easily be upgraded and doesn't require forking the Jans Server code or re-building it. </p>
 <h1 id="types-of-interception-scripts-in-jans-server">Types of Interception scripts in Jans server<a class="headerlink" href="#types-of-interception-scripts-in-jans-server" title="Permanent link">#</a></h1>
-<p>Listed below, are custom scripts classified into various types, each of which represents a feature of the Jans server that can be extended as per the business need. Each script type is described by a java interface whose methods should be overridden to implement your business case. 
-1. <a href="https://jans.io/docs/admin/developer/scripts/person-authentication/">Person Authentication</a> : Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.
-1. <a href="https://jans.io/docs/admin/developer/scripts/consent-gathering/">Consent Gathering</a> : Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.
-1. <a href="">User Registration</a>
-1. Update User
-1. <a href="https://jans.io/docs/admin/developer/scripts/client-registration/">Client Registration</a>
-1. Dynamic scopes : Enables admin to generate scopes on the fly, for example by calling external APIs
-1. ID Generator
-1. Cache Refresh
-1. Session Management
-1. SCIM
-1. Inrospection
-1. Resource Owner Password Credentials
-1. UMA 2 RPT Authorization Policies
-1. UMA 2 Claims-Gathering</p>
+<p>Listed below, are custom scripts classified into various types, each of which represents a feature of the Jans server that can be extended as per the business need. Each script type is described by a java interface whose methods should be overridden to implement your business case. </p>
+<ol>
+<li><a href="../scripts/person-authentication/">Person Authentication</a> : Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.</li>
+<li><a href="../scripts/consent-gathering/">Consent Gathering</a> : Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.</li>
+<li><a href="">User Registration</a></li>
+<li>Update User</li>
+<li><a href="../scripts/client-registration/">Client Registration</a></li>
+<li>Dynamic scopes : Enables admin to generate scopes on the fly, for example by calling external APIs</li>
+<li>ID Generator</li>
+<li>Cache Refresh</li>
+<li>Session Management</li>
+<li>SCIM</li>
+<li>Inrospection</li>
+<li>Resource Owner Password Credentials</li>
+<li>UMA 2 RPT Authorization Policies</li>
+<li>UMA 2 Claims-Gathering</li>
+</ol>
 <h1 id="implementation-languages-jython-or-pure-java">Implementation languages - Jython or pure Java<a class="headerlink" href="#implementation-languages-jython-or-pure-java" title="Permanent link">#</a></h1>
 <p>Interception scripts are written in <strong><a href="http://www.jython.org/">Jython</a></strong> or in <strong>pure Java</strong>, enabling Java or Python libraries to be imported. </p>
 <hr />
 <h2 id="implementation-in-pure-java">Implementation in Pure Java<a class="headerlink" href="#implementation-in-pure-java" title="Permanent link">#</a></h2>
 <p>A script in Java refers to a java source file (e.g. <code>Discovery.java</code>) which is compiled by AS and executed at runtime. </p>
-<p>Some rules:
-* The java class file containing the script should not have a package set.
-* The name of the class must match to the name set in <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java">CustomScriptType source code</a> (e.g. for discovery script it is "Discovery") 
-* Scripts must implement predefined interface which can be found against the <a href="https://github.com/JanssenProject/jans/tree/main/jans-core/script/src/main/java/io/jans/model/custom/script/type">CustomScriptType</a>. For e.g. if you are writing a Person authentication script then your class should implement the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java">following interface</a>
-* All libraries available at runtime to server are available also to pure java script
-* To log to <code>jans-auth_script.log</code> use <code>scriptLogger</code>
-* Normal log will log in to <code>jans-auth.log</code></p>
+<p>Some rules:</p>
+<ul>
+<li>The java class file containing the script should not have a package set.</li>
+<li>The name of the class must match to the name set in <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java">CustomScriptType source code</a> (e.g. for discovery script it is "Discovery") </li>
+<li>Scripts must implement predefined interface which can be found against the <a href="https://github.com/JanssenProject/jans/tree/main/jans-core/script/src/main/java/io/jans/model/custom/script/type">CustomScriptType</a>. For e.g. if you are writing a Person authentication script then your class should implement the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java">following interface</a></li>
+<li>All libraries available at runtime to server are available also to pure java script</li>
+<li>To log to <code>jans-auth_script.log</code> use <code>scriptLogger</code></li>
+<li>Normal log will log in to <code>jans-auth.log</code></li>
+</ul>
 <p><strong>Example pure java script</strong>
 <div class="highlight"><pre><span></span><code>import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
@@ -10821,7 +10825,7 @@ E.g:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-18T21:51:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-18</span>
       
         <br>
         Created:

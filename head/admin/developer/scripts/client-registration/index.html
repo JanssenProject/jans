@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#client-registration-scripts" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -5183,10 +5188,124 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Client Registration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Client Registration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    Behavior
+  </a>
+  
+    <nav class="md-nav" aria-label="Behavior">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration-flow" class="md-nav__link">
+    Registration flow
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface" class="md-nav__link">
+    Interface
+  </a>
+  
+    <nav class="md-nav" aria-label="Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inherited-methods" class="md-nav__link">
+    Inherited Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-methods" class="md-nav__link">
+    New methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#objects" class="md-nav__link">
+    Objects
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-use-case-adding-scopes-defined-in-the-script-configuration-parameters" class="md-nav__link">
+    Common Use Case: Adding scopes defined in the script configuration parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Case: Adding scopes defined in the script configuration parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-type-python" class="md-nav__link">
+    Script Type: Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#script-type-java" class="md-nav__link">
+    Script Type: Java
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10481,6 +10600,104 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    Behavior
+  </a>
+  
+    <nav class="md-nav" aria-label="Behavior">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration-flow" class="md-nav__link">
+    Registration flow
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface" class="md-nav__link">
+    Interface
+  </a>
+  
+    <nav class="md-nav" aria-label="Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inherited-methods" class="md-nav__link">
+    Inherited Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-methods" class="md-nav__link">
+    New methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#objects" class="md-nav__link">
+    Objects
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-use-case-adding-scopes-defined-in-the-script-configuration-parameters" class="md-nav__link">
+    Common Use Case: Adding scopes defined in the script configuration parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Case: Adding scopes defined in the script configuration parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-type-python" class="md-nav__link">
+    Script Type: Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#script-type-java" class="md-nav__link">
+    Script Type: Java
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -10517,16 +10734,320 @@
 
 
 
-  <h1>Client Registration</h1>
+<h1 id="client-registration-scripts">Client Registration scripts<a class="headerlink" href="#client-registration-scripts" title="Permanent link">#</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>The Jans-Auth server implements the OpenID Connect <a href="https://openid.net/specs/openid-connect-registration-1_0.html">Dynamic Client Registration</a> specification. This allows developers to register a client with the Authorization Server (AS) without any intervention from the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the <a href="https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3">Software Statement</a> that is sent with the registration request.</p>
+<h2 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">#</a></h2>
+<p>By default, Jans server has no dynamic client registration scripts enabled, and all clients are given the same attributes. When a script is added and enabled, the script will run and return a <code>boolean</code> after applying logic to the registration request. If <code>true</code>, the client is registered and client credentials are returned. Generally, the script is global for all registration requests, and only one script is enabled at a time.</p>
+<h3 id="registration-flow">Registration flow<a class="headerlink" href="#registration-flow" title="Permanent link">#</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+title Client Registration script
+autonumber 1
+RP-&gt;&gt;Jans AS: /register request
+Jans AS-&gt;&gt;Jans AS: Is there a client registration script enabled?
+Jans AS-&gt;&gt;Jans AS: run script
+note  right of Jans AS: Apply custom logic e.g &lt;br/&gt; Add scopes &lt;br/&gt; Set attributes &lt;br/&gt; validate SSA
+Jans AS-&gt;&gt;RP: return client credentials</code></pre>
+<h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
+<p>The client registration script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/client/ClientRegistrationType.java">ClientRegistrationType</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
+<h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Method header</th>
+<th align="left">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+</tr>
+<tr>
+<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
+<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+</tr>
+<tr>
+<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-methods">New methods<a class="headerlink" href="#new-methods" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Method header</th>
+<th align="left">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>def createClient(self, context)</code></td>
+<td align="left">Called when the dynamic client registration request is received.</td>
+</tr>
+<tr>
+<td align="left"><code>def updateClient(self, context)</code></td>
+<td align="left">Called when the PUT method is called on registration endpoint to update client details.</td>
+</tr>
+<tr>
+<td align="left"><code>def getSoftwareStatementHmacSecret(self, context)</code></td>
+<td align="left">Returns secret key which will be used to validate Software Statement if HMAC algorithm is used (e.g. HS256, HS512)</td>
+</tr>
+<tr>
+<td align="left"><code>def getSoftwareStatementJwks(self, context)</code></td>
+<td align="left">Returns JWKS which will be used to validate Software Statement if keys are used (e.g. RS256)</td>
+</tr>
+<tr>
+<td align="left"><code>def modifyPutResponse(self, responseAsJsonObject, executionContext)</code></td>
+<td align="left">Modifies the response from the PUT request to registration endpoint</td>
+</tr>
+<tr>
+<td align="left"><code>def modifyReadResponse(self, responseAsJsonObject, executionContext)</code></td>
+<td align="left">Modifies the response from the GET request to registration endpoint</td>
+</tr>
+<tr>
+<td align="left"><code>def modifyPostResponse(self, responseAsJsonObject, executionContext)</code></td>
+<td align="left">Modifies the response from the POST request to registration endpoint</td>
+</tr>
+</tbody>
+</table>
+<h3 id="objects">Objects<a class="headerlink" href="#objects" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Object name</th>
+<th align="left">Object description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>customScript</code></td>
+<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+</tr>
+<tr>
+<td align="left"><code>configurationAttributes</code></td>
+<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+</tr>
+<tr>
+<td align="left"><code>context</code></td>
+<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java">Reference</a></td>
+</tr>
+<tr>
+<td align="left"><code>responseAsJsonObject</code></td>
+<td align="left">Java JSONObject. <a href="https://docs.oracle.com/javaee/7/api/javax/json/JsonObject.html">Reference</a></td>
+</tr>
+<tr>
+<td align="left"><code>executionContext</code></td>
+<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java">Reference</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="common-use-case-adding-scopes-defined-in-the-script-configuration-parameters">Common Use Case: Adding scopes defined in the script configuration parameters<a class="headerlink" href="#common-use-case-adding-scopes-defined-in-the-script-configuration-parameters" title="Permanent link">#</a></h2>
+<h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">io.jans.model.custom.script.type.client</span> <span class="kn">import</span> <span class="n">ClientRegistrationType</span>
+<span class="kn">from</span> <span class="nn">io.jans.service.cdi.util</span> <span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span> <span class="nn">io.jans.orm.util</span> <span class="kn">import</span> <span class="n">StringHelper</span><span class="p">,</span> <span class="n">ArrayHelper</span>
+<span class="kn">from</span> <span class="nn">io.jans.as.server.service</span> <span class="kn">import</span> <span class="n">ScopeService</span>
 
-<p>This file is a placeholder.</p>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="k">class</span> <span class="nc">ClientRegistration</span><span class="p">(</span><span class="n">ClientRegistrationType</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Initialization&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;scope_list&quot;</span><span class="p">)):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Client registration. Initialization failed. Scope List not defined.&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">scope_list</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scope_list&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span> 
+
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Initialized successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span> <span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">scopeService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">ScopeService</span><span class="p">)</span>
+        <span class="n">currentScopes</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getScopes</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">newScope</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope_list</span><span class="p">:</span>
+            <span class="n">foundScope</span> <span class="o">=</span> <span class="n">scopeService</span><span class="o">.</span><span class="n">getScopeById</span><span class="p">(</span><span class="n">newScope</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">foundScope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s2">&quot;Client Registration. New scope(s) not found.&quot;</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">newScopes</span> <span class="o">=</span> <span class="n">ArrayHelper</span><span class="o">.</span><span class="n">addItemToStringArray</span><span class="p">(</span><span class="n">currentScopes</span><span class="p">,</span> <span class="n">foundScope</span><span class="o">.</span><span class="n">getDn</span><span class="p">())</span>
+
+        <span class="n">client</span><span class="o">.</span><span class="n">setScopes</span><span class="p">(</span><span class="n">newScopes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">updateClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;SSA Client registration. UpdateClient method&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Returns secret key which will be used to validate Software Statement if HMAC algorithm is used (e.g. HS256, HS512). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.</span>
+    <span class="k">def</span> <span class="nf">getSoftwareStatementHmacSecret</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Returns JWKS which will be used to validate Software Statement if keys are used (e.g. RS256). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.</span>
+    <span class="k">def</span> <span class="nf">getSoftwareStatementJwks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+    <span class="k">def</span> <span class="nf">modifyPutResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">modifyReadResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">modifyPostResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+<h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.common.model.registration.Client</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.persistence.model.Scope</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.ScopeService</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.DynamicClientRegistrationContext</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.client.ClientRegistrationType</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.orm.util.ArrayHelper</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util.CdiUtil</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.json.JSONArray</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ClientRegistration</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ClientRegistrationType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">ClientRegistration</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">JSONArray</span><span class="w"> </span><span class="n">json_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="s">&quot;scope_list&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Client registration. Initialization failed. Scope List not found.&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">scope_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;scope_list&quot;</span><span class="p">).</span><span class="na">getValue2</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">json_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONArray</span><span class="p">(</span><span class="n">scope_list</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Client registration. Initialization.&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="s">&quot;scope_list&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Client registration. Initialization failed. Scope List not found.&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">scope_list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;scope_list&quot;</span><span class="p">).</span><span class="na">getValue2</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">json_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONArray</span><span class="p">(</span><span class="n">scope_list</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Client registration. Destroy.&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">createClient</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Client registration. CreateClient method&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">DynamicClientRegistrationContext</span><span class="w"> </span><span class="n">regContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">DynamicClientRegistrationContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">Client</span><span class="w"> </span><span class="n">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regContext</span><span class="p">.</span><span class="na">getClient</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">ScopeService</span><span class="w"> </span><span class="n">scopeService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdiUtil</span><span class="p">.</span><span class="na">bean</span><span class="p">(</span><span class="n">ScopeService</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">currentScopes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">client</span><span class="p">.</span><span class="na">getScopes</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">newScopes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">currentScopes</span><span class="p">.</span><span class="na">clone</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">json_array</span><span class="p">.</span><span class="na">length</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">scopeName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="w"> </span><span class="n">json_array</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">Scope</span><span class="w"> </span><span class="n">foundScope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scopeService</span><span class="p">.</span><span class="na">getScopeById</span><span class="p">(</span><span class="n">scopeName</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">foundScope</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Client registration. Scope not found&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="n">newScopes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ArrayHelper</span><span class="p">.</span><span class="na">addItemToStringArray</span><span class="p">(</span><span class="n">newScopes</span><span class="p">,</span><span class="w"> </span><span class="n">foundScope</span><span class="p">.</span><span class="na">getDn</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">client</span><span class="p">.</span><span class="na">setScopes</span><span class="p">(</span><span class="n">newScopes</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Client registration. Scopes added.&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">updateClient</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// This method needs to be overridden if client is providing an SSA with HMAC</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getSoftwareStatementHmacSecret</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// This method needs to be overridden if client is providing an SSA and RS256 validation</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getSoftwareStatementJwks</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getDcrHmacSecret</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getDcrJwks</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isCertValidForClient</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">o</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">o1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyPutResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">executionContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyReadResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">executionContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyPostResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">executionContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-18T21:51:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-18</span>
       
         <br>
         Created:

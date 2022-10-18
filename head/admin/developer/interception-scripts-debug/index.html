@@ -4865,16 +4865,29 @@
   
 </li>
         
-          <li class="md-nav__item">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#development-debugging" class="md-nav__link">
     Development &amp; Debugging
+  </a>
+  
+    <nav class="md-nav" aria-label="Development &amp; Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-remote-debugging-in-jans-auth" class="md-nav__link">
+    Enable Remote Debugging in jans-auth
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#enable-remote-debug-in-custom-script" class="md-nav__link">
-    Enable Remote Debug in Custom Script
+  <a href="#enable-remote-debug-in-jython-custom-script" class="md-nav__link">
+    Enable remote debug in Jython Custom Script
   </a>
   
 </li>
@@ -10625,16 +10638,29 @@
   
 </li>
         
-          <li class="md-nav__item">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#development-debugging" class="md-nav__link">
     Development &amp; Debugging
+  </a>
+  
+    <nav class="md-nav" aria-label="Development &amp; Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-remote-debugging-in-jans-auth" class="md-nav__link">
+    Enable Remote Debugging in jans-auth
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#enable-remote-debug-in-custom-script" class="md-nav__link">
-    Enable Remote Debug in Custom Script
+  <a href="#enable-remote-debug-in-jython-custom-script" class="md-nav__link">
+    Enable remote debug in Jython Custom Script
   </a>
   
 </li>
@@ -10904,20 +10930,48 @@ helm install jans-auth jans/jans -n jans --set global.lbIp<span class="o">=</spa
 <p>From the menu: go to <code>Pydev</code> &gt; <code>Start Debug Server</code>. Now the server should have started at port <code>5678</code>. Take a note of the ip of the computer running Liclipse and save it for later use. Remember that the auth server pod must be able to communicate with this ip. If you have followed the instructions above and installed minikube on your local computer which is the same computer Liclipse is operating on you should be able to reach it from within the pods.</p>
 </li>
 </ol>
-<h3 id="development-debugging">Development &amp; Debugging<a class="headerlink" href="#development-debugging" title="Permanent link">#</a></h3>
+<h2 id="development-debugging">Development &amp; Debugging<a class="headerlink" href="#development-debugging" title="Permanent link">#</a></h2>
 <p>Now we are ready to perform script development and debugging. Here is a quick overview:</p>
 <ol>
 <li>
-<p>Instruct the auth server to load the script from the file system <em>instead</em> of LDAP. Follow the example scenario below to learn how to do this.</p>
+<p>Enable remote debugging on the <code>jans-auth</code> service.</p>
 </li>
 <li>
-<p>Add debug instructions to the script, as specified in the next section</p>
+<p>Instruct the auth server to load the script from the file system <em>instead</em> of LDAP.</p>
 </li>
 <li>
-<p>Execute the script</p>
+<p>Add debug instructions to the script.</p>
+</li>
+<li>
+<p>Execute the script.</p>
 </li>
 </ol>
-<h3 id="enable-remote-debug-in-custom-script">Enable Remote Debug in Custom Script<a class="headerlink" href="#enable-remote-debug-in-custom-script" title="Permanent link">#</a></h3>
+<h3 id="enable-remote-debugging-in-jans-auth">Enable Remote Debugging in jans-auth<a class="headerlink" href="#enable-remote-debugging-in-jans-auth" title="Permanent link">#</a></h3>
+<p>In order to enable remote debugging in the <code>jans-auth</code> process, open <code>/etc/default/jans-auth</code> in your favorite text editor. The default <code>JAVA_OPTIONS</code> variable is as follows:</p>
+<div class="highlight"><pre><span></span><code>JAVA_OPTIONS=&quot;-server 
+    -Xms256m -Xmx928m -XX:+DisableExplicitGC 
+    -Djans.base=/etc/jans -Dserver.base=/opt/jans/jetty/jans-auth 
+    -Dlog.base=/opt/jans/jetty/jans-auth -Dpython.home=/opt/jython&quot;
+</code></pre></div>
+<p>Modify to this:</p>
+<div class="highlight"><pre><span></span><code>JAVA_OPTIONS=&quot;-server -Xms256m -Xmx928m -XX:+DisableExplicitGC 
+    -Djans.base=/etc/jans -Dserver.base=/opt/jans/jetty/jans-auth 
+    -Dlog.base=/opt/jans/jetty/jans-auth -Dpython.home=/opt/jython 
+    -Dorg.eclipse.jetty.server.Request.maxFormContentSize=50000000 
+    -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005&quot;
+</code></pre></div>
+<p>The last line will enable remote debug on port 5005. Now restart the <code>jans-auth</code> service.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># To list all jans processes</span>
+systemctl list-units --all <span class="s2">&quot;jans*&quot;</span>
+<span class="c1"># On Ubuntu, the service name is jans-auth.service</span>
+systemctl restart jans-auth.service
+</code></pre></div>
+<p>If you are running Jans on a local VM or anywhere that is not the same as the machine that will be debugging, you will need to set up an SSH tunnel on port 5005. Execute the following command:</p>
+<div class="highlight"><pre><span></span><code>ssh -L 5005:localhost:5005 &lt;username&gt;@&lt;host&gt;
+</code></pre></div>
+<p>This will cause your local host's port 5005 to listen on the remote server's port 5005. Now you can use your favorite IDE and set up the remote debugger to connect to <code>localhost:5005</code>.</p>
+<h3 id="enable-remote-debug-in-jython-custom-script">Enable remote debug in Jython Custom Script<a class="headerlink" href="#enable-remote-debug-in-jython-custom-script" title="Permanent link">#</a></h3>
+<p>For Jython scripts, we need additional steps to enable breakpoints.</p>
 <ol>
 <li>
 <p>After the import section, add:   </p>
@@ -11038,22 +11092,20 @@ if REMOTE_DEBUG:
 </li>
 <li>
 <p>Port forward the opendj pod. </p>
-<p><div class="highlight"><pre><span></span><code>kubectl port-forward jans-opendj-0 -n &lt;jans-namespace&gt; <span class="m">1636</span>:1636 --address <span class="m">0</span>.0.0.0
+<div class="highlight"><pre><span></span><code>kubectl port-forward jans-opendj-0 -n &lt;jans-namespace&gt; <span class="m">1636</span>:1636 --address <span class="m">0</span>.0.0.0
 </code></pre></div>
-1. Create a connection to the ldap browser. The default password will be <code>Test1234#</code> if not changed in the helm install command.</p>
 </li>
-</ol>
+<li>
+<p>Create a connection to the ldap browser. The default password will be <code>Test1234#</code> if not changed in the helm install command.</p>
 <p><img alt="LDAP browser connection" src="../../../assets/ldap_browser_connection.png" /></p>
-<ol>
+</li>
 <li>
 <p>Inside the browser navigate to <code>o=jans, ou=scripts</code>. Right click on <code>ou=scripts</code> and click on <code>Quick Search</code>. Inside the pop up box that appears fill <code>Returning Attributes</code> with <code>displayName</code>, and press <code>Apply and Close</code></p>
 </li>
 <li>
 <p>In the results that appear click on the <code>Dn</code> that has a <code>displayName</code> of <code>basic</code>.</p>
-</li>
-</ol>
 <p><img alt="LDAP basic script " src="../../../assets/basic_script.png" /></p>
-<ol>
+</li>
 <li>
 <p>Choose to load the script from file instead of ldap. Inside the browser change <code>jansModuleProperty</code> with value <code>{"value1":"location_type","value2":"ldap","description":""}</code> to <code>{"value1":"location_type","value2":"file","description":""}</code></p>
 </li>
@@ -11062,10 +11114,8 @@ if REMOTE_DEBUG:
 </li>
 <li>
 <p>Enable the script by settings <code>jansEnabled</code> to <code>true</code>. The following is an example of how the basic script entry should look.  </p>
-</li>
-</ol>
 <p><img alt="LDAP basic script " src="../../../assets/basic_script_enabled.png" /></p>
-<ol>
+</li>
 <li>
 <p>Check the following log inside the the auth-server container to verify that auth server loaded the script properly: <code>/opt/jans/jetty/jans-auth/logs/jans-auth_script.log</code>. It should look like this:    </p>
 <div class="highlight"><pre><span></span><code>kubectl exec -ti &lt;auth-server-pod-name&gt; -n &lt;jans-namespace&gt; -- tail -f /opt/jans/jetty/jans-auth/logs/jans-auth_script.log
@@ -11145,7 +11195,7 @@ if REMOTE_DEBUG:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-18T21:51:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-18</span>
       
         <br>
         Created:
