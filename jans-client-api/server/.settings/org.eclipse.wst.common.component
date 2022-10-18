@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="jans-client-api-server">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="jans-core-util-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-util/jans-core-util">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-annotation-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-annotation/jans-orm-annotation">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-standalone-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-standalone/jans-orm-standalone">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-cdi-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-cdi/jans-orm-cdi">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-model-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-model/jans-core-model">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-model-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-model/jans-orm-model">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-util-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-util/jans-orm-util">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-auth-common-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-auth-common/jans-auth-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-server-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-server/jans-core-server">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-service-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-service/jans-core-service">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-ldap-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-ldap/jans-orm-ldap">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-couchbase-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-couchbase/jans-orm-couchbase">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-sql-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-sql/jans-orm-sql">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-spanner-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-spanner/jans-orm-spanner">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-hybrid-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-hybrid/jans-orm-hybrid">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-cache-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-cache/jans-core-cache">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-cdi-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-cdi/jans-core-cdi">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-timer-weld-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-timer-weld/jans-core-timer-weld">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-auth-model-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-auth-model/jans-auth-model">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-eleven-client-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-eleven-client/jans-eleven-client">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-eleven-model-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-eleven-model/jans-eleven-model">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="agama-model-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/agama-model/agama-model">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-auth-persistence-model-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-auth-persistence-model/jans-auth-persistence-model">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-document-store-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-document-store/jans-core-document-store">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-core-script-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-core-script/jans-core-script">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-core-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-core/jans-orm-core">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-orm-filter-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-orm-filter/jans-orm-filter">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-client-api-common-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-client-api-common/jans-client-api-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-auth-client-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-auth-client/jans-auth-client">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jans-client-api-1.0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/jans-client-api/jans-client-api">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="jans-client-api-server"/>
+        <property name="java-output-path" value="/jans-client-api-server/target/classes"/>
+    </wb-module>
+</project-modules>
