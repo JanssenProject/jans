@@ -11,11 +11,12 @@ Scripts can easily be upgraded and doesn't require forking the Jans Server code 
 
 # Types of Interception scripts in Jans server
 Listed below, are custom scripts classified into various types, each of which represents a feature of the Jans server that can be extended as per the business need. Each script type is described by a java interface whose methods should be overridden to implement your business case. 
-1. [Person Authentication](https://jans.io/docs/admin/developer/scripts/person-authentication/) : Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.
-1. [Consent Gathering](https://jans.io/docs/admin/developer/scripts/consent-gathering/) : Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.
+
+1. [Person Authentication](./scripts/person-authentication.md) : Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.
+1. [Consent Gathering](./scripts/consent-gathering.md) : Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.
 1. [User Registration]()
 1. Update User
-1. [Client Registration](https://jans.io/docs/admin/developer/scripts/client-registration/)
+1. [Client Registration](./scripts/client-registration.md)
 1. Dynamic scopes : Enables admin to generate scopes on the fly, for example by calling external APIs
 1. ID Generator
 1. Cache Refresh
@@ -38,6 +39,7 @@ Interception scripts are written in **[Jython](http://www.jython.org/)** or in *
 A script in Java refers to a java source file (e.g. `Discovery.java`) which is compiled by AS and executed at runtime. 
 
 Some rules:
+
 * The java class file containing the script should not have a package set.
 * The name of the class must match to the name set in [CustomScriptType source code](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java) (e.g. for discovery script it is "Discovery") 
 * Scripts must implement predefined interface which can be found against the [CustomScriptType](https://github.com/JanssenProject/jans/tree/main/jans-core/script/src/main/java/io/jans/model/custom/script/type). For e.g. if you are writing a Person authentication script then your class should implement the [following interface](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java)
