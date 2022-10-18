@@ -31,10 +31,6 @@ configmap:
   cnSqldbUserPassword: Test1234#
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
-  # -- Client-api OAuth certificate common name. This should be left to the default value client-api.
-  cnClientApiCertCn: client-api
-  # -- Client-api bind address. This limits what ip ranges can access the client-api. This should be left as * and controlled by a NetworkPolicy
-  cnClientApiBindIpAddresses: "*"
   containerMetadataName: kubernetes
   # -- The name of the Kubernetes ConfigMap that will hold the configuration layer
   cnConfigKubernetesConfigMap: cn

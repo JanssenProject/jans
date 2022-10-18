@@ -75,7 +75,8 @@ def check_install_dependencies():
             print("Can't continue...")
             sys.exit()
 
-    os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
+    if package_dependencies:
+        os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
 def download_jans_acrhieve():

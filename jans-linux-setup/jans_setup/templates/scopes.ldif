@@ -119,17 +119,6 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
-dn: inum=6D90,ou=scopes,o=jans
-description: jans_client_api scope which is required to call jans_client_api API
-displayName: jans_client_api
-inum: 6D90
-jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansDefScope: true
-jansId: jans_client_api
-jansScopeTyp: openid
-objectClass: top
-objectClass: jansScope
-
 dn: inum=7D90,ou=scopes,o=jans
 description: revoke_session scope which is required to be able call /revoke_session endpoint
 displayName: revoke_session

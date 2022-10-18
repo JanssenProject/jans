@@ -122,80 +122,6 @@ auth-server-key-rotation:
   additionalLabels: {}
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: {}
-# -- Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
-client-api:
-  # -- Configure the HorizontalPodAutoscaler
-  hpa:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 50
-    # -- metrics if targetCPUUtilizationPercentage is not set
-    metrics: []
-    # -- Scaling Policies
-    behavior: {}
-  # -- Add custom normal and secret envs to the service
-  usrEnvs:
-    # -- Add custom normal envs to the service
-    # variable1: value1
-    normal: {}
-    # -- Add custom secret envs to the service
-    # variable1: value1
-    secret: {}
-  # -- Add custom dns policy
-  dnsPolicy: ""
-  # -- Add custom dns config
-  dnsConfig: {}
-  image:
-    # -- Image pullPolicy to use for deploying.
-    pullPolicy: IfNotPresent
-    # -- Image  to use for deploying.
-    repository: janssenproject/client-api
-    # -- Image  tag to use for deploying.
-    tag: 1.0.3_dev
-    # -- Image Pull Secrets
-    pullSecrets: []
-  # -- Service replica number.
-  replicas: 1
-  # -- Resource specs.
-  resources:
-    limits:
-      # -- CPU limit.
-      cpu: 1000m
-      # -- Memory limit.
-      memory: 400Mi
-    requests:
-      # -- CPU request.
-      cpu: 1000m
-      # -- Memory request.
-      memory: 400Mi
-  # -- Configure the liveness healthcheck for the auth server if needed.
-  livenessProbe:
-    # -- Executes the python3 healthcheck.
-    exec:
-      command:
-        - curl
-        - -k
-        - https://localhost:8443/health-check
-    initialDelaySeconds: 30
-    periodSeconds: 30
-    timeoutSeconds: 5
-  # -- Configure the readiness healthcheck for the auth server if needed.
-  readinessProbe:
-    tcpSocket:
-      port: 8443
-    initialDelaySeconds: 60
-    timeoutSeconds: 5
-    periodSeconds: 25
-  # -- Configure any additional volumes that need to be attached to the pod
-  volumes: []
-  # -- Configure any additional volumesMounts that need to be attached to the containers
-  volumeMounts: []
-
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: {}
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: {}
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 config:
   # -- Add custom normal and secret envs to the service.
@@ -229,10 +155,6 @@ config:
     cnSqldbUserPassword: Test1234#
     # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
     cnCacheType: NATIVE_PERSISTENCE
-    # -- Client-api OAuth certificate common name. This should be left to the default value client-api.
-    cnClientApiCertCn: client-api
-    # -- Client-api bind address. This limits what ip ranges can access the client-api. This should be left as * and controlled by a NetworkPolicy
-    cnClientApiBindIpAddresses: "*"
     # -- The name of the Kubernetes ConfigMap that will hold the configuration layer
     cnConfigKubernetesConfigMap: cn
     # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
@@ -562,33 +484,6 @@ global:
   azureStorageAccountType: Standard_LRS
   # -- Azure storage kind if using Azure disks
   azureStorageKind: Managed
-  client-api:
-    # -- Name of the client-api service. Please keep it as default.
-    clientApiServerServiceName: client-api
-    # -- Boolean flag to enable/disable the client-api chart.
-    enabled: false
-    # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
-    appLoggers:
-      # -- client-api.log target
-      clientApiLogTarget: "STDOUT"
-      # -- client-api.log level
-      clientApiLogLevel: "INFO"
-      # -- client-api_persistence.log target
-      persistenceLogTarget: "FILE"
-      # -- client-api_persistence.log level
-      persistenceLogLevel: "INFO"
-      # -- client-api_persistence_duration.log target
-      persistenceDurationLogTarget: "FILE"
-      # -- client-api_persistence_duration.log level
-      persistenceDurationLogLevel: "INFO"
-      # -- client-api_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- client-api_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
-      # -- client-api_script.log target
-      scriptLogTarget: "FILE"
-      # -- client-api_script.log level
-      scriptLogLevel: "INFO"
   cloud:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
     testEnviroment: false

@@ -97,9 +97,11 @@ def main():
         sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
+
         render_sql_properties(
             manager,
-            "/app/templates/jans-sql.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties.tmpl",
             "/etc/jans/conf/jans-sql.properties",
         )
 

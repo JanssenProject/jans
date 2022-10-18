@@ -551,25 +551,31 @@ def test_get_sql_password_from_secrets(gmanager):
     assert get_sql_password(gmanager) == "secret"
 
 
-def test_render_sql_properties(monkeypatch, tmpdir, gmanager):
+@pytest.mark.parametrize("dialect, port, schema, jdbc_driver", [
+    ("mysql", 3306, "jans", "mysql"),
+    ("pgsql", 5432, "public", "postgresql"),
+])
+def test_render_sql_properties(monkeypatch, tmpdir, gmanager, dialect, port, schema, jdbc_driver):
     from jans.pycloudlib.persistence.sql import render_sql_properties
 
     passwd = tmpdir.join("sql_password")
     passwd.write("secret")
 
     monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(passwd))
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", dialect)
+    monkeypatch.setenv("CN_SQL_DB_PORT", str(port))
 
     tmpl = """
-db.schema.name=%(rdbm_db)s
+db.schema.name=%(rdbm_schema)s
 connection.uri=jdbc:%(rdbm_type)s://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s
 connection.driver-property.serverTimezone=%(server_time_zone)s
 auth.userName=%(rdbm_user)s
 auth.userPassword=%(rdbm_password_enc)s
 """.strip()
 
-    expected = """
-db.schema.name=jans
-connection.uri=jdbc:mysql://localhost:3306/jans
+    expected = f"""
+db.schema.name={schema}
+connection.uri=jdbc:{jdbc_driver}://localhost:{port}/jans
 connection.driver-property.serverTimezone=UTC
 auth.userName=jans
 auth.userPassword=fHL54sT5qHk=

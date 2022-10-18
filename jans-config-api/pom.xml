@@ -45,6 +45,7 @@
 
 		<rest-assured.version>4.3.3</rest-assured.version>
 		<karate.version>0.9.5</karate.version>
+		<snake.version>1.33</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.5</jacoco.version>
@@ -210,17 +211,6 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>jans-client-api</artifactId>
-				<version>${jans.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>org.jboss.resteasy</artifactId>
-						<groupId>*</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
 				<artifactId>jans-orm-annotation</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
@@ -346,12 +336,23 @@
 				<artifactId>karate-junit5</artifactId>
 				<version>${karate.version}</version>
 				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<artifactId>snakeyaml</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.intuit.karate</groupId>
 				<artifactId>karate-apache</artifactId>
 				<version>${karate.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snake.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>

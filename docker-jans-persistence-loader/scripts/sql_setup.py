@@ -179,7 +179,8 @@ class SQLBackend:
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
-            if table_name == "jansPerson" and self.client.server_version < "8.0":
+            # if table_name == "jansPerson" and self.client.server_version < "8.0":
+            if table_name == "jansPerson" and self.client.get_server_version() < (8, 0):
                 continue
             name = f"{table_name}_CustomIdx{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
@@ -194,7 +195,7 @@ class SQLBackend:
 
             index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
 
-            if column_type.lower() != "json":
+            if column_type.lower() != "jsonb":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
@@ -203,12 +204,12 @@ class SQLBackend:
                         "field": column_name, "data_type": column_type,
                     })
                     name = f"{table_name}_json_{i}"
-                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({index_str_fmt}))"
+                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {index_str_fmt}"
                     self.client.create_index(query)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             name = f"{table_name}_custom_{i}"
-            query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({custom}))"
+            query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {custom}"
             self.client.create_index(query)
 
     def create_indexes(self):
@@ -299,8 +300,12 @@ class SQLBackend:
             if data_type == old_data_type:
                 return
 
-            query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
-                    f"MODIFY COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            if self.client.dialect == "mysql":
+                query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
+                        f"MODIFY COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            else:
+                query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
+                        f"ALTER COLUMN {self.client.quoted_id(col_name)} TYPE {data_type}"
             with self.client.engine.connect() as conn:
                 conn.execute(query)
 
