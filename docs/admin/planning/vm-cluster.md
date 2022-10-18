@@ -9,11 +9,9 @@ an option? You could cluster Janssen using VM's, but you'll have to do
 some legwork, because we don't publish tools for this task. This planning
 guide will cover some of the things you'll need to consider.
 
-1. **Hostname**
-
-Remember when you run the linux setup to use the hostname of the cluster,
-not the hostname of the individual server.  This is important because the
-OpenID Provider metadata needs to use the public hostname (i.e. the URL's
+1. **Hostname** Remember when you run the linux setup to use the hostname of the
+cluster,not the hostname of the individual server.  This is important because
+the OpenID Provider metadata needs to use the public hostname (i.e. the URL's
 you'll find at `/.well-known/openid-configuration`)
 
 1. **Load Balancing / SSL** As Auth Server and FIDO (the two Internet facing
@@ -38,4 +36,4 @@ applications handle key rotation properly in their code, and don't hardcode
 the metadata, but retrieve it from the OpenID configuration endpoint.
 
 1. **Customizations** You must copy any libraries, xhtml pages, CSS or
-javascript must be available on all servers. 
+javascript must be available on all servers.
