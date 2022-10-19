@@ -6,7 +6,6 @@
 
 package io.jans.model;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +36,6 @@ public enum GluuStatus implements AttributeEnum {
         this.displayName = displayName;
     }
 
-    @JsonValue
     public String getValue() {
         return value;
     }

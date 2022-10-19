@@ -6,7 +6,6 @@
 
 package io.jans.model;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +35,6 @@ public enum GluuUserRole implements AttributeEnum {
 		this.value = value;
 	}
 
-	@JsonValue
 	public String getValue() {
 		return value;
 	}

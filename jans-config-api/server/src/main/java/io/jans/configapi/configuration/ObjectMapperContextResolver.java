@@ -39,6 +39,9 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+        mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING); //serialization 
+        mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING); //deserialization 
+
         return mapper;
     }
 
