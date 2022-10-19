@@ -1,6 +1,8 @@
 import os
 import sys
 
+from collections import OrderedDict
+
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame, Box
@@ -23,6 +25,8 @@ class Plugin():
         self.app = app
         self.pid = 'fido'
         self.name = '[F]IDO'
+        self.page_entered = False
+        self.data = {}
         self.prepare_navbar()
         self.prepare_containers()
 
@@ -44,13 +48,8 @@ class Plugin():
         """prepare the main container (tabs) for the current Plugin 
         """
 
-        self.containers = {
-            'configuration': HSplit([Label("config")],width=D()),
-            'registration': HSplit([Label("regist")],width=D()),
-        }
-
-        self.main_area = HSplit([],width=D())
-
+        self.containers = OrderedDict()
+        self.main_area = HSplit([Label("configuration")],width=D())
 
         self.main_container = HSplit([
                                         Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
@@ -60,10 +59,29 @@ class Plugin():
                                     style='class:outh_maincontainer'
                                     )
 
+
+    def on_page_enter(self) -> None:
+        if self.page_entered:
+            return
+
+        self.page_entered = True
+        schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/JansFido2DynConfiguration')
+
+        self.containers['configuration'] = HSplit([
+                                self.app.getTitledText(_("Issuer"), name='issuer', value=self.data.get('issuer',''), jans_help=self.app.get_help_from_schema(schema, 'issuer'), style='class:outh-scope-text'),
+                                self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.data.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(schema, 'baseEndpoint'), style='class:outh-scope-text'),
+                                
+                                    ],
+                                width=D()
+                                )
+
+        self.nav_selection_changed(list(self.containers)[0])
+
     def nav_selection_changed(
-        self, 
-        selection: str,
-        ) -> None:
+                self,
+                selection: str
+            ) -> None:
+
         """This method for the selection change
 
         Args:
@@ -71,9 +89,9 @@ class Plugin():
         """
 
         if selection in self.containers:
-            self.oauth_main_area = self.containers[selection]
+            self.main_area = self.containers[selection]
         else:
-            self.oauth_main_area = self.app.not_implemented
+            self.main_area = self.app.not_implemented
 
     def set_center_frame(self) -> None:
         """center frame content

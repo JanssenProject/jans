@@ -487,6 +487,8 @@ class JansCliApp(Application):
 
     def main_nav_selection_changed(self, selection: str) -> None:
         plugin = self.get_plugin_by_id(selection)
+        if hasattr(plugin, 'on_page_enter'):
+            plugin.on_page_enter()
         plugin.set_center_frame()
 
     async def show_dialog_as_float(self, dialog:Dialog) -> None:
