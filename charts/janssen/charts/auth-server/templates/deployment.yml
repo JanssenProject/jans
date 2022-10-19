@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -78,41 +77,6 @@ spec:
         {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{ if .Values.global.cnObExtSigningJwksKeyPassPhrase }}
-          - name: cn-ob-ext-signing-jwks-key-passphrase
-            mountPath: /etc/certs/ob-ext-signing.pin
-            subPath: ob-ext-signing.pin
-        {{- end }}
-        {{ if .Values.global.cnObExtSigningJwksKey }}
-          - name: cn-ob-ext-signing-jwks-key
-            mountPath: /etc/certs/ob-ext-signing.key
-            subPath: ob-ext-signing.key
-        {{- end }}
-        {{ if .Values.global.cnObExtSigningJwksCrt }}
-          - name: cn-ob-ext-signing-jwks-crt
-            mountPath: /etc/certs/ob-ext-signing.crt
-            subPath: ob-ext-signing.crt
-        {{- end }}
-        {{ if .Values.global.cnObTransportKeyPassPhrase }}
-          - name: cn-ob-transport-key-passphrase
-            mountPath: /etc/certs/ob-transport.pin
-            subPath: ob-transport.pin
-        {{- end }}
-        {{ if .Values.global.cnObTransportKey }}
-          - name: cn-ob-transport-key
-            mountPath: /etc/certs/ob-transport.key
-            subPath: ob-transport.key
-        {{- end }}
-        {{ if .Values.global.cnObTransportCrt }}
-          - name: cn-ob-transport-crt
-            mountPath: /etc/certs/ob-transport.crt
-            subPath: ob-transport.crt
-        {{- end }}
-        {{ if .Values.global.cnObTransportTrustStore }}
-          - name: cn-ob-transport-truststore
-            mountPath: /etc/certs/ob-transport-truststore.p12
-            subPath: ob-transport-truststore.p12
-        {{- end }}
         {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
             name: google-sa
@@ -135,7 +99,7 @@ spec:
 {{- toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
 {{- toYaml .Values.readinessProbe | nindent 10 }}
-        {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
+        {{- if and ( .Values.global.opendj.enabled ) (or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath")) }}
         resources: {}
         {{- else if .Values.global.cloud.testEnviroment }}
         resources: {}
@@ -152,59 +116,6 @@ spec:
       volumes:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{ if .Values.global.cnObExtSigningJwksCrt }}
-        - name: cn-ob-ext-signing-jwks-crt
-          secret:
-            secretName: {{ .Release.Name }}-ob-ext-signing-jwks-crt-key-pin
-            items:
-              - key: ob-ext-signing.crt
-                path: ob-ext-signing.crt
-      {{- end }}
-      {{ if .Values.global.cnObExtSigningJwksKey }}
-        - name: cn-ob-ext-signing-jwks-key
-          secret:
-            secretName: {{ .Release.Name }}-ob-ext-signing-jwks-crt-key-pin
-            items:
-              - key: ob-ext-signing.key
-                path: ob-ext-signing.key
-      {{- end }}
-      {{ if .Values.global.cnObExtSigningJwksKeyPassPhrase }}
-        - name: cn-ob-ext-signing-jwks-key-passphrase
-          secret:
-            secretName: {{ .Release.Name }}-ob-ext-signing-jwks-crt-key-pin
-            items:
-              - key: ob-ext-signing.pin
-                path: ob-ext-signing.pin
-      {{- end }}
-      {{ if .Values.global.cnObTransportCrt }}
-        - name: cn-ob-transport-crt
-          secret:
-            secretName: {{ .Release.Name }}-ob-transport-crt-key-pin
-            items:
-              - key: ob-transport.crt
-                path: ob-transport.crt
-      {{- end }}
-      {{ if .Values.global.cnObTransportKey }}
-        - name: cn-ob-transport-key
-          secret:
-            secretName: {{ .Release.Name }}-ob-transport-crt-key-pin
-            items:
-              - key: ob-transport.key
-                path: ob-transport.key
-      {{- end }}
-      {{ if .Values.global.cnObTransportKeyPassPhrase }}
-        - name: cn-ob-transport-key-passphrase
-          secret:
-            secretName: {{ .Release.Name }}-ob-transport-crt-key-pin
-            items:
-              - key: ob-transport.pin
-                path: ob-transport.pin
-      {{- end }}
-      {{ if .Values.global.cnObTransportTrustStore }}
-        - name: cn-ob-transport-truststore
-          secret:
-            secretName: {{ .Release.Name }}-ob-transport-truststore
       {{- end }}
       {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - name: google-sa

@@ -1,5 +1,4 @@
 {{ if .Values.global.usrEnvs.secret }}
-
 apiVersion: v1
 kind: Secret
 metadata:
