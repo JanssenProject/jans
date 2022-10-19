@@ -542,7 +542,7 @@ class Plugin(DialogUtils):
         dialog = EditClientDialog(self.app, title=_("Add Client"), data={}, save_handler=self.save_client)
         result = self.app.show_jans_dialog(dialog)
 
-    def delete_client(self, selected, event):
+    def delete_client(self, **args):
         """This method for the deletion of the clients data
 
         Args:
@@ -566,7 +566,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-openid-clients-by-inum',
-                    url_suffix='inum:{}'.format(selected[0]),
+                    url_suffix='inum:{}'.format(args['selected']),
                     endpoint_args='',
                     data_fn='',
                     data={}
@@ -610,7 +610,7 @@ class Plugin(DialogUtils):
 
         ensure_future(coroutine())
 
-    def delete_UMAresource(self, selected, event=None):
+    def delete_UMAresource(self, **args):
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(selected[0]))
         async def coroutine():
             focused_before = self.app.layout.current_window
@@ -623,7 +623,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-uma-resources-by-id',
-                    url_suffix='id:{}'.format(selected[0]),
+                    url_suffix='id:{}'.format(args['selected']),
                     endpoint_args='',
                     data_fn=None,
                     data={}
