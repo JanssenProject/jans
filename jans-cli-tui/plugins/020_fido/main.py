@@ -26,11 +26,10 @@ class Plugin():
         self.prepare_navbar()
         self.prepare_containers()
 
-    def process(self):
+    def process(self) -> None:
         pass
 
-
-    def prepare_navbar(self):
+    def prepare_navbar(self) -> None:
         """prepare the navbar for the current Plugin 
         """
         self.nav_bar = JansNavBar(
@@ -41,7 +40,7 @@ class Plugin():
                     jans_name='fido:nav_bar'
                     )
 
-    def prepare_containers(self):
+    def prepare_containers(self) -> None:
         """prepare the main container (tabs) for the current Plugin 
         """
 
@@ -61,9 +60,10 @@ class Plugin():
                                     style='class:outh_maincontainer'
                                     )
 
-
-
-    def nav_selection_changed(self, selection) -> None:
+    def nav_selection_changed(
+        self, 
+        selection: str,
+        ) -> None:
         """This method for the selection change
 
         Args:
@@ -75,8 +75,7 @@ class Plugin():
         else:
             self.oauth_main_area = self.app.not_implemented
 
-
-    def set_center_frame(self):
+    def set_center_frame(self) -> None:
         """center frame content
         """
         self.app.center_container = self.main_container

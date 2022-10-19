@@ -1,4 +1,4 @@
-from typing import OrderedDict
+from typing import Any, OrderedDict
 from urllib import response
 
 from prompt_toolkit.layout.dimension import D
@@ -43,9 +43,9 @@ from prompt_toolkit.widgets import (
     Dialog,
     VerticalLine,
 )
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
+from prompt_toolkit.layout.containers import AnyContainer
+from prompt_toolkit.buffer import Buffer
+
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.dimension import AnyDimension
 from typing import Optional, Sequence, Union
@@ -88,7 +88,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.prepare_tabs()
         self.create_window()
 
-    def save(self):
+    def save(self) -> None:
 
         self.data = self.make_data_from_dialog()
         self.data['disabled'] = not self.data['disabled']
@@ -168,10 +168,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.future.set_result(DialogResult.CANCEL)
 
-    def create_window(self):
+    def create_window(self) -> None:
         self.side_nav_bar = JansSideNavBar(myparent=self.myparent,
             entries=list(self.tabs.keys()),
             selection_changed=(self.client_dialog_nav_selection_changed) ,
@@ -191,7 +191,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
                    )
 
-    def prepare_tabs(self):
+    def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Client Dialogs
         """
 
@@ -599,7 +599,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
-    def show_client_scopes(self):
+    def show_client_scopes(self) -> None:
         client_scopes = self.data.get('scopes')  
         self.myparent.logger.debug('client_scopes: '+str(client_scopes))
         data = []
@@ -645,13 +645,16 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.myparent.show_jans_dialog(dialog)
 
-    def oauth_get_uma_resources(self):
+    def oauth_get_uma_resources(self) -> None:
         """Method to get the clients data from server
         """
         t = threading.Thread(target=self.oauth_update_uma_resources, daemon=True)
         t.start()
 
-    def search_uma_resources(self, tbuffer):
+    def search_uma_resources(
+        self, 
+        tbuffer: Buffer,
+        ) -> None:
         if not len(tbuffer.text) > 2:
             self.myparent.show_message(_("Error!"), _("Search string should be at least three characters"))
             return
@@ -659,7 +662,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
         t = threading.Thread(target=self.oauth_update_uma_resources, args=(tbuffer.text,), daemon=True)
         t.start()
 
-    def oauth_update_uma_resources (self, pattern: str= ''): 
+    def oauth_update_uma_resources (
+        self, 
+        pattern: Optional[str]= '',
+        ) -> None: 
         """update the current uma_resources  data to server
 
         Args:
@@ -755,10 +761,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.uma_resources = HSplit([],width=D())
             self.myparent.show_message(_("Oops"), _("No matching result"),tobefocused=self.resources.children[0].children[0])  
 
-    def client_dialog_nav_selection_changed(self, selection):
+    def client_dialog_nav_selection_changed(
+        self, 
+        selection: str
+        ) -> None:
         self.left_nav = selection
 
-    def view_uma_resources(self, **params):
+    def view_uma_resources(self, **params: Any) -> None:
         
         selected_line_data = params['data']    ##self.uma_result 
         title = _("Edit user Data (Clients)")
@@ -767,7 +776,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         
         self.myparent.show_jans_dialog(dialog)
 
-
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.dialog
 

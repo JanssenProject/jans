@@ -1,4 +1,4 @@
-from typing import OrderedDict
+from typing import Any, OrderedDict
 from asyncio import ensure_future
 
 from prompt_toolkit.layout.dimension import D
@@ -35,6 +35,7 @@ import threading
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
+from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.widgets.base import RadioList
 from prompt_toolkit.layout.containers import FloatContainer
 from prompt_toolkit.formatted_text import AnyFormattedText
@@ -51,7 +52,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self,
         parent,
         title: AnyFormattedText,
-        data:list,
+        data: list,
         buttons: Optional[Sequence[Button]]= [],
         save_handler: Callable= None,
         )-> Dialog:
@@ -149,14 +150,10 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         ) -> None:
         self.sope_type = cb.current_value
 
-    # def set_scope_type(self, scope_type) -> None:>>> UN USED
-    #     self.sope_type = scope_type
-
     def get_named_claims(
         self, 
         claims_list:list
         ) -> list:
-        # self.myparent.logger.debug('claims_list: ' + str(claims_list))
         try :
             responce = self.myparent.cli_object.process_command_by_id(
                         operation_id='get-all-attribute',
@@ -205,7 +202,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         return self.claims_container
 
-    def delete_claim(self, **args) -> None:
+    def delete_claim(self, **kwargs: Any) -> None:
         """This method for the deletion of claim
 
         Args:
@@ -223,18 +220,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             except:
                 self.myparent.layout.focus(self.myparent.center_frame) ##
 
-            self.myparent.logger.debug('claims to delete: ' + str(args['selected']))
-
-            self.myparent.logger.debug('claims before delete: ' + str(self.data['claims']))
-
             if result.lower() == 'yes':
-                self.data['claims'].remove(args['selected'][0])
-                self.claims_container.data.remove(args['selected'])
+                self.data['claims'].remove(kwargs['selected'][0])
+                self.claims_container.data.remove(kwargs['selected'])
 
 
         ensure_future(coroutine())
 
-    def prepare_tabs(self):
+    def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Scope Dialogs
         """
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope')
@@ -353,7 +346,10 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     width=D(),
                     )
 
-    def search_claims(self, textbuffer):
+    def search_claims(
+        self, 
+        textbuffer: Buffer,
+        ) -> None:
 
         try :
             responce = self.myparent.cli_object.process_command_by_id(
@@ -368,7 +364,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     return
 
         result = responce.json()
-        # self.myparent.logger.debug('result: ' + str(result))
 
         if not result.get('entries'):
             self.myparent.show_message(_("Ooops"), _("Can't find any claim for ʹ%sʹ.") % textbuffer.text)
@@ -408,6 +403,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         dialog = JansGDialog(self.myparent, title=_("Select claims to add"), body=check_box_list, buttons=buttons)
         self.myparent.show_jans_dialog(dialog)
 
-    def __pt_container__(self):
+    def __pt_container__(self) -> Dialog:
         return self.dialog
 

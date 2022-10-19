@@ -14,15 +14,11 @@ from prompt_toolkit.widgets import (
     Button,
     Label,
     TextArea,
-)
-from prompt_toolkit.application.current import get_app
-from prompt_toolkit.widgets import (
+    RadioList,
     Button,
     Dialog,
-    VerticalLine,
-    HorizontalLine,
-    CheckboxList,
 )
+from prompt_toolkit.application.current import get_app
 
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers.python import PythonLexer
@@ -45,6 +41,9 @@ from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.dimension import AnyDimension
 from typing import Optional, Sequence, Union
 from typing import TypeVar, Callable
+
+from typing import Any, Optional
+
 
 from view_uma_dialog import ViewUMADialog
 import threading
@@ -83,7 +82,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.create_window()
         self.script = self.data.get('script','')
 
-    def save(self):
+    def save(self) -> None:
 
         data = {}
 
@@ -131,10 +130,10 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.future.set_result(DialogResult.CANCEL)
 
-    def create_window(self):
+    def create_window(self) -> None:
 
         schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/CustomScript')
 
@@ -309,20 +308,29 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
             )
 
-    def script_lang_changed(self, value):
+    def script_lang_changed(
+        self, 
+        value: str,
+        ) -> None:
         self.cur_lang = value
 
-    def set_location_widget_state(self, state):
+    def set_location_widget_state(
+        self, 
+        state: bool,
+        ) -> None:
         self.location_widget.me.read_only = not state
         self.location_widget.me.focusable = state
         if not state:
             self.location_widget.me.text = ''
 
-    def script_location_changed(self, redio_button):
+    def script_location_changed(
+        self, 
+        redio_button: RadioList,
+        ) -> None:
         state = redio_button.current_value == 'file'
         self.set_location_widget_state(state)
 
-    def edit_property(self, **kwargs):
+    def edit_property(self, **kwargs: Any) -> None:
 
         if kwargs['jans_name'] == 'moduleProperties':
             key, val = kwargs.get('data', ('',''))
@@ -335,8 +343,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         key_widget = self.myparent.getTitledText(_("Key"), name='property_key', value=key, style='class:script-titledtext', jans_help=_("Script propery Key"))
         val_widget = self.myparent.getTitledText(_("Value"), name='property_val', value=val, style='class:script-titledtext', jans_help=_("Script property Value"))
 
-
-        def add_property(dialog):
+        def add_property(dialog: Dialog) -> None:
             key_ = key_widget.me.text
             val_ = val_widget.me.text
             cur_data = [key_, val_]
@@ -361,13 +368,13 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         dialog = JansGDialog(self.myparent, title=title, body=body, buttons=buttons, width=self.myparent.dialog_width-20)
         self.myparent.show_jans_dialog(dialog)
 
-    def delete_config_property(self, **kwargs):
+    def delete_config_property(self, **kwargs: Any) -> None:
         if kwargs['jans_name'] == 'configurationProperties':
             self.config_properties_container.remove_item(kwargs['selected'])
         else:
             self.module_properties_container.remove_item(kwargs['selected'])
 
-    def edit_script_dialog(self):
+    def edit_script_dialog(self) -> None:
 
         text_editor = TextArea(
                 text=self.script,
@@ -380,13 +387,13 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 lexer=PygmentsLexer(PythonLexer if self.cur_lang == 'PYTHON' else JavaLexer),
             )
 
-        def modify_script(arg):
+        def modify_script(arg) -> None:
             self.script = text_editor.text
 
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=modify_script)]
         dialog = JansGDialog(self.myparent, title=_("Edit Script"), body=HSplit([text_editor]), buttons=buttons, width=self.myparent.dialog_width-10)
         self.myparent.show_jans_dialog(dialog)
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.dialog
 

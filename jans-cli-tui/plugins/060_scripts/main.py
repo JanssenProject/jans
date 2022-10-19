@@ -21,8 +21,12 @@ from prompt_toolkit.widgets import (
     Box,
     Button,
     Label,
-    Frame
+    Frame,
+    Dialog
 )
+from typing import Any, Optional
+from prompt_toolkit.buffer import Buffer
+
 from static import DialogResult
 
 from cli import config_cli
@@ -53,18 +57,17 @@ class Plugin():
 
         self.scripts_prepare_containers()
 
-    def process(self):
+    def process(self) -> None:
         pass
 
-    def set_center_frame(self):
+    def set_center_frame(self) -> None:
         """center frame content
         """
         self.app.center_container = self.scripts_main_area
 
-    def scripts_prepare_containers(self):
+    def scripts_prepare_containers(self) -> None:
         """prepare the main container (tabs) for the current Plugin 
         """
-
         self.scripts_list_container = HSplit([],width=D(), height=D())
 
         self.scripts_main_area = HSplit([
@@ -79,17 +82,18 @@ class Plugin():
                     DynamicContainer(lambda: self.scripts_list_container)
                     ],style='class:outh_containers_scopes')
 
-
-
-    def scrips_get_scripts(self):
+    def scrips_get_scripts(self) -> None:
         """Method to get the Scripts data from server
         """
         self.scripts_list_container = HSplit([Label(_("Please wait while getting Scripts"),style='class:outh-waitscopedata.label')], width=D(), height=D(), style='class:outh-waitclientdata')
         t = threading.Thread(target=self.scripts_update_list, daemon=True)
         t.start()
 
-
-    def scripts_update_list(self, start_index=1, pattern=''):
+    def scripts_update_list(
+        self, 
+        start_index: Optional[int]= 1,
+        pattern: Optional[str]= '',
+        ) -> None:
         """Updates Scripts data from server
 
         Args:
@@ -176,8 +180,7 @@ class Plugin():
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.scripts_main_area)
 
-
-    def search_scripts(self, tbuffer):
+    def search_scripts(self, tbuffer:Buffer,) -> None:
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.scripts_main_area)
             return
@@ -185,8 +188,7 @@ class Plugin():
         t = threading.Thread(target=self.scripts_update_list, args=(1, tbuffer.text), daemon=True)
         t.start()
 
-
-    def add_script_dialog(self, **kwargs):
+    def add_script_dialog(self, **kwargs: Any):
         """Method to display the edit script dialog
         """
         if kwargs:
@@ -199,8 +201,7 @@ class Plugin():
         dialog = EditScriptDialog(self.app, title=title, data=data, save_handler=self.save_script)
         result = self.app.show_jans_dialog(dialog)
 
-
-    def save_script(self, dialog):
+    def save_script(self, dialog: Dialog) -> None:
         """This method to save the script data to server
 
         Args:

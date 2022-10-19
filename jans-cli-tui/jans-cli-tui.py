@@ -43,7 +43,8 @@ from prompt_toolkit.widgets import (
     Checkbox,
 )
 
-from typing import Optional, Sequence, Union
+from typing import Any, Optional, OrderedDict, Sequence, Union
+from prompt_toolkit.key_binding.key_processor import KeyPressEvent
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
@@ -71,16 +72,14 @@ config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
-def accept_yes():
+def accept_yes() -> None:
     get_app().exit(result=True)
 
-
-def accept_no():
+def accept_no() -> None:
     get_app().exit(result=False)
 
-def do_exit(*c):
+def do_exit(*c) -> None:
     get_app().exit(result=False)
-
 
 class JansCliApp(Application):
 
@@ -95,12 +94,9 @@ class JansCliApp(Application):
         self._load_plugins()
         self.cli_object_ok = False
 
-        # -------------------------------------------------------------------------------- #
-
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
                             height=D())
-
 
         self.keyboard = Controller()
 
@@ -119,7 +115,6 @@ class JansCliApp(Application):
                     select=0,
                     jans_name='main:nav_bar'
                     )
-
         self.center_frame = FloatContainer(content=
                     Frame(
                         body=DynamicContainer(lambda: self.center_container),
@@ -127,8 +122,6 @@ class JansCliApp(Application):
                         ),
                         floats=[],
                 )
-
-
         self.root_layout = FloatContainer(
                         HSplit([
                                 Frame(self.nav_bar.nav_window),
@@ -138,7 +131,6 @@ class JansCliApp(Application):
                                 ),
                         floats=[]
                 )
-
         super(JansCliApp, self).__init__(
                 layout=Layout(self.root_layout),
                 key_bindings=self.bindings, 
@@ -146,7 +138,6 @@ class JansCliApp(Application):
                 full_screen=True,
                 mouse_support=True, ## added
             )
-
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
         self.plugins_initialised = False
@@ -154,8 +145,7 @@ class JansCliApp(Application):
         if self.cli_object_ok:
             self.init_plugins()
 
-    def _load_plugins(self):
-
+    def _load_plugins(self) -> None:
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
             sys.path.append(plugin_file.parent.as_posix())
@@ -164,21 +154,21 @@ class JansCliApp(Application):
             spec.loader.exec_module(plugin)
             self._plugins.append(plugin.Plugin(self))
 
-    def init_plugins(self):
+    def init_plugins(self) -> None:
         for plugin in self._plugins:
             if hasattr(plugin, 'init_plugin'):
                 plugin.init_plugin()
         self.plugins_initialised = True
 
     @property
-    def dialog_width(self):
+    def dialog_width(self) -> None:
         return int(self.output.get_size().columns*0.8)
 
     @property
-    def dialog_height(self):
+    def dialog_height(self) -> None:
         return int(self.output.get_size().rows*0.9)
 
-    def init_logger(self):
+    def init_logger(self) -> None:
         self.logger = logging.getLogger('JansCli')
         self.logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -188,11 +178,11 @@ class JansCliApp(Application):
         self.logger.addHandler(file_handler)
         self.logger.debug('JANS CLI Started')
 
-    def press_tab(self):
+    def press_tab(self) -> None:
         self.keyboard.press(Key.tab)
         self.keyboard.release(Key.tab)
 
-    def create_cli(self):
+    def create_cli(self) -> None:
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
                 host=config_cli.host, 
@@ -246,14 +236,13 @@ class JansCliApp(Application):
                 if not self.plugins_initialised:
                     self.init_plugins()
 
-    def check_jans_cli_ini(self):
+    def check_jans_cli_ini(self) -> None:
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
             self.jans_creds_dialog()
         else :
             self.create_cli()
 
-    def jans_creds_dialog(self, *params):
-
+    def jans_creds_dialog(self, *params: Any) -> None:
         body=HSplit([
             self.getTitledText(_("Hostname"), name='jans_host', value=config_cli.host or '', jans_help=_("FQN name of Jannsen Config Api Server"),style='class:jans-main-usercredintial.titletext'),
             self.getTitledText(_("Client ID"), name='jca_client_id', value=config_cli.client_id or '', jans_help=_("Jannsen Config Api Client ID"),style='class:jans-main-usercredintial.titletext'),
@@ -276,13 +265,7 @@ class JansCliApp(Application):
 
         ensure_future(coroutine())
 
-    def focus_next(self, ev):
-        focus_next(ev)
-
-    def focus_previous(self, ev):
-        focus_previous(ev)
-
-    def set_keybindings(self):
+    def set_keybindings(self) -> None:
         # Global key bindings.
         self.bindings = KeyBindings()
         self.bindings.add('tab')(self.focus_next)
@@ -291,10 +274,18 @@ class JansCliApp(Application):
         self.bindings.add('f1')(self.help)
         self.bindings.add('escape')(self.escape)
 
-    def help(self,ev):
+    def focus_next(self, ev: KeyPressEvent) -> None:
+        focus_next(ev)
+
+    def focus_previous(self, ev: KeyPressEvent) -> None:
+        focus_previous(ev)
+
+    def help(self,ev: KeyPressEvent) -> None:
+        self.logger.debug("ev:"+str(ev))
+        self.logger.debug("ev:"+str(type(ev)))
         self.show_message(_("Help"),'''<Enter> {} \n<j> {}\n<d> {}'''.format(_("Edit current selection"),_("Display current item in JSON format"),_("Delete current selection")))
         
-    def escape(self,ev):
+    def escape(self,ev: KeyPressEvent) -> None:
         try:
             if get_app().layout.container.floats:
                 if len(get_app().layout.container.floats) >=2 :
@@ -306,7 +297,11 @@ class JansCliApp(Application):
         except Exception as e:
             pass
 
-    def get_help_from_schema(self, schema, jans_name):
+    def get_help_from_schema(
+        self, 
+        schema: OrderedDict, 
+        jans_name: str
+        ) -> str:
         for prop in schema.get('properties', {}):
             if prop == jans_name:
                 return schema['properties'][jans_name].get('description', '')
@@ -316,7 +311,7 @@ class JansCliApp(Application):
             title: AnyFormattedText= "",
             name: AnyFormattedText= "",
             value: AnyFormattedText= "",
-            height: int= 1,
+            height: Optional[int] = 1,
             jans_help: AnyFormattedText= "",
             accept_handler: Callable= None,
             read_only: Optional[bool] = False,
@@ -355,8 +350,8 @@ class JansCliApp(Application):
         self,
         title: AnyFormattedText,
         name: AnyFormattedText,
-        values: list= [],
-        current_values: list= [],
+        values: Optional[list] = [],
+        current_values: Optional[list] = [],
         jans_help: AnyFormattedText= "",
         style: AnyFormattedText= "",
         ) -> AnyContainer:
@@ -411,7 +406,7 @@ class JansCliApp(Application):
         self, 
         title: AnyFormattedText, 
         name: AnyFormattedText,
-        values: list= [],
+        values: Optional[list] = [],
         current_value: AnyFormattedText= "", 
         on_selection_changed: Callable= None,  
         jans_help: AnyFormattedText= "", 
@@ -474,7 +469,7 @@ class JansCliApp(Application):
             b.handler = handler
         return b
 
-    def update_status_bar(self):
+    def update_status_bar(self) -> None:
         text = ''
         if self.status_bar_text:
             text = self.status_bar_text
@@ -485,17 +480,16 @@ class JansCliApp(Application):
 
         return text
 
-    def get_plugin_by_id(self, pid):
+    def get_plugin_by_id(self, pid: str) -> None:
         for plugin in self._plugins:
             if plugin.pid == pid:
                 return plugin
 
-    def main_nav_selection_changed(self, selection):
-        self.logger.debug('Main navbar selection changed %s', str(selection))
+    def main_nav_selection_changed(self, selection: str) -> None:
         plugin = self.get_plugin_by_id(selection)
         plugin.set_center_frame()
 
-    async def show_dialog_as_float(self, dialog:Dialog):
+    async def show_dialog_as_float(self, dialog:Dialog) -> None:
         'Coroutine.'
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
@@ -512,7 +506,7 @@ class JansCliApp(Application):
 
         return result
 
-    def show_jans_dialog(self, dialog:Dialog):
+    def show_jans_dialog(self, dialog:Dialog) -> None:
 
         async def coroutine():
             focused_before = self.layout.current_window
@@ -526,7 +520,7 @@ class JansCliApp(Application):
 
         ensure_future(coroutine())
 
-    def data_display_dialog(self, **params):
+    def data_display_dialog(self, **params: Any) -> None:
 
         body = HSplit([
                 TextArea(
@@ -544,7 +538,7 @@ class JansCliApp(Application):
 
         self.show_jans_dialog(dialog)
 
-    def save_creds(self, dialog:Dialog):
+    def save_creds(self, dialog:Dialog) -> None:
 
         for child in dialog.body.children:
             prop_name = child.children[1].jans_name
@@ -581,16 +575,17 @@ class JansCliApp(Application):
         self.layout.focus(dialog)
         self.press_tab()
 
-    def show_again(self): ## nasted dialog Button
+    def show_again(self) -> None:
         self.show_message(_("Again"), _("Nasted Dialogs"),)
 
-    def get_confirm_dialog(self, message: AnyFormattedText):
+    def get_confirm_dialog(
+        self, 
+        message: AnyFormattedText
+        ) -> Dialog:
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
         buttons = [Button(_("No")), Button(_("Yes"))]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons)
         return dialog
-
-
 
 
 application = JansCliApp()

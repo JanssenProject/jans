@@ -18,10 +18,10 @@ class Plugin():
         self.pid = 'scim'
         self.name = '[S]CIM'
 
-    def process(self):
+    def process(self) -> None:
         pass
 
-    def set_center_frame(self):
+    def set_center_frame(self) -> None:
         """center frame content
         """
         self.app.center_container = Frame(

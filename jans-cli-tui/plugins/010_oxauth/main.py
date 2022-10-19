@@ -5,7 +5,7 @@ import time
 import threading
 from asyncio import Future, ensure_future
 from functools import partial
-from typing import Optional
+from typing import Any, Optional
 
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
@@ -23,7 +23,8 @@ from prompt_toolkit.widgets import (
     Box,
     Button,
     Label,
-    Frame
+    Frame,
+    Dialog
 )
 from static import DialogResult
 
@@ -40,6 +41,7 @@ from wui_components.jans_cli_dialog import JansGDialog
 
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
+from prompt_toolkit.buffer import Buffer
 
 from multi_lang import _
 import cli_style
@@ -62,13 +64,11 @@ class Plugin(DialogUtils):
         self.oauth_prepare_containers()
         self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
-
-    def init_plugin(self):
+    def init_plugin(self) -> None:
 
         self.get_appconfiguration()
         self.schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
         self.oauth_logging()
-
 
     def get_appconfiguration(self) -> None:
         try:
@@ -90,16 +90,15 @@ class Plugin(DialogUtils):
 
         self.app_configuration = response.json()
 
-
     def process(self):
         pass
 
-    def set_center_frame(self):
+    def set_center_frame(self) -> None:
         """center frame content
         """
         self.app.center_container = self.oauth_main_container
 
-    def oauth_prepare_containers(self):
+    def oauth_prepare_containers(self) -> None:
         """prepare the main container (tabs) for the current Plugin 
         """
 
@@ -158,7 +157,7 @@ class Plugin(DialogUtils):
                                     style='class:outh_maincontainer'
                                     )
 
-    def oauth_prepare_navbar(self):
+    def oauth_prepare_navbar(self) -> None:
         """prepare the navbar for the current Plugin 
         """
         self.nav_bar = JansNavBar(
@@ -169,7 +168,10 @@ class Plugin(DialogUtils):
                     jans_name='oauth:nav_bar'
                     )
 
-    def oauth_nav_selection_changed(self, selection):
+    def oauth_nav_selection_changed(
+        self, 
+        selection
+        ) -> None:
         """This method for the selection change
 
         Args:
@@ -180,14 +182,21 @@ class Plugin(DialogUtils):
         else:
             self.oauth_main_area = self.app.not_implemented
 
-    def oauth_update_clients(self,start_index=0, pattern=''):
+    def oauth_update_clients(
+        self,
+        start_index: Optional[int]= 0, 
+        pattern: Optional[str]= '',
+        ) -> None:
         """update the current clients data to server
 
         Args:
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
-        def get_next(start_index, pattern=''):
+        def get_next(
+            start_index: int,  
+            pattern: Optional[str]= '', 
+            ) -> None:
             self.oauth_update_clients(start_index, pattern='')
 
         endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
@@ -268,20 +277,27 @@ class Plugin(DialogUtils):
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
 
-    def oauth_get_clients(self):
+    def oauth_get_clients(self) -> None:
         """Method to get the clients data from server
         """ 
         self.oauth_data_container['clients'] = HSplit([Label(_("Please wait while getting clients"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_clients, daemon=True)
         t.start()
 
-    def oauth_update_scopes(self, start_index=0, pattern=''):
+    def oauth_update_scopes(
+        self, 
+        start_index: Optional[int]= 0,  
+        pattern: Optional[str]= '', 
+        ) -> None:
         """update the current Scopes data to server
 
         Args:
             start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
         """
-        def get_next(start_index, pattern=''):
+        def get_next(
+            start_index: int,  
+            pattern: Optional[str]= '', 
+            ) -> None:
             self.oauth_update_scopes(start_index, pattern='')
 
         endpoint_args ='withAssociatedClients:true,limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
@@ -363,18 +379,12 @@ class Plugin(DialogUtils):
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['scopes'])
 
-    def oauth_get_scopes(self):
+    def oauth_get_scopes(self) -> None:
         """Method to get the Scopes data from server
         """
         self.oauth_data_container['scopes'] = HSplit([Label(_("Please wait while getting Scopes"),style='class:outh-waitscopedata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_scopes, daemon=True)
         t.start()
-
-    def display_scope(self):
-        pass
-
-
-
 
     def oauth_update_keys(self) -> None:
 
@@ -439,30 +449,27 @@ class Plugin(DialogUtils):
         else:
             self.app.show_message(_("Oops"), _("Nothing to display"), tobefocused=self.oauth_containers['keys'])
 
-
     def oauth_get_keys(self) -> None:
         """Method to get the Keys from server
         """
         self.oauth_data_container['keys'] = HSplit([Label(_("Please wait while getting Keys"), style='class:outh-waitscopedata.label')], width=D(), style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_keys, daemon=True)
         t.start()
-
   
-    def edit_scope_dialog(self, **params): 
+    def edit_scope_dialog(self, **params: Any) -> None:
         selected_line_data = params['data']  
 
         dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data,save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
 
-
-    def edit_client_dialog(self, **params):
+    def edit_client_dialog(self, **params: Any) -> None:
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
 
         self.EditClientDialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client,delete_UMAresource=self.delete_UMAresource)
         self.app.show_jans_dialog(self.EditClientDialog)
 
-    def save_client(self, dialog):
+    def save_client(self, dialog: Dialog) -> None:
         """This method to save the client data to server
 
         Args:
@@ -482,15 +489,13 @@ class Plugin(DialogUtils):
             data=dialog.data
         )
 
-        # self.app.logger.debug(response.text)
-
         if response.status_code in (200, 201):
             self.oauth_get_clients()
             return True
 
         self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
 
-    def save_scope(self, dialog):
+    def save_scope(self, dialog: Dialog) -> None:
         """This method to save the client data to server
 
         Args:
@@ -514,7 +519,7 @@ class Plugin(DialogUtils):
 
         self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
 
-    def search_scope(self, tbuffer):
+    def search_scope(self, tbuffer:Buffer,) -> None:
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['scopes'])
             return
@@ -522,7 +527,7 @@ class Plugin(DialogUtils):
         t = threading.Thread(target=self.oauth_update_scopes, args=(0,tbuffer.text), daemon=True)
         t.start()
 
-    def search_clients(self, tbuffer):
+    def search_clients(self, tbuffer:Buffer,) -> None:
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['clients'])
             return
@@ -530,19 +535,19 @@ class Plugin(DialogUtils):
         t = threading.Thread(target=self.oauth_update_clients, args=(0,tbuffer.text), daemon=True)
         t.start()
 
-    def add_scope(self):
+    def add_scope(self) -> None:
         """Method to display the dialog of clients
         """
         dialog = EditScopeDialog(self.app, title=_("Add New Scope"), data={}, save_handler=self.save_scope)
         result = self.app.show_jans_dialog(dialog)
 
-    def add_client(self):
+    def add_client(self) -> None:
         """Method to display the dialog of clients
         """
         dialog = EditClientDialog(self.app, title=_("Add Client"), data={}, save_handler=self.save_client)
         result = self.app.show_jans_dialog(dialog)
 
-    def delete_client(self, **args):
+    def delete_client(self, **kwargs: Any):
         """This method for the deletion of the clients data
 
         Args:
@@ -566,7 +571,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-openid-clients-by-inum',
-                    url_suffix='inum:{}'.format(args['selected'][0]),
+                    url_suffix='inum:{}'.format(kwargs ['selected'][0]),
                     endpoint_args='',
                     data_fn='',
                     data={}
@@ -577,7 +582,7 @@ class Plugin(DialogUtils):
 
         ensure_future(coroutine())
 
-    def delete_scope(self, **args):
+    def delete_scope(self, **kwargs: Any):
         """This method for the deletion of the clients data
 
         Args:
@@ -600,7 +605,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-scopes-by-inum',
-                    url_suffix='inum:{}'.format(args['selected'][3]),
+                    url_suffix='inum:{}'.format(kwargs['selected'][3]),
                     endpoint_args='',
                     data_fn='',
                     data={}
@@ -610,7 +615,7 @@ class Plugin(DialogUtils):
 
         ensure_future(coroutine())
 
-    def delete_UMAresource(self, **args):
+    def delete_UMAresource(self, **kwargs: Any):
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(selected[0]))
         async def coroutine():
             focused_before = self.app.layout.current_window
@@ -623,7 +628,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-uma-resources-by-id',
-                    url_suffix='id:{}'.format(args['selected'][0]),
+                    url_suffix='id:{}'.format(kwargs['selected'][0]),
                     endpoint_args='',
                     data_fn=None,
                     data={}
@@ -681,7 +686,6 @@ class Plugin(DialogUtils):
                             Window(width=100),
                             ])
                      ], style='class:outh_containers_clients', width=D())
-
 
     def save_logging(self) -> None:
         mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})

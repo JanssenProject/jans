@@ -66,7 +66,6 @@ import cli_style
 class ViewUMADialog(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details
     """
-
     def __init__(
         self,
         parent,
@@ -87,7 +86,6 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
             save_handler (method, optional): handler invoked when closing the dialog. Defaults to None.
         """
-
         super().__init__(parent, title, buttons)
         self.data = data
         self.myparent= parent
@@ -95,15 +93,11 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         self.UMA_containers = {}
         self.UMA_prepare_containers()
 
-
-        def delete():
-            
+        def delete() -> None:
             selected = [data.get('id'),data.get('description', ''),data.get('scopes', [''])[0]]
             self.deleted_uma(selected,self.future.set_result(DialogResult.CANCEL))
             
-            
-
-        def cancel():
+        def cancel() -> None:
             self.future.set_result(DialogResult.CANCEL)
 
         self.side_nav_bar =  JansNavBar(
@@ -113,7 +107,6 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                     select=0,
                     bgcolor=cli_style.outh_navbar_bgcolor  ### it is not a style > only color
                     )
-
 
         self.dialog = Dialog(title='UMA-resources',
 
@@ -183,7 +176,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             # width=140,
         )
 
-    def UMA_prepare_containers(self):
+    def UMA_prepare_containers(self) -> None:
         """Prepare the containers for UMA Dialog
         """
         self.oauth_main_area =  self.UMA_containers['scope'] = HSplit([
@@ -195,10 +188,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 style='class:outh-uma-text',
                                 height=3,
                             )
-
         ],width=D())
-        
-        
 
         self.UMA_containers['expression'] = HSplit([
         self.myparent.getTitledText(
@@ -209,10 +199,12 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 style='class:outh-uma-text',
                                  height=3,
                             ),
-
         ],width=D())
         
-    def oauth_nav_selection_changed(self, selection):
+    def oauth_nav_selection_changed(
+        self, 
+        selection: str
+        ) -> None:
         """This method for the selection change for tabs
 
         Args:
@@ -221,6 +213,6 @@ class ViewUMADialog(JansGDialog, DialogUtils):
         if selection in self.UMA_containers:
             self.oauth_main_area = self.UMA_containers[selection]
         
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.dialog
 
