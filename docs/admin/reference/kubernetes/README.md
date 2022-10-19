@@ -2,6 +2,7 @@
 tags:
   - administration
   - reference
+  - cloud-native
   - kubernetes
 ---
 

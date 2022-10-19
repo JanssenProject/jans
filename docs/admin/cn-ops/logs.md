@@ -1,6 +1,7 @@
 ---
 tags:
   - administration
+  - cloud-native
   - kubernetes
   - operations
 ---

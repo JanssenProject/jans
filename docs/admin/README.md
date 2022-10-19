@@ -15,7 +15,7 @@ each specific area.
 
 * **Installation** Howto's for VM and cloud native deployment
 
-* **Kubernetes Operation Guide** Day-to-day administration for cloud native
+* **Cloud Native Operation Guide** Day-to-day administration for cloud native
 
 * **VM Operation Guide** Day-to-day administration if you installed a SUSE,
 Red Hat, or Ubuntu linux package.
