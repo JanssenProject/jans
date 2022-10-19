@@ -145,6 +145,7 @@ class JansCliApp(Application):
         if self.cli_object_ok:
             self.init_plugins()
 
+
     def _load_plugins(self) -> None:
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
