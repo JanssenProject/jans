@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#dynamic-client-registration-dcr" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -2882,9 +2887,149 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Client Registration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Client Registration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-client-registration-dcr" class="md-nav__link">
+    Dynamic Client Registration (DCR)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-registration-endpoint" class="md-nav__link">
+    Client Registration endpoint
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-janssen-as-to-allow-clients-to-dynamically-register" class="md-nav__link">
+    Configuring Janssen AS to allow clients to dynamically register
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-registration-requests" class="md-nav__link">
+    Client registration Requests
+  </a>
+  
+    <nav class="md-nav" aria-label="Client registration Requests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-a-simple-client-registration-request-with-mandatory-parameter" class="md-nav__link">
+    1. A simple client registration request (with mandatory parameter):
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-a-typical-client-registration-request" class="md-nav__link">
+    2. A typical client registration request :
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-client-registration-request-using-a-signed-request-object" class="md-nav__link">
+    3. Client Registration Request Using a signed request object
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-client-registration-using-software-statement" class="md-nav__link">
+    4. Client registration using software statement
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-special-mention-about-fapi" class="md-nav__link">
+    5. Special mention about FAPI:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-the-behavior-of-op-during-dcr-using-an-interception-script" class="md-nav__link">
+    Customizing the behavior of OP during DCR using an interception script:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-pointers" class="md-nav__link">
+    Security Pointers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#curl-commands-to-configure-jans-auth-server" class="md-nav__link">
+    CURL commands to configure Jans-auth server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-metadata" class="md-nav__link">
+    Client metadata
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-registration-custom-attributes" class="md-nav__link">
+    Dynamic registration custom attributes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#crud-operations" class="md-nav__link">
+    CRUD Operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internationalization-for-client-metadata" class="md-nav__link">
+    Internationalization for Client metadata
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10482,6 +10627,132 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-client-registration-dcr" class="md-nav__link">
+    Dynamic Client Registration (DCR)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-registration-endpoint" class="md-nav__link">
+    Client Registration endpoint
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-janssen-as-to-allow-clients-to-dynamically-register" class="md-nav__link">
+    Configuring Janssen AS to allow clients to dynamically register
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-registration-requests" class="md-nav__link">
+    Client registration Requests
+  </a>
+  
+    <nav class="md-nav" aria-label="Client registration Requests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-a-simple-client-registration-request-with-mandatory-parameter" class="md-nav__link">
+    1. A simple client registration request (with mandatory parameter):
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-a-typical-client-registration-request" class="md-nav__link">
+    2. A typical client registration request :
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-client-registration-request-using-a-signed-request-object" class="md-nav__link">
+    3. Client Registration Request Using a signed request object
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-client-registration-using-software-statement" class="md-nav__link">
+    4. Client registration using software statement
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-special-mention-about-fapi" class="md-nav__link">
+    5. Special mention about FAPI:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-the-behavior-of-op-during-dcr-using-an-interception-script" class="md-nav__link">
+    Customizing the behavior of OP during DCR using an interception script:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-pointers" class="md-nav__link">
+    Security Pointers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#curl-commands-to-configure-jans-auth-server" class="md-nav__link">
+    CURL commands to configure Jans-auth server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-metadata" class="md-nav__link">
+    Client metadata
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-registration-custom-attributes" class="md-nav__link">
+    Dynamic registration custom attributes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#crud-operations" class="md-nav__link">
+    CRUD Operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internationalization-for-client-metadata" class="md-nav__link">
+    Internationalization for Client metadata
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -10513,20 +10784,307 @@
         <span class="md-tag">endpoint</span>
       
     
+      
+        <span class="md-tag">DCR</span>
+      
+    
+      
+        <span class="md-tag">dynamic client registration</span>
+      
+    
   </nav>
 
 
 
   <h1>Client Registration</h1>
 
-<p>This is a placeholder</p>
+<h3 id="dynamic-client-registration-dcr">Dynamic Client Registration (DCR)<a class="headerlink" href="#dynamic-client-registration-dcr" title="Permanent link">#</a></h3>
+<p>Dynamic client registration refers to the process by which a client submits a registration request to the Authorization server and how that request is served by the Authorization server. It is explained in the following specifications:</p>
+<ol>
+<li>For OpenID Connect relying parties - <a href="https://openid.net/specs/openid-connect-registration-1_0.html">OpenID Connect Dynamic Client Registration 1.0</a>. </li>
+<li>For OAuth 2.0 client (without OpenID Connect features) - <a href="https://tools.ietf.org/html/rfc7591">OAuth 2.0 Dynamic Client Registration Protocol - RFC 7591</a>.</li>
+<li>CRUD operations on client - <a href="https://tools.ietf.org/html/rfc7592">OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592</a>. </li>
+</ol>
+<h3 id="client-registration-endpoint">Client Registration endpoint<a class="headerlink" href="#client-registration-endpoint" title="Permanent link">#</a></h3>
+<p>The URI to dynamically register a client to a Janssen Auth Server can be found by checking the <code>registration_endpoint</code> claim of the OpenID Connect configuration reponse, typically deployed at <code>https://&lt;my.jans.server&gt;/.well-known/openid-configuration</code></p>
+<h3 id="configuring-janssen-as-to-allow-clients-to-dynamically-register">Configuring Janssen AS to allow clients to dynamically register<a class="headerlink" href="#configuring-janssen-as-to-allow-clients-to-dynamically-register" title="Permanent link">#</a></h3>
+<p>The Janssen Authorization server will serve a DCR request if the following configuration parameters are set:</p>
+<ol>
+<li><code>dynamicRegistrationEnabled</code> : <code>true</code> or <code>false</code></li>
+<li><code>dynamicRegistrationExpirationTime</code> : Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire</li>
+</ol>
+<p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
+<h3 id="client-registration-requests">Client registration Requests<a class="headerlink" href="#client-registration-requests" title="Permanent link">#</a></h3>
+<h4 id="1-a-simple-client-registration-request-with-mandatory-parameter">1. A simple client registration request (with mandatory parameter):<a class="headerlink" href="#1-a-simple-client-registration-request-with-mandatory-parameter" title="Permanent link">#</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="w"></span>
+<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">X</span><span class="w"> </span><span class="n">POST</span><span class="w"> </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="o">-</span><span class="n">i</span><span class="w"> </span><span class="p">&#39;</span><span class="nl">https:</span><span class="c1">//my.jans.server/jans-auth/restv1/register&#39;  \</span>
+<span class="c1">     --data &#39;{ \ </span>
+<span class="w">              </span><span class="s">&quot;redirect_uris&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;https://client.example.org/cb&quot;</span><span class="p">]</span><span class="w"> </span><span class="se">\</span><span class="w"></span>
+<span class="w">             </span><span class="p">}&#39;</span><span class="w"> </span><span class="se">\</span><span class="w"></span>
+<span class="err">```</span><span class="w"></span>
+</code></pre></div>
+
+<h4 id="2-a-typical-client-registration-request">2. A typical client registration request :<a class="headerlink" href="#2-a-typical-client-registration-request" title="Permanent link">#</a></h4>
+<p>A typical client registration request : A client or developer calls the client registration endpoint with a set of client metadata as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC7591</a></p>
+<div class="highlight"><pre><span></span><code>   curl -X POST -k -i &#39;https://my.jans.server/jans-auth/restv1/register&#39;  \
+        --data &#39;{ \ 
+                      &quot;redirect_uris&quot;: [&quot;https://client.example.org/cb&quot;] \
+                  &quot;client_id&quot;: &quot;c3BhdRkqfX&quot;, \
+                  &quot;client_secret&quot;: &quot;bd136123eeffeef234235805d&quot;, \
+                  &quot;grant_types&quot;: [&quot;authorization_code&quot;, &quot;refresh_token&quot;], \
+                  &quot;token_endpoint_auth_method&quot;: &quot;client_secret_basic&quot;, \
+                  &quot;jwks_uri&quot;: &quot;https://client.example.org/my_public_keys.jwks&quot;, \
+                  &quot;client_name&quot;: &quot;My Example&quot;, \
+                  &quot;client_name#fr&quot;: &quot;Mon Exemple&quot; \
+            }&#39; \
+</code></pre></div>
+<h4 id="3-client-registration-request-using-a-signed-request-object">3. Client Registration Request Using a signed request object<a class="headerlink" href="#3-client-registration-request-using-a-signed-request-object" title="Permanent link">#</a></h4>
+<p>In some usecases like FAPI implementation,  DCR request payload is a JWT. 
+Example:<br />
+<div class="highlight"><pre><span></span><code>  curl -X POST -k -H &#39;Content-Type: application/jwt&#39; \
+       -H &#39;Accept: application/json&#39; \
+       -i &#39;https://my-jans-server/jans-auth/restv1/register&#39;  \
+       --data &#39;eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q&#39; 
+</code></pre></div>
+When such will be the nature of client registration requests, the following configuration properties should be set in the authorization server:
+- <code>dcrSignatureValidationEnabled</code> - enables DCR signature validation
+- <code>dcrSignatureValidationJwksUri</code> - specifies JWKS URI for all DCR's validations.
+- <code>dcrSignatureValidationJwks</code> - specifies JWKS for all DCR's validations.
+Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
+<h4 id="4-client-registration-using-software-statement">4. Client registration using software statement<a class="headerlink" href="#4-client-registration-using-software-statement" title="Permanent link">#</a></h4>
+<p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to dynamically register clients to an Authorization server.
+Example: 
+<div class="highlight"><pre><span></span><code>  #!/bin/bash curl -X POST https://my.jans.server/jans-auth/restv1/register \
+                   -H &quot;Content-Type: application/json&quot; \
+               --data-binary @- &lt;&lt;DATA \
+            { &quot;redirect_uris&quot;: [ &quot;https://client.example.org/cab1&quot; ], \
+              &quot;software_statement&quot;:&quot;eyJ0eXAi........j3ouyeYOv8&quot;, \
+              &quot;jwks_uri&quot;:&quot;https://my.portal/portal/jwks&quot; \
+            } DATA
+</code></pre></div>
+For Client registrations using Software statements, the AS should be configured using the following configuration parameters:
+ - <code>softwareStatementValidationType</code> - The value of this variable is one of the following: 
+        - NONE - validation is skipped for software statement
+        - SCRIPT - (default), invokes <code>getSoftwareStatementJwks</code> of dynamic registration script which has to return jwks.
+    - JWKS - claim name within software statement that has inlined JWKS
+    - JWKS_URI - claim name within software statement that points to JWKS URI that should lead to keys.
+ - <code>dcrSignatureValidationSoftwareStatementJwksURIClaim</code> - specifies claim name inside software statement that should point to JWKS URI.
+ - <code>dcrSignatureValidationSoftwareStatementJwksClaim</code> - specifies claim name inside software statement. Value of claim should point to inlined JWKS.</p>
+<p>Configure the AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
+<h4 id="5-special-mention-about-fapi">5. Special mention about FAPI:<a class="headerlink" href="#5-special-mention-about-fapi" title="Permanent link">#</a></h4>
+<p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>, the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and OBIE respectively.</p>
+<h3 id="customizing-the-behavior-of-op-during-dcr-using-an-interception-script">Customizing the behavior of OP during DCR using an interception script:<a class="headerlink" href="#customizing-the-behavior-of-op-during-dcr-using-an-interception-script" title="Permanent link">#</a></h3>
+<p>The Janssen Authorization Server uses <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/client/ClientRegistrationType.java"><code>ClientRegistrationType</code></a> interception scripts to enable you to customize the behavior of the OpenID Provider during client registration. Examples of business customizations in the client registration script are validating certificates against a certificate directory, manage client claims, modify scopes, perform validation and checks.</p>
+<p>Reference : </p>
+<h3 id="security-pointers">Security Pointers<a class="headerlink" href="#security-pointers" title="Permanent link">#</a></h3>
+<p>If <code>dynamicRegistrationEnabled</code> is enabled in the Authorization Server, assess the following points to minimize potential exposure of sensitive personal data:</p>
+<ol>
+<li>
+<p><code>trustedClientEnabled</code> and <code>dynamicRegistrationPersistClientAuthorizations</code> properties determine whether clients are trusted and if consent should be sought from the user before releasing their personal data to the RP</p>
+</li>
+<li>
+<p><code>dynamicRegistrationScopesParamEnabled</code> controls whether default scopes are globally enabled. If <code>dynamicRegistrationScopesParamEnabled</code> is <code>true</code> then scopes defined as default will be automatically added to any dynamically registered client entry without consent of OP's administrator. Therefore, make an informed decision before setting this field to <code>true</code>.</p>
+</li>
+</ol>
+<h3 id="curl-commands-to-configure-jans-auth-server">CURL commands to configure Jans-auth server<a class="headerlink" href="#curl-commands-to-configure-jans-auth-server" title="Permanent link">#</a></h3>
+<p>Jans-auth server is configured using <a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> :
+1. Obtain the access token 
+   <div class="highlight"><pre><span></span><code>   curl -u &quot;put_client_id_here:put_config_api_client_secret_here&quot; https://&lt;your.jans.server&gt;/jans-auth/restv1/token \
+        -d  &quot;grant_type=client_credentials&amp;scope=https://jans.io/oauth/jans-auth-server/config/properties.write&quot;
+</code></pre></div>
+2. Patch jans-auth server configurations to reflect <code>anExampleConfigField</code> with the value <code>anExampleConfigField_value</code></p>
+<p><div class="highlight"><pre><span></span><code> curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \ 
+    -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \ 
+    -H &quot;Authorization: Bearer put_access_token_here&quot; --data &#39;[
+       {
+        &quot;op&quot;: &quot;add&quot;,
+        &quot;path&quot;: &quot;anExampleConfigField&quot;,
+        &quot;value&quot;: &quot;anExampleConfigField_value&quot;
+        }
+       ]&#39;
+</code></pre></div>
+ Example : Patch jans-auth server configurations to reflect <code>dynamicRegistrationEnabled</code> with value as <code>true</code></p>
+<div class="codehilite"><pre><span></span><code>  ```
+   curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \ 
+   -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \ 
+   -H &quot;Authorization: Bearer put_access_token_here&quot; --data &#39;[
+      {
+       &quot;op&quot;: &quot;add&quot;,
+       &quot;path&quot;: &quot;dynamicRegistrationEnabled&quot;,
+       &quot;value&quot;: &quot;true&quot;
+       }
+      ]&#39;
+   ```
+</code></pre></div>
+
+<h3 id="client-metadata">Client metadata<a class="headerlink" href="#client-metadata" title="Permanent link">#</a></h3>
+<p>Command to obtain metadata schema:
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/Client
+</code></pre></div>
+Output:
+<div class="highlight"><pre><span></span><code>{
+  &quot;dn&quot;: &quot;string&quot;,
+  &quot;inum&quot;: &quot;string&quot;,
+  &quot;displayName&quot;: &quot;string&quot;,
+  &quot;clientSecret&quot;: &quot;string&quot;,
+  &quot;frontChannelLogoutUri&quot;: &quot;string&quot;,
+  &quot;frontChannelLogoutSessionRequired&quot;: true,
+  &quot;registrationAccessToken&quot;: &quot;string&quot;,
+  &quot;clientIdIssuedAt&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
+  &quot;clientSecretExpiresAt&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
+  &quot;redirectUris&quot;: [
+    &quot;https://client.example.org/cb&quot;
+  ],
+  &quot;claimRedirectUris&quot;: [
+    &quot;string&quot;
+  ],
+  &quot;responseTypes&quot;: [
+    &quot;code&quot;
+  ],
+  &quot;grantTypes&quot;: [
+    &quot;authorization_code&quot;
+  ],
+  &quot;applicationType&quot;: &quot;web&quot;,
+  &quot;contacts&quot;: [
+    &quot;string&quot;
+  ],
+  &quot;idTokenTokenBindingCnf&quot;: &quot;string&quot;,
+  &quot;logoUri&quot;: &quot;string&quot;,
+  &quot;clientUri&quot;: &quot;string&quot;,
+  &quot;policyUri&quot;: &quot;string&quot;,
+  &quot;tosUri&quot;: &quot;string&quot;,
+  &quot;jwksUri&quot;: &quot;string&quot;,
+  &quot;jwks&quot;: &quot;{ \&quot;keys\&quot; : [ { \&quot;e\&quot; : \&quot;AQAB\&quot;, \&quot;n\&quot; : \&quot;gmlDX_mgMcHX..\&quot; ] }&quot;,
+  &quot;sectorIdentifierUri&quot;: &quot;string&quot;,
+  &quot;subjectType&quot;: &quot;pairwise&quot;,
+  &quot;idTokenSignedResponseAlg&quot;: &quot;HS256&quot;,
+  &quot;idTokenEncryptedResponseAlg&quot;: &quot;RSA1_5&quot;,
+  &quot;idTokenEncryptedResponseEnc&quot;: &quot;A128CBC+HS256&quot;,
+  &quot;userInfoSignedResponseAlg&quot;: &quot;HS256&quot;,
+  &quot;userInfoEncryptedResponseAlg&quot;: &quot;RSA1_5&quot;,
+  &quot;userInfoEncryptedResponseEnc&quot;: &quot;A128CBC+HS256&quot;,
+  &quot;requestObjectSigningAlg&quot;: &quot;HS256&quot;,
+  &quot;requestObjectEncryptionAlg&quot;: &quot;RSA1_5&quot;,
+  &quot;requestObjectEncryptionEnc&quot;: &quot;A128CBC+HS256&quot;,
+  &quot;tokenEndpointAuthMethod&quot;: &quot;client_secret_basic&quot;,
+  &quot;tokenEndpointAuthSigningAlg&quot;: &quot;HS256&quot;,
+  &quot;defaultMaxAge&quot;: 1000000,
+  &quot;requireAuthTime&quot;: true,
+  &quot;defaultAcrValues&quot;: [
+    &quot;string&quot;
+  ],
+  &quot;initiateLoginUri&quot;: &quot;string&quot;,
+  &quot;postLogoutRedirectUris&quot;: [
+    &quot;https://client.example.org/logout/page1&quot;,
+    &quot;https://client.example.org/logout/page2&quot;,
+    &quot;https://client.example.org/logout/page3&quot;
+  ],
+  &quot;requestUris&quot;: [
+    &quot;string&quot;
+  ],
+  &quot;scopes&quot;: [
+    &quot;read write dolphin&quot;
+  ],
+  &quot;claims&quot;: [
+    &quot;string&quot;
+  ],
+  &quot;trustedClient&quot;: false,
+  &quot;lastAccessTime&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
+  &quot;lastLogonTime&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
+  &quot;persistClientAuthorizations&quot;: true,
+  &quot;includeClaimsInIdToken&quot;: false,
+  &quot;refreshTokenLifetime&quot;: 100000000,
+  &quot;accessTokenLifetime&quot;: 100000000,
+  &quot;customAttributes&quot;: [
+    {
+      &quot;name&quot;: &quot;name, displayName, birthdate, email&quot;,
+      &quot;multiValued&quot;: true,
+      &quot;values&quot;: [
+        &quot;string&quot;
+      ]
+    }
+  ],
+  &quot;customObjectClasses&quot;: [
+    &quot;string&quot;
+  ],
+  &quot;rptAsJwt&quot;: true,
+  &quot;accessTokenAsJwt&quot;: true,
+  &quot;accessTokenSigningAlg&quot;: &quot;HS256&quot;,
+  &quot;disabled&quot;: false,
+  &quot;authorizedOrigins&quot;: [
+    &quot;string&quot;
+  ],
+  &quot;softwareId&quot;: &quot;4NRB1-0XZABZI9E6-5SM3R&quot;,
+  &quot;softwareVersion&quot;: &quot;2.1&quot;,
+  &quot;softwareStatement&quot;: &quot;string&quot;,
+  &quot;attributes&quot;: {
+    &quot;tlsClientAuthSubjectDn&quot;: &quot;string&quot;,
+    &quot;runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims&quot;: true,
+    &quot;keepClientAuthorizationAfterExpiration&quot;: true,
+    &quot;allowSpontaneousScopes&quot;: true,
+    &quot;spontaneousScopes&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;spontaneousScopeScriptDns&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;updateTokenScriptDns&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;backchannelLogoutUri&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;backchannelLogoutSessionRequired&quot;: true,
+    &quot;additionalAudience&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;postAuthnScripts&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;consentGatheringScripts&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;introspectionScripts&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;rptClaimsScripts&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;ropcScripts&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;parLifetime&quot;: 0,
+    &quot;requirePar&quot;: true,
+    &quot;jansAuthSignedRespAlg&quot;: &quot;string&quot;,
+    &quot;jansAuthEncRespAlg&quot;: &quot;string&quot;,
+    &quot;jansAuthEncRespEnc&quot;: &quot;string&quot;,
+    &quot;jansSubAttr&quot;: &quot;string&quot;,
+    &quot;redirectUrisRegex&quot;: &quot;string&quot;,
+    &quot;jansAuthorizedAcr&quot;: [
+      &quot;string&quot;
+    ],
+    &quot;jansDefaultPromptLogin&quot;: true
+  },
+  &quot;backchannelTokenDeliveryMode&quot;: &quot;poll&quot;,
+  &quot;backchannelClientNotificationEndpoint&quot;: &quot;string&quot;,
+  &quot;backchannelAuthenticationRequestSigningAlg&quot;: &quot;RS256&quot;,
+  &quot;backchannelUserCodeParameter&quot;: true,
+  &quot;expirationDate&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
+  &quot;deletable&quot;: false,
+  &quot;jansId&quot;: &quot;string&quot;,
+  &quot;description&quot;: &quot;string&quot;
+}
+</code></pre></div></p>
+<h3 id="dynamic-registration-custom-attributes">Dynamic registration custom attributes<a class="headerlink" href="#dynamic-registration-custom-attributes" title="Permanent link">#</a></h3>
+<h3 id="crud-operations">CRUD Operations<a class="headerlink" href="#crud-operations" title="Permanent link">#</a></h3>
+<h3 id="internationalization-for-client-metadata">Internationalization for Client metadata<a class="headerlink" href="#internationalization-for-client-metadata" title="Permanent link">#</a></h3>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T03:54:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-19T06:40:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-19</span>
       
         <br>
         Created:
