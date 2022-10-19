@@ -1,5 +1,6 @@
 import os
 import sys
+from prompt_toolkit.application import Application
 
 from prompt_toolkit.layout.containers import HSplit
 from prompt_toolkit.layout.dimension import D
@@ -8,7 +9,10 @@ from prompt_toolkit.widgets import Button, Label, Frame
 class Plugin():
     """This is a general class for plugins 
     """
-    def __init__(self, app):
+    def __init__(
+        self, 
+        app: Application
+        ) -> None:
         """init for Plugin class "scim"
 
         Args:

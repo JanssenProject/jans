@@ -24,7 +24,8 @@ from prompt_toolkit.widgets import (
     Button,
     Label,
     Frame,
-    Dialog
+    Dialog,
+    CheckboxList
 )
 from static import DialogResult
 from prompt_toolkit.layout import ScrollablePane
@@ -43,6 +44,7 @@ from wui_components.jans_cli_dialog import JansGDialog
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.application import Application
 
 from multi_lang import _
 import cli_style
@@ -50,7 +52,10 @@ import cli_style
 class Plugin(DialogUtils):
     """This is a general class for plugins 
     """
-    def __init__(self, app):
+    def __init__(
+        self, 
+        app: Application
+        ) -> None:
         """init for Plugin class "oxauth"
 
         Args:
@@ -155,7 +160,12 @@ class Plugin(DialogUtils):
         self.oauth_containers['properties'] = HSplit([
                     VSplit([
                         self.app.getButton(text=_("Get properties"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_properties),
-                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
+                        self.app.getTitledText(
+                            _("Search: "), 
+                            name='oauth:scopes:search', 
+                            jans_help=_("Press enter to perform search"), 
+                            accept_handler=self.search_claims,
+                            style='class:outh_containers_scopes.text'),
                         ],
                         padding=3,
                         width=D(),
@@ -403,7 +413,9 @@ class Plugin(DialogUtils):
         t = threading.Thread(target=self.oauth_update_scopes, daemon=True)
         t.start()
 
-
+    # ---------------------------------------------------------------------- #
+    # ---------------------------------------------------------------------- #
+    # ---------------------------------------------------------------------- #
     def oauth_update_properties(
         self, 
         start_index: Optional[int]= 0,  
@@ -505,6 +517,48 @@ class Plugin(DialogUtils):
         t = threading.Thread(target=self.oauth_update_properties, daemon=True)
         t.start()
 
+    def search_claims(
+        self, 
+        textbuffer: Buffer,
+        ) -> None:   ## TODO >> NOT FINSIHED >> JUST A SKELTON
+
+        try :
+            responce = self.app.cli_object.process_command_by_id(
+                        operation_id='get-properties',
+                        url_suffix='',
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
+                        )
+        except Exception as e:
+                    self.app.show_message(_("Error searching properties"), str(e))
+                    return
+
+        result = responce.json()
+
+
+        # def add_selected_claims(dialog):
+        #     if 'claims' not in self.data:
+        #         self.data['claims'] = []
+
+        #     for item in dialog.body.current_values:
+        #         self.claims_container.add_item(item)
+        #         self.data['claims'].append(item[0])
+
+        values_uniqe = []
+
+        for k in result:
+                values_uniqe.append((k,k))
+
+        check_box_list = CheckboxList(
+            values=values_uniqe,
+            )
+        buttons = [Button(_("Cancel")), Button(_("OK"),)]# handler=add_selected_claims)]
+        dialog = JansGDialog(self.app, title=_("Select properties to Edit"), body=check_box_list, buttons=buttons)
+        self.app.show_jans_dialog(dialog)
+    # ---------------------------------------------------------------------- #
+    # ---------------------------------------------------------------------- #
+    # ---------------------------------------------------------------------- #
 
     def oauth_update_keys(self) -> None:
 

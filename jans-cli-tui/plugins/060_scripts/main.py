@@ -39,13 +39,17 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 
 from edit_script_dialog import EditScriptDialog
+from prompt_toolkit.application import Application
 
 from multi_lang import _
 import cli_style
 class Plugin():
     """This is a general class for plugins 
     """
-    def __init__(self, app):
+    def __init__(
+        self, 
+        app: Application
+        ) -> None:
         """init for Plugin class "oxauth"
 
         Args:

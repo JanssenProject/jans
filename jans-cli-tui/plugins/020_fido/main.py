@@ -9,6 +9,7 @@ from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame, Box
+from prompt_toolkit.application import Application
 
 from wui_components.jans_nav_bar import JansNavBar
 
@@ -19,7 +20,10 @@ import cli_style
 class Plugin():
     """This is a general class for plugins 
     """
-    def __init__(self, app):
+    def __init__(
+        self, 
+        app: Application
+        ) -> None:
         """init for Plugin class "fido"
 
         Args:
