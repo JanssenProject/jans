@@ -1,0 +1,10 @@
+//This flow is based on the "hello world" flow found in Agama docs (quick-start quide)
+Flow io.jans.agama.test.auth.uidOnly
+    Basepath "hello"
+    Inputs uid
+
+in = { name: uid }
+RRF "index.ftlh" in
+
+Log "Done!"
+Finish uid
