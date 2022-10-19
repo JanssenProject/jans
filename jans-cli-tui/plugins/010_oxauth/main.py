@@ -66,11 +66,13 @@ class Plugin(DialogUtils):
 
     def init_plugin(self) -> None:
 
-        self.get_appconfiguration()
+        self.app.create_background_task(self.get_appconfiguration())
         self.schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
-        self.oauth_logging()
 
-    def get_appconfiguration(self) -> None:
+
+    async def get_appconfiguration(self) -> None:
+        """Coroutine for getting application configuration.
+        """
         try:
             response = self.app.cli_object.process_command_by_id(
                         operation_id='get-properties',
@@ -89,6 +91,7 @@ class Plugin(DialogUtils):
             return
 
         self.app_configuration = response.json()
+        self.oauth_logging()
 
     def process(self):
         pass

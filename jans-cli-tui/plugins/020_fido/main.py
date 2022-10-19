@@ -56,7 +56,7 @@ class Plugin():
 
 
     async def get_fido_configuration(self) -> None:
-        'Coroutine.'
+        'Coroutine for getting fido2 configuration.'
         try:
             response = self.app.cli_object.process_command_by_id(
                         operation_id='get-properties-fido2',
