@@ -1,15 +1,12 @@
 import re
 import os 
-from prompt_toolkit.layout.containers import Window
-from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.formatted_text import HTML, merge_formatted_text
-from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.application.current import get_app
+
 from typing import TypeVar, Callable
 from typing import Optional, Sequence, Union
 from prompt_toolkit.key_binding.key_processor import KeyPressEvent
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
+
 
 import cli_style
 
@@ -20,11 +17,12 @@ class JansNavBar():
     """This is a horizontal Navigation bar Widget used in Main screen ('clients', 'scopes', 'keys', 'defaults', 'properties', 'logging')
     """
     def __init__(
-        self, 
-        myparent, 
-        entries: list, 
-        selection_changed: Callable, 
-        select: Optional[int]= 0, 
+        self,
+        myparent,
+        entries: list,
+        selection_changed: Callable,
+        select: int= 0,
+        jans_name: Optional[str] = ''
         ) -> Window:
 
         """init for JansNavBar
@@ -49,6 +47,7 @@ class JansNavBar():
         self.navbar_entries = entries
         self.cur_navbar_selection = select
         self.selection_changed = selection_changed
+        self.jans_name = jans_name
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.create_window()
 
@@ -65,24 +64,33 @@ class JansNavBar():
                             cursorline=False,
                         )
 
-    def _go_tab(
-        self, 
-        ev:KeyPressEvent,
-        )-> None:
+
+    def _set_tab_for_view(self, view, ev):
+        for i, entry in enumerate(view.navbar_entries):
+            re_search = shortcut_re.search(entry[1])
+            if re_search and re_search.group(1).lower() == ev.data:
+                view.cur_navbar_selection = i
+                try: 
+                    self.myparent.layout.focus(view.nav_window)
+                except:
+                    pass
+                view._set_selection()
+                return True
+
+
+
+    def _go_tab(self, ev)-> None:
 
         if get_app().layout.container.floats:
             return
+        # first set main navbar tab
+        if not self._set_tab_for_view(self.myparent.nav_bar, ev):
+        # then set sub navbar
+            cur_plugin = self.myparent.nav_bar.cur_navbar_selection
+            cur_view = self.myparent._plugins[cur_plugin].nav_bar
 
-        for i, entry in enumerate(self.navbar_entries):
-            re_search = shortcut_re.search(entry[1])
-            if re_search and re_search.group(1).lower() == ev.data:
-                self.cur_navbar_selection = i
-                try: 
-                    self.myparent.layout.focus(self.nav_window)
-                except:
-                    pass
-                self._set_selection()
-                break
+            self._set_tab_for_view(cur_view, ev)
+
 
     def add_key_binding(
         self, 

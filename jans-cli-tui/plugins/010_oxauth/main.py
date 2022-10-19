@@ -60,7 +60,7 @@ class Plugin(DialogUtils):
         self.oauth_containers = {}
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
-        self.oauth_nav_selection_changed(self.oauth_navbar.navbar_entries[0][0])
+        self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
 
     def init_plugin(self):
@@ -151,7 +151,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
-                                        Box(self.oauth_navbar.nav_window, style='class:sub-navbar', height=1),
+                                        Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
                                         DynamicContainer(lambda: self.oauth_main_area),
                                         ],
                                     height=D(),
@@ -161,11 +161,12 @@ class Plugin(DialogUtils):
     def oauth_prepare_navbar(self):
         """prepare the navbar for the current Plugin 
         """
-        self.oauth_navbar = JansNavBar(
+        self.nav_bar = JansNavBar(
                     self.app,
                     entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging')],
                     selection_changed=self.oauth_nav_selection_changed,
-                    select=0
+                    select=0,
+                    jans_name='oauth:nav_bar'
                     )
 
     def oauth_nav_selection_changed(self, selection):
@@ -174,7 +175,6 @@ class Plugin(DialogUtils):
         Args:
             selection (str): the current selected tab
         """
-
         if selection in self.oauth_containers:
             self.oauth_main_area = self.oauth_containers[selection]
         else:

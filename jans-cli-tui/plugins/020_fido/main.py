@@ -1,7 +1,7 @@
 import os
 import sys
 
-from prompt_toolkit.layout.containers import HSplit
+from prompt_toolkit.layout.containers import HSplit, DynamicContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame, Box
 
@@ -24,6 +24,7 @@ class Plugin():
         self.pid = 'fido'
         self.name = '[F]IDO'
         self.prepare_navbar()
+        self.prepare_containers()
 
     def process(self):
         pass
@@ -32,36 +33,52 @@ class Plugin():
     def prepare_navbar(self):
         """prepare the navbar for the current Plugin 
         """
-        self.navbar = JansNavBar(
+        self.nav_bar = JansNavBar(
                     self.app,
                     entries=[('configuration', 'C[o]nfiguration'), ('registration', 'Re[g]istration')],
                     selection_changed=self.nav_selection_changed,
                     select=0,
+                    jans_name='fido:nav_bar'
                     )
 
+    def prepare_containers(self):
+        """prepare the main container (tabs) for the current Plugin 
+        """
+
+        self.containers = {
+            'configuration': HSplit([Label("config")],width=D()),
+            'registration': HSplit([Label("regist")],width=D()),
+        }
+
+        self.main_area = HSplit([],width=D())
+
+
+        self.main_container = HSplit([
+                                        Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
+                                        DynamicContainer(lambda: self.main_area),
+                                        ],
+                                    height=D(),
+                                    style='class:outh_maincontainer'
+                                    )
+
+
+
     def nav_selection_changed(self, selection) -> None:
-        open("/tmp/fido.txt", "a").write(str(selection)+'\n')
         """This method for the selection change
 
         Args:
             selection (str): the current selected tab
         """
 
-        #if selection in self.oauth_containers:
-        #    self.oauth_main_area = self.oauth_containers[selection]
-        #else:
-        #    self.oauth_main_area = self.app.not_implemented
+        if selection in self.containers:
+            self.oauth_main_area = self.containers[selection]
+        else:
+            self.oauth_main_area = self.app.not_implemented
 
 
     def set_center_frame(self):
         """center frame content
         """
-        self.app.center_container = HSplit([
-                                Box(self.navbar.nav_window, style='class:sub-navbar', height=1),
-                                Label(text="Plugin {} is not imlemented yet".format(self.name))
-                                ],
-                                height=D(),
-                                style='class:outh_maincontainer'
-                            )
+        self.app.center_container = self.main_container
 
 
