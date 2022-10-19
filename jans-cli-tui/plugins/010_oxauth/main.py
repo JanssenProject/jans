@@ -566,7 +566,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-openid-clients-by-inum',
-                    url_suffix='inum:{}'.format(args['selected']),
+                    url_suffix='inum:{}'.format(args['selected'][0]),
                     endpoint_args='',
                     data_fn='',
                     data={}
@@ -577,7 +577,7 @@ class Plugin(DialogUtils):
 
         ensure_future(coroutine())
 
-    def delete_scope(self, selected, event):
+    def delete_scope(self, **args):
         """This method for the deletion of the clients data
 
         Args:
@@ -600,7 +600,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-scopes-by-inum',
-                    url_suffix='inum:{}'.format(selected[3]),
+                    url_suffix='inum:{}'.format(args['selected'][3]),
                     endpoint_args='',
                     data_fn='',
                     data={}
@@ -623,7 +623,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-oauth-uma-resources-by-id',
-                    url_suffix='id:{}'.format(args['selected']),
+                    url_suffix='id:{}'.format(args['selected'][0]),
                     endpoint_args='',
                     data_fn=None,
                     data={}
