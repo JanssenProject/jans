@@ -160,7 +160,7 @@ Flow com.acme.FoodSurvey
     Basepath "mydir"
 ```
 
-Next, flow timeout may be specified. This is the maximum amount of time available the end-user can take to fully complete a flow. For instance:
+Next, flow timeout may be specified. This is the maximum amount of time the end-user can take to fully complete a flow. For instance:
 
 ```
 Flow com.acme.FoodSurvey
