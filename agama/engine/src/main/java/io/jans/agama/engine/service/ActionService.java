@@ -105,7 +105,9 @@ public class ActionService {
                     throw new InstantiationException(msg);
                 }
 
-                logger.debug("Constructor found: {}", constr.toGenericString());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Constructor found: {}", constr.toGenericString());
+                }
                 Object[] args = getArgsForCall(constr, arity, rhinoArgs);
 
                 logger.debug("Creating an instance");
@@ -128,7 +130,9 @@ public class ActionService {
             throw new NoSuchMethodException(msg);
         }
 
-        logger.debug("Method found: {}", javaMethod.toGenericString());        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Method found: {}", javaMethod.toGenericString());
+        }
         Object[] args = getArgsForCall(javaMethod, arity, rhinoArgs);
 
         logger.debug("Performing method call");
