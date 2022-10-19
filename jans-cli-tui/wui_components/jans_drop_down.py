@@ -10,6 +10,9 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
+
 from prompt_toolkit.layout.dimension import AnyDimension
 from typing import Optional, Sequence, Union
 from typing import TypeVar, Callable
@@ -22,12 +25,12 @@ class JansSelectBox:
 
     def __init__(
         self,
-        values: list= [],
-        value: str= '',
+        values: Optional[list] = [],
+        value: Optional[str] = '',
         height: AnyDimension= 4,
         rotatable_up: Optional[bool] = True,
         rotatable_down: Optional[bool] = True,
-        ) -> AnyContainer:
+        ) -> HSplit:
         """_summary_
 
         Args:
@@ -61,7 +64,10 @@ class JansSelectBox:
             allow_scroll_beyond_bottom=True,
         )])
 
-    def set_value(self, value):
+    def set_value(
+        self, 
+        value:str
+        )-> None:
         """_summary_
 
         Args:
@@ -76,7 +82,7 @@ class JansSelectBox:
         else:
             self.selected_line = 0
 
-    def _get_formatted_text(self):
+    def _get_formatted_text(self)-> AnyFormattedText:
         """_summary_
 
         Returns:
@@ -93,7 +99,11 @@ class JansSelectBox:
 
         return merge_formatted_text(result)
 
-    def shift(self, seq, n):
+    def shift(
+        self, 
+        seq:str, 
+        n:int,
+        )-> str:
         """_summary_
 
         Args:
@@ -105,7 +115,7 @@ class JansSelectBox:
         """
         return seq[n:]+seq[:n]
 
-    def up(self):
+    def up(self)-> None:
         """_summary_
         """
         if self.selected_line == 0:
@@ -118,7 +128,7 @@ class JansSelectBox:
 
         self.set_value(self.values[self.selected_line][0])
 
-    def down(self):
+    def down(self)-> None:
         """_summary_
         """
         if self.selected_line + 1 == (self.height):
@@ -131,7 +141,7 @@ class JansSelectBox:
 
         self.set_value(self.values[self.selected_line][0])
         
-    def __pt_container__(self):
+    def __pt_container__(self)-> HSplit:
         return self.container
 
 
@@ -141,10 +151,10 @@ class DropDownWidget:
 
     def __init__(
         self,
-        values: list= [],
-        value: str= '',
+        values: Optional[list] = [],
+        value: Optional[str] = '',
         on_value_changed: Callable= None, 
-        ):
+        )->Window:
         """init for DropDownWidget
         Args:
             values (list, optional): List of values to select one from them. Defaults to [].
@@ -179,7 +189,7 @@ class DropDownWidget:
             content=self.select_box, xcursor=True, ycursor=True)
 
     @property
-    def value(self):
+    def value(self)-> str:
         """Getter for the value property
 
         Returns:
@@ -188,12 +198,15 @@ class DropDownWidget:
         return self.select_box.value
 
     @value.setter
-    def value(self, value):
+    def value(
+        self, 
+        value:str,
+        )-> None:
         self.select_box.set_value(value)
         if self.on_value_changed:
             self.on_value_changed(value)
 
-    def _get_text(self):
+    def _get_text(self)-> AnyFormattedText:
         """To get The selected value
 
         Returns:
@@ -203,7 +216,7 @@ class DropDownWidget:
             return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format(cli_style.drop_down_hover, self.text))
         return '> {} <'.format(self.text)
 
-    def _get_key_bindings(self):
+    def _get_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
         Returns:
@@ -252,5 +265,5 @@ class DropDownWidget:
 
         return kb
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> Window:
         return self.window

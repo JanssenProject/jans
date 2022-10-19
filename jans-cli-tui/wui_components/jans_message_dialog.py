@@ -16,7 +16,7 @@ class JansMessageDialog:
     """
     def __init__(
         self,
-        title,
+        title: AnyFormattedText,
         body: AnyContainer,
         buttons:Optional[Sequence[Button]] = [],
         focus_on_exit:AnyContainer =None
@@ -72,5 +72,5 @@ class JansMessageDialog:
         app = get_app()
         app.layout.focus(self.dialog)
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.dialog

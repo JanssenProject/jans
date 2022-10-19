@@ -6,6 +6,10 @@ from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.application.current import get_app
 from typing import TypeVar, Callable
+from typing import Optional, Sequence, Union
+from prompt_toolkit.key_binding.key_processor import KeyPressEvent
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 
 import cli_style
 
@@ -20,7 +24,7 @@ class JansNavBar():
         myparent, 
         entries: list, 
         selection_changed: Callable, 
-        select: int= 0, 
+        select: Optional[int]= 0, 
         ) -> Window:
 
         """init for JansNavBar
@@ -48,7 +52,7 @@ class JansNavBar():
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.create_window()
 
-    def create_window(self):
+    def create_window(self)-> None:
         """This method creat the Navigation Bar it self
         """
         self.nav_window = Window(
@@ -61,7 +65,10 @@ class JansNavBar():
                             cursorline=False,
                         )
 
-    def _go_tab(self, ev):
+    def _go_tab(
+        self, 
+        ev:KeyPressEvent,
+        )-> None:
 
         if get_app().layout.container.floats:
             return
@@ -77,7 +84,10 @@ class JansNavBar():
                 self._set_selection()
                 break
 
-    def add_key_binding(self, shorcut_key):
+    def add_key_binding(
+        self, 
+        shorcut_key:str,
+        )-> None:
         r = os.urandom(3).hex()
         for binding in self.myparent.bindings.bindings:
             if len(binding.keys) == 2 and binding.keys[0].value == 'escape' and binding.keys[1].lower() == shorcut_key:
@@ -85,7 +95,7 @@ class JansNavBar():
         self.myparent.bindings.add('escape', shorcut_key.lower())(self._go_tab)
 
 
-    def get_navbar_entries(self):
+    def get_navbar_entries(self)-> AnyFormattedText:
         """Get all selective entries
 
         Returns:    
@@ -111,12 +121,12 @@ class JansNavBar():
         return merge_formatted_text(result)
 
 
-    def _set_selection(self):
+    def _set_selection(self)-> None:
 
         if self.selection_changed:
             self.selection_changed(self.navbar_entries[self.cur_navbar_selection][0])
 
-    def get_nav_bar_key_bindings(self):
+    def get_nav_bar_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
         Returns:

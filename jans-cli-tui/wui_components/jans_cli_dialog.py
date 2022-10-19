@@ -17,7 +17,7 @@ class JansGDialog:
         self, 
         parent, 
         body: AnyContainer,
-        title: AnyFormattedText= "",
+        title: Optional[str]= '',
         buttons: Optional[Sequence[Button]]= [],
         width: AnyDimension= None
         )-> Dialog:  
@@ -61,5 +61,5 @@ class JansGDialog:
             modal=True,
         )
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.dialog

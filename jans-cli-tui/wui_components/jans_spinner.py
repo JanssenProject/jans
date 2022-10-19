@@ -1,13 +1,15 @@
 from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Window
-
+from typing import Optional, Sequence, Union
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 class Spinner:
     def __init__(self, 
-            value: int = 1, 
-            min_value: int = 1, 
-            max_value: int = 100, 
-            style: str = 'bg:#cccccc fg:blue'
+            value: Optional[int]= 1, 
+            min_value: Optional[int]= 1, 
+            max_value: Optional[int]= 100,  
+            style: Optional[str]= 'bg:#cccccc fg:blue',  
             ) -> Window:
 
         self.value = value
@@ -25,12 +27,12 @@ class Spinner:
             cursorline=False,
         )
 
-    def _get_formatted_text(self):
+    def _get_formatted_text(self) -> AnyFormattedText:
         spacing = len(str(self.max_value))+1
         result = [str(self.value).rjust(spacing) + ' ↕']
         return merge_formatted_text(result)
 
-    def _get_key_bindings(self):
+    def _get_key_bindings(self) -> KeyBindingsBase:
         kb = KeyBindings()
 
         @kb.add("up")
@@ -45,5 +47,5 @@ class Spinner:
 
         return kb
 
-    def __pt_container__(self):
+    def __pt_container__(self) -> Window:
         return self.window

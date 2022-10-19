@@ -23,6 +23,11 @@ from prompt_toolkit.layout.containers import (
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
+from typing import Optional, Sequence, Union
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.widgets import Button, Dialog
+from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
+
 import calendar
 import time
 import datetime
@@ -34,10 +39,10 @@ class JansSelectDate:
    
     def __init__(
         self,
-        date: str= '',
-        months: list= [],
-        mytime: list= [],
-        )-> AnyContainer:  
+        date: Optional[str] = '',
+        months: Optional[list] = [],
+        mytime: Optional[list] = [],
+        )-> HSplit:  
         
         """_summary_
 
@@ -110,13 +115,16 @@ class JansSelectDate:
         ),
         ])
 
-    def digitalize (self,number) :
+    def digitalize (
+        self,
+        number:int
+        )-> str: 
         if len(str(number)) == 1 :
             return '0'+ str(number)
         else :
             return str(number)
 
-    def _get_time_text(self):
+    def _get_time_text(self)-> AnyFormattedText: 
 
         result = []
         time_line = []
@@ -148,7 +156,10 @@ class JansSelectDate:
 
         return merge_formatted_text(result)
 
-    def extract_date(self, date):  #"11/27/2023"
+    def extract_date(
+        self, 
+        date:str
+        )-> None:  #"11/27/2023"
         ### this function is for the init date >> passed date from `data`
         
         day = int(date.split('/')[1])
@@ -172,7 +183,10 @@ class JansSelectDate:
         self.cord_x = day_index 
         self.selected_cord = (self.cord_x, self.cord_y)
  
-    def adjust_sizes(self,day):
+    def adjust_sizes(
+        self,
+        day:str
+        )-> str:
         if str(day) != '0':
             if len(str(day)) <=1:
                 return '  '+str(day)
@@ -181,7 +195,7 @@ class JansSelectDate:
         else:
             return '   '
 
-    def _get_calender_text(self):
+    def _get_calender_text(self)-> AnyFormattedText: 
         result = []
         week_line = []
         for i, week in enumerate(self.entries): 
@@ -199,7 +213,11 @@ class JansSelectDate:
 
         return merge_formatted_text(result)
 
-    def adjust_month(self, day, i):
+    def adjust_month(
+        self, 
+        day:int, 
+        i:int,
+        )-> None:
         if self.change_date:
             if i == 1 and self.current_month == 12:
                 return
@@ -215,25 +233,44 @@ class JansSelectDate:
             current_date = str(self.current_month)+'/'+str(day) + '/'+str(self.current_year)
             self.extract_date(current_date)
 
-    def inc_month(self,day):
+    def inc_month(
+        self,
+        day:int,
+        )-> None:
         self.adjust_month(day, 1)
 
-    def dec_month(self,day):
+    def dec_month(
+        self,
+        day:int,
+        )-> None:
         self.adjust_month(day, -1)
 
-    def adjust_year(self, day, i):
+    def adjust_year(
+        self, 
+        day:int, 
+        i:int,
+        )-> None:
         self.current_year += i
         self.year_label =  Label(text=str(self.current_year),width=len(str(self.current_year)))
         current_date = str(day)+'/'+str(self.current_month) + '/'+str(self.current_year)
         self.extract_date(current_date)# 20/2/1997
 
-    def inc_year(self, day):
+    def inc_year(
+        self, 
+        day:int,
+        )-> None:
         self.adjust_year(day, 1)
 
-    def dec_year(self, day):
+    def dec_year(
+        self, 
+        day:int
+        )-> None:
         self.adjust_year(day, -1)
 
-    def adjust_time(self, i):
+    def adjust_time(
+        self, 
+        i:int,
+        )-> None:
         if self.cord_x ==0 :
             self.hours +=i
         elif self.cord_x ==1 :
@@ -245,7 +282,7 @@ class JansSelectDate:
         self.minuts = abs(self.minuts % 60)
         self.seconds = abs(self.seconds % 60)
 
-    def up(self): 
+    def up(self)-> None: 
         if self.change_date:
             if self.cord_y == 0 or int(self.entries[self.cord_y-1][self.cord_x]) == 0:
                 self.dec_month(day=1)
@@ -256,7 +293,7 @@ class JansSelectDate:
         else:
             self.adjust_time(1)
 
-    def down(self):
+    def down(self)-> None:
         if self.change_date:
             if self.cord_y == 4 or int(self.entries[self.cord_y+1][self.cord_x]) == 0:
                 self.inc_month(day=28)
@@ -267,7 +304,7 @@ class JansSelectDate:
         else:
             self.adjust_time(-1)
 
-    def right(self):
+    def right(self)-> None:
         if self.change_date:
             if self.cord_x == 6 or int(self.entries[self.cord_y][self.cord_x+1]) == 0:
                 self.inc_year(day=7)
@@ -280,7 +317,7 @@ class JansSelectDate:
             else :
                 self.cord_x = (self.cord_x + 1) #% 7
 
-    def left(self):
+    def left(self)-> None:
         if self.change_date:
             if self.cord_x == 0 or int(self.entries[self.cord_y][self.cord_x-1]) == 0:
                 self.dec_year(day=1)
@@ -295,7 +332,7 @@ class JansSelectDate:
             else :
                 self.cord_x = (self.cord_x - 1) #% 7
 
-    def next(self):
+    def next(self)-> None:
         self.change_date = not self.change_date
          
         if not self.change_date:
@@ -305,7 +342,7 @@ class JansSelectDate:
             self.cord_x = self.old_cord_x
 
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.container
 
 class DateSelectWidget:
@@ -366,11 +403,17 @@ class DateSelectWidget:
             return self.text
 
     @value.setter
-    def value(self, value):
+    def value(
+        self, 
+        value:str,
+        )-> None:
         #passed_value = self.value  
         self._value = self.value  
 
-    def make_time(self, text):
+    def make_time(
+        self, 
+        text:str,
+        )-> None:
         """extract time from the text to increase or decrease
 
         Args:
@@ -388,7 +431,7 @@ class DateSelectWidget:
         t = time.mktime(t)
         self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
 
-    def _get_text(self):
+    def _get_text(self)-> AnyFormattedText:
         """To get The selected value
 
         Returns:
@@ -399,7 +442,7 @@ class DateSelectWidget:
             return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format('#00FF00', self.text))
         return '> {} <'.format(self.text)
 
-    def _get_key_bindings(self):
+    def _get_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
         Returns:
@@ -502,5 +545,5 @@ class DateSelectWidget:
 
         return kb
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> Window:
         return self.window

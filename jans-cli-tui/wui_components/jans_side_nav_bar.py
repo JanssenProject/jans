@@ -8,7 +8,8 @@ from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.key_binding import KeyBindings
 from typing import TypeVar, Callable
-
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 
 class JansSideNavBar():
     """This is a Vertical Navigation bar Widget with one value used in clients/scopes dialogs
@@ -48,7 +49,7 @@ class JansSideNavBar():
         self.selection_changed = selection_changed
         self.create_window()
 
-    def create_window(self):
+    def create_window(self)-> None:
         """This method creat the dialog it self
         Todo:
             * Change `width` to be dynamic      
@@ -73,7 +74,7 @@ class JansSideNavBar():
             ), floats=[]
         )
 
-    def get_data_width(self):
+    def get_data_width(self)-> int:
         """get the largest title lenght
 
         Returns:
@@ -81,7 +82,7 @@ class JansSideNavBar():
         """
         return len(max(self.navbar_entries, key=len))
 
-    def get_navbar_entries(self):
+    def get_navbar_entries(self)-> AnyFormattedText:
         """Get all selective entries
 
         Returns:
@@ -97,23 +98,23 @@ class JansSideNavBar():
             result.append('\n')
         return merge_formatted_text(result)
 
-    def update_selection(self):
+    def update_selection(self)-> None:
         """Update the selected tab and pass the current tab name to the selection_changed handler
         """
         self.cur_tab = self.navbar_entries[self.cur_navbar_selection]
         self.selection_changed(self.cur_tab)
 
-    def go_up(self):
+    def go_up(self)-> None:
         self.cur_navbar_selection = (
             self.cur_navbar_selection - 1) % len(self.navbar_entries)
         self.update_selection()
 
-    def go_down(self):
+    def go_down(self)-> None:
         self.cur_navbar_selection = (
             self.cur_navbar_selection + 1) % len(self.navbar_entries)
         self.update_selection()
 
-    def get_nav_bar_key_bindings(self):
+    def get_nav_bar_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
         Returns:
@@ -140,5 +141,5 @@ class JansSideNavBar():
 
         return kb
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> FloatContainer:
         return self.side_nav

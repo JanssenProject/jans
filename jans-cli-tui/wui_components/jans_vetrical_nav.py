@@ -7,7 +7,9 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import HorizontalLine
 from typing import TypeVar, Callable
 from prompt_toolkit.layout.dimension import AnyDimension
-
+from typing import Optional, Sequence, Union
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 class JansVerticalNav():
     """This is a Vertical Navigation bar Widget with many values used in <Get clients>/<Get scopes>
     """
@@ -16,17 +18,17 @@ class JansVerticalNav():
         myparent,
         headers: list,
         on_display: Callable, 
-        selectes: int=0,
+        selectes: Optional[int]= 0, 
         on_enter: Callable= None,
         on_delete: Callable= None,
-        all_data: list= [],
-        preferred_size: list= [],
-        data: list= [],
-        headerColor: str= "green",
-        entriesColor: str= "white",
-        underline_headings: bool= True, 
+        all_data: Optional[list]= [], 
+        preferred_size: Optional[list]= [], 
+        data: Optional[list]= [], 
+        headerColor: Optional[str]= "green",
+        entriesColor: Optional[str]= "white",
+        underline_headings: Optional[bool]= True, 
         max_width: AnyDimension = None,
-        jans_name: str= '',
+        jans_name: Optional[str]= '', 
         max_height: AnyDimension = None,
         )->FloatContainer :
         """init for JansVerticalNav
@@ -86,7 +88,10 @@ class JansVerticalNav():
         self.handle_header_spaces()
         self.create_window()
 
-    def view_data(self,data):
+    def view_data(
+        self,
+        data:list
+        ) -> list:
         result = []
         for i, entry in enumerate(data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
             mod_entry = []
@@ -103,7 +108,7 @@ class JansVerticalNav():
  
         return result
 
-    def create_window(self):
+    def create_window(self) -> None:
         """This method creat the dialog it self
         """
         self.container_content = [
@@ -140,7 +145,7 @@ class JansVerticalNav():
             floats=[],
         )
 
-    def handle_header_spaces(self):
+    def handle_header_spaces(self) -> None:
         """Make header evenlly spaced
         """
 
@@ -174,7 +179,7 @@ class JansVerticalNav():
             
         self.spaces[-1] =  self.myparent.output.get_size()[1] - sum(self.spaces) + sum(len(s) for s in self.headers)    ## handle last head spaces (add space to the end of ter. width to remove the white line)
 
-    def get_spaced_data(self):
+    def get_spaced_data(self) -> list:
         """Make entries evenlly spaced
         """
         data = self.view_data(self.data)
@@ -188,7 +193,7 @@ class JansVerticalNav():
 
         return spaced_data
 
-    def _get_head_text(self):
+    def _get_head_text(self) -> AnyFormattedText:
         """Get all headers entries
 
         Returns:
@@ -204,7 +209,7 @@ class JansVerticalNav():
 
         return merge_formatted_text(result)
 
-    def _get_formatted_text(self):
+    def _get_formatted_text(self) -> AnyFormattedText:
         """Get all selective entries
 
         Returns:
@@ -223,22 +228,32 @@ class JansVerticalNav():
         return merge_formatted_text(result)
 
 
-    def remove_item(self, item):
+    def remove_item(
+        self, 
+        item: list,
+        ) -> None:
         self.data.remove(item)
         self.handle_header_spaces()
         if self.max_height:
             self.container_content[-1].height = self.max_height if self.max_height else len(self.data)
 
-    def add_item(self, item):
+    def add_item(
+        self, 
+        item: list,
+        ) -> None:
         self.data.append(item)
         self.handle_header_spaces()
         self.container_content[-1].height = self.max_height if self.max_height else len(self.data)
 
-    def replace_item(self, item_index, item):
+    def replace_item(
+        self, 
+        item_index: int,
+        item: list,
+        ) -> None:
         self.data[item_index] = item
         self.handle_header_spaces()
 
-    def _get_key_bindings(self):
+    def _get_key_bindings(self) -> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
         Returns:
@@ -289,5 +304,5 @@ class JansVerticalNav():
 
         return kb
 
-    def __pt_container__(self):
+    def __pt_container__(self) ->FloatContainer:
         return self.container

@@ -18,6 +18,7 @@ from typing import Optional, Sequence, Union
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
+from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 
@@ -30,8 +31,8 @@ class JansDialogWithNav():
         width: AnyDimension,
         navbar: AnyContainer=None,
         height: AnyDimension= None,
-        title: AnyFormattedText= "",
-        button_functions: list= [],
+        title: Optional[str]= '',
+        button_functions: Optional[list] = [],
         )-> Dialog:
 
         """init for JansDialogWithNav
@@ -65,7 +66,7 @@ class JansDialogWithNav():
         self.content = content
         self.create_window()
 
-    def create_window(self):
+    def create_window(self)-> None:
         """This method creat the dialog it self
         Todo:
             * Change `max_data_str` to be dynamic 
@@ -97,10 +98,9 @@ class JansDialogWithNav():
                 ) for k in range(len(self.button_functions))
             ],
             with_background=False,
-
         )
 
-    def get_nav_bar_key_bindings(self):
+    def get_nav_bar_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
         Returns:
@@ -132,6 +132,6 @@ class JansDialogWithNav():
 
         return kb
 
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.dialog
 

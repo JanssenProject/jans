@@ -14,12 +14,12 @@ from prompt_toolkit.layout.containers import HSplit
 class JansDialog():
     """NOt Used
     """
-    def __init__( #,
+    def __init__(
         self,
         only_view: Optional[bool] = False,
         height: AnyDimension = None,
         width: AnyDimension = None,
-        title: AnyFormattedText = "",
+        title: Optional[str]= '',
         button_functions: Optional[list] = [],
         entries_list: Optional[list] = [],
         entries_color: str="#00ff44",
@@ -34,7 +34,7 @@ class JansDialog():
         self.only_view=only_view
         self.create_window()
 
-    def create_window(self):
+    def create_window(self)-> None:
         ### get max title len
         max_title_str = self.entries_list[0][1]   # list is not empty
         for x in self.entries_list:
@@ -59,6 +59,6 @@ class JansDialog():
             with_background=False,
         ) 
 #--------------------------------------------------------------------------------------#
-    def __pt_container__(self):
+    def __pt_container__(self)-> Dialog:
         return self.dialog
 
