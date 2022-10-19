@@ -174,7 +174,7 @@ public class ActionService {
                     logger.trace("Parameter is a primitive (or wrapped) {}", typeName);
                     javaArgs[i] = arg;
 
-                } else if (argClass.isAssignableFrom(Number.class)) {
+                } else if (Number.class.isAssignableFrom(argClass)) {
                     Object number = PrimitiveUtils.primitiveNumberFrom((Number) arg, paramType);
                     
                     if (number != null) {
