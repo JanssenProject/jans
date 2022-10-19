@@ -35,6 +35,8 @@ import threading
 from prompt_toolkit.layout.containers import (
     AnyContainer,
 )
+from prompt_toolkit.widgets.base import RadioList
+from prompt_toolkit.layout.containers import FloatContainer
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.dimension import AnyDimension
 from typing import Optional, Sequence, Union
@@ -75,7 +77,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.create_window()
         self.sope_type = self.data.get('scopeType') or 'oauth'
 
-    def save(self):
+    def save(self) -> None:
         self.myparent.logger.debug('SAVE SCOPE')
 
         data = {}
@@ -100,10 +102,10 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
     
-    def cancel(self):
+    def cancel(self) -> None:
         self.future.set_result(DialogResult.CANCEL)
 
-    def create_window(self):
+    def create_window(self) -> None:
 
         scope_types = [('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('uma', 'UMA')]
         buttons = [(self.save, _("Save")), (self.cancel, _("Cancel"))]
@@ -141,16 +143,19 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
                    )
 
-    def scope_selection_changed(self, cb):
+    def scope_selection_changed(
+        self, 
+        cb: RadioList,
+        ) -> None:
         self.sope_type = cb.current_value
 
-    def set_scope_type(self, scope_type):
-        self.sope_type = scope_type
+    # def set_scope_type(self, scope_type) -> None:>>> UN USED
+    #     self.sope_type = scope_type
 
-    def nothing(self):
-        pass
-
-    def get_named_claims(self, claims_list):
+    def get_named_claims(
+        self, 
+        claims_list:list
+        ) -> list:
         # self.myparent.logger.debug('claims_list: ' + str(claims_list))
         try :
             responce = self.myparent.cli_object.process_command_by_id(
@@ -179,7 +184,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         return calims_names
 
-    def get_claims(self):
+    def get_claims(self) -> FloatContainer:
 
         data = self.get_named_claims(self.data.get('claims', []))
         if data :
@@ -200,7 +205,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         return self.claims_container
 
-    def delete_claim(self, selected, event):
+    def delete_claim(self, **args) -> None:
         """This method for the deletion of claim
 
         Args:
@@ -218,13 +223,13 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             except:
                 self.myparent.layout.focus(self.myparent.center_frame) ##
 
-            self.myparent.logger.debug('claims to delete: ' + str(selected))
+            self.myparent.logger.debug('claims to delete: ' + str(args['selected']))
 
             self.myparent.logger.debug('claims before delete: ' + str(self.data['claims']))
 
             if result.lower() == 'yes':
-                self.data['claims'].remove(selected[0])
-                self.claims_container.data.remove(selected)
+                self.data['claims'].remove(args['selected'][0])
+                self.claims_container.data.remove(args['selected'])
 
 
         ensure_future(coroutine())
