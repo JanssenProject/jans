@@ -133,10 +133,15 @@ public class IdTokenFactory {
                             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
                             ExecutionContext executionContext) throws Exception {
 
+        final Client client = authorizationGrant.getClient();
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
-        Audience.setAudience(jwr.getClaims(), authorizationGrant.getClient());
+        Audience.setAudience(jwr.getClaims(), client);
 
         int lifeTime = appConfiguration.getIdTokenLifetime();
+        if (client.getAttributes().getIdTokenLifetime() != null && client.getAttributes().getIdTokenLifetime() > 0) {
+            lifeTime = client.getAttributes().getIdTokenLifetime();
+            log.trace("Override id token lifetime with value from client: {}", client.getClientId());
+        }
         int lifetimeFromScript = externalUpdateTokenService.getIdTokenLifetimeInSeconds(ExternalUpdateTokenContext.of(executionContext));
         if (lifetimeFromScript > 0) {
             lifeTime = lifetimeFromScript;
@@ -191,7 +196,7 @@ public class IdTokenFactory {
 
         User user = authorizationGrant.getUser();
         List<Scope> dynamicScopes = new ArrayList<>();
-        if (executionContext.isIncludeIdTokenClaims() && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
+        if (executionContext.isIncludeIdTokenClaims() && client.isIncludeClaimsInIdToken()) {
             for (String scopeName : executionContext.getScopes()) {
                 Scope scope = scopeService.getScopeById(scopeName);
                 if (scope == null) {
