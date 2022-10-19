@@ -27,6 +27,7 @@ from prompt_toolkit.widgets import (
     Dialog
 )
 from static import DialogResult
+from prompt_toolkit.layout import ScrollablePane
 
 from cli import config_cli
 from utils import DialogUtils
@@ -109,6 +110,7 @@ class Plugin(DialogUtils):
             'clients': HSplit([],width=D()),
             'scopes': HSplit([],width=D()),
             'keys': HSplit([],width=D()),
+            'properties': HSplit([],width=D()),
             'logging': HSplit([],width=D()),
         }
 
@@ -149,6 +151,18 @@ class Plugin(DialogUtils):
                         ),
                         DynamicContainer(lambda: self.oauth_data_container['keys'])
                      ], style='class:outh_containers_clients')
+
+        self.oauth_containers['properties'] = HSplit([
+                    VSplit([
+                        self.app.getButton(text=_("Get properties"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_properties),
+                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
+                        ],
+                        padding=3,
+                        width=D(),
+                    ),
+                    DynamicContainer(lambda: self.oauth_data_container['properties'])
+                    ],style='class:outh_containers_scopes')
+
 
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
@@ -389,6 +403,109 @@ class Plugin(DialogUtils):
         t = threading.Thread(target=self.oauth_update_scopes, daemon=True)
         t.start()
 
+
+    def oauth_update_properties(
+        self, 
+        start_index: Optional[int]= 0,  
+        pattern: Optional[str]= '', 
+        ) -> None:
+        """update the current Scopes data to server
+
+        Args:
+            start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
+        """
+        try :
+            rsponse = self.app.cli_object.process_command_by_id(
+                operation_id='get-properties',
+                url_suffix='',
+                endpoint_args='',
+                data_fn=None,
+                data={}
+                        )
+
+        except Exception as e:
+            self.app.show_message(_("Error getting properties"), str(e))
+            return
+
+        if rsponse.status_code not in (200, 201):
+            self.app.show_message(_("Error getting properties"), str(rsponse.text))
+            return
+
+        try:
+            result = rsponse.json()
+        except Exception:
+            self.app.show_message(_("Error getting properties"), str(rsponse.text))
+            return
+        
+        properties =[]
+        
+        for d in result: 
+            try:
+                if type(result[d]) == str:# or type(result[d]) == int:
+                    prop = self.app.getTitledText(
+                        d, 
+                        name=d, 
+                        value=result[d], 
+                        style='class:outh-client-text'),
+                    properties.append(prop[0])
+
+                # elif type(result[d]) == list:
+                #     if d == 'responseTypesSupported':
+                #         dum_list=[]
+                #         for k in result[d]:
+                #             dum_list.append('\n'.join(k))
+
+                #         prop = self.app.getTitledText(
+                #             d, 
+                #             name=d, 
+                #             value='\n'.join(dum_list), 
+                #             height=3,
+                #             style='class:outh-client-text'),
+                #         properties.append(prop[0])
+
+                #     else:
+                #         prop = self.app.getTitledText(
+                #             d, 
+                #             name=d, 
+                #             value='\n'.join(result[d]), 
+                #             height=3,
+                #             style='class:outh-client-text'),
+                #         properties.append(prop[0])
+
+                # elif type(result[d]) == bool:
+                #     prop = self.app.getTitledCheckBox(
+                #         d, 
+                #         name=d, 
+                #         checked= not result[d], 
+                #         style='class:outh-client-checkbox'),
+
+                    # properties.append(prop[0])
+            except:
+                self.app.logger.debug('result[d] error: '+str(result[d]))
+                self.app.logger.debug('result[d] error: '+str(d))
+
+        if properties:
+
+            properties_wid = ScrollablePane(content=HSplit(children=properties,style='white')) 
+
+            self.oauth_data_container['properties'] = HSplit([
+                properties_wid,
+            ])
+
+            get_app().invalidate()
+            self.app.layout.focus(properties_wid)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+
+        else:
+            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['properties'])
+
+    def oauth_get_properties(self) -> None:
+        """Method to get the Scopes data from server
+        """
+        self.oauth_data_container['properties'] = HSplit([Label(_("Please wait while getting Scopes"),style='class:outh-waitscopedata.label')], width=D(),style='class:outh-waitclientdata')
+        t = threading.Thread(target=self.oauth_update_properties, daemon=True)
+        t.start()
+
+
     def oauth_update_keys(self) -> None:
 
         """update the current Keys fromserver
@@ -561,7 +678,7 @@ class Plugin(DialogUtils):
             str: The server response
         """
 
-        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete client inum:")+"\n {} ?".format(selected[0]))
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete client inum:")+"\n {} ?".format(kwargs ['selected'][0]))
 
         async def coroutine():
             focused_before = self.app.layout.current_window
@@ -596,7 +713,7 @@ class Plugin(DialogUtils):
             str: The server response
         """
 
-        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete scope inum:")+"\n {} ?".format(selected[3]))
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete scope inum:")+"\n {} ?".format(kwargs ['selected'][3]))
         async def coroutine():
             focused_before = self.app.layout.current_window
             result = await self.app.show_dialog_as_float(dialog)
@@ -619,7 +736,7 @@ class Plugin(DialogUtils):
         ensure_future(coroutine())
 
     def delete_UMAresource(self, **kwargs: Any):
-        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(selected[0]))
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(kwargs ['selected'][0]))
         async def coroutine():
             focused_before = self.app.layout.current_window
             result = await self.app.show_dialog_as_float(dialog)
