@@ -1,0 +1,7 @@
+Flow org.gluu.flow3 
+    Basepath "me"
+    
+obj = Trigger org.gluu.flow1
+    Override templates "f1/index.ftl" "myindex.ftlh"
+
+Finish obj
