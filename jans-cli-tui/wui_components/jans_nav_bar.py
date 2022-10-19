@@ -1,11 +1,14 @@
 import re
 import os 
 
-from typing import TypeVar, Callable
-from typing import Optional, Sequence, Union
+from typing import TypeVar, Callable, Optional, Sequence, Union
+
 from prompt_toolkit.key_binding.key_processor import KeyPressEvent
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
+from prompt_toolkit.layout.containers import Window
+from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 
 
 import cli_style
@@ -81,7 +84,7 @@ class JansNavBar():
 
     def _go_tab(self, ev)-> None:
 
-        if get_app().layout.container.floats:
+        if self.myparent.layout.container.floats:
             return
         # first set main navbar tab
         if not self._set_tab_for_view(self.myparent.nav_bar, ev):
