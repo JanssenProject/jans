@@ -238,4 +238,19 @@ Used to modify claims in a Refresh Token
 1. Use this: [Reference for testing](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java)
 2. Inspect the tokens. Use [jwt.io](https://jwt.io) to inspect the contents of a JWT. 
 
+## FAQ
+
+1. How can I add a `dict` type object as a claim value?
+```
+from io.jans.as.model.uti import JwtUtil
+from org.json import JSONObject;
+
+    def modifyIdToken(self, jsonWebResponse, context):
+        datas =  {'country': 'ID', 'sponsor': '7022952467', 'role': 'BusinessOwner', 'salesplanaff': '220', 'acctsubtype': 'BusinessOwner', 'accttype': 'AmBCBusiness', 'abo': '7022953754', 'aboname': 'NEW', 'lclpartyid': '119700175', 'email': None, 'status': 'Active'}
+        string_rep = json.dumps(datas)
+        jsonObject = JwtUtil.fromJson(string_rep)
+        jsonWebResponse.getClaims().setClaim("test", jsonObject)
+        print "Update token script. Modify idToken: %s" % jsonWebResponse
+        return True
+```
 
