@@ -27,14 +27,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 import io.swagger.v3.oas.models.examples.Example;
-//import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.v3.jaxrs2.Reader;
 import io.swagger.v3.jaxrs2.ReaderListener;
-
 import io.swagger.v3.oas.integration.api.OpenApiReader;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.annotations.servers.Server;
+
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -97,6 +98,10 @@ public class ConfigReaderListener implements ReaderListener {
         log.error("ConfigReaderListener::afterScan() - openAPI.getComponents():{} ", openAPI.getComponents());
         log.error("ConfigReaderListener::afterScan() - openAPI.getPaths():{} ", openAPI.getPaths());
         
+        List<Server> servers = new ArrayList<>();
+        
+        openAPI.addExtension("name", "krishna");
+        
         if(openAPI.getPaths()!=null && openAPI.getPaths().size()>0) {
             
           Map<String,PathItem> map = openAPI.getPaths().entrySet().stream()
@@ -109,13 +114,13 @@ public class ConfigReaderListener implements ReaderListener {
             
         }
     }
-/
+/*
     Map<String, Example> generateExamples() throws Exception {
         final Map<String, Example> examples = new LinkedHashMap<>();
         /getFolderData(examples, "PLACE YOUR URL HERE");
         //getExamples(examples);
         return examples;
-    }
+    }*/
 
     //If user has provided the folder then recursively loop over it to get the files and their contents
  /*   private void getFolderData(final Map<String, Example> examples, final String inputURL) throws IOException {
