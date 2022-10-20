@@ -3,7 +3,7 @@ entries:
   janssen:
   - annotations:
       artifacthub.io/changes: |
-        - Releasing new charts
+        - Releasing updated dev chart
       artifacthub.io/containsSecurityUpdates: "true"
       artifacthub.io/images: |
         - name: auth-server
@@ -22,15 +22,13 @@ entries:
           image: janssenproject/persistence-loader:1.0.3_dev
         - name: scim
           image: janssenproject/scim:1.0.3_dev
-        - name: monolith
-          image: janssenproject/monolith:1.0.3_dev
       artifacthub.io/license: Apache-2.0
       artifacthub.io/prerelease: "true"
       catalog.cattle.io/certified: partner
       catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
-    created: "2022-09-14T08:19:24.3528186Z"
+    created: "2022-10-20T09:05:21.377725345Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -688,4 +686,4 @@ entries:
     urls:
     - https://github.com/JanssenProject/jans/releases/download/janssen-1.0.0-beta.14/janssen-1.0.0-beta.14.tgz
     version: 1.0.0-beta.14
-generated: "2022-09-14T08:19:24.3396721Z"
+generated: "2022-10-20T09:05:21.377725345Z"
