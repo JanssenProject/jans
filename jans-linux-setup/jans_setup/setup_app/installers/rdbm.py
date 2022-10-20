@@ -28,8 +28,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.register_progess()
         self.output_dir = os.path.join(Config.output_dir, Config.rdbm_type)
 
+    @property
+    def qchar(self):
+        return '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
+
     def install(self):
-        self.qchar = '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
         self.local_install()
         if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
             self.reset_rdbm_db()
