@@ -49,7 +49,7 @@
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.5</jacoco.version>
-		<swagger.version>2.2.2</swagger.version>
+		<swagger.version>2.2.4</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -235,12 +235,12 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
