@@ -694,21 +694,21 @@
 			<dependency>
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>6.0.0</version>
+				<version>6.0.6</version>
 			</dependency>
 
 			<!-- Couchbase -->
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>3.3.2</version>
+				<version>3.3.4</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-pool2</artifactId>
-				<version>2.10.0</version>
+				<version>2.11.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -718,12 +718,12 @@
 			<dependency>
 			    <groupId>mysql</groupId>
 			    <artifactId>mysql-connector-java</artifactId>
-			    <version>8.0.28</version>
+			    <version>8.0.31</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.4.1</version>
+			    <version>42.5.0</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -735,28 +735,14 @@
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
 				<artifactId>jsqlparser</artifactId>
-				<version>4.3</version>
+				<version>4.5</version>
 			</dependency>
 
 			<!-- Cloud Spanner -->
 			<dependency>
 			    <groupId>com.google.cloud</groupId>
 			    <artifactId>google-cloud-spanner</artifactId>
-			    <version>6.17.4</version>
-			</dependency>
-			<!-- Force to use latest grpc libs. We need to remove this once google-cloud-spanner will depend on grpc >= 1.43.0  -->
-			<dependency>
-			    <groupId>io.grpc</groupId>
-			    <artifactId>grpc-bom</artifactId>
-			    <version>1.43.0</version>
-			    <scope>import</scope>
-			    <type>pom</type>
-			</dependency>
-			<!-- Force to use this version because MySQL connector depends on older version -->
-			<dependency>
-			    <groupId>com.google.protobuf</groupId>
-			    <artifactId>protobuf-java</artifactId>
-			    <version>3.19.6</version>
+			    <version>6.31.2</version>
 			</dependency>
 
 			<!-- Metrics -->
