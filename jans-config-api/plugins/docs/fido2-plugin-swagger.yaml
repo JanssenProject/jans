@@ -15,9 +15,6 @@ servers:
   variables: {}
 tags:
 - name: Fido2 - Configuration
-- name: Admin UI - Permission
-- name: Admin UI - Role-Permissions Mapping
-- name: Admin UI - License
 paths:
   /fido2/config:
     get:
