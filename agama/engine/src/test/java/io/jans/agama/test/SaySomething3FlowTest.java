@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-@org.testng.annotations.Ignore
 public class SaySomething3FlowTest extends BaseTest {
 
     private static final String QNAME = "org.gluu.flow3";
@@ -28,7 +27,7 @@ public class SaySomething3FlowTest extends BaseTest {
         page = doClick(button);
         
         assertOK(page);
-        assertTrue(page.getVisibleText().contains("Agama")); //see me/myindex.ftl and f1/index2.ftl
+        assertTextContained(page.getVisibleText(), "Agama"); //see me/myindex.ftl and f1/index2.ftl
         
         button = page.getForms().get(0).getInputByValue("Continue");
         page = doClick(button);

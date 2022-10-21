@@ -15,6 +15,7 @@ import io.jans.inbound.oauth2.OAuthParams;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -49,7 +50,10 @@ public class BaseTest {
         WebClientOptions options = client.getOptions();
 
         options.setThrowExceptionOnFailingStatusCode(false);
-        //prevents the finish page to autosubmit the POST to AS's postlogin endpoint
+        //skip downloading of external resources to avoid time waste
+        options.setCssEnabled(false);
+        options.setDownloadImages(false); 
+        //prevent the finish page to autosubmit the POST to AS's postlogin endpoint
         options.setJavaScriptEnabled(false);
 
     }
@@ -130,7 +134,7 @@ public class BaseTest {
         String title = page.getTitleText().toLowerCase();
         
         if (success) {
-            assertTrue(title.contains("redirect"), "'redirect' word not found in page title");
+            assertTextContained(title, true, "redirect");
             
             List<HtmlForm> forms = page.getForms();
             assertEquals(forms.size(), 1, "Page should have one and only one form");
@@ -140,12 +144,8 @@ public class BaseTest {
             assertEquals(form.getMethodAttribute().toLowerCase(), "post", "Form does not use POST");
 
         } else {
-            
-            assertTrue(title.contains("error"), "'error' word not found in page title");
-            
-            String text = page.getVisibleText().toLowerCase();
-            assertTrue(text.contains("authentication"), "'authentication' word not found in page text");
-            assertTrue(text.contains("failed"), "'failed' word not found in page text");
+            assertTextContained(title, true, "error");
+            assertTextContained(page.getVisibleText().toLowerCase(), true, "authentication", "failed");
         }
         
     }
@@ -156,6 +156,21 @@ public class BaseTest {
     
     void assertServerError(Page page) {
         assertEquals(page.getWebResponse().getStatusCode(), WebResponse.INTERNAL_SERVER_ERROR);
+    }
+    
+    void assertTextContained(String text, String ...words) {
+        assertTextContained(text, false, words);
+    }
+    
+    void assertTextContained(String text, boolean includeMessageInAssert, String ...words) {
+        
+        List<String> list = Arrays.asList(words);
+        if (includeMessageInAssert) {
+            list.forEach(w -> assertTrue(text.contains(w), String.format("'%s' word not found in page text", w)));
+        } else {
+            list.forEach(w -> assertTrue(text.contains(w)));
+        }
+        
     }
     
     <P extends Page> P doClick(DomElement el) {
