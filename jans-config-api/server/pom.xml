@@ -325,6 +325,7 @@
 							<resourcePackages>
 								<package>io.jans.configapi.rest</package>			
 							</resourcePackages>
+							<filterClass></filterClass>
 						</configuration>
 					</execution>
 				</executions>

@@ -577,8 +577,7 @@
 								<outputFormat>YAML</outputFormat>
 								<outputPath>${project.parent.basedir}/docs</outputPath>
 								<prettyPrint>true</prettyPrint>
-								<readerClass>io.jans.configapi.filters.ConfigReaderListener</readerClass>
-							
+								<filterClass>io.jans.configapi.filters.SpecFilter</filterClass>
 							</configuration>
 							<phase>compile</phase>
 							<goals>

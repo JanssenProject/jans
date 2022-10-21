@@ -78,7 +78,7 @@ public class ConfigReaderListener implements ReaderListener {
         log.error("ConfigReaderListener::beforeScan() - openApiReader:{}, openAPI:{} ", openApiReader, openAPI);
         log.error("ConfigReaderListener::beforeScan() - openAPI.getComponents():{} ", openAPI.getComponents());
         log.error("ConfigReaderListener::beforeScan() - openAPI.getPaths():{} ", openAPI.getPaths());
-        
+        System.out.println("\n\n\n *********** ConfigReaderListener::beforeScan() *********** \n\n\n");
         if(openAPI.getPaths()!=null && openAPI.getPaths().size()>0) {
             
           Map<String,PathItem> map = openAPI.getPaths().entrySet().stream()
@@ -97,7 +97,7 @@ public class ConfigReaderListener implements ReaderListener {
         log.error("ConfigReaderListener::afterScan() - openApiReader:{}, openAPI:{} ", openApiReader, openAPI);
         log.error("ConfigReaderListener::afterScan() - openAPI.getComponents():{} ", openAPI.getComponents());
         log.error("ConfigReaderListener::afterScan() - openAPI.getPaths():{} ", openAPI.getPaths());
-        
+        System.out.println("\n\n\n *********** ConfigReaderListener::afterScan() *********** \n\n\n");
         List<Server> servers = new ArrayList<>();
         
         openAPI.addExtension("name", "krishna");
