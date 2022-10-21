@@ -58,7 +58,7 @@ class ScimInstaller(JettyInstaller):
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
 
-        scope['inum'] = [inum_base + '.' + os.urandom(3).hex().upper()]
+        scope['inum'] = [inum_base + '.{}-{}'.format(os.urandom(3).hex().upper(), os.urandom(3).hex().upper())]
         ldif_scope_fn = os.path.join(self.output_folder, '{}.ldif'.format(scope['inum'][0]))
         scope_ldif_fd = open(ldif_scope_fn, 'wb')
         scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'][0])
