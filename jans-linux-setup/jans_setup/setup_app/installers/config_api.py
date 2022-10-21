@@ -45,6 +45,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.load_ldif_files = [self.config_ldif_fn, self.scope_ldif_fn]
         self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
         self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
+        self.config_api_swagger_yaml_fn = os.path.join(Config.data_dir, 'jans-config-api-swagger-auto.yaml')
 
         if not base.argsp.shell:
             self.extract_files()
@@ -76,7 +77,7 @@ class ConfigApiInstaller(JettyInstaller):
 
     def extract_files(self):
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
-        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', Config.data_dir)
+        base.extract_file(base.current_app.jans_zip, os.path.join('jans-config-api/docs', os.path.basename(self.config_api_swagger_yaml_fn)), Config.data_dir)
 
 
     def create_folders(self):
@@ -88,8 +89,7 @@ class ConfigApiInstaller(JettyInstaller):
 
 
     def read_config_api_swagger(self):
-        config_api_swagger_yaml_fn = os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml')
-        yml_str = self.readFile(config_api_swagger_yaml_fn)
+        yml_str = self.readFile(self.config_api_swagger_yaml_fn)
         yml_str = yml_str.replace('\t', ' ')
         cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
         return cfg_yml
