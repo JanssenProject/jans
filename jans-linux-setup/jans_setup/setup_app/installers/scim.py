@@ -106,7 +106,7 @@ class ScimInstaller(JettyInstaller):
         for scope in config_scopes:
             if scope in ('https://jans.io/scim/users.read', 'https://jans.io/scim/users.write'):
                 continue
-            inum = '1200.' + os.urandom(3).hex().upper()
+            inum = '1200.{}-{}'.format(os.urandom(3).hex().upper(), os.urandom(3).hex().upper())
             scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
             scopes_dn.append(scope_dn)
             display_name = 'Scim {}'.format(os.path.basename(scope))
