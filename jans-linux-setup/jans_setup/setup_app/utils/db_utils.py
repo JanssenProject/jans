@@ -869,7 +869,6 @@ class DBUtils:
                             if isinstance(sqlalchObj.__table__.columns[attribute].type, self.json_dialects_instance):
                                 cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
                                 for val_ in new_val:
-                                    cur_val['v'].append(val_)
                                     if Config.rdbm_type == 'mysql':
                                         cur_val['v'].append(val_)
                                     else:
