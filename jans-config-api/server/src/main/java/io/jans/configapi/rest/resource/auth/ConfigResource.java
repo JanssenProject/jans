@@ -51,7 +51,7 @@ public class ConfigResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets all Jans authorization server configuration properties.", description = "Gets all Jans authorization server configuration properties.", operationId = "get-properties", tags = {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly" }))
+                    ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -66,7 +66,7 @@ public class ConfigResource extends ConfigBaseResource {
 
     @Operation(summary = "Partially modifies Jans authorization server Application configuration properties.", description = "Partially modifies Jans authorization server AppConfiguration properties.", operationId = "patch-properties", tags = {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/config/properties.write" }))
+                    ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS}))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
@@ -98,7 +98,7 @@ public class ConfigResource extends ConfigBaseResource {
 
     @Operation(summary = "Returns persistence type configured for Jans authorization server.", description = "Returns persistence type configured for Jans authorization server.", operationId = "get-properties-persistence", tags = {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly" }))
+                    ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Jans Authorization Server persistence type", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersistenceConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
