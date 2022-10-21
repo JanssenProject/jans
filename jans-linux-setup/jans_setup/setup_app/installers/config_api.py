@@ -127,7 +127,7 @@ class ConfigApiInstaller(JettyInstaller):
                 continue
 
             if not scope in scopes:
-                inum = '1800.' + os.urandom(3).hex().upper()
+                inum = '1800.{}-{}'.format(os.urandom(3).hex().upper(), os.urandom(3).hex().upper())
                 scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
                 scopes[scope] = {'dn': scope_dn}
                 display_name = 'Config API scope {}'.format(scope)
