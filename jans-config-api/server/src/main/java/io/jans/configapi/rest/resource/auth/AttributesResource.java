@@ -61,7 +61,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets a list of Gluu attributes.", description = "Gets a list of Gluu attributes.", operationId = "get-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            "https://jans.io/oauth/config/attributes.readonly" }))
+                    ApiAccessConstants.ATTRIBUTES_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -91,7 +91,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets an attribute based on inum", description = "Gets an attribute based on inum", operationId = "get-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.readonly" }))
+                    ApiAccessConstants.ATTRIBUTES_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -107,7 +107,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Adds a new attribute", description = "Adds a new attribute", operationId = "post-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.write" }))
+                    ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
@@ -130,7 +130,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates an existing attribute", description = "Updates an existing attribute", operationId = "put-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.write" }))
+                    ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
@@ -156,7 +156,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Partially modify a GluuAttribute", description = "Partially modify a GluuAttribute", operationId = "patch-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.write" }))
+                    ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = PatchRequest.class))))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
@@ -180,7 +180,7 @@ public class AttributesResource extends ConfigBaseResource {
 
     @Operation(summary = "Deletes an attribute based on inum", description = "Deletes an attribute based on inum", operationId = "delete-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/attributes.delete" }))
+                    ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

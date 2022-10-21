@@ -16,18 +16,17 @@ servers:
 tags:
 - name: Attribute
 - name: Default Authentication Method
+- name: Cache Configuration
 - name: Cache Configuration – Memcached
 - name: Cache Configuration – Redis
 - name: Cache Configuration – in-Memory
 - name: Cache Configuration – Native-Persistence
 - name: Configuration – Properties
-- name: Fido2 - Configuration
 - name: Configuration – SMTP
 - name: Configuration – Logging
 - name: Configuration – JWK - JSON Web Key (JWK)
 - name: Custom Scripts
 - name: Database - LDAP configuration
-- name: Database - Couchbase configuration
 - name: OAuth - OpenID Connect - Clients
 - name: OAuth - UMA Resources
 - name: OAuth - Scopes
@@ -2946,19 +2945,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -3285,8 +3284,6 @@ components:
           format: int32
         displayName:
           type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3298,6 +3295,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
         baseDn:
           type: string
         inum:
@@ -3376,6 +3375,9 @@ components:
             type: string
         jansDefaultPromptLogin:
           type: boolean
+        idTokenLifetime:
+          type: integer
+          format: int32
     CustomObjectAttribute:
       type: object
       properties:
@@ -3387,10 +3389,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -3398,13 +3400,13 @@ components:
           type: object
           additionalProperties:
             type: string
-        value:
-          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
+        value:
+          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4093,15 +4095,6 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         fapi:
           type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4129,6 +4122,15 @@ components:
             - STAT
             - PAR
             - SSA
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -4919,12 +4921,6 @@ components:
               related information
             https://jans.io/oauth/config/database/ldap.delete: Delete LDAP database
               related information
-            https://jans.io/oauth/config/database/couchbase.readonly: View Couchbase
-              database information
-            https://jans.io/oauth/config/database/couchbase.write: Manage Couchbase
-              database related information
-            https://jans.io/oauth/config/database/couchbase.delete: Delete Couchbase
-              database related information
             https://jans.io/oauth/config/scripts.readonly: View cache scripts information
             https://jans.io/oauth/config/scripts.write: Manage scripts related information
             https://jans.io/oauth/config/scripts.delete: Delete scripts related information
@@ -4937,6 +4933,7 @@ components:
             https://jans.io/oauth/config/logging.write: Manage logging related information
             https://jans.io/oauth/config/jwks.readonly: View JWKS related information
             https://jans.io/oauth/config/jwks.write: Manage JWKS related information
+            https://jans.io/oauth/config/jwks.delete: Delete JWKS related information
             https://jans.io/oauth/config/openid/clients.readonly: View clients related
               information
             https://jans.io/oauth/config/openid/clients.write: Manage clients related
@@ -4952,20 +4949,11 @@ components:
               related information
             https://jans.io/oauth/config/uma/resources.delete: Delete UMA Resource
               related information
-            https://jans.io/oauth/config/database/sql.readonly: View SQL database
-              related information
-            https://jans.io/oauth/config/database/sql.write: Manage SQL database related
-              information
-            https://jans.io/oauth/config/database/sql.delete: Delete SQL database
-              related information
             https://jans.io/oauth/config/stats.readonly: View server with basic statistic
             https://jans.io/oauth/config/organization.readonly: View organization
               configuration information
             https://jans.io/oauth/config/organization.write: Manage organization configuration
               information
-            https://jans.io/oauth/config/user.readonly: View user related information
-            https://jans.io/oauth/config/user.write: Manage user related information
-            https://jans.io/oauth/config/user.delete: Delete user related information
             https://jans.io/oauth/config/agama.readonly: View Agama Flow related information
             https://jans.io/oauth/config/agama.write: Manage Agama Flow related information
             https://jans.io/oauth/config/agama.delete: Delete Agama Flow related information
