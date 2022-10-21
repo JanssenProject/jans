@@ -2964,7 +2964,7 @@ paths:
         '500':
           description: Internal Server Error
 
-  /jans-config-api/admin-ui/user/roles:
+  /jans-config-api/admin-ui/adminUIRoles:
     get:
       tags:
         - Admin UI - Role
@@ -3086,7 +3086,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/admin-ui/user/permissions:
+  /jans-config-api/admin-ui/adminUIPermissions:
     get:
       tags:
         - Admin UI - Permission
@@ -3208,7 +3208,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/admin-ui/user/rolePermissionsMapping:
+  /jans-config-api/admin-ui/adminUIRolePermissionsMapping:
     get:
       tags:
         - Admin UI - Role-Permissions Mapping
