@@ -9,14 +9,14 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-@org.testng.annotations.Ignore
 public class CustomConfigsFlowTest extends BaseTest {
 
     private static final String QNAME = "io.jans.agama.test.showConfig";
-    
+
     @Test
     public void withTimeout() {
         
+        //Waiting 10 seconds is enough due to time skew (see FlowService#ensureTimeNotExceeded)
         HtmlPage page = launchAndWait(10);
         //Flow should have timed out now - see flow impl
         //The page currently shown may correspond to the Agama timeout template or to
@@ -27,13 +27,10 @@ public class CustomConfigsFlowTest extends BaseTest {
 
         if (status == WebResponse.OK) {
             //See timeout.ftlh
-            assertTrue(text.contains("took"));
-            assertTrue(text.contains("more"));
-            assertTrue(text.contains("expected"));
+            assertTextContained(text, "took", "more", "expected");
         } else if (status == WebResponse.NOT_FOUND) {
             //See mismatch.ftlh
-            assertTrue(text.contains("not"));
-            assertTrue(text.contains("found"));
+            assertTextContained(text, "not", "found");
         } else {
             fail("Unexpected status code " + status);
         }

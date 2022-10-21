@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-@org.testng.annotations.Ignore
 public class SaySomethingFlowTest extends BaseTest {
 
     private static final String QNAME = "org.gluu.flow2";
@@ -42,7 +41,7 @@ public class SaySomethingFlowTest extends BaseTest {
         boolean nameEmpty = name == null;
         HtmlPage page = launch(QNAME, nameEmpty ? null : Collections.singletonMap("val", name));
         
-        if (!nameEmpty) assertTrue(page.getVisibleText().contains(name));
+        if (!nameEmpty) assertTextContained(page.getVisibleText(), name);
 
         HtmlForm form = page.getForms().get(0);
         

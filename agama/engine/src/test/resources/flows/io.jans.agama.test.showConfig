@@ -1,8 +1,8 @@
 Flow io.jans.agama.test.showConfig
     Basepath ""
-    Timeout 10 seconds
+    Timeout 15 seconds
     Configs conf
     
-RRF "printConfigs.ftlh" conf
+RRF "custom/printConfigs.ftlh" conf
 
 Finish false
