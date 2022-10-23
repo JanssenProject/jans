@@ -7,6 +7,7 @@ from asyncio import Future, ensure_future
 from functools import partial
 from typing import Any, Optional
 
+
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
@@ -25,10 +26,15 @@ from prompt_toolkit.widgets import (
     Label,
     Frame,
     Dialog,
-    CheckboxList
+    CheckboxList,
+    TextArea
 )
+from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
+
+import json
 from static import DialogResult
 from prompt_toolkit.layout import ScrollablePane
+from asyncio import Future
 
 from cli import config_cli
 from utils import DialogUtils
@@ -41,6 +47,7 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 from wui_components.jans_cli_dialog import JansGDialog
 
+from view_Property import ViewProperty
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 from prompt_toolkit.buffer import Buffer
@@ -64,6 +71,7 @@ class Plugin(DialogUtils):
         self.app = app
         self.pid = 'oxauth'
         self.name = '[A]uth Server'
+        self.search_text= None
 
         self.oauth_containers = {}
         self.oauth_prepare_navbar()
@@ -162,11 +170,10 @@ class Plugin(DialogUtils):
                         self.app.getButton(text=_("Get properties"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_properties),
                         self.app.getTitledText(
                             _("Search: "), 
-                            name='oauth:scopes:search', 
+                            name='oauth:properties:search', 
                             jans_help=_("Press enter to perform search"), 
-                            accept_handler=self.search_claims,
-                            style='class:outh_containers_scopes.text'),
-                        ],
+                            accept_handler=self.search_properties,
+                            style='class:outh_containers_scopes.text')                        ],
                         padding=3,
                         width=D(),
                     ),
@@ -417,22 +424,33 @@ class Plugin(DialogUtils):
     # ---------------------------------------------------------------------- #
     # ---------------------------------------------------------------------- #
     def oauth_update_properties(
-        self, 
-        start_index: Optional[int]= 0,  
-        pattern: Optional[str]= '', 
+        self,
+        start_index: Optional[int]= 0, 
+        pattern: Optional[str]= '',
         ) -> None:
-        """update the current Scopes data to server
+        """update the current clients data to server
 
         Args:
-            start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
+            pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
+        def get_next(
+            start_index: int,  
+            pattern: Optional[str]= '', 
+            ) -> None:
+            self.app.logger.debug("start_index="+str(start_index))
+            self.oauth_update_properties(start_index, pattern=pattern)
+
+        # ------------------------------------------------------------------------------- #
+        # ------------------------------------------------------------------------------- #
+        # ------------------------------------------------------------------------------- #
+
         try :
             rsponse = self.app.cli_object.process_command_by_id(
-                operation_id='get-properties',
-                url_suffix='',
-                endpoint_args='',
-                data_fn=None,
-                data={}
+                        operation_id='get-properties',
+                        url_suffix='',
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
                         )
 
         except Exception as e:
@@ -448,114 +466,128 @@ class Plugin(DialogUtils):
         except Exception:
             self.app.show_message(_("Error getting properties"), str(rsponse.text))
             return
-        
-        properties =[]
-        
-        for d in result: 
-            try:
-                if type(result[d]) == str:# or type(result[d]) == int:
-                    prop = self.app.getTitledText(
-                        d, 
-                        name=d, 
-                        value=result[d], 
-                        style='class:outh-client-text'),
-                    properties.append(prop[0])
 
-                # elif type(result[d]) == list:
-                #     if d == 'responseTypesSupported':
-                #         dum_list=[]
-                #         for k in result[d]:
-                #             dum_list.append('\n'.join(k))
+        # ------------------------------------------------------------------------------- #
+        # ----------------------------------- Search ------------------------------------ #
+        # ------------------------------------------------------------------------------- #
 
-                #         prop = self.app.getTitledText(
-                #             d, 
-                #             name=d, 
-                #             value='\n'.join(dum_list), 
-                #             height=3,
-                #             style='class:outh-client-text'),
-                #         properties.append(prop[0])
-
-                #     else:
-                #         prop = self.app.getTitledText(
-                #             d, 
-                #             name=d, 
-                #             value='\n'.join(result[d]), 
-                #             height=3,
-                #             style='class:outh-client-text'),
-                #         properties.append(prop[0])
-
-                # elif type(result[d]) == bool:
-                #     prop = self.app.getTitledCheckBox(
-                #         d, 
-                #         name=d, 
-                #         checked= not result[d], 
-                #         style='class:outh-client-checkbox'),
-
-                    # properties.append(prop[0])
-            except:
-                self.app.logger.debug('result[d] error: '+str(result[d]))
-                self.app.logger.debug('result[d] error: '+str(d))
-
-        if properties:
-
-            properties_wid = ScrollablePane(content=HSplit(children=properties,style='white')) 
-
-            self.oauth_data_container['properties'] = HSplit([
-                properties_wid,
-            ])
-
-            get_app().invalidate()
-            self.app.layout.focus(properties_wid)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
-
+        data =[]
+        if pattern:
+            for k in result:
+                if pattern.lower() in k.lower():
+                    data.append(
+                        [
+                        k,
+                        result[k],
+                        ]
+                    )
         else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['properties'])
+            for d in result:
+                data.append(
+                    [
+                    d,
+                    result[d],
+                    ]
+                )
+
+        # ------------------------------------------------------------------------------- #
+        # --------------------------------- View Data ----------------------------------- #
+        # ------------------------------------------------------------------------------- #               
+
+        if data:
+            buttons = []
+            if int(len(data)/ 20) >=1  :
+
+                if start_index< int(len(data)/ 20) :
+                    handler_partial = partial(get_next, start_index+1, pattern)
+                    next_button = Button(_("Next"), handler=handler_partial)
+                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                    buttons.append(next_button)
+
+                if start_index!=0:
+                    handler_partial = partial(get_next, start_index-1, pattern)
+                    prev_button = Button(_("Prev"), handler=handler_partial)
+                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                    buttons.append(prev_button)
+
+
+            data_now = data[start_index*20:start_index*20+20]
+
+            clients = JansVerticalNav(
+                myparent=self.app,
+                headers=['Property Name', 'Property Value'],
+                preferred_size= [0,0],
+                data=data_now,
+                on_enter=self.view_property,
+                on_display=self.properties_display_dialog,
+                # on_delete=self.delete_client,
+                # selection_changed=self.data_selection_changed,
+                selectes=0,      
+                headerColor='class:outh-verticalnav-headcolor',
+                entriesColor='class:outh-verticalnav-entriescolor',
+                all_data=list(result.values())
+            )
+            self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
+            self.oauth_data_container['properties'] = HSplit([
+                clients,
+                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
+            ])
+            get_app().invalidate()
+            self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+        else:
+            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
+
+    def properties_display_dialog(self, **params: Any) -> None:
+        data_property, data_value = params['selected'][0], params['selected'][1]
+        body = HSplit([
+                TextArea(
+                    lexer=DynamicLexer(lambda: PygmentsLexer.from_filename('.json', sync_from_start=True)),
+                    scrollbar=True,
+                    line_numbers=True,
+                    multiline=True,
+                    read_only=True,
+                    text=str(json.dumps(data_value, indent=2)),
+                    style='class:jans-main-datadisplay.text'
+                )
+            ],style='class:jans-main-datadisplay')
+
+        dialog = JansGDialog(self.app, title=data_property, body=body)
+
+        self.app.show_jans_dialog(dialog)
+
+
 
     def oauth_get_properties(self) -> None:
-        """Method to get the Scopes data from server
-        """
-        self.oauth_data_container['properties'] = HSplit([Label(_("Please wait while getting Scopes"),style='class:outh-waitscopedata.label')], width=D(),style='class:outh-waitclientdata')
+        """Method to get the clients data from server
+        """ 
+        self.oauth_data_container['properties'] = HSplit([Label(_("Please wait while getting properties"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_properties, daemon=True)
         t.start()
 
-    def search_claims(
-        self, 
-        textbuffer: Buffer,
-        ) -> None:   ## TODO >> NOT FINSIHED >> JUST A SKELTON
 
-        try :
-            responce = self.app.cli_object.process_command_by_id(
-                        operation_id='get-properties',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-        except Exception as e:
-                    self.app.show_message(_("Error searching properties"), str(e))
-                    return
-
-        result = responce.json()
+    def view_property(self, **params: Any) -> None:
+        #property, value =params['passed']
 
 
-        # def add_selected_claims(dialog):
-        #     if 'claims' not in self.data:
-        #         self.data['claims'] = []
+        selected_line_data = params['passed']    ##self.uma_result 
+        
+        title = _("Edit property")
 
-        #     for item in dialog.body.current_values:
-        #         self.claims_container.add_item(item)
-        #         self.data['claims'].append(item[0])
-
-        values_uniqe = []
-
-        for k in result:
-                values_uniqe.append((k,k))
-
-        check_box_list = CheckboxList(
-            values=values_uniqe,
-            )
-        buttons = [Button(_("Cancel")), Button(_("OK"),)]# handler=add_selected_claims)]
-        dialog = JansGDialog(self.app, title=_("Select properties to Edit"), body=check_box_list, buttons=buttons)
+        dialog = ViewProperty(self.app, title=title, data=selected_line_data, get_properties= self.oauth_get_properties, search_properties=self.search_properties, search_text=self.search_text)
+        
         self.app.show_jans_dialog(dialog)
+ 
+    def search_properties(self, tbuffer:Buffer,) -> None:
+        self.app.logger.debug("tbuffer="+str(tbuffer))
+        self.app.logger.debug("type tbuffer="+str(type(tbuffer)))
+        self.search_text=tbuffer.text
+
+        if not len(tbuffer.text) > 2:
+            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['properties'])
+            return
+        t = threading.Thread(target=self.oauth_update_properties, args=(0,tbuffer.text), daemon=True)
+        t.start()
+
     # ---------------------------------------------------------------------- #
     # ---------------------------------------------------------------------- #
     # ---------------------------------------------------------------------- #
