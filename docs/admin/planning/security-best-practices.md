@@ -30,32 +30,12 @@ undermine the integrity of authentications, a multi-layer security approach
 is warranted. There is no use case for an Internet facing Config API--you should
 tightly control access to this service.
 
-## Other administrative services
-
 Make sure no services are listening on external interfaces except for those that
 are absolutely required--`tcp/443` for the OpenID and FIDO endpoints.
 
 On Linux servers, a list of current listeners can be obtained with `netstat -nlpt`
 (for TCP) and `netstat -nlpu` (for UDP). In particular, make sure the internal
 databases used by Gluu to store all its configuration are not Internet facing.
-
-## OAuth Client Security
-
-Consider whether support of OpenID Connect Dynamic Client Registration extension
-is required. If not, disable it by setting `dynamicRegistrationEnabled` to
-`False`. If Dynamic Client Registration is enabled, consider using
-[software statements](https://www.rfc-editor.org/rfc/rfc7591.html#section-3.1),
-and writing a Client Registration interception script to implement extra rules
-for software statement validation.
-
-Check the list of scopes to quickly assess which scopes the clients can
-potentially add to their registration entry without consent of OP's administrator.
-Make sure sensitive scopes are `dynamicRegistrationScopesParamEnabled` set to
-False.
-
-The Auth Server property `dynamicRegistrationScopesParamEnabled` controls
-whether default scopes are globally enabled; scopes defined as default
-will be automatically added to any dynamically registered client entry.
 
 ## OpenID
 
@@ -72,9 +52,40 @@ flow, Review the CORS filter configuration for Jans Auth Server. CORS restricts
 access to trusted domains to execute browser application requests to Auth Server
 endpoints. By default, the filter allows any RP to call OpenID endpoints.
 
-Review values chosen for `sessionIdUnusedLifetime` and `sessionIdLifetime`.
-Long sessions present higher risks of session hijacking and unauthorized access
-from shared devices.
+Review Auth Server propoerties chosen for `sessionIdUnusedLifetime` and
+`sessionIdLifetime`. Long sessions present higher risks of session hijacking and
+unauthorized access from shared devices.
+
+### OAuth Client Security
+
+The table below summarizes the default values for dynamically registered
+clients.
+
+| Attribute      | Default Value |
+| -------------   |:-------------:|
+| applicationType | web |
+| subjectType | public|
+|idTokenSignedResponseAlg | RS512 |
+| userInfoSignedResponseAlg | RS512 |
+| userInfoEncryptedResponseAlg | RSA-OAEP |
+| userInfoEncryptedResponseEnc | RSA-OAEP |
+| accessTokenLifetime | 3600 |
+
+Consider whether support of OpenID Connect Dynamic Client Registration extension
+is required. If not, disable it by setting `dynamicRegistrationEnabled` to
+`False`. If Dynamic Client Registration is enabled, consider using
+[software statements](https://www.rfc-editor.org/rfc/rfc7591.html#section-3.1),
+and writing a Client Registration interception script to implement extra rules
+for software statement validation.
+
+Check the list of scopes to quickly assess which scopes the clients can
+potentially add to their registration entry without consent of OP's administrator.
+Make sure sensitive scopes are `dynamicRegistrationScopesParamEnabled` set to
+False.
+
+The Auth Server property `dynamicRegistrationScopesParamEnabled` controls
+whether default scopes are globally enabled; scopes defined as default
+will be automatically added to any dynamically registered client entry.
 
 For client authentication at the token endpoint, move away from shared secrets--
 use either private key authentication or [MTLS](https://datatracker.ietf.org/doc/html/rfc8705). A client secret is basically a password for your software application. Utilize
@@ -115,7 +126,7 @@ code challenge method. Use App Auth if possible for
 [iOS](https://github.com/openid/AppAuth-iOS),
 or [JavaScript](https://github.com/openid/AppAuth-JS).
 
-If additional security is needed, consider using the
+If additional client security is needed, consider using the
 [FAPI](https://openid.net/wg/fapi/) profile of OpenID
 Connect, which adds additional signing, encryption and security
 mitigations.
