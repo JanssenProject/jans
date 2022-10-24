@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-janssen-server-using-the-ubuntu-linux-package" class="md-skip">
+        <a href="#install-janssen-on-ubuntu" class="md-skip">
           Skip to content
         </a>
       
@@ -1061,22 +1061,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
-    System Requirements
+  <a href="#install-the-bits" class="md-nav__link">
+    Install the bits
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#run-the-setup-script" class="md-nav__link">
+    Run the setup script
   </a>
   
 </li>
@@ -1085,33 +1078,6 @@
   <a href="#verify-the-installation" class="md-nav__link">
     Verify the Installation
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uninstall" class="md-nav__link">
-    Uninstall
-  </a>
-  
-    <nav class="md-nav" aria-label="Uninstall">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#uninstall-janssen-server" class="md-nav__link">
-    Uninstall Janssen Server
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#remove-the-linux-package" class="md-nav__link">
-    Remove the linux package
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -10593,22 +10559,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
-    System Requirements
+  <a href="#install-the-bits" class="md-nav__link">
+    Install the bits
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#run-the-setup-script" class="md-nav__link">
+    Run the setup script
   </a>
   
 </li>
@@ -10617,33 +10576,6 @@
   <a href="#verify-the-installation" class="md-nav__link">
     Verify the Installation
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uninstall" class="md-nav__link">
-    Uninstall
-  </a>
-  
-    <nav class="md-nav" aria-label="Uninstall">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#uninstall-janssen-server" class="md-nav__link">
-    Uninstall Janssen Server
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#remove-the-linux-package" class="md-nav__link">
-    Remove the linux package
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -10694,53 +10626,53 @@
   </a>
 
 
-<h1 id="install-janssen-server-using-the-ubuntu-linux-package">Install Janssen Server using the Ubuntu Linux Package<a class="headerlink" href="#install-janssen-server-using-the-ubuntu-linux-package" title="Permanent link">#</a></h1>
-<p>Janssen Server can be installed using the Linux package for Ubuntu</p>
+<h1 id="install-janssen-on-ubuntu">Install Janssen on Ubuntu<a class="headerlink" href="#install-janssen-on-ubuntu" title="Permanent link">#</a></h1>
+<p>Janssen Server can be installed using the Linux package for Ubuntu. You can<br />
+check Github for the latest <a href="https://github.com/JanssenProject/jans/releases">Releases</a></p>
+<p>Before you install, check the <a href="../vm-requirements/">VM system requirements</a>.</p>
 <h2 id="supported-versions">Supported Versions<a class="headerlink" href="#supported-versions" title="Permanent link">#</a></h2>
 <ul>
 <li>Ubuntu 20.04</li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-</div>
-<p><a href="https://wiki.ubuntu.com/SELinux">SELinux</a> should be disabled</p>
-<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>System should meet <a href="../vm-requirements/">minimum VM system requirements</a></p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<h2 id="install-the-bits">Install the bits<a class="headerlink" href="#install-the-bits" title="Permanent link">#</a></h2>
 <ul>
-<li><code>curl</code> should be installed. This can be easily installed using the command below</li>
+<li><code>curl</code>  and <code>wget</code> are required if you run the command below. If you don't
+have these already installed, run:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>apt install curl
+<div class="highlight"><pre><span></span><code>apt install curl wget
 </code></pre></div>
-<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
 <ul>
 <li>Download the installer from the Janssen Project site using the command below</li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*ubuntu20.04_amd64.deb&#39; | head -n 1) -O /tmp/jans.ubuntu20.04_amd64.deb
+<div class="highlight"><pre><span></span><code>wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*ubuntu20.04_amd64.deb&#39; | head -n 1) -O ~/jans.ubuntu20.04_amd64.deb
 </code></pre></div>
 <ul>
 <li>Unpack/install the installer package</li>
 </ul>
-<div class="highlight"><pre><span></span><code>apt install -y /tmp/jans.ubuntu20.04_amd64.deb
+<div class="highlight"><pre><span></span><code>apt install -y ~/jans.ubuntu20.04_amd64.deb
 </code></pre></div>
+<h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
-<li>Initiate the setup process using the command below. The setup process will prompt for user for inputs.</li>
+<li>Run the setup script in interactive mode:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py
 </code></pre></div>
+<p>See more detailed <a href="setup-script.md">instructions</a> on the setup script if you're
+confused how to answer any of the questions, for details about command line
+arguments, or you would prefer to use a properties file instead of
+interactive mode.</p>
 <h2 id="verify-the-installation">Verify the Installation<a class="headerlink" href="#verify-the-installation" title="Permanent link">#</a></h2>
 <p>After the successful completion of setup process, <a href="../../install-faq/#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running">verify the system health</a>.</p>
-<h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
-<p>Uninstall process involves two steps</p>
+<h1 id="uninstall-janssen">Uninstall Janssen<a class="headerlink" href="#uninstall-janssen" title="Permanent link">#</a></h1>
+<p>Removing Janssen is a two step process:</p>
 <ol>
-<li>Uninstall Janssen Server</li>
+<li>Delete files installed by Janssen</li>
 <li>Remove and purge the <code>jans</code> package</li>
 </ol>
-<h3 id="uninstall-janssen-server">Uninstall Janssen Server<a class="headerlink" href="#uninstall-janssen-server" title="Permanent link">#</a></h3>
 <p>Use the command below to uninstall the Janssen server</p>
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/install.py -uninstall
 </code></pre></div>
-<p>Console output like below will confirm the successful uninstallation of the Janssen Server</p>
+<p>You'll see the following confirmation:</p>
 <div class="highlight"><pre><span></span><code>This process is irreversible.
 You will lose all data related to Janssen Server.
 
@@ -10774,11 +10706,10 @@ Executing rm -r -f /opt/dist
 Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
 </code></pre></div>
-<h3 id="remove-the-linux-package">Remove the linux package<a class="headerlink" href="#remove-the-linux-package" title="Permanent link">#</a></h3>
-<p>Use the command below to remove and purge the <code>jans</code> package</p>
+<p>The use the command below to remove and purge the <code>jans</code> package</p>
 <div class="highlight"><pre><span></span><code>apt-get --purge remove jans
 </code></pre></div>
-<p>Successful removal will provide the output as below:</p>
+<p>Which should result in the following:</p>
 <div class="highlight"><pre><span></span><code>Reading package lists... Done
 Building dependency tree       
 Reading state information... Done
@@ -10801,7 +10732,7 @@ Checking to make sure service is down...
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T06:46:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-24T17:23:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-24</span>
       
         <br>
         Created:

@@ -652,23 +652,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#other-administrative-services" class="md-nav__link">
-    Other administrative services
+  <a href="#openid" class="md-nav__link">
+    OpenID
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="OpenID">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#oauth-client-security" class="md-nav__link">
     OAuth Client Security
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#openid" class="md-nav__link">
-    OpenID
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -10586,23 +10585,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#other-administrative-services" class="md-nav__link">
-    Other administrative services
+  <a href="#openid" class="md-nav__link">
+    OpenID
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="OpenID">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#oauth-client-security" class="md-nav__link">
     OAuth Client Security
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#openid" class="md-nav__link">
-    OpenID
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -10667,13 +10665,67 @@ is protected via OAuth or UMA access tokens, because a breach of SCIM would
 undermine the integrity of authentications, a multi-layer security approach
 is warranted. There is no use case for an Internet facing Config API--you should
 tightly control access to this service.</p>
-<h2 id="other-administrative-services">Other administrative services<a class="headerlink" href="#other-administrative-services" title="Permanent link">#</a></h2>
 <p>Make sure no services are listening on external interfaces except for those that
 are absolutely required--<code>tcp/443</code> for the OpenID and FIDO endpoints.</p>
 <p>On Linux servers, a list of current listeners can be obtained with <code>netstat -nlpt</code>
 (for TCP) and <code>netstat -nlpu</code> (for UDP). In particular, make sure the internal
 databases used by Gluu to store all its configuration are not Internet facing.</p>
-<h2 id="oauth-client-security">OAuth Client Security<a class="headerlink" href="#oauth-client-security" title="Permanent link">#</a></h2>
+<h2 id="openid">OpenID<a class="headerlink" href="#openid" title="Permanent link">#</a></h2>
+<p>Review the <a href="OAuth 2.0 Security Best Current Practice">OAuth 2.0 Security Best Current Practice</a> IETF draft.</p>
+<p>Don't use the implicit flow. In the implicit flow, the client is not
+authenticated, and a token is returned from the Authorization endpoint. If the
+<code>response_type</code> in your OpenID Authentication contains <code>token</code>, you are using
+the implicit flow. Section
+<a href="https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-21.html#section-2.1.2">2.1.2</a>
+of the current OAuth Security Best Practices OAuth working group draft
+specifically warns against using the implicit flow. If you must use the implicit
+flow, Review the CORS filter configuration for Jans Auth Server. CORS restricts
+access to trusted domains to execute browser application requests to Auth Server
+endpoints. By default, the filter allows any RP to call OpenID endpoints.</p>
+<p>Review Auth Server propoerties chosen for <code>sessionIdUnusedLifetime</code> and
+<code>sessionIdLifetime</code>. Long sessions present higher risks of session hijacking and
+unauthorized access from shared devices.</p>
+<h3 id="oauth-client-security">OAuth Client Security<a class="headerlink" href="#oauth-client-security" title="Permanent link">#</a></h3>
+<p>The table below summarizes the default values for dynamically registered
+clients.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th align="center">Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>applicationType</td>
+<td align="center">web</td>
+</tr>
+<tr>
+<td>subjectType</td>
+<td align="center">public</td>
+</tr>
+<tr>
+<td>idTokenSignedResponseAlg</td>
+<td align="center">RS512</td>
+</tr>
+<tr>
+<td>userInfoSignedResponseAlg</td>
+<td align="center">RS512</td>
+</tr>
+<tr>
+<td>userInfoEncryptedResponseAlg</td>
+<td align="center">RSA-OAEP</td>
+</tr>
+<tr>
+<td>userInfoEncryptedResponseEnc</td>
+<td align="center">RSA-OAEP</td>
+</tr>
+<tr>
+<td>accessTokenLifetime</td>
+<td align="center">3600</td>
+</tr>
+</tbody>
+</table>
 <p>Consider whether support of OpenID Connect Dynamic Client Registration extension
 is required. If not, disable it by setting <code>dynamicRegistrationEnabled</code> to
 <code>False</code>. If Dynamic Client Registration is enabled, consider using
@@ -10687,21 +10739,6 @@ False.</p>
 <p>The Auth Server property <code>dynamicRegistrationScopesParamEnabled</code> controls
 whether default scopes are globally enabled; scopes defined as default
 will be automatically added to any dynamically registered client entry.</p>
-<h2 id="openid">OpenID<a class="headerlink" href="#openid" title="Permanent link">#</a></h2>
-<p>Review the <a href="OAuth 2.0 Security Best Current Practice">OAuth 2.0 Security Best Current Practice</a> IETF draft.</p>
-<p>Don't use the implicit flow. In the implicit flow, the client is not
-authenticated, and a token is returned from the Authorization endpoint. If the
-<code>response_type</code> in your OpenID Authentication contains <code>token</code>, you are using
-the implicit flow. Section
-<a href="https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-21.html#section-2.1.2">2.1.2</a>
-of the current OAuth Security Best Practices OAuth working group draft
-specifically warns against using the implicit flow. If you must use the implicit
-flow, Review the CORS filter configuration for Jans Auth Server. CORS restricts
-access to trusted domains to execute browser application requests to Auth Server
-endpoints. By default, the filter allows any RP to call OpenID endpoints.</p>
-<p>Review values chosen for <code>sessionIdUnusedLifetime</code> and <code>sessionIdLifetime</code>.
-Long sessions present higher risks of session hijacking and unauthorized access
-from shared devices.</p>
 <p>For client authentication at the token endpoint, move away from shared secrets--
 use either private key authentication or <a href="https://datatracker.ietf.org/doc/html/rfc8705">MTLS</a>. A client secret is basically a password for your software application. Utilize
 asymmetric client authentication.</p>
@@ -10734,7 +10771,7 @@ code challenge method. Use App Auth if possible for
 <a href="https://github.com/openid/AppAuth-Android">Android</a>,
 <a href="https://github.com/openid/AppAuth-iOS">iOS</a>,
 or <a href="https://github.com/openid/AppAuth-JS">JavaScript</a>.</p>
-<p>If additional security is needed, consider using the
+<p>If additional client security is needed, consider using the
 <a href="https://openid.net/wg/fapi/">FAPI</a> profile of OpenID
 Connect, which adds additional signing, encryption and security
 mitigations.</p>
@@ -10759,7 +10796,7 @@ recommended to have it enabled for production setups</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-23T19:45:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-24T17:23:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-24</span>
       
         <br>
         Created:
