@@ -147,7 +147,7 @@ public class OpenIdConfiguration extends HttpServlet {
             List<String> listResponseModesSupported = new ArrayList<>();
             if (appConfiguration.getResponseModesSupported() != null) {
                 for (ResponseMode responseMode : appConfiguration.getResponseModesSupported()) {
-                    listResponseModesSupported.add(responseMode.toString());
+                    listResponseModesSupported.add(responseMode.getValue());
                 }
             }
             if (!listResponseModesSupported.isEmpty()) {
@@ -156,7 +156,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
             List<String> listGrantTypesSupported = new ArrayList<>();
             for (GrantType grantType : appConfiguration.getGrantTypesSupported()) {
-                listGrantTypesSupported.add(grantType.toString());
+                listGrantTypesSupported.add(grantType.getValue());
             }
             if (!listGrantTypesSupported.isEmpty()) {
                 Util.putArray(jsonObj, listGrantTypesSupported, GRANT_TYPES_SUPPORTED);
