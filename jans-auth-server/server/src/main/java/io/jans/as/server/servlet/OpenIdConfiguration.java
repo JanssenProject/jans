@@ -35,13 +35,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 import static io.jans.as.model.util.StringUtils.implode;
@@ -147,22 +144,22 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(RESPONSE_TYPES_SUPPORTED, responseTypesSupported);
             }
 
-            JSONArray responseModesSupported = new JSONArray();
+            List<String> listResponseModesSupported = new ArrayList<>();
             if (appConfiguration.getResponseModesSupported() != null) {
                 for (ResponseMode responseMode : appConfiguration.getResponseModesSupported()) {
-                    responseModesSupported.put(responseMode);
+                    listResponseModesSupported.add(responseMode.getValue());
                 }
             }
-            if (responseModesSupported.length() > 0) {
-                jsonObj.put(RESPONSE_MODES_SUPPORTED, responseModesSupported);
+            if (!listResponseModesSupported.isEmpty()) {
+                Util.putArray(jsonObj, listResponseModesSupported, RESPONSE_MODES_SUPPORTED);
             }
 
-            JSONArray grantTypesSupported = new JSONArray();
+            List<String> listGrantTypesSupported = new ArrayList<>();
             for (GrantType grantType : appConfiguration.getGrantTypesSupported()) {
-                grantTypesSupported.put(grantType);
+                listGrantTypesSupported.add(grantType.getValue());
             }
-            if (grantTypesSupported.length() > 0) {
-                jsonObj.put(GRANT_TYPES_SUPPORTED, grantTypesSupported);
+            if (!listGrantTypesSupported.isEmpty()) {
+                Util.putArray(jsonObj, listGrantTypesSupported, GRANT_TYPES_SUPPORTED);
             }
 
             JSONArray acrValuesSupported = new JSONArray();
