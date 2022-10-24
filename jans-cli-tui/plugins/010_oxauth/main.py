@@ -535,7 +535,7 @@ class Plugin(DialogUtils):
             get_app().invalidate()
             self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
         else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
+            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['properties'])
 
     def properties_display_dialog(self, **params: Any) -> None:
         data_property, data_value = params['selected'][0], params['selected'][1]
@@ -555,15 +555,12 @@ class Plugin(DialogUtils):
 
         self.app.show_jans_dialog(dialog)
 
-
-
     def oauth_get_properties(self) -> None:
         """Method to get the clients data from server
         """ 
         self.oauth_data_container['properties'] = HSplit([Label(_("Please wait while getting properties"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_properties, daemon=True)
         t.start()
-
 
     def view_property(self, **params: Any) -> None:
         #property, value =params['passed']
