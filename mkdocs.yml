@@ -23,7 +23,6 @@ plugins:
    - git-committers:
        repository: JanssenProject/jans
        branch: main
-       token: !ENV GH_TOKEN
 # Configuration
 theme:
     name: material
