@@ -144,21 +144,22 @@ nav:
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
-            - 'Quick Start Installation': 'admin/install/vm-install/quick-start-install.md'
+            - 'Docker Quick Start': 'admin/install/vm-install/quick-start-install.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
             - 'Suse': 'admin/install/vm-install/suse.md'
-            - 'FIPS DISA STIG': 'admin/install/vm-install/disa-stig.md'
+#            - 'FIPS DISA STIG': 'admin/install/vm-install/disa-stig.md'
             - 'Dynamic Download': 'admin/install/vm-install/dynamic-download.md'
         - 'Helm Deployments':
             - 'admin/install/helm-install/README.md'
             - 'Local Kubernetes Cluster': 'admin/install/helm-install/local.md'
             - 'Amazon EKS': 'admin/install/helm-install/amazon-eks.md'
             - 'Google GKE': 'admin/install/helm-install/google-gke.md'
-            - 'Digital Ocean DOK': 'admin/install/helm-install/digitalocean-dok.md'
+#            - 'Digital Ocean DOK': 'admin/install/helm-install/digitalocean-dok.md'
             - 'Microsoft Azure AKS': 'admin/install/helm-install/microsoft-azure.md'
-            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
+#            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
             - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
+        - 'Setup Instructions': 'admin/install/setup.md
         - 'CORS configuration': 'admin/install/cors.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
