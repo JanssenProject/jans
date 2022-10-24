@@ -4,11 +4,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.CommonUtils;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -34,6 +37,7 @@ import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
+import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.par.ws.rs.ParService;
 import io.jans.as.server.service.*;
 import io.jans.as.server.util.ServerUtil;
@@ -52,6 +56,7 @@ import org.slf4j.Logger;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -100,6 +105,20 @@ public class AuthzRequestService {
 
     @Inject
     private RedirectionUriService redirectionUriService;
+
+    public void addDeviceSecretToSession(AuthzRequest authzRequest, SessionId sessionId) {
+        if (!Arrays.asList(authzRequest.getScope().split(" ")).contains(ScopeConstants.DEVICE_SSO)) {
+            return;
+        }
+
+        final String newDeviceSecret = HandleTokenFactory.generateHandleToken();
+
+        final List<String> deviceSecrets = sessionId.getDeviceSecrets();
+        deviceSecrets.add(newDeviceSecret);
+
+        authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.DEVICE_SECRET, newDeviceSecret);
+    }
+
 
     public boolean processPar(AuthzRequest authzRequest) {
         boolean isPar = Util.isPar(authzRequest.getRequestUri());
