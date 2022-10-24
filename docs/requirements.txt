@@ -1,5 +1,5 @@
 # Direct dependencies
-mkdocs==1.4.1 --hash=sha256:07ed90be4062e4ef732bbac2623097b9dca35c67b562c38cfd0bfbc7151758c1
+mkdocs==1.4.1 --hash=sha256:2b7845c2775396214cd408753e4cfb01af3cfed36acc141a84bce2ceec9d705d
 mkdocs-exclude==1.0.2 --hash=sha256:ba6fab3c80ddbe3fd31d3e579861fd3124513708271180a5f81846da8c7e2a51
 mkdocs-material==8.5.7 --hash=sha256:ff4c7851b2e5f9a6cfa0a8b247e973ebae753b9836a53bd68742827541ab73e5
 mkdocs-material-extensions==1.1 --hash=sha256:96ca979dae66d65c2099eefe189b49d5ac62f76afb59c38e069ffc7cf3c131ec
