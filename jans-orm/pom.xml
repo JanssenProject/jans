@@ -44,8 +44,10 @@
 		<module>core</module>
 		<module>ldap</module>
 		<module>couchbase</module>
+		<module>couchbase-libs</module>
  		<module>sql</module>
  		<module>spanner</module>
+ 		<module>spanner-libs</module>
 		<module>hybrid</module>
 		<module>cdi</module>
 		<module>standalone</module>
