@@ -22,7 +22,7 @@ plugins:
        enable_creation_date: true
    - git-committers:
        repository: JanssenProject/jans
-       token: !ENV GH_TOKEN
+       branch: main
 # Configuration
 theme:
     name: material
