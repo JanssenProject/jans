@@ -7,10 +7,6 @@ from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
 from static import DialogResult
 from wui_components.jans_dialog import JansDialog
-from prompt_toolkit.layout.containers import (
-    VSplit,
-    DynamicContainer,
-)
 from prompt_toolkit.key_binding import KeyBindings
 
 from prompt_toolkit.widgets import (
@@ -97,7 +93,9 @@ class ViewProperty(JansGDialog, DialogUtils):
         self.future.set_result(DialogResult.CANCEL)
 
     def save(self) -> None:
-        
+
+        prop_type = self.get_type(self.property)
+
         for wid in self.dialog.body.children:
             for item in wid.children:
                 if type(self.value) == str or type(self.value) == int :
@@ -111,41 +109,28 @@ class ViewProperty(JansGDialog, DialogUtils):
                         data = item_data['value']
 
                 elif type(self.value) == list:
-                    self.myparent.logger.debug("self.value: "+str(self.value))
-                    if type(self.value[0]) in [str,int,bool] :
-                        
+                    if type(self.value[0]) == dict :
+                        self.myparent.logger.debug("item: "+str(item))
                         item_data = self.get_item_data(item)
                         self.myparent.logger.debug("item_data: "+str(item_data))
-                        if item_data:
-                            data = item_data['value'].split('\n')
-                            self.myparent.logger.debug("data[item_data['key']]: "+str(data))
-
-                    else:
-                        ## TODO dict in list
-                        # pass
-                        tab_num = len(self.value)
-                        tabs = []
-                        for i in range(tab_num) :
-                            tabs.append(('tab{}'.format(i),'tab{}'.format(i)))
-                        self.myparent.logger.debug("*******************************************")
                         data = []
-                        self.myparent.logger.debug("itemitem: "+str(item))
-                        self.myparent.logger.debug("wid: "+str(wid))
+                        # for dict_list in self.value:
+                        #     self.myparent.logger.debug("item.children: "+str(item.children))
+                        #     dict_data = {}
+                        #     for i,field in enumerate(dict_list) :
+                        #         self.myparent.logger.debug("field: "+str(field))
+
+                        #         if type(dict_list[list(dict_list)[i]])  in [str,int,bool]:
+                        #             item_data = self.get_item_data(field)
+                        #             self.myparent.logger.debug("item_data: "+str(item_data))
+                        #             if item_data:
+                        #                 dict_data[item_data['key']] = item_data['value']
+                        #         data.append(dict_data)
+                    else:
+                        self.myparent.logger.debug("self.value: "+str(self.value))
                         item_data = self.get_item_data(item)
                         self.myparent.logger.debug("item_data: "+str(item_data))
-                        for tab in self.value:  
-                            data_tab={}
-                            for i,field in enumerate(item.children) :
-                                item_data = self.get_item_data(item)
-                                self.myparent.logger.debug("item_data: "+str(item_data))
-                                
-                                if item_data:
-                                    data_tab['tab{}'.format(self.value.index(tab))] = item_data['value']
-                                    self.myparent.logger.debug("data_tab: "+str(data_tab))
-                                    data.append(data_tab)
-                        self.myparent.logger.debug("datadata: "+str(data))
-                        self.myparent.logger.debug("*******************************************")
-
+                        data = item_data['value']
 
                 elif type(self.value) == dict:
                     data = {}
@@ -154,10 +139,21 @@ class ViewProperty(JansGDialog, DialogUtils):
                             item_data = self.get_item_data(field)
                             if item_data:
                                 data[item_data['key']] = item_data['value']
+                    # data = {}
+                    # for i,field in enumerate(item.children) :
+                    #     if type(self.value[list(self.value)[i]])  in [str,int,bool]:
+                    #         item_data = self.get_item_data(field)
+                    #         if item_data:
+                    #             data[item_data['key']] = item_data['value']
 
                 else:
                     item_data = self.get_item_data(item)
                     self.myparent.logger.debug("item_data,Else: "+str(item_data))
+        
+        # ------------------------------------------------------------#
+        # --------------------- Patch to server ----------------------#
+        # ------------------------------------------------------------#
+
         if data :
             response = self.myparent.cli_object.process_command_by_id(
                     operation_id='patch-properties' ,
@@ -168,9 +164,10 @@ class ViewProperty(JansGDialog, DialogUtils):
                     )
         else:
             return
-
+        # ------------------------------------------------------------#
+        # -- get_properties or serach again to see Momentary change --#
+        # ------------------------------------------------------------#
         if response:
-
             if self.search_text:
                 tbuff = Buffer(name='', )
                 tbuff.text=self.search_text
@@ -247,87 +244,6 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 values=self.get_listValues(self.property), 
                                 style='class:outh-client-checkboxlist'),
                                 ],width=D())    
-
-
-        # elif type(self.value) == list:
-        #     if type(self.value[0]) in [str,bool,int]: 
-        #         self.value_content= HSplit([self.myparent.getTitledText(
-        #             self.property+'\n'*(len(self.value)-1), 
-        #             name=self.property, 
-        #             height=3,
-        #             value='\n'.join(self.value), 
-        #             style='class:outh-scope-text'
-        #             ),
-        #             ],width=D())
-        #     elif type(self.value[0]) == dict:
-        #         tab_num = len(self.value)
-        #         tabs = []
-        #         for i in range(tab_num) :
-        #             tabs.append(('tab{}'.format(i),'tab{}'.format(i)))
-        #         self.myparent.logger.debug("tabs: "+str(tabs))
-
-        #         self.myparent.logger.debug("self.value: "+str(self.value))
-        #         for tab in self.value:  
-        #             tab_list=[]
-        #             self.myparent.logger.debug("tab: "+str(tab))
-        #             for item in tab:
-        #                 self.myparent.logger.debug("item: "+str(item))
-        #                 if type(tab[item]) == str or type(tab[item]) == int :
-        #                     tab_list.append(HSplit([self.myparent.getTitledText(
-        #                         item ,
-        #                         name=item, 
-        #                         value=tab[item], 
-        #                         style='class:outh-scope-text'
-        #                         ),
-        #                         ],width=D()))
-
-        #                 elif type(tab[item]) == list:
-        #                     tab_list.append(HSplit([self.myparent.getTitledText(
-        #                         item, 
-        #                         name=item, 
-        #                         height=3,
-        #                         value='\n'.join(tab[item]), 
-        #                         style='class:outh-scope-text'
-        #                         ),
-        #                         ],width=D()))
-
-        #                 elif type(tab[item]) == bool:
-        #                     tab_list.append(HSplit([
-        #                         self.myparent.getTitledCheckBox(
-        #                             item, 
-        #                             name=item, 
-        #                             checked= tab[item], 
-        #                             style='class:outh-client-checkbox'),
-        #                     ],width=D()))
-
-        #                 self.tabs['tab{}'.format(self.value.index(tab))] = HSplit(tab_list,width=D())
-
-        #         self.myparent.logger.debug("self.tabs: "+str(self.tabs))
-        #         self.value_content=HSplit([
-        #                         self.myparent.getTitledRadioButton(
-        #                             _("Tab Num")+'\n'*(len(tabs)-1),
-        #                             name='tabNum',
-        #                             current_value=self.selected_tab,
-        #                             values=tabs,
-        #                             on_selection_changed=self.tab_selection_changed,
-        #                             style='class:outh-scope-radiobutton'),
-
-        #                         DynamicContainer(lambda: self.tabs[self.selected_tab]),     
-
-        #             ],width=D())
-                    
-        #     elif type(self.value[0]) == list:
-        #         for k in range(len(self.value)):
-        #             self.value[k] = (','.join(self.value[k]),','.join(self.value[k]))
-
-        #         self.value_content= HSplit([
-        #             self.myparent.getTitledCheckBoxList(
-        #                 self.property+'\n'*(len(self.value)-1), 
-        #                 name=self.property, 
-        #                 values=self.value,
-        #                 # current_values=self.data.get('grantTypes', []), 
-        #                 style='class:outh-client-checkboxlist'), 
-        #             ],width=D())
 
         elif prop_type == 'list-dict':  
             tab_num = len(self.value)
