@@ -310,8 +310,13 @@ public class Transpiler {
     public static void runSyntaxCheck(String flowQname, String source)
             throws SyntaxException, TranspilerException {
 
-        Transpiler tr = new Transpiler(flowQname, null);        
+        Transpiler tr = new Transpiler(flowQname, null);
         tr.validateName(tr.getFlowContext(source));
+    }
+    
+    public static void runSyntaxCheck(String source) throws SyntaxException, TranspilerException {
+        Transpiler tr = new Transpiler("", null);
+        tr.getFlowContext(source);
     }
 
     public static void main(String... args) throws Exception {
