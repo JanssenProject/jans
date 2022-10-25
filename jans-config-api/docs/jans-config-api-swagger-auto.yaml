@@ -140,7 +140,7 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                value: "{\"someExampleParam\": 1}"
+                value: ""
       responses:
         "200":
           description: Ok
@@ -226,7 +226,7 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                value: "{\"someExampleParam\": 1}"
+                value: ""
       responses:
         "201":
           description: Created
@@ -468,6 +468,38 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GluuAttribute'
+            examples:
+              Attribute request example:
+                description: Attribute request example
+                value: |
+                  {
+                      "adminCanAccess": true,
+                      "adminCanEdit": true,
+                      "adminCanView": true,
+                      "custom": false,
+                      "dataType": "string",
+                      "description": "QAAdded Attribute",
+                      "displayName": "QAAdded Attribute",
+                      "editType": [
+                          "admin",
+                          "user"
+                      ],
+                      "name": "qaattribute",
+                      "origin": "jansPerson",
+                      "jansMultivaluedAttr": false,
+                      "requred": false,
+                      "status": "active",
+                      "urn": "urn:mace:dir:attribute-def:qaattribute",
+                      "userCanAccess": true,
+                      "userCanEdit": true,
+                      "userCanView": true,
+                      "viewType": [
+                          "admin",
+                          "user"
+                      ],
+                      "whitePagesCanView": false
+                  }
+                externalValue: example/attribute.json
       responses:
         "200":
           description: Ok
@@ -475,6 +507,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GluuAttribute'
+              examples:
+                Attribute response example:
+                  description: Attribute response example
+                  externalValue: example/attribute.json
         "401":
           description: Unauthorized
         "500":
@@ -494,6 +530,38 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GluuAttribute'
+            examples:
+              Attribute request example:
+                description: Attribute request example
+                value: |
+                  {
+                      "adminCanAccess": true,
+                      "adminCanEdit": true,
+                      "adminCanView": true,
+                      "custom": false,
+                      "dataType": "string",
+                      "description": "QAAdded Attribute",
+                      "displayName": "QAAdded Attribute",
+                      "editType": [
+                          "admin",
+                          "user"
+                      ],
+                      "name": "qaattribute",
+                      "origin": "jansPerson",
+                      "jansMultivaluedAttr": false,
+                      "requred": false,
+                      "status": "active",
+                      "urn": "urn:mace:dir:attribute-def:qaattribute",
+                      "userCanAccess": true,
+                      "userCanEdit": true,
+                      "userCanView": true,
+                      "viewType": [
+                          "admin",
+                          "user"
+                      ],
+                      "whitePagesCanView": false
+                  }
+                externalValue: example/attribute.json
       responses:
         "201":
           description: Created
@@ -501,6 +569,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GluuAttribute'
+              examples:
+                Attribute response example:
+                  description: Attribute response example
+                  externalValue: example/attribute.json
         "401":
           description: Unauthorized
         "500":
@@ -579,6 +651,12 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/PatchRequest'
+            examples:
+              Attribute patch request example:
+                description: Attribute patch request example
+                value: |
+                  [ {op:replace, path: displayName, value: "CustomAttribute" } ]
+                externalValue: example/attribute-patch.json
       responses:
         "200":
           description: Updated GluuAttribute
@@ -586,6 +664,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GluuAttribute'
+              examples:
+                Attribute response example:
+                  description: Attribute response example
+                  externalValue: example/attribute.json
         "401":
           description: Unauthorized
         "404":
@@ -2941,17 +3023,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        userCanView:
+          type: boolean
         adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -3280,8 +3362,6 @@ components:
           format: int32
         displayName:
           type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3293,6 +3373,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
         baseDn:
           type: string
         inum:
@@ -3385,10 +3467,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -3396,13 +3478,13 @@ components:
           type: object
           additionalProperties:
             type: string
-        value:
-          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
+        value:
+          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4089,6 +4171,17 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4116,17 +4209,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -4383,13 +4465,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

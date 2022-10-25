@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -108,9 +109,9 @@ public class AttributesResource extends ConfigBaseResource {
     @Operation(summary = "Adds a new attribute", description = "Adds a new attribute", operationId = "post-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
-    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class)))
+    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Attribute request example" , externalValue = "example/attribute.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Attribute response example" , externalValue = "example/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -131,9 +132,9 @@ public class AttributesResource extends ConfigBaseResource {
     @Operation(summary = "Updates an existing attribute", description = "Updates an existing attribute", operationId = "put-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
-    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class)))
+    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Attribute request example" , externalValue = "example/attribute.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Attribute response example" , externalValue = "example/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
@@ -157,9 +158,9 @@ public class AttributesResource extends ConfigBaseResource {
     @Operation(summary = "Partially modify a GluuAttribute", description = "Partially modify a GluuAttribute", operationId = "patch-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = PatchRequest.class))))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = PatchRequest.class)) , examples = @ExampleObject(name = "Attribute patch request example" , externalValue = "example/attribute-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class))),
+            @ApiResponse(responseCode = "200", description = "Updated GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Attribute response example" , externalValue = "example/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })

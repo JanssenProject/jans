@@ -60,6 +60,7 @@ import jakarta.ws.rs.ext.Provider;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -74,42 +75,7 @@ public class SpecFilter extends AbstractSpecFilter {
 
     private static final String RESOURCE_FOLDER = "";
 
-    @Override
-    public Optional<OpenAPI> filterOpenAPI(OpenAPI openAPI, Map<String, List<String>> params,
-            Map<String, String> cookies, Map<String, List<String>> headers) {
-        try {
-            System.out.println("\n\n\n *********** SpecFilter::filterOpenAPI() *********** \n\n\n");
-            System.out.println("\n SpecFilter::filterOpenAPI() - openAPI=" + openAPI + " , params=" + params
-                    + " , cookies=" + cookies + " , headers=" + headers + "\n");
-            if (openAPI != null) {
-                System.out.println("\n SpecFilter::filterOpenAPI() - openAPI.getPaths()= " + openAPI.getPaths()
-                        + " openAPI..getServers()=" + openAPI.getServers());
-                if (openAPI.getPaths() != null) {
-                    Paths paths = openAPI.getPaths();
-                    if (paths != null && !paths.isEmpty()) {
-                        Set<Map.Entry<String, PathItem>> pathEntry = paths.entrySet();
-                        for (Map.Entry<String, PathItem> entry : pathEntry) {
-
-                            System.out.println("\n SpecFilter::filterOpenAPI() - entry.getKey()()= " + entry.getKey()
-                                    + " entry.getValue()=" + entry.getValue() + " , entry.getValue().readOperations()="
-                                    + entry.getValue().readOperations());
-                            //InputStream is = getFileAsIOStream("attribute.json");
-                           // printFileContent(is);
-
-                            InputStream is = getFileAsIOStream("example/attribute.json");
-                            printFileContent(is);
-
-                        }
-                    }
-                }
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println("*********** SpecFilter::filterOpenAPI() - ex = " + ex);
-        }
-        return Optional.of(openAPI);
-    }
+  
 
     @Override
     public Optional<Operation> filterOperation(Operation operation, ApiDescription api,
@@ -133,11 +99,12 @@ public class SpecFilter extends AbstractSpecFilter {
                             if(example==null) {
                                 continue;
                             }
-                            System.out.println("\n SpecFilter::filterOperation() - example.getExternalValue() ="+example.getExternalValue());
-                            example.getExternalValue();
+                            System.out.println("\n SpecFilter::filterOperation() - example.getValue() = "+example.getValue()+" , example.getExternalValue() ="+example.getExternalValue());
+                            
+                            
                             // external value contains a path to local resource
                             // get that resource and set it to values as JSON
-                            example.setValue("{\"someExampleParam\": 1}");
+                            example.setValue(getExample(example.getExternalValue()));
                         }
                     }
                     }
@@ -152,39 +119,42 @@ public class SpecFilter extends AbstractSpecFilter {
         return Optional.of(operation);
     }
 
-    @Override
-    public Optional<PathItem> filterPathItem(PathItem pathItem, ApiDescription api, Map<String, List<String>> params,
-            Map<String, String> cookies, Map<String, List<String>> headers) {
-        System.out.println("\n\n\n *********** SpecFilter::filterPathItem() *********** ");
 
-        System.out.println("SpecFilter::filterPathItem() *********** \n\n\n");
-        return Optional.of(pathItem);
-    }
 
-    private InputStream getFileAsIOStream(final String fileName) {
-        System.out.println("SpecFilter::filterPathItem() fileName = " + fileName);
-        InputStream ioStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
-
+    private String getExample(final String fileName) throws IOException{
+        System.out.println("SpecFilter::getExample() fileName = " + fileName);
+        if(StringUtils.isBlank(fileName)) {
+            return "";
+        }
         
-        if (ioStream == null) {
-            //throw new IllegalArgumentException(fileName + " is not found");
-            System.out.println("SpecFilter::filterPathItem() "+fileName+" is not found");
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
+        System.out.println("SpecFilter::filterPathItem() inputStream = " + inputStream);
+        if (inputStream == null) {
+             System.out.println("Example File '"+fileName+"' not found");
         }
-
-        System.out.println("SpecFilter::filterPathItem() ioStream = " + ioStream);
-        return ioStream;
+        
+       
+        
+        String exampleString = getExampleContent(inputStream);
+        System.out.println("SpecFilter::filterPathItem() exampleString = " + exampleString);
+        return exampleString;
     }
 
-    private void printFileContent(InputStream is) throws IOException {
+    private String getExampleContent(InputStream is) throws IOException {
+        System.out.println("SpecFilter::getExampleContent() is = " + is);
         if(is==null) {
-            return;
+            return "";
         }
+        StringBuilder stringBuilder = new StringBuilder();
         try (InputStreamReader isr = new InputStreamReader(is); BufferedReader br = new BufferedReader(isr);) {
             String line;
             while ((line = br.readLine()) != null) {
                 System.out.println(line);
+                stringBuilder.append(line).append("\n");
             }
             is.close();
         }
+        System.out.println("SpecFilter::getExampleContent() - stringBuilder = " + stringBuilder);
+        return stringBuilder.toString();
     }
 }
