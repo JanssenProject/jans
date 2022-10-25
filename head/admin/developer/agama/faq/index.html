@@ -5043,6 +5043,19 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-know-the-number-of-iterations-carried-out-by-a-loop-once-it-has-finished" class="md-nav__link">
+    How to know the number of iterations carried out by a loop once it has finished?
+  </a>
+  
+    <nav class="md-nav" aria-label="How to know the number of iterations carried out by a loop once it has finished?">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
   <a href="#can-agama-code-be-called-from-java" class="md-nav__link">
     Can Agama code be called from Java?
@@ -11031,6 +11044,19 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-know-the-number-of-iterations-carried-out-by-a-loop-once-it-has-finished" class="md-nav__link">
+    How to know the number of iterations carried out by a loop once it has finished?
+  </a>
+  
+    <nav class="md-nav" aria-label="How to know the number of iterations carried out by a loop once it has finished?">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
   <a href="#can-agama-code-be-called-from-java" class="md-nav__link">
     Can Agama code be called from Java?
@@ -11148,7 +11174,8 @@
 <h3 id="why-are-the-contents-of-a-list-or-map-logged-partially">Why are the contents of a list or map logged partially?<a class="headerlink" href="#why-are-the-contents-of-a-list-or-map-logged-partially" title="Permanent link">#</a></h3>
 <p>This is to avoid traversing big structures fully. You can increase the value of <code>maxItemsLoggedInCollections</code> in the <a href="../engine-config/">engine configuration</a>.</p>
 <h3 id="how-to-add-two-numbers-or-compare-numeric-values-in-agama">How to add two numbers or compare numeric values in Agama?<a class="headerlink" href="#how-to-add-two-numbers-or-compare-numeric-values-in-agama" title="Permanent link">#</a></h3>
-<p>Agama only provides operators for boolean comparison in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.</p>
+<p>Agama only provides operators for equality check in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.</p>
+<p><em>Hint</em>: some methods like <code>addExact</code>, <code>incrementExact</code>, etc. in <code>java.lang.Math</code> might help.  </p>
 <h3 id="how-to-concatenate-strings-in-agama">How to concatenate strings in Agama?<a class="headerlink" href="#how-to-concatenate-strings-in-agama" title="Permanent link">#</a></h3>
 <p>See the previous answer. A two-lines solution could be:</p>
 <div class="highlight"><pre><span></span><code>strings = [ s1, s2, ... ]
@@ -11156,6 +11183,8 @@ Call java.lang.String#join &quot;&quot; strings
 </code></pre></div>
 <h3 id="how-to-know-the-index-of-a-given-loop-iteration">How to know the index of a given loop iteration?<a class="headerlink" href="#how-to-know-the-index-of-a-given-loop-iteration" title="Permanent link">#</a></h3>
 <p>See the examples in the Looping section of the DSL <a href="../dsl-full/#looping">full reference</a>.</p>
+<h2 id="how-to-know-the-number-of-iterations-carried-out-by-a-loop-once-it-has-finished">How to know the number of iterations carried out by a loop once it has finished?<a class="headerlink" href="#how-to-know-the-number-of-iterations-carried-out-by-a-loop-once-it-has-finished" title="Permanent link">#</a></h2>
+<p>You can assign this value to a variable at the top of your loop declaration. See the examples in the Looping section of the DSL <a href="../dsl-full/#looping">full reference</a>.</p>
 <h3 id="can-agama-code-be-called-from-java">Can Agama code be called from Java?<a class="headerlink" href="#can-agama-code-be-called-from-java" title="Permanent link">#</a></h3>
 <p>No. These two languages are supposed to play roles that should not be mixed, check <a href="../dsl/#introduction">here</a> and <a href="../lifecycle/#design-and-code">here</a>.</p>
 
@@ -11164,7 +11193,7 @@ Call java.lang.String#join &quot;&quot; strings
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T12:54:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-25T19:55:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-25</span>
       
         <br>
         Created:
