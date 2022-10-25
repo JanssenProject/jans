@@ -40,4 +40,10 @@
         </classes>
     </test>
 
+    <test name="inexistent" enabled="false">
+        <classes>
+            <class name="io.jans.agama.test.InexistentFlowTest" />
+        </classes>
+    </test>
+
 </suite>
