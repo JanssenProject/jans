@@ -36,13 +36,11 @@ small = Call java.lang.Math#decrementExact small
 
 Repeat small times max
     divisor = Call java.lang.Math#incrementExact divisor
-    k = 0
 
     //Try to divide the numbers by 2, 3, ... small+1
-    Iterate over numbers using n
+    k = Iterate over numbers using n
         modulus = Call java.lang.Math#floorMod n divisor
         Quit When modulus is 0
-        k = Call java.lang.Math#incrementExact k
 
     Quit When k is numbers.length
 
