@@ -504,6 +504,9 @@ class JCA_CLI:
     def raise_error(self, msg):
         if not self.wrapped:
             msg = self.colored_text(msg, error_color)
+            print(msg)
+            sys.exit()
+
         raise ValueError(msg)
 
 
@@ -578,10 +581,18 @@ class JCA_CLI:
             )
         self.log_response(response)
         if response.status_code != 200:
-            self.raise_error("Unable to get access token")
+            self.raise_error("Unable to get user info")
+
 
         result = response.text
         config['DEFAULT']['user_data'] = result
+
+
+        user_info = self.get_user_info()
+
+        if 'api-admin' not in user_info.get('jansAdminUIRole', []):
+            config['DEFAULT']['user_data'] = ''
+            self.raise_error("The logged user do not have valid role.")
 
         """
         STEP 4: Get access token for config-api endpoints
@@ -1439,13 +1450,13 @@ def main():
     #try:
         if not access_token:
             cli_object.check_connection()
-        else:
-            if args.info:
-                cli_object.help_for(args.info)
-            elif args.schema:
-                cli_object.get_sample_schema(args.schema)
-            elif args.operation_id:
-                cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
+
+        if args.info:
+            cli_object.help_for(args.info)
+        elif args.schema:
+            cli_object.get_sample_schema(args.schema)
+        elif args.operation_id:
+            cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
 
     #except Exception as e:
     #    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))

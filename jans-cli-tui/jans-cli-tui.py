@@ -226,7 +226,9 @@ class JansCliApp(Application):
                         except Exception as e:
                             err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
                             await self.show_dialog_as_float(err_dialog)
+                            self.cli_object_ok = False
                             self.create_cli()
+                            return
                         self.cli_object_ok = True
                         if not self.plugins_initialised:
                             self.init_plugins()
