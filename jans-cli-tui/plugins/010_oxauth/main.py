@@ -470,25 +470,29 @@ class Plugin(DialogUtils):
         # ------------------------------------------------------------------------------- #
         # ----------------------------------- Search ------------------------------------ #
         # ------------------------------------------------------------------------------- #
+        porp_schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
 
         data =[]
         if pattern:
             for k in result:
                 if pattern.lower() in k.lower():
-                    data.append(
-                        [
-                        k,
-                        result[k],
-                        ]
-                    )
+                    if k in porp_schema.get('properties', {}):
+                        data.append(
+                            [
+                            k,
+                            result[k],
+                            ]
+                        )
         else:
             for d in result:
-                data.append(
-                    [
-                    d,
-                    result[d],
-                    ]
-                )
+                if d in porp_schema.get('properties', {}):
+                    data.append(
+                        [
+                        d,
+                        result[d],
+                        ]
+                    )
+
 
         # ------------------------------------------------------------------------------- #
         # --------------------------------- View Data ----------------------------------- #
