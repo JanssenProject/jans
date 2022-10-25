@@ -11,7 +11,6 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-@org.testng.annotations.Ignore
 public class MathFlowTest extends BaseTest {
 
     private static final String QNAME = "io.jans.agama.test.math";

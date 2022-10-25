@@ -1,12 +1,10 @@
 package io.jans.agama.test;
 
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
-import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -26,27 +24,24 @@ public class UidOnlyAuthTest extends BaseTest {
     @Test
     public void randUid() {
 
-        HtmlPage page = start("" + Math.random());
-        page = proceed(page);
-        assertOK(page);
+        start("" + Math.random());
+        HtmlPage page = (HtmlPage) currentPageAfter(2000);
 
+        assertOK(page);
         assertTrue(page.getUrl().toString().endsWith("error.htm"));
         assertTextContained(page.getVisibleText().toLowerCase(), "failed", "authenticate");
 
     }
-    
+
     @Test(dependsOnMethods = "randUid", alwaysRun = true)
     @Parameters("redirectUri")
     public void adminUid(String redirectUri) {
 
-        HtmlPage page = start("admin");
-        page = proceed(page);
+        start("admin");
+        Page page = currentPageAfter(2000);
+
         assertOK(page);
-        
-        if (!page.getUrl().toString().startsWith(redirectUri)) {
-            //check if this is the consent page
-            assertTextContained(page.getVisibleText().toLowerCase(), "permission", "allow");
-        }
+        assertTrue(page.getUrl().toString().startsWith(redirectUri));
 
     }
 
@@ -59,15 +54,15 @@ public class UidOnlyAuthTest extends BaseTest {
 
     }
     
-    private HtmlPage proceed(HtmlPage page) {
+    private Page currentPageAfter(long wait) {
 
         try {
             //wait for the auto-submitting javascript to execute (see finished.ftlh) and redirections to take place
-            Thread.sleep(2000);
-            page = (HtmlPage) client.getCurrentWindow().getEnclosedPage();
+            Thread.sleep(wait);
+            Page p = client.getCurrentWindow().getEnclosedPage();
             
-            logger.debug("Landed at {}",page.getUrl());
-            return page;
+            logger.debug("Landed at {}", p.getUrl());
+            return p;
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
