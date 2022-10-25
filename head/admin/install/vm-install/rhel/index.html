@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-janssen-server-using-enterprise-linux-package" class="md-skip">
+        <a href="#ubuntu-janssen-installation" class="md-skip">
           Skip to content
         </a>
       
@@ -1075,22 +1075,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
-    System Requirements
+  <a href="#install-the-package" class="md-nav__link">
+    Install the Package
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#run-the-setup-script" class="md-nav__link">
+    Run the setup script
   </a>
   
 </li>
@@ -1104,15 +1097,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#uninstall-janssen-server" class="md-nav__link">
-    Uninstall Janssen Server
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#remove-the-linux-package" class="md-nav__link">
-    Remove the linux package
+  <a href="#red-hat-centos-un-installation" class="md-nav__link">
+    Red Hat / Centos Un-installation
   </a>
   
 </li>
@@ -10586,22 +10572,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
-    System Requirements
+  <a href="#install-the-package" class="md-nav__link">
+    Install the Package
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#run-the-setup-script" class="md-nav__link">
+    Run the setup script
   </a>
   
 </li>
@@ -10615,15 +10594,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#uninstall-janssen-server" class="md-nav__link">
-    Uninstall Janssen Server
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#remove-the-linux-package" class="md-nav__link">
-    Remove the linux package
+  <a href="#red-hat-centos-un-installation" class="md-nav__link">
+    Red Hat / Centos Un-installation
   </a>
   
 </li>
@@ -10672,7 +10644,7 @@
     
       
       
-        <span class="md-tag">RedHat</span>
+        <span class="md-tag">CentOS</span>
       
     
   </nav>
@@ -10685,52 +10657,46 @@
   </a>
 
 
-<h1 id="install-janssen-server-using-enterprise-linux-package">Install Janssen Server using Enterprise Linux Package<a class="headerlink" href="#install-janssen-server-using-enterprise-linux-package" title="Permanent link">#</a></h1>
+<h1 id="ubuntu-janssen-installation">Ubuntu Janssen Installation<a class="headerlink" href="#ubuntu-janssen-installation" title="Permanent link">#</a></h1>
+<p>Before you install, check the <a href="../vm-requirements/">VM system requirements</a>.</p>
 <h2 id="supported-versions">Supported versions<a class="headerlink" href="#supported-versions" title="Permanent link">#</a></h2>
 <ul>
-<li>Red Hat 8</li>
+<li>Red Hat Enterprise Linus 8 (RHEL 8)</li>
 <li>CentOS 8</li>
 </ul>
+<h2 id="install-the-package">Install the Package<a class="headerlink" href="#install-the-package" title="Permanent link">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 </div>
-<p><a href="https://wiki.ubuntu.com/SELinux">SELinux</a> should be disabled</p>
-<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>System should meet <a href="../vm-requirements/">minimum VM system requirements</a></p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
-<ul>
-<li>System should be registered and attached with Red Hat. This is required to run commands that install packages like <code>mod_auth_openidc</code></li>
-<li>Install Extra Packages for Enterprise Linux (EPEL)</li>
-</ul>
-<div class="highlight"><pre><span></span><code>yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-</code></pre></div>
-<ul>
-<li><code>curl</code> should be instlled. This can be easily installed using the command below</li>
-</ul>
-<div class="highlight"><pre><span></span><code>yum install curl
-</code></pre></div>
-<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
-<ul>
-<li>Enable the <code>mod_auth_openidc</code> module</li>
-</ul>
-<div class="highlight"><pre><span></span><code>yum module enable mod_auth_openidc
-</code></pre></div>
-<ul>
-<li>Download and Install the Janssen Server Linux package</li>
-</ul>
+<p><code>curl</code>  is required to run the command below</p>
 <div class="highlight"><pre><span></span><code>yum install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*el8.x86_64.rpm&#39; | head -n 1)
 </code></pre></div>
+<h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
-<li>Initiate the setup process using the command below. The setup process will prompt for user for inputs.</li>
+<li>Run the setup script in interactive mode:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>sudo python3 /opt/jans/jans-setup/setup.py
 </code></pre></div>
-<p>The installer should confirm successful installation with a message similar to the one shown below:</p>
+<p>The installer should confirm successful installation with a message similar
+to the one shown below:</p>
 <p><img alt="" src="../../../../assets/image-jans-install-success.png" /></p>
+<p>See more detailed <a href="setup-script.md">instructions</a> on the setup script if you're
+confused how to answer any of the questions, for details about command line
+arguments, or you would prefer to use a properties file instead of
+interactive mode.</p>
 <h2 id="verify-the-installation">Verify the Installation<a class="headerlink" href="#verify-the-installation" title="Permanent link">#</a></h2>
 <p>After the successful completion of setup process, <a href="../../install-faq/#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running">verify the system health</a>.</p>
-<h3 id="uninstall-janssen-server">Uninstall Janssen Server<a class="headerlink" href="#uninstall-janssen-server" title="Permanent link">#</a></h3>
+<h3 id="red-hat-centos-un-installation">Red Hat / Centos Un-installation<a class="headerlink" href="#red-hat-centos-un-installation" title="Permanent link">#</a></h3>
+<p>Removing Janssen is a two step process:</p>
+<ol>
+<li>Delete files installed by Janssen</li>
+<li>
+<p>Remove and purge the <code>jans</code> package</p>
+</li>
+<li>
 <p>Use the command below to uninstall the Janssen server</p>
+</li>
+</ol>
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/install.py -uninstall
 </code></pre></div>
 <p>Console output like below will confirm the successful uninstallation of the Janssen Server</p>
@@ -10767,18 +10733,21 @@ Executing rm -r -f /opt/dist
 Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
 </code></pre></div>
-<h3 id="remove-the-linux-package">Remove the linux package<a class="headerlink" href="#remove-the-linux-package" title="Permanent link">#</a></h3>
+<ul>
+<li>Remove the linux package</li>
+</ul>
 <p>Use the command below to remove and purge <code>jans</code> package</p>
 <div class="highlight"><pre><span></span><code>yum remove jans.x86_64
 </code></pre></div>
-<p>Successful removal will remove the Janssen Server package along with the removal of all the unused dependencies.</p>
+<p>Successful removal will remove the Janssen Server package along with
+the removal of all the unused dependencies.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T09:20:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-25T17:24:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-25</span>
       
         <br>
         Created:

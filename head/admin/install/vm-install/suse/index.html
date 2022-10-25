@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-janssen-server-using-the-suse-linux-enterprise-server-sles-package" class="md-skip">
+        <a href="#suse-janssen-installation" class="md-skip">
           Skip to content
         </a>
       
@@ -1089,22 +1089,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
-    System Requirements
+  <a href="#install-the-package" class="md-nav__link">
+    Install the Package
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#run-the-setup-script" class="md-nav__link">
+    Run the setup script
   </a>
   
 </li>
@@ -1120,19 +1113,6 @@
   <a href="#uninstall" class="md-nav__link">
     Uninstall
   </a>
-  
-    <nav class="md-nav" aria-label="Uninstall">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#uninstall-janssen-server" class="md-nav__link">
-    Uninstall Janssen Server
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -10586,22 +10566,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
-    System Requirements
+  <a href="#install-the-package" class="md-nav__link">
+    Install the Package
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#run-the-setup-script" class="md-nav__link">
+    Run the setup script
   </a>
   
 </li>
@@ -10617,19 +10590,6 @@
   <a href="#uninstall" class="md-nav__link">
     Uninstall
   </a>
-  
-    <nav class="md-nav" aria-label="Uninstall">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#uninstall-janssen-server" class="md-nav__link">
-    Uninstall Janssen Server
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -10675,6 +10635,11 @@
         <span class="md-tag">SLES</span>
       
     
+      
+      
+        <span class="md-tag">Tumbleweed</span>
+      
+    
   </nav>
 
 
@@ -10685,35 +10650,33 @@
   </a>
 
 
-<h1 id="install-janssen-server-using-the-suse-linux-enterprise-server-sles-package">Install Janssen Server using the SUSE Linux Enterprise Server (SLES) Package<a class="headerlink" href="#install-janssen-server-using-the-suse-linux-enterprise-server-sles-package" title="Permanent link">#</a></h1>
-<p>Janssen Server can be installed using the Linux package for SLES </p>
+<h1 id="suse-janssen-installation">SUSE Janssen Installation<a class="headerlink" href="#suse-janssen-installation" title="Permanent link">#</a></h1>
+<p>Before you install, check the <a href="../vm-requirements/">VM system requirements</a>.</p>
 <h2 id="supported-versions">Supported versions<a class="headerlink" href="#supported-versions" title="Permanent link">#</a></h2>
 <ul>
 <li>SUSE Linux Enterprise Server (SLES) 15</li>
+<li>openSUSE Leap 15.4</li>
+<li>openSUSE Tumbleweed (non-production)</li>
 </ul>
+<h2 id="install-the-package">Install the Package<a class="headerlink" href="#install-the-package" title="Permanent link">#</a></h2>
+<p>Download the latest package from the Github Janssen Project
+<a href="https://github.com/JanssenProject/jans/releases">Releases</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><a href="https://wiki.ubuntu.com/SELinux">SELinux</a> should be disabled</p>
 </div>
-<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>System should meet <a href="../vm-requirements/">minimum VM system requirements</a></p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
-<ul>
-<li><code>curl</code> should be installed. This can be easily installed using the command below</li>
-</ul>
-<div class="highlight"><pre><span></span><code>zypper install curl
-</code></pre></div>
-<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">#</a></h2>
-<ul>
-<li>Download and install package from the Janssen Project site using the command below</li>
-</ul>
+<p><code>curl</code>  is required to run the command below</p>
 <div class="highlight"><pre><span></span><code>zypper --no-gpg-checks install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*suse15.x86_64.rpm&#39; | head -n 1)
 </code></pre></div>
+<h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
-<li>Initiate the setup process using the command below. The setup process will prompt for user for inputs.</li>
+<li>Run the setup script in interactive mode:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py
 </code></pre></div>
+<p>See more detailed <a href="setup-script.md">instructions</a> on the setup script if you're
+confused how to answer any of the questions, for details about command line
+arguments, or you would prefer to use a properties file instead of
+interactive mode.</p>
 <h2 id="verify-the-installation">Verify the Installation<a class="headerlink" href="#verify-the-installation" title="Permanent link">#</a></h2>
 <p>After the successful completion of setup process, <a href="../../install-faq/#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running">verify the system health</a>.</p>
 <h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
@@ -10722,11 +10685,10 @@
 <li>Uninstall Janssen Server</li>
 <li>Remove and purge the <code>jans</code> package</li>
 </ol>
-<h3 id="uninstall-janssen-server">Uninstall Janssen Server<a class="headerlink" href="#uninstall-janssen-server" title="Permanent link">#</a></h3>
 <p>Use the command below to uninstall the Janssen server</p>
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/install.py -uninstall
 </code></pre></div>
-<p>Console output like below will confirm the successful uninstallation of the Janssen Server</p>
+<p>You'll see the following confirmation:</p>
 <div class="highlight"><pre><span></span><code>This process is irreversible.
 You will lose all data related to Janssen Server.
 
@@ -10766,7 +10728,7 @@ Removing /etc/apache2/sites-available/https_jans.conf
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T06:46:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-25T17:24:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-25</span>
       
         <br>
         Created:
