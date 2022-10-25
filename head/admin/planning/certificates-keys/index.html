@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#json-signing-and-encryption" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -630,10 +635,71 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Certificates/Keys
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Certificates/Keys
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server-supported-signing" class="md-nav__link">
+    Auth Server Supported Signing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server-supported-encryption" class="md-nav__link">
+    Auth Server Supported Encryption
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-cryptographic-engine-jce" class="md-nav__link">
+    Java Cryptographic Engine (JCE)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-a-hardware-security-module-hsm" class="md-nav__link">
+    Using a Hardware Security Module (HSM)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-rotation" class="md-nav__link">
+    Key Rotation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10481,6 +10547,51 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server-supported-signing" class="md-nav__link">
+    Auth Server Supported Signing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server-supported-encryption" class="md-nav__link">
+    Auth Server Supported Encryption
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-cryptographic-engine-jce" class="md-nav__link">
+    Java Cryptographic Engine (JCE)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-a-hardware-security-module-hsm" class="md-nav__link">
+    Using a Hardware Security Module (HSM)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-rotation" class="md-nav__link">
+    Key Rotation
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -10507,6 +10618,36 @@
         <span class="md-tag">planning</span>
       
     
+      
+      
+        <span class="md-tag">certificates</span>
+      
+    
+      
+      
+        <span class="md-tag">keys</span>
+      
+    
+      
+      
+        <span class="md-tag">cryptography</span>
+      
+    
+      
+      
+        <span class="md-tag">JCE</span>
+      
+    
+      
+      
+        <span class="md-tag">HSM</span>
+      
+    
+      
+      
+        <span class="md-tag">FIPS</span>
+      
+    
   </nav>
 
 
@@ -10517,16 +10658,142 @@
   </a>
 
 
-  <h1>Certificates/Keys</h1>
-
-<p>This is a placeholder</p>
+<h1 id="json-signing-and-encryption">JSON Signing and Encryption<a class="headerlink" href="#json-signing-and-encryption" title="Permanent link">#</a></h1>
+<p>Janssen uses keys for signing and encryption, primarily concerning
+JSON documents. There are six IETF RFCs that provide considerable detail:</p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7515">RFC 7515 JSON Web Signing (JWE)</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7516">RFC 7516 JSON Web Encryption (JWE)</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7517">RFC 7517 JSON Web Key (JWK)</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7518">RFC 7518 JSON Web Algorithms (JWA)</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7519">RFC 7519 JSON Web Signing (JWT)</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7520">RFC 7520 Examples of Protecting Content Using JSON Object Signing and Encryption (JOSE)</a></li>
+</ul>
+<h3 id="auth-server-supported-signing">Auth Server Supported Signing<a class="headerlink" href="#auth-server-supported-signing" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>JWT Type</th>
+<th align="center">Algorithms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DPOP</td>
+<td align="center">RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512</td>
+</tr>
+<tr>
+<td>Authorization</td>
+<td align="center">HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, ES512, PS256, PS384, PS512</td>
+</tr>
+<tr>
+<td>Request Object</td>
+<td align="center">[ none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512</td>
+</tr>
+<tr>
+<td>Userinfo</td>
+<td align="center">HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512</td>
+</tr>
+<tr>
+<td>Token Endpoint Auth</td>
+<td align="center">HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512</td>
+</tr>
+<tr>
+<td>ID Token</td>
+<td align="center">none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512</td>
+</tr>
+</tbody>
+</table>
+<h3 id="auth-server-supported-encryption">Auth Server Supported Encryption<a class="headerlink" href="#auth-server-supported-encryption" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Encryption Methods</th>
+<th align="center">Algorithms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authorization</td>
+<td align="center">A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM</td>
+</tr>
+<tr>
+<td>id_token</td>
+<td align="center">A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM</td>
+</tr>
+<tr>
+<td>Request object</td>
+<td align="center">A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM</td>
+</tr>
+<tr>
+<td>Userinfo</td>
+<td align="center">A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Encryption Algorithms</th>
+<th align="center">Algorithms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Userinfo</td>
+<td align="center">RSA1_5, RSA-OAEP, A128KW, A256KW</td>
+</tr>
+<tr>
+<td>id_token</td>
+<td align="center">RSA1_5, RSA-OAEP, A128KW, A256KW</td>
+</tr>
+<tr>
+<td>authorization</td>
+<td align="center">RSA1_5, RSA-OAEP, A128KW, A256KW</td>
+</tr>
+<tr>
+<td>request object</td>
+<td align="center">RSA1_5, RSA-OAEP, A128KW, A256KW</td>
+</tr>
+</tbody>
+</table>
+<h2 id="java-cryptographic-engine-jce">Java Cryptographic Engine (JCE)<a class="headerlink" href="#java-cryptographic-engine-jce" title="Permanent link">#</a></h2>
+<p>Janssen projects ships and tests with the
+<a href="https://www.bouncycastle.org/">Bouncy Castle Crypto API's</a> JCE. However, you
+may substitute your own JCE as long as it has implementations for the algorithms
+used by Auth Server.</p>
+<h2 id="using-a-hardware-security-module-hsm">Using a Hardware Security Module (HSM)<a class="headerlink" href="#using-a-hardware-security-module-hsm" title="Permanent link">#</a></h2>
+<p>Janssen Auth Server can utilize an external REST API,
+<a href="https://github.com/JanssenProject/jans/tree/main/jans-eleven">Jans Eleven</a>,
+which leverages an HSM that exposes a <code>PKCS #11</code> interface.</p>
+<h2 id="key-rotation">Key Rotation<a class="headerlink" href="#key-rotation" title="Permanent link">#</a></h2>
+<p>OpenID Connect clients must support the rotation of both
+<a href="https://openid.net/specs/openid-connect-core-1_0.html#RotateSigKeys">signing</a> and
+<a href="https://openid.net/specs/openid-connect-core-1_0.html#RotateEncKeys">encryption</a>
+keys. The best practice is to rotate often--the default configuration in
+a VM installation of Auth Server is <strong>every two days</strong>. The reason for such a
+frequent rotation is to make sure developer account for rotation at the time
+they create applications--lest they forget and their software breaks a year
+later when rotation happens.</p>
+<p>In a single VM deployment, key rotation is controlled by Auth Server. But in a
+clustered deployment, key rotation has to happen centrally. Janssen includes a
+key rotation service for cloud deployments.</p>
+<h1 id="certificates">Certificates<a class="headerlink" href="#certificates" title="Permanent link">#</a></h1>
+<p>X.509 is used extensively for web server TLS. But it is also used for Mutual
+Transport Layer Security (MTLS), either initiated by a software client, or
+presented by a person (i.e. a personal certificate). MTLS is generally
+implemented in the web tier.</p>
+<h1 id="fips">FIPS<a class="headerlink" href="#fips" title="Permanent link">#</a></h1>
+<p>To support FIPS 140-2 conformance, you must use a FIPS approved JCE, and
+preferably, use an operating system that has FIPS Enforcement, like
+<a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/security_hardening/assembly_installing-a-rhel-8-system-with-fips-mode-enabled_security-hardening">RHEL 8</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T16:08:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-25T22:09:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-25</span>
       
         <br>
         Created:
