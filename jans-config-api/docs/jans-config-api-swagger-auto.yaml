@@ -2945,17 +2945,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        userCanAccess:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanAccess:
+          type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         userCanEdit:
-          type: boolean
-        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -3389,10 +3389,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -3400,13 +3400,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        value:
+          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
-        value:
-          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4093,6 +4093,15 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
         fapi:
           type: boolean
         enabledFeatureFlags:
@@ -4122,15 +4131,6 @@ components:
             - STAT
             - PAR
             - SSA
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
     AuthenticationFilter:
       required:
       - baseDn
