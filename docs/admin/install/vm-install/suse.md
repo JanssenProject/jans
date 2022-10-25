@@ -5,43 +5,44 @@ tags:
 - vm
 - SUSE
 - SLES
+- Tumbleweed
 ---
 
-# Install Janssen Server using the SUSE Linux Enterprise Server (SLES) Package
+# SUSE Janssen Installation
 
-Janssen Server can be installed using the Linux package for SLES 
+Before you install, check the [VM system requirements](vm-requirements.md).
+
 
 ## Supported versions
 - SUSE Linux Enterprise Server (SLES) 15
+- openSUSE Leap 15.4
+- openSUSE Tumbleweed (non-production)
+
+## Install the Package
+
+Download the latest package from the Github Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases)
 
 !!! note
-    [SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
-
-## System Requirements
-
-System should meet [minimum VM system requirements](vm-requirements.md)
-
-## Prerequisites
-
-- `curl` should be installed. This can be easily installed using the command below
-
- ```
- zypper install curl
- ```
-
-## Install
-
-- Download and install package from the Janssen Project site using the command below
+`curl`  is required to run the command below
 
 ```
 zypper --no-gpg-checks install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*suse15.x86_64.rpm' | head -n 1)
 ```
 
-- Initiate the setup process using the command below. The setup process will prompt for user for inputs.
+## Run the setup script
+
+- Run the setup script in interactive mode:
 
 ```
 python3 /opt/jans/jans-setup/setup.py
 ```
+
+See more detailed [instructions](setup-script.md) on the setup script if you're
+confused how to answer any of the questions, for details about command line
+arguments, or you would prefer to use a properties file instead of
+interactive mode.
+
 
 ## Verify the Installation
 
@@ -54,22 +55,21 @@ Uninstall process involves two steps
 1. Uninstall Janssen Server
 2. Remove and purge the `jans` package
 
-### Uninstall Janssen Server
 
 Use the command below to uninstall the Janssen server
 
-```commandline
+```
 python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
-Console output like below will confirm the successful uninstallation of the Janssen Server
+You'll see the following confirmation:
 
-```text
+```
 This process is irreversible.
 You will lose all data related to Janssen Server.
 
 
- 
+
 Are you sure to uninstall Janssen Server? [yes/N] yes
 
 Uninstalling Jannsen Server...
