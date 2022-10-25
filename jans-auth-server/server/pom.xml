@@ -637,7 +637,21 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- We have to explicitly specify version because arquillian-jetty-container depends on 1.1.11-->
+		<!-- Test: External DB drivers-->
+		<!-- Couchbase -->
+		<dependency>
+			<groupId>com.couchbase.client</groupId>
+			<artifactId>java-client</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Cloud Spanner -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-spanner</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- We have to explicitly specify version because arquillian-jetty-container depends on 1.1.11 -->
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
 			<artifactId>arquillian-container-test-impl-base</artifactId>
