@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+RRF form.ftl data
+
+//Failure reason: first parameter of RRF expected to be a string literal

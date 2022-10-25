@@ -1,0 +1,8 @@
+Flow flow
+    Basepath ""
+
+Trigger co.wboy.music
+    Repeat 3 times max
+        Log idx[0]
+
+//Failure reason: unexpected Repeat block under Trigger
