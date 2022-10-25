@@ -12,6 +12,7 @@ from prompt_toolkit.widgets import Button, Label, Frame, Box
 from prompt_toolkit.application import Application
 
 from wui_components.jans_nav_bar import JansNavBar
+from wui_components.jans_drop_down import DropDownWidget
 
 
 from multi_lang import _
@@ -52,6 +53,19 @@ class Plugin():
                                 self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.data.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(schema, 'baseEndpoint'), style='class:outh-scope-text'),
                                 self.app.getTitledText(_("Clean Service Interval"), name='cleanServiceInterval', value=self.data.get('cleanServiceInterval',''), jans_help=self.app.get_help_from_schema(schema, 'cleanServiceInterval'), style='class:outh-scope-text'),
                                 self.app.getTitledText(_("Clean Service Batch ChunkSize"), name='cleanServiceBatchChunkSize', value=self.data.get('cleanServiceBatchChunkSize',''), jans_help=self.app.get_help_from_schema(schema, 'cleanServiceBatchChunkSize'), style='class:outh-scope-text'),
+                                self.app.getTitledCheckBox(_("Use Local Cache"), name='useLocalCache', checked= not self.data.get('useLocalCache'), jans_help=self.app.get_help_from_schema(schema, 'useLocalCache'), style='class:outh-client-checkbox'),
+                                self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked= not self.data.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(schema, 'disableJdkLogger'), style='class:outh-client-checkbox'),
+                                self.app.getTitledWidget(
+                                    _("Logging Level"),
+                                    name='loggingLevel',
+                                    widget=DropDownWidget(
+                                        values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'),('ERROR', 'ERROR'),('FATAL', 'FATAL'),('OFF', 'OFF')],
+                                        value=self.data.get('loggingLevel')
+                                        ),
+                                    jans_help=self.app.get_help_from_schema(schema, 'loggingLevel'),
+                                    style='class:outh-client-dropdown'
+                                    )
+
                                     ],
                                 width=D()
                                 )
