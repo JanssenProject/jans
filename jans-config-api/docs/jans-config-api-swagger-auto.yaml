@@ -140,8 +140,7 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                value:
-                  defaultAcr: simple_password_auth
+                value: "{\"someExampleParam\": 1}"
       responses:
         "200":
           description: Ok
@@ -227,10 +226,7 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                value:
-                  source: "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\"\
-                    \ }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\""
-                  qname: test
+                value: "{\"someExampleParam\": 1}"
       responses:
         "201":
           description: Created
@@ -2945,11 +2941,11 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanAccess:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
@@ -3284,6 +3280,8 @@ components:
           format: int32
         displayName:
           type: string
+        tokenBindingSupported:
+          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3295,8 +3293,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        tokenBindingSupported:
-          type: boolean
         baseDn:
           type: string
         inum:
@@ -4093,17 +4089,6 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
-        fapi:
-          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4131,6 +4116,17 @@ components:
             - STAT
             - PAR
             - SSA
+        fapi:
+          type: boolean
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -4387,13 +4383,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
