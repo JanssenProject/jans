@@ -200,6 +200,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return processCIBA(scope, authReqId, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(executionContext, deviceCode, scope);
+            } else if (gt == GrantType.TOKEN_EXCHANGE) {
+                return processTokenExchange(code, scope, executionContext);
             }
         } catch (WebApplicationException e) {
             throw e;
@@ -209,6 +211,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         throw new WebApplicationException(tokenRestWebServiceValidator.error(400, TokenErrorResponseType.UNSUPPORTED_GRANT_TYPE, "Unsupported Grant Type.").build());
+    }
+
+    private Response processTokenExchange(String code, String scope, ExecutionContext executionContext) {
+        // todo
+        return null;
     }
 
     private Response processROPC(String username, String password, String scope, GrantType gt, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) throws SearchException {

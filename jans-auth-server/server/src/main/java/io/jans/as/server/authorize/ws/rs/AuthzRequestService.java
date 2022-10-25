@@ -9,6 +9,7 @@ import io.jans.as.common.util.CommonUtils;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ScopeConstants;
@@ -108,6 +109,10 @@ public class AuthzRequestService {
 
     public void addDeviceSecretToSession(AuthzRequest authzRequest, SessionId sessionId) {
         if (!Arrays.asList(authzRequest.getScope().split(" ")).contains(ScopeConstants.DEVICE_SSO)) {
+            return;
+        }
+        if (!ArrayUtils.contains(authzRequest.getClient().getGrantTypes(), GrantType.TOKEN_EXCHANGE)) {
+            log.debug("Skip device secret. Scope has {} value but client does not have Token Exchange Grant Type enabled ('urn:ietf:params:oauth:grant-type:token-exchange')", ScopeConstants.DEVICE_SSO);
             return;
         }
 

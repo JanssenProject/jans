@@ -1,7 +1,9 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -69,9 +71,13 @@ public class AuthzRequestServiceTest {
 
     @Test
     public void addDeviceSecretToSession_withoutDeviceSsoScope_shouldNotGenerateDeviceSecret() {
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setScope("openid");
         authzRequest.setRedirectUriResponse(new RedirectUriResponse(mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+        authzRequest.setClient(client);
 
         SessionId sessionId = new SessionId();
 
@@ -81,9 +87,13 @@ public class AuthzRequestServiceTest {
 
     @Test
     public void addDeviceSecretToSession_withDeviceSsoScope_shouldGenerateDeviceSecret() {
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setRedirectUriResponse(new RedirectUriResponse(mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
         authzRequest.setScope("openid device_sso");
+        authzRequest.setClient(client);
 
         SessionId sessionId = new SessionId();
 
@@ -91,5 +101,22 @@ public class AuthzRequestServiceTest {
         authzRequestService.addDeviceSecretToSession(authzRequest, sessionId);
         assertEquals(1, sessionId.getDeviceSecrets().size());
         assertTrue(StringUtils.isNotBlank(sessionId.getDeviceSecrets().get(0)));
+    }
+
+    @Test
+    public void addDeviceSecretToSession_withClientWithoutTokenExchangeGrantType_shouldNotGenerateDeviceSecret() {
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE});
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+        authzRequest.setScope("openid device_sso");
+        authzRequest.setClient(client);
+
+        SessionId sessionId = new SessionId();
+
+        assertTrue(sessionId.getDeviceSecrets().isEmpty());
+        authzRequestService.addDeviceSecretToSession(authzRequest, sessionId);
+        assertTrue(sessionId.getDeviceSecrets().isEmpty());
     }
 }
