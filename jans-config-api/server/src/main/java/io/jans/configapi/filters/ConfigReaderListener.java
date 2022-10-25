@@ -32,7 +32,7 @@ import io.swagger.v3.jaxrs2.ReaderListener;
 import io.swagger.v3.oas.integration.api.OpenApiReader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.annotations.servers.Server;
-
+import io.swagger.v3.oas.annotations.tags.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +71,6 @@ public class ConfigReaderListener implements ReaderListener {
 
     @Inject
     Logger log;
-
    
     @Override
     public void beforeScan(OpenApiReader openApiReader, OpenAPI openAPI) {
@@ -98,8 +97,9 @@ public class ConfigReaderListener implements ReaderListener {
         log.error("ConfigReaderListener::afterScan() - openAPI.getComponents():{} ", openAPI.getComponents());
         log.error("ConfigReaderListener::afterScan() - openAPI.getPaths():{} ", openAPI.getPaths());
         System.out.println("\n\n\n *********** ConfigReaderListener::afterScan() *********** \n\n\n");
-        List<Server> servers = new ArrayList<>();
-        
+        PathItem expectedPath = new PathItem().$ref("http://my.company.com/paths/health.json");
+        openAPI.path("/test-puja", expectedPath);
+        openAPI.addTagsItem( new io.swagger.v3.oas.models.tags.Tag().description("ABC-Tag"));
         openAPI.addExtension("name", "krishna");
         
         if(openAPI.getPaths()!=null && openAPI.getPaths().size()>0) {

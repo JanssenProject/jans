@@ -17,7 +17,7 @@ import org.apache.http.util.EntityUtils;
 
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -74,6 +74,29 @@ public class SpecFilter extends AbstractSpecFilter {
     public Optional<OpenAPI> filterOpenAPI(OpenAPI openAPI, Map<String, List<String>> params, Map<String, String> cookies, Map<String, List<String>> headers) {
         
         System.out.println("\n\n\n *********** SpecFilter::filterOpenAPI() *********** \n\n\n");
+        System.out.println("\n openAPI="+openAPI+" , params="+params+" , cookies="+cookies+" , headers="+headers+"\n");
+        if(openAPI!=null) {
+            System.out.println("\n SpecFilter::filterOpenAPI() - openAPI.getPaths()= "+openAPI.getPaths()+" openAPI..getServers()="+openAPI.getServers());
+            if(openAPI.getPaths()!=null) {
+                Paths paths = openAPI.getPaths();
+                for(Path)
+            }
+        }
         return Optional.of(openAPI);
       }
+    
+    @Override
+    public Optional<Operation> filterOperation(Operation operation, ApiDescription api, Map<String, List<String>> params, Map<String, String> cookies, Map<String, List<String>> headers) {
+        System.out.println("\n\n\n *********** SpecFilter::filterOperation() *********** \n\n\n");
+        return Optional.of(operation);
+      }
+    
+    
+    @Override
+    public Optional<PathItem> filterPathItem(PathItem pathItem, ApiDescription api, Map<String, List<String>> params, Map<String, String> cookies, Map<String, List<String>> headers) {
+        System.out.println("\n\n\n *********** SpecFilter::filterOperation() *********** ");
+        
+        System.out.println("SpecFilter::filterOperation() *********** \n\n\n");
+      return Optional.of(pathItem);
+    }
 }

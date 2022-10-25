@@ -2946,17 +2946,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
+        adminCanAccess:
+          type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -4094,6 +4094,17 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        fapi:
+          type: boolean
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4121,17 +4132,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
     AuthenticationFilter:
       required:
       - baseDn
