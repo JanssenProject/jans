@@ -213,7 +213,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText(_("Client Secret"), name='clientSecret', value=self.data.get('clientSecret',''), jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), style='class:outh-client-text'),
                         self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-client-text'),
                         
-                        self.myparent.getTitledText(_("Authn Method token endpoint"),
+                        self.myparent.getTitledText(_("Authn Method token endpoint"),## TODO not titledtext
                             name='tokenEndpointAuthMethodsSupported',  ## TODO AppConfiguration
                             value='\n'.join(self.data.get('tokenEndpointAuthMethodsSupported', [])),## TODO Not in attributes >> in get-properties
                             height=3, 
