@@ -2,6 +2,7 @@ package io.jans.as.server.service.stat;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 import io.jans.as.common.model.stat.StatEntry;
 import io.jans.as.server.ws.rs.stat.StatResponse;
 import io.jans.as.server.ws.rs.stat.StatResponseItem;
@@ -10,13 +11,12 @@ import io.jans.orm.search.filter.Filter;
 import net.agkn.hll.HLL;
 import org.slf4j.Logger;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.jans.as.model.util.Util.escapeLog;
@@ -43,10 +43,13 @@ public class StatResponseService {
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build();
 
-    public StatResponse buildResponse(List<String> months) {
+    public StatResponse buildResponse(Set<String> months) {
         final String cacheKey = months.toString();
         final StatResponse cachedResponse = responseCache.getIfPresent(cacheKey);
         if (cachedResponse != null) {
+            if (log.isTraceEnabled()) {
+                log.trace("Get stat response from cache for: {}", escapeLog(cacheKey));
+            }
             return cachedResponse;
         }
 
@@ -64,11 +67,19 @@ public class StatResponseService {
 
     private StatResponseItem buildItem(String month) {
         try {
-            String monthlyDn = String.format("ou=%s,%s", escapeLog(month), statService.getBaseDn());
+            final String escapedMonth = escapeLog(month);
+            log.trace("Trying to fetch stat for month: {}", escapedMonth);
 
-            final List<StatEntry> entries = entryManager.findEntries(monthlyDn, StatEntry.class, Filter.createPresenceFilter("jansId"));
+            final List<StatEntry> entries = entryManager.findEntries(statService.getBaseDn(), StatEntry.class, Filter.createEqualityFilter("jansData", month));
             if (entries == null || entries.isEmpty()) {
-                log.trace("Can't find stat entries for month: {}", monthlyDn);
+                log.trace("Can't find stat entries for month: {}", escapedMonth);
+                return null;
+            }
+            log.trace("Fetched stat entries for month {} successfully", escapedMonth);
+
+            checkNotMatchedEntries(month, entries);
+            if (entries.isEmpty()) {
+                log.trace("No stat entries for month: {}", escapedMonth);
                 return null;
             }
 
@@ -83,6 +94,19 @@ public class StatResponseService {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    // this should not occur for newly created StatEntry (only outdated db)
+    private void checkNotMatchedEntries(String month, List<StatEntry> entries) {
+        final List<StatEntry> notMatched = Lists.newArrayList();
+        for (StatEntry entry : entries) {
+            if (!Objects.equals(month, entry.getMonth())) {
+                log.error("Not matched entry: {}", entry.getDn());
+                notMatched.add(entry);
+            }
+        }
+
+        entries.removeAll(notMatched);
     }
 
 

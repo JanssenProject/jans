@@ -7,7 +7,7 @@ import io.jans.model.custom.script.type.discovery.DiscoveryType;
 import io.jans.service.custom.script.ExternalScriptService;
 import org.json.JSONObject;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * @author Yuriy Zabrovarnyy

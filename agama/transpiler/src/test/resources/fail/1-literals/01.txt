@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = "\""
+
+//Failure reason: string literals cannot contain double quotes inside; last quote is hanging

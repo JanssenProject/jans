@@ -14,7 +14,6 @@ import io.jans.as.server.util.TokenHashUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
 import java.util.Date;
 import java.util.UUID;
 
@@ -28,9 +27,6 @@ public class GrantServiceTest extends BaseComponentTest {
 
     private static final String TEST_TOKEN_CODE = UUID.randomUUID().toString();
 
-    @Inject
-    private GrantService grantService;
-
     private static String clientId;
 
     private static TokenEntity tokenEntity;
@@ -40,20 +36,20 @@ public class GrantServiceTest extends BaseComponentTest {
     public void createTestToken(String clientId) {
         GrantServiceTest.clientId = clientId;
         tokenEntity = createTestToken();
-        grantService.persist(tokenEntity);
+        getGrantService().persist(tokenEntity);
     }
 
     @Test(dependsOnMethods = "createTestToken")
     public void removeTestTokens() {
-        final TokenEntity t = grantService.getGrantByCode(TEST_TOKEN_CODE);
+        final TokenEntity t = getGrantService().getGrantByCode(TEST_TOKEN_CODE);
         if (t != null) {
-            grantService.remove(t);
+            getGrantService().remove(t);
         }
     }
 
     private TokenEntity createTestToken() {
         final String grantId = GrantService.generateGrantId();
-        final String dn = grantService.buildDn(TokenHashUtil.hash(TEST_TOKEN_CODE));
+        final String dn = getGrantService().buildDn(TokenHashUtil.hash(TEST_TOKEN_CODE));
 
         final TokenEntity t = new TokenEntity();
         t.setDn(dn);

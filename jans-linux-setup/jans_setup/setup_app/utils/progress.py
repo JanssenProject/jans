@@ -134,6 +134,6 @@ class JansProgress:
         if self.queue:
             self.queue.put({'current': service_name, 'msg': msg})
         elif service_name != static.COMPLETED:
-            print("Process {}:{}".format(service_name, msg))
+            print("Process {}: {}".format(service_name, msg))
         
 jansProgress = JansProgress()

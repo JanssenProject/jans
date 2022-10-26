@@ -48,7 +48,9 @@ def main():
             update_image(image, "CN_SOURCE_URL", "CN_BUILD_DATE")
             if image == "docker-jans-config-api":
                 update_image(image, "SCIM_PLUGIN_SOURCE_URL", "SCIM_PLUGIN_BUILD_DATE")
-                update_image(image, "ADMIN_UI_SOURCE_URL", "ADMIN_UI_PLUGIN_BUILD_DATE")
+                update_image(image, "ADMIN_UI_PLUGIN_SOURCE_URL", "ADMIN_UI_PLUGIN_BUILD_DATE")
+                update_image(image, "FIDO2_PLUGIN_SOURCE_URL", "FIDO2_PLUGIN_BUILD_DATE")
+                update_image(image, "USER_MGT_PLUGIN_SOURCE_URL", "USER_MGT_PLUGIN_BUILD_DATE")
         except KeyError:
             print(f'Docker image {image} does not contain any packages to update')
             continue

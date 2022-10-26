@@ -22,22 +22,18 @@ queue = Queue()
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 
-if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv:
-    import install
-    install.setup_dir = dir_path
-    if '-uninstall' in sys.argv:
-        install.uninstall_jans()
-        sys.exit()
-    else:
-        print("Downloading Files")
-        install.download_files()
-        install.extract_yaml_files()
-        install.prepare_jans_cli_package()
+profile_fn = os.path.join(dir_path, 'profile')
+if os.path.exists(profile_fn):
+    with open(profile_fn) as f:
+        profile = f.read().strip()
+else:
+    profile = 'jans'
 
 os.environ['LC_ALL'] = 'C'
-from setup_app.utils.arg_parser import arg_parser
+os.environ['JANS_PROFILE'] = profile
+from setup_app.utils import arg_parser
 
-argsp = arg_parser()
+argsp = arg_parser.get_parser()
 
 # first import paths and make changes if necassary
 from setup_app import paths
@@ -76,13 +72,31 @@ from setup_app import static
 
 # second import module base, this makes some initial settings
 from setup_app.utils import base
+base.current_app.profile = profile
 
 # we will access args via base module
 base.argsp = argsp
 
+if 'SETUP_BRANCH' not in base.current_app.app_info:
+    base.current_app.app_info['SETUP_BRANCH'] = argsp.setup_branch
+
+base.current_app.app_info['ox_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
+
+
+# download pre-required apps
+from setup_app import downloads
+downloads.download_apps()
+
+sys.path.insert(0, base.pylib_dir)
+
 from setup_app.utils.package_utils import packageUtils
 
 packageUtils.check_and_install_packages()
+sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
+
+if argsp.download_exit:
+    downloads.download_all()
+    sys.exit()
 
 from setup_app.messages import msg
 from setup_app.config import Config
@@ -102,9 +116,9 @@ from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
+from setup_app.installers.opendj import OpenDjInstaller
 
-if Config.profile == 'jans':
-    from setup_app.installers.opendj import OpenDjInstaller
+if base.current_app.profile == 'jans':
     from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
@@ -115,6 +129,7 @@ from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 # from setup_app.installers.oxd import OxdInstaller
 
+
 if base.snap:
     try:
         open('/proc/mounts').close()
@@ -124,17 +139,19 @@ if base.snap:
         sys.exit()
 
 if paths.IAMPACKAGED:
-    Config.outputFolder = os.path.join(__STATIC_SETUP_DIR__, 'output')
-    if not os.path.exists(Config.outputFolder):
-        os.makedirs(Config.outputFolder)
+    Config.output_dir = os.path.join(__STATIC_SETUP_DIR__, 'output')
+    if not os.path.exists(Config.output_dir):
+        os.makedirs(Config.output_dir)
 
 # initialize config object
 Config.init(paths.INSTALL_DIR)
-Config.determine_version()
 
-base.profile = Config.profile
+
 if Config.profile != 'jans':
     argsp.t = False
+
+if os.path.exists(Config.jans_properties_fn):
+    Config.installed_instance = True
 
 # we must initilize SetupUtils after initilizing Config
 SetupUtils.init()
@@ -152,7 +169,7 @@ try:
 except:
     argsp.no_progress = True
 
-if not argsp.n:
+if not (argsp.n or Config.installed_instance):
     base.check_resources()
 
 # pass progress indicator to Config object
@@ -164,17 +181,16 @@ for key in setupOptions:
 jansInstaller = JansInstaller()
 jansInstaller.initialize()
 
-print()
-detected_os = '{} {}'.format(base.os_type, base.os_version)
-if base.snap:
-    detected_os = 'snap ' + detected_os
-print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
-print("Profile         :  {}".format(Config.profile))
-print("Detected OS     :  {}".format(detected_os))
-print("Janssen Version :  {}".format(Config.oxVersion))
-print("Detected init   :  {}".format(base.os_initdaemon))
-print("Detected Apache :  {}".format(base.determineApacheVersion()))
-print()
+if not Config.installed_instance:
+    print()
+
+    print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
+    print("Profile         :  {}".format(Config.profile))
+    print("Detected OS     :  {}".format(base.get_os_description()))
+    print("Janssen Version :  {}".format(base.current_app.app_info['ox_version']))
+    print("Detected init   :  {}".format(base.os_initdaemon))
+    print("Detected Apache :  {}".format(base.determineApacheVersion()))
+    print()
 
 setup_loaded = {}
 if setupOptions['setup_properties']:
@@ -197,7 +213,6 @@ collectProperties = CollectProperties()
 if os.path.exists(Config.jans_properties_fn):
     collectProperties.collect()
     collectProperties.save()
-    Config.installed_instance = True
 
     if argsp.csx:
         print("Saving collected properties")
@@ -212,9 +227,9 @@ propertiesUtils.check_properties()
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
+openDjInstaller = OpenDjInstaller()
 
 if Config.profile == 'jans':
-    openDjInstaller = OpenDjInstaller()
     couchbaseInstaller = CouchbaseInstaller()
 
 rdbmInstaller = RDBMInstaller()
@@ -234,6 +249,18 @@ jansCliInstaller = JansCliInstaller()
 rdbmInstaller.packageUtils = packageUtils
 
 if Config.installed_instance:
+
+    if argsp.enable_script:
+        print("Enabling scripts {}".format(', '.join(argsp.enable_script)))
+        jansInstaller.enable_scripts(argsp.enable_script)
+        sys.exit()
+
+    if argsp.disable_script:
+        print("Disabling scripts {}".format(', '.join(argsp.disable_script)))
+        jansInstaller.enable_scripts(argsp.disable_script, enable=False)
+        sys.exit()
+
+
     for service in jansProgress.services:
         setattr(Config, service['object'].install_var, service['object'].installed())
 
@@ -270,7 +297,7 @@ if Config.profile == 'jans':
         print("Exiting ...")
         sys.exit()
 
-Config.installJansCli = Config.installConfigApi or Config.installScimServer
+Config.install_jans_cli = Config.install_config_api or Config.install_scim_server
 
 app_vars = locals().copy()
 
@@ -302,7 +329,7 @@ def main():
         service_name = 'post-setup'
         install_var = 'installPostSetup'
         app_type = static.AppType.APPLICATION
-        install_type = static.InstallOption.MONDATORY
+        install_type = static.InstallOption.MANDATORY
 
 
     jansProgress.register(PostSetup)
@@ -337,7 +364,6 @@ def main():
                     Config.ldapTrustStoreFn = Config.opendj_p12_fn
                     Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
 
-                jansInstaller.prepare_base64_extension_scripts()
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
 
@@ -379,15 +405,16 @@ def main():
                         not Config.installed_instance and Config.installFido2):
                     fidoInstaller.start_installation()
 
-                if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.installScimServer):
+                if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.install_scim_server):
                     scimInstaller.start_installation()
 
                 if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
 
-            if Config.installJansCli:
+
+            if Config.install_jans_cli:
                 jansCliInstaller.start_installation()
                 jansCliInstaller.configure()
 
@@ -429,17 +456,26 @@ def main():
     if base.current_app.proceed_installation:
         do_installation()
         print('\n', static.colors.OKGREEN)
-        if Config.installConfigApi or Config.installScimServer:
+        if Config.install_config_api or Config.install_scim_server:
             msg.installation_completed += "CLI available to manage Jannsen Server:\n"
-            if Config.installConfigApi:
-                msg.installation_completed += "/opt/jans/jans-cli/config-cli.py\n"
-            if  Config.profile == 'jans' and Config.installScimServer:
+            if Config.install_config_api:
+                msg.installation_completed += "/opt/jans/jans-cli/config-cli.py"
+                if base.current_app.profile == static.SetupProfiles.OPENBANKING:
+                    ca_dir = os.path.join(Config.output_dir, 'CA')
+                    crt_fn = os.path.join(ca_dir, 'client.crt')
+                    key_fn = os.path.join(ca_dir, 'client.key')
+                    msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
+                msg.installation_completed +="\n"
+            if  Config.profile == 'jans' and Config.install_scim_server:
                 msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
             Config.hostname)
         print(msg_text)
         print('\n', static.colors.ENDC)
+        print(static.colors.DANGER)
+        print(msg.setup_removal_warning)
+        print(static.colors.ENDC, '\n')
         # we need this for progress write last line
         time.sleep(2)
 

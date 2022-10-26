@@ -14,6 +14,7 @@ import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.TClientService;
@@ -23,9 +24,9 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -42,7 +43,6 @@ import static org.testng.Assert.fail;
 /**
  * @author Yuriy Zabrovarnyy
  */
-@RunAsClient
 public class EndSessionBackchannelRestServerTest extends BaseTest {
 
     private static io.jans.as.client.RegisterResponse registerResponse;
@@ -61,7 +61,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         registerRequest.setBackchannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
-        registerResponse = TClientService.register(registerRequest, url);
+        registerResponse = TClientService.register(registerRequest, getApiTagetURL(url));
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -83,7 +83,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Invocation.Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -100,7 +100,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -132,7 +132,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         endSessionRequest.setSid(sid);
 
         Invocation.Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
         Response response = request.get();

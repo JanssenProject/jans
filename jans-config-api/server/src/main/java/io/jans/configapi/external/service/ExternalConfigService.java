@@ -14,10 +14,10 @@ import io.jans.model.custom.script.type.configapi.ConfigApiType;
 import io.jans.service.custom.script.ExternalScriptService;
 
 import java.util.Map;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ public class ExternalConfigService extends ExternalScriptService {
     private static final long serialVersionUID = 1767751544454591666L;
 
     @Inject
-    Logger logger;
+    transient Logger logger;
 
     public ExternalConfigService() {
         super(CustomScriptType.CONFIG_API);

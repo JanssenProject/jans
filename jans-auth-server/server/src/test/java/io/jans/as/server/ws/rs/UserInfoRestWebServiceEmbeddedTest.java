@@ -12,7 +12,8 @@ import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.model.util.QueryStringDecoder;
+import io.jans.as.server.util.TestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.GrantType;
@@ -36,11 +37,11 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris,
                                           final String sectorIdentifierUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
@@ -110,7 +111,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            TestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
             clientSecret = registerResponse.getClientSecret();
@@ -136,7 +137,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + userEncodedCredentials);
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -153,7 +154,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
@@ -177,7 +178,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoStep1ImplicitFlow")
     public void requestUserInfoStep2PostImplicitFlow(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
 
         request.header("Authorization", "Bearer " + accessToken1);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
@@ -220,7 +221,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + userInfoPath + "?" + userInfoRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + userInfoPath + "?" + userInfoRequest.getQueryString()).request();
         request.header("Authorization", "Bearer " + accessToken1);
 
         Response response = request.get();
@@ -257,7 +258,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     public void requestUserInfoStep1PasswordFlow(final String tokenPath, final String userId, final String userSecret)
             throws Exception {
         // Testing with valid parameters
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -300,7 +301,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoStep1PasswordFlow")
     public void requestUserInfoStep2PasswordFlow(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
         request.header("Authorization", "Bearer " + accessToken4);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -341,7 +342,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     public void requestUserInfoInvalidRequest(final String userInfoPath) throws Exception {
         io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
         String entity = response.readEntity(String.class);
@@ -366,7 +367,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest("INVALID_ACCESS_TOKEN");
         userInfoRequest.setAuthorizationMethod(io.jans.as.model.common.AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
         String entity = response.readEntity(String.class);
@@ -388,7 +389,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test
     public void requestUserInfoInvalidSchema(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
         io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest("INVALID_ACCESS_TOKEN");
@@ -444,7 +445,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         System.out.println("Request JWT: " + authJwt);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -461,7 +462,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
@@ -485,7 +486,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoAdditionalClaims")
     public void requestUserInfoAdditionalClaimsStep2(final String userInfoPath) {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -529,7 +530,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestUserInfoHS256Step1(final String registerPath, final String redirectUris) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
@@ -599,7 +600,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         System.out.println("Request JWT: " + authJwt);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -615,7 +616,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -632,7 +633,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoHS256Step2")
     public void requestUserInfoHS256Step3(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
         request.header("Authorization", "Bearer " + accessToken5);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -687,7 +688,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -744,7 +745,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         System.out.println("Request JWT: " + authJwt);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -761,7 +762,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -778,7 +779,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoHS384Step2")
     public void requestUserInfoHS384Step3(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
         request.header("Authorization", "Bearer " + accessToken6);
 
         io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
@@ -817,7 +818,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestUserInfoHS512Step1(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
 
@@ -889,7 +890,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         System.out.println("Request JWT: " + authJwt);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -905,7 +906,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -922,7 +923,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoHS512Step2")
     public void requestUserInfoHS512Step3(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
 
         request.header("Authorization", "Bearer " + accessToken7);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);

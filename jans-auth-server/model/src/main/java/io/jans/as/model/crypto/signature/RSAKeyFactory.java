@@ -34,6 +34,7 @@ import java.util.GregorianCalendar;
  *
  * @author Javier Rojas Blum
  * @version June 15, 2016
+ * @deprecated Used for Tests
  */
 @Deprecated
 public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {

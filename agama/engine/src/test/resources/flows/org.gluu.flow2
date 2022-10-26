@@ -1,0 +1,14 @@
+//This flow appeared originally in the demos of the authentication-trees project
+Flow org.gluu.flow2
+    Basepath "f1" 
+    Inputs val
+
+x = {value: val}
+data = RRF "index2.ftl" x
+
+When data.something is ""
+    Log "There was a missing value"
+    ret = { success: false, error: "You forgot something!" }
+    Finish ret
+Otherwise
+    Finish true

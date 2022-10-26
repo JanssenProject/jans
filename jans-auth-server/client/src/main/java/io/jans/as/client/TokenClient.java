@@ -10,9 +10,9 @@ import io.jans.as.model.common.GrantType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 
 import static io.jans.as.model.token.TokenRequestParam.ASSERTION;
 import static io.jans.as.model.token.TokenRequestParam.AUTH_REQ_ID;

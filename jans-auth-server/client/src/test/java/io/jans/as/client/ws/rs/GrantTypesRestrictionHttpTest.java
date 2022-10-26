@@ -23,6 +23,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -39,7 +40,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -85,7 +86,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -105,7 +106,9 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readResponse, 200, true);
+        AssertBuilder.registerResponse(readResponse).ok()
+                .notNullRegistrationClientUri()
+                .check();
         assertRegisterResponseClaimsNotNull(readResponse, APPLICATION_TYPE, SCOPE);
         assertNotNull(readResponse.getResponseTypes());
         assertTrue(readResponse.getResponseTypes().containsAll(expectedResponseTypes));
@@ -163,14 +166,15 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
 
             // 4. Validate id_token
             Jwt jwt = Jwt.parse(idToken);
-            assertJwtStandarClaimsNotNull(jwt, false);
+            AssertBuilder.jwt(jwt)
+                    .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                    .notNullAuthenticationTime()
+                    .check();
 
             RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                     jwksUri,
                     jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
             RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-            assertTrue(rsaSigner.validate(jwt));
 
             if (expectedResponseTypes.contains(ResponseType.CODE)) {
                 assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
@@ -196,7 +200,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, false, false);
+            AssertBuilder.tokenResponse(tokenResponse)
+                    .check();
 
             if (expectedGrantTypes.contains(GrantType.REFRESH_TOKEN)) {
                 assertNotNull(tokenResponse.getRefreshToken());
@@ -208,7 +213,9 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 TokenResponse refreshTokenResponse = refreshTokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
                 showClient(refreshTokenClient);
-                assertTokenResponseOk(refreshTokenResponse, true, false);
+                AssertBuilder.tokenResponse(refreshTokenResponse)
+                        .notNullRefreshToken()
+                        .check();
 
                 accessToken = refreshTokenResponse.getAccessToken();
             } else {

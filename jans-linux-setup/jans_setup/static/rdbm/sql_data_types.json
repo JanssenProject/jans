@@ -36,56 +36,6 @@
       "type": "STRING"
     }
   },
-  "inum": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "middleName": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "nickname": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "o": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "ou": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
   "sn": {
     "mysql": {
       "size": 128,
@@ -93,16 +43,6 @@
     },
     "spanner": {
       "size": 128,
-      "type": "STRING"
-    }
-  },
-  "uid": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
       "type": "STRING"
     }
   },
@@ -126,56 +66,6 @@
       "type": "STRING"
     }
   },
-  "jansAccessTknSigAlg": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansAppTyp": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansAttrName": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansAttrOrigin": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansAttrTyp": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
   "jansAttrs": {
     "mysql": {
       "type": "TEXT"
@@ -184,14 +74,12 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansAuthMode": {
+  "jansAuthData": {
     "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
+      "type": "TEXT"
     },
     "spanner": {
-      "size": 64,
-      "type": "STRING"
+      "type": "STRING(MAX)"
     }
   },
   "jansCacheConf": {
@@ -200,26 +88,6 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
-    }
-  },
-  "jansClaimName": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansClntSecret": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
     }
   },
   "jansConfApp": {
@@ -266,6 +134,9 @@
     "mysql": {
       "type": "JSON"
     },
+    "pgsql": {
+      "type": "JSONB"
+    },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
     }
@@ -282,6 +153,9 @@
     "mysql": {
       "type": "JSON"
     },
+    "pgsql": {
+      "type": "JSONB"
+    },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
     }
@@ -296,72 +170,15 @@
       "type": "STRING"
     }
   },
-  "jansIdTknSignedRespAlg": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansOrgShortName": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansProgLng": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
   "jansRespTyp": {
     "mysql": {
       "type": "JSON"
     },
+    "pgsql": {
+      "type": "JSONB"
+    },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
-    }
-  },
-  "jansSAML1URI": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansSAML2URI": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansScopeTyp": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
     }
   },
   "jansScr": {
@@ -372,16 +189,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansScrTyp": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
   "jansStatus": {
     "mysql": {
       "size": 16,
@@ -389,36 +196,6 @@
     },
     "spanner": {
       "size": 16,
-      "type": "STRING"
-    }
-  },
-  "jansSubjectTyp": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansThemeColor": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansTknEndpointAuthMethod": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
       "type": "STRING"
     }
   },
@@ -436,6 +213,9 @@
   "member": {
     "mysql": {
       "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
     },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
@@ -532,17 +312,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansReqURI": {
-    "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
-    }
-  },
   "jansSectorIdentifierURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -566,17 +335,6 @@
     }
   },
   "jansTosURI": {
-    "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
-    }
-  },
-  "jansClaimRedirectURI": {
     "mysql": {
       "type": "TINYTEXT"
     },
@@ -625,26 +383,6 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
-    }
-  },
-  "clnId": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
-    }
-  },
-  "jansClntId": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 64,
-      "type": "STRING"
     }
   },
   "jwtReq": {
@@ -746,14 +484,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "memberOf": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "tknCde": {
     "mysql": {
       "size": 80,
@@ -762,14 +492,6 @@
     "spanner": {
       "size": 80,
       "type": "STRING"
-    }
-  },
-  "jansUmaPermission": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansScrError": {
@@ -823,19 +545,11 @@
       "type": "STRING"
     }
   },
-  "jansSmtpConf": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "jansResource": {
     "mysql": {
       "type": "TINYTEXT"
     },
-  "pgsql": {
+    "pgsql": {
       "type": "TEXT"
     },
     "spanner": {
@@ -845,6 +559,9 @@
   "scimCustomSecond": {
     "mysql": {
       "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
     },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
@@ -1033,5 +750,61 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "mobile": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
+  "agFlowEncCont": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
+    },
+  "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "agFlowMeta": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "agFlowTrans": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "agFlowSt": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansCustomMessage": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }      
   }
 }

@@ -6,9 +6,12 @@
 
 package io.jans.as.server;
 
+import io.jans.as.server.util.TestUtil;
 import org.testng.Assert;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
+
+import java.net.URI;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -53,4 +56,42 @@ public abstract class BaseTest extends ConfigurableTest {
     public static void output(String msg) {
         System.out.println(msg);
     }
+
+    public static String getApiTagetURL(URI uriArquillianTestServer) {
+        if (TestUtil.testWithExternalApiUrl()) {
+            return TestUtil.readExternalApiUrl();
+        } else if (uriArquillianTestServer != null) {
+            return uriArquillianTestServer.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public static URI getApiTagetURI(URI uriArquillianTestServer) {
+        String url = getApiTagetURL(uriArquillianTestServer);
+        if (url != null) {
+            try {
+                return new URI(url);
+            } catch (Exception e) {
+                System.out.println("Parsing URI getApiTagetURI : " + url + " - " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    public static String getApiTargetPath(URI uriArquillianTestServer, String endpointPath) {
+        if (TestUtil.testWithExternalApiUrl()) {
+            String url = TestUtil.readExternalApiUrl() + endpointPath;
+            try {
+                URI testURI = new URI(url);
+                return testURI.getPath();
+            } catch (Exception e) {
+                System.out.println("Parsing URI getApiTargetPath : " + e.getMessage());
+            }
+        } else if (uriArquillianTestServer != null) {
+            return uriArquillianTestServer.getPath();
+        }
+        return null;
+    }
+
 }

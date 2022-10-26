@@ -14,9 +14,9 @@ import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.json.JSONObject;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
 
 import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 

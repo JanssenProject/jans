@@ -6,7 +6,7 @@
 
 package io.jans.scim.service.cdi.event;
 
-import javax.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 public class EventTypeQualifier extends AnnotationLiteral<EventType> implements EventType {
 

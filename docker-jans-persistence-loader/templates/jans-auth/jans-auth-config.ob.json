@@ -26,6 +26,12 @@
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
     "openidSubAttribute":"inum",
+    "discoveryDenyKeys": [
+        "id_generation_endpoint",
+        "auth_level_mapping",
+        "scope_to_claims_mapping",
+        "op_policy_uri"
+    ],
     "discoveryAllowedKeys": [
         "issuer",
         "authorization_endpoint",
@@ -116,6 +122,7 @@
     ],
     "idTokenEncryptionEncValuesSupported":[
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "HS256",
         "RS256",
@@ -180,6 +187,10 @@
     "claimsParameterSupported":true,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
+    "requestUriBlockList": [
+        "localhost",
+        "127.0.0.1"
+    ],
     "requireRequestUriRegistration":false,
     "allowPostLogoutRedirectWithoutValidation":false,
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
@@ -216,7 +227,6 @@
     "dcrSignatureValidationJwks": null,
     "dcrSignatureValidationJwksUri": null,
     "dcrAuthorizationWithClientCredentials": false,
-    "dcrSkipSignatureValidation": true,
     "dcrAuthorizationWithMTLS": false,
     "softwareStatementValidationType": "script",
     "softwareStatementValidationClaimName": "jwks_uri",
@@ -288,7 +298,7 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
-    "httpLoggingExludePaths": [],
+    "httpLoggingExcludePaths": [],
     "externalLoggerConfiguration": "",
     "authorizationRequestCustomAllowedParameters" : [
         {
@@ -343,6 +353,11 @@
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEnabled": false,
+    "ssaConfiguration": {
+        "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
         "authDomain": "",
@@ -359,5 +374,7 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "staticKid": "%(staticKid)s",
-    "forceOfflineAccessScopeToEnableRefreshToken" : false
+    "forceOfflineAccessScopeToEnableRefreshToken" : false,
+    "redirectUrisRegexEnabled": false,
+    "useHighestLevelScriptIfAcrScriptNotFound": true
 }

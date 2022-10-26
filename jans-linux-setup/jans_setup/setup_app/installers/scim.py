@@ -11,39 +11,42 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class ScimInstaller(JettyInstaller):
 
+    source_files = [
+            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+            ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-scim'
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installScimServer'
+        self.install_var = 'install_scim_server'
         self.register_progess()
 
-        self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-scim.war'), 'https://ox.gluu.org/maven/org/gluu/scim-server/{0}/scim-server-{0}.war'.format(Config.oxVersion)),
-                (os.path.join(Config.install_dir, 'jans_setup/data/jans-scim-openapi.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml'),
-                ]
-
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
-        self.output_folder = os.path.join(Config.outputFolder, self.service_name)
+        self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         self.dynamic_config_fn = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.static_config_fn = os.path.join(self.output_folder, 'static-conf.json')
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_clients_fn = os.path.join(self.output_folder, 'clients.ldif')
         self.ldif_scopes_fn = os.path.join(self.output_folder, 'scopes.ldif')
+        self.jans_scim_openapi_fn = os.path.join(Config.data_dir, 'jans-scim-openapi.yaml')
+
+        if not base.argsp.shell:
+            self.extract_files()
+
+
+    def extract_files(self):
+        base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', Config.data_dir)
 
 
     def install(self):
-        if not os.path.exists(self.source_files[1][0]):
-            base.download(self.source_files[1][1], self.source_files[1][0])
-
         self.logIt("Copying scim.war into jetty webapps folder...")
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-        self.war_for_jetty10(os.path.join(jettyServiceWebapps, os.path.basename(self.source_files[0][0])))
         self.enable()
 
 
@@ -91,7 +94,7 @@ class ScimInstaller(JettyInstaller):
 
     def generate_configuration(self):
         self.logIt("Generating {} configuration".format(self.service_name))
-        yml_str = self.readFile(os.path.join(self.source_files[1][0]))
+        yml_str = self.readFile(self.jans_scim_openapi_fn)
         yml_str = yml_str.replace('\t', ' ')
         cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
         config_scopes = cfg_yml['components']['securitySchemes']['scim_oauth']['flows']['clientCredentials']['scopes']
@@ -141,7 +144,8 @@ class ScimInstaller(JettyInstaller):
                 'jansSubjectTyp': ['pairwise'],
                 'jansTknEndpointAuthMethod': ['client_secret_basic'],
                 'inum': [Config.scim_client_id],
-                'jansClntSecret': [Config.scim_client_encoded_pw]
+                'jansClntSecret': [Config.scim_client_encoded_pw],
+                'jansRedirectURI': ['https://{}/.well-known/scim-configuration'.format(Config.hostname)]
                 })
 
         client_ldif_fd.close()

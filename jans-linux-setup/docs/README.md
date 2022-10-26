@@ -80,7 +80,7 @@ Collection of utilities used by SetupApp.
 - `db_utils.py` Database management (both ldap and cocuhbase) class is inclueded `DBUtils` in this file. Since `DBUtils`
    class is assigned to `self.dbutils` variable in base class for installers, we generally don't include this module
    in installers. Functions in `DBUtils` class automatically determines which database to be used for operations by examining
-   `mappingLocations` defined in `Config` and populated during install time (or later from `setup.properties`).
+   `mapping_locations` defined in `Config` and populated during install time (or later from `setup.properties`).
    Some most commanly functions are:
    
    - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
@@ -219,7 +219,7 @@ class SampleInstaller(JettyInstaller):
                                           # services, for example, systemctl start application
 
         self.app_type = static.AppType.SERVICE   # enumartiation for application type, etiher APPLICATION or SERVICE
-        self.install_type = static.InstallOption.OPTONAL # enumartiation for installation type, etiher MONDATORY or OPTONAL
+        self.install_type = static.InstallOption.OPTONAL # enumartiation for installation type, etiher MANDATORY or OPTONAL
         self.install_var = 'installApplication' # variale defined in Config to determine if thi application is going to be installed or not
         self.register_progess() # we need to register to progress indicator so that it will shows status of installation during installation process
 
@@ -237,7 +237,7 @@ class SampleInstaller(JettyInstaller):
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
         
         self.templates_folder = os.path.join(Config.templateFolder, 'sample-app') # folder where themplates of this application exists
-        self.output_folder = os.path.join(Config.outputFolder, 'sample-app') # folder where rendered templates to be written
+        self.output_folder = os.path.join(Config.output_dir, 'sample-app') # folder where rendered templates to be written
 
 
         self.app_client_jks_fn = os.path.join(Config.certFolder, 'sample-app.jks')

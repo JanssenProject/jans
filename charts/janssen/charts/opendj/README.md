@@ -1,6 +1,6 @@
 # opendj
 
-![Version: 1.0.0-beta.15](https://img.shields.io/badge/Version-1.0.0--beta.15-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
+![Version: 1.0.3-dev](https://img.shields.io/badge/Version-1.0.3--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.3-dev](https://img.shields.io/badge/AppVersion-1.0.3--dev-informational?style=flat-square)
 
 OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 
@@ -10,12 +10,11 @@ OpenDJ is a directory server which implements a wide range of Lightweight Direct
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Mohammad Abudayyeh | support@jans.io | https://github.com/moabu |
+| Mohammad Abudayyeh | <support@jans.io> | <https://github.com/moabu> |
 
 ## Source Code
 
-* <https://github.com/JanssenFederation/docker-opendj>
-* <https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/opendj>
+* <https://github.com/GluuFederation/docker-opendj>
 
 ## Requirements
 
@@ -35,17 +34,10 @@ Kubernetes: `>=v1.21.0-0`
 | hpa.metrics | list | `[]` | metrics if targetCPUUtilizationPercentage is not set |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"janssenfederation/opendj"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.0_dev"` | Image  tag to use for deploying. |
-| livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
+| image.repository | string | `"gluufederation/opendj"` | Image  to use for deploying. |
+| image.tag | string | `"5.0.0_dev"` | Image  tag to use for deploying. |
+| livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for OpenDJ if needed. |
 | livenessProbe.exec | object | `{"command":["python3","/app/scripts/healthcheck.py"]}` | Executes the python3 healthcheck. |
-| multiCluster.clusterId | string | `""` | This id needs to be unique to each kubernetes cluster in a multi cluster setup west, east, south, north, region ...etc If left empty it will be randomly generated. |
-| multiCluster.enabled | bool | `false` | Enable OpenDJ multiCluster mode. This flag enables loading keys under `opendj.multiCluster` |
-| multiCluster.namespaceIntId | int | `0` | Namespace int id. This id needs to be a unique number 0-9 per janssen installation per namespace. Used when janssen is installed in the same kubernetes cluster more than once. |
-| multiCluster.replicaCount | int | `1` | The number of opendj non scalabble statefulsets to create. Each pod created must be resolvable as it follows the patterm RELEASE-NAME-opendj-CLUSTERID-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }} If set to 1, with a release name of janssen,  the address of the pod would be janssen-opendj-regional-0-regional.janssen.org |
-| multiCluster.serfAdvertiseAddrSuffix | string | `"regional.janssen.org:30946"` | OpenDJ Serf advertise address suffix that will be added to each opendj replica. i.e RELEASE-NAME-opendj-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }} |
-| multiCluster.serfKey | string | `"Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk="` | Serf key. This key will automatically sync across clusters. |
-| multiCluster.serfPeers | list | `["janssen-opendj-regional-0-regional.janssen.org:30946","janssen-opendj-regional-0-regional.janssen.org:31946"]` | Serf peer addresses. One per cluster. |
 | nameOverride | string | `""` |  |
 | openDjVolumeMounts.config.mountPath | string | `"/opt/opendj/config"` |  |
 | openDjVolumeMounts.config.name | string | `"opendj-volume"` |  |
@@ -61,7 +53,7 @@ Kubernetes: `>=v1.21.0-0`
 | persistence.size | string | `"5Gi"` | OpenDJ volume size |
 | persistence.type | string | `"DirectoryOrCreate"` |  |
 | ports | object | `{"tcp-admin":{"nodePort":"","port":4444,"protocol":"TCP","targetPort":4444},"tcp-ldap":{"nodePort":"","port":1389,"protocol":"TCP","targetPort":1389},"tcp-ldaps":{"nodePort":"","port":1636,"protocol":"TCP","targetPort":1636},"tcp-repl":{"nodePort":"","port":8989,"protocol":"TCP","targetPort":8989},"tcp-serf":{"nodePort":"","port":7946,"protocol":"TCP","targetPort":7946},"udp-serf":{"nodePort":"","port":7946,"protocol":"UDP","targetPort":7946}}` | servicePorts values used in StatefulSet container |
-| readinessProbe | object | `{"failureThreshold":20,"initialDelaySeconds":60,"periodSeconds":25,"tcpSocket":{"port":1636},"timeoutSeconds":5}` | Configure the readiness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
+| readinessProbe | object | `{"failureThreshold":20,"initialDelaySeconds":60,"periodSeconds":25,"tcpSocket":{"port":1636},"timeoutSeconds":5}` | Configure the readiness healthcheck for OpenDJ if needed. |
 | replicas | int | `1` | Service replica number. |
 | resources | object | `{"limits":{"cpu":"1500m","memory":"2000Mi"},"requests":{"cpu":"1500m","memory":"2000Mi"}}` | Resource specs. |
 | resources.limits.cpu | string | `"1500m"` | CPU limit. |
@@ -75,4 +67,4 @@ Kubernetes: `>=v1.21.0-0`
 | volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
 
 ----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.7.0](https://github.com/norwoodj/helm-docs/releases/v1.7.0)
+Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)

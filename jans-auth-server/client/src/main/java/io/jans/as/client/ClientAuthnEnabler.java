@@ -9,8 +9,8 @@ package io.jans.as.client;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.token.ClientAssertionType;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Form;
 
 
 /**

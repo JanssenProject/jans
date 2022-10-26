@@ -21,18 +21,21 @@ jobs:
             asset_prefix: '_'
             asset_path: jans
             sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            python_version: 3.8
           - name: el8
-            asset_suffix: .el8.x86_64.rpm
+            asset_suffix: -el8.x86_64.rpm
             build_files: rpm/el8
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
+            python_version: 3.6
           - name: suse15
-            asset_suffix: .suse15.x86_64.rpm
+            asset_suffix: -suse15.x86_64.rpm
             build_files: rpm/suse15
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
+            python_version: 3.6
 
     steps:
     - name: Getting build dependencies
@@ -42,11 +45,14 @@ jobs:
          mkdir -p jans/jans-src/opt/
          cp -rp packaging/${{ matrix.build_files }}/* jans/
          wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O jans/install.py
-         sudo apt install -y python3-distutils python3-ldap3 build-essential devscripts debhelper rpm dpkg-sig
+         sudo add-apt-repository ppa:deadsnakes/ppa
+         sudo apt-get update
+         sudo apt-get install -y python${{ matrix.python_version }}
+         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@v4
+      uses: crazy-max/ghaction-import-gpg@v5
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -67,11 +73,13 @@ jobs:
       id: run_build
       run: |
          cd jans/
-         sudo python3.8 install.py --no-setup
+         sudo python${{ matrix.python_version }} install.py -download-exit -yes
          cp -r /opt/dist jans-src/opt/
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
          rm -rf install.py install jans-cli
+         rm -rf jans-src/opt/jans/jans-setup/logs/setup.log
+         rm -rf jans-src/opt/jans/jans-setup/logs/setup_error.log         
          sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
          cat run-build.sh
          sudo ./run-build.sh
@@ -160,7 +168,7 @@ jobs:
           mv jans-cli.pyz jans-cli-linux-X86-64.pyz
           sha256sum jans-cli-linux-X86-64.pyz > jans-cli-linux-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: 3.6
     - name: Build with Ubuntu
@@ -179,7 +187,7 @@ jobs:
         make zipapp 
         mv jans-cli.pyz jans-cli-linux-ubuntu-X86-64.pyz
         sha256sum jans-cli-linux-ubuntu-X86-64.pyz > jans-cli-linux-ubuntu-X86-64.pyz.sha256sum
-    - uses: actions/cache@v2.1.7
+    - uses: actions/cache@v3
       id: cache-installers
       with:
         path: |
@@ -206,7 +214,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - uses: actions/cache@v2.1.7
+    - uses: actions/cache@v3
       id: cache-installers
       with:
         path: |

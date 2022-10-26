@@ -16,7 +16,7 @@ import io.jans.jsf2.i18n.ExtendedResourceBundle;
  */
 public class CustomResourceBundle extends ExtendedResourceBundle {
 
-    private static final String BASE_NAME = "oxauth";
+    private static final String BASE_NAME = "jans-auth";
 
     @Override
     public String getBaseName() {

@@ -21,7 +21,7 @@ from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
-if Config.profile == 'jans':
+if base.current_app.profile == 'jans':
     from setup_app.utils.spanner import Spanner
 
 my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
@@ -52,9 +52,9 @@ class DBUtils:
                 format='%(asctime)s %(levelname)s - %(message)s'
                 )
 
-        if Config.mappingLocations['default'] == 'ldap':
+        if Config.mapping_locations['default'] == 'ldap':
             self.moddb = BackendTypes.LDAP
-        elif Config.mappingLocations['default'] == 'rdbm':
+        elif Config.mapping_locations['default'] == 'rdbm':
             self.read_jans_schema()
             if Config.rdbm_type == 'mysql':
                 self.moddb = BackendTypes.MYSQL
@@ -67,8 +67,8 @@ class DBUtils:
             self.moddb = BackendTypes.COUCHBASE
 
         if not hasattr(self, 'ldap_conn') or force:
-            for group in Config.mappingLocations:
-                if Config.mappingLocations[group] == 'ldap':
+            for group in Config.mapping_locations:
+                if Config.mapping_locations[group] == 'ldap':
                     base.logIt("Making LDAP Conncetion")
                     ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldaps_port), use_ssl=use_ssl)
                     self.ldap_conn = ldap3.Connection(
@@ -81,10 +81,10 @@ class DBUtils:
                     break
 
         if not self.session or force:
-            for group in Config.mappingLocations:
-                if Config.mappingLocations[group] == 'rdbm':
+            for group in Config.mapping_locations:
+                if Config.mapping_locations[group] == 'rdbm':
                     if Config.rdbm_type in ('mysql', 'pgsql'):
-                        base.logIt("Making MySql Conncetion")
+                        base.logIt("Making {} Conncetion".format(Config.rdbm_type))
                         result = self.mysqlconnection()
                         if not result[0]:
                             print("{}FATAL: {}{}".format(colors.FAIL, result[1], colors.ENDC))
@@ -131,7 +131,7 @@ class DBUtils:
 
     @property
     def json_dialects_instance(self):
-        return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
+        return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSONB
 
     def mysqlconnection(self, log=True):
         return self.sqlconnection(log)
@@ -148,6 +148,10 @@ class DBUtils:
         self.sql_data_types = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'sql_data_types.json'))
         self.opendj_attributes_syntax = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'opendj_attributes_syntax.json'))
         self.sub_tables = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'sub_tables.json'))
+
+        for attr in attribDataTypes.listAttributes:
+            if not attr in self.sql_data_types:
+                self.sql_data_types[attr] = { 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} }
 
     def in_subtable(self, table, attr):
         if table in self.sub_tables[Config.rdbm_type]:
@@ -236,25 +240,26 @@ class DBUtils:
                 self.cbm.exec_query(n1ql)
 
 
-    def enable_script(self, inum):
+    def enable_script(self, inum, enable=True):
+        base.logIt("Enabling script {}".format(inum))
         if self.moddb == BackendTypes.LDAP:
             ldap_operation_result = self.ldap_conn.modify(
                     'inum={},ou=scripts,o=jans'.format(inum),
-                    {"jansEnabled": [ldap3.MODIFY_REPLACE, 'true']}
+                    {"jansEnabled": [ldap3.MODIFY_REPLACE, str(enable).lower()]}
                     )
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             dn = 'inum={},ou=scripts,o=jans'.format(inum)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
-            sqlalchemyObj.jansEnabled = 1
+            sqlalchemyObj.jansEnabled = 1 if enable else 0
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
             dn = 'inum={},ou=scripts,o=jans'.format(inum)
             table = self.get_spanner_table_for_dn(dn)
             if table:
-                self.spanner.update_data(table=table, columns=['doc_id', 'jansEnabled'], values=[[inum, True]])
+                self.spanner.update_data(table=table, columns=['doc_id', 'jansEnabled'], values=[[inum, enable]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
@@ -350,7 +355,7 @@ class DBUtils:
                 return result
             return
         sqlalchemy_table = self.Base.classes[table].__table__
-        return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
+        return self.session.query(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
 
 
     def spanner_to_dict(self, data):
@@ -537,6 +542,34 @@ class DBUtils:
 
         return  ','.join(value2)
 
+    def delete_dn(self, dn):
+        if self.dn_exists(dn):
+            backend_location = self.get_backend_location_for_dn(dn)
+
+            if backend_location == BackendTypes.LDAP:
+                def recursive_delete(dn):
+                    self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL)
+                    for entry in self.ldap_conn.response:
+                        recursive_delete(entry['dn'])
+                    self.ldap_conn.delete(dn)
+                recursive_delete(dn)
+
+            elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+                sqlalchemy_obj = self.get_sqlalchObj_for_dn(dn)
+                if sqlalchemy_obj:
+                    self.session.delete(sqlalchemy_obj)
+                    self.session.commit()
+
+            elif backend_location == BackendTypes.SPANNER:
+                tbl = self.get_spanner_table_for_dn(dn)
+                self.spanner.exec_sql('DELETE from {} WHERE dn="{}"'.format(tbl, dn))
+
+            elif backend_location == BackendTypes.COUCHBASE:
+                key = ldif_utils.get_key_from(dn)
+                bucket =self.get_bucket_for_key(key)
+                n1ql = 'DELETE FROM `{}` USE KEYS "{}"'.format(bucket, key)
+                self.cbm.exec_query(n1ql)
+
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
 
@@ -572,14 +605,19 @@ class DBUtils:
                 else:
                     jansConfProperty = {'v': []}
 
-                for oxconfigprop in jansConfProperty['v']:
-                    if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
+                ox_configuration_property_list = jansConfProperty['v'] if Config.rdbm_type == 'mysql' else jansConfProperty
+
+                for i, oxconfigprop in enumerate(ox_configuration_property_list[:]):
+                    if isinstance(oxconfigprop, str):
+                        oxconfigprop = json.loads(oxconfigprop)
+                    if oxconfigprop.get('value1') == 'allowed_clients' and client_id not in oxconfigprop['value2']:
                         oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
+                        ox_configuration_property_list[i] = json.dumps(oxconfigprop)
                         break
                 else:
-                    jansConfProperty['v'].append({'value1': 'allowed_clients', 'value2': client_id})
+                    ox_configuration_property_list.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
 
-                sqlalchemyObj.jansConfProperty = jansConfProperty
+                sqlalchemyObj.jansConfProperty = jansConfProperty if BackendTypes.MYSQL else ox_configuration_property_list
                 self.session.commit()
 
 
@@ -678,11 +716,13 @@ class DBUtils:
         self.Base = sqlalchemy.ext.automap.automap_base(metadata=self.metadata)
         self.Base.prepare()
 
+
         # fix JSON type for mariadb
-        for tbl in self.Base.classes:
-            for col in tbl.__table__.columns:
-                if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment.lower() == 'json':
-                    col.type = sqlalchemy.dialects.mysql.json.JSON()
+        if Config.rdbm_type == 'mysql':
+            for tbl in self.Base.classes:
+                for col in tbl.__table__.columns:
+                    if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment.lower() == 'json':
+                        col.type = sqlalchemy.dialects.mysql.json.JSON()
 
         base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
 
@@ -725,7 +765,7 @@ class DBUtils:
 
         data_type = self.get_attr_sql_data_type(key)
 
-        if data_type in ('SMALLINT', 'BOOL'):
+        if data_type in ('SMALLINT', 'BOOL', 'BOOLEAN'):
             if val[0].lower() in ('1', 'on', 'true', 'yes', 'ok'):
                 return 1 if data_type == 'SMALLINT' else True
             return 0 if data_type == 'SMALLINT' else False
@@ -746,7 +786,7 @@ class DBUtils:
 
             return json_data
 
-        if data_type == 'ARRAY<STRING(MAX)>':
+        if data_type in ('ARRAY<STRING(MAX)>', 'JSONB'):
             return val
 
         return val[0]
@@ -787,7 +827,7 @@ class DBUtils:
 
         base.logIt("Importing ldif file(s): {} ".format(', '.join(ldif_files)))
 
-        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
+        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for ldif_fn in ldif_files:
             base.logIt("Importing entries from " + ldif_fn)
@@ -829,7 +869,10 @@ class DBUtils:
                             if isinstance(sqlalchObj.__table__.columns[attribute].type, self.json_dialects_instance):
                                 cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
                                 for val_ in new_val:
-                                    cur_val['v'].append(val_)
+                                    if Config.rdbm_type == 'mysql':
+                                        cur_val['v'].append(val_)
+                                    else:
+                                        cur_val.append(val_)
                                 setattr(sqlalchObj, attribute, cur_val)
                             else:
                                 setattr(sqlalchObj, attribute, new_val[0])
@@ -883,7 +926,7 @@ class DBUtils:
 
                         for col in sqlalchCls.__table__.columns:
                             if isinstance(col.type, self.json_dialects_instance) and not col.name in vals:
-                                vals[col.name] = {'v': []}
+                                vals[col.name] = {'v': []} if Config.rdbm_type == 'mysql' else []
 
                         sqlalchObj = sqlalchCls()
 
@@ -1026,7 +1069,7 @@ class DBUtils:
 
         base.logIt("Importing templates file(s): {} ".format(', '.join(templates)))
 
-        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
+        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for template in templates:
             base.logIt("Importing entries from " + template)
@@ -1152,10 +1195,10 @@ class DBUtils:
         key = ldif_utils.get_key_from(dn)
         group = self.get_group_for_key(key)
 
-        if Config.mappingLocations[group] == 'ldap':
+        if Config.mapping_locations[group] == 'ldap':
             return static.BackendTypes.LDAP
 
-        if Config.mappingLocations[group] == 'rdbm':
+        if Config.mapping_locations[group] == 'rdbm':
             if Config.rdbm_type == 'mysql':
                 return static.BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
@@ -1163,7 +1206,7 @@ class DBUtils:
             elif Config.rdbm_type == 'spanner':
                 return static.BackendTypes.SPANNER
 
-        if Config.mappingLocations[group] == 'couchbase':
+        if Config.mapping_locations[group] == 'couchbase':
             return static.BackendTypes.COUCHBASE
 
 

@@ -31,7 +31,7 @@ public class ClientData implements Serializable {
     private final String challenge;
     private final String origin;
     private final String rawClientData;
-    private final JsonNode data;
+    private final transient JsonNode data;
 
     public ClientData(String clientData) throws BadInputException {
         this.rawClientData = new String(Base64Util.base64urldecode(clientData));

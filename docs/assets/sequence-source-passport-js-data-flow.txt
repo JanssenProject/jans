@@ -1,0 +1,13 @@
+title How Passport pass data to jans-server?
+
+fontawesome5solid f1e6 "++**Passport**++" as passport #green
+fontawesome5solid f233 "++**Jans Authz Server**++" as jans #green
+
+note over passport: after getting success response and \n userinfo from external social provider,
+note over passport: Base64 encrypt userinfo data \n using secretkey(jans salt key)
+note over passport: generate jwt(private rsa key sign) with above encrypted data \n\npayload:\n{ \n  iss: post_url, \n  sub: sub, \n  aud: op_server_uri, \n  jti: uuidv4(), \n  exp: now / 1000 + 30, \n  iat: now, \n  data: encrypted_user_data \n} \n\njwt.sign(payload, private_key, { alg: key_alg, kid: key_id })
+passport->jans:                 post jwt to /postlogin.htm                   
+note over jans: verify jwt using keystore file
+note over jans: decrypt user data using secretkey(jans salt key)
+note over jans: add/update user in ldap
+note over jans: authenticate user

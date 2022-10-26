@@ -21,7 +21,7 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.needdb = False # we don't need backend connection in this class
         self.install_var = 'installNode'
         self.app_type = AppType.APPLICATION
-        self.install_type = InstallOption.MONDATORY
+        self.install_type = InstallOption.MANDATORY
         if not base.snap:
             self.register_progess()
 
@@ -29,7 +29,7 @@ class NodeInstaller(BaseInstaller, SetupUtils):
 
     def install(self):
 
-        node_archieve_list = glob.glob(os.path.join(Config.distAppFolder, 'node-*-linux-x64.tar.xz'))
+        node_archieve_list = glob.glob(os.path.join(Config.dist_app_dir, 'node-*-linux-x64.tar.xz'))
 
         if not node_archieve_list:
             self.logIt("Can't find node archive", True, True)

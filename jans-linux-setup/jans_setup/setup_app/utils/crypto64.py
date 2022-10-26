@@ -2,6 +2,9 @@ import os
 import re
 import base64
 import json
+import socket
+import ssl
+import urllib.request
 
 from collections import OrderedDict
 from pathlib import Path
@@ -15,15 +18,10 @@ from setup_app.config import Config
 class Crypto64:
 
     def get_ssl_subject(self, ssl_fn):
+        cert_info = ssl._ssl._test_decode_cert(ssl_fn)    
         retDict = {}
-        cmd = paths.cmd_openssl + ' x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
-        s = self.run(cmd, shell=True)
-        s = s.strip() + ','
-
-        for k in ('emailAddress', 'CN', 'O', 'L', 'ST', 'C'):
-            rex = re.search('{}=(.*?),'.format(k), s)
-            retDict[k] = rex.groups()[0] if rex else ''
-
+        for subj in cert_info["subject"]:
+            retDict[subj[0][0]] = subj[0][1]
         return retDict
 
     def obscure(self, data=""):
@@ -39,7 +37,7 @@ class Crypto64:
         decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
         return decrypted.decode('utf-8')
 
-    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
+    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None, truststore_pw='changeit'):
         self.logIt('Generating Certificate for %s' % suffix)
         key_with_password = '%s/%s.key.orig' % (Config.certFolder, suffix)
         key = '%s/%s.key' % (Config.certFolder, suffix)
@@ -100,23 +98,81 @@ class Crypto64:
 
         self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (Config.hostname, suffix), \
                   "-file", public_certificate, "-keystore", truststore_fn, \
-                  "-storepass", "changeit", "-noprompt"])
+                  "-storepass", truststore_pw, "-noprompt"])
+
+        return key, csr, public_certificate
+
+    def gen_ca(self, ca_suffix='ca'):
+        self.logIt('Generating CA Certificate')
+
+        out_dir = os.path.join(Config.output_dir, 'CA')
+        self.run([paths.cmd_mkdir, '-p', out_dir])
+
+        ca_key_fn = os.path.join(out_dir, ca_suffix+'.key')
+        ca_crt_fn = os.path.join(out_dir, ca_suffix+'.crt')
+
+        self.run([paths.cmd_openssl, 'req',
+                  '-newkey', 'rsa:2048', '-nodes',
+                  '-keyform', 'PEM',
+                  '-keyout', ca_key_fn,
+                  '-x509',
+                  '-days', '3650',
+                  '-outform', 'PEM',
+                  '-out', ca_crt_fn,
+                  '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, Config.hostname, Config.admin_email)
+                  ])
+
+        return ca_key_fn, ca_crt_fn
+
+
+    def gen_key_cert_from_ca(self, fn_suffix, ca_suffix='ca', cn=None):
+        if not cn:
+            cn = Config.hostname
+        out_dir = os.path.join(Config.output_dir, 'CA')
+        ca_key_fn = os.path.join(out_dir, ca_suffix+'.key')
+        ca_crt_fn = os.path.join(out_dir, ca_suffix+'.crt')
+
+        key_fn = os.path.join(out_dir, fn_suffix+'.key')
+        self.run([paths.cmd_openssl, 'genrsa', '-out', key_fn, '2048'])
+
+        csr_fn = os.path.join(out_dir, fn_suffix+'.csr')
+        self.run([paths.cmd_openssl, 'req', '-new',
+            '-key', key_fn,
+            '-out', csr_fn,
+            '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, cn, Config.admin_email)
+            ])
+
+        crt_fn = os.path.join(out_dir, fn_suffix+'.crt')
+        self.run([paths.cmd_openssl, 'x509', '-req',
+            '-in', csr_fn,
+            '-CA', ca_crt_fn,
+            '-CAkey', ca_key_fn,
+            '-set_serial', '101',
+            '-days', '365',
+            '-outform', 'PEM',
+            '-out', crt_fn
+            ])
+
+        return key_fn, csr_fn, crt_fn
+
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
-        extension_path = Path(Config.extensionFolder)
-        for ep in extension_path.glob("**/*"):
-            if ep.is_file() and ep.suffix in ['.py']:
-                extension_type = ep.parent.name.lower()
-                extension_name = ep.stem.lower()
-                extension_script_name = '{}_{}'.format(extension_type, extension_name)
+        # Remove extensionFolder when all scripts are moved to script_catalog_dir
+        for path_ in (Config.extensionFolder, Config.script_catalog_dir):
+            extension_path = Path(path_)
+            for ep in extension_path.glob("**/*"):
+                if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
+                    extension_type = ep.relative_to(path_).parent.as_posix().lower().replace(os.path.sep, '_').replace('-','_')
+                    extension_name = ep.stem.lower()
+                    extension_script_name = '{}_{}'.format(extension_type, extension_name)
 
-                if extensions and extension_script_name in extensions:
-                    continue
+                    if extensions and extension_script_name in extensions:
+                        continue
 
-                # Prepare key for dictionary
-                base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
-                Config.templateRenderingDict[extension_script_name] = base64_script_file
+                    # Prepare key for dictionary
+                    base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
+                    Config.templateRenderingDict[extension_script_name] = base64_script_file
 
 
     def generate_base64_file(self, fn, num_spaces):
@@ -136,42 +192,32 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, alias=None):
+    def import_key_cert_into_keystore(self, suffix, keystore_fn, keystore_pw, in_key, in_cert, alias=None, store_type=None):
+
+        if not store_type:
+            store_type = Config.default_store_type
 
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
         pkcs_fn = '%s/%s.pkcs12' % (Config.certFolder, suffix)
         self.run([paths.cmd_openssl,
-                  'pkcs12',
-                  '-export',
-                  '-inkey',
-                  inKey,
-                  '-in',
-                  inCert,
-                  '-out',
-                  pkcs_fn,
-                  '-name',
-                  alias or Config.hostname,
-                  '-passout',
-                  'pass:%s' % keystorePW
+                  'pkcs12', '-export',
+                  '-inkey', in_key,
+                  '-in', in_cert,
+                  '-out', pkcs_fn,
+                  '-name', alias or Config.hostname,
+                  '-passout', 'pass:%s' % keystore_pw
                   ])
+
         # Import p12 to keystore
         import_cmd = [Config.cmd_keytool,
                   '-importkeystore',
-                  '-srckeystore',
-                  '%s/%s.pkcs12' % (Config.certFolder, suffix),
-                  '-srcstorepass',
-                  keystorePW,
-                  '-srcstoretype',
-                  'PKCS12',
-                  '-destkeystore',
-                  keystoreFN,
-                  '-deststorepass',
-                  keystorePW,
-                  '-deststoretype',
-                  'JKS',
-                  '-keyalg',
-                  'RSA',
+                  '-srckeystore', '%s/%s.pkcs12' % (Config.certFolder, suffix),
+                  '-srcstorepass', keystore_pw,
+                  '-srcstoretype', 'PKCS12',
+                  '-destkeystore', keystore_fn,
+                  '-deststorepass', keystore_pw,
+                  '-deststoretype', store_type,
                   '-noprompt'
                   ]
         if alias:
@@ -293,7 +339,7 @@ class Crypto64:
             return None
 
         plain_text = ''.join(lines)
-        plain_b64encoded_text = base64.encodestring(plain_text.encode('utf-8')).decode('utf-8').strip()
+        plain_b64encoded_text = base64.encodebytes(plain_text.encode('utf-8')).decode('utf-8').strip()
 
         if num_spaces > 0:
             plain_b64encoded_text = self.reindent(plain_b64encoded_text, num_spaces)
@@ -327,3 +373,30 @@ class Crypto64:
             Config.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_4_pw'])
         except:
             self.logIt("Error encoding test passwords", True)
+
+    def get_server_certificate(self, host):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        context = ssl.SSLContext()
+        ssl_sock = context.wrap_socket(sock, server_hostname=host)
+        ssl_sock.connect((host, 443))
+        cert_der = ssl_sock.getpeercert(True)
+        return ssl.DER_cert_to_PEM_cert(cert_der)
+
+    def download_ob_cert(self, ob_cert_fn=None):
+        self.logIt("Downloading Openbanking Certificate from {}".format(Config.jwks_uri))
+        if not ob_cert_fn:
+            ob_cert_fn = Config.ob_cert_fn
+
+        try:
+            req = urllib.request.Request(Config.jwks_uri)
+            with urllib.request.urlopen(req) as f:
+                data = f.read().decode('utf-8')
+            keys = json.loads(data)
+
+            with open(ob_cert_fn, 'w') as w:
+                w.write('-----BEGIN CERTIFICATE-----\n')
+                w.write(keys["keys"][0]["x5c"][0])
+                w.write('\n-----END CERTIFICATE-----')
+        except Exception as e:
+            print("{}Can't download certificate{}".format(static.colors.DANGER, static.colors.ENDC))
+            print(e)

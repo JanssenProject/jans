@@ -15,6 +15,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.service.ClientFactory;
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -38,20 +39,19 @@ import io.jans.as.model.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import sun.security.ec.ECPublicKeyImpl;
-import sun.security.rsa.RSAPublicKeyImpl;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -80,7 +80,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        RSAPublicKeyImpl publicKey = (RSAPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.RSA);
@@ -132,7 +132,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        RSAPublicKeyImpl publicKey = (RSAPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.RSA);
@@ -184,7 +184,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        RSAPublicKeyImpl publicKey = (RSAPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.RSA);
@@ -236,7 +236,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        ECPublicKeyImpl publicKey = (ECPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        ECPublicKey publicKey = (ECPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.EC);
@@ -289,7 +289,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        ECPublicKeyImpl publicKey = (ECPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        ECPublicKey publicKey = (ECPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.EC);
@@ -342,7 +342,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        ECPublicKeyImpl publicKey = (ECPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        ECPublicKey publicKey = (ECPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.EC);
@@ -395,7 +395,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        RSAPublicKeyImpl publicKey = (RSAPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.RSA);
@@ -447,7 +447,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        RSAPublicKeyImpl publicKey = (RSAPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.RSA);
@@ -499,7 +499,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        RSAPublicKeyImpl publicKey = (RSAPublicKeyImpl) cryptoProvider.getPublicKey(keyId);
+        RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
         jsonWebKey.setKty(KeyType.RSA);
@@ -544,7 +544,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
         assertEquals(tokenResponse.getTokenType(), TokenType.DPOP);
     }
 
@@ -589,7 +591,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
         assertEquals(tokenResponse.getTokenType(), TokenType.DPOP);
         return tokenResponse;
     }
@@ -605,7 +609,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         return authorizationResponse.getCode();
     }
@@ -625,7 +629,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse.getClientId();
     }

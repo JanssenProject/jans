@@ -13,11 +13,11 @@ import io.jans.as.client.BackchannelAuthenticationClient;
 import io.jans.as.client.BackchannelAuthenticationRequest;
 import io.jans.as.client.BackchannelAuthenticationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
@@ -25,12 +25,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -241,8 +236,11 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
         showClient(registerClient);
 
-        assertRegisterResponseOk(registerResponse, 201, true);
-        assertRegisterResponseClaimsBackChannel(registerResponse, algorithm, mode, false);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(mode)
+                .backchannelRequestSigningAlgorithm(algorithm)
+                .backchannelUserCodeParameter(false)
+                .check();
     }
 
     /**
@@ -265,7 +263,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
         showClient(backchannelAuthenticationClient);
 
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     /**
@@ -289,11 +288,13 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, httpStatus, errorType);
-
-        assertNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNull(backchannelAuthenticationResponse.getInterval());
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
+                .status(httpStatus)
+                .errorResponseType(errorType)
+                .nullAuthReqId()
+                .nullExpiresIn()
+                .nullInterval()
+                .check();
     }
 
     /**
@@ -343,7 +344,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -361,21 +362,16 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintRS384 = idToken;
     }

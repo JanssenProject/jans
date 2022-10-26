@@ -1,9 +1,0 @@
-{
-  "configId": "couchbase_server_delete",
-  "userName":  "testUser",
-  "userPassword":  "testPassword",
-  "level": 0,
-  "version": 0,
-  "enabled": false,
-  "useSSL": true
-}

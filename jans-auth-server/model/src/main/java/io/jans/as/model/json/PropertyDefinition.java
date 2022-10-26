@@ -22,11 +22,11 @@ public enum PropertyDefinition {
     private final Set<ClassNames> javaTargetsClassNames;
     private final Set<String> javaTargetsClassNamesAsStrings;
     private final String javaTargetPropertyName;
-    private final Class javaType;
+    private final Class<?> javaType;
     private final String jsonName;
 
 
-    PropertyDefinition(Set<ClassNames> javaTargetsClassNames, String javaTargetPropertyName, Class javaType, String jsonName) {
+    PropertyDefinition(Set<ClassNames> javaTargetsClassNames, String javaTargetPropertyName, Class<?> javaType, String jsonName) {
         this.javaTargetsClassNames = javaTargetsClassNames;
         this.javaTargetsClassNamesAsStrings = javaTargetsClassNames.stream().map(PropertyDefinition.ClassNames::getFullClassName).collect(Collectors.toSet());
         this.javaTargetPropertyName = javaTargetPropertyName;
@@ -34,7 +34,7 @@ public enum PropertyDefinition {
         this.jsonName = jsonName;
     }
 
-    public Class getJavaType() {
+    public Class<?> getJavaType() {
         return javaType;
     }
 

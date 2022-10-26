@@ -19,6 +19,7 @@ import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -88,11 +89,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(response2, 200);
-        assertUserInfoPersonalDataNotNull(response2);        
-        assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
-        assertNull(response2.getClaim("org_name"));
-        assertNull(response2.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(response2)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.ADDRESS)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -125,10 +126,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(response2, 200);
-        assertUserInfoPersonalDataNotNull(response2);        
-        assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
-        assertNull(response2.getClaim("phone_mobile_number"));
+        AssertBuilder.userInfoResponse(response2)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.ADDRESS)
+                .claimsNoPresence("phone_mobile_number")
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -161,11 +163,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(response2, 200);
-        assertUserInfoPersonalDataNotNull(response2);        
-        assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(response2.getClaim("org_name"));
-        assertNotNull(response2.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(response2)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.ADDRESS)
+                .claimsPresence("org_name", "work_phone")
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -193,8 +195,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false, false);
-        assertNotNull(response1.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(response1)
+                .notNullScope()
+                .check();
 
         String accessToken = response1.getAccessToken();
 
@@ -203,10 +206,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(response2, 200);
-        assertUserInfoPersonalDataNotNull(response2);        
-        assertNull(response2.getClaim("org_name"));
-        assertNull(response2.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(response2)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -234,8 +238,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false, false);
-        assertNotNull(response1.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(response1)
+                .notNullScope()
+                .check();
 
         String accessToken = response1.getAccessToken();
 
@@ -244,9 +249,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(response2, 200);
-        assertUserInfoPersonalDataNotNull(response2);        
-        assertNull(response2.getClaim("phone_mobile_number"));
+        AssertBuilder.userInfoResponse(response2)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .claimsNoPresence("phone_mobile_number")
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -274,8 +281,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false, false);
-        assertNotNull(response1.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(response1)
+                .notNullScope()
+                .check();
 
         String accessToken = response1.getAccessToken();
 
@@ -284,10 +292,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(response2, 200);
-        assertUserInfoPersonalDataNotNull(response2);        
-        assertNotNull(response2.getClaim("org_name"));
-        assertNotNull(response2.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(response2)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .claimsPresence("org_name", "work_phone")
+                .check();
     }
 
     @Test
@@ -344,7 +353,10 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true, false);
+        AssertBuilder.authorizationResponse(authorizationResponse)
+                .nullScope()
+                .responseTypes(responseTypes)
+                .check();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -383,7 +395,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -398,8 +410,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(userInfoResponse, 200);
-            assertUserInfoPersonalDataNotNull(userInfoResponse);
+            AssertBuilder.userInfoResponse(userInfoResponse)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .notNullClaimsPersonalData()
+                    .claimsPresence(JwtClaimName.EMAIL)
+                    .check();
         }
 
         Thread.sleep(4000);
@@ -444,7 +459,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -472,7 +487,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -484,8 +499,10 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
 
         // Custom Claims
         //assertNotNull(response2.getClaim("gluuStatus"), "Unexpected result: gluuStatus not found");
@@ -500,8 +517,10 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient2.exec();
 
         showClient(userInfoClient2);
-        assertUserInfoBasicMinimumResponseOk(response3, 200);
-        assertUserInfoPersonalDataNotNull(response3);
+        AssertBuilder.userInfoResponse(response3)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
 
         // 5. Request user info (URL_QUERY_PARAMETER)
         UserInfoRequest userInfoRequest3 = new UserInfoRequest(accessToken);
@@ -511,8 +530,10 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response4 = userInfoClient3.exec();
 
         showClient(userInfoClient3);
-        assertUserInfoBasicMinimumResponseOk(response4, 200);
-        assertUserInfoPersonalDataNotNull(response4);
+        AssertBuilder.userInfoResponse(response4)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
@@ -544,7 +565,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -568,7 +589,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -585,7 +606,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true, false);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -625,7 +648,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -640,8 +663,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -668,7 +694,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -683,8 +709,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -711,7 +740,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -726,8 +755,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -754,7 +786,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -768,8 +800,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -796,7 +831,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -810,8 +845,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -838,7 +876,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -852,8 +890,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -880,7 +921,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -894,8 +935,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -922,7 +966,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -936,8 +980,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -964,7 +1011,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -978,8 +1025,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -1006,7 +1056,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1020,8 +1070,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -1048,7 +1101,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1062,8 +1115,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -1090,7 +1146,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1104,8 +1160,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
@@ -1138,7 +1197,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertRegisterResponseOk(registerResponse, 201, true);
+            AssertBuilder.registerResponse(registerResponse).created().check();
 
             String clientId = registerResponse.getClientId();
 
@@ -1158,8 +1217,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             UserInfoResponse userInfoResponse = userInfoClient.exec();
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(userInfoResponse, 200);
-            assertUserInfoPersonalDataNotNull(userInfoResponse);
+            AssertBuilder.userInfoResponse(userInfoResponse)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .notNullClaimsPersonalData()
+                    .claimsPresence(JwtClaimName.EMAIL)
+                    .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -1195,7 +1257,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertRegisterResponseOk(registerResponse, 201, true);
+            AssertBuilder.registerResponse(registerResponse).created().check();
 
             String clientId = registerResponse.getClientId();
 
@@ -1215,8 +1277,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             UserInfoResponse userInfoResponse = userInfoClient.exec();
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(userInfoResponse, 200);
-            assertUserInfoPersonalDataNotNull(userInfoResponse);
+            AssertBuilder.userInfoResponse(userInfoResponse)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .notNullClaimsPersonalData()
+                    .claimsPresence(JwtClaimName.EMAIL)
+                    .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -1252,7 +1317,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertRegisterResponseOk(registerResponse, 201, true);
+            AssertBuilder.registerResponse(registerResponse).created().check();
 
             String clientId = registerResponse.getClientId();
 
@@ -1272,8 +1337,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             UserInfoResponse userInfoResponse = userInfoClient.exec();
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(userInfoResponse, 200);
-            assertUserInfoPersonalDataNotNull(userInfoResponse);
+            AssertBuilder.userInfoResponse(userInfoResponse)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .notNullClaimsPersonalData()
+                    .claimsPresence(JwtClaimName.EMAIL)
+                    .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -1304,7 +1372,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1322,8 +1390,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -1351,7 +1422,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1369,8 +1440,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     private RegisterResponse register(final String redirectUris, final List<ResponseType> responseTypes,
@@ -1387,7 +1461,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse;
     }
@@ -1411,7 +1485,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
         return authorizationResponse;
     }
@@ -1440,7 +1514,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1457,7 +1531,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
 
         String accessToken = authorizationResponse.getAccessToken();
@@ -1496,7 +1570,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1510,7 +1584,10 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 }

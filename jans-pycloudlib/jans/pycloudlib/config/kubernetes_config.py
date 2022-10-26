@@ -1,13 +1,7 @@
-"""
-jans.pycloudlib.config.kubernetes_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains config adapter class to interact with
-Kubernetes ConfigMap.
-"""
+"""This module contains config adapter class to interact with Kubernetes ConfigMap."""
 
 import os
-from typing import Any
+import typing as _t
 
 import kubernetes.client
 import kubernetes.config
@@ -20,14 +14,16 @@ from jans.pycloudlib.utils import safe_value
 class KubernetesConfig(BaseConfig):
     """This class interacts with Kubernetes ConfigMap backend.
 
-    The following environment variables are used to instantiate the client:
+    The instance of this class is configured via environment variables.
 
-    - ``CN_CONFIG_KUBERNETES_NAMESPACE``
-    - ``CN_CONFIG_KUBERNETES_CONFIGMAP``
-    - ``CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG``
+    Supported environment variables:
+
+    - `CN_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
+    - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
+    - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.settings = {
             k: v
             for k, v in os.environ.items()
@@ -41,26 +37,28 @@ class KubernetesConfig(BaseConfig):
             "CN_CONFIG_KUBERNETES_CONFIGMAP", "jans",
         )
 
-        self.settings.setdefault("CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG", False)
+        self.settings.setdefault("CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG", "false")
 
         self._client = None
         self.name_exists = False
         self.kubeconfig_file = os.path.expanduser("~/.kube/config")
 
-    def get(self, key: str, default: Any = "") -> Any:
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
-        :params key: Key name.
-        :params default: Default value if key is not exist.
-        :returns: Value based on given key or default one.
+        Args:
+            key: Key name.
+            default: Default value if key is not exist.
+
+        Returns:
+            Value based on given key or default one.
         """
         result = self.all()
         return result.get(key) or default
 
     @property
-    def client(self):
-        """Lazy-loaded client to interact with Kubernetes API.
-        """
+    def client(self) -> kubernetes.client.CoreV1Api:
+        """Lazy-loaded client to interact with Kubernetes API."""
         if not self._client:
             if as_boolean(self.settings["CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG"]):
                 kubernetes.config.load_kube_config(self.kubeconfig_file)
@@ -70,8 +68,7 @@ class KubernetesConfig(BaseConfig):
         return self._client
 
     def _prepare_configmap(self) -> None:
-        """Create a configmap name if not exist.
-        """
+        """Create a configmap name if not exist."""
         if not self.name_exists:
             try:
                 self.client.read_namespaced_config_map(
@@ -98,12 +95,15 @@ class KubernetesConfig(BaseConfig):
                 else:
                     raise
 
-    def set(self, key: str, value: Any) -> bool:
+    def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
-        :params key: Key name.
-        :params value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            key: Key name.
+            value: Value of the key.
+
+        Returns:
+            A boolean to mark whether config is set or not.
         """
         self._prepare_configmap()
         body = {
@@ -119,17 +119,11 @@ class KubernetesConfig(BaseConfig):
         )
         return bool(ret)
 
-    def all(self) -> dict:  # pragma: no cover
+    def get_all(self) -> dict[str, _t.Any]:
         """Get all key-value pairs.
 
-        :returns: A ``dict`` of key-value pairs (if any).
-        """
-        return self.get_all()
-
-    def get_all(self) -> dict:
-        """Get all key-value pairs.
-
-        :returns: A ``dict`` of key-value pairs (if any).
+        Returns:
+            A mapping of configs (if any).
         """
         self._prepare_configmap()
         result = self.client.read_namespaced_config_map(
@@ -138,10 +132,11 @@ class KubernetesConfig(BaseConfig):
         )
         return result.data or {}
 
-    def set_all(self, data: dict) -> bool:
+    def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set all key-value pairs.
 
-        :returns: A ``bool`` indicating operation is succeed or not.
+        Returns:
+            A boolean indicating operation is succeed or not.
         """
         self._prepare_configmap()
         body = {

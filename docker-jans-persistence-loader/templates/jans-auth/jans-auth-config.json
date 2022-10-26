@@ -26,6 +26,17 @@
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
     "openidSubAttribute":"inum",
+    "discoveryDenyKeys": [
+        "id_generation_endpoint",
+        "auth_level_mapping",
+        "scope_to_claims_mapping",
+        "op_policy_uri"
+    ],
+    "publicSubjectIdentifierPerClientEnabled": true,
+    "subjectIdentifiersPerClientSupported": [
+        "mail",
+        "uid"
+     ],
     "responseTypesSupported":[
         ["code"],
         ["code", "id_token"],
@@ -126,6 +137,22 @@
         "PS384",
         "PS512"
     ],
+    "accessTokenSigningAlgValuesSupported":[
+        "none",
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
     "idTokenEncryptionAlgValuesSupported":[
         "RSA1_5",
         "RSA-OAEP",
@@ -138,6 +165,7 @@
         "A128GCM",
         "A256GCM"
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "none",
         "HS256",
@@ -250,6 +278,10 @@
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
+    "requestUriBlockList": [
+        "localhost",
+        "127.0.0.1"
+    ],
     "requireRequestUriRegistration":false,
     "allowPostLogoutRedirectWithoutValidation":false,
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
@@ -286,10 +318,7 @@
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
-    "personCustomObjectClassList":[
-        "jansCustomPerson",
-        "jansPerson"
-    ],
+    "personCustomObjectClassList": %(person_custom_object_class_list)s,
     "persistIdTokenInLdap":false,
     "persistRefreshTokenInLdap":true,
     "authenticationFiltersEnabled":false,
@@ -366,7 +395,7 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
-    "httpLoggingExludePaths": [],
+    "httpLoggingExcludePaths": [],
     "externalLoggerConfiguration": "",
     "authorizationRequestCustomAllowedParameters" : [
         {
@@ -421,6 +450,11 @@
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEnabled": false,
+    "ssaConfiguration": {
+        "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
         "authDomain": "",
@@ -435,5 +469,22 @@
     },
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
-    "deviceAuthzResponseTypeToProcessAuthz": "code"
+    "deviceAuthzResponseTypeToProcessAuthz": "code",
+    "redirectUrisRegexEnabled": true,
+    "useHighestLevelScriptIfAcrScriptNotFound": true,
+    "agamaConfiguration": {
+        "enabled": false,
+        "templatesPath": "/ftl",
+        "scriptsPath": "/scripts",
+        "serializerType": "KRYO",
+        "maxItemsLoggedInCollections": 3,
+        "pageMismatchErrorPage": "mismatch.ftl",
+        "interruptionErrorPage": "timeout.ftl",
+        "crashErrorPage": "crash.ftl",
+        "finishedFlowPage": "finished.ftl",
+        "bridgeScriptPage": "agama.xhtml",
+        "defaultResponseHeaders": {
+            "Cache-Control": "max-age=0, no-store"
+        }
+    }
 }

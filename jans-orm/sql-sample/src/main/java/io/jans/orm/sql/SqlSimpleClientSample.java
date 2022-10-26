@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.orm.sql;
 
 import java.util.Arrays;
@@ -16,7 +22,7 @@ import io.jans.orm.util.ArrayHelper;
 /**
  * @author Yuriy Movchan Date: 05/26/2021
  */
-public class SqlSimpleClientSample {
+public final class SqlSimpleClientSample {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
@@ -31,15 +37,14 @@ public class SqlSimpleClientSample {
 		SqlEntryManager sqlEntryManager = sqlEntryManagerSample.createSqlEntryManager();
 
 		SimpleClient newClient = new SimpleClient();
-		newClient.setDn("inum=test_clnt2,ou=client,o=gluu");
-		newClient.setDefaultAcrValues(new String[] { "test_clnt2_acr" });
-		newClient.setClientName("test_clnt2");
+		newClient.setDn("inum=test_acr2,ou=client,o=jans");
+		newClient.setDefaultAcrValues(new String[] {"test_acr2"});
+		newClient.setClientName("test_acr2");
 
 		sqlEntryManager.persist(newClient);
 
-		Filter presenceFilter = Filter.createEqualityFilter("displayName", "test_clnt2");
-		List<SimpleClient> results = sqlEntryManager.findEntries("ou=test_clnt2,o=gluu", SimpleClient.class,
-				presenceFilter);
+		Filter presenceFilter = Filter.createEqualityFilter("displayName", "test_acr2");
+		List<SimpleClient> results = sqlEntryManager.findEntries("ou=client,o=jans", SimpleClient.class, presenceFilter);
 		for (SimpleClient client : results) {
 			String[] acrs = client.getDefaultAcrValues();
 			if (ArrayHelper.isNotEmpty(acrs)) {

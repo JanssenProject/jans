@@ -6,29 +6,15 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-
+import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -38,10 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * OC5:FeatureTest-Providing ID Token with max age Restriction
@@ -68,7 +51,6 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         registerRequest.setContacts(Arrays.asList("javier@gluu.org"));
         registerRequest.setGrantTypes(Arrays.asList(GrantType.AUTHORIZATION_CODE));
         registerRequest.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setRequireAuthTime(true);
         registerRequest.setDefaultMaxAge(3600);
         registerRequest.setResponseTypes(responseTypes);
 
@@ -77,7 +59,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -93,7 +75,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-            assertAuthorizationResponse(authorizationResponse);
+            AssertBuilder.authorizationResponse(authorizationResponse).check();
             assertEquals(authorizationResponse.getState(), state);
 
             String authorizationCode = authorizationResponse.getCode();
@@ -115,18 +97,16 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             showClient(tokenClient);
 
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
             // 4. Validate id_token
-            Jwt jwt = Jwt.parse(idToken);
-            assertJwtStandarClaimsNotNull(jwt, true);
-
-            RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                    jwksUri,
-                    jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-            RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-            assertTrue(rsaSigner.validate(jwt));
+            AssertBuilder.jwtParse(idToken)
+                    .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                    .notNullAccesTokenHash()
+                    .notNullAuthenticationTime()
+                    .check();
         }
 
         Thread.sleep(60000);
@@ -143,7 +123,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
             assertEquals(authorizationResponse.getState(), state);
 
             String authorizationCode = authorizationResponse.getCode();
@@ -163,18 +143,16 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
             // 7. Validate id_token
-            Jwt jwt = Jwt.parse(idToken);
-            assertJwtStandarClaimsNotNull(jwt, true);
-
-            RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                    jwksUri,
-                    jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-            RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-            assertTrue(rsaSigner.validate(jwt));
+            AssertBuilder.jwtParse(idToken)
+                    .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                    .notNullAccesTokenHash()
+                    .notNullAuthenticationTime()
+                    .check();
         }
     }
 
@@ -200,7 +178,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -217,7 +195,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
             String authorizationCode = authorizationResponse.getCode();
             sessionId = authorizationResponse.getSessionId();
@@ -235,7 +213,9 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
         }
 
         Thread.sleep(60000);
@@ -259,7 +239,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
-            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -276,7 +256,9 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
         }
     }
 }

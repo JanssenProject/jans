@@ -20,9 +20,9 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
@@ -62,7 +62,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void omittedApplicationTypeStep1(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -108,7 +108,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "omittedApplicationTypeStep1")
     public void omittedApplicationTypeStep2(final String registerPath) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath + "?"
                 + registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1)).request();
         request.header("Authorization", "Bearer " + registrationAccessToken1);
 
@@ -149,7 +149,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void applicationTypeWebStep1(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -194,7 +194,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "applicationTypeWebStep1")
     public void applicationTypeWebStep2(final String registerPath) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath + "?"
                 + registrationClientUri2.substring(registrationClientUri2.indexOf("?") + 1)).request();
         request.header("Authorization", "Bearer " + registrationAccessToken2);
 
@@ -236,7 +236,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     @Parameters({"registerPath"})
     @Test
     public void applicationTypeWebFail1(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -274,7 +274,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     @Parameters({"registerPath"})
     @Test
     public void applicationTypeNativeStep1(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -321,7 +321,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "applicationTypeNativeStep1")
     public void applicationTypeNativeStep2(final String registerPath) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath + "?"
                 + registrationClientUri3.substring(registrationClientUri3.indexOf("?") + 1)).request();
         request.header("Authorization", "Bearer " + registrationAccessToken3);
 
@@ -365,7 +365,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     // schema to conform "OAuth 2.0 for Native Apps"
     // spec
     public void applicationTypeNativeFail1(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -405,7 +405,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
     // schema to conform "OAuth 2.0 for Native Apps"
     // spec
     public void applicationTypeNativeFail2(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {

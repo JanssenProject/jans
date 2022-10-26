@@ -532,5 +532,27 @@
             "description": "The resource owner or OpenID Provider denied the request.",
             "uri": null
         }
+    ],
+    "ssa":[
+        {
+            "id": "invalid_request",
+            "description": "The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed.",
+            "uri": null
+        },
+        {
+            "id": "unauthorized_client",
+            "description": "The Client is not authorized to use this authentication flow.",
+            "uri": null
+        },
+        {
+            "id": "invalid_client",
+            "description": "The Client is not authorized to use this authentication flow.",
+            "uri": null
+        },
+        {
+            "id": "unknown_error",
+            "description": "Unknown or not found error.",
+            "uri": null
+        }
     ]
 }

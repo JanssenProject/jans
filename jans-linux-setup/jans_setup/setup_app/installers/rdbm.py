@@ -26,22 +26,36 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'rdbm_install'
         self.register_progess()
-        self.qchar = '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
-        self.output_dir = os.path.join(Config.outputFolder, Config.rdbm_type)
+        self.output_dir = os.path.join(Config.output_dir, Config.rdbm_type)
+
+    @property
+    def qchar(self):
+        return '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
 
     def install(self):
-
         self.local_install()
+        if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
+            self.reset_rdbm_db()
         jans_schema_files = []
-
+        self.jans_attributes = []
         for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
-            jans_schema_files.append(os.path.join(Config.install_dir, 'schema', jans_schema_fn))
+            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
+            jans_schema_files.append(schema_full_path)
+            schema_ = base.readJsonFile(schema_full_path)
+            self.jans_attributes += schema_.get('attributeTypes', [])
 
         self.create_tables(jans_schema_files)
         self.create_subtables()
         self.import_ldif()
         self.create_indexes()
         self.rdbmProperties()
+
+    def reset_rdbm_db(self):
+        self.logIt("Resetting DB {}".format(Config.rdbm_db))
+        self.dbUtils.metadata.reflect(self.dbUtils.engine)
+        self.dbUtils.metadata.drop_all(self.dbUtils.engine)
+        self.dbUtils.session.commit()
+        self.dbUtils.metadata.clear()
 
     def local_install(self):
         if not Config.rdbm_password:
@@ -79,7 +93,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages):
                     self.run(cmd, shell=True)
 
-        self.dbUtils.bind()
+        self.dbUtils.bind(force=True)
 
     def get_sql_col_type(self, attrname, table=None):
 
@@ -176,7 +190,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
                 if Config.rdbm_type == 'pgsql':
                     sql_cmd = 'CREATE TABLE "{}" (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
-                if Config.rdbm_type == 'spanner':
+                elif Config.rdbm_type == 'spanner':
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL, `objectClass` STRING(48), dn STRING(128), {}) PRIMARY KEY (`doc_id`)'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 else:
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
@@ -219,10 +233,20 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
+        # read opendj indexes and add multivalued attributes to JSON indexing
+        opendj_index = base.readJsonFile(base.current_app.OpenDjInstaller.openDjIndexJson)
+        opendj_index_list = [ atribute['attribute'] for atribute in opendj_index ]
+
+        for attribute in self.jans_attributes:
+            if attribute.get('multivalued'):
+                for attr_name in attribute['names']:
+                    if attr_name in opendj_index_list and attr_name not in sql_indexes['__common__']['fields']:
+                        sql_indexes['__common__']['fields'].append(attr_name)
+
         if Config.rdbm_type == 'spanner':
             tables = self.dbUtils.spanner.get_tables()
             for tblCls in tables:
-                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
+                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) + sql_indexes['__common__']['fields']
 
                 tbl_data = self.dbUtils.spanner.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
 
@@ -234,7 +258,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     data_type = attr['type']
 
                     if data_type == 'ARRAY':
-                        #TODO: How to index for ARRAY types in spanner?
+                        # How to index for ARRAY types in spanner?
                         pass
 
                     elif attr_name in tbl_fields:
@@ -276,13 +300,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                             tblCls,
                                             ind_name,
                                             i+1,
-                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            tmp_str.safe_substitute({'field':attr.name})
                                             )
                                     self.dbUtils.exec_rdbm_query(sql_cmd)
                                 elif Config.rdbm_type == 'pgsql':
-                                    sql_cmd ='CREATE INDEX ON "{}" (({}));'.format(
+                                    sql_cmd ='CREATE INDEX ON "{}" {};'.format(
                                             tblCls,
-                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            tmp_str.safe_substitute({'field':attr.name})
                                             )
                                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
@@ -313,7 +337,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
                     elif Config.rdbm_type == 'pgsql':
-                        sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
+                        sql_cmd = 'CREATE INDEX ON "{}" {};'.format(
                                     tblCls,
                                     custom_index
                                     )
@@ -322,7 +346,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def import_ldif(self):
         ldif_files = []
 
-        if Config.mappingLocations['default'] == 'rdbm':
+        if Config.mapping_locations['default'] == 'rdbm':
             ldif_files += Config.couchbaseBucketDict['default']['ldif']
 
         ldap_mappings = self.getMappingType('rdbm')
@@ -337,7 +361,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             ldif_files.remove(Config.ldif_site)
 
         Config.pbar.progress(self.service_name, "Importing ldif files to {}".format(Config.rdbm_type), False)
-        if not Config.ldif_base in ldif_files:
+        if Config.ldif_base not in ldif_files:
             if Config.rdbm_type == 'mysql':
                 force = BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
@@ -348,14 +372,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.import_ldif(ldif_files)
 
-    def server_time_zone(self):
-        Config.templateRenderingDict['server_time_zone'] = 'UTC' + time.strftime("%z")
-
     def rdbmProperties(self):
-        if Config.rdbm_type in ('sql', 'mysql'):
-            self.server_time_zone()
+        if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
-            self.renderTemplateInOut(Config.jansRDBMProperties, Config.templateFolder, Config.configFolder)
+            src_temp_fn = os.path.join(Config.templateFolder, 'jans-{}.properties'.format(Config.rdbm_type))
+            targtet_fn = os.path.join(Config.configFolder, Config.jansRDBMProperties)
+            rendered_tmp = self.render_template(src_temp_fn)
+            self.writeFile(targtet_fn, rendered_tmp)
 
         elif Config.rdbm_type == 'spanner':
             if Config.spanner_emulator_host:

@@ -1,13 +1,17 @@
 package io.jans.ca.plugin.adminui.service.config;
 
+import io.jans.as.model.config.adminui.AdminConf;
+import io.jans.as.model.config.adminui.LicenseSpringCredentials;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
+import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.orm.PersistenceEntryManager;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,6 +25,9 @@ public class AUIConfigurationService {
 
     @Inject
     Logger log;
+
+    @Inject
+    private PersistenceEntryManager entryManager;
 
     public AUIConfiguration getAUIConfiguration() {
 
@@ -37,6 +44,10 @@ public class AUIConfigurationService {
         }
     }
 
+    public void setAuiConfiguration(AUIConfiguration auiConfiguration) {
+        this.auiConfiguration = auiConfiguration;
+    }
+
     private AUIConfiguration addPropertiesToAUIConfiguration(Properties props) {
         AUIConfiguration auiConfig = new AUIConfiguration();
         auiConfig.setAuthServerHost(props.getProperty("authserver.host"));
@@ -51,6 +62,7 @@ public class AUIConfigurationService {
         auiConfig.setAuthServerIntrospectionEndpoint(props.getProperty("authserver.introspectionEndpoint"));
         auiConfig.setAuthServerUserInfoEndpoint(props.getProperty("authserver.userInfoEndpoint"));
         auiConfig.setAuthServerEndSessionEndpoint(props.getProperty("authserver.endSessionEndpoint"));
+        auiConfig.setAuthServerAcrValues(props.getProperty("authserver.acrValues"));
 
         auiConfig.setTokenServerClientId(props.getProperty("tokenServer.clientId"));
         auiConfig.setTokenServerClientSecret(props.getProperty("tokenServer.clientSecret"));
@@ -63,17 +75,22 @@ public class AUIConfigurationService {
         auiConfig.setTokenServerIntrospectionEndpoint(props.getProperty("tokenServer.introspectionEndpoint"));
         auiConfig.setTokenServerUserInfoEndpoint(props.getProperty("tokenServer.userInfoEndpoint"));
         auiConfig.setTokenServerEndSessionEndpoint(props.getProperty("tokenServer.endSessionEndpoint"));
+        auiConfig.setTokenServerAcrValues(props.getProperty("tokenServer.acrValues"));
 
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
-        licenseConfiguration.setApiKey(props.getProperty("licenseSpring.apiKey"));
-        licenseConfiguration.setProductCode(props.getProperty("licenseSpring.productCode"));
-        licenseConfiguration.setSharedKey(props.getProperty("licenseSpring.sharedKey"));
-        licenseConfiguration.setEnabled(Boolean.valueOf(props.getProperty("licenseSpring.enabled")));
-        licenseConfiguration.setManagementKey(props.getProperty("licenseSpring.managementKey"));
-        licenseConfiguration.initializeLicenseManager();
+        AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+        LicenseSpringCredentials licenseSpringCredentials = adminConf.getDynamic().getLicenseSpringCredentials();
 
+        if(licenseSpringCredentials != null)
+        {
+            licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
+            licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
+            licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
+            licenseConfiguration.setManagementKey(licenseSpringCredentials.getManagementKey());
+            licenseConfiguration.setHardwareId(licenseSpringCredentials.getHardwareId());
+            licenseConfiguration.setLicenseKey(licenseSpringCredentials.getLicenseKey());
+        }
         auiConfig.setLicenseConfiguration(licenseConfiguration);
-
         return auiConfig;
     }
 

@@ -14,20 +14,16 @@ import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.ldap.TokenEntity;
+import io.jans.as.server.service.KeyGeneratorTimer;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.util.TokenHashUtil;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -51,6 +47,9 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Inject
     protected ScopeChecker scopeChecker;
+
+    @Inject
+    private KeyGeneratorTimer keyGeneratorTimer;
 
     private User user;
     private AuthorizationGrantType authorizationGrantType;
@@ -290,8 +289,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         return grantedScopesSb.toString().trim();
     }
 
-    @Override
-    public AccessToken createAccessToken(ExecutionContext executionContext) {
+    public int getAccessTokenLifetimeInSeconds(ExecutionContext executionContext) {
         int lifetime = appConfiguration.getAccessTokenLifetime();
         // Jans Auth #830 Client-specific access token expiration
         if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
@@ -304,7 +302,21 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             log.trace("Override access token lifetime with value from script: {}", lifetimeFromScript);
         }
 
-        AccessToken accessToken = new AccessToken(lifetime);
+        if (client != null && client.isAccessTokenAsJwt() && appConfiguration.getKeyRegenerationEnabled()) {
+            int intervalInSeconds = appConfiguration.getKeyRegenerationInterval() * 3600;
+            int timePassedInSeconds = (int) ((System.currentTimeMillis() - keyGeneratorTimer.getLastFinishedTime()) / 1000);
+            final int recalculcatedLifetime = intervalInSeconds - timePassedInSeconds;
+            if (recalculcatedLifetime > 0) {
+                log.trace("Override access token lifetime based on key lifetime: {}", recalculcatedLifetime);
+                lifetime = recalculcatedLifetime;
+            }
+        }
+        return lifetime;
+    }
+
+    @Override
+    public AccessToken createAccessToken(ExecutionContext executionContext) {
+        AccessToken accessToken = new AccessToken(getAccessTokenLifetimeInSeconds(executionContext));
 
         accessToken.setSessionDn(getSessionDn());
         accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(executionContext.getCertAsPem()));

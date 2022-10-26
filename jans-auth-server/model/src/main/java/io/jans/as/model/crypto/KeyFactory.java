@@ -22,7 +22,7 @@ public abstract class KeyFactory<E extends PrivateKey, F extends PublicKey> {
     public abstract Certificate getCertificate();
 
     public Key<E, F> getKey() {
-        Key key = new Key();
+        Key<E, F> key = new Key<>();
 
         key.setPrivateKey(getPrivateKey());
         key.setPublicKey(getPublicKey());

@@ -16,7 +16,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.faces.application.ApplicationConfigurationPopulator;
+import jakarta.faces.application.ApplicationConfigurationPopulator;
 
 import io.jans.util.StringHelper;
 import org.apache.commons.io.FileUtils;

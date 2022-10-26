@@ -29,16 +29,15 @@ class msg:
     installOxTrust_label = "Install OxTrust"
     backend_types_label = "Backend Types"
     java_type_label = "Java Type"
-    installHttpd_label = "Install Apache" 
-    installSaml_label = "Install Saml" 
-    installOxAuthRP_label = "Install OxAuthRP" 
-    installPassport_label = "Install Passport" 
+    installHttpd_label = "Install Apache"
+    installSaml_label = "Install Saml"
+    installPassport_label = "Install Passport"
     installJansRadius_label = "Install Radius"
     opendj_storages_label = "Store on OpenDJ"
     installing_label = "Current"
     installOxd_label = "Install Oxd"
     installCasa_label = "Install Casa"
-    installScimServer_label = "Install Scim"
+    install_scim_server_label = "Install Scim"
     installFido2_label = "Install Fido2"
 
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
@@ -80,7 +79,7 @@ class msg:
     ask_installCasa = "Install Casa"
     ask_installOxd = "Install Oxd"
     ask_opendj_install = "Install OpenDJ"
-    ask_installScimServer = "Install Scim Server"
+    ask_install_scim_server = "Install Scim Server"
     ask_installFido2 = "Install Fido2"
 
     opendj_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]
@@ -117,7 +116,7 @@ class msg:
     installation_description_passport = "Janssen bundles the Passport.js authentication middleware project to support user authentication at external SAML, OAuth, and OpenID Connect providers "
     installation_description_radius = "The Janssen Server now ships with a RADIUS server called Janssen Radius. It is based on the TinyRadius Java library."
     installation_description_jans = "Janssen Server is identity & access management (IAM) platform for web & mobile single sign-on (SSO), two-factor authentication (2FA) and API access management."
-    installation_description_jetty = "Eclipse Jetty provides a Web server and javax.servlet container, plus support for HTTP/2, WebSocket, OSGi, JMX, JNDI, JAAS and many other integrations."
+    installation_description_jetty = "Eclipse Jetty provides a Web server and jakarta.servlet container, plus support for HTTP/2, WebSocket, OSGi, JMX, JNDI, JAAS and many other integrations."
     installation_description_jython = "Jython is a Java implementation of Python that combines expressive power with clarity. Jython is freely available for both commercial and non-commercial use and is distributed with source code under the PSF License v2."
     installation_description_node = "As an asynchronous event-driven JavaScript runtime, Node.js is designed to build scalable network applications."
     installation_description_oxd = "oxd exposes simple, static APIs web application developers can use to implement user authentication and authorization against an OAuth 2.0 authorization server like Janssen."
@@ -131,3 +130,4 @@ class msg:
     exit_post_setup = "No service was selected to install. Exit now?"
 
     used_ports = "Port(s) {} should be free to continue. Please check."
+    setup_removal_warning = "Please remove the whole setup directory /opt/jans/jans-setup post-installation for a production deployment."

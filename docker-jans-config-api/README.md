@@ -5,7 +5,7 @@ Docker image packaging for config-api.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-config-api/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/config-api`.
+For bleeding-edge/unstable version, use `janssenproject/config-api:1.0.1_dev`.
 
 ## Environment Variables
 
@@ -26,7 +26,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Janssen configuration secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to `jans`. If left intact `jans-configuration` secret will be created.
-- `CN_SECRET_ADAPTER`: The secrets adapter, can be `vault` or `kubernetes`.
+- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` or `kubernetes`.
 - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
 - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
 - `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
@@ -45,14 +45,14 @@ The following environment variables are supported by the container:
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 - `CN_MAX_RAM_PERCENTAGE`: Value passed to Java option `-XX:MaxRAMPercentage`.
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `ldap`, `couchbase`, or `hybrid`; default to `ldap`).
-- `CN_PERSISTENCE_LDAP_MAPPING`: Specify data that should be saved in LDAP (one of `default`, `user`, `cache`, `site`, or `token`; default to `default`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`.
-- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`); required if `CN_PERSISTENCE_TYPE` is set to `ldap` or `hybrid`.
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `ldap`, `couchbase`, `sql`, `spanner`, or `hybrid`; default to `ldap`).
+- `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
+- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`).
 - `CN_LDAP_USE_SSL`: Whether to use SSL connection to LDAP server (default to `true`).
-- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
+- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
+- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
+- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`).
+- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`).
 - `CN_COUCHBASE_CONN_TIMEOUT`: Connect timeout used when a bucket is opened (default to `10000` milliseconds).
 - `CN_COUCHBASE_CONN_MAX_WAIT`: Maximum time to wait before retrying connection (default to `20000` milliseconds).
 - `CN_COUCHBASE_SCAN_CONSISTENCY`: Default scan consistency; one of `not_bounded`, `request_plus`, or `statement_plus` (default to `not_bounded`).
@@ -68,19 +68,17 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
-- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui` and `scim`).
-- `CN_TOKEN_SERVER_BASE_HOSTNAME`: Hostname of token server (default to `localhost`).
-- `CN_TOKEN_SERVER_AUTHZ_ENDPOINT`: Authorization endpoint at token server (default to `/jans-auth/authorize.htm`).
-- `CN_TOKEN_SERVER_TOKEN_ENDPOINT`: Token endpoint at token server (default to `/jans-auth/restv1/token`).
-- `CN_TOKEN_SERVER_INTROSPECTION_ENDPOINT`: Introspection endpoint at token server (default to `/jans-auth/restv1/introspection`).
-- `CN_TOKEN_SERVER_USERINFO_ENDPOINT`: User info endpoint at token server (default to `/jans-auth/restv1/userinfo`).
-- `CN_TOKEN_SERVER_CLIENT_ID`: Client ID registered at token server.
+- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, and `user-mgt`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
-- `CN_LICENSE_ADMIN_UI_API_KEY`: Path to admin-ui license api key (default to `/etc/jans/conf/admin_ui_api_key`).
-- `CN_LICENSE_ADMIN_UI_PRODUCT_CODE`: Path to admin-ui license product code (default to `/etc/jans/conf/admin_ui_product_code`).
-- `CN_LICENSE_ADMIN_UI_SHARED_KEY`: Path to admin-ui license shared key (default to `/etc/jans/conf/admin_ui_shared_key`).
-- `CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY`: Path to admin-ui license management key (default to `/etc/jans/conf/admin_ui_management_key`).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
+- `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
+- `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
+- `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
+- `CN_SQL_DB_NAME`: SQL database name (default to `jans`).
+- `CN_SQL_DB_USER`: User name to access the SQL database (default to `jans`).
+- `CN_SQL_DB_DIALECT`: Dialect name of the SQL (`mysql` for MySQL  or `pgsql` for PostgreSQL; default to `mysql`).
+- `CN_SQL_DB_TIMEZONE`: Timezone used by the SQL database (default to `UTC`).
+- `CN_SQL_DB_SCHEMA`: Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`).
 
 ### Configure app loggers
 
@@ -146,3 +144,44 @@ The following key-value pairs are the defaults:
 }
 ```
 
+### Hybrid mapping
+
+As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:
+
+1. Set `CN_PERSISTENCE_TYPE` environment variable to `hybrid`
+
+2. Set `CN_HYBRID_MAPPING` with the following format:
+
+    ```
+    {
+        "default": "<couchbase|ldap|spanner|sql>",
+        "user": "<couchbase|ldap|spanner|sql>",
+        "site": "<couchbase|ldap|spanner|sql>",
+        "cache": "<couchbase|ldap|spanner|sql>",
+        "token": "<couchbase|ldap|spanner|sql>",
+        "session": "<couchbase|ldap|spanner|sql>",
+    }
+    ```
+
+    Example:
+
+    ```
+    {
+        "default": "sql",
+        "user": "spanner",
+        "site": "ldap",
+        "cache": "sql",
+        "token": "couchbase",
+        "session": "spanner",
+    }
+    ```
+
+### Exposing metrics
+
+As per v1.0.1, certain metrics can be exposed via Prometheus JMX exporter.
+To expose the metrics, set the `CN_PROMETHEUS_PORT` environment variable, i.e. `CN_PROMETHEUS_PORT=9093`.
+Afterwards, metrics can be scraped by Prometheus or accessed manually by making request to `/metrics` URL,
+i.e. `http://container:9093/metrics`.
+
+Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
+To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 10, 2022
+ * @version March 17, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientAttributes implements Serializable {
@@ -32,8 +32,8 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("tlsClientAuthSubjectDn")
     private String tlsClientAuthSubjectDn;
 
-    @JsonProperty("runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims")
-    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+    @JsonProperty("runIntrospectionScriptBeforeJwtCreation")
+    private Boolean runIntrospectionScriptBeforeJwtCreation = false;
 
     @JsonProperty("keepClientAuthorizationAfterExpiration")
     private Boolean keepClientAuthorizationAfterExpiration = false;
@@ -91,6 +91,26 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("jansSubAttr")
     private String publicSubjectIdentifierAttribute;
+
+    @JsonProperty("redirectUrisRegex")
+    private String redirectUrisRegex;
+
+    @JsonProperty("jansAuthorizedAcr")
+    private List<String> authorizedAcrValues;
+
+    @JsonProperty("jansDefaultPromptLogin")
+    private Boolean defaultPromptLogin = false;
+
+    @JsonProperty("idTokenLifetime")
+    private Integer idTokenLifetime;
+
+    public Integer getIdTokenLifetime() {
+        return idTokenLifetime;
+    }
+
+    public void setIdTokenLifetime(Integer idTokenLifetime) {
+        this.idTokenLifetime = idTokenLifetime;
+    }
 
     public List<String> getRopcScripts() {
         if (ropcScripts == null) ropcScripts = new ArrayList<>();
@@ -209,15 +229,15 @@ public class ClientAttributes implements Serializable {
         this.updateTokenScriptDns = updateTokenScriptDns;
     }
 
-    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims == null) {
-            runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+    public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
+        if (runIntrospectionScriptBeforeJwtCreation == null) {
+            runIntrospectionScriptBeforeJwtCreation = false;
         }
-        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+        return runIntrospectionScriptBeforeJwtCreation;
     }
 
-    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
-        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public void setRunIntrospectionScriptBeforeJwtCreation(Boolean runIntrospectionScriptBeforeJwtCreation) {
+        this.runIntrospectionScriptBeforeJwtCreation = runIntrospectionScriptBeforeJwtCreation;
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
@@ -293,11 +313,42 @@ public class ClientAttributes implements Serializable {
         this.publicSubjectIdentifierAttribute = publicSubjectIdentifierAttribute;
     }
 
+    public String getRedirectUrisRegex() {
+        return redirectUrisRegex;
+    }
+
+    public void setRedirectUrisRegex(String redirectUrisRegex) {
+        this.redirectUrisRegex = redirectUrisRegex;
+    }
+
+    public List<String> getAuthorizedAcrValues() {
+        if (authorizedAcrValues == null) {
+            return Lists.newArrayList();
+        }
+        return authorizedAcrValues;
+    }
+
+    public void setAuthorizedAcrValues(List<String> authorizedAcrValues) {
+        this.authorizedAcrValues = authorizedAcrValues;
+    }
+
+    public Boolean getDefaultPromptLogin() {
+        if (defaultPromptLogin == null) {
+            defaultPromptLogin = false;
+        }
+
+        return defaultPromptLogin;
+    }
+
+    public void setDefaultPromptLogin(Boolean defaultPromptLogin) {
+        this.defaultPromptLogin = defaultPromptLogin;
+    }
+
     @Override
     public String toString() {
         return "ClientAttributes{" +
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
-                ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
+                ", runIntrospectionScriptBeforeJwtCreation=" + runIntrospectionScriptBeforeJwtCreation +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
                 ", spontaneousScopes=" + spontaneousScopes +
@@ -314,6 +365,8 @@ public class ClientAttributes implements Serializable {
                 ", authorizationEncryptedResponseAlg=" + authorizationEncryptedResponseAlg +
                 ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
                 ", publicSubjectIdentifierAttribute=" + publicSubjectIdentifierAttribute +
+                ", redirectUrisRegex=" + redirectUrisRegex +
+                ", defaultPromptLogin=" + defaultPromptLogin +
                 '}';
     }
 }

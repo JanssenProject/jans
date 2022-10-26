@@ -1,12 +1,14 @@
-import contextlib
 import base64
+import contextlib
 import json
 import os
+import typing as _t
+from itertools import chain
 from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
 
-from ldap3.utils import dn as dnutils
+import ruamel.yaml
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -25,7 +27,7 @@ def render_ldif(src, dst, ctx):
 
 def get_jackrabbit_creds():
     username = os.environ.get("CN_JACKRABBIT_ADMIN_ID", "admin")
-    password = ""
+    password = ""  # nosec: B105
 
     password_file = os.environ.get(
         "CN_JACKRABBIT_ADMIN_PASSWORD_FILE",
@@ -74,7 +76,6 @@ def get_base_ctx(manager):
     redis_ssl_truststore = os.environ.get("CN_REDIS_SSL_TRUSTSTORE", "")
     redis_sentinel_group = os.environ.get("CN_REDIS_SENTINEL_GROUP", "")
     memcached_url = os.environ.get('CN_MEMCACHED_URL', 'localhost:11211')
-    casa_enabled = os.environ.get("CN_CASA_ENABLED", False)
     scim_enabled = os.environ.get("CN_SCIM_ENABLED", False)
 
     ctx = {
@@ -124,12 +125,8 @@ def get_base_ctx(manager):
         "auth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
         "auth_legacyIdTokenClaims": manager.config.get("auth_legacyIdTokenClaims"),
         "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
-        "fido2ConfigFolder": manager.config.get("fido2ConfigFolder"),
 
         "admin_inum": manager.config.get("admin_inum"),
-        "scim_client_id": manager.config.get("scim_client_id"),
-        "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
-        "casa_enable_script": str(as_boolean(casa_enabled)).lower(),
         "jca_client_id": manager.config.get("jca_client_id"),
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
@@ -149,67 +146,40 @@ def get_base_ctx(manager):
     # static kid
     ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
 
-    # admin-ui plugins
-    ctx["admin_ui_client_id"] = manager.config.get("admin_ui_client_id")
-    if not ctx["admin_ui_client_id"]:
-        ctx["admin_ui_client_id"] = f"1901.{uuid4()}"
-        manager.config.set("admin_ui_client_id", ctx["admin_ui_client_id"])
-
-    ctx["admin_ui_client_pw"] = manager.secret.get("admin_ui_client_pw")
-    if not ctx["admin_ui_client_pw"]:
-        ctx["admin_ui_client_pw"] = get_random_chars()
-        manager.secret.set("admin_ui_client_pw", ctx["admin_ui_client_pw"])
-
-    ctx["admin_ui_client_encoded_pw"] = manager.secret.get("admin_ui_client_encoded_pw")
-    if not ctx["admin_ui_client_encoded_pw"]:
-        ctx["admin_ui_client_encoded_pw"] = encode_text(ctx["admin_ui_client_pw"], manager.secret.get("encoded_salt")).decode()
-        manager.secret.set(
-            "admin_ui_client_encoded_pw",
-            ctx["admin_ui_client_encoded_pw"],
-        )
-
-    # token server client
-    ctx["token_server_admin_ui_client_id"] = manager.config.get("token_server_admin_ui_client_id")
-    if not ctx["token_server_admin_ui_client_id"]:
-        ctx["token_server_admin_ui_client_id"] = f"1901.{uuid4()}"
-        manager.config.set("token_server_admin_ui_client_id", ctx["token_server_admin_ui_client_id"])
-
-    ctx["token_server_admin_ui_client_pw"] = manager.secret.get("token_server_admin_ui_client_pw")
-    if not ctx["token_server_admin_ui_client_pw"]:
-        ctx["token_server_admin_ui_client_pw"] = get_random_chars()
-        manager.secret.set("token_server_admin_ui_client_pw", ctx["token_server_admin_ui_client_pw"])
-
-    ctx["token_server_admin_ui_client_encoded_pw"] = manager.secret.get("token_server_admin_ui_client_encoded_pw")
-    if not ctx["token_server_admin_ui_client_encoded_pw"]:
-        ctx["token_server_admin_ui_client_encoded_pw"] = encode_text(
-            ctx["token_server_admin_ui_client_pw"], manager.secret.get("encoded_salt"),
-        ).decode()
-        manager.secret.set(
-            "token_server_admin_ui_client_encoded_pw",
-            ctx["token_server_admin_ui_client_encoded_pw"],
-        )
-
     # finalize ctx
     return ctx
 
 
-def merge_extension_ctx(ctx):
-    basedir = "/app/static/extension"
+def merge_extension_ctx(ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
+    """Merge extension script contexts into given contexts.
 
+    :param ctx: A key-value pairs of existing contexts.
+    :returns: Merged contexts.
+    """
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        basedir = "/app/openbanking/static/extension"
+        basedirs = ["/app/openbanking/static/extension"]
+    else:
+        basedirs = ["/app/static/extension", "/app/script-catalog"]
 
-    filepath = Path(basedir)
-    for ext_path in filepath.glob("**/*.py"):
-        if not ext_path.is_file():
-            continue
+    for basedir in basedirs:
+        filepath = Path(basedir)
+        for ext_path in filepath.glob("**/*"):
+            if not ext_path.is_file() or ext_path.suffix.lower() not in (".py", ".java"):
+                continue
 
-        ext_name = f"{ext_path.parent.name.lower()}_{ext_path.stem.lower()}"
-        ctx[ext_name] = generate_base64_contents(ext_path.read_text())
+            ext_type = ext_path.relative_to(filepath).parent.as_posix().lower().replace(os.path.sep, "_").replace("-", "_")
+            ext_name = ext_path.stem.lower()
+            script_name = f"{ext_type}_{ext_name}"
+            ctx[script_name] = generate_base64_contents(ext_path.read_text())
     return ctx
 
 
 def merge_auth_ctx(ctx):
+    if os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"):
+        ctx["person_custom_object_class_list"] = "[]"
+    else:
+        ctx["person_custom_object_class_list"] = '["jansCustomPerson", "jansPerson"]'
+
     basedir = '/app/templates/jans-auth'
     file_mappings = {
         'auth_static_conf_base64': 'jans-auth-static-conf.json',
@@ -219,41 +189,14 @@ def merge_auth_ctx(ctx):
 
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
         file_mappings["auth_config_base64"] = "jans-auth-config.ob.json"
-    # else:
-    #     file_mappings["auth_config_base64"] = "jans-auth-config.json"
 
     for key, file_ in file_mappings.items():
         file_path = os.path.join(basedir, file_)
         with open(file_path) as fp:
             ctx[key] = generate_base64_contents(fp.read() % ctx)
-    return ctx
 
-
-def merge_fido2_ctx(ctx):
-    basedir = '/app/templates/jans-fido2'
-    file_mappings = {
-        'fido2_dynamic_conf_base64': 'dynamic-conf.json',
-        'fido2_static_conf_base64': 'static-conf.json',
-    }
-
-    for key, file_ in file_mappings.items():
-        file_path = os.path.join(basedir, file_)
-        with open(file_path) as fp:
-            ctx[key] = generate_base64_contents(fp.read() % ctx)
-    return ctx
-
-
-def merge_scim_ctx(ctx):
-    basedir = '/app/templates/jans-scim'
-    file_mappings = {
-        'scim_dynamic_conf_base64': 'dynamic-conf.json',
-        'scim_static_conf_base64': 'static-conf.json',
-    }
-
-    for key, file_ in file_mappings.items():
-        file_path = os.path.join(basedir, file_)
-        with open(file_path) as fp:
-            ctx[key] = generate_base64_contents(fp.read() % ctx)
+    # determine role scope mappings
+    ctx["role_scope_mappings"] = json.dumps(get_role_scope_mappings())
     return ctx
 
 
@@ -314,29 +257,12 @@ def merge_config_api_ctx(ctx):
     return ctx
 
 
-def merge_casa_ctx(manager, ctx):
-    # Casa client
-    ctx["casa_client_id"] = manager.config.get("casa_client_id")
-    if not ctx["casa_client_id"]:
-        ctx["casa_client_id"] = f"1902.{uuid4()}"
-        manager.config.set("casa_client_id", ctx["casa_client_id"])
-
-    ctx["casa_client_pw"] = manager.secret.get("casa_client_pw")
-    if not ctx["casa_client_pw"]:
-        ctx["casa_client_pw"] = get_random_chars()
-        manager.secret.set("casa_client_pw", ctx["casa_client_pw"])
-
-    ctx["casa_client_encoded_pw"] = manager.secret.get("casa_client_encoded_pw")
-    if not ctx["casa_client_encoded_pw"]:
-        ctx["casa_client_encoded_pw"] = encode_text(
-            ctx["casa_client_pw"], manager.secret.get("encoded_salt"),
-        ).decode()
-        manager.secret.set("casa_client_encoded_pw", ctx["casa_client_encoded_pw"])
-
-    return ctx
-
-
 def merge_jans_cli_ctx(manager, ctx):
+    # WARNING:
+    # - deprecated configs and secrets for role_based
+    # - move the configs and secrets creation to configurator
+    # - remove them on future release
+
     # jans-cli client
     ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
     if not ctx["role_based_client_id"]:
@@ -358,22 +284,17 @@ def merge_jans_cli_ctx(manager, ctx):
 
 
 def prepare_template_ctx(manager):
-    opt_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
-
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
     ctx = merge_config_api_ctx(ctx)
-    ctx = merge_fido2_ctx(ctx)
-    ctx = merge_scim_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
-
-    if "casa" in opt_scopes:
-        ctx = merge_casa_ctx(manager, ctx)
     return ctx
 
 
-def get_ldif_mappings(optional_scopes=None):
+def get_ldif_mappings(group, optional_scopes=None):
+    from jans.pycloudlib.persistence.utils import PersistenceMapper
+
     optional_scopes = optional_scopes or []
     dist = os.environ.get("CN_DISTRIBUTION", "default")
 
@@ -399,34 +320,16 @@ def get_ldif_mappings(optional_scopes=None):
                 "configuration.ldif",
                 "o_metric.ldif",
                 "jans-config-api/clients.ldif",
+                "agama.ldif",
             ]
 
         files += [
             "jans-config-api/config.ldif",
-            "jans-config-api/admin-ui-clients.ldif",
             "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",
         ]
 
-        if "scim" in optional_scopes:
-            files += [
-                "jans-scim/configuration.ldif",
-                "jans-scim/scopes.ldif",
-                "jans-scim/clients.ldif",
-            ]
-
-        if "fido2" in optional_scopes:
-            files += [
-                "jans-fido2/fido2.ldif",
-            ]
-
-        if "casa" in optional_scopes:
-            files += [
-                "gluu-casa/configuration.ldif",
-                "gluu-casa/clients.ldif",
-                "gluu-casa/scripts.ldif",
-            ]
         return files
 
     def user_files():
@@ -456,23 +359,47 @@ def get_ldif_mappings(optional_scopes=None):
         "token": [],
         "session": [],
     }
+
+    mapper = PersistenceMapper()
+    ldif_mappings = {
+        mapping: files for mapping, files in ldif_mappings.items()
+        if mapping in mapper.groups()[group]
+    }
     return ldif_mappings
 
 
-def doc_id_from_dn(dn):
-    parsed_dn = dnutils.parse_dn(dn)
-    doc_id = parsed_dn[0][1]
-
-    if doc_id == "jans":
-        doc_id = "_"
-    return doc_id
+def get_config_api_swagger(path="/app/static/jans-config-api-swagger.yaml"):
+    with open(path) as f:
+        txt = f.read()
+    txt = txt.replace("\t", " ")
+    return ruamel.yaml.load(txt, Loader=ruamel.yaml.RoundTripLoader)
 
 
-def id_from_dn(dn):
-    # for example: `"inum=29DA,ou=attributes,o=jans"`
-    # becomes `["29DA", "attributes"]`
-    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
-    dns.reverse()
+def get_config_api_scopes():
+    swagger = get_config_api_swagger()
+    scope_list = []
 
-    # the actual key
-    return '_'.join(dns) or "_"
+    for _, methods in swagger["paths"].items():
+        for _, attrs in methods.items():
+            if "security" not in attrs:
+                continue
+            scope_list += [attr["oauth2"] for attr in attrs["security"]]
+
+    # make sure there's no duplication
+    return list(set(chain(*scope_list)))
+
+
+def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.json"):
+    with open(path) as f:
+        role_mapping = json.loads(f.read())
+
+    scope_list = get_config_api_scopes()
+
+    for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
+        if api_role["role"] == "api-admin":
+            # merge scopes without duplication
+            role_mapping["rolePermissionMapping"][i]["permissions"] = list(set(
+                role_mapping["rolePermissionMapping"][i]["permissions"] + scope_list
+            ))
+            break
+    return role_mapping

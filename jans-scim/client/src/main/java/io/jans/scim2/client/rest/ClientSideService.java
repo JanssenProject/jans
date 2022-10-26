@@ -11,9 +11,9 @@ import io.jans.scim.model.scim2.bulk.BulkRequest;
 
 import static io.jans.scim.model.scim2.Constants.*;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * A conglomerate interface that exhibits a rich amount of methods to manipulate User, Group, and Fido u2f and Fido 2

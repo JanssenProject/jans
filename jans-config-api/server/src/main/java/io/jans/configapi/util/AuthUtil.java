@@ -1,5 +1,7 @@
 package io.jans.configapi.util;
 
+import com.unboundid.ldap.sdk.DN;
+import io.jans.as.client.RevokeSessionResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
@@ -7,6 +9,7 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -17,6 +20,7 @@ import io.jans.configapi.service.auth.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Arrays;
@@ -25,11 +29,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -66,6 +70,18 @@ public class AuthUtil {
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
     }
+    
+    public String getIntrospectionEndpoint() {
+        return configurationService.find().getIntrospectionEndpoint();
+    }
+
+    public String getTokenEndpoint() {
+        return configurationService.find().getTokenEndpoint();
+    }
+    
+    public String getEndSessionEndpoint() {
+        return this.configurationService.find().getEndSessionEndpoint();
+    }
 
     public String getServiceUrl(String url) {
         return this.getIssuer() + url;
@@ -74,6 +90,24 @@ public class AuthUtil {
     public String getClientId() {
         return this.configurationFactory.getApiClientId();
     }
+    
+    public List<String> getUserExclusionAttributes() {
+        return this.configurationFactory.getApiAppConfiguration().getUserExclusionAttributes();
+    }
+    
+    public String getUserExclusionAttributesAsString() {
+        List<String> excludedAttributes = getUserExclusionAttributes();
+        return excludedAttributes == null ? null : excludedAttributes.stream().collect(Collectors.joining(","));
+    }
+    
+    public List<String> getUserMandatoryAttributes() {
+        return this.configurationFactory.getApiAppConfiguration().getUserMandatoryAttributes();
+    }
+    
+    public AgamaConfiguration getAgamaConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getAgamaConfiguration();
+    }
+
 
     public String getTokenUrl() {
         return this.configurationService.find().getTokenEndpoint();
@@ -227,8 +261,19 @@ public class AuthUtil {
             scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
         }
     }
+    
+    public String requestAccessToken(final String clientId, final List<String> scope) {
+        log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
+        String tokenUrl = getTokenEndpoint();
+        Token token = getAccessToken(tokenUrl, clientId, scope);
+        log.info("oAuth AccessToken response - token:{}", token);
+        if (token != null) {
+            return token.getAccessToken();
+        }
+        return null;
+    }
 
-    public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes) {
+    public Token getAccessToken(final String tokenUrl, final String clientId, final List<String> scopes) {
         log.debug("Access Token Request - tokenUrl:{}, clientId:{}, scopes:{}", tokenUrl, clientId, scopes);
 
         // Get clientSecret
@@ -352,5 +397,56 @@ public class AuthUtil {
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
         return CollectionUtils.isEqualCollection(list1, list2);
     }
+    
+    public boolean containsField(List<Field> allFields, String attribute) {
+        log.debug("allFields:{},  attribute:{}, allFields.contains(attribute):{} ", allFields ,  attribute, allFields.stream().anyMatch(f -> f.getName().equals(attribute)));
+         
+        return allFields.stream().anyMatch(f -> f.getName().equals(attribute));
+     }
+     
+     public List<Field> getAllFields(Class<?> type) {
+         List<Field> allFields =  new ArrayList<>();
+         allFields = getAllFields(allFields, type);
+         log.debug("Fields:{} of type:{}  ", allFields, type);
+                 
+         return allFields;
+     }
+     
+     public List<Field> getAllFields(List<Field> fields, Class<?> type) {
+         log.debug("fields:{} of type:{} ", fields, type);
+         fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+         if (type.getSuperclass() != null) {
+             getAllFields(fields, type.getSuperclass());
+         }
+         log.debug("Final fields:{} of type:{} ", fields, type);
+         return fields;
+     }
+     
+     public boolean isValidDn(String dn) {
+         return isValidDn(dn, false);
+     }
+
+     
+     public boolean isValidDn(String dn, boolean strictNameChecking) {
+         return DN.isValidDN(dn, strictNameChecking);
+     }
+
+   
+     public RevokeSessionResponse revokeSession(final String url,final String token, final String userId) {
+         log.debug("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
+
+        
+
+         RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, token,userId);
+         log.debug("revokeSessionResponse:{}",revokeSessionResponse);
+         if (revokeSessionResponse != null) {
+
+             log.debug("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ", revokeSessionResponse.getEntity(), revokeSessionResponse.getStatus());
+           
+            
+         }
+         return revokeSessionResponse;
+     }
 
 }

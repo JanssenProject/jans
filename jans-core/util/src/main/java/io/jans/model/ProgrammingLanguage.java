@@ -18,12 +18,12 @@ import io.jans.orm.annotation.AttributeEnum;
  */
 public enum ProgrammingLanguage implements AttributeEnum {
 
-    PYTHON("python", "Python"), JAVA_SCRIPT("javascript", "JavaScript");
+    PYTHON("python", "Jython"), JAVA("java", "Java");
 
-    private String value;
-    private String displayName;
+    private final String value;
+    private final String displayName;
 
-    private static Map<String, ProgrammingLanguage> MAP_BY_VALUES = new HashMap<String, ProgrammingLanguage>();
+    private static final Map<String, ProgrammingLanguage> MAP_BY_VALUES = new HashMap<>();
 
     static {
         for (ProgrammingLanguage enumType : values()) {

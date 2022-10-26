@@ -8,7 +8,7 @@
     "clientInfoEndpoint":"https://%(hostname)s/jans-auth/restv1/clientinfo",
     "checkSessionIFrame":"https://%(hostname)s/jans-auth/opiframe.htm",
     "endSessionEndpoint":"https://%(hostname)s/jans-auth/restv1/end_session",
-    "jwksUri":"%(jwksUri)s",
+    "jwksUri":"%(jwks_uri)s",
     "registrationEndpoint":"https://%(hostname)s/jans-auth/restv1/register",
     "openIdDiscoveryEndpoint":"https://%(hostname)s/.well-known/webfinger",
     "openIdConfigurationEndpoint":"https://%(hostname)s/.well-known/openid-configuration",
@@ -26,6 +26,12 @@
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
     "openidSubAttribute":"inum",
+    "discoveryDenyKeys": [
+        "id_generation_endpoint",
+        "auth_level_mapping",
+        "scope_to_claims_mapping",
+        "op_policy_uri"
+    ],
     "discoveryAllowedKeys": [
         "issuer",
         "authorization_endpoint",
@@ -67,7 +73,8 @@
     "grantTypesSupported":[
         "client_credentials",
         "authorization_code",
-        "refresh_token"
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:device_code"
     ],
     "allowIdTokenWithoutImplicitGrantType": true,
     "subjectTypesSupported":[
@@ -116,6 +123,7 @@
     ],
     "idTokenEncryptionEncValuesSupported":[
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "HS256",
         "RS256",
@@ -180,6 +188,10 @@
     "claimsParameterSupported":true,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
+    "requestUriBlockList": [
+        "localhost",
+        "127.0.0.1"
+    ],
     "requireRequestUriRegistration":false,
     "allowPostLogoutRedirectWithoutValidation":false,
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
@@ -216,7 +228,6 @@
     "dcrSignatureValidationJwks": null,
     "dcrSignatureValidationJwksUri": null,
     "dcrAuthorizationWithClientCredentials": false,
-    "dcrSkipSignatureValidation": true,
     "dcrAuthorizationWithMTLS": false,
     "softwareStatementValidationType": "script",
     "softwareStatementValidationClaimName": "jwks_uri",
@@ -288,7 +299,7 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
-    "httpLoggingExludePaths": [],
+    "httpLoggingExcludePaths": [],
     "externalLoggerConfiguration": "",
     "authorizationRequestCustomAllowedParameters" : [
         {
@@ -343,6 +354,11 @@
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEnabled": false,
+    "ssaConfiguration": {
+        "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
         "authDomain": "",
@@ -358,6 +374,8 @@
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
-    "staticKid": "%(staticKid)s",
-    "forceOfflineAccessScopeToEnableRefreshToken" : false
+    "staticKid": "%(static_kid)s",
+    "forceOfflineAccessScopeToEnableRefreshToken" : false,
+    "redirectUrisRegexEnabled": false,
+    "useHighestLevelScriptIfAcrScriptNotFound": true
 }

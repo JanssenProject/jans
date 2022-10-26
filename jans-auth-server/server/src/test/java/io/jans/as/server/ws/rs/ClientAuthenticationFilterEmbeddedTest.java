@@ -7,7 +7,8 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.client.ResponseAsserter;
+import io.jans.as.model.util.QueryStringDecoder;
+import io.jans.as.server.util.ResponseAsserter;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -26,11 +27,11 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -61,7 +62,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test
     public void requestClientRegistrationWithCustomAttributes(final String registerPath, final String redirectUris)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -114,7 +115,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -130,7 +131,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
@@ -151,7 +152,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = {"requestAccessTokenCustomClientAuth1Step1"})
     public void requestAccessTokenCustomClientAuth1Step2(final String tokenPath, final String redirectUri)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode1);
@@ -194,7 +195,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
     public void requestAccessTokenCustomClientAuth2(final String tokenPath, final String userId,
                                                     final String userSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);

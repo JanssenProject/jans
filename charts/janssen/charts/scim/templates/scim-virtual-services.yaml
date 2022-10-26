@@ -1,5 +1,4 @@
 {{- if .Values.global.istio.ingress }}
-
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -18,29 +17,38 @@ metadata:
 spec:
   hosts:
   - {{ .Values.global.fqdn }}
+{{- if .Values.global.istio.gateways }}
   gateways:
-  - {{ .Release.Name }}-global-gtw # can omit the namespace if gateway is in same namespace as virtual service.
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
   http:
+  {{- if .Values.global.scim.ingress.scimConfigEnabled }}
   - name: {{ .Release.Name }}-istio-scim-config
     match:
     - uri:
         prefix: /.well-known/scim-configuration
     rewrite:
-      uri: /scim/restv1/scim-configuration
+      uri: /jans-scim/restv1/scim-configuration
     route:
       - destination:
           host: {{ .Values.global.scim.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local
           port:
             number: 8080
         weight: 100
+  {{- end }}
+  {{- if .Values.global.scim.ingress.scimEnabled }}
   - name: {{ .Release.Name }}-istio-scim
     match:
     - uri:
-        prefix: "/scim"
+        prefix: "/jans-scim"
     route:
     - destination:
         host: {{ .Values.global.scim.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local
         port:
           number: 8080
       weight: 100
+  {{- end }}
 {{- end }}

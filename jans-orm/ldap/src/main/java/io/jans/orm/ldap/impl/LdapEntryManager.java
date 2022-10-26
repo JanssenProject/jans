@@ -18,34 +18,11 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.event.DeleteNotifier;
-import io.jans.orm.exception.AuthenticationException;
-import io.jans.orm.exception.EntryDeleteException;
-import io.jans.orm.exception.MappingException;
-import io.jans.orm.exception.operation.ConnectionException;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.exception.operation.SearchException;
-import io.jans.orm.exception.operation.SearchScopeException;
-import io.jans.orm.impl.BaseEntryManager;
-import io.jans.orm.ldap.operation.LdapOperationService;
-import io.jans.orm.ldap.operation.impl.LdapOperationServiceImpl;
-import io.jans.orm.model.AttributeData;
-import io.jans.orm.model.AttributeDataModification;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
-import io.jans.orm.model.BatchOperation;
-import io.jans.orm.model.DefaultBatchOperation;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.reflect.property.PropertyAnnotation;
-import io.jans.orm.search.filter.Filter;
-import io.jans.orm.util.ArrayHelper;
-import io.jans.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,12 +35,40 @@ import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.util.StaticUtils;
 
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.event.DeleteNotifier;
+import io.jans.orm.exception.AuthenticationException;
+import io.jans.orm.exception.EntryDeleteException;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.MappingException;
+import io.jans.orm.exception.operation.ConnectionException;
+import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.exception.operation.SearchScopeException;
+import io.jans.orm.impl.BaseEntryManager;
+import io.jans.orm.ldap.operation.LdapOperationService;
+import io.jans.orm.ldap.operation.impl.LdapOperationServiceImpl;
+import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.AttributeDataModification;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.DefaultBatchOperation;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.model.base.LocalizedString;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.search.filter.Filter;
+import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.StringHelper;
+
+import static io.jans.orm.model.base.LocalizedString.*;
+
 /**
  * LDAP Entry Manager
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public class LdapEntryManager extends BaseEntryManager implements Serializable {
+public class LdapEntryManager extends BaseEntryManager<LdapOperationService> implements Serializable {
 
     private static final long serialVersionUID = -2544614410981223105L;
 
@@ -116,14 +121,14 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
             }
         } else {
-        	boolean configurationEntry = isConfigurationEntry(entryClass);
+            boolean configurationEntry = isConfigurationEntry(entryClass);
             return merge(entry, false, configurationEntry, null);
         }
     }
 
     @Override
     protected <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromLdapMap,
-            List<AttributeDataModification> attributeDataModifications, boolean forceUpdate) {
+                                          List<AttributeDataModification> attributeDataModifications, boolean forceUpdate) {
         // Update object classes if entry contains custom object classes
         if (getSupportedLDAPVersion() > 2) {
             if (!isConfigurationUpdate) {
@@ -155,7 +160,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
         LOG.debug(String.format("LDAP entry to remove: %s", dnValue.toString()));
 
-        remove(dnValue.toString());
+        remove(dnValue.toString(), entryClass);
     }
 
     @Override
@@ -309,7 +314,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-	public <T> int remove(String baseDN, Class<T> entryClass, Filter filter, int count) {
+    public <T> int remove(String baseDN, Class<T> entryClass, Filter filter, int count) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -346,7 +351,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         return batchOperation.getCountEntries();
     }
 
-	@Override
+    @Override
     public <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
         try {
             if (getOperationService().getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
@@ -358,17 +363,17 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     subscriber.onAfterRemove(dn, objectClasses);
                 }
             } else {
-                removeSubtreeThroughIteration(dn);
+                removeSubtreeThroughIteration(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
-    private void removeSubtreeThroughIteration(String dn) {
-    	SearchScope scope = SearchScope.SUB;
+    private void removeSubtreeThroughIteration(String dn, String[] objectClasses) {
+        SearchScope scope = SearchScope.SUB;
 
-    	SearchResult searchResult = null;
+        SearchResult searchResult = null;
         try {
             searchResult = getOperationService().search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), toLdapSearchScope(scope), null, 0, 0, 0, null, "dn");
             if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
@@ -388,11 +393,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         Collections.sort(removeEntriesDn, LINE_LENGHT_COMPARATOR);
 
         for (String removeEntryDn : removeEntriesDn) {
-            remove(removeEntryDn);
+            removeByDn(removeEntryDn, objectClasses);
         }
     }
 
-	@Override
+    @Override
     protected List<AttributeData> find(String dn, String[] objectClasses, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
         try {
             // Load entry
@@ -410,7 +415,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
-            BatchOperation<T> batchOperation, int start, int count, int chunkSize) {
+                                   BatchOperation<T> batchOperation, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -460,7 +465,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
-            SortOrder sortOrder, int start, int count, int chunkSize) {
+                                               SortOrder sortOrder, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -503,7 +508,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Deprecated
     public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int start, int count, String sortBy,
-            SortOrder sortOrder, PagedResult vlvResponse, String[] ldapReturnAttributes) {
+                                                  SortOrder sortOrder, PagedResult vlvResponse, String[] ldapReturnAttributes) {
 
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
@@ -584,7 +589,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
-            SearchResultEntry... searchResultEntries) {
+                                         SearchResultEntry... searchResultEntries) {
         List<T> result = new ArrayList<T>(searchResultEntries.length);
         Map<String, List<AttributeData>> entriesAttributes = new HashMap<String, List<AttributeData>>(100);
 
@@ -615,7 +620,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Deprecated
     private <T> List<T> createEntitiesVirtualListView(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
-            SearchResultEntry... searchResultEntries) {
+                                                      SearchResultEntry... searchResultEntries) {
 
         List<T> result = new LinkedList<T>();
         Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
@@ -650,6 +655,38 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         result.addAll(currentResult);
 
         return result;
+    }
+
+    @Override
+    protected List<AttributeData> getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
+        List<AttributeData> listAttributes = new ArrayList<>();
+
+        localizedString.getLanguageTags().forEach(languageTag -> {
+            String value = localizedString.getValue(languageTag);
+            String key = localizedString.addLdapLanguageTag(ldapAttributeName, languageTag);
+            AttributeData attributeData = new AttributeData(key, value);
+
+            listAttributes.add(attributeData);
+        });
+
+        return listAttributes;
+    }
+
+    @Override
+    protected void loadLocalizedString(Map<String, AttributeData> attributesMap, LocalizedString localizedString, Map<String, AttributeData> filteredAttrs) {
+        filteredAttrs.forEach((key, value) -> {
+            AttributeData data = attributesMap.get(key);
+            String[] keyParts = key.split(LANG_SEPARATOR);
+            if (keyParts.length == 1) {
+                localizedString.setValue(data.getValue().toString());
+            } else if (keyParts.length == 2) {
+                String lagTag = keyParts[1].replace(LANG_PREFIX + LANG_JOINER, "");
+                localizedString.setValue(
+                        data.getValue().toString(),
+                        Locale.forLanguageTag(lagTag)
+                );
+            }
+        });
     }
 
     private List<AttributeData> getAttributeDataList(SearchResultEntry entry) {
@@ -714,7 +751,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             searchFilter = addObjectClassFilter(searchFilter, objectClasses);
         }
 
-    	SearchScope scope = SearchScope.SUB;
+        SearchScope scope = SearchScope.SUB;
         try {
             SearchResult searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, LdapOperationService.UID_ARRAY);
             if ((searchResult == null) || (searchResult.getEntryCount() != 1)) {
@@ -736,7 +773,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     @Override
     @Deprecated
     public boolean authenticate(String bindDn, String password) {
-    	return authenticate(bindDn, null, password);
+        return authenticate(bindDn, null, password);
     }
 
     @Override
@@ -779,10 +816,10 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         String[] ldapReturnAttributes;
         CountBatchOperation<T> batchOperation;
         if (SearchScope.BASE == searchScope) {
-            ldapReturnAttributes = new String[] { "numsubordinates" }; // Don't load attributes
+            ldapReturnAttributes = new String[]{"numsubordinates"}; // Don't load attributes
             batchOperation = null;
         } else {
-            ldapReturnAttributes = new String[] { "" }; // Don't load attributes
+            ldapReturnAttributes = new String[]{""}; // Don't load attributes
             batchOperation = new CountBatchOperation<T>();
         }
 
@@ -825,9 +862,9 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-	protected String encodeTime(Date date) {
-		return encodeTime(null, date);
-	}
+    protected String encodeTime(Date date) {
+        return encodeTime(null, date);
+    }
 
     @Override
     public Date decodeTime(String baseDN, String date) {
@@ -846,7 +883,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     protected Date decodeTime(String date) {
-		return decodeTime(null, date);
+        return decodeTime(null, date);
     }
 
     public boolean loadLdifFileContent(String ldifFileContent) {
@@ -860,7 +897,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             return false;
         } finally {
             if (connection != null) {
-            	getOperationService().releaseConnection(connection);
+                getOperationService().releaseConnection(connection);
             }
         }
     }
@@ -868,23 +905,23 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     @Override
     public List<AttributeData> exportEntry(String dn) {
         try {
-        	SearchResultEntry searchResultEntry = getOperationService().lookup(dn, (String[]) null);
+            SearchResultEntry searchResultEntry = getOperationService().lookup(dn, (String[]) null);
 
             List<AttributeData> result = getAttributeDataList(searchResultEntry);
             if (result != null) {
                 return result;
             }
-            
+
             return null;
         } catch (ConnectionException | SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);
         }
     }
 
-	@Override
-	public List<AttributeData> exportEntry(String dn, String objectClass) {
-		return exportEntry(dn);
-	}
+    @Override
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
+        return exportEntry(dn);
+    }
 
     public int getSupportedLDAPVersion() {
         return getOperationService().getSupportedLDAPVersion();
@@ -910,53 +947,53 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         return LDAP_SEARCH_SCOPE_CONVERTER.convertToLdapSearchScope(scope);
     }
 
-	@Override
-	public boolean hasBranchesSupport(String dn) {
-		return true;
-	}
-
-	@Override
-	public boolean hasExpirationSupport(String primaryKey) {
-		return false;
-	}
-
-	@Override
-	public String getPersistenceType() {
-		return LdapEntryManagerFactory.PERSISTENCE_TYPE;
-	}
-
     @Override
-	public String getPersistenceType(String primaryKey) {
-		return LdapEntryManagerFactory.PERSISTENCE_TYPE;
-	}
-
-	@Override
-	public PersistenceEntryManager getPersistenceEntryManager(String persistenceType) {
-		if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceType)) {
-			return this;
-		}
-		
-		return null;
-	}
-
-    @Override
-	public String[] getObjectClasses(Object entry, Class<?> entryClass) {
-		String[] ojectClasses = super.getObjectClasses(entry, entryClass);
-
-		Set<String> objecClassSet = new HashSet<String>();
-
-		// Add in LDAP implementation "top" by default
-		objecClassSet.add("top");
-		objecClassSet.addAll(Arrays.asList(ojectClasses));
-		return objecClassSet.toArray(new String[0]);
-	}
-
-    @Override
-	protected Object getNativeDateAttributeValue(Date dateValue) {
-		return encodeTime(dateValue);
+    public boolean hasBranchesSupport(String dn) {
+        return true;
     }
 
-	private static class CountBatchOperation<T> extends DefaultBatchOperation<T> {
+    @Override
+    public boolean hasExpirationSupport(String primaryKey) {
+        return false;
+    }
+
+    @Override
+    public String getPersistenceType() {
+        return LdapEntryManagerFactory.PERSISTENCE_TYPE;
+    }
+
+    @Override
+    public String getPersistenceType(String primaryKey) {
+        return LdapEntryManagerFactory.PERSISTENCE_TYPE;
+    }
+
+    @Override
+    public PersistenceEntryManager getPersistenceEntryManager(String persistenceType) {
+        if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceType)) {
+            return this;
+        }
+
+        return null;
+    }
+
+    @Override
+    public String[] getObjectClasses(Object entry, Class<?> entryClass) {
+        String[] ojectClasses = super.getObjectClasses(entry, entryClass);
+
+        Set<String> objecClassSet = new HashSet<String>();
+
+        // Add in LDAP implementation "top" by default
+        objecClassSet.add("top");
+        objecClassSet.addAll(Arrays.asList(ojectClasses));
+        return objecClassSet.toArray(new String[0]);
+    }
+
+    @Override
+    protected Object getNativeDateAttributeValue(Date dateValue) {
+        return encodeTime(dateValue);
+    }
+
+    private static class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 
         private int countEntries = 0;
 
@@ -975,31 +1012,33 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
     }
 
-	private static final class DeleteBatchOperation<T> extends DefaultBatchOperation<T> {
+    private static final class DeleteBatchOperation<T> extends DefaultBatchOperation<T> {
 
-		private int countEntries = 0;
-		private LdapEntryManager ldapEntryManager;
+        private int countEntries = 0;
+        private LdapEntryManager ldapEntryManager;
 
         public DeleteBatchOperation(LdapEntryManager ldapEntryManager) {
-        	this.ldapEntryManager = ldapEntryManager;
-		}
+            this.ldapEntryManager = ldapEntryManager;
+        }
 
         @Override
-		public void performAction(List<T> entries) {
-			for (T entity : entries) {
-				try {
-					String dnValue = ldapEntryManager.getDNValue(entity).toString();
-					if (ldapEntryManager.hasBranchesSupport(dnValue)) {
-						ldapEntryManager.removeRecursively(dnValue);
-					} else {
-						ldapEntryManager.remove(dnValue);
-					}
-					LOG.trace("Removed {}", dnValue);
-				} catch (Exception e) {
-					LOG.error("Failed to remove entry, entity: " + entity, e);
-				}
-			}
-		}
+        public void performAction(List<T> entries) {
+            for (T entity : entries) {
+                try {
+					Class<?> entryClass = entity.getClass();
+					
+					String dnValue = ldapEntryManager.getDNValue(entity, entryClass).toString();
+                    if (ldapEntryManager.hasBranchesSupport(dnValue)) {
+						ldapEntryManager.removeRecursively(dnValue, entryClass);
+                    } else {
+						ldapEntryManager.remove(dnValue, entryClass);
+                    }
+                    LOG.trace("Removed {}", dnValue);
+                } catch (Exception e) {
+                    LOG.error("Failed to remove entry, entity: " + entity, e);
+                }
+            }
+        }
 
         @Override
         public boolean collectSearchResult(int size) {
@@ -1010,6 +1049,6 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         public int getCountEntries() {
             return countEntries;
         }
-	}
+    }
 
 }

@@ -18,6 +18,7 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
@@ -28,11 +29,9 @@ import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jws.ECDSASigner;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
@@ -107,9 +106,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -134,7 +135,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userEmail"})
@@ -157,9 +160,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -181,7 +186,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userInum"})
@@ -204,9 +211,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -228,7 +237,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "userInum"})
@@ -251,9 +262,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, false);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(false)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -274,7 +287,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "userInum"})
@@ -296,9 +311,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, null);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(null)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -319,7 +336,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -347,9 +366,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -375,7 +396,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -403,9 +426,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS384, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -431,7 +456,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -459,9 +486,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS512, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -487,7 +516,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -515,9 +546,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -543,7 +576,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -571,9 +606,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES384, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -599,7 +636,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -627,9 +666,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES512, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -655,7 +696,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -683,9 +726,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -711,7 +756,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -739,9 +786,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS384, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -767,7 +816,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode",
@@ -795,9 +846,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS512, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -823,7 +876,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -847,9 +902,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -871,7 +928,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -895,9 +954,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -919,7 +980,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -943,9 +1006,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -967,7 +1032,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -991,9 +1058,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1015,7 +1084,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1039,9 +1110,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1063,7 +1136,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1087,9 +1162,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1111,7 +1188,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1135,9 +1214,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS384, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1159,7 +1240,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1183,9 +1266,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS512, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1207,7 +1292,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1231,9 +1318,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1255,7 +1344,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1279,9 +1370,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES384, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1303,7 +1396,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1327,9 +1422,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES512, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1351,7 +1448,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1375,9 +1474,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1399,7 +1500,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1423,9 +1526,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS384, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1447,7 +1552,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
@@ -1471,9 +1578,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS512, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1495,7 +1604,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, false);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .nullInterval()
+                        .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -1517,9 +1628,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -1529,7 +1642,8 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
+                .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -1551,9 +1665,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1567,7 +1683,8 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 401, BackchannelAuthenticationErrorResponseType.INVALID_CLIENT);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).unauthorized(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT)
+                .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -1589,9 +1706,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1607,7 +1726,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -1629,9 +1748,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1650,7 +1771,8 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
+                .check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "userId"})
@@ -1672,9 +1794,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1692,7 +1816,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "userId"})
@@ -1714,9 +1838,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1737,7 +1863,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "userId"})
@@ -1759,9 +1885,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1782,7 +1910,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userId"})
@@ -1805,9 +1933,11 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1831,7 +1961,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE);
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -1855,7 +1985,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1873,21 +2003,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintRS256 = idToken;
     }
@@ -1913,7 +2038,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1931,21 +2056,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintRS384 = idToken;
     }
@@ -1971,7 +2091,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1989,21 +2109,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS512, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintRS512 = idToken;
     }
@@ -2029,7 +2144,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2047,21 +2162,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES256, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES256)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintES256 = idToken;
     }
@@ -2087,7 +2197,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2105,21 +2215,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES384, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES384)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintES384 = idToken;
     }
@@ -2145,7 +2250,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2163,21 +2268,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES512, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES512)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintES512 = idToken;
     }
@@ -2203,7 +2303,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2221,21 +2321,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS256)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintPS256 = idToken;
     }
@@ -2261,7 +2356,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2279,21 +2374,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS384)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintPS384 = idToken;
     }
@@ -2319,7 +2409,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2337,21 +2427,16 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS512, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS512)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintPS512 = idToken;
     }
@@ -2378,7 +2463,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2397,13 +2482,15 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgA128KWEncA128GCM = idToken;
     }
@@ -2430,7 +2517,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2449,13 +2536,15 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgA256KWEncA256GCM = idToken;
     }
@@ -2485,7 +2574,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2503,7 +2592,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2512,7 +2601,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgRSA15EncA128CBCPLUSHS256 = idToken;
     }
@@ -2542,7 +2633,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2560,7 +2651,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2569,7 +2660,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgRSA15EncA256CBCPLUSHS512 = idToken;
     }
@@ -2599,7 +2692,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2617,7 +2710,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2626,7 +2719,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgRSAOAEPEncA256GCM = idToken;
     }

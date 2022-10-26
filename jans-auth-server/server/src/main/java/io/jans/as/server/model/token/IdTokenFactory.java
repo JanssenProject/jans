@@ -27,7 +27,7 @@ import io.jans.as.server.model.common.CIBAGrant;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
@@ -44,10 +44,10 @@ import org.apache.logging.log4j.util.Strings;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -133,10 +133,15 @@ public class IdTokenFactory {
                             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
                             ExecutionContext executionContext) throws Exception {
 
+        final Client client = authorizationGrant.getClient();
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
-        Audience.setAudience(jwr.getClaims(), authorizationGrant.getClient());
+        Audience.setAudience(jwr.getClaims(), client);
 
         int lifeTime = appConfiguration.getIdTokenLifetime();
+        if (client.getAttributes().getIdTokenLifetime() != null && client.getAttributes().getIdTokenLifetime() > 0) {
+            lifeTime = client.getAttributes().getIdTokenLifetime();
+            log.trace("Override id token lifetime with value from client: {}", client.getClientId());
+        }
         int lifetimeFromScript = externalUpdateTokenService.getIdTokenLifetimeInSeconds(ExternalUpdateTokenContext.of(executionContext));
         if (lifetimeFromScript > 0) {
             lifeTime = lifetimeFromScript;
@@ -191,7 +196,7 @@ public class IdTokenFactory {
 
         User user = authorizationGrant.getUser();
         List<Scope> dynamicScopes = new ArrayList<>();
-        if (executionContext.isIncludeIdTokenClaims() && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
+        if (executionContext.isIncludeIdTokenClaims() && client.isIncludeClaimsInIdToken()) {
             for (String scopeName : executionContext.getScopes()) {
                 Scope scope = scopeService.getScopeById(scopeName);
                 if (scope == null) {

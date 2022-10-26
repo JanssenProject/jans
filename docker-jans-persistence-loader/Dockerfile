@@ -1,38 +1,43 @@
-FROM alpine:3.14.3
+FROM alpine:3.16
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 \
-    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps git wget
+    && apk upgrade --available \
+    && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps git wget
 
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install -U pip wheel \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ARG JANS_LINUX_SETUP_VERSION=76854c78af1fd0820f12587f40093e5663012a50
+# janssenproject/jans SHA commit
+ENV JANS_SOURCE_VERSION=e74ea8e27e59d35ff6e3c6f997e6c1df6a04ec83
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_LINUX_SETUP_VERSION} \
-    && git sparse-checkout set ${JANS_SETUP_DIR}
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR}
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -42,8 +47,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
-    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json
-
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
+    && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
+    && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
+    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/
 
 RUN mkdir -p /app/templates/jans-config-api
 
@@ -60,9 +67,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
-# TODO: casa should be moved from this image
-ARG GLUU_CASA_VERSION=6aa59af5f7001d8587ca4a9b6c688c861faec5eb
-RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
+# Download jans-config-api-swagger for role_scope_mapping
+RUN wget -q https://github.com/JanssenProject/jans/raw/${JANS_SOURCE_VERSION}/jans-config-api/docs/jans-config-api-swagger.yaml -P /app/static
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -71,7 +77,7 @@ RUN rm -rf /tmp/jans
 # Cleanup
 # =======
 
-RUN apk del build-deps \
+RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 # =======
@@ -127,7 +133,7 @@ ENV CN_SECRET_ADAPTER=vault \
 # ===============
 
 ENV CN_PERSISTENCE_TYPE=couchbase \
-    CN_PERSISTENCE_LDAP_MAPPING=default \
+    CN_HYBRID_MAPPING="{}" \
     CN_COUCHBASE_URL=localhost \
     CN_COUCHBASE_USER=admin \
     CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
@@ -152,7 +158,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_REDIS_SENTINEL_GROUP="" \
     CN_MEMCACHED_URL=localhost:11211 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_CASA_ENABLED=false \
     CN_SCIM_ENABLED=false \
     CN_PERSISTENCE_SKIP_INITIALIZED=false \
     CN_DOCUMENT_STORE_TYPE=LOCAL \
@@ -169,31 +174,30 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 # misc
 # ====
 
-LABEL name="Persistence" \
-    maintainer="Janssen <support@jans.io>" \
+LABEL name="janssenproject/persistence-loader" \
+    maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.0" \
-    release="beta.15" \
+    version="1.0.3" \
+    release="dev" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
-RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
+RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
 # this overrides existing templates
 COPY templates /app/templates
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# # create non-root user
+# create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
- # adjust ownership
-RUN chown -R 1000:1000 /tmp \
-    && chown -R 1000:1000 /app/tmp/ \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /app/tmp && chmod -R g=u /app/tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans
+# adjust ownership and permission
+RUN chmod -R g=u /app/custom_ldif \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans
+
 USER 1000
+
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]

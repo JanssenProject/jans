@@ -21,8 +21,8 @@ package io.jans.fido2.service.verifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.exception.Fido2RpRuntimeException;
 import org.slf4j.Logger;

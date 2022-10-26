@@ -30,6 +30,7 @@ jansClaim: inum=36D9,ou=attributes,o=jans
 jansClaim: inum=BE64,ou=attributes,o=jans
 jansClaim: inum=6493,ou=attributes,o=jans
 jansClaim: inum=4CF1,ou=attributes,o=jans
+jansClaim: inum=29DA,ou=attributes,o=jans
 jansDefScope: false
 jansId: profile
 jansScopeTyp: openid
@@ -114,17 +115,6 @@ inum: 6D99
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansDefScope: true
 jansId: uma_protection
-jansScopeTyp: openid
-objectClass: top
-objectClass: jansScope
-
-dn: inum=6D90,ou=scopes,o=jans
-description: jans_client_api scope which is required to call jans_client_api API
-displayName: jans_client_api
-inum: 6D90
-jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansDefScope: true
-jansId: jans_client_api
 jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope

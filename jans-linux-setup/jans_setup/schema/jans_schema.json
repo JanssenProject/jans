@@ -347,6 +347,7 @@
       "names": [
         "memberOf"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
       "x_origin": "Jans created attribute"
@@ -885,19 +886,10 @@
       "names": [
         "jansReqURI"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "jans Require Authn Time",
-      "equality": "booleanMatch",
-      "names": [
-        "jansRequireAuthTime"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
       "x_origin": "Jans created attribute"
     },
     {
@@ -940,6 +932,39 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "jansScopeTyp"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Creator type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "creatorTyp"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Creator Id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "creatorId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Creator Attrs",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "creatorAttrs"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1187,7 +1212,7 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Usr group",
+      "desc": "Group",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansGrp"
@@ -1621,7 +1646,7 @@
       "names": [
         "jansScrDn"
       ], 
-      "multivalued": true, 
+      "multivalued": true,
       "oid": "jansAttr", 
       "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
       "x_origin": "Jans created attribute"
@@ -1654,6 +1679,7 @@
       "names": [
         "jansSmtpConf"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1917,6 +1943,7 @@
       "names": [
         "jansUmaPermission"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2506,6 +2533,7 @@
       "names": [
         "jansClaimRedirectURI"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2668,6 +2696,7 @@
       "names": [
         "jansAuthorizedOrigins"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2861,6 +2890,7 @@
       "names": [
         "jansAlias"
       ],
+      "multivalued": true,
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
@@ -3054,10 +3084,65 @@
         "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Relying Party Id for jans-client-api",
+      "desc": "Details of a running agama flow instance",
       "equality": "caseIgnoreMatch",
       "names": [
-        "rpId"
+        "agFlowSt"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Continuation associated to a running agama flow instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "agFlowEncCont"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Full name of an agama flow",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "agFlowQname"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Metadata of an agama flow",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "agFlowMeta"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Save Document in DB",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "document"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Transpiled code of an agama flow",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "agFlowTrans"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3257,6 +3342,31 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "inum",
+        "o",
+        "jansAttrs",
+        "description",
+        "exp",
+        "del",
+        "creatorId",
+        "creatorTyp",
+        "creationDate"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansSsa"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
         "c",
         "ou",
         "description",
@@ -3382,6 +3492,8 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "o",
+        "jansGrp",
         "displayName",
         "description",
         "inum",
@@ -3411,7 +3523,6 @@
         "jansReqObjEncAlg",
         "jansReqObjEncEnc",
         "jansReqURI",
-        "jansRequireAuthTime",
         "jansRespTyp",
         "jansScope",
         "jansClaim",
@@ -3470,6 +3581,10 @@
         "displayName",
         "inum",
         "jansScopeTyp",
+        "creatorId",
+        "creatorTyp",
+        "creatorAttrs",
+        "creationDate",
         "jansClaim",
         "jansScrDn",
         "jansGrpClaims",
@@ -3981,27 +4096,6 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "rpId",
-        "dat",
-        "iat",
-        "exp",
-        "jansTyp"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "rpExpiredObject"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
         "jansId",
         "dat"
       ],
@@ -4044,6 +4138,7 @@
       "may": [
         "jansId",
         "dat",
+        "jansData",
         "attr"
       ],
       "must": [
@@ -4119,6 +4214,78 @@
       ],
       "names": [
         "jansAdminConfDyn"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },    
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "agFlowSt",
+        "agFlowEncCont",
+        "jansCustomMessage",
+        "exp"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "agmFlowRun"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "agFlowQname",
+        "agFlowMeta",
+        "jansScr",
+        "jansEnabled",
+        "jansScrError",
+        "agFlowTrans",
+        "jansRevision",
+        "jansCustomMessage"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "agmFlow"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+       "kind": "STRUCTURAL",
+       "may": [
+        "inum",
+        "ou",
+        "displayName",
+        "description",
+        "document",
+        "creationDate",
+        "jansModuleProperty",
+        "jansLevel",
+        "jansRevision",
+        "jansEnabled",
+        "jansAlias"				
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansDocument"
       ],
       "oid": "jansObjClass",
       "sup": [

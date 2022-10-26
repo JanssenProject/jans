@@ -12,6 +12,7 @@ import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.page.LoginPage;
 import io.jans.as.client.page.PageConfig;
 import io.jans.as.client.page.SelectPage;
@@ -33,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
@@ -153,7 +154,7 @@ public class SelectAccountHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest, driver, authorizationResponseStr);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 
@@ -179,7 +180,7 @@ public class SelectAccountHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authorize(authorizationRequest, userId, userSecret, 1);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 }

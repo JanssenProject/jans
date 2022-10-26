@@ -1,21 +1,11 @@
 {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-{{ range $k, $v := until ( .Values.multiCluster.replicaCount | int ) }}
----
-
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  {{- if $.Values.multiCluster.enabled }}
-  name: {{ include "opendj.fullname" $ }}-regional-{{$v}}
-  {{- else }}
   name: {{ include "opendj.fullname" $ }}
-  {{- end }}
   namespace: {{ $.Release.Namespace }}
   labels:
 {{ include "opendj.labels" $ | indent 4}}
-    {{- if $.Values.multiCluster.enabled }}
-    appregion: {{ include "opendj.name" $ }}-regional-{{$v}}
-    {{- end }}
 {{- if $.Values.additionalLabels }}
 {{ toYaml $.Values.additionalLabels | indent 4 }}
 {{- end }}
@@ -26,27 +16,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- if $.Values.multiCluster.enabled }}
       app: {{ include "opendj.name" $ }}
-      appregion: {{ include "opendj.name" $ }}-regional-{{$v}}
-      {{- else }}
-      app: {{ include "opendj.name" $ }}
-      {{- end }}
   serviceName: {{ include "opendj.name" $ }}
-  {{- if $.Values.multiCluster.enabled }}
-  replicas: 1
-  {{- else }}
   replicas: {{ $.Values.replicas }}
-  {{- end }}
   template:
     metadata:
       labels:
-        {{- if $.Values.multiCluster.enabled }}
         app: {{ include "opendj.name" $ }}
-        appregion: {{ include "opendj.name" $ }}-regional-{{$v}}
-        {{- else }}
-        app: {{ include "opendj.name" $ }}
-        {{- end }}
       {{- if $.Values.global.istio.ingress }}
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
@@ -65,14 +41,6 @@ spec:
       {{- with $.Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if $.Values.multiCluster.enabled }}
-        - name: serfkey
-          secret:
-            secretName: {{ $.Release.Name }}-serf-key
-        - name: serfpeers
-          configMap:
-            name: {{ $.Release.Name }}-serf-peers
-      {{- end }}
       {{- if $.Values.global.upgrade.enabled }}
         - name: ox-ldif-cm
           configMap:
@@ -85,20 +53,10 @@ spec:
         env:
           {{- include "opendj.usr-envs" $ | indent 12 }}
           {{- include "opendj.usr-secret-envs" $ | indent 12 }}
-        {{- if $.Values.multiCluster.enabled }}
-          - name: GLUU_SERF_ADVERTISE_ADDR
-            value: "{{ $.Release.Name }}-opendj-{{$.Values.multiCluster.clusterId}}-regional-{{$v}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }}:307{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
-          - name: GLUU_LDAP_ADVERTISE_ADMIN_PORT
-            value: "304{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
-          - name: GLUU_LDAP_ADVERTISE_LDAPS_PORT
-            value: "306{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
-          - name: GLUU_LDAP_ADVERTISE_REPLICATION_PORT
-            value: "309{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
-        {{- end }}
         lifecycle:
           preStop:
             exec:
-              command: ["python3", "/app/scripts/deregister_peer.py"]
+              command: ["/bin/sh", "-c", "python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"]
         envFrom:
         - configMapRef:
             name: {{ $.Release.Name }}-config-cm
@@ -123,14 +81,6 @@ spec:
         {{- end }}
         {{- with $.Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- if $.Values.multiCluster.enabled }}
-          - mountPath: "/etc/janssen/conf/serf-key"
-            name: serfkey
-            subPath: serf-key
-          - mountPath: "/etc/janssen/conf/serf-peers-static.json"
-            name: serfpeers
-            subPath: serf-peers-static.json
         {{- end }}
         {{- if $.Values.global.upgrade.enabled }}
           - name: ox-ldif-cm
@@ -163,5 +113,4 @@ spec:
       {{- else }}
       storageClassName: {{ include "opendj.fullname" $ | quote }}
       {{- end }}
-{{- end }}
 {{- end }}

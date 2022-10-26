@@ -6,12 +6,8 @@
 
 package io.jans.as.client.load;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
+import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -22,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertUserInfoBasicResponseOk;
-import static io.jans.as.client.client.Asserter.assertUserInfoPersonalDataNotNull;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -81,7 +75,9 @@ public class UserInfoLoadTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
-        assertUserInfoPersonalDataNotNull(response2);
+        AssertBuilder.userInfoResponse(response2)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 }

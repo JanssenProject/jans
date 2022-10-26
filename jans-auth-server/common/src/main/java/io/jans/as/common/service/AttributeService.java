@@ -16,7 +16,7 @@ import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

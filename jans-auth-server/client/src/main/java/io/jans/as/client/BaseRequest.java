@@ -10,6 +10,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.util.Util;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,9 +19,11 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.jans.as.model.ciba.PushTokenDeliveryRequestParam.AUTHORIZATION_REQUEST_ID;
+
 /**
  * @author Javier Rojas Blum
- * @version January 26. 2018
+ * @version April 25. 2022
  */
 public abstract class BaseRequest {
 

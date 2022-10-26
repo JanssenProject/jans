@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.kerby.asn1.parse.Asn1Container;
 import org.apache.kerby.asn1.parse.Asn1ParseResult;
@@ -21,13 +21,12 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.AttestationException;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.CoseService;
@@ -86,7 +85,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	 *
 	 * Valid until 03/14/2045 @ 5:00 PM PST
 	 */
-	private static final String APPLE_WEBAUTHN_ROOT_CA = "/etc/gluu/conf/fido2/apple/";
+	private static final String APPLE_WEBAUTHN_ROOT_CA = "/etc/jans/conf/fido2/apple/";
 
 	// @Override
 	public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
@@ -116,7 +115,8 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			trustAnchorCertificates.addAll(certificateService.getCertificates(APPLE_WEBAUTHN_ROOT_CA));
 			try {
 				log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate" + trustAnchorCertificates.size());
-				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates,
+						trustAnchorCertificates);
 				log.info("Step 1 completed  ");
 
 			} catch (Fido2MissingAttestationCertException ex) {

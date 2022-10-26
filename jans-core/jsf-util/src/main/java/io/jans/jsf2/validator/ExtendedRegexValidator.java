@@ -6,10 +6,10 @@
 
 package io.jans.jsf2.validator;
 
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.validator.FacesValidator;
-import javax.faces.validator.RegexValidator;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.validator.FacesValidator;
+import jakarta.faces.validator.RegexValidator;
 
 @FacesValidator("extendedRegexValidator")
 public class ExtendedRegexValidator extends RegexValidator {
