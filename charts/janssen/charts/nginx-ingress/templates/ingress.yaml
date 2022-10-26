@@ -1,4 +1,4 @@
-{{ if .Values.ingress.openidConfigEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "openidConfigEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -55,8 +55,7 @@ spec:
 {{- end }}
 
 ---
-
-{{ if .Values.ingress.deviceCodeEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "deviceCodeEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -113,8 +112,7 @@ spec:
 {{- end }}
 
 ---
-
-{{ if .Values.ingress.firebaseMessagingEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "firebaseMessagingEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -171,7 +169,7 @@ spec:
 {{- end }}
 
 ---
-{{ if .Values.ingress.uma2ConfigEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "uma2ConfigEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -228,8 +226,7 @@ spec:
 {{- end }}
 
 ---
-
-{{ if .Values.ingress.webfingerEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "webfingerEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -286,8 +283,7 @@ spec:
 {{- end }}
 
 ---
-
-{{ if .Values.ingress.webdiscoveryEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "webdiscoveryEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -344,8 +340,7 @@ spec:
 {{- end }}
 
 ---
-
-{{ if .Values.ingress.scimConfigEnabled -}}
+{{- if .Values.global.scim.ingress.scimConfigEnabled }}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -403,7 +398,7 @@ spec:
 
 ---
 
-{{ if .Values.ingress.scimEnabled -}}
+{{- if .Values.global.scim.ingress.scimEnabled }}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -459,7 +454,7 @@ spec:
 
 ---
 
-{{ if .Values.ingress.configApiEnabled -}}
+{{ if index .Values "global" "config-api" "ingress" "configApiEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -514,8 +509,7 @@ spec:
 {{- end }}
 
 ---
-
-{{ if .Values.ingress.u2fConfigEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "u2fConfigEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -573,7 +567,7 @@ spec:
 
 ---
 
-{{ if .Values.ingress.fido2ConfigEnabled -}}
+{{ if .Values.global.fido2.ingress.fido2ConfigEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
@@ -631,7 +625,7 @@ spec:
 
 ---
 
-{{ if .Values.ingress.authServerEnabled -}}
+{{ if index .Values "global" "auth-server" "ingress" "authServerEnabled" -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: networking.k8s.io/v1
