@@ -4,10 +4,11 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.client;
+package io.jans.as.client.ssa.create;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.jans.as.client.BaseRequest;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.json.JsonApplier;
@@ -19,12 +20,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.jans.as.client.util.ClientUtil.*;
+import static io.jans.as.client.util.ClientUtil.extractListByKey;
+import static io.jans.as.client.util.ClientUtil.longOrNull;
 import static io.jans.as.model.ssa.SsaRequestParam.*;
 
-public class SsaRequest extends BaseRequest {
+public class SsaCreateRequest extends BaseRequest {
 
-    private static final Logger log = Logger.getLogger(SsaRequest.class);
+    private static final Logger log = Logger.getLogger(SsaCreateRequest.class);
 
     @JsonProperty(value = "org_id")
     private Long orgId;
@@ -50,7 +52,7 @@ public class SsaRequest extends BaseRequest {
 
     private String accessToken;
 
-    public SsaRequest() {
+    public SsaCreateRequest() {
         setContentType(MediaType.APPLICATION_JSON);
         setMediaType(MediaType.APPLICATION_JSON);
         setAuthorizationMethod(AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD);
@@ -129,21 +131,21 @@ public class SsaRequest extends BaseRequest {
         this.accessToken = accessToken;
     }
 
-    public static SsaRequest fromJson(String json) throws JSONException {
+    public static SsaCreateRequest fromJson(String json) throws JSONException {
         return fromJson(new JSONObject(json));
     }
 
-    public static SsaRequest fromJson(JSONObject requestObject) throws JSONException {
-        final SsaRequest result = new SsaRequest();
+    public static SsaCreateRequest fromJson(JSONObject requestObject) throws JSONException {
+        final SsaCreateRequest result = new SsaCreateRequest();
         JsonApplier.getInstance().apply(requestObject, result);
-        result.setOrgId(requestObject.getLong(ORG_ID.toString()));
-        result.setExpiration(longOrNull(requestObject, EXPIRATION.toString()));
-        result.setDescription(requestObject.optString(DESCRIPTION.toString()));
-        result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
-        result.setSoftwareRoles(extractListByKey(requestObject, SOFTWARE_ROLES.toString()));
-        result.setGrantTypes(extractListByKey(requestObject, GRANT_TYPES.toString()));
-        result.setOneTimeUse(booleanOrNull(requestObject, ONE_TIME_USE.toString()));
-        result.setRotateSsa(booleanOrNull(requestObject, ROTATE_SSA.toString()));
+        result.setOrgId(requestObject.getLong(ORG_ID.getName()));
+        result.setExpiration(longOrNull(requestObject, EXPIRATION.getName()));
+        result.setDescription(requestObject.optString(DESCRIPTION.getName()));
+        result.setSoftwareId(requestObject.optString(SOFTWARE_ID.getName()));
+        result.setSoftwareRoles(extractListByKey(requestObject, SOFTWARE_ROLES.getName()));
+        result.setGrantTypes(extractListByKey(requestObject, GRANT_TYPES.getName()));
+        result.setOneTimeUse(requestObject.optBoolean(ONE_TIME_USE.getName(), true));
+        result.setRotateSsa(requestObject.optBoolean(ROTATE_SSA.getName(), true));
         return result;
     }
 
@@ -182,7 +184,6 @@ public class SsaRequest extends BaseRequest {
                 ", grantTypes=" + grantTypes +
                 ", oneTimeUse=" + oneTimeUse +
                 ", rotateSsa=" + rotateSsa +
-                ", accessToken='" + accessToken + '\'' +
                 '}';
     }
 }
