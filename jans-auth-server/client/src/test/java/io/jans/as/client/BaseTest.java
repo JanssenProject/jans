@@ -1116,6 +1116,23 @@ public abstract class BaseTest {
         return registerResponse;
     }
 
+    public RegisterResponse registerClient(final String redirectUris, List<ResponseType> responseTypes, List<GrantType> grantTypes, List<String> scopes, String sectorIdentifierUri) {
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(scopes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = newRegisterClient(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
+        return registerResponse;
+    }
+
     public RegisterResponse registerClient(
             final String redirectUris, final List<ResponseType> responseTypes, final String sectorIdentifierUri,
             final String clientJwksUri, final SignatureAlgorithm signatureAlgorithm,
@@ -1217,5 +1234,13 @@ public abstract class BaseTest {
         }
 
         return authorizationResponse;
+    }
+
+    public TokenResponse tokenClientCredentialsGrant(String scope, String clientId, String clientSecret) {
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant(scope, clientId, clientSecret);
+        showClient(tokenClient);
+        AssertBuilder.tokenResponse(tokenResponse).ok().check();
+        return tokenResponse;
     }
 }
