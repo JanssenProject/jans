@@ -43,7 +43,7 @@
 		<smallrye.metrics.version>4.0.0-RC1</smallrye.metrics.version>
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 
-		<rest-assured.version>4.3.3</rest-assured.version>
+		<rest-assured.version>5.0.1.Final</rest-assured.version>
 		<karate.version>0.9.5</karate.version>
 		<snake.version>1.33</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
