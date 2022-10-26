@@ -344,7 +344,7 @@ class JansCliApp(Application):
 
         #li, cd, width = self.handle_long_string(title,[1]*num_lines,ta)
 
-        v = VSplit([Label(text=title, width=len(title), style=style), ta], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta], padding=1)
         v.me = ta
 
         return v

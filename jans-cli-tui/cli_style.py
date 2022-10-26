@@ -109,7 +109,7 @@ style = Style.from_dict(
         "date-picker-monthandyear":"bg:#1e51fa",
         "date-picker-day":"bg:#D3D3D3",
         "date-picker-time":"bg:#bab1b1",
-
+        "dialog-titled-widget":"bg:#ffffff fg:green",
 
     }
 )

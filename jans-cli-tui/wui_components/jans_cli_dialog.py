@@ -59,6 +59,7 @@ class JansGDialog:
             buttons=buttons,
             width=width,
             modal=True,
+            with_background=True
         )
 
     def __pt_container__(self)-> Dialog:
