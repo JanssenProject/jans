@@ -398,16 +398,16 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             root = tree.getroot()
 
             for app_set in root.findall("Set"):
-                if app_set.get('name') == 'extraClasspath':
-                    if app_set.text:
-                        path_list = app_set.text.split(',')
-                        if paths:
-                            return path_list
+                if app_set.get('name') == 'extraClasspath' and app_set.text:
 
-                        for plugin_path in path_list:
-                            base_name = os.path.basename(plugin_path)
-                            fname, fext = os.path.splitext(base_name)
-                            plugins.append(fname.rstrip('plugin').rstrip('-'))
+                    path_list = app_set.text.split(',')
+                    if paths:
+                        return path_list
+
+                    for plugin_path in path_list:
+                        base_name = os.path.basename(plugin_path)
+                        fname, fext = os.path.splitext(base_name)
+                        plugins.append(fname.rstrip('plugin').rstrip('-'))
 
         return plugins
 
