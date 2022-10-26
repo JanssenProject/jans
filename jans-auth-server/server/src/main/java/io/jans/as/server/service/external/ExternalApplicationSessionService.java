@@ -7,7 +7,7 @@
 package io.jans.as.server.service.external;
 
 import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;

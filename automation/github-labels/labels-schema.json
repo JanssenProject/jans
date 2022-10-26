@@ -53,6 +53,15 @@
       "title-prefixes": []
     }
   },
+  "backport/v1.0.0": {
+    "color": "E86DDD",
+    "description": "Backport to version 1.0.0",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
   "comp-charts-jans": {
     "color": "0052CC",
     "description": "Touching folder /charts",
@@ -77,15 +86,6 @@
     "auto-label": {
       "branch": "",
       "paths": ["docker-jans-certmanager"],
-      "title-prefixes": []
-    }
-  },
-  "comp-docker-jans-client-api": {
-    "color": "0052CC",
-    "description": "Touching folder /docker-jans-client-api",
-    "auto-label": {
-      "branch": "",
-      "paths": ["docker-jans-client-api"],
       "title-prefixes": []
     }
   },
@@ -158,15 +158,6 @@
     "auto-label": {
       "branch": "",
       "paths": ["jans-cli"],
-      "title-prefixes": []
-    }
-  },
-  "comp-jans-client-api": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-client-api",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-client-api"],
       "title-prefixes": []
     }
   },
@@ -248,6 +239,15 @@
     "auto-label": {
       "branch": "",
       "paths": ["super-jans"],
+      "title-prefixes": []
+    }
+  },
+  "comp-agama": {
+    "color": "0052CC",
+    "description": "Touching folder /agama",
+    "auto-label": {
+      "branch": "",
+      "paths": ["agama"],
       "title-prefixes": []
     }
   },

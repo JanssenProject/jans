@@ -8,26 +8,45 @@ on:
     branches:
       - master
       - main
-      - "!update-pycloud-in-**"      
-    paths-ignore:
-      - 'docker-jans-**/CHANGELOG.md'
-      - 'docker-jans-**/version.txt'
-      - 'jans-pycloudlib/CHANGELOG.md'
-      - 'jans-pycloudlib/jans/pycloudlib/version.py'
-      - '**.md'
+      - '!update-pycloud-in-**'
+    paths:
+      - 'jans-auth-server/**'
+      - 'jans-orm/**'
+      - 'jans-config-api/**'
+      - 'jans-scim/**'
+      - 'jans-core/**'
+      - 'jans-notify/**'
+      - 'jans-fido2/**'
+      - 'jans-eleven/**'
+      - 'agama/**'
+      - 'jans-linux-setup/**'
+      - 'jans-cli/**'
+      - 'jans-pycloudlib/**'
+      - '!**/CHANGELOG.md'
+      - '!**.txt'
 
   # TODO: Optimize so that workflow is only triggered for `opened` and `synchronize` actions
   pull_request:
     branches:
       - master
       - main
-      - "!update-pycloud-in-**"      
-    paths-ignore:
-      - 'docker-jans-**/CHANGELOG.md'
-      - 'docker-jans-**/version.txt'
-      - 'jans-pycloudlib/CHANGELOG.md'
-      - 'jans-pycloudlib/jans/pycloudlib/version.py'
-      - '**.md'
+      - '!update-pycloud-in-**'
+    paths:
+      - 'jans-auth-server/**'
+      - 'jans-orm/**'
+      - 'jans-config-api/**'
+      - 'jans-scim/**'
+      - 'jans-core/**'
+      - 'jans-notify/**'
+      - 'jans-fido2/**'
+      - 'jans-eleven/**'
+      - 'agama/**'
+      - 'jans-linux-setup/**'
+      - 'jans-cli/**'
+      - 'jans-pycloudlib/**'
+      - '!**/CHANGELOG.md'
+      - '!**.txt'
+
   workflow_dispatch:
 
 jobs:
@@ -37,13 +56,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-client-api, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, super-jans]
+        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
     env:
       JVM_PROJECTS: |
         jans-auth-server
         jans-orm
         jans-config-api
-        jans-client-api
         jans-scim
         jans-core
         jans-notify
@@ -54,7 +72,6 @@ jobs:
         jans-linux-setup
         jans-cli
         jans-pycloudlib
-        super-jans
 
     steps:
       - name: check out code
@@ -66,15 +83,15 @@ jobs:
         run: |
           if [ $GITHUB_BASE_REF ]; then
             # Pull Request
-            echo "Triggerring event: pull request"
+            echo "Triggering event: pull request"
             echo Pull request base ref: $GITHUB_BASE_REF
             git fetch origin $GITHUB_BASE_REF --depth=1
             if [ ${{ github.event.action }} = "opened" ]; then
-              echo "Triggerring action: opened"
+              echo "Triggering action: opened"
               echo "CHANGED_DIR=$( git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >> ${GITHUB_ENV}
             fi
             if [ ${{ github.event.action }} = "synchronize" ]; then
-              echo "Triggerring action: synchronize"
+              echo "Triggering action: synchronize"
               echo "CHANGED_DIR=$( git diff --name-only ${{ github.event.before }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >>${GITHUB_ENV}
             fi
           else
@@ -121,8 +138,6 @@ jobs:
           cd ${{ matrix.module }}
           case ${{ matrix.module }} in
             "jans-auth-server")
-                    ;&
-            "jans-client-api")
                     ;&
             "jans-scim")
                     ;&

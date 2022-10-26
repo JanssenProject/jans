@@ -9,7 +9,7 @@ middleName: Admin
 nickname: Admin
 sn: User
 userPassword: %(encoded_admin_password)s
-jansStatus: ACTIVE
+jansStatus: active
 memberOf: inum=60B7,ou=groups,o=jans
 displayName: Default Admin User
 mail: admin@%(hostname)s

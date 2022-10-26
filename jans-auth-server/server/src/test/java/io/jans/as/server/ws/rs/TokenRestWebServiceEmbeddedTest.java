@@ -55,7 +55,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -101,7 +101,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"tokenPath", "redirectUri"})
     @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestAccessToken(final String tokenPath, final String redirectUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode("6f6f3f01-a034-4336-bf31-2e74868e5838");
@@ -135,7 +135,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
     public void requestAccessTokenPassword(final String tokenPath, final String userId, final String userSecret)
             throws Exception {
         // Testing with valid parameters
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -177,7 +177,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenWithClientSecretJwtFail(final String tokenPath, final String userId,
                                                           final String userSecret, final String audience) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
@@ -211,7 +211,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestAccessTokenClientCredentials(final String tokenPath) throws Exception {
         // Testing with valid parameters
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("email read_stream manage_pages");
@@ -249,7 +249,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"tokenPath"})
     @Test(dependsOnMethods = "dynamicClientRegistration")
     public void refreshingAccessTokenFail(final String tokenPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
         tokenRequest.setRefreshToken("tGzv3JOkF0XG5Qx2TlKWIA");

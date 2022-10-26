@@ -6,13 +6,13 @@
 
 package io.jans.orm.couchbase.impl;
 
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.N1qlQueryRow;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.couchbase.client.java.json.JsonObject;
 
 /**
  * Couchbase batch operation wrapper
@@ -43,19 +43,12 @@ public class CouchbaseBatchOperationWraper<T> {
         return batchOperation;
     }
 
-    public List<T> createEntities(List<N1qlQueryRow> searchResult) {
+    public List<T> createEntities(List<JsonObject> searchResult) {
         if (couchbaseEntryManager == null) {
             return new ArrayList<T>(0);
         }
 
-        JsonObject[] resultObjects = new JsonObject[searchResult.size()];
-
-        int index = 0;
-        for (N1qlQueryRow row : searchResult) {
-            resultObjects[index++] = row.value();
-        }
-
-        return couchbaseEntryManager.createEntities(entryClass, propertiesAnnotations, null, resultObjects);
+        return couchbaseEntryManager.createEntities(entryClass, propertiesAnnotations, null, searchResult.toArray(new JsonObject[0]));
     }
 
 }

@@ -47,11 +47,14 @@ class KubernetesMeta(BaseMeta):
     def get_containers(self, label: str) -> list[V1Pod]:
         """Get list of pods based on label in a namespace.
 
-        The namespace is resolved from value of ``CN_CONTAINER_METADATA_NAMESPACE``
+        The namespace is resolved from value of `CN_CONTAINER_METADATA_NAMESPACE`
         environment variable.
 
-        :params label: Label name, i.e. ``APP_NAME=oxauth``.
-        :returns: List of pod objects.
+        Args:
+            label: Label name, i.e. `APP_NAME=jans-auth`.
+
+        Returns:
+            List of pod objects.
         """
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
         pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label).items
@@ -60,8 +63,11 @@ class KubernetesMeta(BaseMeta):
     def get_container_ip(self, container: V1Pod) -> str:
         """Get container's IP address.
 
-        :params container: Pod object.
-        :returns: IP address associated with the pod.
+        Args:
+            container: Pod object.
+
+        Returns:
+            IP address associated with the pod.
         """
         ip: str = container.status.pod_ip
         return ip
@@ -69,8 +75,11 @@ class KubernetesMeta(BaseMeta):
     def get_container_name(self, container: V1Pod) -> str:
         """Get container's name.
 
-        :params container: Pod object.
-        :returns: Pod name.
+        Args:
+            container: Pod object.
+
+        Returns:
+            Pod name.
         """
         name: str = container.metadata.name
         return name
@@ -78,8 +87,9 @@ class KubernetesMeta(BaseMeta):
     def copy_to_container(self, container: V1Pod, path: str) -> None:
         """Copy path to container.
 
-        :params container: Pod object.
-        :params path: Path to file or directory.
+        Args:
+            container: Pod object.
+            path: Path to file or directory.
         """
         # make sure parent directory is created first
         dirname = os.path.dirname(path)
@@ -125,8 +135,9 @@ class KubernetesMeta(BaseMeta):
     def exec_cmd(self, container: V1Pod, cmd: str) -> _t.Any:
         """Run command inside container.
 
-        :params container: Pod object.
-        :params cmd: String of command.
+        Args:
+            container: Pod object.
+            cmd: String of command.
         """
         return stream(
             self.client.connect_get_namespaced_pod_exec,
@@ -143,11 +154,12 @@ class KubernetesMeta(BaseMeta):
     def _get_main_container_name(self, container: V1Pod) -> str:
         """Get the pod's main container name.
 
-        The main container name is determined from the value of ``CN_CONTAINER_MAIN_NAME``
+        The main container name is determined from the value of `CN_CONTAINER_MAIN_NAME`
         environment variable set in the pod.
         If the value is empty, fallback to the first container inside the pod.
 
-        :param container: Pod object.
+        Args:
+            container: Pod object.
         """
         name = ""
         for cntr in container.spec.containers:

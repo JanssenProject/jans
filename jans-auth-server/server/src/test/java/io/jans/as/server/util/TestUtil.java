@@ -1,8 +1,11 @@
 package io.jans.as.server.util;
 
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.model.error.ErrorResponse;
+import jakarta.ws.rs.core.Response;
 
 import static io.jans.as.model.uma.TestUtil.assertNotBlank;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 /**
@@ -22,4 +25,24 @@ public class TestUtil {
         assertNotNull(response.getClientIdIssuedAt());
         assertNotNull(response.getClientSecretExpiresAt());
     }
+
+    public static void assertBadRequest(Response response) {
+        assertEquals(response.getStatus(), 400);
+    }
+
+    public static void assertErrorCode(Response response, String expectedErrorCode) {
+        assertEquals(response.readEntity(ErrorResponse.class).getErrorCode(), expectedErrorCode);
+    }
+
+    public static boolean testWithExternalApiUrl() {
+        return System.getProperties().containsKey("test.jans.auth.url");
+    }
+
+    public static String readExternalApiUrl() {
+        if (testWithExternalApiUrl()) {
+            return System.getProperties().getProperty("test.jans.auth.url");
+        }
+        return null;
+    }
+
 }

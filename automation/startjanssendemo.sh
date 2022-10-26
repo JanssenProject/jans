@@ -128,11 +128,6 @@ global:
       scriptLogLevel: "$LOG_LEVEL"
       auditStatsLogTarget: "$LOG_TARGET"
       auditStatsLogLevel: "$LOG_LEVEL"
-  client-api:
-    enabled: true
-    appLoggers:
-      clientApiLogTarget: "$LOG_TARGET"
-      clientApiLogLevel: "$LOG_LEVEL"
   config-api:
     enabled: true
     appLoggers:
@@ -210,7 +205,7 @@ opendj:
     repository: gluufederation/opendj
     tag: 5.0.0_dev
 EOF
-sudo helm repo add janssen https://janssenproject.github.io/jans/charts
+sudo helm repo add janssen https://docs.jans.io
 sudo helm repo update
 # remove --devel once we issue the first prod chart
 sudo helm install janssen janssen/janssen --devel -n jans -f override.yaml --kubeconfig="$KUBECONFIG"

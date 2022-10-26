@@ -26,6 +26,12 @@
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
     "openidSubAttribute":"inum",
+    "discoveryDenyKeys": [
+        "id_generation_endpoint",
+        "auth_level_mapping",
+        "scope_to_claims_mapping",
+        "op_policy_uri"
+    ],
     "publicSubjectIdentifierPerClientEnabled": true,
     "subjectIdentifiersPerClientSupported": [
         "mail",
@@ -126,6 +132,22 @@
         "RS512",
         "ES256",
         "ES384",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "accessTokenSigningAlgValuesSupported":[
+        "none",
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
         "ES512",
         "PS256",
         "PS384",
@@ -428,6 +450,11 @@
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEnabled": false,
+    "ssaConfiguration": {
+        "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
         "authDomain": "",
@@ -457,8 +484,7 @@
         "finishedFlowPage": "finished.ftl",
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
-            "Content-Type": "text/html",
-            "Expires": "0"
+            "Cache-Control": "max-age=0, no-store"
         }
     }
 }

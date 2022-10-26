@@ -104,7 +104,6 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         registerRequest.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUri));
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
-        registerRequest.setRequireAuthTime(true);
         registerRequest.setDefaultMaxAge(3600);
         registerRequest.setGrantTypes(grantTypes);
 

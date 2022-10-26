@@ -9,7 +9,7 @@ package io.jans.as.server.register.ws.rs.action;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
@@ -95,7 +95,7 @@ public class RegisterCreateAction {
     private RegisterService registerService;
 
     public Response createClient(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
-        errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.REGISTRATION);
 
         Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
@@ -119,7 +119,7 @@ public class RegisterCreateAction {
 
             setSubjectType(r);
             setIdTokenSignedResponseAlg(r);
-            setAccessTokenSigningAlg(r);
+            setAccessTokenSigningAlgFallback(r);
 
             registerParamsValidator.validateAlgorithms(r);
 
@@ -236,7 +236,7 @@ public class RegisterCreateAction {
         }
     }
 
-    private void setAccessTokenSigningAlg(RegisterRequest r) {
+    private void setAccessTokenSigningAlgFallback(RegisterRequest r) {
         if (r.getAccessTokenSigningAlg() == null) {
             r.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
         }

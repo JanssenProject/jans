@@ -32,15 +32,15 @@ logger = logging.getLogger(__name__)
 class GoogleSecret(BaseSecret):
     """This class interacts with Google Secret backend.
 
-    .. important:: The instance of this class is configured via environment variables.
+    The instance of this class is configured via environment variables.
 
-        Supported environment variables:
+    Supported environment variables:
 
-        - ``CN_SECRET_GOOGLE_SECRET_VERSION_ID``:  Janssen secret version ID in Google Secret Manager. Defaults to ``latest``, which is recommended.
-        - ``CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE``: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to ``secret``.
-        - ``CN_SECRET_GOOGLE_SECRET_NAME_PREFIX``: Prefix for Janssen secret in Google Secret Manager. Defaults to ``jans``. If left ``jans-secret`` secret will be created.
-        - ``GOOGLE_APPLICATION_CREDENTIALS``: JSON file (contains Google credentials) that should be injected into container.
-        - ``GOOGLE_PROJECT_ID``: ID of Google project.
+    - `CN_SECRET_GOOGLE_SECRET_VERSION_ID`:  Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
+    - `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
+    - `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
+    - `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+    - `GOOGLE_PROJECT_ID`: ID of Google project.
     """
 
     def __init__(self) -> None:
@@ -60,15 +60,19 @@ class GoogleSecret(BaseSecret):
     def _set_key(self) -> bytes:
         """Return key for for encrypting and decrypting payload.
 
-        :return: key
+        Returns:
+            key
         """
         return hashlib.pbkdf2_hmac("sha256", self.passphrase.encode("utf8"), self.salt, 1000)
 
     def _encrypt(self, plaintext: str) -> str:
         """Encrypt payload.
 
-        :param plaintext: plain string to encrypt
-        :return: A string including salr, iv, and encrypted payload
+        Args:
+            plaintext: plain string to encrypt
+
+        Returns:
+            A string including salt, iv, and encrypted payload
         """
         aes = AESGCM(self.key)
         iv = os.urandom(16)
@@ -83,8 +87,11 @@ class GoogleSecret(BaseSecret):
     def _decrypt(self, ciphertext: str) -> str:
         """Decrypt payload.
 
-        :param ciphertext: encrypted string to decrypt
-        :return: decrypted payload
+        Args:
+            ciphertext: encrypted string to decrypt
+
+        Returns:
+            decrypted payload
         """
         self.salt, iv, cipher_bytes = map(unhexlify, ciphertext.split("-"))
         self.key = self._set_key()
@@ -104,7 +111,8 @@ class GoogleSecret(BaseSecret):
         The version can be a version number as a string (e.g. "5")
         or an alias (e.g. "latest").
 
-        :returns: A ``dict`` of key-value pairs (if any)
+        Returns:
+            A mapping of secrets (if any)
         """
         # Try to get the latest resource name. Used in initialization. If the latest version doesn't exist
         # its a state where the secret and initial version must be created
@@ -136,9 +144,12 @@ class GoogleSecret(BaseSecret):
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
-        :param key: Key name.
-        :param default: Default value if key is not exist.
-        :returns: Value based on given key or default one.
+        Args:
+            key: Key name.
+            default: Default value if key is not exist.
+
+        Returns:
+            Value based on given key or default one.
         """
         result = self.get_all()
         return result.get(key) or default
@@ -146,9 +157,12 @@ class GoogleSecret(BaseSecret):
     def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
-        :param key: Key name.
-        :param value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            key: Key name.
+            value: Value of the key.
+
+        Returns:
+            A boolean to mark whether secret is set or not.
         """
         all_ = self.get_all()
         all_[key] = safe_value(value)
@@ -162,8 +176,11 @@ class GoogleSecret(BaseSecret):
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Push a full dictionary to secrets.
 
-        :param data: full dictionary to push. Used in initial creation of config and secret
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            data: full dictionary to push. Used in initial creation of config and secret
+
+        Returns:
+            A boolean to mark whether secret is set or not.
         """
         all_ = {}
         for k, v in data.items():
@@ -180,8 +197,8 @@ class GoogleSecret(BaseSecret):
         A secret is a logical wrapper around a collection of secret versions.
         Secret versions hold the actual secret material.
 
-        .. versionchanged:: 1.0.1
-            Returns ``google.cloud.secretmanager_v1.types.Secret`` instead of boolean.
+        Returns:
+            `google.cloud.secretmanager_v1.types.Secret` instead of boolean.
         """
         # Build the resource name of the parent project.
         parent = f"projects/{self.project_id}"
@@ -204,7 +221,8 @@ class GoogleSecret(BaseSecret):
     def add_secret_version(self, payload: _t.AnyStr) -> bool:
         """Add a new secret version to the given secret with the provided payload.
 
-        :param payload: encrypted payload
+        Args:
+            payload: encrypted payload
         """
         # Build the resource name of the parent secret.
         parent = self.client.secret_path(self.project_id, self.google_secret_name)

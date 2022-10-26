@@ -8,6 +8,7 @@ package io.jans.as.client;
 
 import com.google.common.collect.Maps;
 import io.jans.as.client.client.AssertBuilder;
+import io.jans.as.client.client.Asserter;
 import io.jans.as.client.dev.HostnameVerifierType;
 import io.jans.as.client.page.AbstractPage;
 import io.jans.as.client.page.PageConfig;
@@ -100,6 +101,7 @@ public abstract class BaseTest {
     protected String backchannelAuthenticationEndpoint;
     protected String revokeSessionEndpoint;
     protected String parEndpoint;
+    protected String ssaEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
     protected String issuer;
     protected String sharedKey;
@@ -234,6 +236,14 @@ public abstract class BaseTest {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public String getSsaEndpoint() {
+        return ssaEndpoint;
+    }
+
+    public void setSsaEndpoint(String ssaEndpoint) {
+        this.ssaEndpoint = ssaEndpoint;
     }
 
     public String getBackchannelAuthenticationEndpoint() {
@@ -815,25 +825,7 @@ public abstract class BaseTest {
             OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
 
             showClient(client);
-            assertEquals(response.getStatus(), 200, "Unexpected response code");
-            assertNotNull(response.getIssuer(), "The issuer is null");
-            assertNotNull(response.getAuthorizationEndpoint(), "The authorizationEndpoint is null");
-            assertNotNull(response.getTokenEndpoint(), "The tokenEndpoint is null");
-            assertNotNull(response.getRevocationEndpoint(), "The revocationEndpoint is null");
-            assertNotNull(response.getUserInfoEndpoint(), "The userInfoEndPoint is null");
-            assertNotNull(response.getJwksUri(), "The jwksUri is null");
-            assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
-
-            assertTrue(response.getScopesSupported().size() > 0, "The scopesSupported is empty");
-            assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
-            assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
-            assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
-            assertTrue(response.getAcrValuesSupported().size() >= 0, "The acrValuesSupported is empty");
-            assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
-            assertTrue(response.getIdTokenSigningAlgValuesSupported().size() > 0, "The idTokenSigningAlgValuesSupported is empty");
-            assertTrue(response.getRequestObjectSigningAlgValuesSupported().size() > 0, "The requestObjectSigningAlgValuesSupported is empty");
-            assertTrue(response.getTokenEndpointAuthMethodsSupported().size() > 0, "The tokenEndpointAuthMethodsSupported is empty");
-            assertTrue(response.getClaimsSupported().size() > 0, "The claimsSupported is empty");
+            Asserter.assertOpenIdConfigurationResponse(response);
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
@@ -852,6 +844,7 @@ public abstract class BaseTest {
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
             issuer = response.getIssuer();
+            ssaEndpoint = response.getSsaEndpoint();
         } else {
             showTitle("Loading configuration endpoints from properties file");
 
@@ -871,6 +864,7 @@ public abstract class BaseTest {
             revokeSessionEndpoint = context.getCurrentXmlTest().getParameter("revokeSessionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
             issuer = context.getCurrentXmlTest().getParameter("issuer");
+            ssaEndpoint = context.getCurrentXmlTest().getParameter("ssaEndpoint");
         }
 
         authorizationPageEndpoint = determineAuthorizationPageEndpoint(authorizationEndpoint);

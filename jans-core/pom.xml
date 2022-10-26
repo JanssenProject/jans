@@ -3,7 +3,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-core-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>jans-core</name>
 
 	<prerequisites>
@@ -22,7 +22,7 @@
 
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<janssen.version>1.0.2-SNAPSHOT</janssen.version>
+		<janssen.version>1.0.3-SNAPSHOT</janssen.version>
 		<jacoco.version>0.8.7</jacoco.version>
 		
 		<sonar.projectKey>JanssenProject_jans-core</sonar.projectKey>
@@ -202,7 +202,7 @@
         <repository>
             <id>bouncycastle</id>
             <name>Bouncy Castle</name>
-            <url>https://repo2.maven.org/maven2/org/bouncycastle</url>
+            <url>https://repo1.maven.org/maven2/org/bouncycastle</url>
         </repository>
         <repository>
             <id>jans</id>

@@ -98,6 +98,9 @@ public class AppInitializer {
 	@Inject
 	private LoggerService loggerService;
 
+	@Inject
+	private MDS3UpdateTimer mds3UpdateTimer;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -113,10 +116,12 @@ public class AppInitializer {
 		configurationFactory.create();
 
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
-		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
+		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
+				localPersistenceEntryManager.getOperationService());
 
 		// Initialize python interpreter
-		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
+		pythonService
+				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
 
 		// Initialize script manager
 		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
@@ -132,6 +137,7 @@ public class AppInitializer {
 		configurationFactory.initTimer();
 		loggerService.initTimer();
 		cleanerTimer.initTimer();
+		mds3UpdateTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 
 		// Notify plugins about finish application initialization

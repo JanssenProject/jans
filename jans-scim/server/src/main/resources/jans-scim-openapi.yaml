@@ -123,9 +123,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/GroupResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/group_minimal_create.json'              
           application/json:
             schema:
               $ref: '#/components/schemas/GroupResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/group_minimal_create.json'
         required: true
       responses:
         201:
@@ -251,9 +257,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/GroupResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/group_minimal_update.json'
           application/json:
             schema:
               $ref: '#/components/schemas/GroupResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/group_minimal_update.json'
         required: true
       responses:
         200:
@@ -345,7 +357,7 @@ paths:
       - group
       operationId: patch-group-by-id
       description: "Updates one or more attributes of a Group resource using a sequence\
-        \ of additions, removals, and \nreplacements operations. See section 3.5.2\
+        \ of additions, removals, and replacements operations. See section 3.5.2\
         \ of RFC 7644\n"
       security:
         - scim_oauth: [https://jans.io/scim/groups.write]
@@ -372,9 +384,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/PatchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/patch/group_patch.json'
           application/json:
             schema:
               $ref: '#/components/schemas/PatchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/patch/group_patch.json'
         required: true
       responses:
         200:
@@ -421,9 +439,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_1.json'
           application/json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_1.json'
         required: true
       responses:
         200:
@@ -607,7 +631,7 @@ paths:
         - fido devices
       operationId: update-fido-device-by-id
       description: "Updates a Fido resource. Update works in a replacement fashion&amp;#58;\
-        \ every\nattribute value found in the payload sent will replace the one in\
+        \ every attribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
         \ will be left intact.\n"
       security:
@@ -735,9 +759,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_2.json'
           application/json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_2.json'
         required: true
       responses:
         200:
@@ -930,8 +960,8 @@ paths:
         - fido2 devices
       operationId: update-fido2-device-by-id
       description: "Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58;\
-        \ every\nattribute value found in the payload sent will replace the one in\
-        \ the existing resource representation. Attributes \nnot passed in the payload\
+        \ every attribute value found in the payload sent will replace the one in\
+        \ the existing resource representation. Attributes not passed in the payload\
         \ will be left intact.\n"
       security:
         - scim_oauth: [https://jans.io/scim/fido2.write]
@@ -1058,9 +1088,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_2.json'
           application/json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_2.json'
         required: true
       responses:
         200:
@@ -1196,14 +1232,20 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Payload that represents the Group to create
+        description: Payload that represents the User to create
         content:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/UserResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/user_average_create.json'
           application/json:
             schema:
               $ref: '#/components/schemas/UserResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/user_average_create.json'
         required: true
       responses:
         201:
@@ -1301,9 +1343,9 @@ paths:
       - user
       operationId: update-user-by-id
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
-        \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
+        \ works in a replacement fashion&amp;#58; every attribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
-        \ Attributes \nnot passed in the payload will be left intact.\n"
+        \ Attributes not passed in the payload will be left intact.\n"
       security:
         - scim_oauth: [https://jans.io/scim/users.write]
       parameters:
@@ -1329,9 +1371,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/UserResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/user_average_update.json'
           application/json:
             schema:
               $ref: '#/components/schemas/UserResource'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/user_average_update.json'
         required: true
       responses:
         200:
@@ -1423,7 +1471,7 @@ paths:
       - user
       operationId: patch-user-by-id
       description: "Updates one or more attributes of a User resource using a sequence\
-        \ of additions, removals, and \nreplacements operations. See section 3.5.2\
+        \ of additions, removals, and replacements operations. See section 3.5.2\
         \ of RFC 7644\n"
       security:
         - scim_oauth: [https://jans.io/scim/users.write]
@@ -1450,9 +1498,19 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/PatchRequest'
+            examples:
+              payloadWithFilters:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/patch/user_patch_valuefilter.json'
+              payloadUserExtension:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/patch/user_patch_ext.json'
           application/json:
             schema:
               $ref: '#/components/schemas/PatchRequest'
+            examples:
+              payloadWithFilters:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/patch/user_patch_valuefilter.json'
+              payloadUserExtension:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/single/patch/user_patch_ext.json'
         required: true
       responses:
         200:
@@ -1499,9 +1557,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_1.json'
           application/json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_1.json'
         required: true
       responses:
         200:
@@ -1549,9 +1613,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_1.json'
           application/json:
             schema:
               $ref: '#/components/schemas/SearchRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/search_post_1.json'
         required: true
       responses:
         200:
@@ -1596,9 +1666,15 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/BulkRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/users_bulk_1.json'
           application/json:
             schema:
               $ref: '#/components/schemas/BulkRequest'
+            examples:
+              samplePayload:
+                externalValue: 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/client/src/test/resources/multiple/users_bulk_1.json'
         required: true
       responses:
         200:
@@ -1805,6 +1881,27 @@ components:
           type: string
           description: A detailed human-readable message of the error
       description: See section 3.12 of RFC 7644
+    AuthenticationScheme:
+      required:
+      - type
+      - name
+      - description
+      type: object
+      properties:
+        type:
+          type: string
+          example: oauth2
+        name:
+          type: string
+        description:
+          type: string
+        specUri:
+          type: string
+        documentationUri:
+          type: string
+        primary:
+          type: boolean
+      description: See section 5 of RFC 7643
     ServiceProviderConfigResponse:
       type: object
       properties:
@@ -1859,21 +1956,9 @@ components:
             supported:
               type: boolean
         authenticationSchemes:
-          type: object
-          properties:
-            type:
-              type: string
-              example: oauth2
-            name:
-              type: string
-            description:
-              type: string
-            specUri:
-              type: string
-            documentationUri:
-              type: string
-            primary:
-              type: boolean
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationScheme'
       description: See section 5 of RFC 7643
     ResourceType:
       type: object

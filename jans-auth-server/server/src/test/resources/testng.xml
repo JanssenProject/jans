@@ -8,13 +8,21 @@
 
     <test name="Unit Tests" enabled="true">
         <classes>
-            <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
-            <class name="io.jans.as.server.service.MTLSServiceTest" />
+            <class name="io.jans.as.server.model.CIBAGrantTest" />
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
-			<class name="io.jans.as.server.service.ScopeServiceTest" />
-			<class name="io.jans.as.server.model.CIBAGrantTest" />
-			<class name="io.jans.as.server.service.RedirectionUriServiceTest" />
-			<class name="io.jans.as.server.service.external.ExternalAuthenticationServiceTest" />
+            <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
+
+            <class name="io.jans.as.server.service.MTLSServiceTest" />
+            <class name="io.jans.as.server.service.ScopeServiceTest" />
+            <class name="io.jans.as.server.service.SpontaneousScopeServiceTest" />
+            <class name="io.jans.as.server.service.RedirectionUriServiceTest" />
+            <class name="io.jans.as.server.service.external.ExternalAuthenticationServiceTest" />
+            <class name="io.jans.as.server.servlet.OpenIdConfigurationTest" />
+
+            <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
         </classes>
     </test>
 
@@ -24,8 +32,8 @@
         </classes>
     </test>
 
-	<!-- Application Type Restriction (embedded) -->
-	<test name="Application Type Restriction (embedded)" enabled="true">
+<!--	 Application Type Restriction (embedded) -->
+	<test name="Application Type Restriction (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ApplicationTypeRestrictionEmbeddedTest" />
 		</classes>
@@ -161,7 +169,7 @@
 		</classes>
 	</test>
 
-	<!-- Signature test -->
+<!--	 Signature test-->
 	<test name="Signature test (embedded)" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.comp.SignatureTest" />

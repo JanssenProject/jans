@@ -109,6 +109,14 @@ public class ClientUtil {
         return jsonObject.has(key) ? jsonObject.optBoolean(key) : null;
     }
 
+    public static Long longOrNull(JSONObject jsonObject, String key) {
+        return jsonObject.has(key) ? jsonObject.optLong(key) : null;
+    }
+
+    public static String stringOrNull(JSONObject jsonObject, String key) {
+        return jsonObject.has(key) ? jsonObject.optString(key) : null;
+    }
+
     /**
      * Creates a special SSLContext using a custom TLS version and a set of ciphers enabled to process SSL connections.
      *

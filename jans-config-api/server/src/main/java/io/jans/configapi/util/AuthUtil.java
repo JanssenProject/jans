@@ -1,6 +1,7 @@
 package io.jans.configapi.util;
 
 import com.unboundid.ldap.sdk.DN;
+import io.jans.as.client.RevokeSessionResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
@@ -8,6 +9,7 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -68,6 +70,18 @@ public class AuthUtil {
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
     }
+    
+    public String getIntrospectionEndpoint() {
+        return configurationService.find().getIntrospectionEndpoint();
+    }
+
+    public String getTokenEndpoint() {
+        return configurationService.find().getTokenEndpoint();
+    }
+    
+    public String getEndSessionEndpoint() {
+        return this.configurationService.find().getEndSessionEndpoint();
+    }
 
     public String getServiceUrl(String url) {
         return this.getIssuer() + url;
@@ -89,6 +103,11 @@ public class AuthUtil {
     public List<String> getUserMandatoryAttributes() {
         return this.configurationFactory.getApiAppConfiguration().getUserMandatoryAttributes();
     }
+    
+    public AgamaConfiguration getAgamaConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getAgamaConfiguration();
+    }
+
 
     public String getTokenUrl() {
         return this.configurationService.find().getTokenEndpoint();
@@ -242,8 +261,19 @@ public class AuthUtil {
             scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
         }
     }
+    
+    public String requestAccessToken(final String clientId, final List<String> scope) {
+        log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
+        String tokenUrl = getTokenEndpoint();
+        Token token = getAccessToken(tokenUrl, clientId, scope);
+        log.info("oAuth AccessToken response - token:{}", token);
+        if (token != null) {
+            return token.getAccessToken();
+        }
+        return null;
+    }
 
-    public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes) {
+    public Token getAccessToken(final String tokenUrl, final String clientId, final List<String> scopes) {
         log.debug("Access Token Request - tokenUrl:{}, clientId:{}, scopes:{}", tokenUrl, clientId, scopes);
 
         // Get clientSecret
@@ -403,5 +433,20 @@ public class AuthUtil {
      }
 
    
+     public RevokeSessionResponse revokeSession(final String url,final String token, final String userId) {
+         log.debug("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
+
+        
+
+         RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, token,userId);
+         log.debug("revokeSessionResponse:{}",revokeSessionResponse);
+         if (revokeSessionResponse != null) {
+
+             log.debug("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ", revokeSessionResponse.getEntity(), revokeSessionResponse.getStatus());
+           
+            
+         }
+         return revokeSessionResponse;
+     }
 
 }

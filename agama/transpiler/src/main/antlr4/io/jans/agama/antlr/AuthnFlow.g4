@@ -57,12 +57,12 @@ variable: short_var | QNAME | DOTEXPR | DOTIDXEXPR ;
 
 flow_call: preassign? FLOWCALL WS ('$' variable | qname) argument* WS? (overrides | NL) ;
 
-overrides: INDENT OVERRIDE WS STRING (WS STRING)* WS? NL DEDENT ;
+overrides: INDENT OVERRIDE (WS STRING WS STRING)* (WS? NL STRING WS STRING)* WS? NL DEDENT ;
 //I don't get why the NL is needed above
 
 action_call: (preassign | preassign_catch)? ACTIONCALL WS (static_call | oo_call) WS? NL ;
 
-rrf_call: preassign? RRFCALL WS STRING (WS variable)? (WS BOOL)? WS? (stchk_block | NL) ;
+rrf_call: preassign? RRFCALL WS STRING (WS variable)? (WS BOOL)? WS? NL ;
 
 log: LOG argument+ WS? NL ;
 
@@ -110,12 +110,6 @@ loopy: preassign? REPEAT WS (variable | UINT) WS MAXTIMES WS? INDENT statement+ 
 
 quit_stmt: QUIT WS caseof NL statement* ;
 
-stchk_block: INDENT STATUS_CHK WS? INDENT stchk_open action_call? stchk_close DEDENT DEDENT ;
-
-stchk_open: OPEN WS (variable | UINT) WS SECS WS? NL;
-
-stchk_close: CLOSE WS caseof WS? NL;
-
 /*
  * Lexer Rules
  */
@@ -145,12 +139,6 @@ FLOWCALL: 'Trigger' ;
 ACTIONCALL: 'Call' ;
 
 RRFCALL: 'RRF' ;
-
-STATUS_CHK: 'Status checker' ;
-
-OPEN: 'Open for' ;
-
-CLOSE: 'Close' ;
 
 OVERRIDE: 'Override templates' ;
 

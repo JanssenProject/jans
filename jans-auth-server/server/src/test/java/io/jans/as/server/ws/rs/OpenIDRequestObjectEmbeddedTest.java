@@ -78,7 +78,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -118,7 +118,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestParameterMethod1Step1(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -199,7 +199,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -218,7 +218,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
@@ -236,7 +236,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = {"requestParameterMethod1Step2"})
     public void requestParameterMethodUserInfo(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -276,7 +276,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestParameterMethod2Step1(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -348,7 +348,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -367,7 +367,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -384,7 +384,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = {"requestParameterMethod2Step2"})
     public void requestParameterMethod2Step3(final String userInfoPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + userInfoPath).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
         io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(accessToken2);
@@ -435,7 +435,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -452,7 +452,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -506,7 +506,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -527,7 +527,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -581,7 +581,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
@@ -602,7 +602,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -646,7 +646,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -666,7 +666,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -720,7 +720,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -739,7 +739,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
@@ -814,7 +814,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -830,7 +830,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get("access_token"), "The accessToken is null");
             assertNotNull(params.get("id_token"), "The idToken is null");
@@ -868,7 +868,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         authorizationRequest.setRequestUri("FAKE_REQUEST_URI");
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -885,7 +885,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -922,7 +922,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         authorizationRequest.setRequestUri(requestFileBaseUrl + "/FAKE_REQUEST_URI");
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -939,7 +939,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -1012,7 +1012,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -1029,7 +1029,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -1047,7 +1047,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     public void requestParameterMethodAlgNoneStep1(final String registerPath, final String redirectUris)
             throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1115,7 +1115,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -1134,7 +1134,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.model.util.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");

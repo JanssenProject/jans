@@ -31,6 +31,7 @@ class Config:
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     node_home = '/opt/node'
+    unit_files_path = '/etc/systemd/system'
     output_dir = None
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     dist_app_dir = os.path.join(distFolder, 'app')
@@ -92,6 +93,8 @@ class Config:
         if base.snap:
             self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
+
+        self.default_store_type = 'JKS'
 
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(LOG_DIR, 'progress-bar.log')
@@ -201,7 +204,6 @@ class Config:
         self.install_jans_cli = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
-        self.install_client_api = True
 
         # backward compatibility
         self.os_type = base.os_type
@@ -225,7 +227,6 @@ class Config:
         self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
         self.java_type = 'jre'
-        self.client_api_storage_type = 'jans_server_configuration'
 
         self.hostname = None
         self.ip = None
@@ -245,6 +246,7 @@ class Config:
         self.staticFolder = os.path.join(self.install_dir, 'static')
 
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
+        self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
 
         self.encoded_ldapTrustStorePass = None
 

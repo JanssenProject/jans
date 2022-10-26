@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.RequestParameterService;

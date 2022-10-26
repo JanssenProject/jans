@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # Agama DSL
 
 !!! Note
@@ -28,9 +35,9 @@ Intrinsic properties to highlight:
 
 ## Language compiler
 
-Agama is not a compiled language. Code is transpiled to an intermediate representation which is then interpreted at runtime. Developers don't need to issue special commands for transpilation to occur. This is automatically executed in the background by the engine after a flow has been added or modified.
+Agama is not a compiled language. Code is transpiled to an intermediate representation which is then interpreted at runtime. Developers don't need to issue special commands for transpilation to occur. This is automatically executed in the background by the engine some seconds after a flow has been added or modified.
 
-The process of checking and fixing potential syntax errors is described [here](./lifecycle.md#creating-a-flow-in-janssen).
+The process of checking and fixing potential syntax errors is described [here](./lifecycle.md#about-syntax-errors).
 
 ## Syntactic features
 
@@ -92,7 +99,7 @@ Next, in an indented block several aspects can be provided (in this specific ord
 
 Except for the base directory, all of these are optional. 
 
-The following is an example of a flow header, where the folder `mydir` should hold the assets of the flow (more info on assets [here](./quick-start.md#upload-required-assets)). The flow may receive three parameters: `salutation`, `askGender`, and `promptRealName` from their callers (when used as [subflow](#subflows)) or from the [authentication request](./quick-start.md#craft-an-authentication-request) when the flow is launched directly from a web browser.
+The following is an example of a flow header, where the folder `mydir` should hold the assets of the flow (more info on assets [here](../../../admin/developer/agama/quick-start.md)). The flow may receive three parameters: `salutation`, `askGender`, and `promptRealName` from their callers (when used as [subflow](#subflows)) or from the [authentication request](./quick-start.md#craft-an-authentication-request) when the flow is launched directly from a web browser.
 
 ```
 Flow com.acme.FoodSurvey
@@ -112,7 +119,7 @@ y = false
 ...
 ```
 
-See the [full reference](./dsl-full.md#TODO) to learn more about flow structure.
+See the [full reference](./dsl-full.md#flow-structure) to learn more about flow structure.
 
 ## Logging
 
@@ -300,7 +307,7 @@ This loop runs `x` iterations at most. At every iteration the template `guess_bi
 **Notes:**
 - `Quit` and the statements following are optional
 - The variable assignment before the `Repeat` keyword is optional
-- See the [full reference](./dsl-full.md#TODO) to learn more about `Repeat`
+- See the [full reference](./dsl-full.md#repeat) to learn more about `Repeat`
 
 ### Iterate over
 
@@ -319,11 +326,11 @@ Iterate over seasons using sn
 
 The above features loop nesting. The outer loop iterates over `seasons` list and the inner one over `sports`. The variables `sn` and `sport` hold the current visited element. The inner loop is aborted upon a given condition. The total number of complete iterations is recorded in `y` every time the inner loop finishes.
 
-See the [full reference](./dsl-full.md#TODO) to learn more about `Iterate over`.
+See the [full reference](./dsl-full.md#iterate-over) to learn more about `Iterate over`.
 
 ## Subflows
 
-A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in agama. Example:
+A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in Agama. Example:
 
 ```
 outcome = Trigger jo.jo.PersonalInfoGathering null false 
@@ -338,6 +345,6 @@ See the [full reference](./dsl-full.md#subflows) to learn more about `Trigger`.
 
 Agama interfaces seemlessly with Java or Groovy by means of the `Call` instruction. 
 
-Recall the DSL is designed to force developers use Java when the task at hand cannot be implemented by simple data manipulation or comparison of values. This way a flow written in agama DSL serves fundamentally as a depiction of the flow itself, hiding most of the internal details and low-level computations.
+Recall the DSL is designed to force developers use Java when the task at hand cannot be implemented by simple data manipulation or comparison of values. This way a flow written in Agama DSL serves fundamentally as a depiction of the flow itself, hiding most of the internal details and low-level computations.
 
-See the [full reference](./dsl-full.md#TODO) to learn more about `Call`.
+See the [full reference](./dsl-full.md#java-interaction) to learn more about `Call`.

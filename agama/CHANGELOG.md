@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+* **agama:** add utility classes for inbound identity ([#2231](https://github.com/JanssenProject/jans/issues/2231)) ([96e32a4](https://github.com/JanssenProject/jans/commit/96e32a407ec6c545b73a6fd103ed2ae5876bd500))
+* **agama:** allow the config-api to perform syntax check of flows ([#1621](https://github.com/JanssenProject/jans/issues/1621)) ([2e99d3a](https://github.com/JanssenProject/jans/commit/2e99d3a9bec389f68086c606062280967ce338ce))
+* **agama:** reject usage of repeated input names ([#1484](https://github.com/JanssenProject/jans/issues/1484)) ([aed8cf3](https://github.com/JanssenProject/jans/commit/aed8cf33d89b98f0ac6aae52e145a84a0937d60e))
+* **jans-config-api:** agama flow endpoint ([#1898](https://github.com/JanssenProject/jans/issues/1898)) ([0e73306](https://github.com/JanssenProject/jans/commit/0e73306f7642a74a3ed2cf8a8687a1ea447aa7bd))
+* update DSL to support shorthand for finish [#1628](https://github.com/JanssenProject/jans/issues/1628) ([71e4652](https://github.com/JanssenProject/jans/commit/71e46524492d48fccf2ed2840ede3d6ae525a3e3))
+
+
+### Bug Fixes
+
+* **agama:** template overriding not working with more than one level of nesting ([#1841](https://github.com/JanssenProject/jans/issues/1841)) ([723922a](https://github.com/JanssenProject/jans/commit/723922a17b1babc49a1135030c06db367726ab63))
+
+
+### Documentation
+
+* add email-otp flow and organize sample flow folders [#1749](https://github.com/JanssenProject/jans/issues/1749) ([#1800](https://github.com/JanssenProject/jans/issues/1800)) ([8aea2ee](https://github.com/JanssenProject/jans/commit/8aea2eeaab8d99724d48a817ff47495b5f7632d7))
+* add instructions to setup inbound identity flows [#2198](https://github.com/JanssenProject/jans/issues/2198) ([#2222](https://github.com/JanssenProject/jans/issues/2222)) ([d959b32](https://github.com/JanssenProject/jans/commit/d959b32cc9de0b8311d13ce25fcba162d0b0c5a3))
+* **agama:** add sample flows to docs ([#1750](https://github.com/JanssenProject/jans/issues/1750)) ([7d33490](https://github.com/JanssenProject/jans/commit/7d334905a147746556f984015215b7c9f5b937ef))
+* update docs wrt to language updates [#1628](https://github.com/JanssenProject/jans/issues/1628) ([ca32bd5](https://github.com/JanssenProject/jans/commit/ca32bd54ec109134dad04d4a0f15eebc6d7bdd8e))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/agama-v1.0.0...agama-v1.0.1) (2022-07-06)
 
 

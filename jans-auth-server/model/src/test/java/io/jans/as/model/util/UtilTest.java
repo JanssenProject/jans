@@ -1,6 +1,7 @@
 package io.jans.as.model.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import io.jans.as.model.BaseTest;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.SubjectType;
@@ -9,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +18,24 @@ import java.util.*;
 import static org.testng.Assert.*;
 
 public class UtilTest extends BaseTest {
+
+    @Test
+    public void putArray_whenListIsNotEmpty_shouldAddArray() {
+        JSONObject json = new JSONObject();
+        Util.putArray(json, Lists.newArrayList("a"), "key");
+
+        final JSONArray jsonArray = json.optJSONArray("key");
+        assertNotNull(jsonArray);
+        assertEquals(jsonArray.get(0), "a");
+    }
+
+    @Test
+    public void putArray_whenListIsEmpty_shouldNotAddArray() {
+        JSONObject json = new JSONObject();
+        Util.putArray(json, Lists.newArrayList(), "key");
+
+        assertNull(json.optJSONArray("key"));
+    }
 
     @Test
     public void putNotBlank_keyNull_nothing() {

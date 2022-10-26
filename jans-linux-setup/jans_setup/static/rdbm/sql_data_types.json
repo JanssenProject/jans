@@ -134,6 +134,9 @@
     "mysql": {
       "type": "JSON"
     },
+    "pgsql": {
+      "type": "JSONB"
+    },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
     }
@@ -149,6 +152,9 @@
   "jansGrantTyp": {
     "mysql": {
       "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
     },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
@@ -167,6 +173,9 @@
   "jansRespTyp": {
     "mysql": {
       "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
     },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
@@ -204,6 +213,9 @@
   "member": {
     "mysql": {
       "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
     },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
@@ -548,6 +560,9 @@
     "mysql": {
       "type": "JSON"
     },
+    "pgsql": {
+      "type": "JSONB"
+    },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
     }
@@ -740,8 +755,56 @@
     "mysql": {
       "type": "JSON"
     },
+    "pgsql": {
+      "type": "JSONB"
+    },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
     }
+  },
+  "agFlowEncCont": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
+    },
+  "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "agFlowMeta": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "agFlowTrans": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "agFlowSt": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansCustomMessage": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }      
   }
 }

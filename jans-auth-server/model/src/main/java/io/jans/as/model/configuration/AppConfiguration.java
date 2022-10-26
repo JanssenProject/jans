@@ -13,6 +13,7 @@ import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
+import io.jans.as.model.ssa.SsaConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -89,6 +90,7 @@ public class AppConfiguration implements Configuration {
     private int statTimerIntervalInSeconds;
     private String statAuthorizationScope;
 
+    private Boolean allowSpontaneousScopes;
     private int spontaneousScopeLifetime;
     private String openidSubAttribute;
     private Boolean publicSubjectIdentifierPerClientEnabled = false;
@@ -107,6 +109,7 @@ public class AppConfiguration implements Configuration {
     private List<String> idTokenSigningAlgValuesSupported;
     private List<String> idTokenEncryptionAlgValuesSupported;
     private List<String> idTokenEncryptionEncValuesSupported;
+    private List<String> accessTokenSigningAlgValuesSupported;
     private Boolean forceSignedRequestObject = false;
     private List<String> requestObjectSigningAlgValuesSupported;
     private List<String> requestObjectEncryptionAlgValuesSupported;
@@ -260,6 +263,8 @@ public class AppConfiguration implements Configuration {
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
     private Boolean forceIdTokenHintPrecense = false;
+    private Boolean rejectEndSessionIfIdTokenExpired = false;
+    private Boolean allowEndSessionWithUnmatchedSid = false;
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
     private Boolean errorReasonEnabled = false;
     private Boolean removeRefreshTokensForClientOnLogout = true;
@@ -277,6 +282,7 @@ public class AppConfiguration implements Configuration {
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
+    private Boolean disableAuthnForMaxAgeZero;
     private Boolean keepAuthenticatorAttributesOnAcrChange = false;
     private int deviceAuthzRequestExpiresIn;
     private int deviceAuthzTokenPollInterval;
@@ -309,14 +315,17 @@ public class AppConfiguration implements Configuration {
 
     private int discoveryCacheLifetimeInMinutes = 60;
     private List<String> discoveryAllowedKeys;
+    private List<String> discoveryDenyKeys;
 
-    private List<String> enabledComponents;
+    private List<String> featureFlags;
 
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
     private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
     
     private EngineConfig agamaConfiguration;
+
+    private SsaConfiguration ssaConfiguration;
 
     public Boolean getRequireRequestObjectEncryption() {
         if (requireRequestObjectEncryption == null) requireRequestObjectEncryption = false;
@@ -354,6 +363,15 @@ public class AppConfiguration implements Configuration {
         this.allowIdTokenWithoutImplicitGrantType = allowIdTokenWithoutImplicitGrantType;
     }
 
+    public List<String> getDiscoveryDenyKeys() {
+        if (discoveryDenyKeys == null) discoveryDenyKeys = new ArrayList<>();
+        return discoveryDenyKeys;
+    }
+
+    public void setDiscoveryDenyKeys(List<String> discoveryDenyKeys) {
+        this.discoveryDenyKeys = discoveryDenyKeys;
+    }
+
     public List<String> getDiscoveryAllowedKeys() {
         if (discoveryAllowedKeys == null) discoveryAllowedKeys = new ArrayList<>();
         return discoveryAllowedKeys;
@@ -372,28 +390,28 @@ public class AppConfiguration implements Configuration {
         this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
     }
 
-    public Set<ComponentType> getEnabledComponentTypes() {
-        return ComponentType.fromValues(getEnabledComponents());
+    public Set<FeatureFlagType> getEnabledFeatureFlags() {
+        return FeatureFlagType.fromValues(getFeatureFlags());
     }
 
-    public boolean isEnabledComponent(ComponentType componentType) {
-        final Set<ComponentType> enabledComponentTypes = getEnabledComponentTypes();
-        if (enabledComponentTypes.isEmpty())
+    public boolean isFeatureEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> flags = getEnabledFeatureFlags();
+        if (flags.isEmpty())
             return true;
 
-        return enabledComponentTypes.contains(componentType);
+        return flags.contains(flagType);
     }
 
-    public List<String> getEnabledComponents() {
-        if (enabledComponents == null) enabledComponents = new ArrayList<>();
-        return enabledComponents;
+    public List<String> getFeatureFlags() {
+        if (featureFlags == null) featureFlags = new ArrayList<>();
+        return featureFlags;
     }
 
-    public void setEnabledComponents(List<String> enabledComponents) {
-        this.enabledComponents = enabledComponents;
+    public void setFeatureFlags(List<String> featureFlags) {
+        this.featureFlags = featureFlags;
     }
 
-    public Boolean getUseNestedJwtDuringEncryption() {
+    public Boolean isUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
         return useNestedJwtDuringEncryption;
     }
@@ -712,6 +730,22 @@ public class AppConfiguration implements Configuration {
 
     public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
         this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
+    }
+
+    public Boolean getRejectEndSessionIfIdTokenExpired() {
+        return rejectEndSessionIfIdTokenExpired;
+    }
+
+    public void setRejectEndSessionIfIdTokenExpired(Boolean rejectEndSessionIfIdTokenExpired) {
+        this.rejectEndSessionIfIdTokenExpired = rejectEndSessionIfIdTokenExpired;
+    }
+
+    public Boolean getAllowEndSessionWithUnmatchedSid() {
+        return allowEndSessionWithUnmatchedSid;
+    }
+
+    public void setAllowEndSessionWithUnmatchedSid(Boolean allowEndSessionWithUnmatchedSid) {
+        this.allowEndSessionWithUnmatchedSid = allowEndSessionWithUnmatchedSid;
     }
 
     public Boolean getRemoveRefreshTokensForClientOnLogout() {
@@ -1239,6 +1273,14 @@ public class AppConfiguration implements Configuration {
         this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
     }
 
+    public List<String> getAccessTokenSigningAlgValuesSupported() {
+        return accessTokenSigningAlgValuesSupported;
+    }
+
+    public void setAccessTokenSigningAlgValuesSupported(List<String> accessTokenSigningAlgValuesSupported) {
+        this.accessTokenSigningAlgValuesSupported = accessTokenSigningAlgValuesSupported;
+    }
+
     public Boolean getForceSignedRequestObject() {
         if (forceSignedRequestObject == null) {
             return false;
@@ -1477,6 +1519,15 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaPctLifetime(int umaPctLifetime) {
         this.umaPctLifetime = umaPctLifetime;
+    }
+
+    public Boolean getAllowSpontaneousScopes() {
+        if (allowSpontaneousScopes == null) allowSpontaneousScopes = false;
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
     }
 
     public int getSpontaneousScopeLifetime() {
@@ -2118,6 +2169,14 @@ public class AppConfiguration implements Configuration {
         this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
     }
 
+    public Boolean getDisableAuthnForMaxAgeZero() {
+        return disableAuthnForMaxAgeZero;
+    }
+
+    public void setDisableAuthnForMaxAgeZero(Boolean disableAuthnForMaxAgeZero) {
+        this.disableAuthnForMaxAgeZero = disableAuthnForMaxAgeZero;
+    }
+
     public String getBackchannelClientId() {
         return backchannelClientId;
     }
@@ -2513,5 +2572,13 @@ public class AppConfiguration implements Configuration {
 
     public void setAgamaConfiguration(EngineConfig agamaConfiguration) {
         this.agamaConfiguration = agamaConfiguration;
+    }
+
+    public SsaConfiguration getSsaConfiguration() {
+        return ssaConfiguration;
+    }
+
+    public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
+        this.ssaConfiguration = ssaConfiguration;
     }
 }

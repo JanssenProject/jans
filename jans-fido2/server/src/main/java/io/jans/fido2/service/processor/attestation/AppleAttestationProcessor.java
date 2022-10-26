@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.AttestationException;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
@@ -86,7 +85,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	 *
 	 * Valid until 03/14/2045 @ 5:00 PM PST
 	 */
-	private static final String APPLE_WEBAUTHN_ROOT_CA = "/etc/gluu/conf/fido2/apple/";
+	private static final String APPLE_WEBAUTHN_ROOT_CA = "/etc/jans/conf/fido2/apple/";
 
 	// @Override
 	public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
@@ -116,7 +115,8 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			trustAnchorCertificates.addAll(certificateService.getCertificates(APPLE_WEBAUTHN_ROOT_CA));
 			try {
 				log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate" + trustAnchorCertificates.size());
-				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates,
+						trustAnchorCertificates);
 				log.info("Step 1 completed  ");
 
 			} catch (Fido2MissingAttestationCertException ex) {

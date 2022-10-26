@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.querydsl.sql.Configuration;
-import com.querydsl.sql.MySQLTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.SQLTemplatesRegistry;
@@ -38,10 +37,14 @@ import com.querydsl.sql.SQLTemplatesRegistry;
 import io.jans.orm.exception.KeyConversionException;
 import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.exception.operation.ConnectionException;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
-import io.jans.orm.sql.dsl.template.SqlJsonMySQLTemplates;
+import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
+import io.jans.orm.sql.dsl.template.PostgreSQLJsonTemplates;
 import io.jans.orm.sql.model.ResultCode;
 import io.jans.orm.sql.model.TableMapping;
+import io.jans.orm.sql.operation.SqlOperationService;
+import io.jans.orm.sql.operation.SupportedDbType;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.PropertiesHelper;
 import io.jans.orm.util.StringHelper;
@@ -53,11 +56,9 @@ import io.jans.orm.util.StringHelper;
  */
 public class SqlConnectionProvider {
 
-    private static final String JSON_TYPE_NAME = "json";
-
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
-    private static final String QUERY_ENGINE_TYPE =
+    private static final String MYSQL_QUERY_ENGINE_TYPE =
     		"SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
 
     private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
@@ -76,7 +77,7 @@ public class SqlConnectionProvider {
 
     private PasswordEncryptionMethod passwordEncryptionMethod;
 
-	private String dbType;
+	private SupportedDbType dbType;
 	private String dbVersion;
 
 	private boolean mariaDb = false;
@@ -87,7 +88,7 @@ public class SqlConnectionProvider {
 
 	private SQLQueryFactory sqlQueryFactory;
 	
-	private Map<String, Map<String, String>> tableColumnsMap;
+	private Map<String, Map<String, AttributeType>> tableColumnsMap;
 	private Map<String, String> tableEnginesMap = new HashMap<>();
 
 
@@ -112,7 +113,6 @@ public class SqlConnectionProvider {
             }
 
             LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}", clonedProperties, ex);
-            ex.printStackTrace();
         }
     }
 
@@ -194,7 +194,13 @@ public class SqlConnectionProvider {
 
         try (Connection con = this.poolingDataSource.getConnection()) {
         	DatabaseMetaData databaseMetaData = con.getMetaData();
-        	this.dbType = databaseMetaData.getDatabaseProductName().toLowerCase();
+        	String dbTypeString = databaseMetaData.getDatabaseProductName();
+        	this.dbType = SupportedDbType.resolveDbType(dbTypeString.toLowerCase());
+        	
+        	if (this.dbType == null) {
+                throw new ConnectionException(String.format("Database type '%s' is not supported", dbTypeString));
+        	}
+        	
         	this.dbVersion = databaseMetaData.getDatabaseProductVersion().toLowerCase();
         	if ((this.dbVersion != null) && this.dbVersion.toLowerCase().contains("mariadb")) {
         		this.mariaDb = true;
@@ -211,41 +217,54 @@ public class SqlConnectionProvider {
     private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
         long takes = System.currentTimeMillis();
 
-        LOG.info("Detecting engine types...");
-    	PreparedStatement preparedStatement = con.prepareStatement(QUERY_ENGINE_TYPE);
-    	preparedStatement.setString(1, schemaName);
-
-    	ResultSet tableEnginesResultSet = preparedStatement.executeQuery();
-    	while (tableEnginesResultSet.next()) {
-    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
-    		String engineName = tableEnginesResultSet.getString("ENGINE");
-
-        	tableEnginesMap.put(tableName, engineName);
-    	}
-
+        if (SupportedDbType.MYSQL == dbType) {
+	        LOG.info("Detecting engine types...");
+	    	PreparedStatement preparedStatement = con.prepareStatement(MYSQL_QUERY_ENGINE_TYPE);
+	    	preparedStatement.setString(1, schemaName);
+	
+	    	try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
+		    	while (tableEnginesResultSet.next()) {
+		    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+		    		String engineName = tableEnginesResultSet.getString("ENGINE");
+		
+		        	tableEnginesMap.put(tableName, engineName);
+		    	}
+	    	}
+        }
+	
         LOG.info("Scanning DB metadata...");
-        ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"});
-    	while (tableResultSet.next()) {
-    		String tableName = tableResultSet.getString("TABLE_NAME");
-    		Map<String, String> tableColumns = new HashMap<>();
-    		
-    		String engineType = tableEnginesMap.get(tableName);
-    		
-            LOG.debug("Found table: '{}'.", tableName);
-            ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null);
-        	while (columnResultSet.next()) {
-        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
-				String columTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
+        try (ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"})) {
+	    	while (tableResultSet.next()) {
+	    		String tableName = tableResultSet.getString("TABLE_NAME");
+	    		Map<String, AttributeType> tableColumns = new HashMap<>();
+	    		
+	//    		String engineType = tableEnginesMap.get(tableName);
+	    		
+	            LOG.debug("Found table: '{}'.", tableName);
+	            try (ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null)) {
+		        	while (columnResultSet.next()) {
+		        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
+						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
+		
+						String remark = columnResultSet.getString("REMARKS");
+		        		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && SqlOperationService.JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
+		        			columnTypeName = SqlOperationService.JSON_TYPE_NAME;
+		        		}
 
-				String remark = columnResultSet.getString("REMARKS");
-        		if (mariaDb && "longtext".equalsIgnoreCase(columTypeName) && "json".equalsIgnoreCase(remark)) {
-        			columTypeName = JSON_TYPE_NAME;
-        		}
-				tableColumns.put(columnName, columTypeName);
-        	}
-
-        	tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
-    	}
+		        		if (SqlOperationService.JSONB_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
+		        			columnTypeName = SqlOperationService.JSONB_TYPE_NAME;
+		        		}
+		
+		        		boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName) || SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
+		
+		        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
+		        		tableColumns.put(columnName, attributeType);
+		        	}
+	            }
+	
+	        	tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
+	    	}
+        }
 
     	takes = System.currentTimeMillis() - takes;
         LOG.info("Metadata scan finisehd in {} milliseconds", takes);
@@ -256,8 +275,10 @@ public class SqlConnectionProvider {
 		try (Connection con = poolingDataSource.getConnection()) {
 			DatabaseMetaData databaseMetaData = con.getMetaData();
 			SQLTemplates.Builder sqlBuilder = templatesRegistry.getBuilder(databaseMetaData);
-			if (sqlBuilder instanceof MySQLTemplates.Builder) {
-				sqlBuilder = SqlJsonMySQLTemplates.builder();
+			if (SupportedDbType.MYSQL == dbType) {
+				sqlBuilder = MySQLJsonTemplates.builder();
+			} else if (SupportedDbType.POSTGRESQL == dbType) {
+				sqlBuilder = PostgreSQLJsonTemplates.builder().quote();
 			}
 			this.sqlTemplates = sqlBuilder.printSchema().build();
 			Configuration configuration = new Configuration(sqlTemplates);
@@ -396,7 +417,7 @@ public class SqlConnectionProvider {
 
 	public TableMapping getTableMappingByKey(String key, String objectClass) {
 		String tableName = objectClass;
-		Map<String, String> columTypes = tableColumnsMap.get(StringHelper.toLowerCase(tableName));
+		Map<String, AttributeType> columTypes = tableColumnsMap.get(StringHelper.toLowerCase(tableName));
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);
 		}
@@ -436,6 +457,10 @@ public class SqlConnectionProvider {
 
 	public boolean isMariaDb() {
 		return mariaDb;
+	}
+
+	public SupportedDbType getDbType() {
+		return dbType;
 	}
 
 }

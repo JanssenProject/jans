@@ -98,10 +98,10 @@ public class Transpilation {
     public void process() throws IOException {
 
         List<ProtoFlow> flows = entryManager.findEntries(AgamaPersistenceService.AGAMA_FLOWS_BASE,
-                ProtoFlow.class, Filter.createEqualityFilter("jansEnabled", true), null);
+                ProtoFlow.class, null);
 
         Map<String, ProtoFlow> map = flows.stream().collect(
-                Collectors.toMap(ProtoFlow::getQName, Function.identity()));
+                Collectors.toMap(ProtoFlow::getQname, Function.identity()));
 
         if (traces == null) {
             traces = map.entrySet().stream().collect(Collectors.toMap(

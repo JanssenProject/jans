@@ -158,19 +158,21 @@ class Crypto64:
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
-        extension_path = Path(Config.extensionFolder)
-        for ep in extension_path.glob("**/*"):
-            if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
-                extension_type = ep.relative_to(Config.extensionFolder).parent.as_posix().lower().replace(os.path.sep, '_')
-                extension_name = ep.stem.lower()
-                extension_script_name = '{}_{}'.format(extension_type, extension_name)
+        # Remove extensionFolder when all scripts are moved to script_catalog_dir
+        for path_ in (Config.extensionFolder, Config.script_catalog_dir):
+            extension_path = Path(path_)
+            for ep in extension_path.glob("**/*"):
+                if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
+                    extension_type = ep.relative_to(path_).parent.as_posix().lower().replace(os.path.sep, '_').replace('-','_')
+                    extension_name = ep.stem.lower()
+                    extension_script_name = '{}_{}'.format(extension_type, extension_name)
 
-                if extensions and extension_script_name in extensions:
-                    continue
+                    if extensions and extension_script_name in extensions:
+                        continue
 
-                # Prepare key for dictionary
-                base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
-                Config.templateRenderingDict[extension_script_name] = base64_script_file
+                    # Prepare key for dictionary
+                    base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
+                    Config.templateRenderingDict[extension_script_name] = base64_script_file
 
 
     def generate_base64_file(self, fn, num_spaces):
@@ -190,7 +192,10 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def import_key_cert_into_keystore(self, suffix, keystore_fn, keystore_pw, in_key, in_cert, alias=None):
+    def import_key_cert_into_keystore(self, suffix, keystore_fn, keystore_pw, in_key, in_cert, alias=None, store_type=None):
+
+        if not store_type:
+            store_type = Config.default_store_type
 
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
@@ -212,7 +217,7 @@ class Crypto64:
                   '-srcstoretype', 'PKCS12',
                   '-destkeystore', keystore_fn,
                   '-deststorepass', keystore_pw,
-                  '-deststoretype', 'JKS',
+                  '-deststoretype', store_type,
                   '-noprompt'
                   ]
         if alias:

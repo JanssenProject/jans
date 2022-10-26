@@ -11,7 +11,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.util.CommonUtils;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -35,7 +35,6 @@ import io.jans.as.model.jwt.JwtSubClaimObject;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
-import io.jans.as.model.util.JwtUtil;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
@@ -142,7 +141,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}", accessToken, securityContext.isSecure());
-        errorResponseFactory.validateComponentEnabled(ComponentType.USERINFO);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.USERINFO);
         Response.ResponseBuilder builder = Response.ok();
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.USER_INFO);

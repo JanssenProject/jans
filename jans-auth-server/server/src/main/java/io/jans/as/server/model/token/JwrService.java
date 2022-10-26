@@ -92,7 +92,7 @@ public class JwrService {
 
     private Jwe encryptJwe(Jwe jwe, Client client) throws Exception {
 
-        if (BooleanUtils.isTrue(appConfiguration.getUseNestedJwtDuringEncryption())) {
+        if (BooleanUtils.isTrue(appConfiguration.isUseNestedJwtDuringEncryption()) ){
             JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, client);
             Jwt jwt = jwtSigner.newJwt();
             jwt.setClaims(jwe.getClaims());

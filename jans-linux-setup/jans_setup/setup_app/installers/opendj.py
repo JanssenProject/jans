@@ -35,7 +35,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.openDjIndexJson = os.path.join(Config.install_dir, 'static/opendj/index.json')
         self.openDjSchemaFolder = os.path.join(Config.ldap_base_dir, 'config/schema')
 
-        self.opendj_service_centos7 = os.path.join(Config.install_dir, 'static/opendj/systemd/opendj.service')
+        self.unit_file = os.path.join(Config.install_dir, 'static/opendj/systemd/opendj.service')
         self.ldapDsconfigCommand = os.path.join(Config.ldap_bin_dir , 'dsconfig')
         self.ldapDsCreateRcCommand = os.path.join(Config.ldap_bin_dir , 'create-rc-script')
 
@@ -345,38 +345,11 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def setup_opendj_service(self):
         if not base.snap:
+            self.copyFile(self.unit_file, Config.unit_files_path)
             init_script_fn = '/etc/init.d/opendj'
-            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
-                remove_init_script = True
-                opendj_script_name = os.path.basename(self.opendj_service_centos7)
-                opendj_dest_folder = "/etc/systemd/system"
-                try:
-                    self.copyFile(self.opendj_service_centos7, opendj_dest_folder)
-                except:
-                    self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
-                if os.path.exists(init_script_fn):
-                    self.run(['rm', '-f', init_script_fn])
-            else:
-                self.run([self.ldapDsCreateRcCommand, '--outputFile', '/etc/init.d/opendj', '--userName', Config.ldap_user])
-                # Make the generated script LSB compliant
-                lsb_str=(
-                        '### BEGIN INIT INFO\n'
-                        '# Provides:          opendj\n'
-                        '# Required-Start:    $remote_fs $syslog\n'
-                        '# Required-Stop:     $remote_fs $syslog\n'
-                        '# Default-Start:     2 3 4 5\n'
-                        '# Default-Stop:      0 1 6\n'
-                        '# Short-Description: Start daemon at boot time\n'
-                        '# Description:       Enable service provided by daemon.\n'
-                        '### END INIT INFO\n'
-                        )
-                self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
-
-                if base.os_type in ['ubuntu', 'debian']:
-                    self.run([paths.cmd_update_rc, "-f", "opendj", "remove"])
-
-                self.fix_init_scripts('opendj', init_script_fn)
-
+            if os.path.exists(init_script_fn):
+                self.removeFile(init_script_fn)
+            self.run([self.ldapDsCreateRcCommand, '--outputFile', init_script_fn, '--userName', Config.ldap_user])
             self.reload_daemon()
 
 

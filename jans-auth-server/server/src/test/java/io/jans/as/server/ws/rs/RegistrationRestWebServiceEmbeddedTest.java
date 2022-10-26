@@ -90,7 +90,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestClientAssociate1(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -128,7 +128,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestClientAssociate2(final String registerPath, final String redirectUris,
                                         final String sectorIdentifierUri, final String contactEmail1, final String contactEmail2) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -188,7 +188,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath"})
     @Test(dependsOnMethods = "requestClientAssociate1")
     public void requestClientRead(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath + "?"
                 + registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1)).request();
         request.header("Authorization", "Bearer " + registrationAccessToken1);
 
@@ -207,7 +207,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         final String logoUriNewValue = "http://www.gluu.org/test/yuriy/logo.png";
         final String clientUriNewValue = "http://www.gluu.org/company/yuriy";
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath + "?"
                 + registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1)).request();
 
         String registerRequestContent = null;
@@ -248,7 +248,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath"})
     @Test
     public void failRegistration_whenRedirectUriIsNotSetForResponseTypeCode(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -273,7 +273,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath"})
     @Test
     public void requestClientRegistrationFail3(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {

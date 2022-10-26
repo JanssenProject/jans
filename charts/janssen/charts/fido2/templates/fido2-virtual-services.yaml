@@ -1,5 +1,4 @@
-{{- if .Values.global.istio.ingress }}
-
+{{- if and (.Values.global.istio.ingress) (.Values.global.fido2.ingress.fido2ConfigEnabled) }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -18,8 +17,13 @@ metadata:
 spec:
   hosts:
   - {{ .Values.global.fqdn }}
+{{- if .Values.global.istio.gateways }}
   gateways:
-  - {{ .Release.Name }}-global-gtw 
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
   http:
   - name: {{ .Release.Name }}-istio-fido2-configuration
     match:

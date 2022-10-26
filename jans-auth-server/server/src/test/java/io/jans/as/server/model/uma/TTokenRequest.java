@@ -7,7 +7,6 @@
 package io.jans.as.server.model.uma;
 
 import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -20,6 +19,7 @@ import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang.StringUtils;

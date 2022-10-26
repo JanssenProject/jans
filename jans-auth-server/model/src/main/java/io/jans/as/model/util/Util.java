@@ -30,18 +30,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -303,10 +292,14 @@ public class Util {
     }
 
     public static int parseIntSilently(String intString) {
+        return parseIntSilently(intString, -1);
+    }
+
+    public static int parseIntSilently(String intString, int defaultValue) {
         try {
             return Integer.parseInt(intString);
         } catch (Exception e) {
-            return -1;
+            return defaultValue;
         }
     }
 
@@ -366,5 +359,15 @@ public class Util {
             }
         }
         return result;
+    }
+
+    public static void putArray(JSONObject jsonObj, List<String> list, String key) {
+        JSONArray jsonArray = new JSONArray();
+        for (String alg : list) {
+            jsonArray.put(alg);
+        }
+        if (jsonArray.length() > 0) {
+            jsonObj.put(key, jsonArray);
+        }
     }
 }

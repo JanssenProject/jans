@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* jans-cli tabulate scim user list ([#1518](https://github.com/JanssenProject/jans/issues/1518)) ([d370978](https://github.com/JanssenProject/jans/commit/d370978fcdad6e6a4027af1bb2610de3513653ba))
+
+
+### Bug Fixes
+
+* build from source ([#1793](https://github.com/JanssenProject/jans/issues/1793)) ([e389363](https://github.com/JanssenProject/jans/commit/e389363e3fdad7149cdd73ea6fcbc4058f38819a))
+* Jans cli user userpassword ([#1542](https://github.com/JanssenProject/jans/issues/1542)) ([d2e13a2](https://github.com/JanssenProject/jans/commit/d2e13a2bcb16a14f63f3bd99c4b3dc83d2a96d9a))
+* jans-cli download yaml files for build ([#1635](https://github.com/JanssenProject/jans/issues/1635)) ([31b7e49](https://github.com/JanssenProject/jans/commit/31b7e49043d86c9b266590f6437146d625412f60))
+* jans-cli help message format and prompt values (ref: [#1352](https://github.com/JanssenProject/jans/issues/1352)) ([#1478](https://github.com/JanssenProject/jans/issues/1478)) ([37a9181](https://github.com/JanssenProject/jans/commit/37a91819bb7764d2dded27d6b5eafe25de083fe9))
+* jans-cli hide menu item ([#1510](https://github.com/JanssenProject/jans/issues/1510)) ([b70fc52](https://github.com/JanssenProject/jans/commit/b70fc52073a3110c767fbc239bb10cc7924838e8))
+* jans-cli user list failing for empty customAttributes ([#1525](https://github.com/JanssenProject/jans/issues/1525)) ([7cbf10b](https://github.com/JanssenProject/jans/commit/7cbf10b85187c554bf84bc0ceea6bfcf66cb0088))
+
+
+### Documentation
+
+* restructure assets directory ([04265c9](https://github.com/JanssenProject/jans/commit/04265c9f6115c491f958c86136f03f4300722ad2))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-cli-v1.0.0...jans-cli-v1.0.1) (2022-07-06)
 
 

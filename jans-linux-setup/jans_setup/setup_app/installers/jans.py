@@ -70,13 +70,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-            txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
+            txt += 'Install Jans Config API'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Jans Client Api'.ljust(30) + repr(Config.install_client_api).rjust(35) + (' *' if 'install_client_api' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
+
+            if Config.profile == 'jans' and Config.installEleven:
+                txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
@@ -97,7 +98,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def initialize(self):
         self.service_name = 'jans'
         self.app_type = AppType.APPLICATION
-        self.install_type = InstallOption.MONDATORY
+        self.install_type = InstallOption.MANDATORY
         jansProgress.register(self)
 
         Config.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
@@ -127,6 +128,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
+        self.extract_scripts()
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -486,6 +488,13 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
             self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
 
+            self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
+            for p in Path(Config.jansBaseFolder).rglob("*"):
+                if p.is_dir():
+                    self.run([paths.cmd_chmod, '750', p.as_posix()])
+                elif p.is_file():
+                    self.run([paths.cmd_chmod, '640', p.as_posix()])
+
             if not Config.installed_instance:
                 cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
                 self.restart(cron_service)
@@ -513,3 +522,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if inums:
             for inum in inums:
                 self.dbUtils.enable_script(inum, enable)
+
+    def extract_scripts(self):
+        base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)

@@ -22,14 +22,6 @@ public class ApiAccessConstants {
     public static final String DATABASE_LDAP_WRITE_ACCESS = "https://jans.io/oauth/config/database/ldap.write";
     public static final String DATABASE_LDAP_DELETE_ACCESS = "https://jans.io/oauth/config/database/ldap.delete";
 
-    public static final String DATABASE_COUCHBASE_READ_ACCESS = "https://jans.io/oauth/config/database/couchbase.readonly";
-    public static final String DATABASE_COUCHBASE_WRITE_ACCESS = "https://jans.io/oauth/config/database/couchbase.write";
-    public static final String DATABASE_COUCHBASE_DELETE_ACCESS = "https://jans.io/oauth/config/database/couchbase.delete";
-
-    public static final String DATABASE_SQL_READ_ACCESS = "https://jans.io/oauth/config/database/sql.readonly";
-    public static final String DATABASE_SQL_WRITE_ACCESS = "https://jans.io/oauth/config/database/sql.write";
-    public static final String DATABASE_SQL_DELETE_ACCESS = "https://jans.io/oauth/config/database/sql.delete";
-
     public static final String SCRIPTS_READ_ACCESS = "https://jans.io/oauth/config/scripts.readonly";
     public static final String SCRIPTS_WRITE_ACCESS = "https://jans.io/oauth/config/scripts.write";
     public static final String SCRIPTS_DELETE_ACCESS = "https://jans.io/oauth/config/scripts.delete";
@@ -46,6 +38,7 @@ public class ApiAccessConstants {
 
     public static final String JWKS_READ_ACCESS = "https://jans.io/oauth/config/jwks.readonly";
     public static final String JWKS_WRITE_ACCESS = "https://jans.io/oauth/config/jwks.write";
+    public static final String JWKS_DELETE_ACCESS = "https://jans.io/oauth/config/jwks.delete";
 
     public static final String OPENID_CLIENTS_READ_ACCESS = "https://jans.io/oauth/config/openid/clients.readonly";
     public static final String OPENID_CLIENTS_WRITE_ACCESS = "https://jans.io/oauth/config/openid/clients.write";
@@ -68,5 +61,13 @@ public class ApiAccessConstants {
     public static final String USER_READ_ACCESS = "https://jans.io/oauth/config/user.readonly";
     public static final String USER_WRITE_ACCESS = "https://jans.io/oauth/config/user.write";
     public static final String USER_DELETE_ACCESS = "https://jans.io/oauth/config/user.delete";
+    
+    public static final String AGAMA_READ_ACCESS = "https://jans.io/oauth/config/agama.readonly";
+    public static final String AGAMA_WRITE_ACCESS = "https://jans.io/oauth/config/agama.write";
+    public static final String AGAMA_DELETE_ACCESS = "https://jans.io/oauth/config/agama.delete";
+
+    public static final String JANS_AUTH_SESSION_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/session.readonly";
+    public static final String JANS_AUTH_SESSION_DELETE_ACCESS = "https://jans.io/oauth/jans-auth-server/session.delete";
+    public static final String JANS_AUTH_REVOKE_SESSION  = "revoke_session";
 
 }

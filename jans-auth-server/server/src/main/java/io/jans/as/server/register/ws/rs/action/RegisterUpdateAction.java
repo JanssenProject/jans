@@ -8,7 +8,7 @@ package io.jans.as.server.register.ws.rs.action;
 
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -98,7 +98,7 @@ public class RegisterUpdateAction {
     }
 
     public Response updateClient(String requestParams, String clientId, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
-        errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.REGISTRATION);
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_UPDATE);
         oAuth2AuditLog.setClientId(clientId);

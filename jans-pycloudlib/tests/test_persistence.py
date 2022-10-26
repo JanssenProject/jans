@@ -241,9 +241,9 @@ def test_sync_couchbase_cert(monkeypatch, tmpdir):
 
 
 def test_exec_api_unsupported_method():
-    from jans.pycloudlib.persistence.couchbase import RestClient
+    from jans.pycloudlib.persistence.couchbase import RestApi
 
-    client = RestClient("localhost", "admin", "password")
+    client = RestApi("localhost", "admin", "password")
     with pytest.raises(ValueError):
         client.exec_api("pools/default/buckets", method="DELETE")
 
@@ -261,9 +261,9 @@ def test_no_couchbase_hosts(gmanager, client_prop):
 
 
 def test_client_session_unverified():
-    from jans.pycloudlib.persistence.couchbase import BaseClient
+    from jans.pycloudlib.persistence.couchbase import RestApi
 
-    client = BaseClient("localhost", "admin", "password")
+    client = RestApi("localhost", "admin", "password")
     assert client.session.verify is False
 
 
@@ -272,12 +272,12 @@ def test_client_session_unverified():
     ("/etc/certs/custom-cb.crt", "/etc/certs/custom-cb.crt"),
 ])
 def test_client_session_verified(monkeypatch, given, expected):
-    from jans.pycloudlib.persistence.couchbase import BaseClient
+    from jans.pycloudlib.persistence.couchbase import RestApi
 
     monkeypatch.setenv("CN_COUCHBASE_VERIFY", "true")
     monkeypatch.setenv("CN_COUCHBASE_CERT_FILE", given)
 
-    client = BaseClient("localhost", "admin", "password")
+    client = RestApi("localhost", "admin", "password")
     assert client.session.verify == expected
 
 
@@ -286,11 +286,11 @@ def test_client_session_verified(monkeypatch, given, expected):
     ("127.0.0.1", "127.0.0.1"),
 ])
 def test_client_session_verified_host(monkeypatch, given, expected):
-    from jans.pycloudlib.persistence.couchbase import BaseClient
+    from jans.pycloudlib.persistence.couchbase import RestApi
 
     monkeypatch.setenv("CN_COUCHBASE_VERIFY", "true")
     monkeypatch.setenv("CN_COUCHBASE_HOST_HEADER", given)
-    client = BaseClient("localhost", "admin", "password")
+    client = RestApi("localhost", "admin", "password")
     assert client.session.headers["Host"] == expected
 
 
@@ -322,11 +322,11 @@ def test_n1ql_request_body_named_params():
     ("false", "http", 8091),
 ])
 def test_couchbase_rest_client_conn(monkeypatch, enable_ssl, scheme, port):
-    from jans.pycloudlib.persistence.couchbase import RestClient
+    from jans.pycloudlib.persistence.couchbase import RestApi
 
     monkeypatch.setenv("CN_COUCHBASE_TRUSTSTORE_ENABLE", enable_ssl)
 
-    client = RestClient("localhost", "admin", "password")
+    client = RestApi("localhost", "admin", "password")
     assert client.port == port
     assert client.scheme == scheme
 
@@ -336,11 +336,11 @@ def test_couchbase_rest_client_conn(monkeypatch, enable_ssl, scheme, port):
     ("false", "http", 8093),
 ])
 def test_couchbase_n1ql_client_conn(monkeypatch, enable_ssl, scheme, port):
-    from jans.pycloudlib.persistence.couchbase import N1qlClient
+    from jans.pycloudlib.persistence.couchbase import N1qlApi
 
     monkeypatch.setenv("CN_COUCHBASE_TRUSTSTORE_ENABLE", enable_ssl)
 
-    client = N1qlClient("localhost", "admin", "password")
+    client = N1qlApi("localhost", "admin", "password")
     assert client.port == port
     assert client.scheme == scheme
 
@@ -382,8 +382,6 @@ def test_render_couchbase_properties(monkeypatch, tmpdir, gmanager, bucket_prefi
 connection.connect-timeout: %(couchbase_conn_timeout)s
 connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.scan-consistency: %(couchbase_scan_consistency)s
-connection.keep-alive-interval: %(couchbase_keepalive_interval)s
-connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
 buckets: %(couchbase_buckets)s
 bucket.default: %(default_bucket)s
 %(couchbase_mappings)s
@@ -393,8 +391,6 @@ bucket.default: %(default_bucket)s
 connection.connect-timeout: 10000
 connection.connection-max-wait-time: 20000
 connection.scan-consistency: not_bounded
-connection.keep-alive-interval: 30000
-connection.keep-alive-timeout: 2500
 buckets: {bucket_prefix}, {bucket_prefix}_user, {bucket_prefix}_cache, {bucket_prefix}_site, {bucket_prefix}_token, {bucket_prefix}_session
 bucket.default: {bucket_prefix}
 bucket.{bucket_prefix}_user.mapping: people, groups, authorizations
@@ -433,8 +429,6 @@ def test_render_couchbase_properties_hybrid(monkeypatch, tmpdir, gmanager):
 connection.connect-timeout: %(couchbase_conn_timeout)s
 connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.scan-consistency: %(couchbase_scan_consistency)s
-connection.keep-alive-interval: %(couchbase_keepalive_interval)s
-connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
 buckets: %(couchbase_buckets)s
 bucket.default: %(default_bucket)s
 %(couchbase_mappings)s
@@ -444,8 +438,6 @@ bucket.default: %(default_bucket)s
 connection.connect-timeout: 10000
 connection.connection-max-wait-time: 20000
 connection.scan-consistency: not_bounded
-connection.keep-alive-interval: 30000
-connection.keep-alive-timeout: 2500
 buckets: jans, jans_user, jans_token
 bucket.default: jans
 bucket.jans_user.mapping: people, groups, authorizations
@@ -559,25 +551,31 @@ def test_get_sql_password_from_secrets(gmanager):
     assert get_sql_password(gmanager) == "secret"
 
 
-def test_render_sql_properties(monkeypatch, tmpdir, gmanager):
+@pytest.mark.parametrize("dialect, port, schema, jdbc_driver", [
+    ("mysql", 3306, "jans", "mysql"),
+    ("pgsql", 5432, "public", "postgresql"),
+])
+def test_render_sql_properties(monkeypatch, tmpdir, gmanager, dialect, port, schema, jdbc_driver):
     from jans.pycloudlib.persistence.sql import render_sql_properties
 
     passwd = tmpdir.join("sql_password")
     passwd.write("secret")
 
     monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(passwd))
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", dialect)
+    monkeypatch.setenv("CN_SQL_DB_PORT", str(port))
 
     tmpl = """
-db.schema.name=%(rdbm_db)s
+db.schema.name=%(rdbm_schema)s
 connection.uri=jdbc:%(rdbm_type)s://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s
 connection.driver-property.serverTimezone=%(server_time_zone)s
 auth.userName=%(rdbm_user)s
 auth.userPassword=%(rdbm_password_enc)s
 """.strip()
 
-    expected = """
-db.schema.name=jans
-connection.uri=jdbc:mysql://localhost:3306/jans
+    expected = f"""
+db.schema.name={schema}
+connection.uri=jdbc:{jdbc_driver}://localhost:{port}/jans
 connection.driver-property.serverTimezone=UTC
 auth.userName=jans
 auth.userPassword=fHL54sT5qHk=
@@ -660,9 +658,9 @@ def test_doc_id_from_dn(dn, doc_id):
     assert doc_id_from_dn(dn) == doc_id
 
 
-def test_sql_client_engine(gmanager):
-    from jans.pycloudlib.persistence.sql import SqlClient
-    assert SqlClient(gmanager).engine is not None
+def test_sql_client_engine(sql_client):
+    from sqlalchemy.engine import Engine
+    assert isinstance(sql_client.engine, Engine)
 
 
 @pytest.mark.parametrize("dialect, word, quoted_word", [
@@ -681,43 +679,63 @@ def test_sql_client_quoted_id(monkeypatch, gmanager, dialect, word, quoted_word)
 BUILTINS_OPEN = "builtins.open"
 
 
-def test_sql_sql_data_types(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.sql import SqlClient
+def test_sql_sql_data_types(monkeypatch):
+    from jans.pycloudlib.persistence.sql import SqlSchemaMixin
 
-    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
-
-    client = SqlClient(gmanager)
-    assert isinstance(client.sql_data_types, dict)
-
-
-def test_sql_sql_data_types_mapping(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.sql import SqlClient
-
-    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
-
-    client = SqlClient(gmanager)
-    assert isinstance(client.sql_data_types_mapping, dict)
+    types_str = '{"dat": {"mysql": {"type": "TEXT"}}}'
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO(types_str))
+    assert SqlSchemaMixin().sql_data_types == json.loads(types_str)
 
 
-def test_sql_attr_types(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.sql import SqlClient
+def test_sql_sql_data_types_mapping(monkeypatch):
+    from jans.pycloudlib.persistence.sql import SqlSchemaMixin
 
-    monkeypatch.setattr(
-        BUILTINS_OPEN,
-        lambda p: StringIO('{"attributeTypes": []}'),
-    )
+    types_str = """{
+    "1.3.6.1.4.1.1466.115.121.1.11": {
+        "mysql": {"size": 2, "type": "VARCHAR"}
+    }
+}"""
 
-    client = SqlClient(gmanager)
-    assert isinstance(client.attr_types, list)
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO(types_str))
+    assert SqlSchemaMixin().sql_data_types_mapping == json.loads(types_str)
 
 
-def test_sql_opendj_attr_types(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.sql import SqlClient
+def test_sql_attr_types(monkeypatch):
+    from jans.pycloudlib.persistence.sql import SqlSchemaMixin
 
-    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
+    types_str = """{
+    "schemaFile": "101-jans.ldif",
+    "attributeTypes": [
+        {
+            "desc": "Description",
+            "names": ["jansAssociatedClnt"]
+        }
+    ]
+}"""
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO(types_str))
 
-    client = SqlClient(gmanager)
-    assert isinstance(client.opendj_attr_types, dict)
+    item = {
+        "desc": "Description",
+        "names": ["jansAssociatedClnt"],
+    }
+    assert item in SqlSchemaMixin().attr_types
+
+
+def test_sql_opendj_attr_types(monkeypatch):
+    from jans.pycloudlib.persistence.sql import SqlSchemaMixin
+
+    types_str = '{"ds-task-reset-change-number-base-dn": "1.3.6.1.4.1.1466.115.121.1.12"}'
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO(types_str))
+    assert SqlSchemaMixin().opendj_attr_types == json.loads(types_str)
+
+
+def test_sql_metadata_prop(sql_client, monkeypatch):
+    from unittest.mock import patch
+    from sqlalchemy import MetaData
+
+    with patch("sqlalchemy.MetaData.reflect") as patched:
+        assert isinstance(sql_client.metadata, MetaData)
+        patched.assert_called()
 
 
 # =======
@@ -725,19 +743,10 @@ def test_sql_opendj_attr_types(gmanager, monkeypatch):
 # =======
 
 
-def test_render_spanner_properties(monkeypatch, tmpdir, gmanager):
-    import json
+def test_render_spanner_properties(monkeypatch, tmpdir, gmanager, google_creds):
     from jans.pycloudlib.persistence.spanner import render_spanner_properties
 
-    creds = tmpdir.join("google-credentials.json")
-    creds.write(json.dumps({
-        "client_id": "random-id",
-        "client_secret": "random-secret",
-        "refresh_token": "random-refresh-token",
-        "type": "authorized_user"
-    }))
-
-    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(creds))
+    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_creds))
     monkeypatch.setenv("GOOGLE_PROJECT_ID", "testing-project")
     monkeypatch.setenv("CN_GOOGLE_SPANNER_INSTANCE_ID", "testing-instance")
     monkeypatch.setenv("CN_GOOGLE_SPANNER_DATABASE_ID", "testing-db")
@@ -754,7 +763,7 @@ connection.project=testing-project
 connection.instance=testing-instance
 connection.database=testing-db
 connection.credentials-file={}
-""".format(str(creds)).strip()
+""".format(str(google_creds)).strip()
 
     src = tmpdir.join("jans-spanner.properties.tmpl")
     src.write(tmpl)
@@ -794,59 +803,28 @@ connection.emulator-host=localhost:9010
     assert dest.read() == expected
 
 
-def test_spanner_quoted_id(gmanager):
-    from jans.pycloudlib.persistence.spanner import SpannerClient
-
-    client = SpannerClient(gmanager)
-    assert client.quoted_id("random") == "`random`"
+def test_spanner_quoted_id(spanner_client):
+    assert spanner_client.quoted_id("random") == "`random`"
 
 
-def test_spanner_sql_data_types(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.spanner import SpannerClient
-
+def test_spanner_sub_tables(monkeypatch, spanner_client):
     monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
-
-    client = SpannerClient(gmanager)
-    assert isinstance(client.sql_data_types, dict)
+    assert isinstance(spanner_client.sub_tables, dict)
 
 
-def test_spanner_sql_data_types_mapping(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.spanner import SpannerClient
-
-    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
-
-    client = SpannerClient(gmanager)
-    assert isinstance(client.sql_data_types_mapping, dict)
+def test_spanner_client_prop(spanner_client):
+    from google.cloud.spanner_v1.client import Client
+    assert isinstance(spanner_client.client, Client)
 
 
-def test_spanner_attr_types(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.spanner import SpannerClient
-
-    monkeypatch.setattr(
-        BUILTINS_OPEN,
-        lambda p: StringIO('{"attributeTypes": []}'),
-    )
-
-    client = SpannerClient(gmanager)
-    assert isinstance(client.attr_types, list)
+def test_spanner_instance_prop(spanner_client):
+    from google.cloud.spanner_v1.instance import Instance
+    assert isinstance(spanner_client.instance, Instance)
 
 
-def test_spanner_opendj_attr_types(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.spanner import SpannerClient
-
-    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
-
-    client = SpannerClient(gmanager)
-    assert isinstance(client.opendj_attr_types, dict)
-
-
-def test_spanner_sub_tables(gmanager, monkeypatch):
-    from jans.pycloudlib.persistence.spanner import SpannerClient
-
-    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
-
-    client = SpannerClient(gmanager)
-    assert isinstance(client.sub_tables, dict)
+def test_spanner_database_prop(spanner_client):
+    from google.cloud.spanner_v1.database import Database
+    assert isinstance(spanner_client.database, Database)
 
 
 # =====

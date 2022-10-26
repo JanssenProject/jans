@@ -15,7 +15,7 @@ import io.jans.orm.model.base.Entry;
 public class ProtoFlow extends Entry {
     
     @AttributeName(name = Flow.ATTR_NAMES.QNAME)
-    private String QName;
+    private String qname;
     
     @AttributeName(name = Flow.ATTR_NAMES.HASH)
     private String transHash;
@@ -26,12 +26,12 @@ public class ProtoFlow extends Entry {
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
 
-    public String getQName() {
-        return QName;
+    public String getQname() {
+        return qname;
     }
 
-    public void setQName(String QName) {
-        this.QName = QName;
+    public void setQname(String qname) {
+        this.qname = qname;
     }
 
     public String getTransHash() {

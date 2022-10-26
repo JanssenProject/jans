@@ -15,6 +15,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
     - [Branches](#branches)
     - [PRs](#prs)
     - [Issues](#issues)
+    - [Contributing to the documentation](#contributing-to-the-documentation)
 - [Contribution Workflow](#contribution-workflow)
   - [Find Something To Work On](#find-something-to-work-on)
   - [Start a Discussion](#start-a-discussion)
@@ -22,6 +23,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
   - [Document](#document)
   - [Raise a PR](#raise-a-pr)
   - [Follow Through](#follow-through)
+  
 
 # Join the Community
 
@@ -140,6 +142,239 @@ Branch name should have component name as prefix, eg `jans-core-mybranch`
 ### Issues 
 - Issue titles should follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 
+### Backport changes to a different version
+
+Backport changes are now supported through a [workflow](https://github.com/zeebe-io/backport-action#backport-action) through labels prefixed with `backport/`.
+For-example to backport changes in a certain PR to version `v1.0.0` a label to that PR matching the version must be added i.e `backport/v1.0.0`.
+The flow consists of creating a new branch, cherry-picking the changes of the original PR and creating a new PR to merge them.
+
+# Contributing to the documentation
+Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. 
+
+In order to ensure consistency of style, language, format, and terminology across all documents, please follow the guidelines below:
+
+## Glossary of terms
+
+This glossary helps to keep terms and their meanings consistent across documentation.
+
+- `Janssen Project` or `Jans`: 
+
+  Refers to the official project name under Linux Foundation that seeks to build the world’s fastest and most comprehensive cloud native identity and access management software platform
+
+- `Janssen Server`:
+
+  Refers to a set of software components developed under the Janssen Project . Components of the Janssen Server include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. The term `Janssen Server` is used to refer to these components as a group. 
+
+- `jans-auth-server`: 
+
+  Refers to a module within the Janssen Server named `jans-auth-server`. This is one of the significant modules of the Janssen Server that has an implementation for OAuth and OpenId Connect. 
+
+- Janssen Server module names:
+
+  For correct naming of other modules of the Janssen Server, please refer to [README](https://github.com/JanssenProject/jans#janssen-modules)
+
+## Documentation Style Guide
+
+Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents. 
+
+!!! Testing
+
+    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](developer/testing.md#documentation-local-testing) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
+
+### Document Title
+
+The document title summarises what the document aims to achieve and at the same time, it plays a critical role in making the document easy to find via search. Below are a few guidelines to write good titles for documents.
+
+- Every document **must** start with a title. Meaning, `#<space><title text>`
+- Title should summarise what the document is trying to achieve. For examples: `Integrating with the Apache mod_auth_openidc module`, `Integrating DUO's Universal Prompt as an authentication method`, `Install using Ubuntu Linux Package`
+- Title should include its context. For example, the document under `Installation`>`VM Installation`>`Ubuntu` should not be titled as just `Ubuntu` but it should have a more detailed title similar to  `Install using Ubuntu Linux Package`. When required, to keep the title from becoming too long, assume that `Janssen Server` is already understood as context.
+- Titles should be written using [title case](https://en.wikipedia.org/wiki/Title_case)
+
+### Document Tags
+
+Janssen Project documentation uses [tags](https://squidfunk.github.io/mkdocs-material/setup/setting-up-tags/#adding-tags) to make the search more accurate and add context to search results. Following are guidelines and examples to follow while adding tags to a document.
+
+- Maximum 6 tags
+- First three should establish the context of the section hierarchy under which the document belongs. See the example below.
+- Remaining tags can be based on the content of the document.
+- Each tag should be a single word (no spaces, hyphens or commas, etc)
+- All tags should be in lowercase
+
+Example:
+
+Let's look at how to add tags to a document that is located on [documentation site](https://docs.jans.io/) at path `Administration -> Installation -> VM installation`. Also, assume that the document describes the steps to install Janssen Project on the Ubuntu platform. Tags below would be recommended:
+
+```json
+---
+tags:
+ - administration
+ - installation
+ - vm
+ - ubuntu
+---
+```
+
+### General Text
+ - Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line
+ - Keep explanations short and clear
+ - Use complete sentences when possible
+ - To make text _italicised_, put an `_` on each side, like this: `_word_`
+ - To **bold** text, put a double `*` on each end, like this: `**word**`
+ - Leave a blank line between paragraphs. Count a header as a paragraph for this purpose
+ - Avoid passive voice as much as possible. It's clearer to say that a subject does something than to say a result was done
+ - Avoid using `you` in statements as much as possible. For example, instead of saying `You can navigate to...` simply say `Navigate to...` 
+ 
+### Page Setup
+ - Start your page with a title on the first line
+ - Follow with a concise overview of the document / product's purpose
+ - Organize the information in the document from least technical to most technical if possible. Start conceptual, then get detailed
+ 
+### Lists
+ - Leave a blank line between text and first item in the list
+ - Only use a numbered list if the order of the list matters
+ - A line of a list should not end with a period. If it's multiple sentences, like this one, drop the last period
+ - Start each item in the list with a capital letter
+ - End each item in the list with at least three spaces. This makes sure the line breaks properly
+ - To make a *bulleted* list, start each line with `-`
+ - To make a *numbered* list, start each line with `1.` For example:
+ 
+    ```
+    1. This is the first item
+    1. This is the second item
+    1. This is the third item
+    ```
+ 
+    It will look like this:
+
+    ```
+    1. This is the first item
+    2. This is the second item
+    3. This is the third item
+    ```
+ 
+ - To include additional lines in a list item, start the sub-line with four spaces. For example:
+ 
+    ```
+    1. This is the first item in a list   
+       There are four spaces to start this line   
+       Another four spaces here   
+       This keeps all text inside the numbered list item, before starting...   
+
+    1. The following list item   
+    ```
+
+It will look like this:
+
+1. This is the first item in a list   
+    There are four spaces to start this line   
+    Another four spaces here   
+    This keeps all text inside the list, before starting...    
+
+1. The following list item   
+
+#### Other formatting considerations
+
+ - Admonitions cannot be nested inside a list. They must be aligned all the way left. Inserting them within a list will break the list sequence (starting back over from 1).
+    
+ - Nesting a [fenced block of code](#code-formatting) in a numbered list is more challenging, as the list and code block syntaxes clash. To nest a code block into a list, insert four spaces to the left of all lines of the formatting. For example:
+
+```
+1. This is the first item  
+    ```
+    This is code  
+    This is also code.
+    ```
+1. This is the second item  
+```
+
+It will look like this:
+
+1. This is the first item  
+    ```
+    This is code  
+    This is also code.
+    ```
+1. This is the second item  
+
+
+### Headings
+ - Headings should be in title format. All important words should be capitalized
+ - The main title of the page should start with a single `#`, then each level of subheading should add one. For example, the first subheading should start with `##`, a subheading of that should use `###`, and so on
+
+### Code Formatting
+  - To format text as code within a line of normal text, surround the code with a single backtick (\`).
+  - If the code is to be on its own line, it should be a fenced code block. To make a fenced code block, make a line before and after the code with three backticks:
+  
+    ```
+        ```
+        This is code
+        ```
+    ```
+    
+  - We use the [SuperFences](https://facelessuser.github.io/pymdown-extensions/extensions/superfences/) plugin to enhance this functionality.
+  
+  
+### Examples & Navigation
+ - When possible, provide an example in the form of code output or a screenshot
+ - To instruct a user to click a button, or navigate to a certain page or through a menu, use the following style:
+
+     ```
+     Navigate to `Configuration` > `Authentication` and click the `Passport` tab
+     ```  
+ 
+It will look like this:  
+ 
+Navigate to `Configuration` > `Authentication` and click the `Passport` tab
+ 
+### Linking
+
+We recommend using relative linking syntax when linking to other artifacts in repository. Linking to a page within the same repo use this format: `[text for the link](../where/the/link/goes.md)`
+ - You must link to the `.md` file on GitHub for it to work properly
+ - As an example, to make text `this link` link to a Markdown document named `example.md` in the same directory, you'd type it as `[this link](./example.md)`
+ 
+#### Service Commands 
+
+The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for [Service Commands](https://jans.io/docs/vm-ops/checking-service-status/). 
+
+In documenting a process that involves a service restart, the Service Command documentation is linked:  
+
+```  
+## Add the attribute to LDAP
+
+ - Add custom attribute 
+ - [Restart](https://jans.io/docs/vm-ops/restarting-services/) the `jans-auth.service` service.
+```
+
+The word `Restart` is simply linked to the dedicated doc for Service Commands. 
+ 
+### Tables
+ - Try to make tables visually readable by spacing to make distinct columns
+ - The header for each column must be separated by at least three dashes
+ - Use outer pipes for consistency
+ - If an entry is too long to fit in the neat boxes, that's fine, just try to keep it legible
+ - An example table follows:
+
+ ```
+ |This    |Is     |A     |Table    |
+ |--------|-------|------|---------|
+ |1       |2      |3     |4        |
+ |Word    |Code   |Text  |Table    |
+```
+
+It looks like this:
+
+|This    |Is     |A     |Table    |
+|--------|-------|------|---------|
+|1       |2      |3     |4        |
+|Word    |Code   |Text  |Table    |
+
+### Help On Technical Writing
+
+It is essential for everyone in the community to actively participate in the documentation. At the same time, not everyone is formally trained or experienced in writing technical documents. To help everyone understand the basics of good technical writing, we have listed a few resources below. Going through these resources will not take a lot of time and will help in writing better technical documents.
+
+- [Introduction to Technical Writing (part-1)](https://developers.google.com/tech-writing/one)
+- [Introduction to Technical Writing (part-2)](https://developers.google.com/tech-writing/two)
+
 # Contribution Workflow
 
 ## Find something to work on
@@ -181,7 +416,22 @@ To run tests locally before pushing your code, refer to [TESTING] guide.
 
 ## Document
 
-PR should include changes in relevent documentation along with code changes.
+- PR should include changes in relevant documentation along with code changes.  PR is checked by bot to have either one 
+of the following :
+  - A commit that follows [commit guidelines](#commits) with `docs:` message 
+  - Changes in artifacts under `jans/docs`
+  
+- If PR does not need any documentation changes, then the developer needs to acknowledge that in one of two ways:
+  - Add an empty commit to the PR (using `--allow-empty` git flag) with `docs:` message (i.e `docs: no doc changes required`)
+  - Add footer to the commit message of one of the code commits with `docs:` message e.g
+  ```
+  fix: typo on class name
+
+  More details here.
+
+  docs: no docs modification
+  ```
+    
 
 ## Raise a PR
 - Make sure that PR title follows these [guidelines](#prs)

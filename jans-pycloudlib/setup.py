@@ -35,10 +35,7 @@ setup(
         # "urllib3<1.25,>=1.21.1",
         # "urllib3>=1.25.2",
         "ldap3>=2.5",
-
-        # backoff v2 introduces non-compatible code
-        "backoff>=1.8.0,<2.0.0",
-
+        "backoff>=2.1.2",
         "docker>=3.7.2",
         "requests-toolbelt>=0.9.1",
         "cryptography>=2.8",
@@ -49,6 +46,8 @@ setup(
         "google-cloud-spanner>=3.3.0",
         "Click>=6.7",
         "ldif>=4.1.1",
+        # handle CVE-2022-36087
+        "oauthlib>=3.2.1",
     ],
     classifiers=[
         "Intended Audience :: Developers",
@@ -63,5 +62,8 @@ setup(
     include_package_data=True,
     entry_points={
         "console_scripts": ["jans-pycloudlib=jans.pycloudlib.cli:cli"],
+    },
+    package_data={
+        "jans.pycloudlib": ["py.typed"],
     },
 )

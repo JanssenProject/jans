@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.2-1 (2022-08-30)
+
+
+### Features
+
+* **docker-jans-fido2:** allow creating initial persistence entry ([#2029](https://github.com/JanssenProject/jans/issues/2029)) ([41dfab7](https://github.com/JanssenProject/jans/commit/41dfab7a6d09d10b05954d4f5fae2437eb81a885))
+* **docker-jans-scim:** allow creating initial persistence entry ([#2035](https://github.com/JanssenProject/jans/issues/2035)) ([e485618](https://github.com/JanssenProject/jans/commit/e4856186d566f9ac7b08395b59cd75e389e5c161))
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+
+
+### Bug Fixes
+
+* **pycloudlib:** handle type mismatch for iterable ([#2004](https://github.com/JanssenProject/jans/issues/2004)) ([46e0b2e](https://github.com/JanssenProject/jans/commit/46e0b2e4aff70a97cdcdcd0102dc83d294e45fdc))
+
+
+### Miscellaneous Chores
+
+* prepare docker images release 1.0.1-1 ([12660a8](https://github.com/JanssenProject/jans/commit/12660a800bacb210bd3fb4b35c9156e9c5445343))
+* release 1.0.2-1 ([d01b51a](https://github.com/JanssenProject/jans/commit/d01b51a847bb2f67b52da433ebd1c5e4a66b7c1a))
+
 ## [1.0.1-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.0-1...docker-jans-configurator-v1.0.1-1) (2022-07-06)
 
 

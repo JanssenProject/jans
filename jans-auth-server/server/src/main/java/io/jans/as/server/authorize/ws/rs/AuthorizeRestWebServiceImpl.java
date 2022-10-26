@@ -25,6 +25,7 @@ import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.crypto.binding.TokenBindingParseException;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
@@ -45,8 +46,8 @@ import io.jans.as.server.model.common.DeviceCodeGrant;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.common.IdToken;
 import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
@@ -71,7 +72,6 @@ import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
-import io.jans.as.server.util.QueryStringDecoder;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -502,6 +502,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getHttpRequest());
 
         addCustomHeaders(builder, authzRequest);
+        updateSessionRpRedirect(sessionUser);
 
         runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         processDeviceAuthorization(deviceAuthzUserCode, user);
@@ -572,15 +573,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
         if (prompts.contains(Prompt.LOGIN)) {
+            boolean sessionUnauthenticated = false;
 
             //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
             if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
-                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
+                sessionUnauthenticated = unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest(), authzRequest.isPromptFromJwt());
             }
             authzRequest.setSessionId(null);
             prompts.remove(Prompt.LOGIN);
 
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            if (sessionUnauthenticated) {
+                throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            }
         }
     }
 
@@ -588,7 +592,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
                 && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
                 && identity.getSessionId().getAuthenticationTime() != null
-                && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 200) {
+                && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 500) {
             prompts.add(Prompt.LOGIN);
         }
     }
@@ -731,7 +735,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
         } else {
             if (prompts.contains(Prompt.LOGIN)) {
-                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
+                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest(), authzRequest.isPromptFromJwt());
                 authzRequest.setSessionId(null);
                 prompts.remove(Prompt.LOGIN);
                 authzRequest.setPrompt(implode(prompts, " "));
@@ -785,7 +789,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
         executionContext.setGrant(cibaGrant);
-        executionContext.setIncludeIdTokenClaims(false);
+        executionContext.setIncludeIdTokenClaims(Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims()));
 
         IdToken idToken = cibaGrant.createIdToken(null, null, accessToken, refreshToken, null, executionContext);
 
@@ -906,16 +910,32 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private void unauthenticateSession(String sessionId, HttpServletRequest httpRequest) {
-        identity.logout();
+    private void updateSessionRpRedirect(SessionId sessionUser) {
+        int rpRedirectCount = Util.parseIntSilently(sessionUser.getSessionAttributes().get("successful_rp_redirect_count"), 0);
+        rpRedirectCount++;
 
+        sessionUser.getSessionAttributes().put("successful_rp_redirect_count", Integer.toString(rpRedirectCount));
+        sessionIdService.updateSessionId(sessionUser);
+    }
+
+    private boolean unauthenticateSession(String sessionId, HttpServletRequest httpRequest) {
+        return unauthenticateSession(sessionId, httpRequest, false);
+    }
+
+    private boolean unauthenticateSession(String sessionId, HttpServletRequest httpRequest, boolean isPromptFromJwt) {
         SessionId sessionUser = identity.getSessionId();
+
+        if (isPromptFromJwt && sessionUser != null && !sessionUser.getSessionAttributes().containsKey("successful_rp_redirect_count")) {
+            return false; // skip unauthentication because there were no at least one successful rp redirect
+        }
 
         if (sessionUser != null) {
             sessionUser.setUserDn(null);
             sessionUser.setUser(null);
             sessionUser.setAuthenticationTime(null);
         }
+
+        identity.logout();
 
         if (StringHelper.isEmpty(sessionId)) {
             sessionId = cookieService.getSessionIdFromCookie(httpRequest);
@@ -924,7 +944,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         SessionId persistenceSessionId = sessionIdService.getSessionId(sessionId);
         if (persistenceSessionId == null) {
             log.error("Failed to load session from LDAP by session_id: '{}'", sessionId);
-            return;
+            return true;
         }
 
         persistenceSessionId.setState(SessionIdState.UNAUTHENTICATED);
@@ -936,6 +956,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (!result) {
             log.error("Failed to update session_id '{}'", sessionId);
         }
+        return result;
     }
 
     /**

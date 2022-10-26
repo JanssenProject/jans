@@ -19,7 +19,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import io.jans.util.io.HTTPFileDownloader;
 import org.apache.commons.io.IOUtils;
 import io.jans.service.document.store.service.DocumentStoreService;
 import org.slf4j.Logger;
@@ -113,18 +112,6 @@ public class SAMLMetadataParser {
 
 
         return handler;
-    }
-
-    public EntityIDHandler parseMetadata(URL metadataURL) {
-        String metadataFileContent = HTTPFileDownloader.getResource(metadataURL.toExternalForm(), "application/xml, text/xml", null, null);
-
-        if (metadataFileContent == null) {
-            return null;
-        }
-
-        InputStream is = new StringBufferInputStream(metadataFileContent);
-
-        return parseMetadata(is);
     }
 
 }

@@ -45,17 +45,24 @@ function _flowCall(flowName, basePath, urlOverrides, args) {
     if (!_isString(flowName))
         throw new TypeError("Flow name is not a string")
 
-    let p = _scriptUtils.prepareSubflow(flowName, basePath, urlOverrides)
+    let mapping = _scriptUtils.templatesMapping(basePath, urlOverrides)
+    let p = _scriptUtils.prepareSubflow(flowName, mapping)
     let params = args.map(_scan)
     params.splice(0, 0, p.second)
 
     let f = p.first
-    //Nullify p to avoid serializing a Java Pair in the next RRF call
-    p = null
+    //Modify p to avoid serializing a Java Pair in the next RRF call
+    //wrapping with ArrayList is a workaround for a kryo deserialization exception
+    p = new Packages.java.util.ArrayList(mapping.values())
+    mapping = null
     let result = f.apply(null, params)
 
     _scriptUtils.closeSubflow()
-    return result
+    if (_isNil(result)) return     //return undefined
+    
+    return { value: result,
+        //determines if the parent should handle this returned value
+        bubbleUp: result.aborted == true && !_scriptUtils.pathMatching(result.url, p) }
 
 }
 
@@ -74,8 +81,8 @@ function _finish(val) {
 
 }
 
-function _abort(data) {
-    return { aborted: true, data: data }
+function _abort(url, data) {
+    return { aborted: true, url: url, data: data }
 }
 
 function _scan(val) {

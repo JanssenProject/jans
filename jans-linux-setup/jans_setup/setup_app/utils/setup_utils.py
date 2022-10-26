@@ -216,18 +216,18 @@ class SetupUtils(Crypto64):
     def applyChangesInFiles(self, changes):
         self.logIt("Applying changes to %s files..." % changes['name'])
         for change in changes['files']:
-            file = change['path']
+            cfile = change['path']
 
-            text = self.readFile(file)
-            file_backup = '%s.bak' % file
+            text = self.readFile(cfile)
+            file_backup = '%s.bak' % cfile
             self.writeFile(file_backup, text)
             self.logIt("Created backup of %s file %s..." % (changes['name'], file_backup))
 
             for replace in change['replace']:
                 text = self.replaceInText(text, replace['pattern'], replace['update'])
 
-            self.writeFile(file, text)
-            self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
+            self.writeFile(cfile, text)
+            self.logIt("Wrote updated %s file %s..." % (changes['name'], cfile))
 
 
     def copyFile(self, inFile, destFolder, backup=True):
@@ -387,24 +387,15 @@ class SetupUtils(Crypto64):
 
     def renderTemplateInOut(self, file_path, template_folder, output_dir, pystring=False):
         fn = os.path.basename(file_path)
-        in_fp = os.path.join(template_folder, fn) 
+        in_fp = os.path.join(template_folder, fn)
+        out_fp = os.path.join(output_dir, fn)
         self.logIt("Rendering template %s" % in_fp)
-        template_text = self.readFile(in_fp)
 
         # Create output folder if needed
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
-        for k in format_dict:
-            if isinstance(format_dict[k], bool):
-                format_dict[k] = str(format_dict[k]).lower()
-
-        if pystring:
-            rendered_text = Template(template_text).substitute(format_dict)
-        else:
-            rendered_text = self.fomatWithDict(template_text, format_dict)
-        out_fp = os.path.join(output_dir, fn)
+        rendered_text = self.render_template(in_fp, pystring)
 
         self.writeFile(out_fp, rendered_text)
 
@@ -446,48 +437,6 @@ class SetupUtils(Crypto64):
         except:
             self.logIt("Error adding group", True)
 
-    def fix_init_scripts(self, serviceName, initscript_fn):
-        if base.snap:
-            return
-
-        changeTo = None
-
-        couchbase_mappings = self.getMappingType('couchbase')
-
-        if Config.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
-            changeTo = 'couchbase-server'
-
-        if Config.get('opendj_install') == InstallTypes.REMOTE or Config.get('cb_install') == InstallTypes.REMOTE:
-            changeTo = ''
-
-        if serviceName in Config.service_requirements:
-            if changeTo != None:
-                for service in Config.service_requirements:
-                    Config.service_requirements[service][0] = Config.service_requirements[service][0].replace('opendj', changeTo)
-
-            with open(initscript_fn) as f:
-                initscript = f.readlines()
-
-            for i,l in enumerate(initscript):
-                if l.startswith('# Provides:'):
-                    initscript[i] = '# Provides:          {0}\n'.format(serviceName)
-                elif l.startswith('# description:'):
-                    initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
-                elif l.startswith('# Required-Start:'):
-                    initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(Config.service_requirements[serviceName][0])
-                elif l.startswith('# chkconfig:'):
-                    initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(Config.service_requirements[serviceName][1], 100 - Config.service_requirements[serviceName][1])
-
-            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
-                service_init_script_fn = os.path.join(Config.distFolder, 'scripts', serviceName)
-            else:
-                service_init_script_fn = os.path.join('/etc/init.d', serviceName)
-
-            with open(service_init_script_fn, 'w') as W:
-                W.write(''.join(initscript))
-
-            self.run([paths.cmd_chmod, '+x', service_init_script_fn])
-
     def load_certificate_text(self, filePath):
         self.logIt("Load certificate %s" % filePath)
         certificate_text = self.readFile(filePath)
@@ -527,6 +476,20 @@ class SetupUtils(Crypto64):
                 rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
                 self.logIt("Writing rendered template {}".format(full_output_file))
                 full_output_file.write_text(rendered_text)
+
+    def render_template(self, tmp_fn, pystring=False):
+        template_text = self.readFile(tmp_fn)
+        format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+        for k in format_dict:
+            if isinstance(format_dict[k], bool):
+                format_dict[k] = str(format_dict[k]).lower()
+
+        if pystring:
+            rendered_text = Template(template_text).substitute(format_dict)
+        else:
+             rendered_text = self.fomatWithDict(template_text, format_dict)
+
+        return rendered_text
 
     def add_yacron_job(self, command, schedule, name=None, args={}):
         import ruamel.yaml

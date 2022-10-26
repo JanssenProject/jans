@@ -13,7 +13,7 @@ import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.model.base.DeletableEntity;
 import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
@@ -151,9 +151,6 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansDefMaxAge")
     private Integer defaultMaxAge;
 
-    @AttributeName(name = "jansRequireAuthTime")
-    private boolean requireAuthTime;
-
     @AttributeName(name = "jansDefAcrValues")
     private String[] defaultAcrValues;
 
@@ -193,8 +190,8 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansAccessTknLife")
     private Integer accessTokenLifetime;
 
-    @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<>();
+    @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
+    private List<CustomObjectAttribute> customAttributes = new ArrayList<>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -245,8 +242,19 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "o")
     private String organization;
 
+    @AttributeName(name = "jansGrp")
+    private String[] groups;
+
     @Expiration
     private Integer ttl;
+
+    public String[] getGroups() {
+        return groups;
+    }
+
+    public void setGroups(String[] groups) {
+        this.groups = groups;
+    }
 
     public String getOrganization() {
         return organization;
@@ -1042,26 +1050,6 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Returns a boolean value specifying whether the auth_time Claim in the ID Token is required.
-     * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
-     *
-     * @return The required authentication time.
-     */
-    public boolean getRequireAuthTime() {
-        return requireAuthTime;
-    }
-
-    /**
-     * Sets a boolean value specifying whether the auth_time Claim in the ID Token is required.
-     * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
-     *
-     * @param requireAuthTime The required authentication time.
-     */
-    public void setRequireAuthTime(boolean requireAuthTime) {
-        this.requireAuthTime = requireAuthTime;
-    }
-
-    /**
      * Returns the Default requested Authentication Context Class Reference values.
      * Array of strings that specifies the default acr values that the Authorization Server must use for processing
      * requests from the Client.
@@ -1211,11 +1199,11 @@ public class Client extends DeletableEntity implements Serializable {
         this.accessTokenLifetime = accessTokenLifetime;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+    public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
     }
 

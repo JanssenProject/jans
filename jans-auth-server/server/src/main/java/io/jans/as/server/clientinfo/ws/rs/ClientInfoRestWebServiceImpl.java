@@ -9,7 +9,7 @@ package io.jans.as.server.clientinfo.ws.rs;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.persistence.model.Scope;
@@ -78,7 +78,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
         }
         log.debug("Attempting to request Client Info, Access token = {}, Is Secure = {}", accessToken, securityContext.isSecure());
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.CLIENTINFO);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.CLIENTINFO);
         Response.ResponseBuilder builder = Response.ok();
 
         if (!ClientInfoParamsValidator.validateParams(accessToken)) {

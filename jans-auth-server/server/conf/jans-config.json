@@ -400,6 +400,11 @@
         "PS384",
         "PS512"
     ],
+    "ssaConfiguration": {
+        "ssaEndpoint":"${config.oxauth.contextPath}/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "backchannelClientId": "123-123-123",
     "backchannelRedirectUri": "https://ce.gluu.info:8443/ciba/home.htm",
     "backchannelUserCodeParameterSupported": true,
@@ -430,14 +435,14 @@
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",
-        "maxItemsLoggedInCollections": 3,
+        "maxItemsLoggedInCollections": 7,
         "pageMismatchErrorPage": "mismatch.ftlh",
         "interruptionErrorPage": "timeout.ftlh",
         "crashErrorPage": "crash.ftlh",
         "finishedFlowPage": "finished.ftlh",
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
-            "Expires": "0"
+            "Cache-Control": "max-age=0, no-store"
         }
     }
 }

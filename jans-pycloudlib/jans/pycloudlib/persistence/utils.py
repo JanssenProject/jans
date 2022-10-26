@@ -1,23 +1,31 @@
 """This module consists of common utilities to work with persistence."""
 
+from __future__ import annotations
+
 import json
 import os
+import typing as _t
 from collections import defaultdict
-from typing import Dict
+
+if _t.TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from jans.pycloudlib.manager import Manager
 
 
-def render_salt(manager, src: str, dest: str) -> None:
+def render_salt(manager: Manager, src: str, dest: str) -> None:
     """Render file contains salt string.
 
     The generated file has the following contents:
 
-    .. code-block:: text
+    ```py
+    encode_salt = random-salt-string
+    ```
 
-        encode_salt = random-salt-string
-
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        manager: An instance of manager class.
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     encode_salt = manager.secret.get("encoded_salt")
 
@@ -32,8 +40,9 @@ def render_salt(manager, src: str, dest: str) -> None:
 def render_base_properties(src: str, dest: str) -> None:
     """Render file contains properties for Janssen Server.
 
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     with open(src) as f:
         txt = f.read()
@@ -45,7 +54,7 @@ def render_base_properties(src: str, dest: str) -> None:
         f.write(rendered_txt)
 
 
-#: Supported persistence types
+#: Supported persistence types.
 PERSISTENCE_TYPES = (
     "ldap",
     "couchbase",
@@ -53,8 +62,8 @@ PERSISTENCE_TYPES = (
     "spanner",
     "hybrid",
 )
+"""Supported persistence types."""
 
-#: Data mapping of persistence, ordered by priority
 PERSISTENCE_DATA_KEYS = (
     "default",
     "user",
@@ -63,12 +72,17 @@ PERSISTENCE_DATA_KEYS = (
     "token",
     "session",
 )
+"""Data mapping of persistence, ordered by priority."""
 
-#: Supported SQL dialects
 PERSISTENCE_SQL_DIALECTS = (
     "mysql",
     "pgsql",
 )
+"""SQL dialects.
+
+!!! warning
+    The `pgsql` dialect is in experimental phase and may introduce bugs
+    hence it is not recommended at the moment."""
 
 RDN_MAPPING = {
     "default": "",
@@ -78,54 +92,81 @@ RDN_MAPPING = {
     "token": "tokens",
     "session": "sessions",
 }
+"""Mapping of RDN (Relative Distinguished Name)."""
 
 
 class PersistenceMapper:
-    """
-    This class creates persistence data mapping.
+    """This class creates persistence data mapping.
 
     Example of data mapping when using ``sql`` persistence type:
 
-    .. codeblock:: python
-
-        os.environ["CN_PERSISTENCE_TYPE"] = "sql"
-
-        mapper = PersistenceMapper()
-        mapper.validate_hybrid_mapping()
-        print(mapper.mapping)
+    ```py
+    os.environ["CN_PERSISTENCE_TYPE"] = "sql"
+    mapper = PersistenceMapper()
+    mapper.validate_hybrid_mapping()
+    print(mapper.mapping)
+    ```
 
     The output will be:
 
-    .. codeblock:: python
-
-        {
-            "default": "sql",
-            "user": "sql",
-            "site": "sql",
-            "cache": "sql",
-            "token": "sql",
-            "session": "sql",
-        }
+    ```py
+    {
+        "default": "sql",
+        "user": "sql",
+        "site": "sql",
+        "cache": "sql",
+        "token": "sql",
+        "session": "sql",
+    }
+    ```
 
     The same rule applies to any supported persistence types, except for ``hybrid``
     where each key can have different value. To customize the mapping, additional environment
     variable is required.
 
-    .. codeblock:: python
+    ```py
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_HYBRID_MAPPING"] = json.loads({
+        "default": "sql",
+        "user": "spanner",
+        "site": "sql",
+        "cache": "sql",
+        "token": "sql",
+        "session": "sql",
+    })
 
-        os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
-        os.environ["CN_HYBRID_MAPPING"] = json.loads({
-            "default": "sql", "user": "spanner", "site": "sql", "cache": "sql", "token": "sql", "session": "sql"
-        })
-
-        mapper = PersistenceMapper()
-        mapper.validate_hybrid_mapping()
-        print(mapper.mapping)
+    mapper = PersistenceMapper()
+    mapper.validate_hybrid_mapping()
+    print(mapper.mapping)
+    ```
 
     The output will be:
 
-    .. codeblock:: python
+    ```py
+    {
+        "default": "sql",
+        "user": "spanner",
+        "site": "sql",
+        "cache": "sql",
+        "token": "sql",
+        "session": "sql",
+    }
+    ```
 
+    Note that when using ``hybrid``, all mapping must be defined explicitly.
+    """
+
+    def __init__(self) -> None:
+        self.type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+        self._mapping: dict[str, str] = {}
+
+    @property
+    def mapping(self) -> dict[str, str]:
+        """Pre-populate a key-value pair of persistence data (if empty).
+
+        Example of pre-populated mapping:
+
+        ```py
         {
             "default": "sql",
             "user": "spanner",
@@ -134,30 +175,7 @@ class PersistenceMapper:
             "token": "sql",
             "session": "sql",
         }
-
-    Note that when using ``hybrid``, all mapping must be defined explicitly.
-    """
-
-    def __init__(self) -> None:
-        self.type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-        self._mapping = {}
-
-    @property
-    def mapping(self) -> Dict[str, str]:
-        """Pre-populate a key-value pair of persistence data (if empty).
-
-        Example of pre-populated mapping:
-
-        .. codeblock:: python
-
-            {
-                "default": "sql",
-                "user": "spanner",
-                "site": "sql",
-                "cache": "sql",
-                "token": "sql",
-                "session": "sql",
-            }
+        ```
         """
         if not self._mapping:
             if self.type != "hybrid":
@@ -166,19 +184,19 @@ class PersistenceMapper:
                 self._mapping = self.validate_hybrid_mapping()
         return self._mapping
 
-    def groups(self) -> Dict[str, list]:
+    def groups(self) -> dict[str, list[str]]:
         """Pre-populate mapping groupped by persistence type.
 
         Example of pre-populated groupped mapping:
 
-        .. codeblock:: python
-
-            {
-                "sql": ["cache", "default", "session"],
-                "couchbase": ["user"],
-                "spanner": ["token"],
-                "ldap": ["site"],
-            }
+        ```py
+        {
+            "sql": ["cache", "default", "session"],
+            "couchbase": ["user"],
+            "spanner": ["token"],
+            "ldap": ["site"],
+        }
+        ```
         """
         mapper = defaultdict(list)
 
@@ -186,19 +204,19 @@ class PersistenceMapper:
             mapper[v].append(k)
         return dict(sorted(mapper.items()))
 
-    def groups_with_rdn(self) -> Dict[str, list]:
+    def groups_with_rdn(self) -> dict[str, list[str]]:
         """Pre-populate mapping groupped by persistence type and its values replaced by RDN.
 
         Example of pre-populated groupped mapping:
 
-        .. codeblock:: python
-
-            {
-                "sql": ["cache", "", "sessions"],
-                "couchbase": ["people, groups, authorizations"],
-                "spanner": ["tokens"],
-                "ldap": ["cache-refresh"],
-            }
+        ```py
+        {
+            "sql": ["cache", "", "sessions"],
+            "couchbase": ["people, groups, authorizations"],
+            "spanner": ["tokens"],
+            "ldap": ["cache-refresh"],
+        }
+        ```
         """
         mapper = defaultdict(list)
         for k, v in self.mapping.items():
@@ -206,7 +224,7 @@ class PersistenceMapper:
         return dict(sorted(mapper.items()))
 
     @classmethod
-    def validate_hybrid_mapping(cls) -> Dict[str, list]:
+    def validate_hybrid_mapping(cls) -> dict[str, str]:
         """Validate the value of ``hybrid_mapping`` attribute."""
         mapping = json.loads(os.environ.get("CN_HYBRID_MAPPING", "{}"))
 

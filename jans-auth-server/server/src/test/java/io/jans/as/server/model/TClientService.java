@@ -33,8 +33,8 @@ public class TClientService {
     private TClientService() {
     }
 
-    public static RegisterResponse register(RegisterRequest registerRequest, URI uri) throws JsonProcessingException {
-        RegisterRestWebService registerWs = WebServiceFactory.instance().createRegisterWs(uri.toString());
+    public static RegisterResponse register(RegisterRequest registerRequest, String url) throws JsonProcessingException {
+        RegisterRestWebService registerWs = WebServiceFactory.instance().createRegisterWs(url);
         Response response = registerWs.requestRegister(ServerUtil.toPrettyJson(registerRequest.getJSONParameters()), null, null);
         String entity = response.readEntity(String.class);
 

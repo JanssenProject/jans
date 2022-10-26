@@ -45,7 +45,7 @@ public class SimpleSessionState implements Serializable {
     @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
-    @AttributeName(name = "oxAuthSessionState")
+    @AttributeName(name = "jansAuthSessionState")
     private Boolean permissionGranted;
 
     @AttributeName(name = "jansAsJwt")

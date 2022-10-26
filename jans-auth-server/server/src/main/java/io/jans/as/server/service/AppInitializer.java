@@ -9,7 +9,7 @@ package io.jans.as.server.service;
 import com.google.common.collect.Lists;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.EncryptionService;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
@@ -55,9 +55,6 @@ import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
@@ -70,6 +67,9 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -244,6 +244,7 @@ public class AppInitializer {
         // Notify plugins about finish application initialization
         eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
                 .fire(new ApplicationInitializedEvent());
+
     }
 
     protected void initSchedulerService() {
@@ -701,8 +702,8 @@ public class AppInitializer {
      * should be more than 0 seconds of interval
      */
     private void initCibaRequestsProcessor() {
-        final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
-        if ((enabledComponents.isEmpty() || enabledComponents.contains(ComponentType.CIBA)) && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
+        final Set<FeatureFlagType> featureFlags = appConfiguration.getEnabledFeatureFlags();
+        if ((featureFlags.isEmpty() || featureFlags.contains(FeatureFlagType.CIBA)) && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
             if (cibaRequestsProcessorJob != null) {
                 cibaRequestsProcessorJob.initTimer();
             }

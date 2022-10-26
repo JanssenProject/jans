@@ -70,7 +70,7 @@ public class UmaPermissionService {
         final String ticket = generateNewTicket();
         List<UmaPermission> result = new ArrayList<>();
         for (io.jans.as.model.uma.UmaPermission permission : permissions) {
-            UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()), ticket, configurationCode, expirationDate);
+            UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(permission.getScopes()), ticket, configurationCode, expirationDate);
             if (permission.getParams() != null && !permission.getParams().isEmpty()) {
                 p.getAttributes().putAll(permission.getParams());
             }

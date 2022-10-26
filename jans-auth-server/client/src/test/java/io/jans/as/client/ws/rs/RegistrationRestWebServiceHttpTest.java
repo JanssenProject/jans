@@ -123,7 +123,6 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertEquals(clientUpdateResponse.getClaims().get(SUBJECT_TYPE.toString()), registerResponse.getClaims().get(SUBJECT_TYPE.toString()));
         assertEquals(clientUpdateResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()), registerResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(clientUpdateResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()), registerResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
-        assertEquals(clientUpdateResponse.getClaims().get(REQUIRE_AUTH_TIME.toString()), registerResponse.getClaims().get(REQUIRE_AUTH_TIME.toString()));
         assertEquals(clientUpdateResponse.getClaims().get(RPT_AS_JWT.toString()), registerResponse.getClaims().get(RPT_AS_JWT.toString()));
         assertEquals(clientUpdateResponse.getClaims().get(ACCESS_TOKEN_AS_JWT.toString()), registerResponse.getClaims().get(ACCESS_TOKEN_AS_JWT.toString()));
         assertEquals(clientUpdateResponse.getClaims().get(ACCESS_TOKEN_SIGNING_ALG.toString()), registerResponse.getClaims().get(ACCESS_TOKEN_SIGNING_ALG.toString()));

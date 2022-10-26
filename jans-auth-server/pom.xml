@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>Jans authentication server parent</name>
     <distributionManagement>
 	  <repository>
@@ -27,7 +27,7 @@
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
 		<activemq.version>5.15.14</activemq.version>
 
-		<jettison.version>1.4.1</jettison.version>
+		<jettison.version>1.5.1</jettison.version>
 
 		<slf4j.version>1.7.25</slf4j.version>
 
@@ -39,8 +39,12 @@
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
         <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
         <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
-		<shrinkwrap.version>2.1.0</shrinkwrap.version>
+		<arquillian.test.version>1.7.0.Alpha10</arquillian.test.version>
+		<arquillian.jetty.embedded.11.version>1.0.0.CR4</arquillian.jetty.embedded.11.version>
+		<arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
 
+
+		<shrinkwrap.version>2.1.0</shrinkwrap.version>
 		<!-- argLine property needs to stay as POM property so that JaCoCo plugin can append it at build time -->
 		<argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
 
@@ -48,6 +52,8 @@
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<weld.version>4.0.3.Final</weld.version>
+		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 	</properties>
 
 	<prerequisites>
@@ -77,7 +83,7 @@
 		<repository>
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
-			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 		<repository>
 			<id>mulesoft</id>
@@ -116,6 +122,15 @@
                 <artifactId>hll</artifactId>
                 <version>1.6.0</version>
             </dependency>
+
+			<!-- Weld -->
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core-parent</artifactId>
+				<version>${weld.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
 
          	<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
 			<dependency>
@@ -370,6 +385,11 @@
 				<artifactId>swagger-annotations</artifactId>
 				<version>${swagger.version}</version>
 	            <scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-client-microprofile</artifactId>
+				<version>${org.jboss.resteasy.client.microprofile.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

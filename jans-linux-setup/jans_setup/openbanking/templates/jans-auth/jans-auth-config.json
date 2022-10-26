@@ -26,6 +26,12 @@
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
     "openidSubAttribute":"inum",
+    "discoveryDenyKeys": [
+        "id_generation_endpoint",
+        "auth_level_mapping",
+        "scope_to_claims_mapping",
+        "op_policy_uri"
+    ],
     "discoveryAllowedKeys": [
         "issuer",
         "authorization_endpoint",
@@ -348,6 +354,11 @@
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEnabled": false,
+    "ssaConfiguration": {
+        "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
         "authDomain": "",

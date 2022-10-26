@@ -17,7 +17,24 @@ from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 
 ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig]
+"""Configs adapter type.
+
+Currently supports the following classes:
+
+* [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
+* [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
+* [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
+"""
+
 SecretAdapter = _t.Union[VaultSecret, KubernetesSecret, GoogleSecret]
+"""Secrets adapter type.
+
+Currently supports the following classes:
+
+* [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
+* [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
+* [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
+"""
 
 
 class AdapterProtocol(_t.Protocol):  # pragma: no cover
@@ -48,78 +65,94 @@ class BaseConfiguration(ABC):
 
         The adapter is used in the following public methods:
 
-        - ``get``
-        - ``get_all``
-        - ``set``
-        - ``set_all``
+        - `get`
+        - `get_all`
+        - `set`
+        - `set_all`
 
-        Any subclass **MUST** returns an instance of adapter or raise exception.
+        !!! important
+            Any subclass **MUST** returns an instance of adapter or raise exception.
         """
 
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
-        :param key: Key name.
-        :param default: Default value if key is not exist.
-        :returns: Value based on given key or default one.
+        Args:
+            key: Key name.
+            default: Default value if key is not exist.
+
+        Returns:
+            Value based on given key or default one.
         """
         return self.adapter.get(key, default)
 
     def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
-        :param key: Key name.
-        :param value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            key: Key name.
+            value: Value of the key.
+
+        Returns:
+            A boolean to mark whether configuration is set or not.
         """
         return self.adapter.set(key, value)
 
     def all(self) -> dict[str, _t.Any]:  # noqa: A003
-        """Get all key-value pairs (deprecated in favor of ``get_all``).
+        """Get all key-value pairs (deprecated in favor of [get_all][jans.pycloudlib.manager.BaseConfiguration.get_all]).
 
-        :returns: A ``dict`` of key-value pairs.
+        Returns:
+            A mapping of configuration.
         """
         return self.get_all()
 
     def get_all(self) -> dict[str, _t.Any]:
-        """Get all key-value pairs.
+        """Get all configuration.
 
-        :returns: A ``dict`` of key-value pairs.
+        Returns:
+            A mapping of configuration (if any).
         """
         return self.adapter.get_all()
 
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set all key-value pairs.
 
-        :param data: Key-value pairs.
+        Args:
+            data: Key-value pairs.
+
+        Returns:
+            A boolean to mark whether configuration is set or not.
         """
         return self.adapter.set_all(data)
 
 
 class ConfigManager(BaseConfiguration):
-    """A subclass of :class:`~jans.pycloudlib.manager.BaseConfiguration` to manage configs.
-
-    This class acts as a proxy to specific config adapter class.
-    """
+    """This class manage configs and act as a proxy to specific config adapter class."""
 
     @cached_property
     def adapter(self) -> ConfigAdapter:  # noqa: D412
-        """Get an instance of adapter class.
+        """Get an instance of config adapter class.
 
-        Example:
+        Returns:
+            An instance of config adapter class.
 
-        .. code-block:: python
+        Raises:
+            ValueError: If the value of `CN_CONFIG_ADAPTER` environment variable is not supported.
 
-            os.environ["CN_CONFIG_ADAPTER"] = "consul"
-            ConfigManager().adapter  # returns an instance of adapter class
+        Examples:
 
-        .. important:: The adapter name is pre-populated from ``CN_CONFIG_ADAPTER`` environment variable.
+        ```py
+        os.environ["CN_CONFIG_ADAPTER"] = "consul"
+        ConfigManager().adapter  # returns an instance of adapter class
+        ```
 
-            Supported config adapter name:
+        The adapter name is pre-populated from `CN_CONFIG_ADAPTER` environment variable.
 
-            - ``consul``: returns an instance of :class:`~jans.pycloudlib.config.consul_config.ConsulConfig`
-            - ``kubernetes``: returns an instance of :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
-            - ``google``: returns an instance of :class:`~jans.pycloudlib.config.google_config.GoogleConfig`
+        Supported config adapter name:
+
+        - `consul`: returns an instance of [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
+        - `kubernetes`: returns an instance of [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
+        - `google`: returns an instance of [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
         """
         adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul")
 
@@ -136,29 +169,32 @@ class ConfigManager(BaseConfiguration):
 
 
 class SecretManager(BaseConfiguration):
-    """A subclass of :class:`~jans.pycloudlib.manager.BaseConfiguration` to manage secrets.
-
-    This class acts as a proxy to specific secret adapter class.
-    """
+    """This class manage secrets and act as a proxy to specific secret adapter class."""
 
     @cached_property
     def adapter(self) -> SecretAdapter:  # noqa: D412
-        """Get an instance of adapter class.
+        """Get an instance of secret adapter class.
 
-        Example:
+        Returns:
+            An instance of secret adapter class.
 
-        .. code-block:: python
+        Raises:
+            ValueError: If the value of `CN_SECRET_ADAPTER` environment variable is not supported.
 
-            os.environ["CN_SECRET_ADAPTER"] = "vault"
-            SecretManager().adapter  # returns an instance of adapter class
+        Examples:
 
-        .. important:: The adapter name is pre-populated from ``CN_SECRET_ADAPTER`` environment variable (i.e. ``CN_SECRET_ADAPTER=vault``).
+        ```py
+        os.environ["CN_SECRET_ADAPTER"] = "vault"
+        SecretManager().adapter  # returns an instance of adapter class
+        ```
 
-            Supported config adapter name:
+        The adapter name is pre-populated from `CN_SECRET_ADAPTER` environment variable (i.e. `CN_SECRET_ADAPTER=vault`).
 
-            - ``vault``: returns an instance of :class:`~jans.pycloudlib.secret.vault_secret.VaultSecret`
-            - ``kubernetes``: returns an instance of :class:`~jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret`
-            - ``google``: returns an instance of :class:`~jans.pycloudlib.secret.google_secret.GoogleSecret`
+        Supported config adapter name:
+
+        - `vault`: returns an instance of [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
+        - `kubernetes`: returns an instance of [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
+        - `google`: returns an instance of [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
         """
         adapter = os.environ.get("CN_SECRET_ADAPTER", "vault")
 
@@ -178,29 +214,30 @@ class SecretManager(BaseConfiguration):
     ) -> None:  # noqa: D412
         """Pull secret and write to a file.
 
-        Example:
+        Args:
+            key: Key name in secret backend.
+            dest: Absolute path to file to write the secret to.
+            decode: Decode the content of the secret.
+            binary_mode: Write the file as binary.
 
-        .. code-block:: python
+        Examples:
 
-            # assuming there is secret with key ``server_cert`` that stores
-            # server cert needed to be fetched as ``/etc/certs/server.crt``
-            # file.
-            SecretManager().to_file("server_cert", "/etc/certs/server.crt")
+        ```py
+        # assuming there is secret with key `server_cert` that stores
+        # server cert needed to be fetched as `/etc/certs/server.crt`
+        # file.
+        SecretManager().to_file("server_cert", "/etc/certs/server.crt")
 
-            # assuming there is secret with key ``server_jks`` that stores
-            # server keystore needed to be fetched as ``/etc/certs/server.jks``
-            # file.
-            SecretManager().to_file(
-                "server_jks",
-                "/etc/certs/server.jks",
-                decode=True,
-                binary_mode=True,
-            )
-
-        :param key: Key name in secret backend.
-        :param dest: Absolute path to file to write the secret to.
-        :param decode: Decode the content of the secret.
-        :param binary_mode: Write the file as binary.
+        # assuming there is secret with key `server_jks` that stores
+        # server keystore needed to be fetched as `/etc/certs/server.jks`
+        # file.
+        SecretManager().to_file(
+            "server_jks",
+            "/etc/certs/server.jks",
+            decode=True,
+            binary_mode=True,
+        )
+        ```
         """
         mode = "w"
         if binary_mode:
@@ -228,27 +265,28 @@ class SecretManager(BaseConfiguration):
     ) -> None:  # noqa: D412
         """Read from a file and put to secret.
 
-        Example:
+        Args:
+            key: Key name in secret backend.
+            src: Absolute path to file to read the secret from.
+            encode: Encode the content of the file.
+            binary_mode: Read the file as binary.
 
-        .. code-block:: python
+        Examples:
 
-            # assuming there is file ``/etc/certs/server.crt`` need to be save
-            # as ``server_crt`` secret.
-            SecretManager().from_file("server_cert", "/etc/certs/server.crt")
+        ```py
+        # assuming there is file `/etc/certs/server.crt` need to be save
+        # as `server_crt` secret.
+        SecretManager().from_file("server_cert", "/etc/certs/server.crt")
 
-            # assuming there is file ``/etc/certs/server.jks`` need to be save
-            # as ``server_jks`` secret.
-            SecretManager().from_file(
-                "server_jks",
-                "/etc/certs/server.jks",
-                encode=True,
-                binary_mode=True,
-            )
-
-        :param key: Key name in secret backend.
-        :param src: Absolute path to file to read the secret from.
-        :param encode: Encode the content of the file.
-        :param binary_mode: Read the file as binary.
+        # assuming there is file `/etc/certs/server.jks` need to be save
+        # as `server_jks` secret.
+        SecretManager().from_file(
+            "server_jks",
+            "/etc/certs/server.jks",
+            encode=True,
+            binary_mode=True,
+        )
+        ```
         """
         mode = "r"
         if binary_mode:
@@ -268,10 +306,14 @@ class SecretManager(BaseConfiguration):
 
 
 @dataclass
-class _Manager:
+class Manager:
     """Class acts as a container of config and secret manager.
 
-    This object is not intended for direct use, use :func:`~jans.pycloudlib.manager.get_manager` function instead.
+    This object is not intended for direct use, use [get_manager][jans.pycloudlib.manager.get_manager] function instead.
+
+    Args:
+        config: An instance of config manager class.
+        secret: An instance of secret manager class.
     """
 
     #: An instance of :class:`~jans.pycloudlib.manager.ConfigManager`
@@ -281,20 +323,23 @@ class _Manager:
     secret: SecretManager
 
 
-def get_manager() -> _Manager:
-    """Create an instance of :class:`~jans.pycloudlib.manager._Manager` class.
+def get_manager() -> Manager:  # noqa: D412
+    """Create an instance of [Manager][jans.pycloudlib.manager.Manager] class.
 
-    The instance has ``config`` and ``secret`` attributes to interact with
+    The instance has `config` and `secret` attributes to interact with
     configs and secrets, for example:
 
-    .. code-block:: python
+    Returns:
+        An instance of manager class.
 
-        manager = get_manager()
-        manager.config.get("hostname")
-        manager.secret.get("ssl-cert")
+    Examples:
 
-    :returns: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    ```py
+    manager = get_manager()
+    manager.config.get("hostname")
+    manager.secret.get("ssl-cert")
+    ```
     """
     config_mgr = ConfigManager()
     secret_mgr = SecretManager()
-    return _Manager(config_mgr, secret_mgr)
+    return Manager(config_mgr, secret_mgr)

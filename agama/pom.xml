@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>agama</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>agama parent</name>
 
     <prerequisites>
@@ -25,6 +25,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.6.3</maven.min-version>
         <jans.version>${project.version}</jans.version>
+
+        <sonar.projectKey>janssenproject_jans-agama</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <sonar.organization>janssenproject</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <repositories>
@@ -39,6 +44,7 @@
         <module>model</module>
         <module>transpiler</module>
         <module>engine</module>
+        <module>inboundID</module>
     </modules>
 
     <dependencyManagement>

@@ -1,0 +1,29 @@
+//This flow does not make sense, however is syntactically valid and must pass validation
+Flow flow
+    Basepath ""
+
+x = True    // "True" is a valid variable name
+
+y = [ zero, False, void, return, for, while, continue ]   // these are all valid variable names too
+
+y = { function: f, NaN: None, undefined: null }
+
+y = []
+
+// valid variable access (from a syntax view point)
+x = y.length    
+x = y.size
+x = who.knows
+x = maybe[you]
+x = x."- wow!"
+x = x.$y
+x = x.$y[3].do
+x = y.null
+
+x = [ "no", "such",  "thing"  
+, "as", "a",
+            "stupid","question"]
+
+y = { hey: "ho",
+          let: "go"
+  , foo: { bar: {} } }

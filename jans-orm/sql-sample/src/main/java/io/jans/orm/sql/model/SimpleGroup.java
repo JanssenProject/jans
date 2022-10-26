@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * @author Yuriy Movchan Date: 11.02.2010
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "gluuGroup")
+@ObjectClass(value = "jansGroup")
 @JsonInclude(Include.NON_NULL)
 public class SimpleGroup extends Entry implements Serializable {
 

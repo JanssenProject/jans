@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.crypto.signature.RSAKeyFactory;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +134,14 @@ public enum Algorithm {
 
     public boolean canGenerateKeys() { // based on currently supported generator, see io.jans.as.model.crypto.AuthCryptoProvider.generateKeyEncryption
         return family == AlgorithmFamily.RSA || family == AlgorithmFamily.EC || family == AlgorithmFamily.ED;
+    }
+
+    public void fill(JSONObject jsonObject) {
+        jsonObject.put(JWKParameter.NAME, getOutName());
+        jsonObject.put(JWKParameter.DESCRIPTION, getDescription());
+        jsonObject.put(JWKParameter.KEY_TYPE, getFamily());
+        jsonObject.put(JWKParameter.KEY_USE, getUse().getParamName());
+        jsonObject.put(JWKParameter.ALGORITHM, getParamName());
     }
 
     /**

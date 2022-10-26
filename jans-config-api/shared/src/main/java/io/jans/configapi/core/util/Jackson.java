@@ -55,6 +55,11 @@ public class Jackson {
         return applyPatch(jsonPatch, obj);
     }
 
+    public static <T> T applyJsonPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, IOException {
+        LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj );
+        return applyPatch(jsonPatch, obj);
+    }
+    
     @SuppressWarnings("unchecked")
     public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
         Preconditions.checkNotNull(jsonPatch);

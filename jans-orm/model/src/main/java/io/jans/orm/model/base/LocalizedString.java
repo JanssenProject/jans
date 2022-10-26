@@ -6,8 +6,10 @@
 
 package io.jans.orm.model.base;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+
+import io.jans.orm.util.StringHelper;
 
 import java.io.Serializable;
 import java.util.*;

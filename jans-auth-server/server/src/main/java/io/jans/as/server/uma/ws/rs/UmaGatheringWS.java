@@ -7,13 +7,13 @@
 package io.jans.as.server.uma.ws.rs;
 
 import io.jans.as.common.service.common.UserService;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.as.server.uma.authorization.UmaWebException;
@@ -89,7 +89,7 @@ public class UmaGatheringWS {
                         escapeLog(clientId), escapeLog(ticket), escapeLog(claimRedirectUri), escapeLog(state), escapeLog(authenticationRedirect), httpRequest.getQueryString());
             }
 
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             SessionId session = sessionService.getSession(httpRequest, httpResponse);
 
