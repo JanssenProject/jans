@@ -174,7 +174,6 @@ nav:
         - 'FAQ': 'admin/kubernetes-ops/faq.md'
     - 'VM Operation Guide':
         - 'admin/vm-ops/README.md'
-        - 'Running Setup': 'admin/vm-ops/running-setup.md'
         - 'Backup': 'admin/vm-ops/backup.md'
         - 'Logs': 'admin/vm-ops/logs.md'
         - 'Checking Service Status': 'admin/vm-ops/checking-service-status.md'
@@ -305,7 +304,6 @@ nav:
             - 'Claims Gathering Endpoint': 'admin/auth-server/uma-features/claims-gathering-endpoint.md'
         - 'Client Management':
             - 'admin/auth-server/client-management/README.md'
-            - 'Overview': 'admin/auth-server/client-management/index.md'
             - 'Client Schema': 'admin/auth-server/client-management/client-schema.md'
             - 'Client Authentication': 'admin/auth-server/client-management/client-authn.md'
             - 'Configuration':
