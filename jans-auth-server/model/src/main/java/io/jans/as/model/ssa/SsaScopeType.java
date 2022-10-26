@@ -11,7 +11,11 @@ import java.util.Map;
 
 public enum SsaScopeType {
 
-    SSA_ADMIN("https://jans.io/auth/ssa.admin");
+    SSA_ADMIN("https://jans.io/auth/ssa.admin"),
+    SSA_PORTAL("https://jans.io/auth/ssa.portal"),
+    SSA_DEVELOPER("https://jans.io/auth/ssa.developer"),
+    ;
+
 
     private static final Map<String, SsaScopeType> lookup = new HashMap<>();
 

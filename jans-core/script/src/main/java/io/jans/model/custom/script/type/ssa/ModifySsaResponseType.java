@@ -10,5 +10,7 @@ import io.jans.model.custom.script.type.BaseExternalType;
 
 public interface ModifySsaResponseType extends BaseExternalType {
 
-    boolean create(Object jsonWebResponse, Object tokenContext);
+    boolean create(Object jsonWebResponse, Object ssaContext);
+
+    boolean get(Object jsonArray, Object ssaContext);
 }
