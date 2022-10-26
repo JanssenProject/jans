@@ -4,6 +4,8 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.model.config.BaseDnConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -15,6 +17,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.ssa.SsaConfiguration;
+import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.orm.PersistenceEntryManager;
@@ -33,9 +36,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.text.ParseException;
 import java.util.*;
 
+import static io.jans.as.model.ssa.SsaRequestParam.*;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 @Listeners(MockitoTestNGListener.class)
 public class SsaServiceTest {
@@ -63,6 +66,9 @@ public class SsaServiceTest {
 
     @Mock
     private PersistenceEntryManager persistenceEntryManager;
+
+    @Mock
+    private StaticConfiguration staticConfiguration;
 
     private Ssa ssa;
 
@@ -161,6 +167,74 @@ public class SsaServiceTest {
     }
 
     @Test
+    public void getSsaList_withPortalScope_valid() {
+        BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
+        baseDnConfiguration.setSsa("ou=ssa,o=jans");
+        when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
+
+        String jti = null;
+        String orgId = null;
+        String clientId = "test-client";
+        String[] scopes = new String[]{SsaScopeType.SSA_PORTAL.getValue()};
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        assertNotNull(ssaList);
+        verify(log).trace(eq("Filter with AND created: " + String.format("[(creatorId=%s)]", clientId)));
+        verify(persistenceEntryManager).findEntries(any(), any(), any());
+        verifyNoMoreInteractions(log);
+    }
+
+    @Test
+    public void getSsaList_withJti_valid() {
+        BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
+        baseDnConfiguration.setSsa("ou=ssa,o=jans");
+        when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
+
+        String jti = "test-jti";
+        String orgId = null;
+        String clientId = "test-client";
+        String[] scopes = new String[]{};
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        assertNotNull(ssaList);
+        verify(log).trace(eq("Filter with AND created: " + String.format("[(inum=%s)]", jti)));
+        verify(persistenceEntryManager).findEntries(any(), any(), any());
+        verifyNoMoreInteractions(log);
+    }
+
+    @Test
+    public void getSsaList_withOrgId_valid() {
+        BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
+        baseDnConfiguration.setSsa("ou=ssa,o=jans");
+        when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
+
+        String jti = null;
+        String orgId = "test-org";
+        String clientId = "test-client";
+        String[] scopes = new String[]{};
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        assertNotNull(ssaList);
+        verify(log).trace(eq("Filter with AND created: " + String.format("[(o=%s)]", orgId)));
+        verify(persistenceEntryManager).findEntries(any(), any(), any());
+        verifyNoMoreInteractions(log);
+    }
+
+    @Test
+    public void getSsaList_withNullParam_valid() {
+        BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
+        baseDnConfiguration.setSsa("ou=ssa,o=jans");
+        when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
+
+        String jti = null;
+        String orgId = null;
+        String clientId = null;
+        String[] scopes = new String[]{};
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        assertNotNull(ssaList);
+        assertTrue(ssaList.isEmpty());
+        verify(persistenceEntryManager).findEntries(any(), any(), any());
+        verifyNoInteractions(log);
+    }
+
+    @Test
     public void generateJwt_executionContextWithPostProcessorNull_jwtValid() {
         JSONWebKey jsonWebKey = JSONWebKey.fromJSONObject(new JSONObject(senderJwkJson));
         WebKeysConfiguration webKeysConfiguration = new WebKeysConfiguration();
@@ -232,23 +306,23 @@ public class SsaServiceTest {
         assertEquals(jwtHeader.getType().toString(), "jwt");
 
         JwtClaims jwtClaims = jwt.getClaims();
-        assertNotNull(jwtClaims.getClaim("org_id"), "The org_id in jwt is null");
-        assertEquals(jwtClaims.getClaim("org_id"), Long.parseLong(ssa.getOrgId()));
-        assertNotNull(jwtClaims.getClaim("software_id"), "The software_id in jwt is null");
-        assertEquals(jwtClaims.getClaim("software_id"), ssa.getAttributes().getSoftwareId());
-        assertNotNull(jwtClaims.getClaim("software_roles"), "The software_roles in jwt is null");
-        assertEquals(jwtClaims.getClaim("software_roles"), ssa.getAttributes().getSoftwareRoles());
-        assertNotNull(jwtClaims.getClaim("grant_types"), "The grant_types in jwt is null");
-        assertEquals(jwtClaims.getClaim("grant_types"), ssa.getAttributes().getGrantTypes());
+        assertNotNull(jwtClaims.getClaim(ORG_ID.getName()), "The org_id in jwt is null");
+        assertEquals(jwtClaims.getClaim(ORG_ID.getName()), Long.parseLong(ssa.getOrgId()));
+        assertNotNull(jwtClaims.getClaim(SOFTWARE_ID.getName()), "The software_id in jwt is null");
+        assertEquals(jwtClaims.getClaim(SOFTWARE_ID.getName()), ssa.getAttributes().getSoftwareId());
+        assertNotNull(jwtClaims.getClaim(SOFTWARE_ROLES.getName()), "The software_roles in jwt is null");
+        assertEquals(jwtClaims.getClaim(SOFTWARE_ROLES.getName()), ssa.getAttributes().getSoftwareRoles());
+        assertNotNull(jwtClaims.getClaim(GRANT_TYPES.getName()), "The grant_types in jwt is null");
+        assertEquals(jwtClaims.getClaim(GRANT_TYPES.getName()), ssa.getAttributes().getGrantTypes());
 
-        assertNotNull(jwtClaims.getClaim("jti"), "The jti in jwt is null");
-        assertEquals(jwtClaims.getClaim("jti"), ssa.getId());
-        assertNotNull(jwtClaims.getClaim("iss"), "The iss in jwt is null");
-        assertEquals(jwtClaims.getClaim("iss"), issuer);
-        assertNotNull(jwtClaims.getClaim("iat"), "The iat in jwt is null");
-        assertEquals(jwtClaims.getClaim("iat"), ssa.getCreationDate());
-        assertNotNull(jwtClaims.getClaim("exp"), "The exp in jwt is null");
-        assertEquals(jwtClaims.getClaim("exp"), ssa.getExpirationDate());
+        assertNotNull(jwtClaims.getClaim(JTI.getName()), "The jti in jwt is null");
+        assertEquals(jwtClaims.getClaim(JTI.getName()), ssa.getId());
+        assertNotNull(jwtClaims.getClaim(ISS.getName()), "The iss in jwt is null");
+        assertEquals(jwtClaims.getClaim(ISS.getName()), issuer);
+        assertNotNull(jwtClaims.getClaim(IAT.getName()), "The iat in jwt is null");
+        assertEquals(jwtClaims.getClaim(IAT.getName()), ssa.getCreationDate());
+        assertNotNull(jwtClaims.getClaim(EXP.getName()), "The exp in jwt is null");
+        assertEquals(jwtClaims.getClaim(EXP.getName()), ssa.getExpirationDate());
     }
 
     private static void assertSsaWithAux(Ssa ssa, Ssa ssaAux) {
