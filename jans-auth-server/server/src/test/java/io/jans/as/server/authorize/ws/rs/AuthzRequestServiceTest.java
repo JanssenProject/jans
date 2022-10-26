@@ -99,7 +99,7 @@ public class AuthzRequestServiceTest {
 
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
         authzRequestService.addDeviceSecretToSession(authzRequest, sessionId);
-        assertEquals(1, sessionId.getDeviceSecrets().size());
+        assertEquals(sessionId.getDeviceSecrets().size(), 1);
         assertTrue(StringUtils.isNotBlank(sessionId.getDeviceSecrets().get(0)));
     }
 
