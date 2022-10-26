@@ -2,7 +2,14 @@ import json
 import logging.config
 import os
 import re
+import typing as _t
+from functools import cached_property
 from string import Template
+from urllib.parse import urlparse
+from uuid import uuid4
+
+import ruamel.yaml
+from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -14,8 +21,17 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import generate_base64_contents
+from jans.pycloudlib.utils import get_random_chars
+from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
@@ -88,6 +104,9 @@ def main():
     modify_jetty_xml()
     modify_webdefault_xml()
     configure_logging()
+
+    persistence_setup = PersistenceSetup(manager)
+    persistence_setup.import_ldif_files()
 
     plugins = discover_plugins()
     logger.info(f"Loaded config-api plugins: {', '.join(plugins)}")
@@ -285,6 +304,225 @@ def configure_admin_ui_logging():
     tmpl = Template(txt)
     with open("/opt/jans/jetty/jans-config-api/custom/config/log4j2-adminui.xml", "w") as f:
         f.write(tmpl.safe_substitute(config))
+
+
+def generate_hex(size: int = 3):
+    return os.urandom(size).hex().upper()
+
+
+def get_config_api_swagger(path="/app/static/jans-config-api-swagger-auto.yaml"):
+    with open(path) as f:
+        txt = f.read()
+    txt = txt.replace("\t", " ")
+    return ruamel.yaml.load(txt, Loader=ruamel.yaml.RoundTripLoader)
+
+
+class PersistenceSetup:
+    def __init__(self, manager) -> None:
+        self.manager = manager
+
+        client_classes = {
+            "ldap": LdapClient,
+            "couchbase": CouchbaseClient,
+            "spanner": SpannerClient,
+            "sql": SqlClient,
+        }
+
+        # determine persistence type
+        mapper = PersistenceMapper()
+        self.persistence_type = mapper.mapping["default"]
+
+        # determine persistence client
+        client_cls = client_classes.get(self.persistence_type)
+        self.client = client_cls(manager)
+
+    def get_auth_config(self):
+        dn = "ou=jans-auth,ou=configuration,o=jans"
+
+        # sql and spanner
+        if self.persistence_type in ("sql", "spanner"):
+            entry = self.client.get("jansAppConf", doc_id_from_dn(dn))
+            return json.loads(entry["jansConfDyn"])
+
+        # couchbase
+        elif self.persistence_type == "couchbase":
+            key = id_from_dn(dn)
+            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            req = self.client.exec_query(
+                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            )
+            attrs = req.json()["results"][0]
+            return attrs["jansConfDyn"]
+
+        # ldap
+        else:
+            entry = self.client.get(dn, attributes=["jansConfDyn"])
+            return json.loads(entry.entry_attributes_as_dict["jansConfDyn"][0])
+
+    def transform_url(self, url):
+        auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
+
+        if not auth_server_url:
+            return url
+
+        parse_result = urlparse(url)
+        if parse_result.path.startswith("/.well-known"):
+            path = f"/jans-auth{parse_result.path}"
+        else:
+            path = parse_result.path
+        url = f"http://{auth_server_url}{path}"
+        return url
+
+    def get_injected_urls(self):
+        auth_config = self.get_auth_config()
+
+        urls = (
+            "issuer",
+            "openIdConfigurationEndpoint",
+            "introspectionEndpoint",
+            "tokenEndpoint",
+            "tokenRevocationEndpoint",
+        )
+
+        return {
+            url: self.transform_url(auth_config[url])
+            for url in urls
+        }
+
+    @cached_property
+    def ctx(self) -> dict[str, _t.Any]:
+        hostname = self.manager.config.get("hostname")
+        approved_issuer = [hostname]
+
+        token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAME")
+        if token_server_hostname and token_server_hostname not in approved_issuer:
+            approved_issuer.append(token_server_hostname)
+
+        ctx = {
+            "hostname": hostname,
+            "apiApprovedIssuer": ",".join([f'"https://{issuer}"' for issuer in approved_issuer]),
+            "apiProtectionType": "oauth2",
+            "endpointInjectionEnabled": "true",
+            "configOauthEnabled": str(os.environ.get("CN_CONFIG_API_OAUTH_ENABLED") or True).lower(),
+        }
+        ctx.update(self.get_injected_urls())
+
+        # Client
+        ctx["jca_client_id"] = self.manager.config.get("jca_client_id")
+        if not ctx["jca_client_id"]:
+            ctx["jca_client_id"] = f"1800.{uuid4()}"
+            self.manager.config.set("jca_client_id", ctx["jca_client_id"])
+
+        ctx["jca_client_pw"] = self.manager.secret.get("jca_client_pw")
+        if not ctx["jca_client_pw"]:
+            ctx["jca_client_pw"] = get_random_chars()
+            self.manager.secret.set("jca_client_pw", ctx["jca_client_pw"])
+
+        ctx["jca_client_encoded_pw"] = self.manager.secret.get("jca_client_encoded_pw")
+        if not ctx["jca_client_encoded_pw"]:
+            ctx["jca_client_encoded_pw"] = encode_text(
+                ctx["jca_client_pw"], self.manager.secret.get("encoded_salt"),
+            ).decode()
+            self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
+
+        # pre-populate config_api_dynamic_conf_base64
+        with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
+            tmpl = Template(f.read())
+            ctx["config_api_dynamic_conf_base64"] = generate_base64_contents(tmpl.substitute(**ctx))
+
+        # finalize ctx
+        return ctx
+
+    def get_scope_jans_ids(self):
+        if self.persistence_type in ("sql", "spanner"):
+            entries = self.client.search("jansScope", ["jansId"])
+            return [entry["jansId"] for entry in entries]
+
+        if self.persistence_type == "couchbase":
+            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            req = self.client.exec_query(
+                f"SELECT {bucket}.jansId FROM {bucket} WHERE objectClass = 'jansScope'",
+            )
+            results = req.json()["results"]
+            return [item["jansId"] for item in results]
+
+        # likely ldap
+        entries = self.client.search("ou=scopes,o=jans", "(objectClass=jansScope)", ["jansId"])
+        return [entry.entry_attributes_as_dict["jansId"][0] for entry in entries]
+
+    def generate_scopes_ldif(self):
+        # jansId to compare to
+        existing_jans_ids = self.get_scope_jans_ids()
+
+        def generate_config_api_scopes():
+            swagger = get_config_api_swagger()
+            scopes = swagger["components"]["securitySchemes"]["oauth2"]["flows"]["clientCredentials"]["scopes"]
+
+            generated_scopes = []
+            for jans_id, desc in scopes.items():
+                if jans_id in existing_jans_ids:
+                    continue
+
+                inum = f"1800.{generate_hex()}-{generate_hex()}"
+                attrs = {
+                    "creatorAttrs": [json.dumps({})],
+                    "description": [desc],
+                    "displayName": [f"Config API scope {jans_id}"],
+                    "inum": [inum],
+                    "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
+                    "jansId": [jans_id],
+                    "jansScopeTyp": ["oauth"],
+                    "objectClass": ["top", "jansScope"],
+                    "jansDefScope": ["false"],
+                }
+                generated_scopes.append(attrs)
+            return generated_scopes
+
+        def generate_scim_scopes():
+            scopes = {
+                "https://jans.io/scim/users.read": "Query user resources",
+                "https://jans.io/scim/users.write": "Manage user resources",
+            }
+
+            generated_scopes = []
+            for jans_id, desc in scopes.items():
+                if jans_id in existing_jans_ids:
+                    continue
+
+                inum = f"1200.{generate_hex()}-{generate_hex()}"
+                attrs = {
+                    "description": [desc],
+                    "displayName": [f"SCIM scope {jans_id}"],
+                    "inum": [inum],
+                    "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
+                    "jansId": [jans_id],
+                    "jansScopeTyp": ["oauth"],
+                    "objectClass": ["top", "jansScope"],
+                    "jansDefScope": ["false"],
+                }
+                generated_scopes.append(attrs)
+            return generated_scopes
+
+        # prepare required scopes (if any)
+        # scopes = generate_config_api_scopes()
+        scopes = []
+        scim_scopes = generate_scim_scopes()
+        scopes += scim_scopes
+
+        with open("/app/templates/jans-config-api/scopes.ldif", "wb") as fd:
+            writer = LDIFWriter(fd, cols=1000)
+            for scope in scopes:
+                writer.unparse(f"inum={scope['inum'][0]},ou=scopes,o=jans", scope)
+
+    def import_ldif_files(self) -> None:
+        self.generate_scopes_ldif()
+
+        files = ["config.ldif", "scopes.ldif", "clients.ldif"]
+        ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
+
+        for file_ in ldif_files:
+            logger.info(f"Importing {file_}")
+            self.client.create_from_ldif(file_, self.ctx)
 
 
 if __name__ == "__main__":

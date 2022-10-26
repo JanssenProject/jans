@@ -183,9 +183,9 @@ def wait_for_ldap(manager: Manager, **kwargs: _t.Any) -> None:
         manager: An instance of manager class.
         **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
-    jca_client_id = manager.config.get("jca_client_id")
+    client_id = manager.config.get("role_based_client_id")
     search_mapping = {
-        "default": (f"inum={jca_client_id},ou=clients,o=jans", "(objectClass=jansClnt)"),
+        "default": (f"inum={client_id},ou=clients,o=jans", "(objectClass=jansClnt)"),
         "user": (_ADMIN_GROUP_DN, "(objectClass=jansGrp)"),
         "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
         "cache": ("ou=cache,o=jans", "(ou=cache)"),
@@ -228,9 +228,9 @@ def wait_for_couchbase(manager: Manager, **kwargs: _t.Any) -> None:
         **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
     bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-    jca_client_id = manager.config.get("jca_client_id")
+    client_id = manager.config.get("role_based_client_id")
     search_mapping = {
-        "default": (id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), f"{bucket_prefix}"),
+        "default": (id_from_dn(f"inum={client_id},ou=clients,o=jans"), f"{bucket_prefix}"),
         "user": (id_from_dn(_ADMIN_GROUP_DN), f"{bucket_prefix}_user"),
     }
 
@@ -284,9 +284,9 @@ def wait_for_sql(manager: Manager, **kwargs: _t.Any) -> None:
         manager: An instance of manager class.
         **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
-    jca_client_id = manager.config.get("jca_client_id")
+    client_id = manager.config.get("role_based_client_id")
     search_mapping = {
-        "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
+        "default": (doc_id_from_dn(f"inum={client_id},ou=clients,o=jans"), "jansClnt"),
         "user": (doc_id_from_dn(_ADMIN_GROUP_DN), "jansGrp"),
     }
 
@@ -325,9 +325,9 @@ def wait_for_spanner(manager: Manager, **kwargs: _t.Any) -> None:
         manager: An instance of manager class.
         **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
     """
-    jca_client_id = manager.config.get("jca_client_id")
+    client_id = manager.config.get("role_based_client_id")
     search_mapping = {
-        "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
+        "default": (doc_id_from_dn(f"inum={client_id},ou=clients,o=jans"), "jansClnt"),
         "user": (doc_id_from_dn(_ADMIN_GROUP_DN), "jansGrp"),
     }
 
