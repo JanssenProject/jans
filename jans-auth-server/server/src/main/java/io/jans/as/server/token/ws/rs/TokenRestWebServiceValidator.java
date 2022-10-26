@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
+import static io.jans.as.model.config.Constants.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -169,6 +169,22 @@ public class TokenRestWebServiceValidator {
         if (user == null) {
             log.debug("Invalid user", new RuntimeException("User is empty"));
             throw new WebApplicationException(response(error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user."), auditLog));
+        }
+    }
+
+    public void validateSubjectTokenType(String subjectTokenType, OAuth2AuditLog auditLog) {
+        if (!SUBJECT_TOKEN_TYPE_ID_TOKEN.equalsIgnoreCase(subjectTokenType)) {
+            String msg = String.format("Unsupported subject_token_type: %s", subjectTokenType);
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+        }
+    }
+
+    public void validateActorTokenType(String actorTokenType, OAuth2AuditLog auditLog) {
+        if (!ACTOR_TOKEN_TYPE_DEVICE_SECRET.equalsIgnoreCase(actorTokenType)) {
+            String msg = String.format("Unsupported actor_token_type: %s", actorTokenType);
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
         }
     }
 }

@@ -201,7 +201,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else if (gt == GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(executionContext, deviceCode, scope);
             } else if (gt == GrantType.TOKEN_EXCHANGE) {
-                return processTokenExchange(code, scope, executionContext);
+                return processTokenExchange(scope, executionContext);
             }
         } catch (WebApplicationException e) {
             throw e;
@@ -213,7 +213,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         throw new WebApplicationException(tokenRestWebServiceValidator.error(400, TokenErrorResponseType.UNSUPPORTED_GRANT_TYPE, "Unsupported Grant Type.").build());
     }
 
-    private Response processTokenExchange(String code, String scope, ExecutionContext executionContext) {
+    private Response processTokenExchange(String scope, ExecutionContext executionContext) {
+        final HttpServletRequest httpRequest = executionContext.getHttpRequest();
+
+        String audience = httpRequest.getParameter("audience");
+        String subjectToken = httpRequest.getParameter("subject_token");
+        String subjectTokenType = httpRequest.getParameter("subject_token_type");
+        String actorToken = httpRequest.getParameter("actor_token");
+        String actorTokenType = httpRequest.getParameter("actor_token_type");
+
+        tokenRestWebServiceValidator.validateSubjectTokenType(subjectTokenType, executionContext.getAuditLog());
+        tokenRestWebServiceValidator.validateActorTokenType(actorTokenType, executionContext.getAuditLog());
         // todo
         return null;
     }

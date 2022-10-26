@@ -3,6 +3,7 @@ package io.jans.as.server.token.ws.rs;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
@@ -48,6 +49,39 @@ public class TokenRestWebServiceValidatorTest {
 
     @InjectMocks
     private TokenRestWebServiceValidator validator;
+
+    @Test
+    public void validateSubjectTokenType_withInvalidTokenType_shouldThrowError() {
+        try {
+            validator.validateSubjectTokenType("urn:mytype", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for invalid subject token type.");
+    }
+
+    @Test
+    public void validateSubjectTokenType_withValidTokenType_shouldPassSuccessfully() {
+        validator.validateSubjectTokenType(Constants.SUBJECT_TOKEN_TYPE_ID_TOKEN, AUDIT_LOG);
+    }
+
+    @Test
+    public void validateActorTokenType_withInvalidTokenType_shouldThrowError() {
+        try {
+            validator.validateActorTokenType("urn:mytype", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for invalid actor token type.");
+    }
+
+    @Test
+    public void validateActorTokenType_withValidTokenType_shouldPassSuccessfully() {
+        validator.validateActorTokenType(Constants.ACTOR_TOKEN_TYPE_DEVICE_SECRET, AUDIT_LOG);
+    }
+
 
     @Test
     public void validateParams_whenGrantTypeIsBlank_shouldRaiseError() {
