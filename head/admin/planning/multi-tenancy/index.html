@@ -10507,6 +10507,11 @@
         <span class="md-tag">planning</span>
       
     
+      
+      
+        <span class="md-tag">multitenancy</span>
+      
+    
   </nav>
 
 
@@ -10519,14 +10524,48 @@
 
   <h1>Multi-tenancy</h1>
 
-<p>This is a placeholder</p>
+<p>Multitenancy is a software architecture where several distinct customers can
+utilize a single software instance. For a federated identity platform, this
+presents a number of challenges:</p>
+<ol>
+<li>Privacy: Customers must only see their own user information and data</li>
+<li>Trust: Customers trust a distinct set of RP's</li>
+<li>Authorization: Customers have specific police requirements</li>
+<li>UX: Customers brand all user-facing web pages and messages</li>
+<li>Logs: Customers see only their own log</li>
+<li>Custom Business Logic: Customers have special rules, for example to
+authenticate users, register clients, or issue access tokens.</li>
+<li>Cryptographic Keys: Customers have their own keys</li>
+<li>URLs: Customers host the IDP using their own domain name</li>
+<li>Quality of Service: Customers control response time and concurrency</li>
+<li>Access: Customers can access systems and data directly</li>
+</ol>
+<p>One key decision to make with regard to multitenancy is which systems to
+share. You could share nothing, which lowers deployment complexity but
+increases operational complexity. Or you could share everything, which is
+easier to operate, saves money on hardware, but requires a lot more code. Or you
+could land somewhere between--share some systems, but not others.</p>
+<p>If you want to address all the challenges of multitenancy, then a "shared
+nothing" approach makes the most sense. And with advances in cloud native
+deployment, gitops, and configuration as code, you can approach the cost savings
+of "shared everything" multitenancy today, especially if you leverage serverless,
+just in time auto-scaling. However, you will need some cloud natiuve devops
+gurus to pull this off.</p>
+<p>If having one top level domain is acceptable, it is possible to add a <code>tenant_id</code>
+property to each entity (for example, client and person entities). Auth Server
+and SCIM interceptions scripts enable you to filter results by adding this
+<code>tenant_id</code> to queries behind the scenes. For example, you could also render
+different login pages by using <code>default_acr_values</code> for clients.</p>
+<p>It's possible in the future Jansen Project will implement some kind of support
+to bundle a multitenancy approach that captures some of the properties described
+above at the code level, but for the time being, it is not a priority.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T16:08:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-26T22:08:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-26</span>
       
         <br>
         Created:
