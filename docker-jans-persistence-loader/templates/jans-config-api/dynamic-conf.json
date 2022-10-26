@@ -43,5 +43,15 @@
     "jansStatus",
     "userPassword",
     "givenName"
-  ]
+  ],
+  "agamaConfiguration": {
+    "mandatoryAttributes": [
+        "qname",
+        "source"
+    ],
+    "optionalAttributes": [
+        "serialVersionUID",
+        "enabled"
+    ]
+  }
 }

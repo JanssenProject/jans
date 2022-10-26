@@ -6,6 +6,7 @@
 
 package io.jans.fido2.service.mds;
 
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -80,13 +81,23 @@ public class AttestationCertificateService {
         this.rootCertificatesMap = certificateService.getCertificatesMap(authenticatorCertsFolder);
 	}
 
-	public List<X509Certificate> getAttestationRootCertificates(JsonNode metadataNode, List<X509Certificate> attestationCertificates) {
-		if (metadataNode == null || !metadataNode.has("attestationRootCertificates")) {
-            List<X509Certificate> selectedRootCertificate = certificateService.selectRootCertificates(rootCertificatesMap, attestationCertificates);
+	public List<X509Certificate> getAttestationRootCertificates(JsonNode metadataNode,
+			List<X509Certificate> attestationCertificates) {
+		JsonNode metaDataStatement = null;
+		try {
+			metaDataStatement = dataMapperService.readTree(metadataNode.get("metadataStatement").toPrettyString());
+		} catch (IOException e) {
+			log.error("Error parsing the metadata statement", e);
+		}
+
+		if (metaDataStatement == null || !metaDataStatement.has("attestationRootCertificates")) {
+			List<X509Certificate> selectedRootCertificate = certificateService
+					.selectRootCertificates(rootCertificatesMap, attestationCertificates);
+
 			return selectedRootCertificate;
 		}
 
-		ArrayNode node = (ArrayNode) metadataNode.get("attestationRootCertificates");
+		ArrayNode node = (ArrayNode) metaDataStatement.get("attestationRootCertificates");
 		Iterator<JsonNode> iter = node.elements();
 		List<String> x509certificates = new ArrayList<>();
 		while (iter.hasNext()) {
@@ -103,12 +114,11 @@ public class AttestationCertificateService {
 		JsonNode metadataForAuthenticator = localMdsService.getAuthenticatorsMetadata(aaguid);
 		if (metadataForAuthenticator == null) {
 			try {
-				log.info("No metadata for authenticator {}. Attempting to contact MDS", aaguid);
+				log.info("No Local metadata for authenticator {}. Checking for metadata MDS3 blob", aaguid);
 				JsonNode metadata = mdsService.fetchMetadata(authData.getAaguid());
 				commonVerifiers.verifyThatMetadataIsValid(metadata);
-				metadataForAuthenticator = metadata;
 				
-				return getAttestationRootCertificates(metadataForAuthenticator, attestationCertificates);
+				return getAttestationRootCertificates(metadata, attestationCertificates);
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server");
 				

@@ -6,17 +6,18 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
 def validate_persistence_type(type_: str) -> None:
-    r"""Validate persistence type.
+    """Validate persistence type.
 
     Supported types:
 
-    - ``couchbase``
-    - ``hybrid``
-    - ``ldap``
-    - ``spanner``
-    - ``sql``
+    - `couchbase`
+    - `hybrid`
+    - `ldap`
+    - `spanner`
+    - `sql`
 
-    :param type\_: Persistence type.
+    Args:
+        type_: Persistence type.
     """
     if type_ not in PERSISTENCE_TYPES:
         types = ", ".join(PERSISTENCE_TYPES)
@@ -46,9 +47,10 @@ def validate_persistence_sql_dialect(dialect: str) -> None:
 
     Supported dialects:
 
-    - ``mysql``
+    - `mysql`
 
-    :param dialect: Dialect of SQL.
+    Args:
+        dialect: Dialect of SQL.
     """
     if dialect not in PERSISTENCE_SQL_DIALECTS:
         dialects = ", ".join(PERSISTENCE_SQL_DIALECTS)

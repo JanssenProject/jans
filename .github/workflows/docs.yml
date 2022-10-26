@@ -28,7 +28,8 @@ jobs:
           sudo apt-get install jq
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
           gh auth login --with-token < token.txt
-          NUMBER_OF_FOLDERS_CHANGED=$( git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | sort -u | wc -l)
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          NUMBER_OF_FOLDERS_CHANGED=$( gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | wc -l)
           echo "The number of folders that changed are $NUMBER_OF_FOLDERS_CHANGED"
           IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/${{ github.repository_owner }}/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
           echo "checking if ${{ github.actor }} belongs to the ${{ github.repository_owner }}. Found $IS_USER_ORG_MEMBER."
@@ -41,7 +42,7 @@ jobs:
             gh pr merge --squash --auto $PULL_NUMBER
             echo ""
           else
-            echo "Bot will not merge this as it does not meet the requirments."
+            echo "Bot will not merge this as it does not meet the requirements."
             echo "Either the developer has merged with doc changes code changes or an external contributor has requested doc changes."
           fi
 
@@ -85,7 +86,8 @@ jobs:
         if: steps.check_message.outcome != 'success'
         id: check_files
         run: |
-          CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | grep '^docs' | sort -u )
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          CHANGES=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | grep '^docs' | sort -u )
           if [ -n "$CHANGES" ]; then
             echo "File changes exist"
             exit 0
@@ -94,3 +96,21 @@ jobs:
             exit 1
           fi
           
+
+  lint_docs:
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Markdown linter
+        continue-on-error: true
+        run: |
+          sudo apt-get install rubygems -y
+          sudo gem install mdl
+          mdl --style automation/markdown/.mdl_style.rb docs/
+

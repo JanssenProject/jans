@@ -1,9 +1,9 @@
 package io.jans.configapi.plugin.scim.service;
 
 import io.jans.configapi.plugin.scim.configuration.ScimConfigurationFactory;
-import io.jans.configapi.plugin.scim.model.config.ScimAppConfiguration;
-import io.jans.configapi.plugin.scim.model.config.ScimConf;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.scim.model.conf.AppConfiguration;
+import io.jans.scim.model.conf.Conf;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,22 +22,22 @@ public class ScimConfigService {
     @Inject
     ScimConfigurationFactory scimConfigurationFactory;
 
-    public ScimConf findConf() {
+    public Conf findConf() {
         final String dn = scimConfigurationFactory.getScimConfigurationDn();
         log.debug("\n\n ScimConfigService::findConf() - dn:{} ", dn);
-        return persistenceManager.find(dn, ScimConf.class, null);
+        return persistenceManager.find(dn, Conf.class, null);
     }
 
-    public void merge(ScimConf conf) {
+    public void merge(Conf conf) {
         conf.setRevision(conf.getRevision() + 1);
         persistenceManager.merge(conf);
     }
 
-    public ScimAppConfiguration find() {
-        final ScimConf conf = findConf();
+    public AppConfiguration find() {
+        final Conf conf = findConf();
         log.debug(
-                "\n\n ScimConfigService::find() - new - conf.getDn:{}, conf.getDynamicConf:{}, conf.getStaticConf:{}, conf.getRevision:{}",
-                conf.getDn(), conf.getDynamicConf(), conf.getStaticConf(), conf.getRevision());
+                "\n\n ScimConfigService::find() - new - conf.getDn:{}, conf.getDynamicConf:{}, conf.getRevision:{}",
+                conf.getDn(), conf.getDynamicConf(), conf.getRevision());
         return conf.getDynamicConf();
     }
 

@@ -15,7 +15,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;

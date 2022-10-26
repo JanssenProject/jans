@@ -19,20 +19,20 @@ MaybeCacert = _t.Union[bool, str]
 class VaultSecret(BaseSecret):
     """This class interacts with Vault backend.
 
-    .. important:: The instance of this class is configured via environment variables.
+    The instance of this class is configured via environment variables.
 
     Supported environment variables:
 
-    - ``CN_SECRET_VAULT_SCHEME``: supported Vault scheme (``http`` or ``https``).
-    - ``CN_SECRET_VAULT_HOST``: hostname or IP of Vault (default to ``localhost``).
-    - ``CN_SECRET_VAULT_PORT``: port of Vault (default to ``8200``).
-    - ``CN_SECRET_VAULT_VERIFY``: whether to verify cert or not (default to ``false``).
-    - ``CN_SECRET_VAULT_ROLE_ID_FILE``: path to file contains Vault AppRole role ID (default to ``/etc/certs/vault_role_id``).
-    - ``CN_SECRET_VAULT_SECRET_ID_FILE``: path to file contains Vault AppRole secret ID (default to ``/etc/certs/vault_secret_id``).
-    - ``CN_SECRET_VAULT_CERT_FILE``: path to Vault cert file (default to ``/etc/certs/vault_client.crt``).
-    - ``CN_SECRET_VAULT_KEY_FILE``: path to Vault key file (default to ``/etc/certs/vault_client.key``).
-    - ``CN_SECRET_VAULT_CACERT_FILE``: path to Vault CA cert file (default to ``/etc/certs/vault_ca.crt``). This file will be used if it exists and ``CN_SECRET_VAULT_VERIFY`` set to ``true``.
-    - ``CN_SECRET_VAULT_NAMESPACE``: namespace used to create the config tree, i.e. ``secret/jans`` (default to ``jans``).
+    - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
+    - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
+    - `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
+    - `CN_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
+    - `CN_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
+    - `CN_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
+    - `CN_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
+    - `CN_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
+    - `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+    - `CN_SECRET_VAULT_NAMESPACE`: namespace used to create the config tree, i.e. `secret/jans` (default to `jans`).
     """
 
     def __init__(self) -> None:
@@ -97,7 +97,7 @@ class VaultSecret(BaseSecret):
         """Get the Role ID from file.
 
         The file location is determined by
-        ``CN_SECRET_VAULT_ROLE_ID_FILE`` environment variable.
+        `CN_SECRET_VAULT_ROLE_ID_FILE` environment variable.
         """
         try:
             with open(self.settings["CN_SECRET_VAULT_ROLE_ID_FILE"]) as f:
@@ -111,7 +111,7 @@ class VaultSecret(BaseSecret):
         """Get the Secret ID from file.
 
         The file location is determined by
-        ``CN_SECRET_VAULT_SECRET_ID_FILE`` environment variable.
+        `CN_SECRET_VAULT_SECRET_ID_FILE` environment variable.
         """
         try:
             with open(self.settings["CN_SECRET_VAULT_SECRET_ID_FILE"]) as f:
@@ -131,9 +131,12 @@ class VaultSecret(BaseSecret):
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
-        :param key: Key name.
-        :param default: Default value if key is not exist.
-        :returns: Value based on given key or default one.
+        Args:
+            key: Key name.
+            default: Default value if key is not exist.
+
+        Returns:
+            Value based on given key or default one.
         """
         self._authenticate()
         sc = self.client.read(f"{self.prefix}/{key}")
@@ -145,9 +148,12 @@ class VaultSecret(BaseSecret):
     def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
-        :param key: Key name.
-        :param value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            key: Key name.
+            value: Value of the key.
+
+        Returns:
+            A boolean to mark whether config is set or not.
         """
         self._authenticate()
         val = {"value": safe_value(value)}
@@ -161,16 +167,16 @@ class VaultSecret(BaseSecret):
         return bool(response.status_code == 204)
 
     def _request_warning(self, scheme: str, verify: _t.Union[bool, str]) -> None:
-        """
-        Emit warning about unverified request to unsecure Consul address.
+        """Emit warning about unverified request to unsecure Consul address.
 
-        :param scheme: Scheme of Vault address.
-        :param verify: Mark whether client needs to verify the address.
+        Args:
+            scheme: Scheme of Vault address.
+            verify: Mark whether client needs to verify the address.
         """
         import urllib3
 
         if scheme == "https" and verify is False:
-            urllib3.disable_warnings()  # type: ignore
+            urllib3.disable_warnings()
             logger.warning(
                 "All requests to Vault will be unverified. "
                 "Please adjust CN_SECRET_VAULT_SCHEME and "
@@ -186,12 +192,15 @@ class VaultSecret(BaseSecret):
     ) -> tuple[MaybeCert, MaybeCacert]:
         """Verify client cert and key.
 
-        :param scheme: Scheme of Consul address.
-        :param verify: Mark whether client needs to verify the address.
-        :param cacert_file: Path to CA cert file.
-        :param cert_file: Path to client's cert file.
-        :param key_file: Path to client's key file.
-        :returns: A pair of cert key files (if exist) and verification.
+        Args:
+            scheme: Scheme of Consul address.
+            verify: Mark whether client needs to verify the address.
+            cacert_file: Path to CA cert file.
+            cert_file: Path to client's cert file.
+            key_file: Path to client's key file.
+
+        Returns:
+            A pair of cert key files (if exist) and verification.
         """
         cert = None
         maybe_cacert: MaybeCacert = as_boolean(verify)
@@ -208,18 +217,21 @@ class VaultSecret(BaseSecret):
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set key-value pairs.
 
-        :param data: Key-value pairs.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            data: Key-value pairs.
+
+        Returns:
+            A boolean to mark whether secret is set or not.
         """
         for k, v in data.items():
             self.set(k, v)
         return True
 
     def get_all(self) -> dict[str, _t.Any]:
-        """
-        Get all key-value pairs.
+        """Get all key-value pairs.
 
-        :returns: A ``dict`` of key-value pairs (if any).
+        Returns:
+            A mapping of secrets (if any).
         """
         self._authenticate()
         result = self.client.list(self.prefix)

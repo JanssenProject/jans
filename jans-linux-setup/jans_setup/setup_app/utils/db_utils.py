@@ -84,7 +84,7 @@ class DBUtils:
             for group in Config.mapping_locations:
                 if Config.mapping_locations[group] == 'rdbm':
                     if Config.rdbm_type in ('mysql', 'pgsql'):
-                        base.logIt("Making MySql Conncetion")
+                        base.logIt("Making {} Conncetion".format(Config.rdbm_type))
                         result = self.mysqlconnection()
                         if not result[0]:
                             print("{}FATAL: {}{}".format(colors.FAIL, result[1], colors.ENDC))
@@ -131,7 +131,7 @@ class DBUtils:
 
     @property
     def json_dialects_instance(self):
-        return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
+        return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSONB
 
     def mysqlconnection(self, log=True):
         return self.sqlconnection(log)
@@ -151,7 +151,7 @@ class DBUtils:
 
         for attr in attribDataTypes.listAttributes:
             if not attr in self.sql_data_types:
-                self.sql_data_types[attr] = { 'mysql': {'type': 'JSON'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} }
+                self.sql_data_types[attr] = { 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} }
 
     def in_subtable(self, table, attr):
         if table in self.sub_tables[Config.rdbm_type]:
@@ -355,7 +355,7 @@ class DBUtils:
                 return result
             return
         sqlalchemy_table = self.Base.classes[table].__table__
-        return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
+        return self.session.query(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
 
 
     def spanner_to_dict(self, data):
@@ -542,6 +542,34 @@ class DBUtils:
 
         return  ','.join(value2)
 
+    def delete_dn(self, dn):
+        if self.dn_exists(dn):
+            backend_location = self.get_backend_location_for_dn(dn)
+
+            if backend_location == BackendTypes.LDAP:
+                def recursive_delete(dn):
+                    self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL)
+                    for entry in self.ldap_conn.response:
+                        recursive_delete(entry['dn'])
+                    self.ldap_conn.delete(dn)
+                recursive_delete(dn)
+
+            elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+                sqlalchemy_obj = self.get_sqlalchObj_for_dn(dn)
+                if sqlalchemy_obj:
+                    self.session.delete(sqlalchemy_obj)
+                    self.session.commit()
+
+            elif backend_location == BackendTypes.SPANNER:
+                tbl = self.get_spanner_table_for_dn(dn)
+                self.spanner.exec_sql('DELETE from {} WHERE dn="{}"'.format(tbl, dn))
+
+            elif backend_location == BackendTypes.COUCHBASE:
+                key = ldif_utils.get_key_from(dn)
+                bucket =self.get_bucket_for_key(key)
+                n1ql = 'DELETE FROM `{}` USE KEYS "{}"'.format(bucket, key)
+                self.cbm.exec_query(n1ql)
+
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
 
@@ -577,14 +605,19 @@ class DBUtils:
                 else:
                     jansConfProperty = {'v': []}
 
-                for oxconfigprop in jansConfProperty['v']:
-                    if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
+                ox_configuration_property_list = jansConfProperty['v'] if Config.rdbm_type == 'mysql' else jansConfProperty
+
+                for i, oxconfigprop in enumerate(ox_configuration_property_list[:]):
+                    if isinstance(oxconfigprop, str):
+                        oxconfigprop = json.loads(oxconfigprop)
+                    if oxconfigprop.get('value1') == 'allowed_clients' and client_id not in oxconfigprop['value2']:
                         oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
+                        ox_configuration_property_list[i] = json.dumps(oxconfigprop)
                         break
                 else:
-                    jansConfProperty['v'].append({'value1': 'allowed_clients', 'value2': client_id})
+                    ox_configuration_property_list.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
 
-                sqlalchemyObj.jansConfProperty = jansConfProperty
+                sqlalchemyObj.jansConfProperty = jansConfProperty if BackendTypes.MYSQL else ox_configuration_property_list
                 self.session.commit()
 
 
@@ -683,11 +716,13 @@ class DBUtils:
         self.Base = sqlalchemy.ext.automap.automap_base(metadata=self.metadata)
         self.Base.prepare()
 
+
         # fix JSON type for mariadb
-        for tbl in self.Base.classes:
-            for col in tbl.__table__.columns:
-                if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment.lower() == 'json':
-                    col.type = sqlalchemy.dialects.mysql.json.JSON()
+        if Config.rdbm_type == 'mysql':
+            for tbl in self.Base.classes:
+                for col in tbl.__table__.columns:
+                    if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment.lower() == 'json':
+                        col.type = sqlalchemy.dialects.mysql.json.JSON()
 
         base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
 
@@ -730,7 +765,7 @@ class DBUtils:
 
         data_type = self.get_attr_sql_data_type(key)
 
-        if data_type in ('SMALLINT', 'BOOL'):
+        if data_type in ('SMALLINT', 'BOOL', 'BOOLEAN'):
             if val[0].lower() in ('1', 'on', 'true', 'yes', 'ok'):
                 return 1 if data_type == 'SMALLINT' else True
             return 0 if data_type == 'SMALLINT' else False
@@ -751,7 +786,7 @@ class DBUtils:
 
             return json_data
 
-        if data_type == 'ARRAY<STRING(MAX)>':
+        if data_type in ('ARRAY<STRING(MAX)>', 'JSONB'):
             return val
 
         return val[0]
@@ -834,7 +869,10 @@ class DBUtils:
                             if isinstance(sqlalchObj.__table__.columns[attribute].type, self.json_dialects_instance):
                                 cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
                                 for val_ in new_val:
-                                    cur_val['v'].append(val_)
+                                    if Config.rdbm_type == 'mysql':
+                                        cur_val['v'].append(val_)
+                                    else:
+                                        cur_val.append(val_)
                                 setattr(sqlalchObj, attribute, cur_val)
                             else:
                                 setattr(sqlalchObj, attribute, new_val[0])
@@ -888,7 +926,7 @@ class DBUtils:
 
                         for col in sqlalchCls.__table__.columns:
                             if isinstance(col.type, self.json_dialects_instance) and not col.name in vals:
-                                vals[col.name] = {'v': []}
+                                vals[col.name] = {'v': []} if Config.rdbm_type == 'mysql' else []
 
                         sqlalchObj = sqlalchCls()
 

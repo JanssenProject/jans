@@ -1,11 +1,11 @@
-FROM alpine:3.16.0
+FROM alpine:3.16
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk upgrade \
+    && apk upgrade --available \
     && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
     && apk add --no-cache --virtual .build-deps git wget
 
@@ -24,8 +24,9 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=7ad2b06edf70322d85b40de05a423c2f8cdd4200
+ENV JANS_SOURCE_VERSION=e74ea8e27e59d35ff6e3c6f997e6c1df6a04ec83
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -33,7 +34,8 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout set ${JANS_SETUP_DIR}
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR}
 
 RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj
 
@@ -46,7 +48,9 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
-    && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json
+    && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
+    && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
+    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/
 
 RUN mkdir -p /app/templates/jans-config-api
 
@@ -173,8 +177,8 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL name="janssenproject/persistence-loader" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.2" \
-    release="1" \
+    version="1.0.3" \
+    release="dev" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 

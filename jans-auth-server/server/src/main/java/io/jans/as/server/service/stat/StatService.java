@@ -2,7 +2,7 @@ package io.jans.as.server.service.stat;
 
 import io.jans.as.common.model.stat.Stat;
 import io.jans.as.common.model.stat.StatEntry;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -73,8 +73,8 @@ public class StatService {
 
     public boolean init() {
         try {
-            final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
-            if (!enabledComponents.isEmpty() && !enabledComponents.contains(ComponentType.STAT)) {
+            final Set<FeatureFlagType> featureFlags = appConfiguration.getEnabledFeatureFlags();
+            if (!featureFlags.isEmpty() && !featureFlags.contains(FeatureFlagType.STAT)) {
                 log.trace("Stat service is not enabled.");
                 return false;
             }

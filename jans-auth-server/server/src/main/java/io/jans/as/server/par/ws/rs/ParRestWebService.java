@@ -4,7 +4,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.config.Constants;
@@ -12,12 +12,12 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.util.QueryStringDecoder;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.ThreadContext;
@@ -104,7 +104,7 @@ public class ParRestWebService {
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.PAR);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.PAR);
 
             scope = ServerUtil.urlDecode(scope); // it may be encoded
             String tokenBindingHeader = httpRequest.getHeader("Sec-Token-Binding");

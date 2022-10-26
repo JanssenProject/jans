@@ -13,7 +13,9 @@ class FidoInstaller(JettyInstaller):
 
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
-                (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN'])
+                (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN']),
+                (os.path.join(Config.dist_app_dir, 'fido2/mds/toc/toc.jwt'), 'https://mds.fidoalliance.org/'),
+                (os.path.join(Config.dist_app_dir, 'fido2/mds/cert/root-r3.crt'), 'https://secure.globalsign.com/cacert/root-r3.crt'),
                 ]
 
     def __init__(self):
@@ -69,12 +71,6 @@ class FidoInstaller(JettyInstaller):
             src = os.path.join(Config.install_dir, 'static/fido2/authenticator_cert/', f)
             self.copyFile(src, target_dir)
 
-        # Fido2 MDS TOC cert
-        self.copyFile(
-            os.path.join(Config.install_dir, 'static/fido2/mds_toc_cert/metadata-root-ca.cer'),
-            os.path.join(self.fido2ConfigFolder, 'mds/cert')
-            )
-
         #copy fido2 server metadata
         src_dir = os.path.join(Config.install_dir, 'static/fido2/server_metadata')
         trgt_dir = os.path.join(self.fido2ConfigFolder, 'server_metadata')
@@ -86,3 +82,8 @@ class FidoInstaller(JettyInstaller):
             self.run([paths.cmd_mkdir, '-p', target_dir])
             self.copyFile(self.source_files[1][0], target_dir)
 
+        # copy external files
+        self.copy_tree(
+                os.path.join(Config.dist_app_dir, 'fido2'),
+                self.fido2ConfigFolder
+            )

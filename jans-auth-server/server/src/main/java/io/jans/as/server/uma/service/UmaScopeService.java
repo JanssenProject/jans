@@ -8,6 +8,7 @@ package io.jans.as.server.uma.service;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
+import io.jans.as.model.common.CreatorType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -75,11 +76,15 @@ public class UmaScopeService {
             return fromLdap;
         }
 
+        if (isFalse(appConfiguration.getAllowSpontaneousScopes())) {
+            return null;
+        }
+
         if (isFalse(client.getAttributes().getAllowSpontaneousScopes())) {
             return null;
         }
 
-        if (!spontaneousScopeService.isAllowedBySpontaneousScopes_(regExps, scopeId)) {
+        if (!spontaneousScopeService.isAllowedBySpontaneousScopeRegExps(regExps, scopeId)) {
             return null;
         }
 
@@ -120,7 +125,7 @@ public class UmaScopeService {
         }
     }
 
-    public List<String> getScopeDNsByIdsAndAddToLdapIfNeeded(List<String> scopeIds) {
+    public List<String> getScopeDNsByIdsAndAddToPersistenceIfNeeded(List<String> scopeIds) {
         List<String> result = new ArrayList<>();
         for (Scope scope : getScopesByIds(scopeIds)) {
             result.add(scope.getDn());
@@ -193,6 +198,7 @@ public class UmaScopeService {
             newScope.setDisplayName(scopeId);
             newScope.setId(scopeId);
             newScope.setDeletable(false);
+            newScope.setCreatorType(CreatorType.AUTO);
 
             final boolean persisted = persist(newScope);
             if (persisted) {

@@ -26,8 +26,7 @@ public class LogUtils {
     //MUST be a single character string
     private static final String PLACEHOLDER = "%";
 
-    private static final int MAX_ITERABLE_ITEMS = CdiUtil.bean(EngineConfig.class)
-            .getMaxItemsLoggedInCollections();
+    private static int maxIterableItems = 1;
     
     private enum LogLevel {
         ERROR, WARN, INFO, DEBUG, TRACE;
@@ -48,6 +47,8 @@ public class LogUtils {
         int dummyArgs = 0;
         String sfirst;
         int nargs = rest.length - 1;
+        
+        maxIterableItems = CdiUtil.bean(EngineConfig.class).getMaxItemsLoggedInCollections();
 
         Object first = rest[0];
         if (first != null && first instanceof String) {
@@ -157,23 +158,16 @@ public class LogUtils {
         
     }
     
-    private static String subCollectionAsString(Collection<?> col) {
+    private static String subListAsString(List<?> list, int originalSize) {
         
-        int len = col.size();
-        int count = Math.min(len, MAX_ITERABLE_ITEMS);
-        Iterator iterator = col.iterator();
         StringBuilder sb = new StringBuilder("[");
-        
-        if (count > 0) {
-            for (int i = 0; i < count; i++) {
-                sb.append(asString(iterator.next())).append(", ");
-            }
-            if (len > count) {
-                sb.append("...").append(len - count).append(" more");
-            } else {
-                sb.deleteCharAt(sb.length() - 1);
-                sb.deleteCharAt(sb.length() - 1);
-            }
+        list.forEach(item -> sb.append(asString(item)).append(", "));
+
+        if (originalSize > maxIterableItems) {
+            sb.append("...").append(originalSize - maxIterableItems).append(" more");
+        } else {
+            sb.deleteCharAt(sb.length() - 1);
+            sb.deleteCharAt(sb.length() - 1);
         }
         return sb.append("]").toString();
         
@@ -186,24 +180,34 @@ public class LogUtils {
         
         //JS-native numeric values always come as doubles; make them look like integers if that's the case
         if (objCls.equals(Double.class)) {
+
             Double d = (Double) obj;
             if (Math.floor(d) == d && d >= 1.0*Long.MIN_VALUE && d <= 1.0*Long.MAX_VALUE) {
                 return Long.toString(d.longValue());
             }
+
         } else if (objCls.isArray()) {
             
             List<Object> list = new ArrayList<>();
-            for (int i = 0; i <= MAX_ITERABLE_ITEMS; i++) { //Allows one extra element
-                try {
-                    list.add(Array.get(obj, i));
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    break;
-                }
+            int len = Array.getLength(obj);
+
+            for (int i = 0; i < Math.min(len, maxIterableItems); i++) {
+                list.add(Array.get(obj, i));
             }
-            return subCollectionAsString(list);
+            return subListAsString(list, len);
             
         } else if (Collection.class.isInstance(obj)) {
-            return subCollectionAsString((Collection) obj);  
+
+            Collection<?> col = (Collection<?>) obj;
+            Iterator iterator = col.iterator();
+            
+            List<Object> list = new ArrayList<>();
+            int len = col.size();
+            
+            for (int i = 0; i < Math.min(len, maxIterableItems); i++) {
+                list.add(iterator.next());
+            }            
+            return subListAsString(list, len);  
             
         } else if (Map.class.isInstance(obj)) {
             
@@ -213,15 +217,17 @@ public class LogUtils {
 
             for (Object key : map.keySet()) {                
                 entries.add(new AbstractMap.SimpleImmutableEntry(key, map.get(key)));
-                if (++i > MAX_ITERABLE_ITEMS) break; //Allows one extra element
+                if (++i == maxIterableItems) break;
             }
-            return subCollectionAsString(entries);
+            return subListAsString(entries, map.size());
             
         } else if (Map.Entry.class.isInstance(obj)) {
+
             Map.Entry e = (Map.Entry) obj;
             return String.format("(%s: %s)", asString(e.getKey()), asString(e.getValue()));
             
         } else if (Throwable.class.isInstance(obj)) {
+
             Throwable t = (Throwable) obj;
             try(
                 StringWriter sw = new StringWriter();

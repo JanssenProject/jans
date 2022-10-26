@@ -72,7 +72,7 @@ if not (os_type and os_version):
     sys.exit()
 
 os_name = os_type + os_version
-deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'ubuntu22', 'debian9', 'debian10', 'debian11')
+deb_sysd_clone = os_name.startswith(('ubuntu', 'debian'))
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
@@ -92,6 +92,19 @@ else:
     clone_type = 'deb'
     httpd_name = 'apache2'
 
+def get_os_description():
+    desc_dict = { 'suse': 'SUSE', 'red': 'RHEL', 'ubuntu': 'Ubuntu', 'deb': 'Debian', 'centos': 'CentOS', 'fedora': 'Fedora' }
+    descs = desc_dict.get(os_type, os_type)
+    descs += ' ' + os_version
+
+    fipsl = subprocess.getoutput("sysctl crypto.fips_enabled").strip().split()
+
+    if fipsl and fipsl[0] == 'crypto.fips_enabled' and fipsl[-1] == '1':
+        descs += ' [FIPS]'
+    if snap:
+        descs += ' [SNAP]'
+
+    return descs
 
 if snap:
     snapctl = shutil.which('snapctl')
@@ -389,3 +402,6 @@ def extract_subdir(zip_fn, sub_dir, target_dir):
 
 current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
+
+def as_bool(val):
+    return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')

@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.util.RedirectUri;
 import io.jans.as.common.util.CommonUtils;
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
@@ -35,10 +35,7 @@ import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.par.ws.rs.ParService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.RedirectUriResponse;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.ServerCryptoProvider;
+import io.jans.as.server.service.*;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -100,6 +97,9 @@ public class AuthzRequestService {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private RedirectionUriService redirectionUriService;
 
     public boolean processPar(AuthzRequest authzRequest) {
         boolean isPar = Util.isPar(authzRequest.getRequestUri());
@@ -181,6 +181,17 @@ public class AuthzRequestService {
                 }
 
                 if (jwtRequest.getRedirectUri() != null) {
+                    if (!jwtRequest.getRedirectUri().equals(authzRequest.getRedirectUri())) {
+                        log.error("The redirect_uri parameter in url is not the same as in the JWT");
+                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The redirect_uri parameter in url is not the same as in the JWT");
+                    }
+                    if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(client, jwtRequest.getRedirectUri()))) {
+                        log.error("redirect_uri in request object is not valid.");
+                        throw new WebApplicationException(Response
+                                .status(Response.Status.BAD_REQUEST)
+                                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, authzRequest.getState(), ""))
+                                .build());
+                    }
                     redirectUriResponse.getRedirectUri().setBaseRedirectUri(jwtRequest.getRedirectUri());
                 }
 
@@ -201,9 +212,6 @@ public class AuthzRequestService {
                     scopes.clear();
                     scopes.addAll(scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes())));
                 }
-                if (jwtRequest.getRedirectUri() != null && !jwtRequest.getRedirectUri().equals(authzRequest.getRedirectUri())) {
-                    throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The redirect_uri parameter is not the same in the JWT");
-                }
                 if (StringUtils.isNotBlank(jwtRequest.getNonce())) {
                     authzRequest.setNonce(jwtRequest.getNonce());
                 }
@@ -220,6 +228,7 @@ public class AuthzRequestService {
                     prompts.clear();
                     prompts.addAll(Lists.newArrayList(jwtRequest.getPrompts()));
                     authzRequest.setPrompt(implode(prompts, " "));
+                    authzRequest.setPromptFromJwt(true);
                 }
                 if (jwtRequest.getResponseMode() != null) {
                     authzRequest.setResponseMode(jwtRequest.getResponseMode().getValue());

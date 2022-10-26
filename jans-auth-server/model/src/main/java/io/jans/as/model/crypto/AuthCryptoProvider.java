@@ -530,10 +530,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
+        algorithm.fill(jsonObject);
+
         jsonObject.put(JWKParameter.KEY_ID, alias);
-        jsonObject.put(JWKParameter.KEY_USE, algorithm.getUse().getParamName());
-        jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
         jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
         if (publicKey instanceof RSAPublicKey) {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;

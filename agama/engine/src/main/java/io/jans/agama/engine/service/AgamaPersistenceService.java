@@ -133,11 +133,15 @@ public class AgamaPersistenceService {
                     Flow.ATTR_NAMES.TRANSPILED };
             }
             
-            Flow fl = entryManager.findEntries(AGAMA_FLOWS_BASE, Flow.class, 
-               Filter.createEqualityFilter(Flow.ATTR_NAMES.QNAME, flowName), attrs, 1).get(0);
-            
             logger.debug("Retrieving {}info of flow '{}'", full ? "" : "minimal ", flowName);
-            return fl;
+            List<Flow> fls = entryManager.findEntries(AGAMA_FLOWS_BASE, Flow.class, 
+               Filter.createEqualityFilter(Flow.ATTR_NAMES.QNAME, flowName), attrs, 1);
+            
+            if (fls.isEmpty()) {
+                logger.warn("Flow '{}' does not exist!", flowName);
+            }
+            
+            return fls.get(0);
         } catch(Exception e) {
             throw new IOException(e);
         }
@@ -203,7 +207,7 @@ public class AgamaPersistenceService {
 
             status.setQname(null);
             status.setJsonInput(null);
-            status.setParentsData(null);                
+            status.setParentsMappings(null);                
             status.setTemplatePath(null);
             status.setTemplateDataModel(null);
             status.setExternalRedirectUrl(null);

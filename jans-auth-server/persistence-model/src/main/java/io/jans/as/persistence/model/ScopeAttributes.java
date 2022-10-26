@@ -18,24 +18,13 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScopeAttributes implements Serializable {
 
-    private static final long serialVersionUID = 213428216911083393L;
-
-    @JsonProperty("spontaneousClientId")
-    private String spontaneousClientId;
+    private static final long serialVersionUID = 213428216911083394L;
 
     @JsonProperty("spontaneousClientScopes")
     private List<String> spontaneousClientScopes;
 
     @JsonProperty("showInConfigurationEndpoint")
     private boolean showInConfigurationEndpoint = true;
-
-    public String getSpontaneousClientId() {
-        return spontaneousClientId;
-    }
-
-    public void setSpontaneousClientId(String spontaneousClientId) {
-        this.spontaneousClientId = spontaneousClientId;
-    }
 
     public List<String> getSpontaneousClientScopes() {
         return spontaneousClientScopes;
@@ -55,8 +44,9 @@ public class ScopeAttributes implements Serializable {
 
     @Override
     public String toString() {
-        return "ScopeAttributes{" + "spontaneousClientId='" + spontaneousClientId + '\'' + "spontaneousClientScopes='"
-                + spontaneousClientScopes + '\'' + "showInConfigurationEndpoint='" + showInConfigurationEndpoint + '\''
-                + '}';
+        return "ScopeAttributes{" +
+                "spontaneousClientScopes=" + spontaneousClientScopes +
+                ", showInConfigurationEndpoint=" + showInConfigurationEndpoint +
+                '}';
     }
 }

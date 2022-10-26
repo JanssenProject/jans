@@ -21,7 +21,7 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.persistence.PersistenceType;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.extension.PersistenceExtension;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.service.custom.script.ExternalScriptService;
 
 /**

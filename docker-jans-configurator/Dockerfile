@@ -1,11 +1,11 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.15
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk upgrade \
+    && apk upgrade --available \
     && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
     && apk add --no-cache --virtual .build-deps wget git \
     && mkdir -p /usr/java/latest \
@@ -16,8 +16,8 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.2-SNAPSHOT
-ENV CN_BUILD_DATE='2022-07-06 12:50'
+ENV CN_VERSION=1.0.3-SNAPSHOT
+ENV CN_BUILD_DATE='2022-08-30 17:15'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -115,8 +115,8 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL name="janssenproject/configurator" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.2" \
-    release="1" \
+    version="1.0.3" \
+    release="dev" \
     summary="Janssen Configuration Manager" \
     description="Manage config and secret"
 

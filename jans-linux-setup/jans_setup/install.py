@@ -56,13 +56,18 @@ def check_install_dependencies():
 
     try:
         from distutils import dist
-    except:
+    except ImportError:
         package_dependencies.append('python3-distutils')
 
     try:
         import ldap3
-    except:
+    except ImportError:
         package_dependencies.append('python3-ldap3')
+
+    try:
+        import psycopg2
+    except ImportError:
+        package_dependencies.append('python3-psycopg2')
 
     if package_dependencies and not argsp.yes:
         install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(package_dependencies)))
@@ -70,6 +75,7 @@ def check_install_dependencies():
             print("Can't continue...")
             sys.exit()
 
+    if package_dependencies:
         os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
@@ -202,6 +208,19 @@ def uninstall_jans():
         print("Executing", cmd)
         os.system('rm -r -f ' + p)
 
+    apache_conf_fn_list = []
+
+    if shutil.which('zypper'):
+        apache_conf_fn_list = ['/etc/apache2/vhosts.d/_https_jans.conf']
+    elif shutil.which('yum') or shutil.which('dnf'):
+        apache_conf_fn_list = ['/etc/httpd/conf.d/https_jans.conf']
+    elif shutil.which('apt'):
+        apache_conf_fn_list = ['/etc/apache2/sites-enabled/https_jans.conf', '/etc/apache2/sites-available/https_jans.conf']
+
+    for fn in apache_conf_fn_list:
+        if os.path.exists(fn):
+            print("Removing", fn)
+            os.unlink(fn)
 
 def upgrade():
     check_installation()
@@ -254,7 +273,7 @@ def do_install():
 
 def main():
 
-    if not argsp.uninstall:
+    if not argsp.uninstall or argsp.download_exit:
         check_install_dependencies()
 
     if not (argsp.use_downloaded or argsp.uninstall):

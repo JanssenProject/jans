@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.2 (2022-08-30)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+* **jans-client-api:** migration to Weld/Resteasy and Jetty 11 - Issue 260 ([#1319](https://github.com/JanssenProject/jans/issues/1319)) ([420ffc3](https://github.com/JanssenProject/jans/commit/420ffc3329b91c52d5c9996d7c1e600d9b6fead2))
+* **jans-orm:** update Couchbase ORM to use SDK 3.x [#1851](https://github.com/JanssenProject/jans/issues/1851) ([#1852](https://github.com/JanssenProject/jans/issues/1852)) ([d9d5157](https://github.com/JanssenProject/jans/commit/d9d5157c3421f4995ee4abd6918c106f9a78dd5f))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.0...jans-bom-v1.0.1) (2022-07-06)
 
 

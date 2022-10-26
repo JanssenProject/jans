@@ -89,14 +89,14 @@ downloads.download_apps()
 
 sys.path.insert(0, base.pylib_dir)
 
-if argsp.download_exit:
-    downloads.download_all()
-    sys.exit()
-
 from setup_app.utils.package_utils import packageUtils
 
 packageUtils.check_and_install_packages()
 sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
+
+if argsp.download_exit:
+    downloads.download_all()
+    sys.exit()
 
 from setup_app.messages import msg
 from setup_app.config import Config
@@ -128,7 +128,6 @@ from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 # from setup_app.installers.oxd import OxdInstaller
-from setup_app.installers.client_api import ClientApiInstaller
 
 
 if base.snap:
@@ -184,12 +183,10 @@ jansInstaller.initialize()
 
 if not Config.installed_instance:
     print()
-    detected_os = '{} {}'.format(base.os_type, base.os_version)
-    if base.snap:
-        detected_os = 'snap ' + detected_os
+
     print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
     print("Profile         :  {}".format(Config.profile))
-    print("Detected OS     :  {}".format(detected_os))
+    print("Detected OS     :  {}".format(base.get_os_description()))
     print("Janssen Version :  {}".format(base.current_app.app_info['ox_version']))
     print("Detected init   :  {}".format(base.os_initdaemon))
     print("Detected Apache :  {}".format(base.determineApacheVersion()))
@@ -244,7 +241,7 @@ if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
-    client_api_installer = ClientApiInstaller()
+
 jansCliInstaller = JansCliInstaller()
 
 # oxdInstaller = OxdInstaller()
@@ -332,7 +329,7 @@ def main():
         service_name = 'post-setup'
         install_var = 'installPostSetup'
         app_type = static.AppType.APPLICATION
-        install_type = static.InstallOption.MONDATORY
+        install_type = static.InstallOption.MANDATORY
 
 
     jansProgress.register(PostSetup)
@@ -416,10 +413,6 @@ def main():
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
 
-                if (Config.installed_instance and client_api_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(client_api_installer.install_var)):
-                    client_api_installer.start_installation()
-
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()
@@ -480,6 +473,9 @@ def main():
             Config.hostname)
         print(msg_text)
         print('\n', static.colors.ENDC)
+        print(static.colors.DANGER)
+        print(msg.setup_removal_warning)
+        print(static.colors.ENDC, '\n')
         # we need this for progress write last line
         time.sleep(2)
 

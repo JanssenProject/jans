@@ -113,6 +113,9 @@
     "mysql": {
       "type": "SMALLINT"
     },
+    "pgsql": {
+      "type": "BOOLEAN"
+    },
     "spanner": {
       "type": "BOOL"
     }
@@ -131,6 +134,9 @@
   "JSON": {
     "mysql": {
       "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
     },
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"

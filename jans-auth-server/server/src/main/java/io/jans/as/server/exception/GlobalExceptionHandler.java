@@ -7,6 +7,8 @@
 package io.jans.as.server.exception;
 
 import io.jans.as.server.model.exception.InvalidSessionStateException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,19 +50,29 @@ public class GlobalExceptionHandler extends ExceptionHandlerWrapper {
             final FacesContext fc = FacesContext.getCurrentInstance();
             final ExternalContext externalContext = fc.getExternalContext();
             try {
-                if (isInvalidSessionStateException(t)) {
-                    log.error(t.getMessage(), t);
-                    performRedirect(externalContext, "/error_session.htm");
-                } else {
-                    log.error(t.getMessage(), t);
-                    performRedirect(externalContext, "/error_service.htm");
-                }
+                logExceptionAsError(t);
+                performRedirect(externalContext, isInvalidSessionStateException(t) ? "/error_session.htm" : "/error_service.htm");
                 fc.renderResponse();
             } finally {
                 i.remove();
             }
         }
         getWrapped().handle();
+    }
+
+    private void logExceptionAsError(Throwable t) {
+        if (!log.isErrorEnabled()) {
+            return;
+        }
+
+        if (t instanceof WebApplicationException) {
+            Response response = ((WebApplicationException) t).getResponse();
+            if (response != null && response.getStatus() == 302) {
+                return;
+            }
+        }
+
+        log.error(t.getMessage(), t);
     }
 
     private boolean isInvalidSessionStateException(Throwable t) {

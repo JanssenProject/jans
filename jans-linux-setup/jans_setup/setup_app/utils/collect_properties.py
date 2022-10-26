@@ -72,13 +72,16 @@ class CollectProperties(SetupUtils, BaseInstaller):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
 
             uri_re = re.match('jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
-            Config.rdbm_type, Config.rdbm_host, self.rdbm_port, self.rdbm_db = uri_re.groups()
-            Config.rdbm_port = int(self.rdbm_port)
+            Config.rdbm_type, Config.rdbm_host, Config.rdbm_port, Config.rdbm_db = uri_re.groups()
+            if '?' in Config.rdbm_db:
+                Config.rdbm_db = Config.rdbm_db.split('?')[0]
+            Config.rdbm_port = int(Config.rdbm_port)
             Config.rdbm_install_type = static.InstallTypes.LOCAL if Config.rdbm_host == 'localhost' else static.InstallTypes.REMOTE
             Config.rdbm_user = jans_sql_prop['auth.userName']
             Config.rdbm_password_enc = jans_sql_prop['auth.userPassword']
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
-            Config.rdbm_db = jans_sql_prop['db.schema.name']
+            if Config.rdbm_type == 'postgresql':
+                Config.rdbm_type = 'pgsql'
 
         if not Config.persistence_type in ('couchbase', 'ldap') and Config.get('jansSpannerProperties') and os.path.exists(Config.jansSpannerProperties):
             Config.rdbm_type = 'spanner'
@@ -142,8 +145,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
             oxCacheConfiguration = oxConfiguration['jansCacheConf']
 
         Config.cache_provider_type = str(oxCacheConfiguration['cacheProviderType'])
-
-        Config.scim_rp_client_jks_pass = 'secret' # this is static
 
         # Other clients
         client_var_id_list = [

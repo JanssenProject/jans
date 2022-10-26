@@ -9,15 +9,18 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-fido2-parent</artifactId>
-		<version>1.0.2-SNAPSHOT</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 
 	<build>
 		<finalName>fido2-server</finalName>
-
+		<filters>
+			<filter>profiles/default/config-build.properties</filter>
+		</filters>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
 				<includes>
 					<include>**/*.xml</include>
 					<include>**/*.properties</include>

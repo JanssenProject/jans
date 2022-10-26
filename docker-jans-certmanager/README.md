@@ -30,7 +30,7 @@ The following environment variables are supported by the container:
 - `CN_SECRET_GOOGLE_SECRET_VERSION_ID`:  Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
 - `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
-- `CN_SECRET_ADAPTER`: The secrets adapter, can be `vault` (default), `kubernetes`, or `google`.
+- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, or `google`.
 - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
 - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
 - `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
@@ -66,6 +66,13 @@ The following environment variables are supported by the container:
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
+- `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
+- `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
+- `CN_SQL_DB_NAME`: SQL database name (default to `jans`).
+- `CN_SQL_DB_USER`: User name to access the SQL database (default to `jans`).
+- `CN_SQL_DB_DIALECT`: Dialect name of the SQL (`mysql` for MySQL  or `pgsql` for PostgreSQL; default to `mysql`).
+- `CN_SQL_DB_TIMEZONE`: Timezone used by the SQL database (default to `UTC`).
+- `CN_SQL_DB_SCHEMA`: Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`).
 
 ## Usage
 
@@ -98,7 +105,7 @@ Global options:
 
 Supported services:
 
-1.  `web` (nginx container or ingress)
+1. `web` (nginx container or ingress)
 
     Load from existing or re-generate:
 
@@ -110,7 +117,7 @@ Supported services:
     - `source`: `from-files` or empty string
     - `valid-to`: Validity length in days (default to `365`)
 
-1.  `auth`
+2. `auth`
 
     Re-generate:
 
@@ -119,7 +126,7 @@ Supported services:
 
     Options:
 
-    - `interval`: cryto keys expiration time (in hours)
+    - `interval`: crypto keys expiration time (in hours)
     - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth-server containers (default to `true`)
     - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `OLDER`)
     - `privkey-push-delay`: delay time in seconds before pushing `auth-keys.jks` to auth containers (default to `0`)
@@ -127,7 +134,7 @@ Supported services:
     - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 
-1.  `ldap`
+3. `ldap`
 
     Re-generate:
 
@@ -141,22 +148,6 @@ Supported services:
     - `subj-alt-name`: Subject Alternative Name (SAN) for certificate (default to `localhost`)
     - `valid-to`: Validity length in days (default to `365`)
 
-1.  `client-api`
-
-    Re-generate:
-
-    - `/etc/certs/client_api_application.crt`
-    - `/etc/certs/client_api_application.key`
-    - `/etc/certs/client_api_application.keystore`
-    - `/etc/certs/client_api_admin.crt`
-    - `/etc/certs/client_api_admin.key`
-    - `/etc/certs/client_api_admin.keystore`
-
-    Options:
-
-    - `application-cn`: Subject alternative name for application certificate (default to `localhost`)
-    - `admin-cn`: Subject alternative name for admin certificate (default to `localhost`)
-    - `valid-to`: Validity length in days (default to `365`)
 
 #### prune
 
@@ -229,7 +220,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: janssenproject/certmanager:1.0.1_dev
+              image: janssenproject/certmanager:1.0.3_dev
               resources:
                 requests:
                   memory: "300Mi"
@@ -248,9 +239,9 @@ spec:
 
 As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:
 
-1.  Set `CN_PERSISTENCE_TYPE` environment variable to `hybrid`
+1. Set `CN_PERSISTENCE_TYPE` environment variable to `hybrid`
 
-1.  Set `CN_HYBRID_MAPPING` with the following format:
+2. Set `CN_HYBRID_MAPPING` with the following format:
 
     ```
     {

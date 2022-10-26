@@ -6,6 +6,7 @@
 
 package io.jans.orm;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +25,11 @@ import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
+import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.event.DeleteNotifier;
-import io.jans.orm.exception.extension.PersistenceExtension;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
@@ -94,6 +97,7 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	@Deprecated
 	void remove(String dn);
+	<T> void removeByDn(String dn, String[] objectClasses);
 	<T> void remove(String primaryKey, Class<T> entryClass);
 
 	<T> int remove(String primaryKey, Class<T> entryClass, Filter filter, int count);
@@ -102,6 +106,7 @@ public interface PersistenceEntryManager extends EntityManager {
     void removeRecursively(String primaryKey);
 
 	<T> void removeRecursively(String primaryKey, Class<T> entryClass);
+	<T> void removeRecursivelyFromDn(String primaryKey, String[] objectClasses);
 
     boolean hasBranchesSupport(String primaryKey);
     boolean hasExpirationSupport(String primaryKey);
@@ -126,7 +131,7 @@ public interface PersistenceEntryManager extends EntityManager {
     @Deprecated
     List<AttributeData> exportEntry(String dn);
 
-    List<AttributeData> exportEntry(String dn, String objectClass);
+	<T> List<AttributeData> exportEntry(String dn, String objectClass);
 
     <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data);
 
@@ -134,6 +139,15 @@ public interface PersistenceEntryManager extends EntityManager {
     PersistenceEntryManager getPersistenceEntryManager(String persistenceType);
 
     void setPersistenceExtension(PersistenceExtension persistenceExtension);
+
+    <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName);
+
+    Class<?> getCustomAttributesListItemType(Object entry, AttributesList attributesList,
+			String propertyName);
+	List<AttributeData> getAttributeDataListFromCustomAttributesList(Object entry, AttributesList attributesList,
+			String propertyName);
+	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
+			String propertyName, Collection<AttributeData> attributes);
 
     boolean destroy();
 

@@ -2,45 +2,45 @@ name: release
 on:
   workflow_dispatch:
 jobs:
-  release-chart-pr:
-    if: contains(github.event.head_commit.message, 'Release-As:') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    strategy:
-      #max-parallel: 1
-      fail-fast: false
-      matrix:
-        charts: [ "charts/janssen" ]
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Import GPG key
-      id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v5
-      with:
-        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
-
-    - name: Configure Git
-      run: |
-        git config user.name "mo-auto"
-        git config user.email "54212639+mo-auto@users.noreply.github.com"
-        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-
-    - uses: google-github-actions/release-please-action@v3.2
-      id: release-please
-      with:
-         path: ${{ matrix.charts }}
-         token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-         release-type: helm
-         package-name: ${{ matrix.charts }}
-         monorepo-tags: true
+# Currently the release of that charts is being handled by the build-docs.yml workflow
+#  release-chart-pr:
+#    if: contains(github.event.head_commit.message, 'Release-As:') || github.event_name == 'workflow_dispatch'
+#    runs-on: ubuntu-latest
+#    strategy:
+#      #max-parallel: 1
+#      fail-fast: false
+#      matrix:
+#        charts: [ "charts/janssen" ]
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v3
+#      with:
+#        fetch-depth: 0
+#
+#    - name: Import GPG key
+#      id: import_gpg
+#      uses: crazy-max/ghaction-import-gpg@v5
+#      with:
+#        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+#        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+#        git_user_signingkey: true
+#        git_commit_gpgsign: true
+#
+#    - name: Configure Git
+#      run: |
+#        git config user.name "mo-auto"
+#        git config user.email "54212639+mo-auto@users.noreply.github.com"
+#        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+#
+#    - uses: google-github-actions/release-please-action@v3.5
+#      id: release-please
+#      with:
+#         path: ${{ matrix.charts }}
+#         token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+#         release-type: helm
+#         package-name: ${{ matrix.charts }}
+#        monorepo-tags: true
   release-simple-pr:
-    needs: release-chart-pr
     runs-on: ubuntu-latest
     strategy:
       #max-parallel: 1
@@ -68,7 +68,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.2
+    - uses: google-github-actions/release-please-action@v3.5
       id: release-please
       with:
          path: ${{ matrix.simple }}
@@ -83,7 +83,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        maven: [ "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-client-api", "jans-bom", "jans-auth-server", "agama" ]
+        maven: [ "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -105,7 +105,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.2
+    - uses: google-github-actions/release-please-action@v3.5
       id: release-please
       with:
          path: ${{ matrix.maven }}
@@ -120,7 +120,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-client-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim" ]
+        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -142,7 +142,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.2
+    - uses: google-github-actions/release-please-action@v3.5
       id: release-please
       with:
          path: ${{ matrix.simple }}
@@ -179,7 +179,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.2
+    - uses: google-github-actions/release-please-action@v3.5
       id: release-please
       with:
          path: ${{ matrix.python-projects }}
@@ -212,7 +212,7 @@ jobs:
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
 
-    - uses: google-github-actions/release-please-action@v3.2
+    - uses: google-github-actions/release-please-action@v3.5
       id: release-please
       with:
          token: ${{ secrets.MOAUTO3_WORKFLOW_TOKEN }}

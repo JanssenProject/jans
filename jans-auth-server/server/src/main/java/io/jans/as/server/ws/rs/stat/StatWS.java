@@ -1,6 +1,6 @@
 package io.jans.as.server.ws.rs.stat;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -162,7 +162,7 @@ public class StatWS {
             log.debug("Attempting to request stat, month: {}, startMonth: {}, endMonth: {}, format: {}",
                     escapeLog(monthsParam), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.STAT);
         validateAuthorization(authorization);
         final Set<String> months = validateMonths(monthsParam, startMonth, endMonth);
 

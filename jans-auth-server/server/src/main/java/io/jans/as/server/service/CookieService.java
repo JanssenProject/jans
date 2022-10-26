@@ -8,8 +8,8 @@ package io.jans.as.server.service;
 
 import com.google.common.collect.Sets;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.cdi.util.CdiUtil;

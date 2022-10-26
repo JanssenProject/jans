@@ -6,16 +6,7 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -33,10 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * OC5:FeatureTest-Providing ID Token with max age Restriction
@@ -63,7 +51,6 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         registerRequest.setContacts(Arrays.asList("javier@gluu.org"));
         registerRequest.setGrantTypes(Arrays.asList(GrantType.AUTHORIZATION_CODE));
         registerRequest.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setRequireAuthTime(true);
         registerRequest.setDefaultMaxAge(3600);
         registerRequest.setResponseTypes(responseTypes);
 

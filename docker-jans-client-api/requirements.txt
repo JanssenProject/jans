@@ -1,5 +1,0 @@
-# pinned to py3-grpcio version to avoid failure on native extension build
-grpcio==1.41.0
-ruamel.yaml==0.16.10
-libcst<0.4
-git+https://github.com/JanssenProject/jans@7ad2b06edf70322d85b40de05a423c2f8cdd4200#egg=jans-pycloudlib&subdirectory=jans-pycloudlib

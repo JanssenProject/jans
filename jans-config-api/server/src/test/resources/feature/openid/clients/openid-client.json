@@ -1,6 +1,5 @@
 {
     "accessTokenAsJwt": false,
-	"description":"Description for test client",
     "attributes": {
         "additionalAudience": [],
         "allowSpontaneousScopes": false,
@@ -11,7 +10,7 @@
         "keepClientAuthorizationAfterExpiration": false,
         "postAuthnScripts": [],
         "rptClaimsScripts": [],
-        "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+        "runIntrospectionScriptBeforeJwtCreation": false,
         "spontaneousScopeScriptDns": [],
         "spontaneousScopes": []
     },

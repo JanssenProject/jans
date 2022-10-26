@@ -1,25 +1,40 @@
 """This module contains classes and functions for interacting with Google Spanner database."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
 import os
+import typing as _t
 from contextlib import suppress
+from functools import cached_property
 from tempfile import NamedTemporaryFile
 
 from google.api_core.exceptions import AlreadyExists
 from google.api_core.exceptions import NotFound
 from google.api_core.exceptions import FailedPrecondition
-from google.cloud import spanner
+from google.cloud.spanner_v1 import Client
+from google.cloud.spanner_v1.keyset import KeySet
+from google.cloud.spanner_v1.param_types import STRING
 from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.sql import SqlSchemaMixin
 from jans.pycloudlib.utils import safe_render
+
+if _t.TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from google.cloud.spanner_v1.database import Database
+    from google.cloud.spanner_v1.instance import Instance
+    from jans.pycloudlib.manager import Manager
+
 
 logger = logging.getLogger(__name__)
 
 
-class SpannerClient:
+class SpannerClient(SqlSchemaMixin):
     """Class to interact with Spanner database.
 
     The following envvars are required:
@@ -28,103 +43,52 @@ class SpannerClient:
     - ``GOOGLE_PROJECT_ID``: (a.k.a Google project ID)
     - ``CN_GOOGLE_SPANNER_INSTANCE_ID``: Spanner instance ID
     - ``CN_GOOGLE_SPANNER_DATABASE_ID``: Spanner database ID
+
+    Args:
+        manager: An instance of manager class.
+        *args: Positional arguments.
+        **kwargs: Keyword arguments.
     """
 
-    def __init__(self, manager, *args, **kwargs):
+    def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
         self.manager = manager
         self.dialect = "spanner"
-        self.schema_files = [
-            "/app/schema/jans_schema.json",
-            "/app/schema/custom_schema.json",
-        ]
 
-        self._client = None
-        self._instance = None
-        self._database = None
-
-        self._sql_data_types = {}
-        self._sql_data_types_mapping = {}
-        self._attr_types = []
-        self._opendj_attr_types = {}
-        self._sub_tables = {}
-
-    @property
-    def client(self):
+    @cached_property
+    def client(self) -> Client:
         """Get an instance Spanner client object."""
-        if not self._client:
-            project_id = os.environ.get("GOOGLE_PROJECT_ID", "")
-            self._client = spanner.Client(project=project_id)
-        return self._client
+        project_id = os.environ.get("GOOGLE_PROJECT_ID", "")
+        return Client(project=project_id)  # type: ignore
 
-    @property
-    def instance(self):
+    @cached_property
+    def instance(self) -> Instance:
         """Get an instance Spanner instance object."""
-        if not self._instance:
-            instance_id = os.environ.get("CN_GOOGLE_SPANNER_INSTANCE_ID", "")
-            self._instance = self.client.instance(instance_id)
-        return self._instance
+        instance_id = os.environ.get("CN_GOOGLE_SPANNER_INSTANCE_ID", "")
+        return self.client.instance(instance_id)  # type: ignore
 
-    @property
-    def database(self):
+    @cached_property
+    def database(self) -> Database:
         """Get an instance Spanner database object."""
-        if not self._database:
-            database_id = os.environ.get("CN_GOOGLE_SPANNER_DATABASE_ID", "")
-            self._database = self.instance.database(database_id)
-        return self._database
+        database_id = os.environ.get("CN_GOOGLE_SPANNER_DATABASE_ID", "")
+        return self.instance.database(database_id)  # type: ignore
 
-    @property
-    def sql_data_types(self):
-        """Get list of data types from pre-defined file."""
-        if not self._sql_data_types:
-            with open("/app/static/rdbm/sql_data_types.json") as f:
-                self._sql_data_types = json.loads(f.read())
-        return self._sql_data_types
-
-    @property
-    def sql_data_types_mapping(self):
-        """Get a mapping of data types from pre-defined file."""
-        if not self._sql_data_types_mapping:
-            with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
-                self._sql_data_types_mapping = json.loads(f.read())
-        return self._sql_data_types_mapping
-
-    @property
-    def attr_types(self):
-        """Get list of attribute types from pre-defined file."""
-        if not self._attr_types:
-            for fn in self.schema_files:
-                with open(fn) as f:
-                    schema = json.loads(f.read())
-                    self._attr_types += schema["attributeTypes"]
-        return self._attr_types
-
-    @property
-    def opendj_attr_types(self):
-        """Get a mapping of OpenDJ attribute types from pre-defined file."""
-        if not self._opendj_attr_types:
-            with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
-                self._opendj_attr_types = json.loads(f.read())
-        return self._opendj_attr_types
-
-    @property
-    def sub_tables(self):
+    @cached_property
+    def sub_tables(self) -> dict[str, list[list[str]]]:
         """Get a mapping of subtables from pre-defined file."""
-        if not self._sub_tables:
-            with open("/app/static/rdbm/sub_tables.json") as f:
-                self._sub_tables = json.loads(f.read()).get(self.dialect) or {}
-        return self._sub_tables
+        with open("/app/static/rdbm/sub_tables.json") as f:
+            return json.loads(f.read()).get(self.dialect, {})  # type: ignore
 
-    def connected(self):
+    def connected(self) -> bool:
         """Check whether connection is alive by executing simple query."""
         cntr = 0
-        with self.database.snapshot() as snapshot:
+        with self.database.snapshot() as snapshot:  # type: ignore
             result = snapshot.execute_sql("SELECT 1")
             with suppress(IndexError):
                 row = list(result)[0]
                 cntr = row[0]
         return cntr > 0
 
-    def create_table(self, table_name: str, column_mapping: dict, pk_column: str):
+    def create_table(self, table_name: str, column_mapping: dict[str, str], pk_column: str) -> None:
         """Create table with its columns."""
         columns = []
         for column_name, column_type in column_mapping.items():
@@ -139,7 +103,7 @@ class SpannerClient:
         query = f"CREATE TABLE {self.quoted_id(table_name)} ({columns_fmt}) {pk_def}"
 
         try:
-            self.database.update_ddl([query])
+            self.database.update_ddl([query])  # type: ignore
         except FailedPrecondition as exc:
             if "Duplicate name in schema" in exc.args[0]:
                 # table exists
@@ -147,28 +111,30 @@ class SpannerClient:
             else:
                 raise
 
-    def quoted_id(self, identifier):
+    def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
         char = '`'
         return f"{char}{identifier}{char}"
 
-    def get_table_mapping(self) -> dict:
+    def get_table_mapping(self) -> dict[str, dict[str, str]]:
         """Get mapping of column name and type from all tables."""
         table_mapping = {}
-        for table in self.database.list_tables():
-            with self.database.snapshot() as snapshot:
+        for table in self.database.list_tables():  # type: ignore
+            with self.database.snapshot() as snapshot:  # type: ignore
                 result = snapshot.execute_sql(
-                    f"select column_name, spanner_type "
+                    "select column_name, spanner_type "
                     "from information_schema.columns "
-                    f"where table_name = '{table.table_id}'"
+                    "where table_name = @table_name",
+                    params={"table_name": table.table_id},
+                    param_types={"table_name": STRING},
                 )
                 table_mapping[table.table_id] = dict(result)
         return table_mapping
 
-    def insert_into(self, table_name, column_mapping):
+    def insert_into(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         """Insert a row into a table."""
         # TODO: handle ARRAY<STRING(MAX)> ?
-        def insert_rows(transaction):
+        def insert_rows(transaction):  # type: ignore
             transaction.insert(
                 table_name,
                 columns=column_mapping.keys(),
@@ -176,18 +142,16 @@ class SpannerClient:
             )
 
         with suppress(AlreadyExists):
-            self.database.run_in_transaction(insert_rows)
+            self.database.run_in_transaction(insert_rows)  # type: ignore
 
-    def row_exists(self, table_name, id_):
+    def row_exists(self, table_name: str, id_: str) -> bool:
         """Check whether a row is exist."""
         exists = False
-        with self.database.snapshot() as snapshot:
+        with self.database.snapshot() as snapshot:  # type: ignore
             result = snapshot.read(
                 table=table_name,
                 columns=["doc_id"],
-                keyset=spanner.KeySet([
-                    [id_]
-                ]),
+                keyset=KeySet([[id_]]),  # type: ignore
                 limit=1,
             )
             with suppress(IndexError, NotFound):
@@ -196,10 +160,10 @@ class SpannerClient:
                     exists = True
         return exists
 
-    def create_index(self, query):
+    def create_index(self, query: str) -> None:
         """Create index using raw query."""
         try:
-            self.database.update_ddl([query])
+            self.database.update_ddl([query])  # type: ignore
         except FailedPrecondition as exc:
             if "Duplicate name in schema" in exc.args[0]:
                 # table exists
@@ -207,7 +171,14 @@ class SpannerClient:
             else:
                 raise
 
-    def create_subtable(self, table_name: str, sub_table_name: str, column_mapping: dict, pk_column: str, sub_pk_column: str):
+    def create_subtable(
+        self,
+        table_name: str,
+        sub_table_name: str,
+        column_mapping: dict[str, str],
+        pk_column: str,
+        sub_pk_column: str
+    ) -> None:
         """Create sub table with its columns."""
         columns = []
         for column_name, column_type in column_mapping.items():
@@ -225,7 +196,7 @@ class SpannerClient:
         ])
 
         try:
-            self.database.update_ddl([query])
+            self.database.update_ddl([query])  # type: ignore
         except FailedPrecondition as exc:
             if "Duplicate name in schema" in exc.args[0]:
                 # table exists
@@ -233,32 +204,32 @@ class SpannerClient:
             else:
                 raise
 
-    def get(self, table_name, id_, column_names=None) -> dict:
+    def get(self, table_name: str, id_: str, column_names: _t.Union[list[str], None] = None) -> dict[str, _t.Any]:
         """Get a row from a table with matching ID."""
         if not column_names:
             # TODO: faster lookup on column names
-            column_names = self.get_table_mapping().get(table_name).keys()
+            col_names = list(self.get_table_mapping().get(table_name, {}).keys())
+        else:
+            col_names = []
 
         entry = {}
 
-        with self.database.snapshot() as snapshot:
+        with self.database.snapshot() as snapshot:  # type: ignore
             result = snapshot.read(
                 table=table_name,
-                columns=column_names,
-                keyset=spanner.KeySet([
-                    [id_]
-                ]),
+                columns=col_names,
+                keyset=KeySet([[id_]]),  # type: ignore
                 limit=1,
             )
             with suppress(IndexError, NotFound):
                 row = list(result)[0]
-                entry = dict(zip(column_names, row))
+                entry = dict(zip(col_names, row))
         return entry
 
-    def update(self, table_name, id_, column_mapping) -> bool:
+    def update(self, table_name: str, id_: str, column_mapping: dict[str, _t.Any]) -> bool:
         """Update a table row with matching ID."""
         # TODO: handle ARRAY<STRING(MAX)> ?
-        def update_rows(transaction):
+        def update_rows(transaction):  # type: ignore
             # need to add primary key
             column_mapping["doc_id"] = id_
             transaction.update(
@@ -269,30 +240,33 @@ class SpannerClient:
 
         modified = False
         with suppress(NotFound):
-            self.database.run_in_transaction(update_rows)
+            self.database.run_in_transaction(update_rows)  # type: ignore
             modified = True
         return modified
 
-    def search(self, table_name, column_names=None) -> dict:
+    def search(self, table_name: str, column_names: _t.Union[list[str], None] = None) -> _t.Iterator[dict[str, _t.Any]]:
         """Get all rows from a table."""
         if not column_names:
             # TODO: faster lookup on column names
-            column_names = self.get_table_mapping().get(table_name).keys()
+            col_names = list(self.get_table_mapping().get(table_name, {}).keys())
+        else:
+            col_names = []
 
-        with self.database.snapshot() as snapshot:
+        with self.database.snapshot() as snapshot:  # type: ignore
             result = snapshot.read(
                 table=table_name,
-                columns=column_names,
-                keyset=spanner.KeySet(all_=True),
+                columns=col_names,
+                keyset=KeySet(all_=True),  # type: ignore
             )
             for row in result:
-                yield dict(zip(column_names, row))
+                yield dict(zip(col_names, row))
 
-    def insert_into_subtable(self, table_name, column_mapping):
+    def insert_into_subtable(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         """Add new entry into subtable.
 
-        :param table_name: Subtable name.
-        :param column_mapping: Key-value pairs of column name and its value.
+        Args:
+            table_name: Subtable name.
+            column_mapping: Key-value pairs of column name and its value.
         """
         for column, value in column_mapping.items():
             if not self.column_in_subtable(table_name, column):
@@ -312,35 +286,21 @@ class SpannerClient:
                     },
                 )
 
-    def get_attr_syntax(self, attr):
-        """Get attribute syntax.
-
-        :param attr: Attribute name.
-        """
-        for attr_type in self.attr_types:
-            if attr not in attr_type["names"]:
-                continue
-            if attr_type.get("multivalued"):
-                return "JSON"
-            return attr_type["syntax"]
-
-        # fallback to OpenDJ attribute type
-        return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
-
-    def _transform_value(self, key, values):
+    def _transform_value(self, key: str, values: _t.Any) -> _t.Any:
         """Transform value from one to another based on its data type.
 
-        :param key: Attribute name.
-        :param values: Pre-transformed values.
+        Args:
+            key: Attribute name.
+            values: Pre-transformed values.
         """
-        type_ = self.sql_data_types.get(key)
+        type_ = self.sql_data_types.get(key, {})
 
         if not type_:
             attr_syntax = self.get_attr_syntax(key)
             type_ = self.sql_data_types_mapping[attr_syntax]
 
-        type_ = type_.get(self.dialect)
-        data_type = type_["type"]
+        type_ = type_.get(self.dialect, {})
+        data_type = type_.get("type", "")
 
         if data_type in ("SMALLINT", "BOOL",):
             if values[0].lower() in ("1", "on", "true", "yes", "ok"):
@@ -375,10 +335,11 @@ class SpannerClient:
         # fallback
         return values[0]
 
-    def _data_from_ldif(self, filename):
+    def _data_from_ldif(self, filename: str) -> _t.Iterator[tuple[str, dict[str, _t.Any]]]:
         """Get data from parsed LDIF file.
 
-        :param filename: LDIF filename.
+        Args:
+            filename: LDIF filename.
         """
         with open(filename, "rb") as fd:
             parser = LDIFParser(fd)
@@ -412,11 +373,12 @@ class SpannerClient:
                     attr_mapping[attr] = value
                 yield table_name, attr_mapping
 
-    def create_from_ldif(self, filepath, ctx):
+    def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
         """Create entry with data loaded from an LDIF template file.
 
-        :param filepath: Path to LDIF template file.
-        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        Args:
+            filepath: Path to LDIF template file.
+            ctx: Key-value pairs of context that rendered into LDIF template file.
         """
         with open(filepath) as src, NamedTemporaryFile("w+") as dst:
             dst.write(safe_render(src.read(), ctx))
@@ -427,11 +389,12 @@ class SpannerClient:
                 self.insert_into(table_name, column_mapping)
                 self.insert_into_subtable(table_name, column_mapping)
 
-    def column_in_subtable(self, table_name, column):
+    def column_in_subtable(self, table_name: str, column: str) -> bool:
         """Check whether a subtable has certain column.
 
-        :param table_name: Name of the subtable.
-        :param column: Name of the column.
+        Args:
+            table_name: Name of the subtable.
+            column: Name of the column.
         """
         exists = False
 
@@ -444,12 +407,13 @@ class SpannerClient:
         return exists
 
 
-def render_spanner_properties(manager, src: str, dest: str) -> None:
+def render_spanner_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to Spanner database.
 
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    :param src: Absolute path to the template.
-    :param dest: Absolute path where generated file is located.
+    Args:
+        manager: An instance of :class:`~jans.pycloudlib.manager.Manager`.
+        src: Absolute path to the template.
+        dest: Absolute path where generated file is located.
     """
     with open(src) as f:
         txt = f.read()

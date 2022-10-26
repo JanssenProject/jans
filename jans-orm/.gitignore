@@ -1,4 +1,5 @@
 # Eclipse project files
+.dbeaver
 .settings
 .project
 .classpath

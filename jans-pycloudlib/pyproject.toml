@@ -1,5 +1,5 @@
 [tool.pydocstyle]
-convention = "pep257"
+convention = "google"
 inherit = false
 match = '(?!test_|setup|conf).*\.py'
 # match_dir = '[^\.].*'
@@ -19,8 +19,12 @@ module = [
     "consul",
     "hvac",
     "kubernetes.*",
-    "urllib3",
+    # "urllib3",
     "docker.*",
-    "google.cloud",
+    # "google.cloud",
+    "ldap3.*",
+    "ldif",
+    "sqlalchemy.*",
+    "requests_toolbelt.*",
 ]
 ignore_missing_imports = true

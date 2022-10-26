@@ -182,9 +182,9 @@
         </classes>
     </test>
 
-    <test name="Default Prompt Login True Test" enabled="true">
+    <test name="Default Prompt Login True Test" enabled="false">
         <classes>
-            <class name="io.jans.as.client.ws.rs.DefaultPromptLoginTest"></class>
+            <class name="io.jans.as.client.ws.rs.DefaultPromptLoginTest"/>
         </classes>
     </test>
 
@@ -1165,6 +1165,13 @@
     <test name="Test Authorization ACR values" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.AuthorizationAcrValuesTest"/>
+        </classes>
+    </test>
+
+    <!-- SSA -->
+    <test name="SSA test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.SsaRestWebServiceHttpTest"/>
         </classes>
     </test>
 </suite>

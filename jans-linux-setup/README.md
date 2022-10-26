@@ -7,21 +7,21 @@ Scripts and templates to automate deployment and configuration of the Janssen Pr
 
 ## Prerequisites
 
-1.  Python 3.6+.
-1.  Python `pip3` package.
+1. Python 3.6+.
+2. Python `pip3` package.
 
 ## Installation
 
 ### Standard Python package
 
-1.  Create virtual environment and activate:
+1. Create virtual environment and activate:
 
     ```sh
     python3 -m venv .venv
     source .venv/bin/activate
     ```
 
-1.  Install the package:
+2. Install the package:
 
     ```
     make install
@@ -31,13 +31,13 @@ Scripts and templates to automate deployment and configuration of the Janssen Pr
 
 ### Python zipapp
 
-1.  Install [shiv](https://shiv.readthedocs.io/) using `pip3`:
+1. Install [shiv](https://shiv.readthedocs.io/) using `pip3`:
 
     ```sh
     pip3 install shiv
     ```
 
-1.  Install the package:
+2. Install the package:
 
     ```sh
     make zipapp

@@ -51,7 +51,6 @@ function() {
         cacheUrl: baseUrl + '/jans-config-api/api/v1/config/cache',
         jwksUrl: baseUrl + '/jans-config-api/api/v1/config/jwks',
         ldapUrl: baseUrl + '/jans-config-api/api/v1/config/database/ldap',
-        couchbaseUrl: baseUrl + '/jans-config-api/api/v1/config/database/couchbase',
         openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',
         scopes_url: baseUrl + '/jans-config-api/api/v1/scopes',
         umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
@@ -61,6 +60,8 @@ function() {
         auth_health_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/health',
 		org_configuration_url: baseUrl + '/jans-config-api/api/v1/org',
         user_url: baseUrl + '/jans-config-api/api/v1/user',
+		agama_url: baseUrl + '/jans-config-api/api/v1/agama',
+		session_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/session',
     };
 
     karate.configure('connectTimeout', 30000);

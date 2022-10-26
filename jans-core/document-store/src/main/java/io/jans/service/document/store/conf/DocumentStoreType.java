@@ -13,5 +13,5 @@ import jakarta.xml.bind.annotation.XmlEnum;
  */
 @XmlEnum(String.class)
 public enum DocumentStoreType {
-    LOCAL, JCA, WEB_DAV
+    LOCAL, JCA, WEB_DAV, DB
 }

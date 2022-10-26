@@ -37,20 +37,6 @@ questions:
   required: true
   label: Enable SCIM
   description: "System for Cross-domain Identity Management (SCIM) version 2.0"
-- variable: global.client-api.enabled
-  default: false
-  type: boolean
-  group: "Optional Services"
-  required: true
-  label: Enable ClientAPI
-  description: "Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting."
-  show_subquestion_if: true
-  subquestions:
-  - variable: config.configmap.cnClientApiCertCn
-    default: "client-api"
-    description: "Client API CommonName value for certificate subject"
-    type: string
-    label: Client API certificate CommonName (CN)
 
 # ======================
 # Test environment group
@@ -540,7 +526,7 @@ questions:
 - variable: auth-server.image.tag
   required: true
   type: string
-  default: "1.0.0"
+  default: "1.0.1-1"
   description: "The Auth Server Image tag"
   label: Auth Server image tag
   group: "Images"
@@ -569,40 +555,11 @@ questions:
 - variable: auth-server-key-rotation.image.tag
   required: true
   type: string
-  default: "1.0.0"
+  default: "1.0.1-1"
   description: "The Auth Server Image tag"
   label: Auth Server KeyRotation image tag
   group: "Images"
   show_if: "global.auth-server-key-rotation.enabled=true"
-# ClientAPI
-- variable: client-api.image.repository
-  required: true
-  type: string
-  default: "janssenproject/client-api"
-  description: "The ClientAPI Image repository"
-  label: ClientAPI image repo
-  group: "Images"
-  show_if: "global.client-api.enabled=true"
-- variable: client-api.image.pullPolicy
-  required: true
-  type: enum
-  group: "Images"
-  default: IfNotPresent
-  description: "The ClientAPI Image pull policy"
-  label: ClientAPI imagePullPolicy
-  options:
-  - "Always"
-  - "IfNotPresent"
-  - "Never"
-  show_if: "global.client-api.enabled=true"
-- variable: client-api.image.tag
-  required: true
-  type: string
-  default: "1.0.0"
-  description: "The ClientAPI Image tag"
-  label: ClientAPI image tag
-  group: "Images"
-  show_if: "global.client-api.enabled=true"
 # Configurator
 - variable: config.image.repository
   required: true
@@ -627,7 +584,7 @@ questions:
 - variable: config.image.tag
   required: true
   type: string
-  default: "1.0.0"
+  default: "1.0.1-1"
   description: "The Configurator Image tag"
   label: Configurator image tag
   group: "Images"
@@ -656,7 +613,7 @@ questions:
 - variable: config-api.image.tag
   required: true
   type: string
-  default: "1.0.0"
+  default: "1.0.1-1"
   description: "The ConfigAPI Image tag"
   label: ConfigAPI image tag
   group: "Images"
@@ -685,7 +642,7 @@ questions:
 - variable: fido2.image.tag
   required: true
   type: string
-  default: "1.0.0"
+  default: "1.0.1-1"
   description: "The Fido2 Image tag"
   label: Fido2 image tag
   group: "Images"
@@ -743,7 +700,7 @@ questions:
 - variable: persistence.image.tag
   required: true
   type: string
-  default: "1.0.0"
+  default: "1.0.1-1"
   description: "The Persistence Image tag"
   label: Persistence image tag
   group: "Images"
@@ -772,7 +729,7 @@ questions:
 - variable: scim.image.tag
   required: true
   type: string
-  default: "1.0.0"
+  default: "1.0.1-1"
   description: "The SCIM Image tag"
   label: SCIM image tag
   group: "Images"
@@ -790,15 +747,6 @@ questions:
   label: Auth-server Replicas
   description: "Service replica number."
   show_if: "global.auth-server.enabled=true"
-# ClientAPI
-- variable: client-api.replicas
-  default: 1
-  required: false
-  type: int
-  group: "Replicas"
-  label: ClientAPI Replicas
-  description: "Service replica number."
-  show_if: "global.client-api.enabled=true"
 # ConfigAPI
 - variable: config-api.replicas
   default: 1

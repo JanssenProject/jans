@@ -46,10 +46,10 @@ class ConfigApiInstaller(JettyInstaller):
         self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
         self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
 
-        self.extract_files()
+        if not base.argsp.shell:
+            self.extract_files()
 
     def install(self):
-
         self.copyFile(self.source_files[1][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
@@ -99,11 +99,10 @@ class ConfigApiInstaller(JettyInstaller):
         try:
             cfg_yml = self.read_config_api_swagger()
             scopes_def = cfg_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
-            scope_type = cfg_yml['components']['securitySchemes']['oauth2']['type']
         except:
             scopes_def = {}
-            scope_type = 'oauth2'
 
+        scope_type = 'oauth'
         self.check_clients([('jca_client_id', '1800.')])
 
         if not Config.get('jca_client_pw'):
@@ -166,7 +165,7 @@ class ConfigApiInstaller(JettyInstaller):
                 'jansAccessTknAsJwt': ['false'],
                 'jansAccessTknSigAlg': ['RS256'],
                 'jansAppTyp': ['web'],
-                'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
+                'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
                 'jansClntSecret': [Config.jca_client_encoded_pw],
                 'jansDisabled': ['false'],
                 'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
@@ -174,7 +173,6 @@ class ConfigApiInstaller(JettyInstaller):
                 'jansInclClaimsInIdTkn': ['false'],
                 'jansLogoutSessRequired': ['false'],
                 'jansPersistClntAuthzs': ['true'],
-                'jansRequireAuthTime': ['false'],
                 'jansRespTyp': ['code'],
                 'jansRptAsJwt': ['false'],
                 'jansScope': jansUmaScopes_all,

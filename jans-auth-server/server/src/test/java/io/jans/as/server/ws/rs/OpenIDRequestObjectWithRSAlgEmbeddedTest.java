@@ -7,7 +7,6 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
@@ -19,6 +18,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ResponseAsserter;
@@ -64,7 +64,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestParameterMethodRS256Step1(final String registerPath, final String redirectUris,
                                                  final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -134,7 +134,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -168,7 +168,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestParameterMethodRS384Step1(final String registerPath, final String redirectUris,
                                                  final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -238,7 +238,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -272,7 +272,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestParameterMethodRS512Step1(final String registerPath, final String redirectUris,
                                                  final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -342,7 +342,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -376,7 +376,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestParameterMethodRS256X509CertStep1(final String registerPath, final String redirectUris,
                                                          final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -446,7 +446,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
@@ -481,7 +481,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestParameterMethodRS384X509CertStep1(final String registerPath, final String redirectUris,
                                                          final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -551,7 +551,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -585,7 +585,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestParameterMethodRS512X509CertStep1(final String registerPath, final String redirectUris,
                                                          final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -655,7 +655,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {

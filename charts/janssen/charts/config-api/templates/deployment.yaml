@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -88,7 +87,7 @@ spec:
             - name: {{ include "config-api.name" . }}-updatelbip
               mountPath: /scripts
             {{- end }}
-          {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
+          {{- if and ( .Values.global.opendj.enabled ) (or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath")) }}
           resources: {}
           {{- else if .Values.global.cloud.testEnviroment }}
           resources: {}

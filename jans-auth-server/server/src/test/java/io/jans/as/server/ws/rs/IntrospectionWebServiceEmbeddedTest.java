@@ -44,7 +44,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
             "umaRedirectUri"})
     public void requestAuthorization(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                                      String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        authorization = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        authorization = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assertIt(authorization);
     }
@@ -54,7 +54,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
             "umaRedirectUri"})
     public void requestTokenToIntrospect(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                                          String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        tokenToIntrospect = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        tokenToIntrospect = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assertIt(tokenToIntrospect);
     }
@@ -62,7 +62,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestTokenToIntrospect")
     @Parameters({"introspectionPath"})
     public void introspection(final String introspectionPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + introspectionPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + introspectionPath).request();
 
         request.header("Accept", "application/json");
         request.header("Authorization", "Bearer " + authorization.getAccessToken());

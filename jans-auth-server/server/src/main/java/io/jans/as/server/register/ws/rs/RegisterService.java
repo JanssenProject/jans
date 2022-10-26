@@ -22,7 +22,7 @@ import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientMetadataService;
 import io.jans.as.server.service.ScopeService;
-import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.StringHelper;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -191,8 +191,8 @@ public class RegisterService {
         if (requestObject.getSpontaneousScopes() != null) {
             client.getAttributes().setSpontaneousScopes(requestObject.getSpontaneousScopes());
         }
-        if (requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-            client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        if (requestObject.getRunIntrospectionScriptBeforeJwtCreation() != null) {
+            client.getAttributes().setRunIntrospectionScriptBeforeJwtCreation(requestObject.getRunIntrospectionScriptBeforeJwtCreation());
         }
         if (requestObject.getKeepClientAuthorizationAfterExpiration() != null) {
             client.getAttributes().setKeepClientAuthorizationAfterExpiration(requestObject.getKeepClientAuthorizationAfterExpiration());
@@ -247,9 +247,6 @@ public class RegisterService {
         if (requestObject.getDefaultMaxAge() != null) {
             client.setDefaultMaxAge(requestObject.getDefaultMaxAge());
         }
-        if (requestObject.getRequireAuthTime() != null) {
-            client.setRequireAuthTime(requestObject.getRequireAuthTime());
-        }
         List<String> defaultAcrValues = requestObject.getDefaultAcrValues();
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             defaultAcrValues = new ArrayList<>(new HashSet<>(defaultAcrValues)); // Remove repeated elements
@@ -258,6 +255,12 @@ public class RegisterService {
         if (StringUtils.isNotBlank(requestObject.getInitiateLoginUri())) {
             client.setInitiateLoginUri(requestObject.getInitiateLoginUri());
         }
+
+        final List<String> groups = requestObject.getGroups();
+        if (groups != null && !groups.isEmpty()) {
+            client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
+        }
+
         List<String> postLogoutRedirectUris = requestObject.getPostLogoutRedirectUris();
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             postLogoutRedirectUris = new ArrayList<>(new HashSet<>(postLogoutRedirectUris)); // Remove repeated elements
@@ -400,7 +403,10 @@ public class RegisterService {
             try {
                 boolean processed = processApplicationAttributes(client, attr, parameterValues);
                 if (!processed) {
-                    client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
+                    final CustomObjectAttribute customAttribute = new CustomObjectAttribute();
+                    customAttribute.setName(attr);
+                    customAttribute.setValues(new ArrayList<>(parameterValues));
+                    client.getCustomAttributes().add(customAttribute);
                 }
             } catch (Exception e) {
                 log.debug(e.getMessage(), e);

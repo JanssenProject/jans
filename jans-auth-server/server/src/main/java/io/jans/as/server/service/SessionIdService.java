@@ -27,8 +27,8 @@ import io.jans.as.model.util.Util;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
@@ -88,7 +88,6 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 @Named
 public class SessionIdService {
 
-    public static final String OP_BROWSER_STATE = "opbs";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
     private static final int MAX_MERGE_ATTEMPTS = 3;
     private static final int DEFAULT_LOCAL_CACHE_EXPIRATION = 2;
@@ -251,6 +250,11 @@ public class SessionIdService {
     public boolean reinitLogin(SessionId session, boolean force) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
+        if (log.isTraceEnabled()) {
+            log.trace("sessionAttributes: {}", sessionAttributes);
+            log.trace("currentSessionAttributes: {}", currentSessionAttributes);
+            log.trace("shouldReinitSession: {}, force: {}", shouldReinitSession(sessionAttributes, currentSessionAttributes), force);
+        }
 
         if (force || shouldReinitSession(sessionAttributes, currentSessionAttributes)) {
             sessionAttributes.putAll(currentSessionAttributes);
@@ -277,6 +281,9 @@ public class SessionIdService {
             boolean updateResult = updateSessionId(session, true, true, true);
             if (!updateResult) {
                 log.debug("Failed to update session entry: '{}'", session.getId());
+            }
+            if (log.isTraceEnabled()) {
+                log.trace("sessionAttributes after update: {}, ", session.getSessionAttributes());
             }
             return updateResult;
         }
@@ -315,13 +322,17 @@ public class SessionIdService {
         // Update from request
         final Map<String, String> currentSessionAttributes = new HashMap<>(sessionAttributes);
 
-        Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-        Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+        Map<String, String> requestParameters = externalContext.getRequestParameterMap();
+        Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(requestParameters);
         for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
             String name = newRequestParameterMapEntry.getKey();
             if (!StringHelper.equalsIgnoreCase(name, io.jans.as.model.config.Constants.AUTH_STEP)) {
                 currentSessionAttributes.put(name, newRequestParameterMapEntry.getValue());
             }
+        }
+        if (!requestParameters.containsKey(AuthorizeRequestParam.CODE_CHALLENGE) || !requestParameters.containsKey(AuthorizeRequestParam.CODE_CHALLENGE_METHOD)) {
+            currentSessionAttributes.remove(AuthorizeRequestParam.CODE_CHALLENGE);
+            currentSessionAttributes.remove(AuthorizeRequestParam.CODE_CHALLENGE_METHOD);
         }
 
         return currentSessionAttributes;
@@ -452,7 +463,7 @@ public class SessionIdService {
         final String redirectUri = sessionIdAttributes.get("redirect_uri");
         final String sessionState = computeSessionState(clientId, redirectUri, opbs, salt);
         final String dn = buildDn(internalSid);
-        sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
+        sessionIdAttributes.put(SessionId.OP_BROWSER_STATE, opbs);
 
         Preconditions.checkNotNull(dn);
 

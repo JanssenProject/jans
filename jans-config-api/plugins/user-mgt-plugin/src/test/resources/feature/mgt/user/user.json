@@ -1,41 +1,14 @@
 {
-    "userId": "config_test_user_01",
+    "userId": "testUser4",
     "customAttributes": [
         {
             "name": "birthdate",
             "multiValued": false,
             "values": [
-                "19830106010101.253Z"
+                "20001231041508.553Z"
             ],
-            "value": "19830106010101.253Z",
-            "displayValue": "19830106010101.253Z"
-        },
-        {
-            "name": "c",
-            "multiValued": false,
-            "values": [
-                "US"
-            ],
-            "value": "US",
-            "displayValue": "US"
-        },
-        {
-            "name": "cn",
-            "multiValued": false,
-            "values": [
-                "Config Test User 01"
-            ],
-            "value": "Config Test User 01",
-            "displayValue": "Config Test User 01"
-        },
-        {
-            "name": "displayName",
-            "multiValued": false,
-            "values": [
-                "Config Test User"
-            ],
-            "value": "Config Test User 01",
-            "displayValue": "Config Test User 01"
+            "value": "20001231041508.553Z",
+            "displayValue": "20001231041508.553Z"
         },
         {
             "name": "emailVerified",
@@ -47,212 +20,59 @@
             "displayValue": "TRUE"
         },
         {
-            "name": "gender",
+            "name": "jansAdminUIRole",
             "multiValued": false,
             "values": [
-                "Male"
+                "api-admin"
             ],
-            "value": "Male",
-            "displayValue": "Male"
-        },
-        {
-            "name": "givenName",
-            "multiValued": false,
-            "values": [
-                "Test"
-            ],
-            "value": "Test",
-            "displayValue": "Test"
-        },
-        {
-            "name": "jansPrefUsrName",
-            "multiValued": false,
-            "values": [
-                "config_user_1"
-            ],
-            "value": "config_user_01",
-            "displayValue": "config_user_01"
-        },
-        {
-            "name": "jansStatus",
-            "multiValued": false,
-            "values": [
-                "active"
-            ],
-            "value": "active",
-            "displayValue": "active"
-        },
-        {
-            "name": "l",
-            "multiValued": false,
-            "values": [
-                "Austin"
-            ],
-            "value": "Austin",
-            "displayValue": "Austin"
-        },
-        {
-            "name": "locale",
-            "multiValued": false,
-            "values": [
-                "en-US"
-            ],
-            "value": "en-US",
-            "displayValue": "en-US"
-        },
-        {
-            "name": "mail",
-            "multiValued": false,
-            "values": [
-                "config_user_01@test.org"
-            ],
-            "value": "config_user_01@test.org",
-            "displayValue": "config_user_01@test.org"
+            "value": "api-admin",
+            "displayValue": "api-admin"
         },
         {
             "name": "memberOf",
-            "multiValued": true,
+            "multiValued": false,
             "values": [
-                "inum=7890,ou=groups,o=jans",
-                "inum=7891,ou=groups,o=jans"
+                "inum=60B7,ou=groups,o=jans"
             ],
-            "value": "inum=7890,ou=groups,o=jans",
-            "displayValue": "inum=7890,ou=groups,o=jans, inum=7891,ou=groups,o=jans"
+            "value": "inum=60B7,ou=groups,o=jans",
+            "displayValue": "inum=60B7,ou=groups,o=jans"
         },
         {
             "name": "middleName",
             "multiValued": false,
             "values": [
-                "config_user_01"
+                "Test USer 4"
             ],
-            "value": "config_user_01",
-            "displayValue": "config_user_01"
-        },
-        {
-            "name": "mobile",
-            "multiValued": false,
-            "values": [
-                "(512) 516-2414"
-            ],
-            "value": "(512) 516-2414",
-            "displayValue": "(512) 516-2414"
+            "value": "Test USer 4",
+            "displayValue": "Test USer 4"
         },
         {
             "name": "nickname",
             "multiValued": false,
             "values": [
-                "user1"
+                "Test USer 4"
             ],
-            "value": "user01",
-            "displayValue": "user01"
-        },
-        {
-            "name": "o",
-            "multiValued": false,
-            "values": [
-                "Test"
-            ],
-            "value": "Test",
-            "displayValue": "Test"
-        },
-        {
-            "name": "phoneNumberVerified",
-            "multiValued": false,
-            "values": [
-                "TRUE"
-            ],
-            "value": "TRUE",
-            "displayValue": "TRUE"
-        },
-        {
-            "name": "picture",
-            "multiValued": false,
-            "values": [
-                "http://www.jans.org/wp-content/uploads/2012/04/mike3.png"
-            ],
-            "value": "http://www.jans.org/wp-content/uploads/2012/04/mike3.png",
-            "displayValue": "http://www.jans.org/wp-content/uploads/2012/04/mike3.png"
-        },
-        {
-            "name": "preferredLanguage",
-            "multiValued": false,
-            "values": [
-                "en_US"
-            ],
-            "value": "en_US",
-            "displayValue": "en_US"
-        },
-        {
-            "name": "profile",
-            "multiValued": false,
-            "values": [
-                "http://www.mywebsite.com/profile"
-            ],
-            "value": "http://www.mywebsite.com/profile",
-            "displayValue": "http://www.mywebsite.com/profile"
+            "value": "Test USer 4",
+            "displayValue": "Test USer 4"
         },
         {
             "name": "sn",
             "multiValued": false,
             "values": [
-                "User1"
+                "User4"
             ],
-            "value": "User1",
-            "displayValue": "User1"
-        },
-        {
-            "name": "st",
-            "multiValued": false,
-            "values": [
-                "Texas"
-            ],
-            "value": "Texas",
-            "displayValue": "Texas"
-        },
-        {
-            "name": "street",
-            "multiValued": false,
-            "values": [
-                "622 East 6th Street"
-            ],
-            "value": "622 East 6th Street",
-            "displayValue": "622 East 6th Street"
-        },
-        {
-            "name": "telephoneNumber",
-            "multiValued": false,
-            "values": [
-                "(512) 516-2414"
-            ],
-            "value": "(512) 516-2414",
-            "displayValue": "(512) 516-2414"
-        },
-        {
-            "name": "website",
-            "multiValued": false,
-            "values": [
-                "http://www.jans.io"
-            ],
-            "value": "http://www.jans.io",
-            "displayValue": "http://www.jans.io"
-        },
-        {
-            "name": "zoneinfo",
-            "multiValued": false,
-            "values": [
-                "America/Chicago"
-            ],
-            "value": "America/Chicago",
-            "displayValue": "America/Chicago"
-        },
-        {
-            "name": "userPassword",
-            "multiValued": false,
-            "values": [
-                "pwd123"
-            ],
-            "value": "pwd123",
-            "displayValue": "pwd123"
+            "value": "User4",
+            "displayValue": "User4"
         }
-    ]
-}
+    ],
+    "customObjectClasses": [
+        "top",
+        "jansCustomPerson"
+    ],
+    "inum": "5dc28c49-efcc-4eef-9e54-834b910fb3d8",
+    "mail": "test4@jans.server2",
+    "displayName": "Default Test User",
+    "jansStatus": "active",
+    "userPassword": "pwd123",
+    "givenName": "Test4"
+    }

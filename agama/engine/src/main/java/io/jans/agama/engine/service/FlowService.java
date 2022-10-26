@@ -13,7 +13,6 @@ import io.jans.agama.engine.exception.FlowTimeoutException;
 import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
-import io.jans.agama.engine.model.ParentFlowData;
 import io.jans.agama.model.FlowMetadata;
 import io.jans.agama.model.EngineConfig;
 import io.jans.agama.model.Flow;
@@ -27,6 +26,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +43,7 @@ import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Undefined;
 import org.slf4j.Logger;
 
 @RequestScoped
@@ -74,7 +75,7 @@ public class FlowService {
     private String sessionId;
     private Context scriptCtx;
     private Scriptable globalScope;
-    private ParentFlowData parentFlowData;
+    private Deque<Map<String, String>> parentsMappings;
 
     /**
      * Obtains the status of the current flow (if any) for the current user
@@ -110,9 +111,11 @@ public class FlowService {
 
                 logger.info("Executing function {}", funcName);
                 Function f = (Function) globalScope.get(funcName, globalScope);
+                parentsMappings = status.getParentsMappings();
 
                 Object[] params = getFuncParams(fl, status.getJsonInput());
-                NativeObject result = (NativeObject) scriptCtx.callFunctionWithContinuations(f, globalScope, params);                
+                Object val = scriptCtx.callFunctionWithContinuations(f, globalScope, params);
+                NativeObject result = checkJSReturnedValue(val);                
                 finishFlow(result, status);
                 
             } catch (ContinuationPending pe) {
@@ -132,7 +135,7 @@ public class FlowService {
     }
     
     public FlowStatus continueFlow(FlowStatus status, String jsonParameters, boolean callbackResume,
-            boolean abortSubflow) throws FlowCrashException, FlowTimeoutException {
+            String cancelUrl) throws FlowCrashException, FlowTimeoutException {
 
         try {            
             if (callbackResume) {
@@ -149,10 +152,11 @@ public class FlowService {
                 flowUtils.printScopeIds(globalScope);
 
                 logger.debug("Resuming flow");
-                parentFlowData = status.getParentsData().peekLast();
+                parentsMappings = status.getParentsMappings();
 
-                NativeObject result = (NativeObject) scriptCtx.resumeContinuation(pcont.getSecond(), 
-                        globalScope, new Pair<>(abortSubflow, jsonParameters));
+                Object val = scriptCtx.resumeContinuation(pcont.getSecond(), 
+                        globalScope, new Pair<>(cancelUrl, jsonParameters));
+                NativeObject result = checkJSReturnedValue(val);
                 finishFlow(result, status);
 
             } catch (ContinuationPending pe) {
@@ -173,9 +177,10 @@ public class FlowService {
     }
     
     // This is called in the middle of a cx.resumeContinuation invocation (see util.js#_flowCall)
-    public Pair<Function, NativeJavaObject> prepareSubflow(String subflowName, String parentBasepath, 
-        String[] pathOverrides) throws IOException {
+    public Pair<Function, NativeJavaObject> prepareSubflow(String subflowName,
+            Map<String, String> mappings) throws IOException {
 
+        logger.debug("Template mappings of subflow {} are {}", subflowName, mappings);
         Flow flow = aps.getFlow(subflowName, false);
         FlowMetadata fl = flow.getMetadata();
         String funcName = fl.getFuncName();
@@ -189,12 +194,9 @@ public class FlowService {
 
         logger.info("Appending function {} to scope", funcName);
         Function f = (Function) globalScope.get(funcName, globalScope);
-        //The values set below are useful when saving the state, see method processPause
         
-        ParentFlowData pfd = new ParentFlowData();
-        pfd.setParentBasepath(parentBasepath);
-        pfd.setPathOverrides(pathOverrides);
-        parentFlowData = pfd;
+        //This value is useful when saving the state, see method processPause
+        parentsMappings.push(mappings);
 
         logger.info("Evaluating subflow code");
         Map<String, Object> configs = Optional.ofNullable(fl.getProperties()).orElse(Collections.emptyMap());
@@ -215,8 +217,8 @@ public class FlowService {
 
     }
     
-    public void closeSubflow() throws IOException {
-        parentFlowData = null;
+    public void closeSubflow() throws IOException { 
+        parentsMappings.pop();
     }
     
     public void terminateFlow() throws IOException {
@@ -235,7 +237,7 @@ public class FlowService {
     
         String code = fl.getTranspiled();
         if (code == null) {
-            String msg = "Source code of flow " + fl.getQName() + " ";
+            String msg = "Source code of flow " + fl.getQname() + " ";
             msg += fl.getCodeError() == null ? "has not been parsed yet" : "has errors";
             throw new IOException(msg);
         }
@@ -253,18 +255,18 @@ public class FlowService {
 
     private FlowStatus processPause(ContinuationPending pending, FlowStatus status)
             throws FlowCrashException, IOException {
-        
+
         PendingException pe = null;
         if (pending instanceof PendingRenderException) {
 
             PendingRenderException pre = (PendingRenderException) pending;
-            String templPath = pre.getTemplatePath();
+            String templPath = computeTemplatePath(pre.getTemplatePath(), parentsMappings);
             
             if (!templPath.contains("."))
                 throw new FlowCrashException(
                         "Expecting file extension for the template to render: " + templPath);
 
-            status.setTemplatePath(computeTemplatePath(templPath, parentFlowData));
+            status.setTemplatePath(templPath);
             status.setTemplateDataModel(pre.getDataModel());
             status.setExternalRedirectUrl(null);
             pe = pre;
@@ -281,13 +283,8 @@ public class FlowService {
         } else {
             throw new IllegalArgumentException("Unexpected instance of ContinuationPending");
         }
-        
-        if (parentFlowData == null) {
-            status.getParentsData().pollLast();
-        } else {
-            status.getParentsData().offer(parentFlowData);
-        }
 
+        logger.debug("Parents mappings: {}", status.getParentsMappings());
         status.setAllowCallbackResume(pe.isAllowCallbackResume());
         //Save the state
         aps.saveState(sessionId, status, pe.getContinuation(), globalScope);
@@ -296,14 +293,16 @@ public class FlowService {
         
     }
     
-    private String computeTemplatePath(String path, ParentFlowData pfd) {
-        
-        String[] overrides = Optional.ofNullable(pfd).map(ParentFlowData::getPathOverrides)
-                .orElse(new String[0]);
+    private String computeTemplatePath(String path, Deque<Map<String, String>> parentsMappings) {
 
-        if (Stream.of(overrides).anyMatch(path::equals))
-            return pfd.getParentBasepath() + "/" + path;
-        return path;
+        String result = path;
+        for (Map<String, String> mapping : parentsMappings) {
+            String overriden = mapping.get(result);
+            if (overriden != null) result = overriden;
+        }
+
+        logger.info("Inferred template for {} is {}", path, result);
+        return result;
 
     }
     
@@ -350,6 +349,19 @@ public class FlowService {
         
     }
     
+    private NativeObject checkJSReturnedValue(Object obj) throws Exception {
+
+        try {
+            //obj is not null
+            return NativeObject.class.cast(obj);
+        } catch (ClassCastException e) {
+            if (Undefined.isUndefined(obj)) {
+                throw new Exception("No Finish instruction was reached");
+            } else throw e;
+        }
+
+    }
+
     private void makeCrashException(Exception e) throws FlowCrashException {
 
         String msg;

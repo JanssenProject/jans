@@ -356,6 +356,7 @@ class SpannerBackend:
             ("jansUmaRPT", "dpop"),
             ("jansUmaPCT", "dpop"),
             ("jansClnt", "o"),
+            ("jansClnt", "jansGrp"),
         ]:
             add_column(mod[0], mod[1])
 

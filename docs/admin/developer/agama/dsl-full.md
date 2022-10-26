@@ -1,6 +1,13 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 ## Agama DSL reference
 
-This document surveys the different constructs of the agama domain-specific language.
+This document surveys the different constructs of the Agama domain-specific language.
 
 ## Code comments
 
@@ -58,7 +65,7 @@ The “special” value `null` can be used (responsibly) to represent the absenc
 
 - They are in essence associative arrays (a.k.a. dictionaries): unordered collections of key/value pairs 
 
-- Example: `{ brand: "Ford", color: null, model: 1963, overhaulsIn: [ 1979, 1999 ] }`. This map keys are brand, color, model, and overhaulsIn 
+- Example: `{ brand: "Ford", color: null, model: 1963, overhaulsIn: [ 1979, 1999 ] }`. This map keys are `brand`, `color`, `model`, and `overhaulsIn` 
 
 - In literal notation, keys names must follow the pattern `[a-zA-Z]( _ | [a-zA-Z] | [0-9] )*` so these are all valid key names: `a`, `Agama`, `b_a`, `a0_0`; on the contrary, `_a`, `9`, `-a`, and `"aha"` are invalid key names 
 
@@ -153,7 +160,7 @@ Flow com.acme.FoodSurvey
     Basepath "mydir"
 ```
 
-Next, flow timeout may be specified. This is the maximum amount of time available the end-user can take to fully complete a flow. For instance:
+Next, flow timeout may be specified. This is the maximum amount of time the end-user can take to fully complete a flow. For instance:
 
 ```
 Flow com.acme.FoodSurvey
@@ -209,7 +216,7 @@ y = false
 ...
 ```
 
-There are several types of statements: branching, looping, web interaction, etc. They will be regarded in the subsequent sections of this document. Note agama does not support the concept of subroutines/procedures; this is not needed because functional decomposition is carried out by calling [subflows](#subflows).
+There are several types of statements: branching, looping, web interaction, etc. They will be regarded in the subsequent sections of this document. Note Agama does not support the concept of subroutines/procedures; this is not needed because functional decomposition is carried out by calling [subflows](#subflows).
 
 ## Logging
 
@@ -335,24 +342,24 @@ y = ...
 z = [ 3.1416, 2.71828 ]
 
 Match car.model to
-    x
-        //Code in this block will be executed if car.model is equal to the value of x
-       ...
+   x
+      //Code in this block will be executed if car.model is equal to the value of x
+      ...
 
-    -y //Here we use minus y
-       ...  
+   -y //Here we use minus y
+      ...  
 
-    z[0]
-       ...
+   z[0]
+      ...
 
-    1.618 //Literal values can be used too for matching
-       ...  
+   1.618 //Literal values can be used too for matching
+      ...  
 
-    null
-        ...
+   null
+      ...
 
 Otherwise    //optional block
-    //Instructions here are executed if there was no match at all 
+   //Instructions here are executed if there was no match at all 
 ```
 
 ## Flow finish
@@ -439,8 +446,9 @@ Finish it.nonsense
 
 - Any statements found after `Finish` is not reached and thus, not executed
 - If no `Finish` statement is found in a flow's execution, this will degenerate in flow crash 
-- When a flow is finished and was used as subflow (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later.
-- Learn about aborted flows [here](./flows-lifecycle.md#cancellation). Also check the best practices on [Finishing flows](./flows-lifecycle.md#finishing-flows).
+- When a flow is finished and was used as subflow (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later
+- A flow cannot be aborted by itself. This can only be achieved through a parent flow. Learn more about aborted flows [here](./flows-lifecycle.md#cancellation)
+- Check the best practices on finishing flows [here](./flows-lifecycle.md#finishing-flows)
 
 ## Web interaction
 
@@ -471,7 +479,7 @@ result = RFAC map.twitter.loginUrl
 ```
 
 </td>
-		<td>Redirects to the given location. Once the user browser is taken to the callback URL by the external site, the data included in the query string or payload is stored in <code>result</code> (a _map_) for further processing</td>
+		<td>Redirects to the given location. Once the user browser is taken to the callback URL by the external site, the data included in the query string or payload is stored in <code>result</code> (a map) for further processing</td>
 	</tr>
 </table>
 
@@ -533,8 +541,6 @@ The three-param variant can be used when:
 
 - The decision to redirect to an external site can only be done from the browser itself
 - The external site expects to receive an HTTP POST
-
-Status checker TODO.
 
 ## Looping
 
@@ -674,7 +680,7 @@ Iterate over seasons using sn
 
 ## Subflows
 
-A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in agama.
+A flow can `Trigger` another flow (a.k.a subflow) and grab its response when `Finish`ed. This feature materializes flow composition and re-use in Agama.
 
 <table>
 	<tr><th>Example</th><th>Notes</th></tr>
@@ -729,15 +735,30 @@ Note _list_ and _map_ literals cannot be passed as arguments to `Trigger`:
 
 ### Template overrides
 
-When re-using flows, existing templates may not match the required look-and-feel of the flow that is being built, or may require minor adjustments to fit better the parent's needs. These problems can be overcome by declaring which templates the developer would like to override for a given subflow call. Example:
+When re-using flows, existing templates may not match the required look-and-feel or layout of the flow that is being built, or may require minor adjustments to fit better the parent's needs. These can be overcome by declaring which templates the developer would like to override for a given subflow call. Example:
 
 ```
 outcome = Trigger jo.jo.PersonalInfoGathering
-    Override templates "basic.ftl" "detail.ftl"
+    Override templates "path/basic.ftl" "" "path2/dir/detail.ftl" "tmp/mydetail.ftl"
 Log "subflow returned with success?" outcome.success
 ```
 
-In an indented block, using the `Override templates` keyword one or more string literals can be provided. They specify the paths to templates of the subflow that will be overriden by the parent. In the example above, templates `basic.ftl` and `detail.ftl` of `PersonalInfoGathering` flow won't be picked from its expected location but from the base path of the current (parent) flow.
+In an indented block using the `Override templates` keyword, several string literals can be provided. They specify the paths of the (subflows) templates that will be overriden by the parent and the corresponding new paths. In the example above, templates `path/basic.ftl` and `path2/dir/detail.ftl` rendered by flow `PersonalInfoGathering` (or its subflows) won't be picked from these locations but from the base path of the current (parent) flow using names `basic.ftl` and `tmp/mydetail.ftl` respectively. Usage of empty string denotes reusing the same file name than the original file.
+
+Alternatively, every pair of original vs. overriden path can be specified in a single line for more clarity, like this:
+
+```
+outcome = Trigger jo.jo.PersonalInfoGathering
+    Override templates "path/basic.ftl" "" 
+    "path2/dir/detail.ftl" "tmp/mydetail.ftl"
+    ...
+```
+
+To learn more about how paths in template overrides work, see [writing UI pages](./ui-pages.md#template-overrides).
+
+### About recursive invocations
+
+A flow **cannot** trigger itself. Also, mutual calls (e.g. `A` triggering `B`, and `B` triggering `A`) must be **avoided** at all cost. 
 
 ## Java interaction
 
@@ -801,7 +822,7 @@ When E is not null
 ```
 
 </td>
-		<td>Similar to the first example.<br/>If an exception is thrown by the invocation, it's caught and assigned to variable <code>E</code>, while <code>number</code> is assigned <code>null</code>.<br/>Note both checked and unchecked exceptions are caught</td>
+		<td>Similar to the first example.<br/>If an exception is thrown by the invocation, it's caught and assigned to variable <code>E</code>.<br/>Note both checked and unchecked exceptions are caught</td>
 	</tr>
 	<tr>
 <td>
@@ -864,7 +885,11 @@ When using `Call`, the method to execute is picked based on the name (e.g. after
 
 Once a concrete method is picked, a best effort is made to convert (if required) the values passed as arguments so that they match the expected parameter types in the method signature. If a conversion fails, this will degenerate in an `IllegalArgumentException`.
 
-_list_ and _map_ literals cannot be passed as arguments to method calls directly. This means the following is illegal: `Call co.Utils#myMethod { key: [ 1, 2 , 3] } [ "Yeeha!" ]`. To achieve the same effect assign the literal value to a variable and pass that instead.
+**Limitations:**
+
+- _list_ and _map_ literals cannot be passed as arguments to method calls directly. This means the following is illegal: `Call co.Utils#myMethod { key: [ 1, 2 , 3] } [ "Yeeha!" ]`. To achieve the same effect assign the literal value to a variable and pass that instead
+
+- `Call`ing a method that mutates one or more of the arguments passed will not work properly if the corresponding parameters in the method signature have type information attached. For example, copying a list into another using `java.util.Collections#copy​(List<? super T> dest, List<? extends T> src)` may not behave as expected. Conversely, calling `java.lang.reflect.Array#set​(Object array, int index, Object value)` works fine because `array` does not have a parameterized type. The practice of mutating passed arguments is unusual and sometimes discouraged in programming
 
 ### Exception handling
 
@@ -920,7 +945,8 @@ x["1"]
 ```
 
 </td>
-<td>
+</tr><tr>
+<td colspan="3">
 
 ```
 x[ z[0] ]
@@ -928,7 +954,8 @@ x[ z[0] ]
 ```
 
 </td>
-<td>
+</tr><tr>
+<td colspan="3">
 
 ```
 x[obj.property]
@@ -1005,7 +1032,6 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |-|-|
 |Basepath|header declaration|
 |Call|Java interaction|
-|Close|reserved for future use|
 |Configs|header declaration|
 |Finish|termination|
 |Flow|header declaration|
@@ -1013,7 +1039,6 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |Iterate over|loops|
 |Log|logging|
 |Match|conditionals|
-|Open for|reserved for future use|
 |Otherwise|conditionals|
 |Override templates|web interaction|
 |Quit|conditionals and loops|
@@ -1021,7 +1046,6 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |RFAC|web interaction|
 |RRF|web interaction|
 |seconds|header declaration|
-|Status checker|reserved for future use|
 |times max|loops|
 |to|conditionals|
 |Timeout|header declaration|
@@ -1033,7 +1057,7 @@ The following is a list of reserved words and as such, cannot be used as variabl
 |-|
 |and|
 |is|
-|not|
+|is not|
 |or|
 
 |Special literals|

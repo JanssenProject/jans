@@ -10,7 +10,7 @@ import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.server.i18n.LanguageBean;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import io.jans.as.server.uma.authorization.UmaGatherContext;

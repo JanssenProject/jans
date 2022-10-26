@@ -19,20 +19,20 @@ MaybeCacert = _t.Union[bool, str]
 class ConsulConfig(BaseConfig):
     """This class interacts with Consul backend.
 
-    .. important:: The instance of this class is configured via environment variables.
+    The instance of this class is configured via environment variables.
 
-        Supported environment variables:
+    Supported environment variables:
 
-        - ``CN_CONFIG_CONSUL_HOST``: hostname or IP of Consul (default to ``localhost``).
-        - ``CN_CONFIG_CONSUL_PORT``: port of Consul (default to ``8500``).
-        - ``CN_CONFIG_CONSUL_CONSISTENCY``: Consul consistency mode (choose one of ``default``, ``consistent``, or ``stale``). Default to ``stale`` mode.
-        - ``CN_CONFIG_CONSUL_SCHEME``: supported Consul scheme (``http`` or ``https``).
-        - ``CN_CONFIG_CONSUL_VERIFY``: whether to verify cert or not (default to ``false``).
-        - ``CN_CONFIG_CONSUL_CACERT_FILE``: path to Consul CA cert file (default to ``/etc/certs/consul_ca.crt``). This file will be used if it exists and ``CN_CONFIG_CONSUL_VERIFY`` set to ``true``.
-        - ``CN_CONFIG_CONSUL_CERT_FILE``: path to Consul cert file (default to ``/etc/certs/consul_client.crt``).
-        - ``CN_CONFIG_CONSUL_KEY_FILE``: path to Consul key file (default to ``/etc/certs/consul_client.key``).
-        - ``CN_CONFIG_CONSUL_TOKEN_FILE``: path to file contains ACL token (default to ``/etc/certs/consul_token``).
-        - ``CN_CONFIG_CONSUL_NAMESPACE``: namespace used to create the config tree, i.e. ``jans/config`` (default to ``jans``).
+    - `CN_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
+    - `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
+    - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
+    - `CN_CONFIG_CONSUL_SCHEME`: supported Consul scheme (`http` or `https`).
+    - `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not (default to `false`).
+    - `CN_CONFIG_CONSUL_CACERT_FILE`: path to Consul CA cert file (default to `/etc/certs/consul_ca.crt`). This file will be used if it exists and `CN_CONFIG_CONSUL_VERIFY` set to `true`.
+    - `CN_CONFIG_CONSUL_CERT_FILE`: path to Consul cert file (default to `/etc/certs/consul_client.crt`).
+    - `CN_CONFIG_CONSUL_KEY_FILE`: path to Consul key file (default to `/etc/certs/consul_client.key`).
+    - `CN_CONFIG_CONSUL_TOKEN_FILE`: path to file contains ACL token (default to `/etc/certs/consul_token`).
+    - `CN_CONFIG_CONSUL_NAMESPACE`: namespace used to create the config tree, i.e. `jans/config` (default to `jans`).
     """
 
     def __init__(self) -> None:
@@ -104,31 +104,40 @@ class ConsulConfig(BaseConfig):
     def _merge_path(self, key: str) -> str:
         """Add prefix to the key.
 
-        For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
-        and key ``random``, calling this method returns ``jans/config/random`` key.
+        For example, given the namespace is `jans`, prefix will be set as `jans/config`
+        and key `random`, calling this method returns `jans/config/random` key.
 
-        :param key: Key name as relative path.
-        :returns: Absolute path to prefixed key.
+        Args:
+            key: Key name as relative path.
+
+        Returns:
+            Absolute path to prefixed key.
         """
         return "".join([self.prefix, key])
 
     def _unmerge_path(self, key: str) -> str:
         """Remove prefix from the key.
 
-        For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
-        and an absolute path ``jans/config/random``, calling this method returns ``random`` key.
+        For example, given the namespace is `jans`, prefix will be set as `jans/config`
+        and an absolute path `jans/config/random`, calling this method returns `random` key.
 
-        :param key: Key name as relative path.
-        :returns: Relative path to key.
+        Args:
+            key: Key name as relative path.
+
+        Returns:
+            Relative path to key.
         """
         return key[len(self.prefix):]
 
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
-        :param key: Key name.
-        :param default: Default value if key is not exist.
-        :returns: Value based on given key or default one.
+        Args:
+            key: Key name.
+            default: Default value if key is not exist.
+
+        Returns:
+            Value based on given key or default one.
         """
         _, result = self.client.kv.get(self._merge_path(key))
         if not result:
@@ -139,22 +148,26 @@ class ConsulConfig(BaseConfig):
     def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
-        :param key: Key name.
-        :param value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            key: Key name.
+            value: Value of the key.
+
+        Returns:
+            A boolean to mark whether config is set or not.
         """
         return bool(self.client.kv.put(self._merge_path(key), safe_value(value)))
 
     def _request_warning(self, scheme: str, verify: _t.Union[bool, str]) -> None:
         """Emit warning about unverified request to unsecure Consul address.
 
-        :param scheme: Scheme of Consul address.
-        :param verify: Mark whether client needs to verify the address.
+        Args:
+            scheme: Scheme of Consul address.
+            verify: Mark whether client needs to verify the address.
         """
         import urllib3
 
         if scheme == "https" and verify is False:
-            urllib3.disable_warnings()  # type: ignore
+            urllib3.disable_warnings()
             logger.warning(
                 "All requests to Consul will be unverified. "
                 "Please adjust CN_CONFIG_CONSUL_SCHEME and "
@@ -163,8 +176,11 @@ class ConsulConfig(BaseConfig):
     def _token_from_file(self, path: str) -> str:
         """Get the token string from a path.
 
-        :param path: Path to file contains token string.
-        :returns: Token string.
+        Args:
+            path: Path to file contains token string.
+
+        Returns:
+            Token string.
         """
         if not os.path.isfile(path):
             return ""
@@ -183,12 +199,15 @@ class ConsulConfig(BaseConfig):
     ) -> tuple[MaybeCert, MaybeCacert]:
         """Verify client cert and key.
 
-        :param scheme: Scheme of Consul address.
-        :param verify: Mark whether client needs to verify the address.
-        :param cacert_file: Path to CA cert file.
-        :param cert_file: Path to client's cert file.
-        :param key_file: Path to client's key file.
-        :returns: A pair of cert key files (if exist) and verification.
+        Args:
+            scheme: Scheme of Consul address.
+            verify: Mark whether client needs to verify the address.
+            cacert_file: Path to CA cert file.
+            cert_file: Path to client's cert file.
+            key_file: Path to client's key file.
+
+        Returns:
+            A pair of cert key files (if exist) and verification.
         """
         cert = None
         maybe_cacert: MaybeCacert = as_boolean(verify)
@@ -205,8 +224,11 @@ class ConsulConfig(BaseConfig):
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set key-value pairs.
 
-        :param data: Key-value pairs.
-        :returns: A ``bool`` to mark whether config is set or not.
+        Args:
+            data: Key-value pairs.
+
+        Returns:
+            A boolean to mark whether config is set or not.
         """
         for k, v in data.items():
             self.set(k, v)
@@ -215,7 +237,8 @@ class ConsulConfig(BaseConfig):
     def get_all(self) -> dict[str, _t.Any]:
         """Get all key-value pairs.
 
-        :returns: A ``dict`` of key-value pairs (if any).
+        Returns:
+            A mapping of all configs (if any).
         """
         _, resultset = self.client.kv.get(self._merge_path(""), recurse=True)
 

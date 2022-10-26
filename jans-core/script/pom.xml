@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-core-parent</artifactId>
-		<version>1.0.2-SNAPSHOT</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -68,7 +68,7 @@
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>org.gluufederation</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 

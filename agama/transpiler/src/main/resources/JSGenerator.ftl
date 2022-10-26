@@ -31,8 +31,7 @@ let idx = [], _items = []
 
 <#macro rrf_call>
     <#local hasbool = .node.BOOL?size gt 0>
-    
-    <#if .node.statusr_block?size gt 0><#visit .node.statusr_block></#if>    
+
     <#if .node.variable?size = 0>
         _it = {}
     <#else>
@@ -44,12 +43,12 @@ let idx = [], _items = []
     string parsing via JS was preferred over returning a Java Map directly because it feels more
     natural for RRF to return a native JS object; it creates the illusion there was no Java involved -->
     _it2 = JSON.parse(_it.second)
-    if (_it.first.booleanValue()) return _abort(_it2)
+    _it = _it.first
+    if (!_isNil(_it)) return _abort(_it, _it2)
 
     <@util_preassign node=.node /> _it2
     <#-- Clear temp variables to make serialization lighter (in the next RRF call) -->
-    _it = null
-    _it2 = null
+    _it = _it2 = null
 </#macro>
 
 <#macro action_call>
@@ -70,7 +69,7 @@ try {
 
     <#if catch>
 } catch (_e) {
-     var ${.node.preassign_catch.short_var} = _e
+     var ${.node.preassign_catch.short_var} = _e.javaException
 }
     </#if>
 </#macro>
@@ -81,8 +80,10 @@ try {
     <#else>
         _it = "${.node.qname}"
     </#if>
-    <@util_preassign node=.node />
-_flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
+_it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
+if (_it === undefined) return
+if (_it.bubbleUp) return _it.value 
+    <@util_preassign node=.node /> _it.value
 </#macro>
 
 <#macro rfac>
@@ -190,15 +191,6 @@ _equals(${.node.simple_expr[0]}, ${.node.simple_expr[1]})
 
 <#macro log>
 _log(<@util_argslist node=.node />)
-</#macro>
-
-<#macro statusr_block>
-    <#local isuint = .node.statusr_allow.variable?size = 0>
-    <#local isequality = statusr_until.boolean_expr.NOT?size gt 0>
-<#--
-_allowStatusRequest(${isuint?then(.node.statusr_allow.UINT!"", .node.statusr_allow.variable!"")},
-    "${.node.statusr_until.boolean_expr.simple_expr[0]!""}", "${.node.statusr_until.boolean_expr.simple_expr[1]!""}",
-    ${isequality?c}, [<#recurse .node.statusr_reply>]) -->
 </#macro>
 
 <#macro util_loop_body node>

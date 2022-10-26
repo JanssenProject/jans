@@ -232,6 +232,11 @@ public enum RegisterRequestParam {
     INITIATE_LOGIN_URI("initiate_login_uri"),
 
     /**
+     * Groups (roles)
+     */
+    GROUPS("groups"),
+
+    /**
      * URL supplied by the RP to request that the user be redirected to this location after a logout has been performed,
      */
     POST_LOGOUT_REDIRECT_URIS("post_logout_redirect_uris"),
@@ -294,7 +299,7 @@ public enum RegisterRequestParam {
     /**
      * boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT
      */
-    RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS("run_introspection_script_before_access_token_as_jwt_creation_and_include_claims"),
+    RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION("run_introspection_script_before_jwt_creation"),
 
     /**
      * boolean property which indicates whether to keep client authorization after expiration

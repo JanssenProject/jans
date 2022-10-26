@@ -81,7 +81,7 @@ public class RegisterRequest extends BaseRequest {
     private String tlsClientAuthSubjectDn;
     private Boolean allowSpontaneousScopes;
     private List<String> spontaneousScopes;
-    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    private Boolean runIntrospectionScriptBeforeJwtCreation;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
     private String subjectIdentifierAttribute;
@@ -103,9 +103,9 @@ public class RegisterRequest extends BaseRequest {
     private AuthenticationMethod tokenEndpointAuthMethod;
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
-    private Boolean requireAuthTime;
     private List<String> defaultAcrValues;
     private String initiateLoginUri;
+    private List<String> groups;
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
     private List<String> authorizedOrigins;
@@ -155,6 +155,7 @@ public class RegisterRequest extends BaseRequest {
         this.contacts = new ArrayList<>();
         this.defaultAcrValues = new ArrayList<>();
         this.postLogoutRedirectUris = new ArrayList<>();
+        this.groups = new ArrayList<>();
         this.requestUris = new ArrayList<>();
         this.authorizedOrigins = new ArrayList<>();
         this.scope = new ArrayList<>();
@@ -234,12 +235,12 @@ public class RegisterRequest extends BaseRequest {
         this.additionalAudience = additionalAudience;
     }
 
-    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
-        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
+        return runIntrospectionScriptBeforeJwtCreation;
     }
 
-    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
-        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public void setRunIntrospectionScriptBeforeJwtCreation(Boolean runIntrospectionScriptBeforeJwtCreation) {
+        this.runIntrospectionScriptBeforeJwtCreation = runIntrospectionScriptBeforeJwtCreation;
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
@@ -1039,26 +1040,6 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
-     * Returns the Boolean value specifying whether the auth_time claim in the id_token is required.
-     * It is required when the value is true. The auth_time claim request in the request object overrides this setting.
-     *
-     * @return The Boolean value specifying whether the auth_time claim in the id_token is required.
-     */
-    public Boolean getRequireAuthTime() {
-        return requireAuthTime;
-    }
-
-    /**
-     * Sets the Boolean value specifying whether the auth_time claim in the id_token is required.
-     * Ir is required when the value is true. The auth_time claim request in the request object overrides this setting.
-     *
-     * @param requireAuthTime The Boolean value specifying whether the auth_time claim in the id_token is required.
-     */
-    public void setRequireAuthTime(Boolean requireAuthTime) {
-        this.requireAuthTime = requireAuthTime;
-    }
-
-    /**
      * Returns the Default requested Authentication Context Class Reference values.
      *
      * @return The Default requested Authentication Context Class Reference values.
@@ -1093,6 +1074,24 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setInitiateLoginUri(String initiateLoginUri) {
         this.initiateLoginUri = initiateLoginUri;
+    }
+
+    /**
+     * Returns groups
+     *
+     * @return groups
+     */
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    /**
+     * Sets groups
+     *
+     * @param groups groups
+     */
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
     }
 
     /**
@@ -1378,8 +1377,8 @@ public class RegisterRequest extends BaseRequest {
         result.setClaimsRedirectUris(extractListByKey(requestObject, CLAIMS_REDIRECT_URIS.toString()));
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
         result.setPostLogoutRedirectUris(extractListByKey(requestObject, POST_LOGOUT_REDIRECT_URIS.toString()));
+        result.setGroups(extractListByKey(requestObject, GROUPS.toString()));
         result.setDefaultAcrValues(extractListByKey(requestObject, DEFAULT_ACR_VALUES.toString()));
-        result.setRequireAuthTime(requestObject.optBoolean(REQUIRE_AUTH_TIME.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setBackchannelLogoutUris(extractListByKey(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
@@ -1391,7 +1390,7 @@ public class RegisterRequest extends BaseRequest {
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
-        result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
+        result.setRunIntrospectionScriptBeforeJwtCreation(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString()));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
@@ -1586,14 +1585,14 @@ public class RegisterRequest extends BaseRequest {
         if (defaultMaxAge != null) {
             function.apply(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
         }
-        if (requireAuthTime != null) {
-            function.apply(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
-        }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
         }
         if (StringUtils.isNotBlank(initiateLoginUri)) {
             function.apply(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
+        }
+        if (groups != null && !groups.isEmpty()) {
+            function.apply(GROUPS.toString(), toJSONArray(groups));
         }
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             function.apply(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
@@ -1654,8 +1653,8 @@ public class RegisterRequest extends BaseRequest {
         if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
             function.apply(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
         }
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
-            function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
+        if (runIntrospectionScriptBeforeJwtCreation != null) {
+            function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), runIntrospectionScriptBeforeJwtCreation.toString());
         }
         if (keepClientAuthorizationAfterExpiration != null) {
             function.apply(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration.toString());

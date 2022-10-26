@@ -5,14 +5,14 @@
 # Author: Christian Eland
 
 
-from org.xdi.oxauth.service import AuthenticationService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
-from org.gluu.oxauth.auth import Authenticator
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper
-from org.xdi.oxauth.util import ServerUtil
+# from org.gluu.oxauth.auth import Authenticator
+from io.jans.as.server.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
+from io.jans.as.server.util import ServerUtil
 from io.jans.as.common.service.common import ConfigurationService
 from io.jans.as.common.service.common import EncryptionService
 from io.jans.jsf2.message import FacesMessages
@@ -433,3 +433,4 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def logout(self, configurationAttributes, requestParameters):
         return True
+

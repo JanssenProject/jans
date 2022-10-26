@@ -83,7 +83,7 @@ public class ActionService {
                 if (actionCls == null) throw new ClassNotFoundException(rex.getMessage(), rex);                
             }
         }
-        logger.info("Class {} loaded successfully", className);
+        logger.debug("Class {} loaded successfully", className);
         int arity = rhinoArgs.length;
         
         BiPredicate<Executable, Boolean> pr = (e, staticRequired) -> {
@@ -105,7 +105,9 @@ public class ActionService {
                     throw new InstantiationException(msg);
                 }
 
-                logger.debug("Constructor found");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Constructor found: {}", constr.toGenericString());
+                }
                 Object[] args = getArgsForCall(constr, arity, rhinoArgs);
 
                 logger.debug("Creating an instance");
@@ -128,7 +130,9 @@ public class ActionService {
             throw new NoSuchMethodException(msg);
         }
 
-        logger.debug("Found method {}", methodName);        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Method found: {}", javaMethod.toGenericString());
+        }
         Object[] args = getArgsForCall(javaMethod, arity, rhinoArgs);
 
         logger.debug("Performing method call");
@@ -162,9 +166,11 @@ public class ActionService {
                 continue;
             }
             
+            //argClass does not carry type information due to Java type erasure
             Class<?> argClass = arg.getClass();
 
             //Try to apply cheaper conversions first (in comparison to mapper-based conversion)
+            //Note: A numeric literal coming from Javascript code lands as a Double
             Boolean primCompat = PrimitiveUtils.compatible(argClass, paramType);
             if (primCompat != null) {
 
@@ -172,9 +178,8 @@ public class ActionService {
                     logger.trace("Parameter is a primitive (or wrapped) {}", typeName);
                     javaArgs[i] = arg;
 
-                } else if (argClass.equals(Double.class)) {
-                    //Any numeric literal coming from Javascript code lands as a Double
-                    Object number = PrimitiveUtils.primitiveNumberFrom((Double) arg, paramType);
+                } else if (Number.class.isAssignableFrom(argClass)) {
+                    Object number = PrimitiveUtils.primitiveNumberFrom((Number) arg, paramType);
                     
                     if (number != null) {
                         logger.trace("Parameter is a primitive (or wrapped) {}", typeName);
@@ -204,21 +209,18 @@ public class ActionService {
             } else {
                 //argClass should be NativeArray or NativeObject if the value was not created/derived
                 //from a Java call
-                String argClassName = argClass.getCanonicalName();
                 Type parameterizedType = p.getParameterizedType();
                 String ptypeName = parameterizedType.getTypeName();
                 
-                if (ptypeName.equals(argClassName)) {
-                    //This branch will be taken mostly when there is no type information in the parameter
-                    //(method signature). For instance: String[], List, MyBean (no parameterized type info). 
-                    //Due to type erasure argClassName won't contain any type information. As an example, 
-                    //if arg is a List<String>, argClassName will just be like java.util.ArrayList 
+                //ptypeName and typeName are equal when there is no type information in the parameter
+                //(method signature). For instance: String[], List, MyBean (no parameterized types)
+                if (ptypeName.equals(typeName) && paramType.isInstance(arg)) { 
                     javaArgs[i] = arg;
                 } else {
-                    logger.warn("Trying to parse argument of class {} to {}", argClassName, ptypeName);
+                    logger.warn("Trying to parse argument of class {} to {}", argClass.getCanonicalName(), ptypeName);
 
                     JavaType javaType = mapper.getTypeFactory().constructType(parameterizedType);
-                    javaArgs[i] = mapper.convertValue(arguments[i], javaType);
+                    javaArgs[i] = mapper.convertValue(arg, javaType);
                 }
                 logger.trace("Parameter is a {}", ptypeName);
             }

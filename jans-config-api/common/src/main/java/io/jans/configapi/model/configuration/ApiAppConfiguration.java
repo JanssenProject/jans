@@ -35,6 +35,7 @@ public class ApiAppConfiguration implements Configuration {
     
     private List<String> userExclusionAttributes;
     private List<String> userMandatoryAttributes;
+    private AgamaConfiguration agamaConfiguration;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -221,6 +222,14 @@ public class ApiAppConfiguration implements Configuration {
     public void setUserMandatoryAttributes(List<String> userMandatoryAttributes) {
         this.userMandatoryAttributes = userMandatoryAttributes;
     }
+        
+    public AgamaConfiguration getAgamaConfiguration() {
+        return agamaConfiguration;
+    }
+
+    public void setAgamaConfiguration(AgamaConfiguration agamaConfiguration) {
+        this.agamaConfiguration = agamaConfiguration;
+    }
 
     @Override
     public String toString() {
@@ -236,6 +245,7 @@ public class ApiAppConfiguration implements Configuration {
                 + disableJdkLogger + " , maxCount =" + maxCount
                 + " , userExclusionAttributes="+ userExclusionAttributes
                 + " , userMandatoryAttributes="+ userMandatoryAttributes
+                + " , agamaConfiguration="+ agamaConfiguration
                 + "]";
     }
 

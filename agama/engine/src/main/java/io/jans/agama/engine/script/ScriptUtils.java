@@ -13,8 +13,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.AccessDeniedException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -30,7 +33,7 @@ public class ScriptUtils {
     // NOTE: do not alter this method's signature so that it returns void. The returned 
     // value is simulated when the continuation is resumed: see 3rd parameter in call
     // to resumeContinuation (FlowService)
-    public static Pair<Boolean, String> pauseForRender(String page, boolean allowCallbackResume, Object data)
+    public static Pair<String, String> pauseForRender(String page, boolean allowCallbackResume, Object data)
             throws PendingRenderException, AccessDeniedException, URISyntaxException {
         
         page = normalize(page);
@@ -105,10 +108,10 @@ public class ScriptUtils {
     }
     
     //Issue a call to this method only if the request scope is active
-    public static Pair<Function, NativeJavaObject> prepareSubflow(String qname, String parentBasepath,
-        String[] pathOverrides) throws IOException {
+    public static Pair<Function, NativeJavaObject> prepareSubflow(String qname,
+            Map<String, String> mapping) throws IOException {
 
-        return CdiUtil.bean(FlowService.class).prepareSubflow(qname, parentBasepath, pathOverrides);
+        return CdiUtil.bean(FlowService.class).prepareSubflow(qname, mapping);
         
     }
     
@@ -129,8 +132,39 @@ public class ScriptUtils {
         CdiUtil.bean(FlowService.class).closeSubflow();
     }
     
-    private static String normalize(String sUri) throws AccessDeniedException, URISyntaxException {
+    public static Map<String, String> templatesMapping(String parentBasepath, String[] overrides)
+            throws AccessDeniedException, URISyntaxException {
+
+        String slBasepath = parentBasepath + "/";
+        Map<String, String> pathOverrides = new HashMap<>();
+
+        for (int i = 0; i < overrides.length / 2; i++) {
+            String original = normalize(overrides[2 * i]);
+            String overriden = normalize(slBasepath + overrides[2 * i + 1]);
+
+            if (overriden.equals(slBasepath)) {
+                int j = original.lastIndexOf("/");
+                overriden = j == -1 ? original : original.substring(j + 1);
+                overriden = slBasepath + overriden;
+            }
+            pathOverrides.put(original, overriden);
+        }
+        return pathOverrides;
+
+    }
+
+    public static boolean pathMatching(String url, Collection<String> paths) {
         
+        LOG.trace("Matching {} to any of {}", url, paths);
+        UnaryOperator<String> unsuffixed = s -> s.substring(0, s.lastIndexOf("."));
+
+        String path = unsuffixed.apply(url);
+        return paths.stream().map(unsuffixed).anyMatch(path::equals);
+        
+    }
+    
+    private static String normalize(String sUri) throws AccessDeniedException, URISyntaxException {
+
         EngineConfig engineConf = CdiUtil.bean(EngineConfig.class);
         String templatesFolder = engineConf.getRootDir() + engineConf.getTemplatesPath() + "/";
 
@@ -153,7 +187,7 @@ public class ScriptUtils {
             name = cls.getSimpleName();
         }
         return name;
-        
+
     }
 
 }
