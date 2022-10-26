@@ -5,11 +5,12 @@ from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import HorizontalLine
-from typing import TypeVar, Callable
+from typing import Tuple, TypeVar, Callable
 from prompt_toolkit.layout.dimension import AnyDimension
 from typing import Optional, Sequence, Union
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
+
 class JansVerticalNav():
     """This is a Vertical Navigation bar Widget with many values used in <Get clients>/<Get scopes>
     """
@@ -17,9 +18,10 @@ class JansVerticalNav():
         self,
         myparent,
         headers: list,
-        on_display: Callable, 
+        on_display: Callable= None, 
         selectes: Optional[int]= 0, 
         on_enter: Callable= None,
+        get_help: Tuple= None,
         on_delete: Callable= None,
         all_data: Optional[list]= [], 
         preferred_size: Optional[list]= [], 
@@ -82,11 +84,17 @@ class JansVerticalNav():
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
+        if get_help:
+            self.get_help, self.scheme = get_help
+            self.get_help(data=self.data[self.selectes],scheme=self.scheme)
+        else:
+            self.get_help= None
         self.all_data=all_data
         self.underline_headings = underline_headings
 
         self.handle_header_spaces()
         self.create_window()
+            
 
     def view_data(
         self,
@@ -266,12 +274,19 @@ class JansVerticalNav():
             if not self.data:
                 return
             self.selectes = (self.selectes - 1) % len(self.data)
+            
+            self.myparent.logger.debug("Selected:"+str(self.data[self.selectes]))
+            if self.get_help :
+                self.get_help(data=self.data[self.selectes],scheme=self.scheme)
 
         @kb.add('down')
         def _go_up(event) -> None:
             if not self.data:
                 return
             self.selectes = (self.selectes + 1) % len(self.data)
+            self.myparent.logger.debug("Selected:"+str(self.data[self.selectes]))
+            if self.get_help :
+                self.get_help(data=self.data[self.selectes],scheme=self.scheme)
 
         @kb.add('enter')
         def _(event):

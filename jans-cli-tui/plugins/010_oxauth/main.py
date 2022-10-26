@@ -281,7 +281,7 @@ class Plugin(DialogUtils):
                 on_enter=self.edit_client_dialog,
                 on_display=self.app.data_display_dialog,
                 on_delete=self.delete_client,
-                # selection_changed=self.data_selection_changed,
+                get_help=(self.get_help,'Client'),
                 selectes=0,
                 headerColor='class:outh-verticalnav-headcolor',
                 entriesColor='class:outh-verticalnav-entriescolor',
@@ -382,7 +382,7 @@ class Plugin(DialogUtils):
                     on_enter=self.edit_scope_dialog,
                     on_display=self.app.data_display_dialog,
                     on_delete=self.delete_scope,
-                    # selection_changed=self.data_selection_changed,
+                    get_help=(self.get_help,'Scope'),
                     selectes=0,
                     headerColor='class:outh-verticalnav-headcolor',
                     entriesColor='class:outh-verticalnav-entriescolor',
@@ -524,7 +524,7 @@ class Plugin(DialogUtils):
                 data=data_now,
                 on_enter=self.view_property,
                 on_display=self.properties_display_dialog,
-                # on_delete=self.delete_client,
+                get_help=(self.get_help,'AppConfiguration'),
                 # selection_changed=self.data_selection_changed,
                 selectes=0,      
                 headerColor='class:outh-verticalnav-headcolor',
@@ -788,6 +788,28 @@ class Plugin(DialogUtils):
             return result
 
         ensure_future(coroutine())
+
+
+    def get_help(self, **kwargs: Any):
+
+        self.app.logger.debug("get_help: "+str(kwargs['data']))
+        self.app.logger.debug("get_help: "+str(kwargs['scheme']))
+        schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/{}'.format(str(kwargs['scheme'])))
+        
+        self.app.logger.debug("schema: "+str(schema))
+        if kwargs['scheme'] == 'AppConfiguration':
+            self.app.status_bar_text= self.app.get_help_from_schema(schema, kwargs['data'][0])
+        elif kwargs['scheme'] == 'Client':
+            self.app.status_bar_text= "Client Name: "+kwargs['data'][1]
+        elif kwargs['scheme'] == 'Scope':
+            self.app.status_bar_text= kwargs['data'][1]
+        elif kwargs['scheme'] == 'Keys':
+            self.app.status_bar_text= kwargs['data'][1]
+            self.app.logger.debug("kwargs['data']: "+str(kwargs['data']))
+
+        
+        # self.app.status_bar_text= kwargs['data'][1]
+
 
     def delete_scope(self, **kwargs: Any):
         """This method for the deletion of the clients data
