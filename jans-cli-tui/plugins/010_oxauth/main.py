@@ -47,7 +47,7 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
 from wui_components.jans_cli_dialog import JansGDialog
 
-from view_Property import ViewProperty
+from view_property import ViewProperty
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 from prompt_toolkit.buffer import Buffer
