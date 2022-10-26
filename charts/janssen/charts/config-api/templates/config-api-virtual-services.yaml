@@ -1,12 +1,12 @@
-{{- if and (.Values.global.istio.ingress) (.Values.global.fido2.ingress.fido2ConfigEnabled) }}
+{{- if and (.Values.global.istio.ingress) (index .Values "global" "config-api" "ingress" "configApiEnabled") }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ .Release.Name }}-istio-fido2-configuration
+  name: {{ .Release.Name }}-istio-config-api
   namespace: {{.Release.Namespace}}
   labels:
-    APP_NAME: fido2
-{{ include "fido2.labels" . | indent 4}}
+    APP_NAME: config-api
+{{ include "config-api.labels" . | indent 4 }}
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
@@ -15,8 +15,6 @@ metadata:
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
 {{- end }}
 spec:
-  hosts:
-  - {{ .Values.global.fqdn }}
 {{- if .Values.global.istio.gateways }}
   gateways:
 {{ toYaml .Values.global.istio.gateways | indent 2 }}
@@ -24,17 +22,17 @@ spec:
   gateways:
   - {{ .Release.Name }}-global-gtw
 {{- end }}
+  hosts:
+  - {{ .Values.global.fqdn }}
   http:
-  - name: {{ .Release.Name }}-istio-fido2-configuration
+  - name: {{ .Release.Name }}-istio-config-api
     match:
     - uri:
-        prefix: /.well-known/fido2-configuration
-    rewrite:
-      uri: /jans-fido2/restv1/fido2/configuration
+        prefix: /jans-config-api
     route:
     - destination:
-        host: {{ .Values.global.fido2.fido2ServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+        host: {{ index .Values "global" "config-api" "configApiServerServiceName" }}.{{.Release.Namespace}}.svc.cluster.local
         port:
-          number: 8080
+          number: 8074
       weight: 100
 {{- end }}
