@@ -172,29 +172,33 @@ public class ScimCustomPerson extends Entry implements Serializable {
         setCustomAttribute("userPassword", value);
     }
 
-    public void setAttribute(String attributeName, String[] attributeValue) {
-        setCustomAttribute(attributeName, Arrays.asList(attributeValue));
+    public CustomObjectAttribute setAttribute(String attributeName, String[] attributeValue) {
+    	return setCustomAttribute(attributeName, Arrays.asList(attributeValue));
     }
 
-    public void setAttribute(String attributeName, String attributeValue) {
+    public CustomObjectAttribute setAttribute(String attributeName, String attributeValue) {
         if (attributeValue == null || attributeValue.length() == 0) {
-            setCustomAttribute(attributeName, Collections.emptyList());
+            return setCustomAttribute(attributeName, Collections.emptyList());
         } else {
-            setCustomAttribute(attributeName, attributeValue);
+        	return setCustomAttribute(attributeName, attributeValue);
         }
     }
 
-    public void setCustomAttribute(String attributeName, Object attributeValue) {
+    public CustomObjectAttribute setCustomAttribute(String attributeName, Object attributeValue) {
         CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValue);
         typedCustomAttributes.remove(attribute);
         typedCustomAttributes.add(attribute);
+        
+        return attribute;
     }
 
-    public void setCustomAttribute(String attributeName, List<Object> attributeValue) {
+    public CustomObjectAttribute setCustomAttribute(String attributeName, List<Object> attributeValue) {
         CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValue);
         attribute.setMultiValued(true);
         typedCustomAttributes.remove(attribute);
         typedCustomAttributes.add(attribute);
+        
+        return attribute;
     }
 
 }

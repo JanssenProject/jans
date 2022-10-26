@@ -21,6 +21,7 @@ import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.Util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -412,16 +413,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         }
 
         X509Certificate cert = (X509Certificate) chain[0];
-
-        String sighAlgName = cert.getSigAlgName();
-
-        for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
-            if (sighAlgName.equalsIgnoreCase(sa.getAlgorithm())) {
-                return sa;
-            }
-        }
-
-        return null;
+        return CertUtils.getSignatureAlgorithm(cert);
     }
 
     private void checkKeyExpiration(String alias) {
@@ -461,7 +453,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 break;
             }
             case ED: {
-                EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getName());
+                EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), "BC");
                 keyGen.initialize(edSpec, new SecureRandom());
                 break;
@@ -538,10 +530,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
+        algorithm.fill(jsonObject);
+
         jsonObject.put(JWKParameter.KEY_ID, alias);
-        jsonObject.put(JWKParameter.KEY_USE, algorithm.getUse().getParamName());
-        jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
         jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
         if (publicKey instanceof RSAPublicKey) {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;

@@ -3,6 +3,7 @@ package io.jans.as.model.common.converter;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import io.jans.as.model.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ public class ListConverter extends StdConverter<Object, List<String>> {
      * whitespace is assumed as elements separator
      *
      * @param obj Input object
-     * @return A list of strings, null if obj is null or does not have the expected type
+     * @return A list of strings, empty if obj is null or does not have the expected type
      */
     public List<String> convert(Object obj) {
 
@@ -34,7 +35,7 @@ public class ListConverter extends StdConverter<Object, List<String>> {
                 return StringUtils.spaceSeparatedToList(obj.toString());
             }
         }
-        return null;
+        return new ArrayList<>();
 
     }
 

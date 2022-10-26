@@ -8,7 +8,7 @@ package io.jans.service.document.store.conf;
 
 import java.io.Serializable;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -27,7 +27,9 @@ public class DocumentStoreConfiguration implements Serializable {
 
     private JcaDocumentStoreConfiguration jcaConfiguration;
 
-    private WebDavDocumentStoreConfiguration webDavConfiguration;
+    private WebDavDocumentStoreConfiguration webDavConfiguration;    
+    
+    private DBDocumentStoreConfiguration dbConfiguration;
 
     public DocumentStoreType getDocumentStoreType() {
 		return documentStoreType;
@@ -61,9 +63,17 @@ public class DocumentStoreConfiguration implements Serializable {
 		this.webDavConfiguration = webDavConfiguration;
 	}
 
+	public DBDocumentStoreConfiguration getDbConfiguration() {
+		return dbConfiguration;
+	}
+
+	public void setDbConfiguration(DBDocumentStoreConfiguration dbConfiguration) {
+		this.dbConfiguration = dbConfiguration;
+	}
+
 	@Override
 	public String toString() {
 		return "DocumentStoreConfiguration [documentStoreType=" + documentStoreType + ", localConfiguration=" + localConfiguration
-				+ ", jcaConfiguration=" + jcaConfiguration + ", webDavConfiguration=" + webDavConfiguration + "]";
+				+ ", jcaConfiguration=" + jcaConfiguration + ", webDavConfiguration=" + webDavConfiguration + ", dbConfiguration=" + dbConfiguration + "]";
 	}
 }

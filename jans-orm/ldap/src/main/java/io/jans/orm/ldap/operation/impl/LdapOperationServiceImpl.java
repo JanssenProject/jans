@@ -26,10 +26,10 @@ import org.apache.commons.lang.StringUtils;
 
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.MappingException;
-import io.jans.orm.exception.extension.PersistenceExtension;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.ldap.operation.LdapOperationService;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.PagedResult;

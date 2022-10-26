@@ -17,9 +17,9 @@ import io.jans.as.server.service.external.context.ExternalCibaEndUserNotificatio
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.UUID;
 
 import static io.jans.as.model.authorize.AuthorizeRequestParam.ACR_VALUES;

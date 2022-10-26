@@ -2,12 +2,19 @@
 
 set -e
 
-python3 /app/scripts/wait.py
+get_prometheus_opt() {
+    prom_opt=""
 
-if [ ! -f /deploy/touched ]; then
-    python3 /app/scripts/bootstrap.py
-    touch /deploy/touched
-fi
+    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
+        prom_opt="
+            -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
+        "
+    fi
+    echo "${prom_opt}"
+}
+
+python3 /app/scripts/wait.py
+python3 /app/scripts/bootstrap.py
 
 cd /opt/jans/jetty/jans-scim
 exec java \
@@ -21,5 +28,6 @@ exec java \
     -Djava.io.tmpdir=/tmp \
     -Dpython.home=/opt/jython \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
+    $(get_prometheus_opt) \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jetty/start.jar
+    -jar /opt/jetty/start.jar jetty.deploy.scanInterval=0 jetty.httpConfig.sendServerVersion=false

@@ -7,55 +7,43 @@
 package io.jans.as.server.comp;
 
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.ConfigurableTest;
-import io.jans.as.server.model.config.ConfigurationFactory;
 import org.json.JSONObject;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import javax.inject.Inject;
 
 import java.security.interfaces.ECPrivateKey;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import static io.jans.eleven.model.GenerateKeyResponseParam.KEY_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
  * @author Sergey Manoylo
  * @version December 16, 2021
  */
-public class CryptoProviderTest extends ConfigurableTest {
-
-    @Inject
-    private ConfigurationFactory configurationFactory;
-
-    @Inject
-    private AbstractCryptoProvider cryptoProvider;
+public class CryptoProviderTest extends BaseComponentTest {
 
     private final static int NUM_KEY_GENS = 100;
 
-    private final static byte testByte01 = (byte)0x01;
+    private final static byte testByte01 = (byte) 0x01;
 
     private final static String SIGNING_INPUT = "Signing Input";
     private final static String SHARED_SECRET = "secret";
 
     private final static String DEF_GEN_KEYS_PROVIDER = "GenerateKeysDataProvider";
 
-    private final static Object[][] DEF_EC_ALGS_DATA = new Object[][] {
-        { Algorithm.ES256 },
-        { Algorithm.ES384 },
-        { Algorithm.ES512 },
+    private final static Object[][] DEF_EC_ALGS_DATA = new Object[][]{
+            {Algorithm.ES256},
+            {Algorithm.ES384},
+            {Algorithm.ES512},
     };
 
     private static Long expirationTime;
@@ -78,10 +66,10 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test
     public void configuration() {
         try {
-            AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
+            AppConfiguration appConfiguration = getConfigurationFactory().getAppConfiguration();
             assertNotNull(appConfiguration);
 
-            assertNotNull(cryptoProvider);
+            assertNotNull(getAbstractCryptoProvider());
 
             GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
             calendar.add(GregorianCalendar.MINUTE, 5);
@@ -94,7 +82,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testSignHS256() {
         try {
-            hs256Signature = cryptoProvider.sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS256);
+            hs256Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS256);
             assertNotNull(hs256Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -104,7 +92,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignHS256"})
     public void testVerifyHS256() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, hs256Signature, null, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, hs256Signature, null, null,
                     SHARED_SECRET, SignatureAlgorithm.HS256);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -115,7 +103,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testSignHS384() {
         try {
-            hs384Signature = cryptoProvider.sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS384);
+            hs384Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS384);
             assertNotNull(hs384Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -125,7 +113,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignHS384"})
     public void testVerifyHS384() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, hs384Signature, null, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, hs384Signature, null, null,
                     SHARED_SECRET, SignatureAlgorithm.HS384);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -136,7 +124,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testSignHS512() {
         try {
-            hs512Signature = cryptoProvider.sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS512);
+            hs512Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS512);
             assertNotNull(hs512Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -146,7 +134,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignHS512"})
     public void testVerifyHS512() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, hs512Signature, null, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, hs512Signature, null, null,
                     SHARED_SECRET, SignatureAlgorithm.HS512);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -157,7 +145,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyRS256() {
         try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.RS256, expirationTime);
+            JSONObject response = getAbstractCryptoProvider().generateKey(Algorithm.RS256, expirationTime);
             rs256Key = response.optString(KEY_ID);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -167,7 +155,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testGenerateKeyRS256"})
     public void testSignRS256() {
         try {
-            rs256Signature = cryptoProvider.sign(SIGNING_INPUT, rs256Key, null, SignatureAlgorithm.RS256);
+            rs256Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, rs256Key, null, SignatureAlgorithm.RS256);
             assertNotNull(rs256Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -177,7 +165,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignRS256"})
     public void testVerifyRS256() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, rs256Signature, rs256Key, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, rs256Signature, rs256Key, null,
                     null, SignatureAlgorithm.RS256);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -188,7 +176,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testVerifyRS256"})
     public void testDeleteKeyRS256() {
         try {
-            cryptoProvider.deleteKey(rs256Key);
+            getAbstractCryptoProvider().deleteKey(rs256Key);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
@@ -197,7 +185,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyRS384() {
         try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.RS384, expirationTime);
+            JSONObject response = getAbstractCryptoProvider().generateKey(Algorithm.RS384, expirationTime);
             rs384Key = response.optString(KEY_ID);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -207,7 +195,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testGenerateKeyRS384"})
     public void testSignRS384() {
         try {
-            rs384Signature = cryptoProvider.sign(SIGNING_INPUT, rs384Key, null, SignatureAlgorithm.RS384);
+            rs384Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, rs384Key, null, SignatureAlgorithm.RS384);
             assertNotNull(rs384Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -217,7 +205,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignRS384"})
     public void testVerifyRS384() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, rs384Signature, rs384Key, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, rs384Signature, rs384Key, null,
                     null, SignatureAlgorithm.RS384);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -228,7 +216,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testVerifyRS384"})
     public void testDeleteKeyRS384() {
         try {
-            cryptoProvider.deleteKey(rs384Key);
+            getAbstractCryptoProvider().deleteKey(rs384Key);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
@@ -237,7 +225,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyRS512() {
         try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.RS512, expirationTime);
+            JSONObject response = getAbstractCryptoProvider().generateKey(Algorithm.RS512, expirationTime);
             rs512Key = response.optString(KEY_ID);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -247,7 +235,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testGenerateKeyRS512"})
     public void testSignRS512() {
         try {
-            rs512Signature = cryptoProvider.sign(SIGNING_INPUT, rs512Key, null, SignatureAlgorithm.RS512);
+            rs512Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, rs512Key, null, SignatureAlgorithm.RS512);
             assertNotNull(rs512Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -257,7 +245,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignRS512"})
     public void testVerifyRS512() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, rs512Signature, rs512Key, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, rs512Signature, rs512Key, null,
                     null, SignatureAlgorithm.RS512);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -268,7 +256,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testVerifyRS512"})
     public void testDeleteKeyRS512() {
         try {
-            cryptoProvider.deleteKey(rs512Key);
+            getAbstractCryptoProvider().deleteKey(rs512Key);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
@@ -277,7 +265,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyES256() {
         try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.ES256, expirationTime);
+            JSONObject response = getAbstractCryptoProvider().generateKey(Algorithm.ES256, expirationTime);
             es256Key = response.optString(KEY_ID);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -287,7 +275,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testGenerateKeyES256"})
     public void testSignES256() {
         try {
-            es256Signature = cryptoProvider.sign(SIGNING_INPUT, es256Key, null, SignatureAlgorithm.ES256);
+            es256Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, es256Key, null, SignatureAlgorithm.ES256);
             assertNotNull(es256Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -297,7 +285,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignES256"})
     public void testVerifyES256() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, es256Signature, es256Key, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, es256Signature, es256Key, null,
                     null, SignatureAlgorithm.ES256);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -308,7 +296,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testVerifyES256"})
     public void testDeleteKeyES256() {
         try {
-            cryptoProvider.deleteKey(es256Key);
+            getAbstractCryptoProvider().deleteKey(es256Key);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
@@ -317,7 +305,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyES384() {
         try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.ES384, expirationTime);
+            JSONObject response = getAbstractCryptoProvider().generateKey(Algorithm.ES384, expirationTime);
             es384Key = response.optString(KEY_ID);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -327,7 +315,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testGenerateKeyES384"})
     public void testSignES384() {
         try {
-            es384Signature = cryptoProvider.sign(SIGNING_INPUT, es384Key, null, SignatureAlgorithm.ES384);
+            es384Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, es384Key, null, SignatureAlgorithm.ES384);
             assertNotNull(es384Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -337,7 +325,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignES384"})
     public void testVerifyES384() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, es384Signature, es384Key, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, es384Signature, es384Key, null,
                     null, SignatureAlgorithm.ES384);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -348,7 +336,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testVerifyES384"})
     public void testDeleteKeyES384() {
         try {
-            cryptoProvider.deleteKey(es384Key);
+            getAbstractCryptoProvider().deleteKey(es384Key);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
@@ -357,7 +345,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyES512() {
         try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.ES512, expirationTime);
+            JSONObject response = getAbstractCryptoProvider().generateKey(Algorithm.ES512, expirationTime);
             es512Key = response.optString(KEY_ID);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -367,7 +355,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testGenerateKeyES512"})
     public void testSignES512() {
         try {
-            es512Signature = cryptoProvider.sign(SIGNING_INPUT, es512Key, null, SignatureAlgorithm.ES512);
+            es512Signature = getAbstractCryptoProvider().sign(SIGNING_INPUT, es512Key, null, SignatureAlgorithm.ES512);
             assertNotNull(es512Signature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -377,7 +365,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testSignES512"})
     public void testVerifyES512() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, es512Signature, es512Key, null,
+            boolean signatureVerified = getAbstractCryptoProvider().verifySignature(SIGNING_INPUT, es512Signature, es512Key, null,
                     null, SignatureAlgorithm.ES512);
             assertTrue(signatureVerified);
         } catch (Exception e) {
@@ -388,7 +376,7 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Test(dependsOnMethods = {"testVerifyES512"})
     public void testDeleteKeyES512() {
         try {
-            cryptoProvider.deleteKey(es512Key);
+            getAbstractCryptoProvider().deleteKey(es512Key);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
@@ -399,29 +387,29 @@ public class CryptoProviderTest extends ConfigurableTest {
         return ConfigurableTest.ArquillianDataProvider.provide(
                 "CryptoProviderTest#" + DEF_GEN_KEYS_PROVIDER,
                 DEF_EC_ALGS_DATA
-            );
+        );
     }
 
     @Test(dependsOnMethods = {"testDeleteKeyRS256", "testDeleteKeyRS384", "testDeleteKeyRS512",
-            "testDeleteKeyES256", "testDeleteKeyES384", "testDeleteKeyES512" },
+            "testDeleteKeyES256", "testDeleteKeyES384", "testDeleteKeyES512"},
             dataProvider = DEF_GEN_KEYS_PROVIDER)
     public void testGenerateKeys(Algorithm algorithm) {
-        for(int i = 0; i < NUM_KEY_GENS; i++) {
+        for (int i = 0; i < NUM_KEY_GENS; i++) {
             System.out.println("----------------------");
             System.out.println("Algorithm: " + algorithm);
             try {
-                JSONObject response = cryptoProvider.generateKey(algorithm, expirationTime);
+                JSONObject response = getAbstractCryptoProvider().generateKey(algorithm, expirationTime);
                 String keyId = response.optString(JWKParameter.KEY_ID);
-                ECPrivateKey ecPrivateKey = (ECPrivateKey)cryptoProvider.getPrivateKey(keyId);
-                cryptoProvider.deleteKey(response.optString(keyId));
+                ECPrivateKey ecPrivateKey = (ECPrivateKey) getAbstractCryptoProvider().getPrivateKey(keyId);
+                getAbstractCryptoProvider().deleteKey(keyId);
 
                 byte[] s = Base64Util.bigIntegerToUnsignedByteArray(ecPrivateKey.getS());
 
                 System.out.println("s.length = " + s.length);
                 System.out.println("s (hex) = " + Base64Util.bytesToHex(s));
 
-                String keyX = (String)response.get(JWKParameter.X);
-                String keyY = (String)response.get(JWKParameter.Y);
+                String keyX = (String) response.get(JWKParameter.X);
+                String keyY = (String) response.get(JWKParameter.Y);
 
                 System.out.println("keyX = " + keyX);
                 System.out.println("keyY = " + keyY);
@@ -439,14 +427,14 @@ public class CryptoProviderTest extends ConfigurableTest {
                 assertTrue(x.length <= algorithm.getKeyLength());
                 assertTrue(y.length <= algorithm.getKeyLength());
 
-                if(algorithm == Algorithm.ES512) {
-                    if(s.length * 8 == algorithm.getKeyLength()) {
+                if (algorithm == Algorithm.ES512) {
+                    if (s.length * 8 == algorithm.getKeyLength()) {
                         assertEquals(s[0], testByte01);
                     }
-                    if(x.length * 8 == algorithm.getKeyLength()) {
+                    if (x.length * 8 == algorithm.getKeyLength()) {
                         assertEquals(x[0], testByte01);
                     }
-                    if(y.length * 8 == algorithm.getKeyLength()) {
+                    if (y.length * 8 == algorithm.getKeyLength()) {
                         assertEquals(y[0], testByte01);
                     }
                 }

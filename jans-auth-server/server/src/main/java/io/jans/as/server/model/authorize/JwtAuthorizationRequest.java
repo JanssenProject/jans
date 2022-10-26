@@ -6,9 +6,9 @@
 
 package io.jans.as.server.model.authorize;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
@@ -20,6 +20,7 @@ import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweDecrypterImpl;
@@ -28,11 +29,14 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
+import io.jans.as.server.service.RedirectionUriService;
 import io.jans.service.cdi.util.CdiUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -41,9 +45,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -58,8 +62,8 @@ import java.util.List;
  */
 public class JwtAuthorizationRequest {
 
-    private final static Logger log = LoggerFactory.getLogger(JwtAuthorizationRequest.class);
-    private final static int SIXTY_MINUTES_AS_SECONDS = 3600;
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthorizationRequest.class);
+    private static final int SIXTY_MINUTES_AS_SECONDS = 3600;
 
     // Header
     private String type;
@@ -144,6 +148,7 @@ public class JwtAuthorizationRequest {
                     ClientService clientService = CdiUtil.bean(ClientService.class);
                     jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8));
                 }
+                jweDecrypter.setFapi(appConfiguration.getFapiCompatibility());                
                 jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
                 jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
 
@@ -321,9 +326,7 @@ public class JwtAuthorizationRequest {
     private boolean validateSignature(@NotNull AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
         ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
-        JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
-                JwtUtil.getJSONWebKeys(client.getJwksUri()) :
-                new JSONObject(client.getJwks());
+        JSONObject jwks = CommonUtils.getJwks(client);
         return cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
     }
 
@@ -476,7 +479,7 @@ public class JwtAuthorizationRequest {
             String reqUriHash = reqUri.getFragment();
             String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-            javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+            jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
 
             String request = null;
             try {
@@ -510,6 +513,7 @@ public class JwtAuthorizationRequest {
     }
 
     public static JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, RedirectUriResponse redirectUriResponse, AbstractCryptoProvider cryptoProvider, AppConfiguration appConfiguration) {
+        validateRequestUri(requestUri, client, appConfiguration, redirectUriResponse != null ? redirectUriResponse.getState() : null);
         final String requestFromClient = queryRequest(requestUri, redirectUriResponse, appConfiguration);
         if (StringUtils.isNotBlank(requestFromClient)) {
             request = requestFromClient;
@@ -543,17 +547,11 @@ public class JwtAuthorizationRequest {
             throw new InvalidJwtException("None algorithm is not allowed for FAPI");
         }
 
-        if (nbf == null || nbf <= 0) { // https://github.com/JanssenProject/jans-auth-server/issues/164 fapi1-advanced-final-ensure-request-object-without-nbf-fails
-            log.error("nbf claim is not set, nbf: {}", nbf);
-            throw new InvalidJwtException("nbf claim is not set");
-        }
-        final long nowSeconds = System.currentTimeMillis() / 1000;
-        final long nbfDiff = nowSeconds - nbf;
-        if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
-            log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
-            throw new InvalidJwtException("nbf claim is more then 60 in the past");
-        }
+        validateNbf(nbf);
+        validateExp(exp);
+    }
 
+    public static void validateExp(Integer exp) throws InvalidJwtException {
         if (exp == null) {
             log.error("The exp claim is not set");
             throw new InvalidJwtException("exp claim is not set");
@@ -565,6 +563,50 @@ public class JwtAuthorizationRequest {
             log.error("exp claim is more then 60 minutes in the future, exp: {}, nowSecondsExp: {}", exp, nowSecondsExp);
             throw new InvalidJwtException("exp claim is more then 60 in the future");
         }
+    }
 
+    public static void validateNbf(Integer nbf) throws InvalidJwtException {
+        if (nbf == null || nbf <= 0) { // https://github.com/JanssenProject/jans-auth-server/issues/164 fapi1-advanced-final-ensure-request-object-without-nbf-fails
+            log.error("nbf claim is not set, nbf: {}", nbf);
+            throw new InvalidJwtException("nbf claim is not set");
+        }
+        final long nowSeconds = System.currentTimeMillis() / 1000;
+        final long nbfDiff = nowSeconds - nbf;
+        if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
+            log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
+            throw new InvalidJwtException("nbf claim is more then 60 in the past");
+        }
+    }
+
+    public static void validateRequestUri(String requestUri, Client client, AppConfiguration appConfiguration, String state) {
+        validateRequestUri(requestUri, client, appConfiguration, state, CdiUtil.bean(ErrorResponseFactory.class));
+    }
+
+    public static void validateRequestUri(String requestUri, Client client, AppConfiguration appConfiguration, String state, ErrorResponseFactory errorResponseFactory) {
+        if (StringUtils.isBlank(requestUri)) {
+            return; // nothing to validate
+        }
+
+        // client.requestUris() - validation
+        if (ArrayUtils.isNotEmpty(client.getRequestUris()) && !RedirectionUriService.isUriEqual(requestUri, client.getRequestUris())) {
+            log.debug("request_uri is forbidden by client request uris.");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state, ""))
+                    .build());
+        }
+
+        // check block list
+        final List<String> blockList = appConfiguration.getRequestUriBlockList();
+        if (!blockList.isEmpty()) {
+            URLPatternList urlPatternList = new URLPatternList(blockList);
+            if (urlPatternList.isUrlListed(requestUri)) {
+                log.debug("request_uri is forbidden by requestUriBlackList configuration.");
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state, ""))
+                        .build());
+            }
+        }
     }
 }

@@ -26,6 +26,8 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
+import static org.testng.Assert.assertEquals;
+
 /**
  * @version August 9, 2017
  */
@@ -89,10 +91,7 @@ public class TestSessionWorkflow extends BaseTest {
             // Get the user's claims
             UserInfoClient userInfoClient1 = new UserInfoClient(userInfoEndpoint);
             UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken1);
-
-            Assert.assertTrue("userInfoResponse1.getStatus() is not 200", userInfoResponse1.getStatus() == 200);
-            //        System.out.println(userInfoResponse1.getEntity());
-
+            assertEquals(userInfoResponse1.getStatus() , 200, "Unexpected response code: " + userInfoResponse1.getStatus());
 
             ////////////////////////////////////////////////
             //             TV side. Code 2                //
@@ -139,8 +138,7 @@ public class TestSessionWorkflow extends BaseTest {
             UserInfoClient userInfoClient2 = new UserInfoClient(userInfoEndpoint);
             UserInfoResponse userInfoResponse2 = userInfoClient2.execUserInfo(accessToken2);
 
-            Assert.assertTrue("userInfoResponse1.getStatus() is not 200", userInfoResponse2.getStatus() == 200);
-            //        System.out.println(userInfoResponse2.getEntity());
+            assertEquals(userInfoResponse2.getStatus(), 200, "Unexpected response code: " + userInfoResponse2.getStatus());
         } finally {
             if (httpClient != null) {
                 httpClient.getConnectionManager().shutdown();

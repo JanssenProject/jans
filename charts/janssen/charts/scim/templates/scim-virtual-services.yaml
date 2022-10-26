@@ -1,0 +1,54 @@
+{{- if .Values.global.istio.ingress }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-istio-scim-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: scim
+{{ include "scim.labels" . | indent 4}}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  hosts:
+  - {{ .Values.global.fqdn }}
+{{- if .Values.global.istio.gateways }}
+  gateways:
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
+  http:
+  {{- if .Values.global.scim.ingress.scimConfigEnabled }}
+  - name: {{ .Release.Name }}-istio-scim-config
+    match:
+    - uri:
+        prefix: /.well-known/scim-configuration
+    rewrite:
+      uri: /jans-scim/restv1/scim-configuration
+    route:
+      - destination:
+          host: {{ .Values.global.scim.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+          port:
+            number: 8080
+        weight: 100
+  {{- end }}
+  {{- if .Values.global.scim.ingress.scimEnabled }}
+  - name: {{ .Release.Name }}-istio-scim
+    match:
+    - uri:
+        prefix: "/jans-scim"
+    route:
+    - destination:
+        host: {{ .Values.global.scim.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+        port:
+          number: 8080
+      weight: 100
+  {{- end }}
+{{- end }}

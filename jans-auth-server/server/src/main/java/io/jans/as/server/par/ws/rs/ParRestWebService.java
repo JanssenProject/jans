@@ -4,7 +4,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.config.Constants;
@@ -12,37 +12,36 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.util.QueryStringDecoder;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HEAD;
+import jakarta.ws.rs.OPTIONS;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -98,13 +97,14 @@ public class ParRestWebService {
             @FormParam("origin_headers") String originHeaders,
             @FormParam("code_challenge") String codeChallenge,
             @FormParam("code_challenge_method") String codeChallengeMethod,
+            @FormParam("nbf") String nbf,
             @FormParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS) String customResponseHeaders,
             @FormParam("claims") String claims,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.PAR);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.PAR);
 
             scope = ServerUtil.urlDecode(scope); // it may be encoded
             String tokenBindingHeader = httpRequest.getHeader("Sec-Token-Binding");
@@ -145,6 +145,7 @@ public class ParRestWebService {
             par.setTtl(parLifetime);
             par.setExpirationDate(Util.createExpirationDate(parLifetime));
             par.getAttributes().setScope(scope);
+            par.getAttributes().setNbf(Util.parseIntegerSilently(nbf));
             par.getAttributes().setResponseType(responseType);
             par.getAttributes().setClientId(clientId);
             par.getAttributes().setRedirectUri(redirectUri);
@@ -170,13 +171,15 @@ public class ParRestWebService {
             par.getAttributes().setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));
 
             parValidator.validateRequestObject(redirectUriResponse, par, client);
+
+            parValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), state);
             authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), redirectUriResponse);
 
             parService.persist(par);
 
             ParResponse parResponse = new ParResponse();
             parResponse.setRequestUri(ParService.toOutsideId(par.getId()));
-            parResponse.setExpiresIn(parLifetime);
+            parResponse.setExpiresIn(par.getTtl()); // set it to TTL instead of lifetime because TTL can be updated during request object validation
 
             final String responseAsString = ServerUtil.asJson(parResponse);
 
@@ -204,6 +207,7 @@ public class ParRestWebService {
 
         final ErrorResponse response = new ErrorResponse();
 
+        String error = locationRedirect.getResponseParameter("error");
         String errorDescription = locationRedirect.getResponseParameter("error_description");
         errorDescription = Optional.ofNullable(errorDescription)
                 .map(description -> Optional.ofNullable(ThreadContext.get(Constants.CORRELATION_ID_HEADER))
@@ -211,7 +215,7 @@ public class ParRestWebService {
                         .orElse(description))
                 .orElse(null);
 
-        response.setErrorCode(errorDescription);
+        response.setErrorCode(error);
         response.setErrorDescription(errorDescription);
         return response;
     }

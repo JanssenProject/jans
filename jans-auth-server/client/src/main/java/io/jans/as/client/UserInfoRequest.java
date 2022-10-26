@@ -15,7 +15,8 @@ import java.util.Map;
 /**
  * Represents a User Info request to send to the authorization server.
  *
- * @author Javier Rojas Blum Date: 11.28.2011
+ * @author Javier Rojas Blum
+ * @version April 25, 2022
  */
 public class UserInfoRequest extends BaseRequest {
 

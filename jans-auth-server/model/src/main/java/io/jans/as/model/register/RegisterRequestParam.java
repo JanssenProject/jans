@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version March 17, 2022
  */
 
 public enum RegisterRequestParam {
@@ -232,6 +232,11 @@ public enum RegisterRequestParam {
     INITIATE_LOGIN_URI("initiate_login_uri"),
 
     /**
+     * Groups (roles)
+     */
+    GROUPS("groups"),
+
+    /**
      * URL supplied by the RP to request that the user be redirected to this location after a logout has been performed,
      */
     POST_LOGOUT_REDIRECT_URIS("post_logout_redirect_uris"),
@@ -294,7 +299,7 @@ public enum RegisterRequestParam {
     /**
      * boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT
      */
-    RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS("run_introspection_script_before_access_token_as_jwt_creation_and_include_claims"),
+    RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION("run_introspection_script_before_jwt_creation"),
 
     /**
      * boolean property which indicates whether to keep client authorization after expiration
@@ -345,7 +350,15 @@ public enum RegisterRequestParam {
 
     BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG("backchannel_authentication_request_signing_alg"),
 
-    BACKCHANNEL_USER_CODE_PARAMETER("backchannel_user_code_parameter");
+    BACKCHANNEL_USER_CODE_PARAMETER("backchannel_user_code_parameter"),
+
+    PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE("public_subject_identifier_attribute"),
+
+    REDIRECT_URIS_REGEX("redirect_uris_regex"),
+
+    DEFAULT_PROMPT_LOGIN("default_prompt_login"),
+
+    AUTHORIZED_ACR_VALUES("authorized_acr_values");
 
     /**
      * Parameter name

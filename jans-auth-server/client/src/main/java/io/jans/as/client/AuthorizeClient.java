@@ -15,11 +15,11 @@ import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +84,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
     public AuthorizationResponse execAuthorizationCodeGrant(
             String clientId, List<String> scopes, String redirectUri, String nonce,
             String state, String req, String reqUri, Display display, List<Prompt> prompt) {
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = new ArrayList<>();
         responseTypes.add(ResponseType.CODE);
         setRequest(new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce));
         getRequest().setRedirectUri(redirectUri);
@@ -148,7 +148,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
     public AuthorizationResponse execImplicitGrant(
             String clientId, List<String> scopes, String redirectUri, String nonce,
             String state, String req, String reqUri, Display display, List<Prompt> prompt) {
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = new ArrayList<>();
         responseTypes.add(ResponseType.TOKEN);
         setRequest(new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce));
         getRequest().setRedirectUri(redirectUri);

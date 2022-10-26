@@ -9,7 +9,7 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("certmanager")
 
 
-class BaseHandler(object):
+class BaseHandler:
     def __init__(self, manager, dry_run, **opts):
         self.manager = manager
         self.dry_run = dry_run
@@ -21,7 +21,7 @@ class BaseHandler(object):
         generate_keystore(prefix, hostname, passwd)
         return keystore_fn
 
-    def _patch_cert_key(self, prefix, extra_dns=None):
+    def _patch_cert_key(self, prefix, extra_dns=None, valid_to=365):
         cert_fn = f"/etc/certs/{prefix}.crt"
         key_fn = f"/etc/certs/{prefix}.key"
 
@@ -35,6 +35,7 @@ class BaseHandler(object):
             self.manager.config.get("state"),
             self.manager.config.get("city"),
             extra_dns=extra_dns,
+            valid_to=valid_to,
         )
         return cert_fn, key_fn
 

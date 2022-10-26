@@ -1,44 +1,39 @@
 package io.jans.as.server.ws.rs.stat;
 
-import io.jans.as.common.model.stat.StatEntry;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.service.stat.StatResponseService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.search.filter.Filter;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
-import net.agkn.hll.HLL;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -54,27 +49,20 @@ import static io.jans.as.model.util.Util.escapeLog;
 @Path("/internal/stat")
 public class StatWS {
 
-    private static final int DEFAULT_WS_INTERVAL_LIMIT_IN_SECONDS = 60;
-
     @Inject
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager entryManager;
+    private StatResponseService statResponseService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
-
-    @Inject
-    private StatService statService;
 
     @Inject
     private AppConfiguration appConfiguration;
 
     @Inject
     private TokenService tokenService;
-
-    private long lastProcessedAt;
 
     public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {
         Writer writer = new StringWriter();
@@ -151,35 +139,37 @@ public class StatWS {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format) {
-        return stat(authorization, month, format);
+    public Response statGet(@HeaderParam("Authorization") String authorization,
+                            @QueryParam("month") String months,
+                            @QueryParam("start-month") String startMonth,
+                            @QueryParam("end-month") String endMonth,
+                            @QueryParam("format") String format) {
+        return stat(authorization, months, startMonth, endMonth, format);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response statPost(@HeaderParam("Authorization") String authorization, @FormParam("month") String month, @FormParam("format") String format) {
-        return stat(authorization, month, format);
+    public Response statPost(@HeaderParam("Authorization") String authorization,
+                             @FormParam("month") String months,
+                             @FormParam("start-month") String startMonth,
+                             @FormParam("end-month") String endMonth,
+                             @FormParam("format") String format) {
+        return stat(authorization, months, startMonth, endMonth, format);
     }
 
-    public Response stat(String authorization, String month, String format) {
+    public Response stat(String authorization, String monthsParam, String startMonth, String endMonth, String format) {
         if (log.isDebugEnabled())
-            log.debug("Attempting to request stat, month: {}, format: {}", escapeLog(month), escapeLog(format));
+            log.debug("Attempting to request stat, month: {}, startMonth: {}, endMonth: {}, format: {}",
+                    escapeLog(monthsParam), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.STAT);
         validateAuthorization(authorization);
-        final List<String> months = validateMonth(month);
-
-        if (!allowToRun()) {
-            log.trace("Interval request limit exceeded. Request is rejected. Current interval limit: {} (or 60 seconds if not set).", appConfiguration.getStatWebServiceIntervalLimitInSeconds());
-            throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, TokenErrorResponseType.ACCESS_DENIED, "Interval request limit exceeded.");
-        }
-
-        lastProcessedAt = System.currentTimeMillis();
+        final Set<String> months = validateMonths(monthsParam, startMonth, endMonth);
 
         try {
             if (log.isTraceEnabled())
                 log.trace("Recognized months: {}", escapeLog(months));
-            final StatResponse statResponse = buildResponse(months);
+            final StatResponse statResponse = statResponseService.buildResponse(months);
 
             final String responseAsStr;
             if ("openmetrics".equalsIgnoreCase(format)) {
@@ -199,83 +189,6 @@ public class StatWS {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).build();
-        }
-    }
-
-    private StatResponse buildResponse(List<String> months) {
-        StatResponse response = new StatResponse();
-        for (String month : months) {
-            final StatResponseItem responseItem = buildItem(month);
-            if (responseItem != null) {
-                response.getResponse().put(month, responseItem);
-            }
-        }
-
-        return response;
-    }
-
-    private StatResponseItem buildItem(String month) {
-        try {
-            String monthlyDn = String.format("ou=%s,%s", escapeLog(month), statService.getBaseDn());
-
-            final List<StatEntry> entries = entryManager.findEntries(monthlyDn, StatEntry.class, Filter.createPresenceFilter("jansId"));
-            if (entries == null || entries.isEmpty()) {
-                log.trace("Can't find stat entries for month: {}", monthlyDn);
-                return null;
-            }
-
-            final StatResponseItem responseItem = new StatResponseItem();
-            responseItem.setMonthlyActiveUsers(userCardinality(entries));
-            responseItem.setMonth(month);
-
-            unionTokenMapIntoResponseItem(entries, responseItem);
-
-            return responseItem;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    private void unionTokenMapIntoResponseItem(List<StatEntry> entries, StatResponseItem responseItem) {
-        for (StatEntry entry : entries) {
-            entry.getStat().getTokenCountPerGrantType().entrySet().stream().filter(en -> en.getValue() != null).forEach(en -> {
-                final Map<String, Long> tokenMap = responseItem.getTokenCountPerGrantType().get(en.getKey());
-                if (tokenMap == null) {
-                    responseItem.getTokenCountPerGrantType().put(en.getKey(), en.getValue());
-                    return;
-                }
-                for (Map.Entry<String, Long> tokenEntry : en.getValue().entrySet()) {
-                    final Long counter = tokenMap.get(tokenEntry.getKey());
-                    if (counter == null) {
-                        tokenMap.put(tokenEntry.getKey(), tokenEntry.getValue());
-                        continue;
-                    }
-
-                    tokenMap.put(tokenEntry.getKey(), counter + tokenEntry.getValue());
-                }
-            });
-        }
-    }
-
-    private long userCardinality(List<StatEntry> entries) {
-        HLL hll = decodeHll(entries.get(0));
-
-        // Union hll
-        if (entries.size() > 1) {
-            for (int i = 1; i < entries.size(); i++) {
-                hll.union(decodeHll(entries.get(i)));
-            }
-        }
-        return hll.cardinality();
-    }
-
-    private HLL decodeHll(StatEntry entry) {
-        try {
-            return HLL.fromBytes(Base64.getDecoder().decode(entry.getUserHllData()));
-        } catch (Exception e) {
-            log.error("Failed to decode HLL data, entry dn: {}, data: {}", entry.getDn(), entry.getUserHllData());
-            return statService.newHll();
         }
     }
 
@@ -305,38 +218,19 @@ public class StatWS {
         }
     }
 
-    private List<String> validateMonth(String month) {
-        if (StringUtils.isBlank(month)) {
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "`month` parameter can't be blank and should be in format yyyyMM (e.g. 202012)");
+    private Set<String> validateMonths(String months, String startMonth, String endMonth) {
+        if (!Months.isValid(months, startMonth, endMonth)) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "`month` or `start-month`/`end-month` parameter(s) can't be blank and should be in format yyyyMM (e.g. 202012)");
         }
 
-        month = ServerUtil.urlDecode(month);
+        months = ServerUtil.urlDecode(months);
 
-        List<String> months = new ArrayList<>();
-        for (String m : month.split(" ")) {
-            m = m.trim();
-            if (m.length() == 6) {
-                months.add(m);
-            }
+        Set<String> monthList = Months.getMonths(months, startMonth, endMonth);
+
+        if (monthList.isEmpty()) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "Unable to identify months. Check `month` or `start-month`/`end-month` parameter(s). It can't be blank and should be in format yyyyMM (e.g. 202012). start-month must be before end-month");
         }
 
-        if (months.isEmpty()) {
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "`month` parameter can't be blank and should be in format yyyyMM (e.g. 202012)");
-        }
-
-        return months;
-    }
-
-    private boolean allowToRun() {
-        int interval = appConfiguration.getStatWebServiceIntervalLimitInSeconds();
-        if (interval <= 0) {
-            interval = DEFAULT_WS_INTERVAL_LIMIT_IN_SECONDS;
-        }
-
-        long timerInterval = interval * 1000L;
-
-        long timeDiff = System.currentTimeMillis() - lastProcessedAt;
-
-        return timeDiff >= timerInterval;
+        return monthList;
     }
 }

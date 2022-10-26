@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # the name must match the application
+  name: {{ index .Values "global" "config-api" "configApiServerServiceName" }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: config-api
+{{ include "config-api.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  ports:
+    - port: 9444
+      name: tcp-{{ include "config-api.name" . }}-ssl
+    - port: 8074
+      name: tcp-{{ include "config-api.name" . }}-http
+  selector:
+    app: {{ .Release.Name }}-{{ include "config-api.name" . }}
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  {{- with .Values.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+{{ toYaml . | indent 4 }}
+  {{- end }}

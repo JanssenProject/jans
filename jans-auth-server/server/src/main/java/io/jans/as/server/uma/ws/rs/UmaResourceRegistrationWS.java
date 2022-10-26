@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
@@ -18,23 +18,23 @@ import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HEAD;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.OPTIONS;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -140,7 +140,7 @@ public class UmaResourceRegistrationWS {
             @PathParam("rsid")
                     String rsid) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             umaValidationService.validateRestrictedByClient(authorizationGrant.getClientDn(), rsid);
@@ -197,7 +197,7 @@ public class UmaResourceRegistrationWS {
         try {
             log.trace("Getting list of resource descriptions.");
 
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             final String clientDn = authorizationGrant.getClientDn();
@@ -241,7 +241,7 @@ public class UmaResourceRegistrationWS {
         try {
             log.debug("Deleting resource descriptions'");
 
-            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             umaValidationService.validateRestrictedByClient(authorizationGrant.getClientDn(), rsid);
@@ -266,7 +266,7 @@ public class UmaResourceRegistrationWS {
             log.trace("putResourceImpl, rsid: {}, status: {}", escapeLog(rsid), status.name());
         }
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.UMA);
 
         AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
         umaValidationService.validateResource(resource);
@@ -298,7 +298,7 @@ public class UmaResourceRegistrationWS {
         }
 
         final String resourceDn = resourceService.getDnForResource(rsid);
-        final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
+        final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(resource.getScopes());
 
         final Calendar calendar = Calendar.getInstance();
         Date iat = calendar.getTime();
@@ -317,7 +317,6 @@ public class UmaResourceRegistrationWS {
         ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
         ldapResource.setId(rsid);
-        ldapResource.setRev("1");
         ldapResource.setCreator(userDn);
         ldapResource.setDn(resourceDn);
         ldapResource.setScopes(scopeDNs);
@@ -355,9 +354,8 @@ public class UmaResourceRegistrationWS {
         ldapResource.setName(resource.getName());
         ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
-        ldapResource.setScopes(umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes()));
+        ldapResource.setScopes(umaScopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(resource.getScopes()));
         ldapResource.setScopeExpression(resource.getScopeExpression());
-        ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
         ldapResource.setType(resource.getType());
         if (resource.getExp() != null && resource.getExp() > 0) {
             ldapResource.setExpirationDate(new Date(resource.getExp() * 1000L));
@@ -367,15 +365,6 @@ public class UmaResourceRegistrationWS {
         resourceService.updateResource(ldapResource);
 
         return ldapResource;
-    }
-
-    private int incrementRev(String rev) {
-        try {
-            return Integer.parseInt(rev) + 1;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return 1; // fallback
     }
 
     private <T> T throwNotFoundException(String rsid) {

@@ -8,9 +8,9 @@ package io.jans.as.server.service.logger;
 
 import io.jans.as.model.configuration.AppConfiguration;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 

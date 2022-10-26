@@ -1,7 +1,7 @@
 package com.spl.plugin.helloworld.ext;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.Extension;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.Extension;
 
 @ApplicationScoped
 public class HelloWorldExtension implements Extension {

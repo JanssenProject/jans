@@ -44,7 +44,7 @@ public class UserResource extends BaseScimResource {
 
     @Attribute(description = "The casual way to address the user in real life, e.g.'Bob' or 'Bobby' instead of 'Robert'." +
             "This attribute SHOULD NOT be used to represent a User's username (e.g., bjensen or mpepperidge)")
-    @StoreReference(ref = "nickName")
+    @StoreReference(ref = "nickname")
     private String nickName;
 
     @Attribute(description = "A fully qualified URL to a page representing the User's online profile",

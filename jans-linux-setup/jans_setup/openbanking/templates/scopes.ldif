@@ -1,0 +1,105 @@
+dn: inum=F0C4,ou=scopes,o=jans
+description: Authenticate using OpenID Connect.
+displayName: authenticate_openid_connect
+inum: F0C4
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: 1
+jansId: openid
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=53F1,ou=scopes,o=jans
+description: Accounts.
+displayName: accounts
+inum: 53F1
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: 0
+jansId: accounts
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=7371,ou=scopes,o=jans
+description: Payments.
+displayName: payments
+inum: 7371
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: 0
+jansId: payments
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=9391,ou=scopes,o=jans
+description: Funds confirmations.
+displayName: fundsconfirmations
+inum: 9391
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: 0
+jansId: fundsconfirmations
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=C4F7,ou=scopes,o=jans
+jansId: jans_stat
+inum: C4F7
+description: This scope is required for calling Statistic Endpoint
+jansDefScope: false
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":false}
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=C4F6,ou=scopes,o=jans
+description: This scope value requests that an OAuth 2.0 Refresh Token be issued.
+displayName: refresh_token
+inum: C4F6
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: true
+jansId: offline_access
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=43F1,ou=scopes,o=jans
+description: View your basic profile info.
+displayName: view_profile
+inum: 43F1
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansClaim: inum=2B29,ou=attributes,o=jans
+jansClaim: inum=0C85,ou=attributes,o=jans
+jansClaim: inum=B4B0,ou=attributes,o=jans
+jansClaim: inum=A0E8,ou=attributes,o=jans
+jansClaim: inum=5EC6,ou=attributes,o=jans
+jansClaim: inum=B52A,ou=attributes,o=jans
+jansClaim: inum=64A0,ou=attributes,o=jans
+jansClaim: inum=EC3A,ou=attributes,o=jans
+jansClaim: inum=3B47,ou=attributes,o=jans
+jansClaim: inum=3692,ou=attributes,o=jans
+jansClaim: inum=98FC,ou=attributes,o=jans
+jansClaim: inum=A901,ou=attributes,o=jans
+jansClaim: inum=36D9,ou=attributes,o=jans
+jansClaim: inum=BE64,ou=attributes,o=jans
+jansClaim: inum=6493,ou=attributes,o=jans
+jansClaim: inum=4CF1,ou=attributes,o=jans
+jansClaim: inum=29DA,ou=attributes,o=jans
+jansDefScope: false
+jansId: profile
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=764C,ou=scopes,o=jans
+description: View your email address.
+displayName: view_email_address
+inum: 764C
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansClaim: inum=8F88,ou=attributes,o=jans
+jansClaim: inum=CAE3,ou=attributes,o=jans
+jansDefScope: false
+jansId: email
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope

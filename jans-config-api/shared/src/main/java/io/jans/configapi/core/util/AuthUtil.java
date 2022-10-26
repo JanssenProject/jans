@@ -6,8 +6,8 @@ import io.jans.configapi.core.service.ClientService;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class AuthUtil {
     ConfService confService;
 
     @Inject
-    ClientService clientService;
+    ClientService cltSrv;
 
     public String getOpenIdConfigurationEndpoint() {
         return this.confService.find().getOpenIdConfigurationEndpoint();
@@ -33,7 +33,7 @@ public class AuthUtil {
     }
 
     public Client getClient(String clientId) {
-        return clientService.getClientByInum(clientId);
+        return cltSrv.getClientByInum(clientId);
     }
 
     public List<String> findMissingElements(List<String> list1, List<String> list2) {

@@ -6,7 +6,7 @@
 
 package io.jans.scim2.client.rest;
 
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 @Deprecated
 public interface CloseableClient {

@@ -1,13 +1,6 @@
+import json
+
 import pytest
-
-
-@pytest.fixture()
-def gconfig():
-    from jans.pycloudlib.config.base_config import BaseConfig
-
-    class GConfig(BaseConfig):
-        pass
-    yield GConfig()
 
 
 @pytest.fixture()
@@ -29,15 +22,6 @@ def gk8s_config():
     config.settings["CN_CONFIG_KUBERNETES_CONFIGMAP"] = "testing"
     config.kubeconfig_file = "tests/kubeconfig"
     yield config
-
-
-@pytest.fixture
-def gsecret():
-    from jans.pycloudlib.secret.base_secret import BaseSecret
-
-    class GSecret(BaseSecret):
-        pass
-    yield GSecret()
 
 
 @pytest.fixture()
@@ -65,22 +49,27 @@ def gk8s_secret():
 def gmanager(gconsul_config, gvault_secret):
     from jans.pycloudlib.manager import get_manager
 
-    def get_config(key, default=None):
+    ENCODED_PW = "fHL54sT5qHk="
+
+    def get_config(key, default=""):
         ctx = {
             "ldap_binddn": "cn=Directory Manager",
             "couchbase_server_user": "admin",
+            "jca_client_id": "1234",
         }
         return ctx.get(key) or default
 
-    def get_secret(key, default=None):
+    def get_secret(key, default=""):
         ctx = {
-            "encoded_ox_ldap_pw": "YgH8NDxhxmA=",
-            "encoded_ldapTrustStorePass": "YgH8NDxhxmA=",
-            "ldap_pkcs12_base64": "YgH8NDxhxmA=",
+            "encoded_ox_ldap_pw": ENCODED_PW,
+            "encoded_ldapTrustStorePass": ENCODED_PW,
+            "ldap_pkcs12_base64": ENCODED_PW,
             "encoded_salt": "7MEDWVFAG3DmakHRyjMqp5EE",
             "sql_password": "secret",
             "couchbase_password": "secret",
             "couchbase_superuser_password": "secret",
+            "random": ENCODED_PW,
+            "couchbase_truststore_pw": "newsecret",
         }
         return ctx.get(key) or default
 
@@ -100,18 +89,39 @@ def gmanager(gconsul_config, gvault_secret):
 
 
 @pytest.fixture
-def gmeta():
-    from jans.pycloudlib.meta.base_meta import BaseMeta
-
-    class GMeta(BaseMeta):
-        pass
-    yield GMeta()
-
-
-@pytest.fixture
 def gk8s_meta():
     from jans.pycloudlib.meta import KubernetesMeta
 
     meta = KubernetesMeta()
     meta.kubeconfig_file = "tests/kubeconfig"
     yield meta
+
+
+@pytest.fixture
+def google_creds(tmpdir):
+    creds = tmpdir.join("google-credentials.json")
+    creds.write(json.dumps({
+        "client_id": "random-id",
+        "client_secret": "random-secret",
+        "refresh_token": "random-refresh-token",
+        "type": "authorized_user"
+    }))
+    yield creds
+
+
+@pytest.fixture
+def spanner_client(gmanager, monkeypatch, google_creds):
+    from jans.pycloudlib.persistence.spanner import SpannerClient
+
+    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_creds))
+
+    client = SpannerClient(gmanager)
+    yield client
+
+
+@pytest.fixture
+def sql_client(gmanager):
+    from jans.pycloudlib.persistence.sql import SqlClient
+
+    client = SqlClient(gmanager)
+    yield client

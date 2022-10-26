@@ -8,8 +8,8 @@ package io.jans.service.security.protect;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import io.jans.service.CacheService;
 import io.jans.model.security.protect.AuthenticationAttempt;

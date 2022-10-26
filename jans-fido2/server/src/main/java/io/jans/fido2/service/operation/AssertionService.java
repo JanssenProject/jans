@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,9 +29,6 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.entry.Fido2AuthenticationData;
 import io.jans.fido2.model.entry.Fido2AuthenticationEntry;
 import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
-import io.jans.fido2.model.entry.Fido2RegistrationEntry;
-import io.jans.fido2.model.entry.Fido2RegistrationStatus;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
@@ -263,10 +263,12 @@ public class AssertionService {
 		allowedFido2Registrations.forEach((value) -> {
 			log.debug("attestation request:" + value.getRegistrationData().getAttenstationRequest());
 		});
+		
+		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
 		List<JsonNode> allowedFido2Keys = allowedFido2Registrations.parallelStream()
 				.map(f -> dataMapperService.convertValue(new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(),
-						(f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt()) || f
-								.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()))
+						((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null && 
+								f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
 
 										? new String[] { "internal" }
 										: new String[] { "usb", "ble", "nfc" },

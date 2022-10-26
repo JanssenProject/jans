@@ -9,6 +9,9 @@ package io.jans.as.server;
 import io.jans.as.server.util.Deployments;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -21,10 +24,13 @@ import org.testng.annotations.BeforeSuite;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+
+import static org.omnifaces.util.Faces.getServletContext;
 
 /**
  * Base class for all seam test which require external configuration
@@ -40,7 +46,7 @@ public abstract class ConfigurableTest extends Arquillian {
     public boolean initialized = false;
 
     @Deployment
-    @OverProtocol("Servlet 3.0")
+//    @OverProtocol("Servlet 3.0")
     public static Archive<?> createDeployment() {
         return Deployments.createDeployment();
     }
@@ -87,7 +93,7 @@ public abstract class ConfigurableTest extends Arquillian {
 
     /**
      * Data Provider, that returns correct arrays, which should be used, when JEE testing platform Arquillian is used.
-     * 
+     *
      * @author Sergey Manoylo
      * @version December 29, 2021
      */
@@ -97,23 +103,22 @@ public abstract class ConfigurableTest extends Arquillian {
 
         /**
          * Constructor.
-         * 
+         * <p>
          * Private, so only public static functions should be called.
-         * 
          */
         private ArquillianDataProvider() {
         }
 
         /**
          * Returns Array of Data, that should be used by testing framework TestNG.
-         * 
+         * <p>
          * This function returns two-dimensional array, when this function
          * is called 1-st time for some defined provider name.
-         * 
+         * <p>
          * This function returns row of the two-dimensional array, when this function
          * is called 2-nd - N-st time.
          * Number of the row of the two-dimensional array, == (number of call - 1).
-         * 
+         *
          * @param providerName Provider Name.
          * @param providerData Data of the provider (two-dimensional array).
          * @return current array (two-dimensional array or row).
@@ -121,11 +126,10 @@ public abstract class ConfigurableTest extends Arquillian {
         public synchronized static Object[][] provide(final String providerName, final Object[][] providerData) {
             if (calls.containsKey(providerName)) {
                 // get instance and increase calls counter
-                Object[][] testCase = new Object[][] { providerData[calls.get(providerName)] };
+                Object[][] testCase = new Object[][]{providerData[calls.get(providerName)]};
                 calls.put(providerName, (calls.get(providerName) + 1) % providerData.length);
                 return testCase;
-            }
-            else {
+            } else {
                 calls.put(providerName, 0);
                 return providerData;
             }
@@ -133,7 +137,6 @@ public abstract class ConfigurableTest extends Arquillian {
 
         /**
          * Clears counter of calls for all providers.
-         * 
          */
         public synchronized static void initCalls() {
             calls.clear();
@@ -141,7 +144,7 @@ public abstract class ConfigurableTest extends Arquillian {
 
         /**
          * Clears counter of calls for some provider.
-         * 
+         *
          * @param providerName Provider Name.
          */
         public synchronized static void initCalls(final String providerName) {

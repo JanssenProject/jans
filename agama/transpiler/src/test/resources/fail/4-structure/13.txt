@@ -1,0 +1,8 @@
+Flow flow
+    Basepath ""
+    Configs conf
+    Timeout 100 seconds
+    
+Finish true
+
+//Failure reason: header scrambled: Timeout declaration expected before Configs

@@ -8,6 +8,23 @@ import os
 import re
 from setuptools import setup
 from setuptools import find_packages
+from setuptools.command.install import install
+from urllib.request import urlretrieve
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
+
+        urlretrieve(
+             'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml',
+             os.path.join(self.install_lib, 'cli/jca.yaml')
+            )
+
+        urlretrieve(
+             'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml',
+             os.path.join(self.install_lib, 'cli/scim.yaml')
+            )
 
 
 def find_version(*file_paths):
@@ -36,7 +53,14 @@ setup(
     package_data={'': ['*.yaml']},
     zip_safe=False,
     install_requires=[
-        "ruamel.yaml>=0.16.5"
+        "ruamel.yaml>=0.16.5",
+        "PyJWT==2.3.0",
+        "certifi",
+        "six",
+        "prompt_toolkit",
+        "jca-swagger-client @ https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca_swagger_client.zip",
+        "scim_swagger_client @ https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim_swagger_client.zip",
+
     ],
     classifiers=[
         "Intended Audience :: Developers",
@@ -53,5 +77,8 @@ setup(
             "config-cli=cli.config_cli:main",
             "scim-cli=cli.config_cli:main",
         ],
+    },
+    cmdclass={
+        'install': PostInstallCommand,
     },
 )

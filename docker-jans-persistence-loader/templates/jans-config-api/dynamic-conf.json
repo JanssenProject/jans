@@ -33,5 +33,25 @@
       "corsRequestDecorate": true,
       "corsEnabled": true
     }
-  ]
+  ],
+  "userExclusionAttributes": [
+    "userPassword"
+  ],
+  "userMandatoryAttributes": [
+    "mail",
+    "displayName",
+    "jansStatus",
+    "userPassword",
+    "givenName"
+  ],
+  "agamaConfiguration": {
+    "mandatoryAttributes": [
+        "qname",
+        "source"
+    ],
+    "optionalAttributes": [
+        "serialVersionUID",
+        "enabled"
+    ]
+  }
 }

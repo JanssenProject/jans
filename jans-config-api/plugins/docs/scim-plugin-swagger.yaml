@@ -1,0 +1,129 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - SCIM
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+  variables: {}
+tags:
+- name: SCIM - Config Management
+paths:
+  /scim/scim-config:
+    get:
+      tags:
+      - SCIM - Config Management
+      summary: Retrieves SCIM App configuration
+      description: Retrieves SCIM App configuration
+      operationId: get-scim-config
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/scim/config.readonly
+    patch:
+      tags:
+      - SCIM - Config Management
+      summary: Patch SCIM App configuration
+      description: Patch SCIM App configuration
+      operationId: patch-scim-config
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            example: "[ {op:replace, path: loggingLevel, value: DEBUG } ]"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/scim/config.write
+components:
+  schemas:
+    AppConfiguration:
+      type: object
+      properties:
+        baseDN:
+          type: string
+        applicationUrl:
+          type: string
+        baseEndpoint:
+          type: string
+        personCustomObjectClass:
+          type: string
+        oxAuthIssuer:
+          type: string
+        protectionMode:
+          type: string
+          enum:
+          - OAUTH
+          - BYPASS
+        maxCount:
+          type: integer
+          format: int32
+        bulkMaxOperations:
+          type: integer
+          format: int32
+        bulkMaxPayloadSize:
+          type: integer
+          format: int64
+        userExtensionSchemaURI:
+          type: string
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        metricReporterInterval:
+          type: integer
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+        useLocalCache:
+          type: boolean
+    JsonPatch:
+      type: object
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/scim/config.readonly: View SCIM configuration related
+              information
+            https://jans.io/scim/config.write: Manage SCIM configuration related information

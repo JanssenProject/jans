@@ -1,7 +1,0 @@
-{
-  "status": "ok",
-  "data": {
-    "url": "https://<op-hostname>/oxauth/restv1/uma/gather_claims?client_id@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!4508.BF20.9B81.E904&ticket=fba00191-59ab-4ed6-ac99-a786a88a9f40&claims_redirect_uri=https://client.example.com/cb&state=d871gpie16np0f5kfv936sc33k",
-    "state": "d871gpie16np0f5kfv936sc33k"
-  }
-}

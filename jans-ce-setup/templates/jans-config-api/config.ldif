@@ -1,6 +1,0 @@
-dn: ou=jans-config-api,ou=configuration,o=jans
-jansConfDyn:: %(config_api_dynamic_conf_base64)s
-jansRevision: 1
-objectClass: top
-objectClass: jansAppConf
-ou: jans-config-api

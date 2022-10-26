@@ -6,8 +6,8 @@
 
 package io.jans.as.server.exception;
 
-import javax.faces.context.ExceptionHandler;
-import javax.faces.context.ExceptionHandlerFactory;
+import jakarta.faces.context.ExceptionHandler;
+import jakarta.faces.context.ExceptionHandlerFactory;
 
 /**
  * Created by eugeniuparvan on 8/29/17.

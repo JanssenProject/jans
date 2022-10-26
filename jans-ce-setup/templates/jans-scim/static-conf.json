@@ -1,8 +1,0 @@
-{
-    "baseDn":{
-        "configuration":"ou=configuration,o=jans",
-        "people":"ou=people,o=jans",
-        "scripts": "ou=scripts,o=jans",
-        "metric":"ou=statistic,o=metric"
-    }
-}

@@ -6,6 +6,26 @@
 
 package io.jans.scim.service;
 
+import io.jans.as.model.common.IdType;
+import io.jans.model.GluuAttribute;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.base.SimpleUser;
+import io.jans.orm.search.filter.Filter;
+import io.jans.scim.exception.DuplicateEmailException;
+import io.jans.scim.model.GluuCustomAttribute;
+import io.jans.scim.model.GluuCustomPerson;
+import io.jans.scim.model.User;
+import io.jans.scim.util.OxTrustConstants;
+import io.jans.util.ArrayHelper;
+import io.jans.util.OxConstants;
+import io.jans.util.StringHelper;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,27 +36,7 @@ import java.util.Map;
 import java.time.Instant;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import io.jans.model.GluuAttribute;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.operation.DuplicateEntryException;
-import io.jans.orm.model.AttributeData;
-import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.base.SimpleBranch;
-import io.jans.orm.model.base.SimpleUser;
-import io.jans.orm.search.filter.Filter;
-import io.jans.util.ArrayHelper;
-import io.jans.util.OxConstants;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
-
-import io.jans.scim.exception.DuplicateEmailException;
-import io.jans.scim.model.GluuCustomAttribute;
-import io.jans.scim.model.GluuCustomPerson;
-import io.jans.scim.model.User;
-import io.jans.scim.util.OxTrustConstants;
 
 /**
  * Provides operations with persons
@@ -60,6 +60,9 @@ public class PersonService implements Serializable {
 	@Inject
 	private OrganizationService organizationService;
 
+	@Inject
+	private ExternalIdGeneratorService idGeneratorService;
+	
 	private List<GluuCustomAttribute> mandatoryAttributes;
 
 	public void addCustomObjectClass(GluuCustomPerson person) {
@@ -274,7 +277,19 @@ public class PersonService implements Serializable {
 	 * @throws Exception
 	 */
 	private String generateInumForNewPersonImpl() {
-		return UUID.randomUUID().toString();
+
+	    String id = null;
+	    if (idGeneratorService.isEnabled()) {
+	        id = idGeneratorService.executeExternalGenerateIdMethod(
+	            //Use the first enabled script only
+	            idGeneratorService.getCustomScriptConfigurations().stream().findFirst().orElse(null)
+	            , ""    //appId 
+	            , IdType.PEOPLE.getType()    //idType
+	            , ""    //idPrefix
+            );
+	    }
+        return id == null ? UUID.randomUUID().toString() : id;
+
 	}
 
 	public String getDnForPerson(String inum) {

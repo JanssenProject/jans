@@ -8,7 +8,7 @@ package io.jans.as.client;
 
 import io.jans.as.model.session.EndSessionErrorResponseType;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy

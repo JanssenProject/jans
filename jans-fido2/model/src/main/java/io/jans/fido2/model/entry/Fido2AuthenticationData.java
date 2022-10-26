@@ -9,6 +9,7 @@ package io.jans.fido2.model.entry;
 import io.jans.fido2.ctap.UserVerification;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.jans.orm.model.fido2.Fido2Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Fido2AuthenticationData extends Fido2Data {

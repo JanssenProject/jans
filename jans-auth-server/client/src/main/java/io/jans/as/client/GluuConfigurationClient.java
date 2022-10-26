@@ -11,9 +11,9 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -99,7 +99,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
     }
 
     private Map<Integer, Set<String>> mapJsonToAuthLevelMapping(JSONObject jsonObject) {
-        Map<Integer, Set<String>> authLevelMapping = new HashMap<Integer, Set<String>>();
+        Map<Integer, Set<String>> authLevelMapping = new HashMap<>();
 
         Iterator<?> keys = jsonObject.keys();
         while (keys.hasNext()) {
@@ -120,7 +120,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
     }
 
     private Map<String, Set<String>> mapJsonToScopeToClaimsMapping(JSONObject jsonObject) {
-        Map<String, Set<String>> scopeToClaimsMapping = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> scopeToClaimsMapping = new HashMap<>();
         Iterator<?> keys = jsonObject.keys();
         while (keys.hasNext()) {
             try {

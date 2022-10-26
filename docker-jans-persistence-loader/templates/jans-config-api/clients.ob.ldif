@@ -5,7 +5,7 @@ inum: %(jca_client_id)s
 jansAccessTknAsJwt: false
 jansAccessTknSigAlg: RS256
 jansAppTyp: web
-jansAttrs: {"tlsClientAuthSubjectDn": "", "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false, "keepClientAuthorizationAfterExpiration": false, "allowSpontaneousScopes": false, "spontaneousScopes": [], "spontaneousScopeScriptDns": [], "backchannelLogoutUri": [], "backchannelLogoutSessionRequired": false, "additionalAudience": [], "postAuthnScripts": [], "consentGatheringScripts": [], "introspectionScripts": [], "rptClaimsScripts": []}
+jansAttrs: {"tlsClientAuthSubjectDn": "", "runIntrospectionScriptBeforeJwtCreation": false, "keepClientAuthorizationAfterExpiration": false, "allowSpontaneousScopes": false, "spontaneousScopes": [], "spontaneousScopeScriptDns": [], "backchannelLogoutUri": [], "backchannelLogoutSessionRequired": false, "additionalAudience": [], "postAuthnScripts": [], "consentGatheringScripts": [], "introspectionScripts": [], "rptClaimsScripts": []}
 jansClntSecret: %(jca_client_encoded_pw)s
 jansDisabled: false
 jansGrantTyp: authorization_code
@@ -15,7 +15,6 @@ jansIdTknSignedRespAlg: RS256
 jansInclClaimsInIdTkn: false
 jansLogoutSessRequired: false
 jansPersistClntAuthzs: true
-jansRequireAuthTime: false
 jansRespTyp: code
 jansRptAsJwt: false
 jansScope: inum=1800.4F4C08,ou=scopes,o=jans

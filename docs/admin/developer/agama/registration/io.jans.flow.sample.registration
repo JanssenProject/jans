@@ -1,0 +1,18 @@
+Flow io.jans.flow.sample.registration
+    Basepath "samples/registration"
+    
+o = {}
+Repeat 3 times max
+    o = RRF "index.ftlh" o
+    o.error = Call io.jans.agama.samples.RegistrationUtil#register o.name o.username o.pwd o.pwd2 o.email
+
+    When o.error is null
+        o.pwd = null
+        o.pwd2 = null
+
+        RRF "confirmation.ftlh" o
+        Finish true
+    
+    Log "Error creating user %: %" o.name o.error
+
+Finish false

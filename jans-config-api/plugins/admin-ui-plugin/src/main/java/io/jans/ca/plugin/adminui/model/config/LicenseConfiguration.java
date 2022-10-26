@@ -1,11 +1,8 @@
 package io.jans.ca.plugin.adminui.model.config;
 
-import com.licensespring.LicenseManager;
-import com.licensespring.LicenseSpringConfiguration;
-import com.licensespring.model.exceptions.LicenseSpringException;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class LicenseConfiguration {
 
@@ -16,40 +13,17 @@ public class LicenseConfiguration {
     private String productCode;
     private String sharedKey;
     private String managementKey;
-    private Boolean enabled = Boolean.FALSE;
-    LicenseSpringConfiguration licenseSpringConfiguration;
-    LicenseManager licenseManager;
+    private String hardwareId;
+    private String licenseKey;
 
     public LicenseConfiguration() {
     }
-    public LicenseConfiguration(String apiKey, String productCode, String sharedKey, String managementKey, Boolean enabled) {
+
+    public LicenseConfiguration(String apiKey, String productCode, String sharedKey, String managementKey) {
         this.apiKey = apiKey;
         this.productCode = productCode;
         this.sharedKey = sharedKey;
-        this.enabled = enabled;
         this.managementKey = managementKey;
-
-        if(Boolean.TRUE.equals(this.enabled)) {
-            initializeLicenseManager();
-        }
-    }
-
-    public void initializeLicenseManager() {
-        try {
-            this.licenseSpringConfiguration = LicenseSpringConfiguration.builder()
-                    .apiKey(apiKey)
-                    .productCode(productCode)
-                    .sharedKey(sharedKey)
-                    .build();
-
-            this.licenseManager = LicenseManager.getInstance();
-            if (!licenseManager.isInitialized()) {
-                licenseManager.initialize(licenseSpringConfiguration);
-            }
-        } catch (LicenseSpringException e) {
-            log.error("Error in initializing LicenseManager. ");
-            throw e;
-        }
     }
 
     public String getApiKey() {
@@ -76,35 +50,27 @@ public class LicenseConfiguration {
         this.sharedKey = sharedKey;
     }
 
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public LicenseSpringConfiguration getLicenseSpringConfiguration() {
-        return licenseSpringConfiguration;
-    }
-
-    public void setLicenseSpringConfiguration(LicenseSpringConfiguration licenseSpringConfiguration) {
-        this.licenseSpringConfiguration = licenseSpringConfiguration;
-    }
-
-    public LicenseManager getLicenseManager() {
-        return licenseManager;
-    }
-
-    public void setLicenseManager(LicenseManager licenseManager) {
-        this.licenseManager = licenseManager;
-    }
-
     public String getManagementKey() {
         return managementKey;
     }
 
     public void setManagementKey(String managementKey) {
         this.managementKey = managementKey;
+    }
+
+    public String getHardwareId() {
+        return hardwareId;
+    }
+
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
+    }
+
+    public String getLicenseKey() {
+        return licenseKey;
+    }
+
+    public void setLicenseKey(String licenseKey) {
+        this.licenseKey = licenseKey;
     }
 }

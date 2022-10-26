@@ -1,0 +1,17 @@
+#####################################################################################################
+# Added by Jans to prevent user to login into chroot container without starting jans-server service #
+#####################################################################################################
+if [ "$(ls -A /dev/pts/)" != "" ] && [ "$(ls -A /proc/)" != "" ] && [ "$(ls -A /lib/modules/)" != "" ] && [ "$(ls -A /sys/class/net/lo/)" != "" ] && [ "$(ls /dev/ | grep -vE 'null|pts')" != "" ]; then
+    echo "Welcome to the Jans Server!"
+else
+    echo "Jans server is not started, please start it from root machine by service jans-server start"
+    exit
+fi
+
+export JAVA_HOME=%(jre_home)s
+export OPENDJ_JAVA_HOME=%(jre_home)s
+
+export PATH=$PATH:$JAVA_HOME/bin:$NODE_HOME/bin:%(ldap_base_dir)s/bin
+#####################################################################################################
+# End Jans Block                                                                                    #
+#####################################################################################################

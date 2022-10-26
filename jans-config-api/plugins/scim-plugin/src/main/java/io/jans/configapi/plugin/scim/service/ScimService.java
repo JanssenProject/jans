@@ -1,6 +1,5 @@
 package io.jans.configapi.plugin.scim.service;
 
-import static io.jans.configapi.core.util.Util.escapeLog;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.plugin.scim.model.config.ScimConfiguration;
 
@@ -10,9 +9,9 @@ import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 

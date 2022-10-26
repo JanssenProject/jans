@@ -1,6 +1,6 @@
 package io.jans.as.server.session.ws.rs;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -10,7 +10,7 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.DefaultScope;
 import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.token.TokenService;
@@ -21,18 +21,18 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,7 +77,7 @@ public class SessionRestWebService {
             @Context HttpServletResponse response,
             @Context SecurityContext securityContext) {
         try {
-            errorResponseFactory.validateComponentEnabled(ComponentType.ACTIVE_SESSION);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACTIVE_SESSION);
             AuthorizationGrant grant = validateToken(getToken(authorization));
 
             ExecutionContext executionContext = new ExecutionContext(request, response);
@@ -132,14 +132,25 @@ public class SessionRestWebService {
         final Date exp = sessionId.getExpirationDate();
         final Date iat = sessionId.getCreationDate();
         final Date lastUsedAt = sessionId.getLastUsedAt();
+        final String sid = sessionId.getOutsideSid();
+        final Date authnTime = sessionId.getAuthenticationTime();
 
         JSONObject result = new JSONObject();
-        if (lastUsedAt != null)
-            result.put("lastUsedAt", dateAsSeconds(lastUsedAt));
-        if (iat != null)
+        if (lastUsedAt != null) {
+            result.put("last_used_at", dateAsSeconds(lastUsedAt));
+        }
+        if (iat != null) {
             result.put("iat", dateAsSeconds(iat));
-        if (exp != null)
+        }
+        if (exp != null) {
             result.put("exp", dateAsSeconds(exp));
+        }
+        if (StringUtils.isNotBlank(sid)) {
+            result.put("sid", sid);
+        }
+        if (authnTime != null) {
+            result.put("authn_time", sid);
+        }
         return result;
     }
 

@@ -9,6 +9,7 @@ package io.jans.as.server.service;
 import com.google.common.collect.Lists;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AuthorizationRequestCustomParameter;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.model.security.Identity;
@@ -18,26 +19,20 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version February 2, 2022
  */
 @Stateless
 @Named
@@ -85,7 +80,7 @@ public class RequestParameterService {
     }
 
     public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
-        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
+        Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
         if (authorizationRequestCustomAllowedParameters == null) {
             authorizationRequestCustomAllowedParameters = new HashSet<>(0);
         }
@@ -98,7 +93,9 @@ public class RequestParameterService {
         final List<String> allAllowed = getAllAllowedParameters();
         final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
         for (Map.Entry<String, String> entry : set) {
-            if (allAllowed.contains(entry.getKey()) || authorizationRequestCustomAllowedParameters.contains(entry.getKey())) {
+            if (allAllowed.contains(entry.getKey())
+                    || authorizationRequestCustomAllowedParameters.stream()
+                    .filter(o -> StringUtils.isNotBlank(o.getParamName()) && o.getParamName().equals(entry.getKey())).findFirst().isPresent()) {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
@@ -106,7 +103,11 @@ public class RequestParameterService {
     }
 
     public Map<String, String> getCustomParameters(@Nonnull final Map<String, String> requestParameterMap) {
-        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
+        return getCustomParameters(requestParameterMap, false);
+    }
+
+    public Map<String, String> getCustomParameters(@Nonnull final Map<String, String> requestParameterMap, boolean onlyReturnInResponseParams) {
+        Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
 
         final Map<String, String> result = new HashMap<>();
         if (authorizationRequestCustomAllowedParameters == null) {
@@ -116,7 +117,15 @@ public class RequestParameterService {
         if (!requestParameterMap.isEmpty()) {
             final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
             for (Map.Entry<String, String> entry : set) {
-                if (authorizationRequestCustomAllowedParameters.contains(entry.getKey())) {
+
+                if (onlyReturnInResponseParams && authorizationRequestCustomAllowedParameters.stream()
+                        .filter(o -> StringUtils.isNotBlank(o.getParamName())
+                                && o.getParamName().equals(entry.getKey())
+                                && o.getReturnInResponse()).findFirst().isPresent()) {
+                    result.put(entry.getKey(), entry.getValue());
+                } else if (!onlyReturnInResponseParams && authorizationRequestCustomAllowedParameters.stream()
+                        .filter(o -> StringUtils.isNotBlank(o.getParamName())
+                                && o.getParamName().equals(entry.getKey())).findFirst().isPresent()) {
                     result.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -213,16 +222,16 @@ public class RequestParameterService {
      * @param customParameters Custom parameters used in the authorization flow.
      */
     public void getCustomParameters(JwtAuthorizationRequest jwtRequest, Map<String, String> customParameters) {
-        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
+        Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
 
         if (authorizationRequestCustomAllowedParameters == null) {
             return;
         }
 
         JSONObject jsonPayload = jwtRequest.getJsonPayload();
-        for (String customParam : authorizationRequestCustomAllowedParameters) {
-            if (jsonPayload.has(customParam)) {
-                customParameters.put(customParam, jsonPayload.getString(customParam));
+        for (AuthorizationRequestCustomParameter customParam : authorizationRequestCustomAllowedParameters) {
+            if (jsonPayload.has(customParam.getParamName())) {
+                customParameters.put(customParam.getParamName(), jsonPayload.getString(customParam.getParamName()));
             }
         }
     }

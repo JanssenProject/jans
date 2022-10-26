@@ -26,7 +26,7 @@ public class OpenIdConnectDiscoveryResponse extends BaseResponse {
      */
     public OpenIdConnectDiscoveryResponse(int status) {
         super(status);
-        links = new ArrayList<WebFingerLink>();
+        links = new ArrayList<>();
     }
 
     public String getSubject() {

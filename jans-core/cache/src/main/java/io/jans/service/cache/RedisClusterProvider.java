@@ -64,7 +64,7 @@ public class RedisClusterProvider extends AbstractRedisProvider {
     public static Set<HostAndPort> hosts(String servers) {
         final String[] serverWithPorts = StringUtils.split(servers.trim(), ",");
 
-        Set<HostAndPort> set = new HashSet<HostAndPort>();
+        Set<HostAndPort> set = new HashSet<>();
         for (String serverWithPort : serverWithPorts) {
             final String[] split = serverWithPort.trim().split(":");
             String host = split[0];

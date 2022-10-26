@@ -55,6 +55,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> idTokenSigningAlgValuesSupported;
     private List<String> idTokenEncryptionAlgValuesSupported;
     private List<String> idTokenEncryptionEncValuesSupported;
+    private List<String> accessTokenSigningAlgValuesSupported;
     private List<String> requestObjectSigningAlgValuesSupported;
     private List<String> requestObjectEncryptionAlgValuesSupported;
     private List<String> requestObjectEncryptionEncValuesSupported;
@@ -88,6 +89,9 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
     private Boolean backchannelUserCodeParameterSupported;
 
+    // SSA
+    private String ssaEndpoint;
+
     public OpenIdConfigurationResponse() {
     }
 
@@ -114,6 +118,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         idTokenSigningAlgValuesSupported = new ArrayList<>();
         idTokenEncryptionAlgValuesSupported = new ArrayList<>();
         idTokenEncryptionEncValuesSupported = new ArrayList<>();
+        accessTokenSigningAlgValuesSupported = new ArrayList<>();
         requestObjectSigningAlgValuesSupported = new ArrayList<>();
         requestObjectEncryptionAlgValuesSupported = new ArrayList<>();
         requestObjectEncryptionEncValuesSupported = new ArrayList<>();
@@ -619,6 +624,15 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setUserInfoEncryptionEncValuesSupported(List<String> userInfoEncryptionEncValuesSupported) {
         this.userInfoEncryptionEncValuesSupported = userInfoEncryptionEncValuesSupported;
+    }
+
+    public List<String> getAccessTokenSigningAlgValuesSupported() {
+        if (accessTokenSigningAlgValuesSupported == null) accessTokenSigningAlgValuesSupported = new ArrayList<>();
+        return accessTokenSigningAlgValuesSupported;
+    }
+
+    public void setAccessTokenSigningAlgValuesSupported(List<String> accessTokenSigningAlgValuesSupported) {
+        this.accessTokenSigningAlgValuesSupported = accessTokenSigningAlgValuesSupported;
     }
 
     /**
@@ -1175,6 +1189,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.mltsAliases = mltsAliases;
     }
 
+    public String getSsaEndpoint() {
+        return ssaEndpoint;
+    }
+
+    public void setSsaEndpoint(String ssaEndpoint) {
+        this.ssaEndpoint = ssaEndpoint;
+    }
+
     @Override
     public String toString() {
         return "OpenIdConfigurationResponse{" +
@@ -1205,6 +1227,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", idTokenSigningAlgValuesSupported=" + idTokenSigningAlgValuesSupported +
                 ", idTokenEncryptionAlgValuesSupported=" + idTokenEncryptionAlgValuesSupported +
                 ", idTokenEncryptionEncValuesSupported=" + idTokenEncryptionEncValuesSupported +
+                ", accessTokenSigningAlgValuesSupported=" + accessTokenSigningAlgValuesSupported +
                 ", requestObjectSigningAlgValuesSupported=" + requestObjectSigningAlgValuesSupported +
                 ", requestObjectEncryptionAlgValuesSupported=" + requestObjectEncryptionAlgValuesSupported +
                 ", requestObjectEncryptionEncValuesSupported=" + requestObjectEncryptionEncValuesSupported +
@@ -1234,6 +1257,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", backchannelAuthenticationRequestSigningAlgValuesSupported=" + backchannelAuthenticationRequestSigningAlgValuesSupported + '\'' +
                 ", backchannelUserCodeParameterSupported=" + backchannelUserCodeParameterSupported + '\'' +
                 ", mltsAliases=" + mltsAliases + '\'' +
+                ", ssaEndpoint=" + ssaEndpoint + '\'' +
                 '}';
     }
 }

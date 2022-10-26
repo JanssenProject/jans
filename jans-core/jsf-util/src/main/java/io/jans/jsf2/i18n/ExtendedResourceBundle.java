@@ -25,7 +25,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.faces.context.FacesContext;
+import jakarta.faces.context.FacesContext;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -73,6 +73,10 @@ public class ExtendedResourceBundle extends ResourceBundle {
     public ExtendedResourceBundle() {
         Locale locale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
         setParent(ResourceBundle.getBundle(getBaseName(), locale, CONTROL));
+    }
+
+    public ExtendedResourceBundle(String baseName, Locale locale) {
+        setParent(ResourceBundle.getBundle(baseName, locale, CONTROL));
     }
 
     private ExtendedResourceBundle(Path externalResource, Properties properties) {
