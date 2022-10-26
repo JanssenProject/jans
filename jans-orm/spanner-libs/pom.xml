@@ -26,7 +26,6 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>make-assembly-dist</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
