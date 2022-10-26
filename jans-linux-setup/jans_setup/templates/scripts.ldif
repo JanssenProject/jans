@@ -241,26 +241,6 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
-dn: inum=5018-AF9C,ou=scripts,o=jans
-description: UAF authentication module
-displayName: uaf
-inum: 5018-AF9C
-jansConfProperty: {"value1":"uaf_server_uri","value2":"https://%(hostname)s","description":""}
-jansConfProperty: {"value1":"uaf_policy_name","value2":"default","description":""}
-jansConfProperty: {"value1":"qr_options","value2":"{ width: 400, height: 400 }","description":""}
-jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
-jansConfProperty: {"value1":"send_push_notifaction","value2":"false","description":""}
-jansLevel: 70
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansRevision: 1
-jansScr::%(person_authentication_uafexternalauthenticator)s
-jansScrTyp: person_authentication
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
 dn: inum=5018-D4BF,ou=scripts,o=jans
 description: HOTP/TOPT authentication module
 displayName: otp
@@ -292,67 +272,7 @@ jansLevel: 50
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_duoexternalauthenticator)s
-jansScrTyp: person_authentication
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
-dn: inum=522F-CDC5,ou=scripts,o=jans
-description: Sample Update User script
-displayName: update_user
-inum: 522F-CDC5
-jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(update_user_samplescript)s
-jansScrTyp: update_user
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
-dn: inum=6EA0-8F0C,ou=scripts,o=jans
-description: Sample User Registration script
-displayName: user_registration
-inum: 6EA0-8F0C
-jansConfProperty: {"value1":"enable_user","value2":"false","description":""}
-jansLevel: 90
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(user_registration_samplescript)s
-jansScrTyp: user_registration
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
-dn: inum=6EA0-8F0D,ou=scripts,o=jans
-description: Sample Confirm User Registration  script
-displayName: user_confirm_registration
-inum: 6EA0-8F0D
-jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(user_registration_confirmregistrationsamplescript)s
-jansScrTyp: user_registration
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
-dn: inum=8BAF-80D6,ou=scripts,o=jans
-description: Fido U2F authentication module
-displayName: u2f
-inum: 8BAF-80D6
-jansConfProperty: {"value1":"u2f_application_id","value2":"https://%(hostname)s","description":""}
-jansConfProperty: {"value1":"u2f_server_uri","value2":"https://%(hostname)s","description":""}
-jansLevel: 50
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(person_authentication_u2fexternalauthenticator)s
+jansScr::%(person_authentication_duo_external_authenticator_duoexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -398,24 +318,6 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
-dn: inum=92F0-759E,ou=scripts,o=jans
-description: ThumbSignIn authentication module
-displayName: thumb_sign_in
-inum: 92F0-759E
-jansConfProperty: {"value1":"ts_host","value2":"https://ts.host.com","description":""}
-jansConfProperty: {"value1":"ts_apiKey","value2":"ts_api_key","description":""}
-jansConfProperty: {"value1":"ts_apiSecret","value2":"ts_api_secret","description":""}
-jansLevel: 50
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansRevision: 1
-jansScr::%(person_authentication_thumbsigninexternalauthenticator)s
-jansScrTyp: person_authentication
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
 dn: inum=A51E-76DA,ou=scripts,o=jans
 description: Sample authentication module
 displayName: basic
@@ -430,6 +332,8 @@ objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
+jansAlias: basic_alias1
+jansAlias: basic_alias2
 
 dn: inum=A910-56AB,ou=scripts,o=jans
 description: Sample script for SCIM events
@@ -596,4 +500,80 @@ jansProgLng: python
 jansRevision: 1
 jansScr::%(introspection_introspection_role_based_scope)s
 jansScrTyp: introspection
+
+dn: inum=A110-88AB,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Jans Config Api authorization script
+displayName: config_api_authorization
+inum: A110-88AB
+jansEnabled: false
+jansConfProperty: {"value1":"testProp1","value2":"Test value 1","hide":false,"description":""}
+jansConfProperty: {"value1":"testProp2","value2":"Test value 2","hide":false,"description":""}
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansLevel: 100
+jansRevision: 1
+jansProgLng: python
+jansScrTyp: config_api_auth
+jansScr::%(config_api_config_api_interception)s
+
+dn: inum=0300-BA90,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Java Custom Sample Script
+displayName: discovery_java_params
+inum: 0300-BA90
+jansEnabled: FALSE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(discovery_discovery)s
+jansScrTyp: discovery
+
+dn: inum=BADA-BADA,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Agama Script
+displayName: agama
+inum: BADA-BADA
+jansConfProperty: {"value1":"cust_param_name","value2":"customParam1","hide":false,"description":""}
+jansEnabled: false
+jansLevel: 10
+jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description": ""}
+jansProgLng: python
+jansRevision: 1
+jansScr::%(person_authentication_agamabridge)s
+jansScrTyp: person_authentication
+
+dn: inum=B270-381E,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: This script is a 2 in 1. It can be used to enable user to reset its password or to enable 2FA sending a token to user's email
+displayName: Forgot_Password_2FA_Token
+inum: B270-381E
+jansConfProperty: {"value1":"SCRIPT_FUNCTION","value2":"forgot_password","description":""}
+jansEnabled: false
+jansLevel: 10
+jansModuleProperty: {"value1":"SCRIPT_FUNCTION","value2":"ldap","description":""}
+jansProgLng: python
+jansRevision: 1
+jansScr::%(person_authentication_other_forgot_password_forgot_password)s
+jansScrTyp: person_authentication
+
+dn: inum=CACD-5902,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Scan Token Update Script
+displayName: scan_update_token
+inum: CACD-5902
+jansEnabled: false
+jansLevel: 100
+jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
+jansConfProperty: {"value1":"BILLING_API_URL", "value2":"https://my.billing.api.com/", "hide":false, "description":"URL to billing API"}
+jansRevision: 1
+jansScr::%(update_token_updatetoken)s
+jansScrTyp: update_token
+jansProgLng: python
 

@@ -19,7 +19,7 @@
 
 		<RollingFile name="FILE" fileName="${sys:log.base}/logs/jans-auth.log" filePattern="${sys:log.base}/logs/jans-auth-%d{yyyy-MM-dd}-%i.log">
 
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -30,7 +30,7 @@
 
 		<RollingFile name="JANS_AUTH_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence.log" filePattern="${sys:log.base}/logs/jans-auth_persistence-%d{yyyy-MM-dd}-%i.log">
 
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -41,7 +41,7 @@
 
 		<RollingFile name="JANS_AUTH_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence_duration.log" filePattern="${sys:log.base}/logs/jans-auth_persistence_duration-%d{yyyy-MM-dd}-%i.log">
 
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -53,7 +53,7 @@
 		<RollingFile name="JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics.log"
 			filePattern="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
 
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -64,7 +64,7 @@
 
 		<RollingFile name="JANS_AUTH_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_script.log" filePattern="${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log">
 
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -75,7 +75,7 @@
 
 		<RollingFile name="JANS_AUTH_AUDIT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_audit.log" filePattern="${sys:log.base}/logs/jans-auth_audit-%d{yyyy-MM-dd}-%i.log">
 
-			<PatternLayout pattern="%d %-5p [%macAddr] [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%macAddr] [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -87,9 +87,7 @@
 
 	<Loggers>
 		<!-- ############### Gluu ################# -->
-		<Logger name="io.jans" level="INFO" />
-
-		<Logger name="io.jans.as" level="$auth_log_level" additivity="false">
+		<Logger name="io.jans" level="$auth_log_level" additivity="false">
 			<AppenderRef ref="$auth_log_target" />
 		</Logger>
 
@@ -141,6 +139,10 @@
 		</Logger>
 
 		<Logger name="io.jans.as.server.service.custom" level="$script_log_level" additivity="false">
+			<AppenderRef ref="$script_log_target" />
+		</Logger>
+
+		<Logger name="io.jans.agama.engine.script.LogUtils" level="$script_log_level" additivity="false">
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 

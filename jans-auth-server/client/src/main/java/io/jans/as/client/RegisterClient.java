@@ -6,6 +6,7 @@
 
 package io.jans.as.client;
 
+import io.jans.as.client.builder.RegistrationBuilder;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.register.ApplicationType;
 import org.apache.commons.lang.StringUtils;
@@ -13,11 +14,11 @@ import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 /**
@@ -39,6 +40,10 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
      */
     public RegisterClient(String url) {
         super(url);
+    }
+
+    public static RegistrationBuilder builder() {
+        return new RegistrationBuilder();
     }
 
     @Override

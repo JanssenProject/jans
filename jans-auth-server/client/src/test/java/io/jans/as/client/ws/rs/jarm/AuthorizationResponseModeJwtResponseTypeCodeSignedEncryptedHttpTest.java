@@ -6,13 +6,10 @@
 package io.jans.as.client.ws.rs.jarm;
 
 import io.jans.as.client.*;
-import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
@@ -22,7 +19,6 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.JwtUtil;
 import org.json.JSONObject;
 import org.testng.annotations.Parameters;
@@ -33,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.model.util.StringUtils.base64urlencode;
 import static org.testng.Assert.*;
 
 /**
@@ -128,13 +123,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -225,13 +214,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -324,13 +307,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -420,13 +397,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -518,13 +489,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -591,15 +556,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -669,14 +626,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -745,14 +695,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -821,14 +764,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -896,14 +832,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -971,14 +900,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1045,13 +967,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1118,14 +1034,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1192,14 +1101,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -1272,14 +1174,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -1351,15 +1246,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
-
+        assertJweResponse(response);
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
@@ -1502,5 +1389,15 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.INVALID_REQUEST);
 
         privateKey = null; // Clear private key to do not affect to other tests
+    }
+
+    private void assertJweResponse(Jwe jwe){
+        assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
+        assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
+        assertNotNull(jwe.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
+        assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
+        assertNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
+        assertNotNull(jwe.getClaims().getClaimAsString("error"));
+        assertNotNull(jwe.getClaims().getClaimAsString("error_description"));
     }
 }

@@ -9,32 +9,36 @@ package io.jans.orm.couchbase.operation.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
-import io.jans.orm.couchbase.model.BucketMapping;
-import io.jans.orm.couchbase.model.ResultCode;
+import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.StringHelper;
 import io.jans.orm.exception.KeyConversionException;
 import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
-import io.jans.orm.util.ArrayHelper;
-import io.jans.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.couchbase.client.core.CouchbaseException;
-import com.couchbase.client.core.message.internal.PingReport;
-import com.couchbase.client.core.message.internal.PingServiceHealth;
-import com.couchbase.client.core.message.internal.PingServiceHealth.PingState;
+import com.couchbase.client.core.diagnostics.EndpointPingReport;
+import com.couchbase.client.core.diagnostics.PingResult;
+import com.couchbase.client.core.diagnostics.PingState;
+import com.couchbase.client.core.error.CouchbaseException;
+import com.couchbase.client.core.service.ServiceType;
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.CouchbaseCluster;
-import com.couchbase.client.java.bucket.BucketInfo;
-import com.couchbase.client.java.bucket.BucketManager;
-import com.couchbase.client.java.env.CouchbaseEnvironment;
-import com.couchbase.client.java.query.N1qlQueryResult;
-import com.couchbase.client.java.query.Select;
-import com.couchbase.client.java.query.Statement;
-import com.couchbase.client.java.query.dsl.Expression;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.ClusterOptions;
+import com.couchbase.client.java.env.ClusterEnvironment;
+import com.couchbase.client.java.json.JsonArray;
+import com.couchbase.client.java.manager.bucket.BucketManager;
+import com.couchbase.client.java.manager.bucket.BucketSettings;
+import com.couchbase.client.java.query.QueryOptions;
+import com.couchbase.client.java.query.QueryResult;
+import com.couchbase.client.java.query.QueryStatus;
+
+import io.jans.orm.couchbase.model.BucketMapping;
+import io.jans.orm.couchbase.model.ResultCode;
 
 /**
  * Perform cluster initialization and open required buckets
@@ -47,15 +51,15 @@ public class CouchbaseConnectionProvider {
 
     private Properties props;
 
-    private String[] servers;
+    private String connectionString;
     private String[] buckets;
     private String defaultBucket;
 
     private String userName;
     private String userPassword;
 
-    private CouchbaseEnvironment couchbaseEnvironment;
-    private CouchbaseCluster cluster;
+    private ClusterEnvironment clusterEnvironment;
+    private Cluster cluster;
     private int creationResultCode;
 
     private HashMap<String, BucketMapping> bucketToBaseNameMapping;
@@ -69,9 +73,9 @@ public class CouchbaseConnectionProvider {
     protected CouchbaseConnectionProvider() {
     }
 
-    public CouchbaseConnectionProvider(Properties props, CouchbaseEnvironment couchbaseEnvironment) {
+    public CouchbaseConnectionProvider(Properties props, ClusterEnvironment clusterEnvironment) {
         this.props = props;
-        this.couchbaseEnvironment = couchbaseEnvironment;
+        this.clusterEnvironment = clusterEnvironment;
     }
 
     public void create() {
@@ -91,7 +95,7 @@ public class CouchbaseConnectionProvider {
     }
 
     protected void init() {
-        this.servers = StringHelper.split(props.getProperty("servers"), ",");
+        this.connectionString = props.getProperty("servers");
 
         this.userName = props.getProperty("auth.userName");
         this.userPassword = props.getProperty("auth.userPassword");
@@ -182,15 +186,19 @@ public class CouchbaseConnectionProvider {
         this.bucketToBaseNameMapping = new HashMap<String, BucketMapping>();
         this.baseNameToBucketMapping = new HashMap<String, BucketMapping>();
 
-        this.cluster = CouchbaseCluster.create(couchbaseEnvironment, servers);
-        cluster.authenticate(userName, userPassword);
+        ClusterOptions clusterOptions = ClusterOptions.clusterOptions(userName, userPassword);
+        if (clusterEnvironment != null) {
+        	clusterOptions.environment(clusterEnvironment);
+        }
+
+        this.cluster = Cluster.connect(connectionString, clusterOptions);
 
         // Open required buckets
         for (String bucketName : buckets) {
             String baseNamesProp = props.getProperty(String.format("bucket.%s.mapping", bucketName), "");
             String[] baseNames = StringHelper.split(baseNamesProp, ",");
 
-            Bucket bucket = cluster.openBucket(bucketName);
+            Bucket bucket = this.cluster.bucket(bucketName);
 
             BucketMapping bucketMapping = new BucketMapping(bucketName, bucket);
 
@@ -207,23 +215,11 @@ public class CouchbaseConnectionProvider {
     }
 
     public boolean destroy() {
-    	boolean result = true;
-    	if (bucketToBaseNameMapping != null) {
-	        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
-	            try {
-	                bucketMapping.getBucket().close();
-	            } catch (CouchbaseException ex) {
-	                LOG.error("Failed to close bucket '{}'", bucketMapping.getBucketName(), ex);
-	                result = false;
-	            }
-	        }
+    	if (this.cluster != null) {
+    		this.cluster.disconnect();
     	}
     	
-    	if (cluster != null) {
-    		result &= cluster.disconnect();
-    	}
-    	
-    	return result;
+    	return true;
     }
 
     public boolean isConnected() {
@@ -234,12 +230,7 @@ public class CouchbaseConnectionProvider {
         boolean isConnected = true;
         try {
 	        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
-                Bucket bucket = bucketMapping.getBucket();
-                if (bucket.isClosed() || !isConnected(bucketMapping)) {
-                    if (bucket.isClosed()) {
-                        LOG.debug("Bucket '{}' is closed", bucketMapping.getBucketName());
-                    }
-
+                if (!isConnected(bucketMapping)) {
                     LOG.error("Bucket '{}' is in invalid state", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
@@ -256,22 +247,21 @@ public class CouchbaseConnectionProvider {
     private boolean isConnected(BucketMapping bucketMapping) {
         Bucket bucket = bucketMapping.getBucket();
 
-        BucketManager bucketManager = bucket.bucketManager();
-        BucketInfo bucketInfo = bucketManager.info(30, TimeUnit.SECONDS);
+        BucketManager bucketManager = this.cluster.buckets();
+        BucketSettings bucketSettings = bucketManager.getBucket(bucket.name());
 
         boolean result = true;
-        if (com.couchbase.client.java.bucket.BucketType.COUCHBASE == bucketInfo.type()) {
+        if (com.couchbase.client.java.manager.bucket.BucketType.COUCHBASE == bucketSettings.bucketType()) {
         	// Check indexes state
-	        Statement query = Select.select("state").from("system:indexes").where(Expression.path("state").eq(Expression.s("online")).not());
-	        N1qlQueryResult queryResult = bucket.query(query); 
-	        result = queryResult.finalSuccess();
+        	QueryResult queryResult = cluster.query("SELECT state FROM system:indexes WHERE state != $1 AND keyspace_id = $2", QueryOptions.queryOptions().parameters(JsonArray.from("online", bucket.name())));
             
-            if (result) {
-            	result = queryResult.info().resultCount() == 0;
+            if (QueryStatus.SUCCESS == queryResult.metaData().status()) {
+            	result = queryResult.rowsAsObject().size() == 0;
             	if (LOG.isDebugEnabled()) {
             		LOG.debug("There are indexes which not online");
             	}
             } else {
+            	result = false;
             	if (LOG.isDebugEnabled()) {
             		LOG.debug("Faield to check indexes status");
             	}
@@ -279,17 +269,23 @@ public class CouchbaseConnectionProvider {
         }
 
         if (result) {
-	    	PingReport pingReport = bucket.ping();
-	    	for (PingServiceHealth pingServiceHealth : pingReport.services()) {
-	    		if (PingState.OK != pingServiceHealth.state()) {
-	        		LOG.debug("Ping returns that service typ {} is not online", pingServiceHealth.type());
-	    			result = false;
-	    			break;
+        	PingResult pingResult = bucket.ping();
+	    	for (Entry<ServiceType, List<EndpointPingReport>> pingResultEntry : pingResult.endpoints().entrySet()) {
+	    		for (EndpointPingReport endpointPingReport : pingResultEntry.getValue()) {
+		    		if (PingState.OK != endpointPingReport.state()) {
+		        		LOG.debug("Ping returns that service type {} is not online", endpointPingReport.type());
+		    			result = false;
+		    			break;
+		    		}
 	    		}
 	    	}
         }
  
     	return result;
+	}
+
+	public Cluster getCluster() {
+		return cluster;
 	}
 
 	public BucketMapping getBucketMapping(String baseName) {
@@ -327,8 +323,8 @@ public class CouchbaseConnectionProvider {
         return ResultCode.SUCCESS_INT_VALUE == creationResultCode;
     }
 
-    public String[] getServers() {
-        return servers;
+    public String getServers() {
+        return connectionString;
     }
 
     public ArrayList<String> getBinaryAttributes() {

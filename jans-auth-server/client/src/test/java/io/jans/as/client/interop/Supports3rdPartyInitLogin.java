@@ -11,6 +11,7 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -19,7 +20,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+
 import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
 import static io.jans.as.model.common.ResponseType.CODE;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
@@ -56,7 +57,7 @@ public class Supports3rdPartyInitLogin extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).created().check();
         assertEquals(registerResponse.getClaims().get(APPLICATION_TYPE.toString()), ApplicationType.WEB.toString());
         assertEquals(registerResponse.getClaims().get(INITIATE_LOGIN_URI.toString()), initiateLoginUri);
     }

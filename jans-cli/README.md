@@ -4,9 +4,9 @@
 Table of Contents
 =================
 
-   * [<em>Janssen Command Line Interface</em>](#janssen-command-line-interface)
-   * [<em>Installation</em>](#installation)
-   * [<em>Quick Start</em>](#quick-start)
+   * [<em>Janssen Command Line Interface</em>](#_janssen-command-line-interface_)
+   * [<em>Installation</em>](#_installation_)
+   * [<em>Quick Start</em>](#_quick-start_)
 
 # _Installation_
 
@@ -29,76 +29,112 @@ wget https://github.com/JanssenProject/jans-cli/releases/latest/download/jans-cl
 If you would like to build `jans-cli` manually, you can go through the following steps noted here:
 
 ## Prerequisites
-1. git
-1. Python 3.6+.
-1. Python `pip3` package.
+1. wget
+2. unzip
+3. Python 3.6+.
+4. Python `pip3` package.
 
-### Downloading `jans-cli` files
+### Building 
 
-1. Clone the repository:
+1. Install dependencies
 
-    ```
-    git clone https://github.com/JanssenProject/jans-cli/
-    ```
-
-2. open directory
-
-    ```
-    cd jans-cli
-    ```
-
-### Standard Python package
-
-1.  Create virtual environment and activate:
-
+   * On Ubuntu 20
     ```sh
-    python3 -m venv .venv
-    source .venv/bin/activate
+    apt install -y wget unzip python3-pip python3-dev
     ```
-
-1.  Install the package:
-
-    ```
-    make install
-    ```
-
-    This command will install executable called `jans-cli` available in virtual environment `PATH`.
-
-### Python zipapp
-
-1.  Install [shiv](https://shiv.readthedocs.io/) using `pip3`:
-
+   * On CentOS Stream 8
+   ```sh
+   yum install -y  wget unzip python3-pip python3-devel make 
+   pip3 install --upgrade pip
+   ```
+   
+   Install Shiv
+    
     ```sh
     pip3 install shiv
     ```
 
-1.  Install the package:
+2. Download the repository:
+
+    ```sh
+    wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
+    ```
+
+3. Unzip package, and change to directory
+
+    ```sh
+    unzip main.zip
+    cd jans-main/jans-cli
+    ```
+
+4. Build
 
     ```sh
     make zipapp
     ```
 
-    This command will generate executable called `jans-cli.pyz` under the same directory.
+    You can verify with the following command line if everything is done successfully.
+
+    ```
+    python3 config-cli.pyz -h
+    ```
+
+5. Executing config-cli.pyz Remotely
+  Login your Jans Server. Execute the following command to find **client-id** and **client-secret**:
+    ```sh
+    cat /opt/jans/jans-setup/setup.properties.last | grep "role_based_client"
+    ```
+    It will output like this:
+    ```sh
+    role_based_client_encoded_pw=+U3XiW2uM/rnidqZ2mv9sw\=\=
+    role_based_client_id=2000.09b47f56-1b9e-4443-bebd-bdf970406a15
+    role_based_client_pw=T68kLUz4YXnR
+    ```
+    **client-id** is the value of **role_based_client_id** and **client-secret** is the value of **role_based_client_pw**
+    Thus we can execute CLI as:
+    
+    ```sh
+    python3 config-cli.pyz --host demoexmple.gluu.org --client-id 2000.09b47f56-1b9e-4443-bebd-bdf970406a15 --client-secret T68kLUz4YXnR
+    ```
 
 
-You can verify with the following command line if everything is done successfully.
+### Standard Python package
+1. Install venv module
+    ```sh
+    pip3 install virtualenv
+    ```
 
-```
-python3 jans-cli.pyz -h
-```
+2. Create virtual environment and activate:
 
-![](docs/img/build-jans-cli-pyz-manually.png)
+    ```sh
+    python3 -m virtualenv .venv
+    source .venv/bin/activate
+    ```
+
+3. Download and install the package:
+
+    ```
+    wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
+    unzip main.zip
+    cd jans-main/jans-cli
+    make install
+    ```
+
+    This command will install executable called `jans-cli` available in virtual environment `PATH`.
+
+
+![](../docs/assets/image-build-jans-cli-pyz-manually-03042021.png)
 
 
 ## Virtual Machine Setup
 
 **jans-cli** is automatically installed if you choose `jans-config-api` during [Janssen Server](https://github.com/JanssenProject/home/blob/main/development.md#install-janssen-into-vm) Installation on Virtual Machine. 
 
-![](docs/img/jans-config-api.png)
+![](../docs/assets/image-jans-config-api-03042021.png)
 
 After successfully installed Janssen Server, you will get two command-line arguments as below:
 
-![](docs/img/installed.png)
+![](../docs/assets/image-installed-03042021.png)
 
 # _Quick Start_
 
@@ -121,17 +157,18 @@ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 You will get a menu as below image:
 
-![main-menu.png](docs/img/im-main.png)
+![main-menu.png](../docs/assets/image-im-main-03042021.png)
 
 From the following list, you can choose any options by selecting its number. For example, let's say number 2,
 to get **Default Authentication Method**.
 
 That returns another two options as below:
 
-![option-2-option.png](docs/img/im-default-auth-02.png)
+![option-2-option.png](../docs/assets/image-im-default-auth-02-03042021.png)
 
-Now selecting 1 and it returns our desired result as below image:
+Now by selecting 1 it returns our desired result as below image:
 
-![default-authentication-method.png](docs/img/im-cur-default-auth.png)
+![default-authentication-method.png](../docs/assets/image-im-cur-default-auth-03042021.png)
 
-So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](docs) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
+So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](https://github.com/JanssenProject/jans/blob/main/docs/admin/config-guide/jans-cli/index.md) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
+

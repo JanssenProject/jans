@@ -1,0 +1,59 @@
+site_name: jans-pycloudlib
+
+theme: material
+
+plugins:
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          # Finding modules using `paths` or `PYTHONPATH` probably will throw ModuleNotFoundError
+          # errors in resolving `jans` and other 3rd-party packages.
+          # A workaround is to run `mkdocs serve` or `mkdocs build` inside environment where
+          # all packages are installed.
+          #
+          # ref: https://mkdocstrings.github.io/python/usage/#finding-modules
+          # paths: ["."]
+          import:
+            - https://docs.python.org/3/objects.inv
+            - https://cryptography.io/en/latest/objects.inv
+            - https://requests.readthedocs.io/en/latest/objects.inv
+          options:
+            show_root_heading: true
+            show_source: false
+            merge_init_into_class: yes
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      use_pygments: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - mkdocs-click
+
+nav:
+  - "Introduction": index.md
+  - "User's Guides":
+      - "Installation": guides/install.md
+      - "Developing Container Application": guides/container_app.md
+      - "CLI": guides/cli.md
+  - "API Reference":
+      - "Manager": api/manager.md
+      - "Config": api/config.md
+      - "Secret": api/secret.md
+      - "Persistence":
+          - "Couchbase": api/persistence/couchbase.md
+          - "LDAP": api/persistence/ldap.md
+          - "Spanner": api/persistence/spanner.md
+          - "SQL": api/persistence/sql.md
+          - "Hybrid": api/persistence/hybrid.md
+          - "Utilities": api/persistence/utils.md
+      - "Wait": api/wait.md
+      - "Meta": api/meta.md
+      - "Utilities": api/utils.md
+      - "Validators": api/validators.md

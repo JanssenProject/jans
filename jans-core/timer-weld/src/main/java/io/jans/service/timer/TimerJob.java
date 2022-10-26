@@ -6,9 +6,9 @@
 
 package io.jans.service.timer;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
 
 import io.jans.service.timer.event.TimerEvent;
 import org.quartz.Job;

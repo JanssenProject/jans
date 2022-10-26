@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -44,7 +44,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-client-api</artifactId>
+			<artifactId>jans-auth-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -58,12 +58,24 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>uma-rs-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>agama-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>agama-transpiler</artifactId>
+		</dependency>
 
 		<!-- Weld -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld.servlet</groupId>
@@ -86,12 +98,25 @@
 
 		<!-- Microprofile -->
 		<dependency>
+			<groupId>org.eclipse.microprofile.config</groupId>
+			<artifactId>microprofile-config-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.microprofile.health</groupId>
+			<artifactId>microprofile-health-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.microprofile.metrics</groupId>
 			<artifactId>microprofile-metrics-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-metrics</artifactId>
+			<groupId>org.eclipse.microprofile.rest.client</groupId>
+			<artifactId>microprofile-rest-client-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.smallrye.config</groupId>
+			<artifactId>smallrye-config</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.smallrye</groupId>
@@ -99,20 +124,22 @@
 		</dependency>
 		<dependency>
 			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-rest-client</artifactId>
+			<artifactId>smallrye-metrics</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client-microprofile</artifactId>
 		</dependency>
 
 		<!-- Validation -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator-cdi</artifactId>
+			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<scope>provided</scope>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator-cdi</artifactId>
 		</dependency>
-
 		<!-- RestEasy -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -139,11 +166,27 @@
 			<artifactId>resteasy-json-p-provider</artifactId>
 		</dependency>
 
-		<!-- Java -->
+		<!-- Jakarta -->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.inject</groupId>
+			<artifactId>jakarta.inject-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
 
 		<!-- Quartz -->
@@ -186,6 +229,10 @@
 
 		<!-- Others -->
 		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 		</dependency>
@@ -197,6 +244,10 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.faces</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.json</artifactId>
+		</dependency>
 
 		<!-- jetty -->
 		<dependency>
@@ -207,8 +258,14 @@
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>org.gluufederation</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>jython-standalone</artifactId>
+		</dependency>
+
+		<!-- Swagger -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
 
 	</dependencies>
@@ -248,6 +305,41 @@
 		</resources>
 
 		<plugins>
+
+			<!-- swagger -->
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<version>${swagger-maven-plugin-jakarta}</version>
+				<executions>
+					<execution>
+						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
+							<outputFileName>jans-config-api-swagger-auto</outputFileName>
+							<contextId>${project.artifactId}</contextId>
+							<prettyPrint>true</prettyPrint>
+							<resourcePackages>
+								<package>io.jans.configapi.rest</package>			
+							</resourcePackages>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>io.swagger.core.v3</groupId>
+						<artifactId>swagger-models-jakarta</artifactId>
+						<version>${swagger-models-jakarta}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<failOnError>false</failOnError>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
@@ -402,6 +494,9 @@
 					<scanIntervalSeconds>3</scanIntervalSeconds>
 				</configuration>
 			</plugin>
+
+
+
 		</plugins>
 	</build>
 
@@ -416,24 +511,20 @@
 
 			<dependencies>
 				<dependency>
-					<groupId>javax.enterprise</groupId>
-					<artifactId>cdi-api</artifactId>
+					<groupId>jakarta.enterprise</groupId>
+					<artifactId>jakarta.enterprise.cdi-api</artifactId>
+				</dependency>
+
+
+				<dependency>
+					<groupId>org.glassfish</groupId>
+					<artifactId>jakarta.el</artifactId>
+					<scope>provided</scope>
 				</dependency>
 
 				<dependency>
-					<groupId>org.glassfish.web</groupId>
-					<artifactId>el-impl</artifactId>
-					<exclusions>
-						<exclusion>
-							<groupId>javax.el</groupId>
-							<artifactId>el-api</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-
-				<dependency>
-					<groupId>javax.el</groupId>
-					<artifactId>el-api</artifactId>
+					<groupId>jakarta.el</groupId>
+					<artifactId>jakarta.el-api</artifactId>
 					<scope>test</scope>
 				</dependency>
 
@@ -447,8 +538,8 @@
 				</dependency>
 
 				<dependency>
-					<groupId>org.jboss.spec.javax.ejb</groupId>
-					<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+					<groupId>jakarta.ejb</groupId>
+					<artifactId>jakarta.ejb-api</artifactId>
 					<scope>provided</scope>
 				</dependency>
 

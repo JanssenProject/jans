@@ -42,7 +42,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         if Config.persistence_type in ('couchbase', 'sql', 'spanner'):
             ptype = 'rdbm' if Config.persistence_type in ('sql', 'spanner') else 'couchbase'
-            Config.mappingLocations = { group: ptype for group in Config.couchbaseBucketDict }
+            Config.mapping_locations = { group: ptype for group in Config.couchbaseBucketDict }
             default_storage = Config.persistence_type
 
 
@@ -72,13 +72,16 @@ class CollectProperties(SetupUtils, BaseInstaller):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
 
             uri_re = re.match('jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
-            Config.rdbm_type, Config.rdbm_host, self.rdbm_port, self.rdbm_db = uri_re.groups()
-            Config.rdbm_port = int(self.rdbm_port)
+            Config.rdbm_type, Config.rdbm_host, Config.rdbm_port, Config.rdbm_db = uri_re.groups()
+            if '?' in Config.rdbm_db:
+                Config.rdbm_db = Config.rdbm_db.split('?')[0]
+            Config.rdbm_port = int(Config.rdbm_port)
             Config.rdbm_install_type = static.InstallTypes.LOCAL if Config.rdbm_host == 'localhost' else static.InstallTypes.REMOTE
             Config.rdbm_user = jans_sql_prop['auth.userName']
             Config.rdbm_password_enc = jans_sql_prop['auth.userPassword']
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
-            Config.rdbm_db = jans_sql_prop['db.schema.name']
+            if Config.rdbm_type == 'postgresql':
+                Config.rdbm_type = 'pgsql'
 
         if not Config.persistence_type in ('couchbase', 'ldap') and Config.get('jansSpannerProperties') and os.path.exists(Config.jansSpannerProperties):
             Config.rdbm_type = 'spanner'
@@ -99,13 +102,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         if Config.persistence_type in ['hybrid']:
              jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
-             Config.mappingLocations = {'default': jans_hybrid_properties['storage.default']}
+             Config.mapping_locations = {'default': jans_hybrid_properties['storage.default']}
              storages = [ storage.strip() for storage in jans_hybrid_properties['storages'].split(',') ]
 
              for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'cache-refresh'), ('token', 'tokens')):
                  for storage in storages:
                      if m in jans_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
-                         Config.mappingLocations[ml] = storage
+                         Config.mapping_locations[ml] = storage
 
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'jans'
@@ -132,18 +135,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
             if result:
                 Config.oxtrust_requesting_party_client_id = result['inum']
 
-        #admin_dn = None
-        #result = dbUtils.search('o=jans', search_filter='(jansGrpTyp=jansManagerGroup)', search_scope=ldap3.SUBTREE)
-        #if result:
-        #    admin_dn = result['member'][0]
-
-
-        #if admin_dn:
-        #    for rd in dnutils.parse_dn(admin_dn):
-        #        if rd[0] == 'inum':
-        #            Config.admin_inum = str(rd[1])
-        #            break
-
         oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
@@ -154,8 +145,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
             oxCacheConfiguration = oxConfiguration['jansCacheConf']
 
         Config.cache_provider_type = str(oxCacheConfiguration['cacheProviderType'])
-
-        Config.scim_rp_client_jks_pass = 'secret' # this is static
 
         # Other clients
         client_var_id_list = [
@@ -194,12 +183,14 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'keyStoreSecret' in oxAuthConfDynamic:
             Config.oxauth_openid_jks_pass = oxAuthConfDynamic['keyStoreSecret']
 
-        ssl_subj = self.get_ssl_subject('/etc/certs/httpd.crt')
+        httpd_crt_fn = '/etc/certs/httpd.crt'
+        crt_fn = httpd_crt_fn if os.path.exists(httpd_crt_fn) else '/etc/certs/ob/server.crt'
+        ssl_subj = self.get_ssl_subject(crt_fn)
 
-        Config.countryCode = ssl_subj['C']
-        Config.state = ssl_subj['ST']
-        Config.city = ssl_subj['L']
-        Config.city = ssl_subj['L']
+        Config.countryCode = ssl_subj.get('countryName', '')
+        Config.state = ssl_subj.get('stateOrProvinceName', '')
+        Config.city = ssl_subj.get('localityName', '')
+        Config.admin_email = ssl_subj.get('emailAddress', '')
 
          #this is not good, but there is no way to retreive password from ldap
         if not Config.get('admin_password'):
@@ -209,11 +200,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 Config.admin_password = Config.cb_password
 
         if not Config.get('orgName'):
-            Config.orgName = ssl_subj['O']
-
-        #for service in jetty_services:
-        #    setup_prop[jetty_services[service][0]] = os.path.exists('/opt/jans/jetty/{0}/webapps/{0}.war'.format(service))
-
+            Config.orgName = ssl_subj.get('organizationName', '')
 
         for s in ['jansScimEnabled']:
             setattr(Config, s, oxConfiguration.get(s, False))
@@ -247,17 +234,10 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if not Config.get('ip'):
             Config.ip = self.detect_ip()
 
-        Config.installScimServer = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.ini'))
+        Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.ini'))
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
         Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
-        Config.installConfigApi = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
-
-        result = dbUtils.search('ou=people,o=jans', search_filter='(&(uid=admin)(objectClass=jansPerson))')
-        if result:
-            Config.admin_inum = result['inum']
-            if 'mail' in result:
-                Config.admin_email = result['mail']
-
+        Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):

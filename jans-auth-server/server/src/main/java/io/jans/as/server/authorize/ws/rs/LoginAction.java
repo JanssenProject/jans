@@ -8,9 +8,9 @@ package io.jans.as.server.authorize.ws.rs;
 
 import org.slf4j.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 
 /**

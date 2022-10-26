@@ -6,8 +6,8 @@
 
 package io.jans.as.server.model.token;
 
-import com.google.common.base.Strings;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -19,7 +19,6 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.ClientAssertionType;
-import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.service.ClientService;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
@@ -108,9 +107,7 @@ public class ClientAssertion {
 
                                         // Validate the crypto segment
                                         String keyId = jwt.getHeader().getKeyId();
-                                        JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
-                                                JwtUtil.getJSONWebKeys(client.getJwksUri()) :
-                                                new JSONObject(client.getJwks());
+                                        JSONObject jwks = CommonUtils.getJwks(client);
                                         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
                                         boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                                                 keyId, jwks, sharedSecret, signatureAlgorithm);

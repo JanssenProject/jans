@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<artifactId>plugins</artifactId>
 		<groupId>io.jans.jans-config-api.plugins</groupId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans.jans-config-api.plugins</groupId>
@@ -13,7 +11,7 @@
 	<properties>
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
-		<jans.version>1.0.0-SNAPSHOT</jans.version>
+		<jans.version>${project.version}</jans.version>
 	</properties>
 
 	<dependencies>
@@ -47,9 +45,8 @@
 
 		<!-- Microprofile -->
 		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-config</artifactId>
-			<version>1.5.0</version>
+		    <groupId>io.smallrye.config</groupId>
+		    <artifactId>smallrye-config</artifactId>
 		</dependency>
 
 		<!-- Others -->
@@ -70,6 +67,24 @@
 			<artifactId>httpcore-nio</artifactId>
 			<version>${httpcore.version}</version>
 		</dependency>
+		
+		<!-- CDI -->
+		<dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.inject</groupId>
+			<artifactId>jakarta.inject-api</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+		<dependency>
+     	    <groupId>jakarta.ws.rs</groupId>
+     		<artifactId>jakarta.ws.rs-api</artifactId>
+   		</dependency>
 
 		<!-- Testing -->
 		<dependency>
@@ -101,6 +116,12 @@
 			<groupId>net.masterthought</groupId>
 			<artifactId>cucumber-reporting</artifactId>
 			<scope>test</scope>
+		</dependency>
+		
+		<!-- Swagger -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
 
 	</dependencies>
@@ -187,7 +208,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>deploy-to-local-folder</id>
@@ -208,6 +228,35 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<!-- swagger -->
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<version>${swagger-maven-plugin-jakarta}</version>
+				<executions>
+					<execution>
+						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
+							<outputFileName>scim-plugin-swagger</outputFileName>
+							<contextId>${project.artifactId}</contextId>
+							<prettyPrint>true</prettyPrint>
+							<resourcePackages>
+								<package>io.jans.configapi.plugin.scim.rest</package>			
+							</resourcePackages>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>io.swagger.core.v3</groupId>
+						<artifactId>swagger-models-jakarta</artifactId>
+						<version>${swagger-models-jakarta}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			
+			
 		</plugins>
 	</build>
 </project>

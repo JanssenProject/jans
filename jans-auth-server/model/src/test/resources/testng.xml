@@ -1,6 +1,11 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="oxAuthModel" parallel="false">
+    <test name="Unit Tests" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.jwk.AlgorithmTest"/>
+        </classes>
+    </test>
     <test name="Code Verifier (PKCE)" enabled="true">
         <classes>
             <class name="io.jans.as.model.authorize.CodeVerifierTest"/>
@@ -17,15 +22,71 @@
             <class name="io.jans.as.model.uma.JsonLogicNodeParserTest" />
         </classes>
     </test>
+    <test name="JWK Thumbprint Computation Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.jwk.JSONWebKeyTest"/>
+        </classes>
+    </test>
+
+    <!-- Util tests -->
+    <test name="Base64Util Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.Base64UtilTest"/>
+        </classes>
+    </test>
+    <test name="ByteUtil Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.ByteUtilTest"/>
+        </classes>
+    </test>
     <test name="CertUtils Test" enabled="true">
         <classes>
             <class name="io.jans.as.model.util.CertUtilsTest"/>
         </classes>
     </test>
-
-    <test name="JWK Thumbprint Computation Test" enabled="true">
+    <test name="HashUtil Test" enabled="true">
         <classes>
-            <class name="io.jans.as.model.jwk.JSONWebKeyTest"/>
+            <class name="io.jans.as.model.util.HashUtilTest"/>
+        </classes>
+    </test>
+    <test name="JwtUtil Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.JwtUtilTest"/>
+        </classes>
+    </test>
+    <test name="Pair Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.PairTest"/>
+        </classes>
+    </test>
+    <test name="QueryBuilder Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.QueryBuilderTest"/>
+        </classes>
+    </test>
+    <test name="SecurityProviderUtility Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.SecurityProviderUtilityTest"/>
+        </classes>
+    </test>
+    <test name="StringUtils Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.StringUtilsTest"/>
+        </classes>
+    </test>
+    <test name="SubjectIdentifier Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.SubjectIdentifierTest"/>
+        </classes>
+    </test>
+    <test name="URLPatternList Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.URLPatternListTest"/>
+        </classes>
+    </test>
+    <test name="Util Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.UtilTest"/>
         </classes>
     </test>
 </suite>

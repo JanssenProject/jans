@@ -52,7 +52,9 @@ public enum RegisterErrorResponseType implements IErrorType {
      */
     ACCESS_DENIED("access_denied"),
 
-    INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE("invalid_public_subject_identifier_attribute");
+    INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE("invalid_public_subject_identifier_attribute"),
+
+    INVALID_REDIRECT_URIS_REGEX("invalid_redirect_uris_regex");
 
     private final String paramName;
 

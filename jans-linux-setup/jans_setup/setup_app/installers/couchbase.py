@@ -4,6 +4,7 @@ import time
 import sys
 import json
 import uuid
+import shutil
 
 from setup_app import paths
 from setup_app.static import InstallTypes, AppType, InstallOption, BackendTypes, colors
@@ -44,7 +45,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             Config.isCouchbaseUserAdmin = True
 
         if not Config.get('couchbaseTrustStorePass'):
-            Config.couchbaseTrustStorePass = 'secret'
+            Config.couchbaseTrustStorePass = self.getPW()
             Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
 
         if not Config.get('cb_query_node'):
@@ -72,7 +73,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         couchbase_mappings = self.getMappingType('couchbase')
 
-        if Config.mappingLocations['default'] == 'couchbase':
+        if Config.mapping_locations['default'] == 'couchbase':
             self.dbUtils.import_ldif(Config.couchbaseBucketDict['default']['ldif'], Config.couchbase_bucket_prefix)
         else:
             self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.COUCHBASE)
@@ -94,10 +95,17 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             err_msg = "Couchbase package not found at %s. Exiting with error..." % (self.couchbasePackageFolder)
             self.logIt(err_msg, True, True)
 
-        packageName = max(cb_package_list)
-        self.logIt("Found package '%s' for install" % packageName)
-        installOutput = self.installPackage(packageName)
-        Config.post_messages.append(installOutput)
+        package_name = max(cb_package_list)
+        self.logIt("Found package '%s' for install" % package_name)
+
+        if base.clone_type == 'deb':
+            apt_path = shutil.which('apt')
+            self.chown(self.couchbasePackageFolder, '_apt', 'nogroup', recursive=True)
+            install_output = self.run([apt_path, 'install', '-y', package_name])
+        else:
+            install_output = self.installPackage(package_name)
+
+        Config.post_messages.append(install_output)
 
 
     def couchebaseCreateCluster(self):
@@ -288,7 +296,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             bucket = Config.couchbase_bucket_prefix if group == 'default' else Config.couchbase_bucket_prefix + '_' + group
             if bucket in Config.couchbase_buckets:
                 cb_key = 'couchbase_{}_mapping'.format(group)
-                if Config.mappingLocations[group] == 'couchbase':
+                if Config.mapping_locations[group] == 'couchbase':
                     if Config.couchbaseBucketDict[group]['mapping']:
                         couchbase_mappings.append('bucket.{}_{}.mapping: {}'.format(Config.couchbase_bucket_prefix, group, Config.couchbaseBucketDict[group]['mapping']))
                         Config.templateRenderingDict[cb_key] = Config.couchbaseBucketDict[group]['mapping']
@@ -308,7 +316,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         prop = open(os.path.join(Config.templateFolder, prop_file)).read()
         prop_dict = self.couchbaseDict()
         prop = prop % prop_dict
-        out_file = os.path.join(Config.outputFolder, prop_file)
+        out_file = os.path.join(Config.output_dir, prop_file)
         self.writeFile(out_file, prop)
         self.writeFile(Config.jansCouchebaseProperties, prop)
 
@@ -343,13 +351,13 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if not Config.couchbase_bucket_prefix in existing_buckets:
 
-            if Config.mappingLocations['default'] != 'couchbase':
+            if Config.mapping_locations['default'] != 'couchbase':
                 self.couchebaseCreateBucket(Config.couchbase_bucket_prefix, bucketRamsize=100)
             else:
                 bucketRamsize = int((Config.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
                 self.couchebaseCreateBucket(Config.couchbase_bucket_prefix, bucketRamsize=bucketRamsize)
 
-        if Config.mappingLocations['default'] == 'couchbase':
+        if Config.mapping_locations['default'] == 'couchbase':
             self.couchebaseCreateIndexes(Config.couchbase_bucket_prefix)
 
         for group in couchbase_mappings:

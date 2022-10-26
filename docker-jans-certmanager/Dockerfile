@@ -1,13 +1,13 @@
-FROM bellsoft/liberica-openjre-alpine:11
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip curl tini py3-cryptography py3-psycopg2 \
-    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps wget git \
+    && apk upgrade --available \
+    && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
@@ -16,8 +16,8 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-01-25 09:43'
+ENV CN_VERSION=1.0.3-SNAPSHOT
+ENV CN_BUILD_DATE='2022-08-30 17:15'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -38,14 +38,16 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -U pip wheel \
-    && pip3 install --no-cache-dir -r /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =======
 # Cleanup
 # =======
 
-RUN apk del build-deps \
+RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 # =======
@@ -102,7 +104,7 @@ ENV CN_SECRET_ADAPTER=vault \
 # ===============
 
 ENV CN_PERSISTENCE_TYPE=ldap \
-    CN_PERSISTENCE_LDAP_MAPPING=default \
+    CN_HYBRID_MAPPING="{}" \
     CN_LDAP_URL=localhost:1636 \
     CN_LDAP_USE_SSL=true \
     CN_COUCHBASE_URL=localhost \
@@ -133,18 +135,27 @@ ENV CN_WAIT_MAX_TIME=300 \
 # misc
 # ====
 
-LABEL name="Certmanager" \
+LABEL name="janssenproject/certmanager" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.0" \
-    release="b12" \
+    version="1.0.3" \
+    release="dev" \
     summary="Janssen Certmanager" \
     description="Manage certs and crypto keys for Janssen Server"
 
-COPY scripts /app/scripts
+RUN mkdir -p /etc/certs /etc/jans/conf
 
-RUN mkdir -p /etc/certs \
-    && chmod +x /app/scripts/entrypoint.sh
+COPY scripts /app/scripts
+RUN chmod +x /app/scripts/entrypoint.sh
+
+# create non-root user
+RUN adduser -s /bin/sh -D -G root -u 1000 1000
+
+# adjust ownership and permission
+RUN chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans
+
+USER 1000
 
 ENTRYPOINT ["tini", "-g", "--", "sh", "/app/scripts/entrypoint.sh"]
 CMD ["--help"]

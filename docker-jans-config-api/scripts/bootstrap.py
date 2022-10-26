@@ -14,6 +14,7 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 
 from settings import LOGGING_CONFIG
@@ -31,7 +32,13 @@ def main():
     render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
 
-    if persistence_type in ("ldap", "hybrid"):
+    mapper = PersistenceMapper()
+    persistence_groups = mapper.groups().keys()
+
+    if persistence_type == "hybrid":
+        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+
+    if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
             "/app/templates/jans-ldap.properties.tmpl",
@@ -39,7 +46,7 @@ def main():
         )
         sync_ldap_truststore(manager)
 
-    if persistence_type in ("couchbase", "hybrid"):
+    if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties.tmpl",
@@ -48,17 +55,16 @@ def main():
         # need to resolve whether we're using default or user-defined couchbase cert
         sync_couchbase_truststore(manager)
 
-    if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+    if "sql" in persistence_groups:
+        db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
 
-    if persistence_type == "sql":
         render_sql_properties(
             manager,
-            "/app/templates/jans-sql.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties.tmpl",
             "/etc/jans/conf/jans-sql.properties",
         )
 
-    if persistence_type == "spanner":
+    if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
             "/app/templates/jans-spanner.properties.tmpl",
@@ -81,15 +87,16 @@ def main():
 
     modify_jetty_xml()
     modify_webdefault_xml()
-    modify_server_ini()
     configure_logging()
 
     plugins = discover_plugins()
+    logger.info(f"Loaded config-api plugins: {', '.join(plugins)}")
     modify_config_api_xml(plugins)
 
     if "admin-ui" in plugins:
         admin_ui_plugin = AdminUiPlugin(manager)
         admin_ui_plugin.setup()
+        configure_admin_ui_logging()
 
 
 def modify_jetty_xml():
@@ -126,20 +133,19 @@ def modify_webdefault_xml():
         f.write(updates)
 
 
-def modify_server_ini():
-    with open("/opt/jans/jetty/jans-config-api/start.d/server.ini", "a") as f:
-        updates = "\n".join([
-            # disable server version info
-            "jetty.httpConfig.sendServerVersion=false",
-        ])
-        f.write(updates)
-
-
 def configure_logging():
     # default config
     config = {
         "config_api_log_target": "STDOUT",
         "config_api_log_level": "INFO",
+        "persistence_log_target": "FILE",
+        "persistence_log_level": "INFO",
+        "persistence_duration_log_target": "FILE",
+        "persistence_duration_log_level": "INFO",
+        "ldap_stats_log_target": "FILE",
+        "ldap_stats_log_level": "INFO",
+        "script_log_target": "FILE",
+        "script_log_level": "INFO",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -178,10 +184,20 @@ def configure_logging():
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
         "config_api_log_target": "FILE",
+        "persistence_log_target": "JANS_CONFIGAPI_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE",
+        "ldap_stats_log_target": "JANS_CONFIGAPI_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "script_log_target": "JANS_CONFIGAPI_SCRIPT_LOG_FILE",
     }
-    for key, value in file_aliases.items():
-        if config[key] == "FILE":
-            config[key] = value
+
+    for key, value in config.items():
+        if not key.endswith("_target"):
+            continue
+
+        if value == "STDOUT":
+            config[key] = "Console"
+        else:
+            config[key] = file_aliases[key]
 
     logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
     with open(logfile) as f:
@@ -204,6 +220,71 @@ def modify_config_api_xml(plugins=None):
             "extra_classpath": ",".join([f"./custom/libs/{plugin}-plugin.jar" for plugin in plugins])
         }
         f.write(txt % ctx)
+
+
+def configure_admin_ui_logging():
+    # default config
+    config = {
+        "admin_ui_log_target": "FILE",
+        "admin_ui_log_level": "INFO",
+        "admin_ui_audit_log_target": "FILE",
+        "admin_ui_audit_log_level": "INFO",
+    }
+
+    # pre-populate custom config; format is JSON string of ``dict``
+    try:
+        custom_config = json.loads(os.environ.get("CN_ADMIN_UI_PLUGIN_LOGGERS", "{}"))
+    except json.decoder.JSONDecodeError as exc:
+        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        custom_config = {}
+
+    # ensure custom config is ``dict`` type
+    if not isinstance(custom_config, dict):
+        logger.warning("Invalid data type for CN_CONFIG_API_APP_LOGGERS; fallback to defaults")
+        custom_config = {}
+
+    # list of supported levels; OFF is not supported
+    log_levels = ("FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE",)
+
+    # list of supported outputs
+    log_targets = ("STDOUT", "FILE",)
+
+    for k, v in custom_config.items():
+        if k not in config:
+            continue
+
+        if k.endswith("_log_level") and v not in log_levels:
+            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            v = config[k]
+
+        if k.endswith("_log_target") and v not in log_targets:
+            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            v = config[k]
+
+        # update the config
+        config[k] = v
+
+    # mapping between the ``log_target`` value and their appenders
+    file_aliases = {
+        "admin_ui_log_target": "ADMINUI-LOG",
+        "admin_ui_audit_log_target": "ADMINUI-AUDIT",
+    }
+
+    for key, value in config.items():
+        if not key.endswith("_target"):
+            continue
+
+        if value == "STDOUT":
+            config[key] = "Console"
+        else:
+            config[key] = file_aliases[key]
+
+    with open("/app/plugins/admin-ui/log4j2-adminui.xml.tmpl") as f:
+        txt = f.read()
+
+    tmpl = Template(txt)
+    with open("/opt/jans/jetty/jans-config-api/custom/config/log4j2-adminui.xml", "w") as f:
+        f.write(tmpl.safe_substitute(config))
 
 
 if __name__ == "__main__":

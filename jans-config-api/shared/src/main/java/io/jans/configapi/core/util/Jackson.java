@@ -27,11 +27,15 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class Jackson {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Jackson.class);
     private Jackson() {
     }
 
@@ -46,10 +50,16 @@ public class Jackson {
     }
 
     public static <T> T applyPatch(String patchAsString, T obj) throws JsonPatchException, IOException {
+        LOG.debug("Patch details - patchAsString:{}, obj:{}", patchAsString, obj );
         JsonPatch jsonPatch = JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
         return applyPatch(jsonPatch, obj);
     }
 
+    public static <T> T applyJsonPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, IOException {
+        LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj );
+        return applyPatch(jsonPatch, obj);
+    }
+    
     @SuppressWarnings("unchecked")
     public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
         Preconditions.checkNotNull(jsonPatch);

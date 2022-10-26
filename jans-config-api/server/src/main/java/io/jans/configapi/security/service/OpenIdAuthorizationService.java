@@ -11,17 +11,17 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
 
-import javax.annotation.Priority;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
 
     @Inject
-    Logger logger;
+    transient Logger logger;
 
     @Context
     transient HttpServletRequest request;
@@ -50,10 +50,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     transient HttpServletResponse response;
 
     @Inject
-    JwtUtil jwtUtil;
-
-    @Inject
-    Jackson jackson;
+    transient JwtUtil jwtUtil;
 
     @Inject
     OpenIdService openIdService;

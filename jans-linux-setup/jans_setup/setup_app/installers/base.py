@@ -28,8 +28,7 @@ class BaseInstaller:
         if self.needdb:
             self.dbUtils.bind()
 
-        if getattr(self, 'check_version', True):
-            self.check_for_download()
+        self.check_for_download()
 
         if not base.snap:
             self.create_user()
@@ -39,7 +38,7 @@ class BaseInstaller:
         # copy unit file
         unit_file = os.path.join(Config.staticFolder, 'system/systemd', self.service_name + '.service')
         if os.path.exists(unit_file):
-            self.copyFile(unit_file, '/etc/systemd/system')
+            self.copyFile(unit_file, Config.unit_files_path)
 
         self.install()
         self.copy_static()
@@ -173,10 +172,9 @@ class BaseInstaller:
 
     def check_for_download(self):
         # execute for each installer
-        if Config.downloadWars:
+        if base.argsp.force_download:
             self.download_files(force=True)
-            
-        elif Config.installed_instance:
+        else:
             self.download_files()
 
     def download_file(self, url, src):
@@ -193,20 +191,8 @@ class BaseInstaller:
                 if downloads and not src_name in downloads:
                     continue
 
-                if force or self.check_download_needed(src):
-                    src = os.path.join('/tmp' if base.snap else Config.distJansFolder, src_name)
-                    self.source_files[i] = (src, url)
+                if force or not os.path.exists(src):
                     self.download_file(url, src)
-
-    def check_download_needed(self, src):
-        froot, fext = os.path.splitext(src)
-        if fext in ('.war', '.jar'):
-            if os.path.exists(src):
-                war_info = get_war_info(src)
-                if war_info.get('version'):
-                    return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
-
-        return True
 
 
     def create_user(self):
@@ -220,7 +206,7 @@ class BaseInstaller:
 
     def installed(self):
         return None
-    
+
     def check_need_for_download(self):
         pass
 

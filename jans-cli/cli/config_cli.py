@@ -17,26 +17,40 @@ import code
 import traceback
 import ast
 import base64
-
 import pprint
+import copy
+
 from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import urlencode
 from collections import OrderedDict
-
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+log_dir = os.environ.get('cli_log_dir', cur_dir)
 sys.path.append(cur_dir)
 
 from pylib.tabulate.tabulate import tabulate
-from pylib import jwt
+try:
+    import jwt
+except ModuleNotFoundError:
+    from pylib import jwt
 
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
+    'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
+    'jca.get-all-attribute': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
+    'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
+    'jca.get-oauth-scopes': ['dn', 'id', 'scopeType'],
+    'jca.get-oauth-uma-resources': ['dn', 'name', 'expirationDate'],
+    'scim.get-users': ['id', 'userName', 'displayName', 'active']
 }
+
+tabular_dataset = {'scim.get-users': 'Resources'}
+excluded_operations = {'scim': ['search-user'], 'jca':[]}
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
@@ -44,6 +58,7 @@ swagger_client = importlib.import_module(my_op_mode + '.swagger_client')
 swagger_client.models = importlib.import_module(my_op_mode + '.swagger_client.models')
 swagger_client.api = importlib.import_module(my_op_mode + '.swagger_client.api')
 swagger_client.rest = importlib.import_module(my_op_mode + '.swagger_client.rest')
+plugins = []
 
 warning_color = 214
 error_color = 196
@@ -52,21 +67,21 @@ bold_color = 15
 grey_color = 242
 
 clear = lambda: os.system('clear')
+
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
 host = os.environ.get('jans_host')
-client_id = os.environ.get(my_op_mode + '_client_id')
-client_secret = os.environ.get(my_op_mode + '_client_secret')
+client_id = os.environ.get(my_op_mode + 'jca_client_id')
+client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
+access_token = None
 debug = os.environ.get('jans_client_debug')
-debug_log_file = os.environ.get('jans_debug_log_file')
-error_log_file = os.path.join(cur_dir, 'error.log')
 
 def encode_decode(s, decode=False):
     cmd = '/opt/jans/bin/encode.py '
     if decode:
         cmd += '-D '
-    result = os.popen(cmd + s).read()
+    result = os.popen(cmd + s + ' 2>/dev/null').read()
     return result.strip()
 
 
@@ -96,9 +111,10 @@ for api_name in dir(swagger_client.api):
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", help="Hostname of server")
 parser.add_argument("--client-id", help="Jans Config Api Client ID")
-parser.add_argument("--client_secret", help="Jans Config Api Client ID secret")
+parser.add_argument("--client-secret", "--client_secret", help="Jans Config Api Client ID secret")
+parser.add_argument("--access-token", help="JWT access token or path to file containing JWT access token")
+parser.add_argument("--plugins", help="Available plugins separated by comma")
 parser.add_argument("-debug", help="Run in debug mode", action='store_true')
-parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
 parser.add_argument("--operation-id", help="Operation ID to be done")
 parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
@@ -113,35 +129,79 @@ parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key
 parser.add_argument("--key-password", help="Password for SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
 
+parser.add_argument("-use-test-client", help="Use test client without device authorization", action='store_true')
+
+
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
+parser.add_argument("--no-suggestion", help="Do not use prompt toolkit to display word completer", action='store_true')
+parser.add_argument("-log-dir", help="Do not use prompt toolkit to display word completer", default=log_dir)
+
 
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
+if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
+    excluded_operations['jca'] += [
+                    'get-user', 'post-user', 'put-user', 'get-user-by-inum', 'delete-user', 'patch-user-by-inum',
+                    'get-properties-fido2', 'put-properties-fido2', 'get-registration-entries-fido2',
+                    ]
+
+if not args.no_suggestion:
+    from prompt_toolkit import prompt, HTML
+    from prompt_toolkit.completion import WordCompleter
+
+
 ################## end of arguments #################
 
-if not (host and client_id and client_secret):
+test_client = args.use_test_client
+
+
+if args.plugins:
+    for plugin in args.plugins.split(','):
+        plugins.append(plugin.strip())
+
+def write_config():
+    with open(config_ini_fn, 'w') as w:
+        config.write(w)
+
+if not(host and (client_id and client_secret or access_token)):
     host = args.host
     client_id = args.client_id
     client_secret = args.client_secret
     debug = args.debug
-    debug_log_file = args.debug_log_file
 
-if not (host and client_id and client_secret):
+    access_token = args.access_token
+    if access_token and os.path.isfile(access_token):
+        with open(access_token) as f:
+            access_token = f.read()
+
+
+if not(host and (client_id and client_secret or access_token)):
+
     if config_ini_fn.exists():
         config.read_string(config_ini_fn.read_text())
         host = config['DEFAULT']['jans_host']
-        client_id = config['DEFAULT'][my_op_mode + '_client_id']
-        if config['DEFAULT'].get(my_op_mode + '_client_secret'):
-            client_secret = config['DEFAULT'][my_op_mode + '_client_secret']
-        elif config['DEFAULT'].get(my_op_mode + '_client_secret_enc'):
-            client_secret_enc = config['DEFAULT'][my_op_mode + '_client_secret_enc']
+
+        if 'jca_test_client_id' in config['DEFAULT'] and test_client:
+            client_id = config['DEFAULT']['jca_test_client_id']
+            secret_key_str = 'jca_test_client_secret'
+        else:
+            client_id = config['DEFAULT']['jca_client_id']
+            secret_key_str = 'jca_client_secret'
+
+        secret_enc_key_str = secret_key_str + '_enc'
+        if config['DEFAULT'].get(secret_key_str):
+            client_secret = config['DEFAULT'][secret_key_str]
+        elif config['DEFAULT'].get(secret_enc_key_str):
+            client_secret_enc = config['DEFAULT'][secret_enc_key_str]
             client_secret = encode_decode(client_secret_enc, decode=True)
+
         debug = config['DEFAULT'].get('debug')
-        debug_log_file = config['DEFAULT'].get('debug_log_file')
+        log_dir = config['DEFAULT'].get('log_dir', log_dir)
+
     else:
         config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net',
                              'jca_client_id': 'your jans config api client id',
@@ -149,7 +209,7 @@ if not (host and client_id and client_secret):
                              'scim_client_id': 'your jans scim client id',
                              'scim_client_secret': 'client secret for your jans scim client'}
 
-        self.write_config()
+        write_config()
 
         print(
             "Pelase fill {} or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run".format(config_ini_fn)
@@ -170,6 +230,7 @@ class Menu(object):
 
     def __init__(self, name, method='', info={}, path=''):
         self.name = name
+        self.display_name = name
         self.method = method
         self.info = info
         self.path = path
@@ -182,7 +243,7 @@ class Menu(object):
         return self
 
     def __repr__(self):
-        return self.name
+        return self.display_name
         self.__print_child(self)
 
     def tree(self):
@@ -232,20 +293,75 @@ class Menu(object):
 
 class JCA_CLI:
 
-    def __init__(self, host, client_id, client_secret):
+    def __init__(self, host, client_id, client_secret, access_token, test_client=False):
         self.host = host
         self.client_id = client_id
         self.client_secret = client_secret
+        self.use_test_client = test_client
+
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
-        self.access_token = config['DEFAULT'].get('access_token')
+        self.access_token = access_token or config['DEFAULT'].get('access_token')
+
+        self.set_user()
+        self.plugins()
+
         if not self.access_token and config['DEFAULT'].get('access_token_enc'):
             self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
-
 
         if my_op_mode == 'scim':
             self.swagger_configuration.host += '/jans-scim/restv1/v2'
 
+        self.ssl_settings()
+
+        self.swagger_configuration.debug = debug
+        if self.swagger_configuration.debug:
+            self.swagger_configuration.logger_file = os.path.join(log_dir, 'swagger.log')
+
+        self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
+
+        self.cfg_yml = self.get_yaml()
+        self.make_menu()
+        self.current_menu = self.menu
+        self.enums()
+
+    def enums(self):
+        self.enum_dict = {
+                            "CustomAttribute": {
+                              "properties.name": {
+                                "f": "get_attrib_list"
+                              }
+                            }
+                          }
+
+    def set_user(self):
+        self.auth_username = None
+        self.auth_password = None
+        self.askuser = get_bool(config['DEFAULT'].get('askuser'))
+
+        if self.askuser:
+            if args.username:
+                self.auth_username = args.username
+            if args.password:
+                self.auth_password = args.password
+            elif args.j:
+                if os.path.isfile(args.j):
+                    with open(args.j) as reader:
+                        self.auth_password = reader.read()
+                else:
+                    print(args.j, "does not exist. Exiting ...")
+                    sys.exit()
+            if not (self.auth_username and self.auth_password):
+                print("I need username and password. Exiting ...")
+                sys.exit()
+
+    def plugins(self):
+        for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
+            plugin = plugin_s.strip()
+            if plugin:
+                plugins.append(plugin)
+
+    def ssl_settings(self):
         if args.noverify:
             self.swagger_configuration.verify_ssl = False
         else:
@@ -256,16 +372,6 @@ class JCA_CLI:
 
         if args.config_api_mtls_client_key:
             self.swagger_configuration.key_file = args.config_api_mtls_client_key
-
-        self.swagger_configuration.debug = debug
-        if self.swagger_configuration.debug:
-            self.swagger_configuration.logger_file = debug_log_file
-
-        self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
-
-        self.cfg_yml = self.get_yaml()
-        self.make_menu()
-        self.current_menu = self.menu
 
     def drop_to_shell(self, mylocals):
         locals_ = locals()
@@ -285,10 +391,6 @@ class JCA_CLI:
                 with open(debug_json, 'w') as w:
                     json.dump(self.cfg_yml, w, indent=2)
         return self.cfg_yml
-
-    def write_config(self):
-        with open(config_ini_fn, 'w') as w:
-            config.write(w)
 
     def get_rest_client(self):
         rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
@@ -314,9 +416,8 @@ class JCA_CLI:
 
 
     def check_access_token(self):
-        if not self.access_token:
-            print(self.colored_text("Access token was not found.", warning_color))
-            return
+        if not self.access_token :
+            return False
 
         try:
             jwt.decode(self.access_token,
@@ -326,9 +427,12 @@ class JCA_CLI:
                             'verify_aud': False
                              }
                     )
+            return True
         except Exception as e:
             print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
             self.access_token = None
+
+        return False
 
 
     def guess_param_mapping(self, param_s):
@@ -340,30 +444,111 @@ class JCA_CLI:
 
     def make_menu(self):
 
-        menu = Menu('Main Menu')
+        menu_groups = []
+
+        def get_sep_pos(s):
+            for i, c in enumerate(s):
+                if c in ('-', '–'):
+                    return i
+            return -1
+
+        def get_group_obj(mname):
+            for grp in menu_groups:
+                if grp.mname == mname:
+                    return grp
+
 
         for tag in self.cfg_yml['tags']:
-            if tag['name'] != 'developers':
-                m = Menu(name=tag['name'])
-                menu.add_child(m)
-                for path in self.cfg_yml['paths']:
-                    for method in self.cfg_yml['paths'][path]:
-                        if 'tags' in self.cfg_yml['paths'][path][method] and m.name in \
-                                self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in \
-                                self.cfg_yml['paths'][path][method]:
-                            # if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-ignore'):
-                            #    continue
-                            menu_name = self.cfg_yml['paths'][path][method].get('summary') or \
-                                        self.cfg_yml['paths'][path][method].get('description')
+            tname = tag['name'].strip()
+            if tname == 'developers':
+                continue
+            n = get_sep_pos(tname)
+            mname = tname[:n].strip() if n > -1 else tname
+            grp = get_group_obj(mname)
+            if not grp:
+                grp = SimpleNamespace()
+                grp.tag = None if n > -1 else tname
+                grp.mname = mname
+                grp.submenu = []
+                menu_groups.append(grp)
 
-                            sm = Menu(
-                                name=menu_name.strip('.'),
-                                method=method,
-                                info=self.cfg_yml['paths'][path][method],
-                                path=path,
-                            )
+            if n > -1:
+                sname = tname[n+1:].strip()
+                sub = SimpleNamespace()
+                sub.tag = tname
+                sub.mname = sname
+                grp.submenu.append(sub)
 
-                            m.add_child(sm)
+
+        def get_methods_of_tag(tag):
+            methods = []
+            if tag:
+                for path_name in self.cfg_yml['paths']:
+                    path = self.cfg_yml['paths'][path_name]
+                    path_parameters = []
+                    if 'parameters' in path:
+                        for pparam in path['parameters']:
+                            if pparam.get('in') == 'path':
+                                path_parameters.append(dict(pparam))
+
+                    for method_name in path:
+                        method = path[method_name]
+
+
+
+                        if hasattr(method, 'get') and method.get('operationId') in excluded_operations[my_op_mode]:
+                            continue
+                        if 'tags' in method and tag in method['tags'] and 'operationId' in method:
+                            if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
+                                continue
+                            if path_parameters:
+                                method['__path_parameters__'] = path_parameters
+                            method['__method_name__'] = method_name
+                            method['__path_name__'] = path_name
+                            methods.append(method)
+
+            return methods
+
+        menu = Menu('Main Menu')
+
+        for grp in menu_groups:
+            methods = get_methods_of_tag(grp.tag)
+            m = Menu(name=grp.mname)
+            m.display_name = m.name + ' ˅'
+            menu.add_child(m)
+
+            for method in methods:
+                for tag in method['tags']:
+                    menu_name = method.get('summary') or method.get('description')
+                    sm = Menu(
+                        name=menu_name.strip('.'),
+                        method=method['__method_name__'],
+                        info=method,
+                        path=method['__path_name__'],
+                    )
+                    m.add_child(sm)
+
+            if grp.submenu:
+                m.display_name = m.name + ' ˅'
+                for sub in grp.submenu:
+                    methods = get_methods_of_tag(sub.tag)
+                    if not methods:
+                        continue
+                    smenu = Menu(name=sub.mname)
+                    smenu.display_name = smenu.name + ' ˅'
+                    m.add_child(smenu)
+                    
+                    for method in methods:
+                        for tag in method['tags']:
+
+                            sub_menu_name = method.get('summary') or method.get('description')
+                            ssm = Menu(
+                                    name=sub_menu_name.strip('.'),
+                                    method=method['__method_name__'],
+                                    info=method,
+                                    path=method['__path_name__'],
+                                )
+                            smenu.add_child(ssm)
 
         self.menu = menu
 
@@ -377,6 +562,39 @@ class JCA_CLI:
             except:
                 pass
         return js_data
+
+    def get_scoped_access_token(self, scope):
+        sys.stderr.write("Getting access token for scope {}\n".format(scope))
+        rest = self.get_rest_client()
+        headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
+        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
+        headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        if self.askuser:
+            post_params = {"grant_type": "password", "scope": scope, "username": self.auth_username,
+                           "password": self.auth_password}
+        else:
+            post_params = {"grant_type": "client_credentials", "scope": scope}
+
+        response = rest.POST(
+            url,
+            headers=headers,
+            post_params=post_params
+        )
+
+        try:
+            data = json.loads(response.data)
+            if 'access_token' in data:
+                self.swagger_configuration.access_token = data['access_token']
+            else:
+                sys.stderr.write("Error while getting access token")
+                sys.stderr.write(data)
+                sys.stderr.write('\n')
+        except Exception as e:
+            print("Error while getting access token")
+            sys.stderr.write(response.data)
+            sys.stderr.write(e)
+            sys.stderr.write('\n')
+
 
     def get_jwt_access_token(self):
 
@@ -487,14 +705,18 @@ class JCA_CLI:
         self.access_token = result['access_token']
         access_token_enc = encode_decode(self.access_token)
         config['DEFAULT']['access_token_enc'] = access_token_enc
-        self.write_config()
+        write_config()
 
 
     def get_access_token(self, scope):
-        self.check_access_token()
-        if not self.access_token:
-            self.get_jwt_access_token()
-        self.swagger_configuration.access_token = self.access_token
+        if self.use_test_client:
+            self.get_scoped_access_token(scope)
+        else:
+             if not self.check_access_token():
+                self.get_jwt_access_token()
+
+        if not self.use_test_client:
+            self.swagger_configuration.access_token = self.access_token
 
     def print_exception(self, e):
         error_printed = False
@@ -558,7 +780,12 @@ class JCA_CLI:
                   example=None, spacing=0
                   ):
         if 'b' in values and 'q' in values and 'x' in values:
-            print(self.colored_text("b: back, q: quit x: lougout and quit", grey_color))
+            greyed_help_list = [ ('b', 'back'), ('q', 'quit'),  ('x', 'logout and quit') ]
+            for k,v in (('w', 'write result'), ('y', 'yes'), ('n', 'no')):
+                if k in values:
+                    greyed_help_list.insert(1, (k, v))
+            grey_help_text = ', '.join(['{}: {}'.format(k,v) for k,v in greyed_help_list])
+            print(self.colored_text(grey_help_text, grey_color))
         print()
         type_text = ''
         if itype:
@@ -572,6 +799,8 @@ class JCA_CLI:
                     default = False
             else:
                 type_text = "Type: " + itype
+                if values:
+                    type_text += ', Valid values: {}'.format(self.colored_text(', '.join(values), bold_color))
 
         if help_text:
             help_text = help_text.strip('.') + '. ' + type_text
@@ -582,15 +811,19 @@ class JCA_CLI:
             print(' ' * spacing, self.colored_text('«{}»'.format(help_text), 244), sep='')
 
         if example:
+            join_char = '_,' if itype == 'array' else ', '
             if isinstance(example, list):
-                example_str = ', '.join(example)
+                example_str = join_char.join(example)
             else:
                 example_str = str(example)
+            if join_char == '_,':
+                example_str = example_str.replace(' ', join_char)
+
             print(' ' * spacing, self.colored_text('Example: {}'.format(example_str), 244), sep='')
 
         if not default is None:
             default_text = str(default).lower() if itype == 'boolean' else str(default)
-            text += self.colored_text('  [' + default_text + ']', 11)
+            text += '  [<b>' + default_text + '</b>]'
             if itype == 'integer':
                 default = int(default)
 
@@ -601,8 +834,19 @@ class JCA_CLI:
             values = ['_true', '_false']
 
         while True:
-            selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
+
+            if args.no_suggestion:
+                selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
+            else:
+                html_completer = WordCompleter(values)
+                selection = prompt(HTML(' ' * spacing + text + ' '), completer=html_completer)
+
             selection = selection.strip()
+
+            if selection == '_b':
+                self.display_menu(self.current_menu)
+                break
+
             if selection.startswith('_file '):
                 fname = selection.split()[1]
                 if os.path.isfile(fname):
@@ -634,7 +878,7 @@ class JCA_CLI:
                 print("Logging out...")
                 if 'access_token_enc' in config['DEFAULT']:
                     config['DEFAULT'].pop('access_token_enc')
-                    self.write_config()
+                    write_config()
                 print("Quiting...")
                 sys.exit()
                 break
@@ -663,23 +907,27 @@ class JCA_CLI:
                 return default
 
             if itype == 'array' and sitype:
-                selection = selection.split('_,')
-                for i, item in enumerate(selection):
+                if selection == '_null':
+                    selection = []
                     data_ok = True
-                    try:
-                        selection[i] = self.check_type(item.strip(), sitype)
-                        if selection[i] == '_null':
-                            selection[i] = None
-                        if values:
-                            if not selection[i] in values:
-                                data_ok = False
-                                print(' ' * spacing, self.colored_text(
-                                    "Please enter array of {} separated by _,".format(', '.join(values)),
-                                    warning_color), sep='')
-                                break
-                    except TypeError as e:
-                        print(' ' * spacing, e, sep='')
-                        data_ok = False
+                else:
+                    selection = selection.split('_,')
+                    for i, item in enumerate(selection):
+                        data_ok = True
+                        try:
+                            selection[i] = self.check_type(item.strip(), sitype)
+                            if selection[i] == '_null':
+                                selection[i] = None
+                            if values:
+                                if not selection[i] in values:
+                                    data_ok = False
+                                    print(' ' * spacing, self.colored_text(
+                                        "Please enter array of {} separated by _,".format(', '.join(values)),
+                                        warning_color), sep='')
+                                    break
+                        except TypeError as e:
+                            print(' ' * spacing, e, sep='')
+                            data_ok = False
                 if data_ok:
                     break
             else:
@@ -755,14 +1003,17 @@ class JCA_CLI:
 
     def obtain_parameters(self, endpoint, single=False):
         parameters = {}
-
+        end_point_param = {}
         endpoint_parameters = []
         if 'parameters' in endpoint.info:
             endpoint_parameters = endpoint.info['parameters']
 
-        end_point_param = self.get_endpiont_url_param(endpoint)
-        if end_point_param and not end_point_param in endpoint_parameters:
-            endpoint_parameters.insert(0, end_point_param)
+
+        if '__path_parameters__' in endpoint.info:
+            end_point_param = endpoint.info['__path_parameters__'][0]
+
+            if end_point_param and not end_point_param in endpoint_parameters:
+                endpoint_parameters.insert(0, end_point_param)
 
         n = 1 if single else len(endpoint_parameters)
 
@@ -771,7 +1022,7 @@ class JCA_CLI:
             if not param_name in parameters:
                 text_ = param['name']
                 help_text = param.get('description') or param.get('summary')
-                enforce = True if end_point_param and end_point_param['name'] == param['name'] else False
+                enforce = True if param['schema']['type'] == 'integer' or (end_point_param and end_point_param['name'] == param['name']) else False
 
                 parameters[param_name] = self.get_input(
                     text=text_.strip('.'),
@@ -779,7 +1030,8 @@ class JCA_CLI:
                     default=param['schema'].get('default'),
                     enforce=enforce,
                     help_text=help_text,
-                    example=param.get('example')
+                    example=param.get('example'),
+                    values=param['schema'].get('enum', [])
                 )
 
         return parameters
@@ -803,8 +1055,7 @@ class JCA_CLI:
         retVal = {}
         for path in self.cfg_yml['paths']:
             for method in self.cfg_yml['paths'][path]:
-                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method][
-                    'operationId'] == operation_id:
+                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method]['operationId'] == operation_id:
                     retVal = self.cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
                     retVal['__method__'] = method
@@ -825,8 +1076,7 @@ class JCA_CLI:
 
             for method in self.cfg_yml['paths'][path]:
 
-                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method][
-                    'tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
+                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
                     retVal = self.cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
                     retVal['__method__'] = method
@@ -888,26 +1138,28 @@ class JCA_CLI:
         for i, entry in enumerate(data):
             row_ = [i + 1]
             for header in headers:
-                row_.append(entry[header])
+                row_.append(str(entry.get(header, '')))
             tab_data.append(row_)
 
         print(tabulate(tab_data, headers, tablefmt="grid"))
 
-    def process_get(self, endpoint, return_value=False):
+    def process_get(self, endpoint, return_value=False, parameters=None):
         clear()
-        title = endpoint.name
-        if endpoint.name != endpoint.info['description'].strip('.'):
-            title += '\n' + endpoint.info['description']
+        if not return_value:
+            title = endpoint.name
+            if endpoint.name != endpoint.info['description'].strip('.'):
+                title += '\n' + endpoint.info['description']
 
-        self.print_underlined(title)
+            self.print_underlined(title)
 
-        parameters = self.obtain_parameters(endpoint, single=return_value)
+        if not parameters:
+            parameters = self.obtain_parameters(endpoint, single=return_value)
 
-        for param in parameters.copy():
-            if not parameters[param]:
-                del parameters[param]
+            for param in parameters.copy():
+                if not parameters[param]:
+                    del parameters[param]
 
-        if parameters:
+        if parameters and not return_value:
             print("Calling Api with parameters:", parameters)
 
         print("Please wait while retreiving data ...\n")
@@ -958,8 +1210,33 @@ class JCA_CLI:
             op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
 
             if op_mode_endpoint in tabulate_endpoints:
-                self.tabular_data(api_response_unmapped, op_mode_endpoint)
-                item_counters = [str(i + 1) for i in range(len(api_response_unmapped))]
+                api_response_unmapped_ext = copy.deepcopy(api_response_unmapped)
+                if 'entries' in api_response_unmapped_ext:
+                    api_response_unmapped_ext = api_response_unmapped_ext['entries']
+
+                if endpoint.info['operationId'] == 'get-user':
+                    for entry in api_response_unmapped_ext:
+                        if entry.get('customAttributes'):
+                            for attrib in entry['customAttributes']:
+                                if attrib['name'] == 'mail':
+                                    entry['mail'] = ', '.join(attrib['values'])
+                                elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
+                                    entry[attrib['name']] = attrib['values'][0]
+
+                if endpoint.info['operationId'] == 'get-oauth-openid-clients':
+                    for entry in api_response_unmapped_ext:
+                        for custom_attrib in entry.get('customAttributes', []):
+                            if custom_attrib.get('name') == 'displayName':
+                                entry['displayName'] = custom_attrib.get('value') or custom_attrib.get('values',['?'])[0]
+                                break
+                        if isinstance(entry['clientName'], dict) and 'value' in entry['clientName']:
+                            entry['clientName'] = entry['clientName']['value']
+
+                tab_data = api_response_unmapped_ext
+                if op_mode_endpoint in tabular_dataset:
+                    tab_data = api_response_unmapped_ext[tabular_dataset[op_mode_endpoint]]
+                self.tabular_data(tab_data, op_mode_endpoint)
+                item_counters = [str(i + 1) for i in range(len(tab_data))]
                 tabulated = True
             else:
                 self.print_colored_output(api_response_unmapped)
@@ -980,7 +1257,11 @@ class JCA_CLI:
                     print("An error ocurred while saving data")
                     self.print_exception(e)
             elif selection in item_counters:
-                self.pretty_print(api_response_unmapped[int(selection) - 1])
+                if my_op_mode == 'scim' and 'Resources' in api_response_unmapped:
+                    items = api_response_unmapped['Resources'] 
+                elif my_op_mode == 'jca' and 'entries' in api_response_unmapped:
+                    items = api_response_unmapped['entries']
+                self.pretty_print(items[int(selection) - 1])
 
     def get_schema_from_reference(self, ref):
         schema_path_list = ref.strip('/#').split('/')
@@ -993,6 +1274,7 @@ class JCA_CLI:
 
         if 'allOf' in schema_:
             all_schema = OrderedDict()
+            all_schema['required'] = []
 
             all_schema['properties'] = OrderedDict()
             for sch in schema_['allOf']:
@@ -1001,6 +1283,7 @@ class JCA_CLI:
                 elif 'properties' in sch:
                     for sprop in sch['properties']:
                         all_schema['properties'][sprop] = sch['properties'][sprop]
+                all_schema['required'] += sch.get('required', [])
 
             schema_ = all_schema
 
@@ -1049,14 +1332,41 @@ class JCA_CLI:
             if model.swagger_types[attribute] == name:
                 return attribute
 
+    def get_attrib_list(self):
+        for parent in self.menu:
+            for children in parent:
+                if children.info.get('operationId') == 'get-attributes':
+                    attributes = self.process_get(children, return_value=True, parameters={'limit': 1000} )
+                    attrib_names = []
+                    for a in attributes:
+                        attrib_names.append(a.name)
+                    attrib_names.sort()
+                    return attrib_names
+
+    def get_enum(self, schema):
+        if schema['__schema_name__'] in self.enum_dict:
+            enum_obj = schema
+            
+            for path in self.enum_dict[schema['__schema_name__']].copy():
+                for p in path.split('.'):
+                    enum_obj = enum_obj[p]
+
+                if not 'enum' in self.enum_dict[schema['__schema_name__']][path]:
+                    self.enum_dict[schema['__schema_name__']][path]['enum'] = getattr(self, self.enum_dict[schema['__schema_name__']][path]['f'])()
+
+                enum_obj['enum'] = self.enum_dict[schema['__schema_name__']][path]['enum']
+
+
     def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None, required_only=False):
+
+        self.get_enum(schema)
         data = {}
         for prop in schema['properties']:
             item = schema['properties'][prop]
             if getitem and prop != getitem['__name__'] or prop in ('dn', 'inum'):
                 continue
 
-            if (required_only and schema.get('required')) and not prop in schema.get('required'):
+            if required_only and not prop in schema.get('required', []):
                 continue
 
             prop_ = self.get_model_key_map(model, prop)
@@ -1134,6 +1444,9 @@ class JCA_CLI:
                 if item['type'] == 'object' and not default:
                     default = {}
 
+                if not values_:
+                    values_ = []
+
                 val = self.get_input(
                     values=values_,
                     text=prop,
@@ -1149,10 +1462,12 @@ class JCA_CLI:
 
         if model.__class__.__name__ == 'type':
             modelObject = model(**data)
+            for key_ in data:
+                if data[key_] and not getattr(modelObject, key_, None):
+                    setattr(modelObject, key_, data[key_])
             return modelObject
         else:
             for key_ in data:
-                # if data[key_]:
                 setattr(model, key_, data[key_])
 
             return model
@@ -1161,7 +1476,8 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         if security.strip():
             self.get_access_token(security)
-        client = getattr(swagger_client, self.get_api_class_name(endpoint.parent.name))
+
+        client = getattr(swagger_client, self.get_api_class_name(endpoint.info['tags'][0]))
         api_instance = self.get_api_instance(client)
         api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-', '_'))
 
@@ -1193,11 +1509,12 @@ class JCA_CLI:
                 if not field in required_fields:
                     optional_fields.append(field)
 
+            optional_fields.sort()
             if optional_fields:
                 fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
                 fields_numbers = []
                 if fill_optional == 'y':
-                    print("Optiaonal Fields:")
+                    print("Optional Fields:")
                     for i, field in enumerate(optional_fields):
                         print(i + 1, field)
                         fields_numbers.append(str(i + 1))
@@ -1223,12 +1540,34 @@ class JCA_CLI:
             selection = 'y'
             model = None
 
+
+        path_vals = {}
+        if '__path_parameters__' in endpoint.info:
+            for pparam in endpoint.info['__path_parameters__']:
+                swagger_var = self.make_swagger_var(pparam['name'])
+                path_vals[swagger_var] = self.get_input(
+                                                    values=pparam['schema'].get('enum', []),
+                                                    text=pparam['name'],
+                                                    itype=pparam['schema']['type'],
+                                                    help_text= pparam.get('description'),
+                                                    enforce='__true__',
+                                                )
+
+
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
 
             try:
-                api_response = api_caller(body=model) if model else api_caller()
+                if model:
+                    if path_vals:
+                        api_response = api_caller(**path_vals, body=model)
+                    else:
+                        api_response = api_caller(body=model) 
+                        
+                else:
+                    api_response = api_caller(**path_vals)
+
             except Exception as e:
                 api_response = None
                 self.print_exception(e)
@@ -1272,16 +1611,27 @@ class JCA_CLI:
             self.display_menu(endpoint.parent)
 
     def process_patch(self, endpoint):
-
-        if 'PatchOperation' in self.cfg_yml['components']['schemas']:
+        if endpoint.info['operationId'] == 'patch-user-by-inum':
+            schema = self.cfg_yml['components']['schemas']['CustomAttribute'].copy()
+            schema['__schema_name__'] = 'CustomAttribute'
+            model = getattr(swagger_client.models, 'CustomAttribute')
+        elif 'PatchOperation' in self.cfg_yml['components']['schemas']:
             schema = self.cfg_yml['components']['schemas']['PatchOperation'].copy()
             model = getattr(swagger_client.models, 'PatchOperation')
             for item in schema['properties']:
                 if not 'type' in schema['properties'][item]:
                     schema['properties'][item]['type'] = 'string'
+            schema['__schema_name__'] = 'PatchOperation'
         else:
             schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
+            schema['__schema_name__'] = 'PatchRequest'
             model = getattr(swagger_client.models, 'PatchRequest')
+
+        parent_schema = {}
+ 
+        schema_ref = endpoint.info.get('responses', {}).get('200', {}).get('content', {}).get('application/json', {}).get('schema', {}).get('$ref')
+        if schema_ref:
+            parent_schema = self.get_schema_from_reference(schema_ref)
 
         url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
@@ -1289,17 +1639,26 @@ class JCA_CLI:
             url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
         body = []
 
+        if endpoint.info['operationId'] == 'patch-user-by-inum':
+            patch_op = self.get_input(text="Patch operation", values=['add', 'remove', 'replace'], help_text='The operation to be performed')
+
         while True:
             data = self.get_input_for_schema_(schema, model)
-            guessed_val = self.guess_bool(data.value)
-            if not guessed_val is None:
-                data.value = guessed_val
-            if my_op_mode != 'scim' and not data.path.startswith('/'):
-                data.path = '/' + data.path
+            if endpoint.info['operationId'] != 'patch-user-by-inum':
+                guessed_val = self.guess_bool(data.value)
+                if not guessed_val is None:
+                    data.value = guessed_val
+                if my_op_mode != 'scim' and not data.path.startswith('/'):
+                    data.path = '/' + data.path
 
-            if my_op_mode == 'scim':
-                data.path = data.path.replace('/', '.')
+                if my_op_mode == 'scim':
+                    data.path = data.path.replace('/', '.')
 
+                if parent_schema and 'properties' in parent_schema:
+                    for prop_ in parent_schema['properties']:
+                        if data.path.lstrip('/') == prop_:
+                            if parent_schema['properties'][prop_]['type'] == 'array':
+                                data.value = data.value.split('_,')
             body.append(data)
             selection = self.get_input(text='Another patch operation?', values=['y', 'n'])
             if selection == 'n':
@@ -1321,7 +1680,9 @@ class JCA_CLI:
 
             if my_op_mode == 'scim':
                 body = {'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'], 'Operations': body}
-
+            elif endpoint.info['operationId'] == 'patch-user-by-inum':
+                patch_data = {'jsonPatchString': json.dumps([{'op': patch_op, 'path': '/dn', 'value': 'inum={},ou=people,o=jans'.format(url_param_val)}]), 'customAttributes':unmapped_body}
+                body = patch_data
             try:
                 if url_param_val:
                     param_mapping = self.guess_param_mapping(url_param['name'])
@@ -1341,7 +1702,6 @@ class JCA_CLI:
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
-
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
@@ -1349,6 +1709,8 @@ class JCA_CLI:
         initialised = False
         cur_model = None
         go_back = False
+        key_name = None
+        parent_model = None
 
         if endpoint.info.get('x-cli-getdata') != '_file':
             if 'x-cli-getdata' in endpoint.info and endpoint.info['x-cli-getdata'] != None:
@@ -1369,26 +1731,38 @@ class JCA_CLI:
                         break
 
             else:
-                for m in endpoint.parent:
-                    if m.method == 'get' and m.path.endswith('}'):
-                        while True:
+                if endpoint.info['operationId'] == 'put-properties-fido2':
+                    for m in endpoint.parent:
+                        if m.method == 'get':
+                            break
+                    cur_model = self.process_get(m, return_value=True)
+                    initialised = True
+                    get_endpoint = m
+
+                else:
+                    for m in endpoint.parent:
+                        if m.method == 'get' and m.path.endswith('}'):
                             while True:
-                                try:
-                                    cur_model = self.process_get(m, return_value=True)
-                                    break
-                                except ValueError as e:
-                                    print(self.colored_text("Server returned no data", error_color))
-                                    retry = self.get_input(values=['y', 'n'], text='Retry?')
-                                    if retry == 'n':
-                                        self.display_menu(endpoint.parent)
+                                while True:
+                                    try:
+                                        key_name_desc = self.get_endpiont_url_param(m)
+                                        if key_name_desc and 'name' in key_name_desc:
+                                            key_name = key_name_desc['name']
+                                        cur_model = self.process_get(m, return_value=True)
                                         break
+                                    except ValueError as e:
+                                        print(self.colored_text("Server returned no data", error_color))
+                                        retry = self.get_input(values=['y', 'n'], text='Retry?')
+                                        if retry == 'n':
+                                            self.display_menu(endpoint.parent)
+                                            break
 
-                            if not cur_model is False:
-                                break
+                                if not cur_model is False:
+                                    break
 
-                        initialised = True
-                        get_endpoint = m
-                        break
+                            initialised = True
+                            get_endpoint = m
+                            break
 
             if not cur_model:
                 for m in endpoint.parent:
@@ -1478,6 +1852,9 @@ class JCA_CLI:
                     elif selection in item_numbers:
                         item = attr_name_list[int(selection) - 1]
                         item_unmapped = self.get_model_key_map(cur_model, item)
+                        if schema['properties'].get('keys', {}).get('properties'):
+                            schema = schema['properties']['keys']
+
                         schema_item = schema['properties'][item]
                         schema_item['__name__'] = item
                         self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
@@ -1496,10 +1873,25 @@ class JCA_CLI:
                         selection = self.get_input(values=['y', 'n'], text='Continue?')
 
                         if selection == 'y':
+                            schema_must = self.get_scheme_for_endpoint(endpoint)
+                            if schema_must['__schema_name__'] != cur_model.__class__.__name__:
+                                for e in  endpoint.parent.children:
+                                    if e.method == 'get':
+                                        parent_model = self.process_get(e, return_value=True)
+                                        break
+
+
+                                if parent_model and key_name and hasattr(parent_model, 'keys'):
+                                    for i, wkey in enumerate(parent_model.keys):
+                                        if getattr(wkey, key_name) == getattr(cur_model, key_name):
+                                            parent_model.keys[i] = cur_model
+                                            cur_model = parent_model
+                                            break
+
                             print("Please wait while posting data ...\n")
                             api_caller = self.get_api_caller(endpoint)
                             put_pname = self.get_url_param(endpoint.path)
-                            
+
                             try:
                                 if put_pname:
                                     args_ = {'body': cur_model, put_pname: end_point_param_val}
@@ -1525,10 +1917,20 @@ class JCA_CLI:
 
     def display_menu(self, menu):
         clear()
-        print(self.colored_text("*** WARNING! This software is experimental ***", warning_color))
         self.current_menu = menu
 
-        self.print_underlined(menu.name)
+        name_list = [menu.name]
+        par = menu
+        while True:
+            par = par.parent
+            if not par:
+                break
+            name_list.insert(0, par.name)
+
+        if len(name_list) > 1:
+            del name_list[0]
+
+        self.print_underlined(': '.join(name_list))
 
         selection_values = ['q', 'x', 'b']
 
@@ -1536,8 +1938,9 @@ class JCA_CLI:
 
         c = 0
         for i, item in enumerate(menu):
-            if item.info.get('x-cli-ignore'):
+            if item.info.get('x-cli-ignore') or (item.parent.name == 'Main Menu' and not item.children):
                 continue
+
             print(c + 1, item)
             selection_values.append(str(c + 1))
             menu_numbering[c + 1] = i
@@ -1616,8 +2019,13 @@ class JCA_CLI:
                                 schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
                                 print('  Schema: Array of {}'.format(schema_path[1:]))
                             else:
-                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                print('  Schema: {}'.format(schema_path[1:]))
+                                spparent = path['requestBody']['content'][apptype]['schema']
+                                schema_path = spparent.get('$ref')
+                                if schema_path:
+                                    print('  Schema: {}'.format(schema_path[1:]))
+                                else:
+                                    print('  Data type: {}'.format(spparent.get('type')))
+
 
         if schema_path:
             print()
@@ -1678,7 +2086,6 @@ class JCA_CLI:
         return api_caller
 
     def process_command_get(self, path, suffix_param, endpoint_params, data_fn, data=None):
-
         api_caller = self.get_path_api_caller_for_path(path)
         api_response = None
         encoded_param = urlencode(endpoint_params)
@@ -1963,22 +2370,23 @@ class JCA_CLI:
 
 def main():
 
-    cliObject = JCA_CLI(host, client_id, client_secret)
-
+    cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
+    error_log_file = os.path.join(log_dir, 'error.log')
     try:
-        cliObject.check_connection()
+        if not access_token:
+            cli_object.check_connection()
         if not (args.operation_id or args.info or args.schema):
             # reset previous color
             print('\033[0m', end='')
-            cliObject.runApp()
+            cli_object.runApp()
         else:
             print()
             if args.info:
-                cliObject.help_for(args.info)
+                cli_object.help_for(args.info)
             elif args.schema:
-                cliObject.get_sample_schema(args.schema)
+                cli_object.get_sample_schema(args.schema)
             elif args.operation_id:
-                cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
+                cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
             print()
     except Exception as e:
         if os.environ.get('errstdout'):

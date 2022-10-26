@@ -19,9 +19,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -82,6 +82,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             // CouchbaseEntryManagerFactory.PERSISTENCE_TYPE
             skipRemoveBeforePut = "couchbase".equals(persistenceType);
             attemptUpdateBeforeInsert = "sql".equals(persistenceType);
+            if (cacheConfiguration.getNativePersistenceConfiguration().isDisableAttemptUpdateBeforeInsert()) {
+                attemptUpdateBeforeInsert = false;
+            }
 
             log.info("Created NATIVE_PERSISTENCE cache provider. `baseDn`: " + baseDn);
         } catch (Exception e) {

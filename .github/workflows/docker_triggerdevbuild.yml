@@ -6,15 +6,15 @@ jobs:
   checkBuildAndUpdate:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
+      GITHUB_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       PR_DOCKER_DEV_BRANCH_NAME: update-dev-images
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Import GPG key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v4
+        uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -22,7 +22,7 @@ jobs:
           git_commit_gpgsign: true
 
       - name: Setup Python 3.7
-        uses: actions/setup-python@v2.3.1
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
@@ -48,9 +48,9 @@ jobs:
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfiles): updated build dates" || echo "PR Branch is already open")
       - name: Open PR
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
           branch: ${{ env.PR_DOCKER_DEV_BRANCH_NAME }}

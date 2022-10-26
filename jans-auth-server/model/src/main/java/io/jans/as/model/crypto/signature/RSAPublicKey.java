@@ -27,9 +27,6 @@ import static io.jans.as.model.jwk.JWKParameter.Y;
  */
 public class RSAPublicKey extends PublicKey {
 
-    private static final String RSA_ALGORITHM = "RSA";
-    private static final String USE = "sig";
-
     private BigInteger modulus;
     private BigInteger publicExponent;
 

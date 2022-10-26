@@ -11,13 +11,13 @@ import io.jans.scim2.client.UserBaseTest;
 
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.*;
 import static org.testng.Assert.*;
 
 public class ComplexSearchUserTest extends UserBaseTest {
@@ -250,11 +250,6 @@ public class ComplexSearchUserTest extends UserBaseTest {
         for (int i=1; i<users.length; i++) {
             String exId1=users[i-1].getExternalId();
             String exId2=users[i].getExternalId();
-
-            if (exId2!=null)
-                assertNotNull(exId1);
-            if (exId1==null)
-                assertNull(exId2);
 
             if (exId1!=null && exId2!=null)     //In descending order exId1 must be higher than exId2
                 assertFalse(exId1.compareTo(exId2)<0);

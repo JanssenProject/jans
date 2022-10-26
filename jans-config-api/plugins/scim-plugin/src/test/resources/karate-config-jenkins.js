@@ -44,8 +44,7 @@ function() {
         accessToken: '123',
        
         //scim
-        scim_user_url: baseUrl + '/jans-config-api/scim/user',
-		scim_config_url: baseUrl + '/jans-config-api/scim/config',
+		scim_config_url: baseUrl + '/jans-config-api/scim/scim-config',
     };
 
     karate.configure('connectTimeout', 30000);

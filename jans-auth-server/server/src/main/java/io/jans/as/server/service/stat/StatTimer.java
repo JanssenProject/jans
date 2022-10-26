@@ -1,6 +1,6 @@
 package io.jans.as.server.service.stat;
 
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.cdi.event.StatEvent;
 import io.jans.service.cdi.async.Asynchronous;
@@ -9,12 +9,12 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -57,7 +57,7 @@ public class StatTimer {
 
     @Asynchronous
     public void process(@Observes @Scheduled StatEvent event) {
-        if (!appConfiguration.isEnabledComponent(ComponentType.STAT)) {
+        if (!appConfiguration.isFeatureEnabled(FeatureFlagType.STAT)) {
             return;
         }
 

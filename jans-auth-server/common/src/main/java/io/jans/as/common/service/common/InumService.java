@@ -6,12 +6,13 @@
 
 package io.jans.as.common.service.common;
 
+import io.jans.as.model.common.IdType;
 import io.jans.as.model.util.Pair;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.UUID;
 
 /**
@@ -31,11 +32,11 @@ public class InumService {
     private ExternalIdGeneratorService externalIdGenerationService;
 
     public String generateClientInum() {
-        return UUID.randomUUID().toString();
+        return generateId(IdType.CLIENTS.getType());
     }
 
     public String generatePeopleInum() {
-        return UUID.randomUUID().toString();
+        return generateId(IdType.PEOPLE.getType());
     }
 
     public String generateInum() {

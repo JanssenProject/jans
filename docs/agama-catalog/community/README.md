@@ -1,0 +1,1 @@
+This folder contains Agama projects maintained by community developers.

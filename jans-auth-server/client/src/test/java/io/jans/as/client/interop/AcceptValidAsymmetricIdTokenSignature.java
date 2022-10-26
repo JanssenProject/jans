@@ -6,22 +6,14 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-
+import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jws.ECDSASigner;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
@@ -33,9 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -67,7 +57,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -82,20 +72,15 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getIdToken());
-        assertNotNull(authorizationResponse.getState());
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
         assertEquals(authorizationResponse.getState(), state);
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .check();
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "postLogoutRedirectUri", "clientJwksUri"})
@@ -119,7 +104,6 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         registerRequest.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUri));
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
-        registerRequest.setRequireAuthTime(true);
         registerRequest.setDefaultMaxAge(3600);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -128,7 +112,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -142,11 +126,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getIdToken());
-        assertNotNull(authorizationResponse.getState());
-        assertEquals(authorizationResponse.getState(), state);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 

@@ -19,6 +19,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.GrantType;
@@ -33,7 +34,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -63,7 +64,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -82,12 +83,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse1 = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1, userId, userSecret);
-
-        assertNotNull(authorizationResponse1.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
+        AssertBuilder.authorizationResponse(authorizationResponse1).check();
         assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
-        assertNotNull(authorizationResponse1.getScope(), "The scope is null");
-        assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertEquals(authorizationResponse1.getState(), state1);
 
         String code1 = authorizationResponse1.getCode();
@@ -105,12 +102,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.execAuthorizationCode(code1, redirectUri, clientId, clientSecret);
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken1 = tokenResponse1.getAccessToken();
 
@@ -210,7 +204,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -236,11 +230,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse1 = authorizationRequestAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1);
 
-        assertNotNull(authorizationResponse1.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
+        AssertBuilder.authorizationResponse(authorizationResponse1).check();
         assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
-        assertNotNull(authorizationResponse1.getScope(), "The scope is null");
-        assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertEquals(authorizationRequest1.getState(), state1);
 
         String authorizationCode1 = authorizationResponse1.getCode();
@@ -258,12 +249,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         // User wants to authenticate on B2 (without sending its credentials)
 
@@ -354,11 +342,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse3 = tokenClient3.exec();
 
         showClient(tokenClient3);
-        assertEquals(tokenResponse3.getStatus(), 200, "Unexpected response code: " + tokenResponse3.getStatus());
-        assertNotNull(tokenResponse3.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse3.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse3.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse3.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse3.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse3)
+                .notNullRefreshToken()
+                .check();
     }
 }

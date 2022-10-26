@@ -3,9 +3,6 @@ import json
 import sys
 import logging
 
-sys.path.insert(0, '/opt/dist/app/gcs')
-sys.path.insert(0, '/opt/dist/app/gcs/google')
-
 from google.cloud import spanner
 from google.cloud.spanner_v1 import session
 from google.auth.credentials import AnonymousCredentials

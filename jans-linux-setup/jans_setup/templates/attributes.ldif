@@ -201,7 +201,7 @@ objectClass: jansAttr
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gender
 
 dn: inum=98FC,ou=attributes,o=jans
-description:: RW5kLVVzZXIncyBiaXJ0aGRheSwgcmVwcmVzZW50ZWQgYXMgYW4gSVNPIDg2MDE6MjAwNCBbSVNPODYwMeKAkTIwMDRdIFlZWVktTU0tREQgZm9ybWF0Lg==
+description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601-2004] YYYY-MM-DD format.
 displayName: Birthdate
 inum: 98FC
 jansAttrEditTyp: user
@@ -663,6 +663,7 @@ jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
 jansClaimName: phone_mobile_number
+jansMultivaluedAttr: true
 jansSAML1URI: urn:mace:dir:attribute-def:mobile
 jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.41
 jansStatus: inactive

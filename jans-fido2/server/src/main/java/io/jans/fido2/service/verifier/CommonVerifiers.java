@@ -11,9 +11,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -445,9 +445,18 @@ public class CommonVerifiers {
         return timeout;
 	}
 
-    public void verifyThatMetadataIsValid(JsonNode metadata) {
-        long count = Arrays.asList(metadata.hasNonNull("aaguid"), metadata.hasNonNull("assertionScheme"), metadata.hasNonNull("attestationTypes"),
-                metadata.hasNonNull("description")).parallelStream().filter(f -> f == false).count();
+    // fix: fetching metadataStatement from the individual metadataNode (causing NPE) - also, removing metadata.hasNonNull("assertionScheme") as per MDS3 upgrade -  https://medium.com/webauthnworks/webauthn-fido2-whats-new-in-mds3-migrating-from-mds2-to-mds3-a271d82cb774
+    public void verifyThatMetadataIsValid(JsonNode metadata)  {
+    	
+    	JsonNode metaDataStatement= null;
+		try {
+			metaDataStatement = dataMapperService
+					.readTree(metadata.get("metadataStatement").toPrettyString());
+		} catch (IOException e) {
+			 throw new Fido2RuntimeException("Unable to process metadataStatement:",e);
+		}
+        long count = Arrays.asList(metaDataStatement.hasNonNull("aaguid"), metaDataStatement.hasNonNull("attestationTypes"),
+        		metaDataStatement.hasNonNull("description")).parallelStream().filter(f -> f == false).count();
         if (count != 0) {
             throw new Fido2RuntimeException("Invalid parameters in metadata");
         }

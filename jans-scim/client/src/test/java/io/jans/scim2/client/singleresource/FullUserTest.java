@@ -17,11 +17,11 @@ import io.jans.scim2.listener.SkipTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_ID;
-import static javax.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.*;
 
 import static org.testng.Assert.*;
 
@@ -113,6 +113,7 @@ public class FullUserTest extends UserBaseTest {
         String scapedBkSlash = String.valueOf(new char[]{backslash, backslash});
         //Used to generate a random Unicode char
         String rnd = UUID.randomUUID().toString().substring(0, 4);
+        logger.debug("Using random unicode character (HEX): {}", rnd);
         String unicodeStr = String.valueOf(Character.toChars(Integer.parseInt(rnd, 16)));
 
         Name name = user.getName();

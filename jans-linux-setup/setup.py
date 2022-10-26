@@ -23,7 +23,7 @@ def find_version(*file_paths):
 
 setup(
     name="jans-setup",
-    version=find_version("jans_setup/setup_app/__init__.py"),
+    version=find_version("jans_setup/setup_app/version.py"),
     url="",
     license="Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
     author="Janssen",
@@ -36,10 +36,12 @@ setup(
     zip_safe=False,
     install_requires=[
         "setuptools>=59.6.0",
+        "prompt-toolkit==3.0.29",
         "pyasn1==0.4.8",
         "ruamel.yaml>=0.16.5",
         "sqlalchemy==1.3.23",
         "cryptography==36.0.1",
+        "protobuf",
         "google-cloud-spanner==3.13.0",
         "ldap3",
         "PyMySQL",

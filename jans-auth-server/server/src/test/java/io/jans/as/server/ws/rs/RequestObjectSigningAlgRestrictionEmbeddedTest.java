@@ -7,7 +7,6 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
@@ -19,6 +18,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
@@ -29,10 +29,10 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -109,7 +109,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void omittedRequestObjectSigningAlgStep1(final String registerPath, final String redirectUris,
                                                     final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -160,7 +160,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep2(final String registerPath) throws Exception {
         RegisterRequest registerRequest = new RegisterRequest(null);
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath + "?"
                 + registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1)).request();
         request.header("Authorization", "Bearer " + registrationAccessToken1);
 
@@ -234,7 +234,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -306,7 +306,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -378,7 +378,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -450,7 +450,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -525,7 +525,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -599,7 +599,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -673,7 +673,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -747,7 +747,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -821,7 +821,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -895,7 +895,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -932,7 +932,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgNoneStep1(final String registerPath, final String redirectUris,
                                                  final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -981,7 +981,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Parameters({"registerPath"})
     @Test(dependsOnMethods = "requestObjectSigningAlgNoneStep1")
     public void requestObjectSigningAlgNoneStep2(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath + "?"
                 + registrationClientUri2.substring(registrationClientUri2.indexOf("?") + 1)).request();
 
         request.header("Authorization", "Bearer " + registrationAccessToken2);
@@ -1058,7 +1058,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             System.out.println("Request JWT: " + authJwt);
 
             request = ResteasyClientBuilder.newClient()
-                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                    .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
             request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
             request.header("Accept", MediaType.TEXT_PLAIN);
         } catch (Exception e) {
@@ -1141,7 +1141,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgHS256Step1(final String registerPath, final String redirectUris)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1243,7 +1243,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgHS384Step1(final String registerPath, final String redirectUris)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1345,7 +1345,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgHS512Step1(final String registerPath, final String redirectUris)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1447,7 +1447,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgRS256Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1550,7 +1550,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgRS384Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1654,7 +1654,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgRS512Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1757,7 +1757,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgES256Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1860,7 +1860,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgES384Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {

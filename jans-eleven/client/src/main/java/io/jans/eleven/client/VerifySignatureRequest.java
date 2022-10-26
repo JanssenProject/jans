@@ -6,8 +6,8 @@
 
 package io.jans.eleven.client;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.MediaType;
 
 import io.jans.eleven.model.VerifySignatureRequestParam;
 

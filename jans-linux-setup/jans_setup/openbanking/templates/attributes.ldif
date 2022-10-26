@@ -1253,3 +1253,24 @@ objectClass: top
 objectClass: jansAttr
 urn: urn:mace:dir:attribute-def:jansBackchannelUsrCode
 
+dn: inum=4CF1,ou=attributes,o=jans
+description: jansAdminUIRole
+displayName: jansAdminUIRole
+inum: 4CF1
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: jansAdminUIRole
+jansAttrOrigin: jansCustomPerson
+jansAttrSystemEditTyp: admin
+jansAttrSystemEditTyp: user
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: jansAdminUIRole
+jansMultivaluedAttr: true
+jansSAML1URI: urn:mace:dir:attribute-def:jansAdminUIRole
+jansSAML2URI: urn:mace:dir:attribute-def:jansAdminUIRole
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: sampleurn

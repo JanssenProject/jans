@@ -104,9 +104,11 @@
 			<AppenderRef ref="JANS_CONFIGAPI_SCRIPT_LOG_FILE" />
 		</logger>
 
-        <Root level="ERROR">
-            <AppenderRef ref="Console" />
+        <Root level="INFO">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="Console" />
         </Root>
+		
     </Loggers>
 
 </Configuration>

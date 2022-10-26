@@ -7,6 +7,7 @@
 package io.jans.as.client.ws.rs;
 
 import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
@@ -60,7 +61,7 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -115,9 +116,9 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         showClient(registerClient);
 
         if (checkError) {
-            assertBadRequest(registerResponse);
+            AssertBuilder.registerResponse(registerResponse).bad().check();
         } else {
-            assertOk(registerResponse);
+            AssertBuilder.registerResponse(registerResponse).created().check();
         }
 
         return registerResponse;

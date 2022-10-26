@@ -14,32 +14,38 @@ from setup_app.pylib.jproperties import Properties
 
 class JreInstaller(BaseInstaller, SetupUtils):
 
+    amazon_corretto_link = 'https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(base.current_app.app_info['AMAZON_CORRETTO_VERSION'])
+    source_files = [
+            (os.path.join(Config.dist_app_dir, os.path.basename(amazon_corretto_link)), amazon_corretto_link),
+            ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jre'
         self.needdb = False # we don't need backend connection in this class
         self.install_var = 'installJre'
         self.app_type = AppType.APPLICATION
-        self.install_type = InstallOption.MONDATORY
+        self.install_type = InstallOption.MANDATORY
         if not base.snap:
             self.register_progess()
 
-        self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
-
-
     def install(self):
 
-        # we need to call download_files() unless it called by base installer
-        if not Config.downloadWars:
-            self.download_files()
+        if Config.java_type == 'jdk':
+            open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9.1_1.tar.gz'
+            target_fn = os.path.join(Config.dist_app_dir, os.path.basename(open_jdk_archive_link))
+            base.download(open_jdk_archive_link, target_fn)
+            jre_archive = target_fn
+        else:
+            jre_archive = self.source_files[0][0]
 
-        self.logIt("Installing server JRE {} ...".format(os.path.basename(self.jreArchive)))
+        self.logIt("Installing server JRE {} ...".format(os.path.basename(jre_archive)))
 
         try:
-            self.logIt("Extracting %s into /opt/" % os.path.basename(self.jreArchive))
-            self.run([paths.cmd_tar, '-xzf', self.jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.logIt("Extracting %s into /opt/" % os.path.basename(jre_archive))
+            self.run([paths.cmd_tar, '-xzf', jre_archive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except Exception as e:
-            self.logIt("Error encountered while extracting archive %s" % self.jreArchive)
+            self.logIt("Error encountered while extracting archive {}".format(e))
 
         if Config.java_type == 'jdk':
             jreDestinationPath = max(glob.glob('/opt/jdk-11*'))
@@ -60,24 +66,6 @@ class JreInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_sed, '-i', '/^#crypto.policy=unlimited/s/^#//', jsfn._str])
 
         self.fix_java_security()
-
-    def download_files(self):
-        jre_arch_list = glob.glob(os.path.join(Config.distAppFolder, 'amazon-corretto-*.tar.gz'))
-
-        if not jre_arch_list:
-            self.logIt("JRE packgage not found in {}. Will download jdk".format(Config.distAppFolder))
-            Config.java_type = 'jdk'
-        else:
-            Config.java_type = 'jre'
-
-        if Config.java_type != 'jre':
-            jdk_fn = os.path.basename(self.open_jdk_archive_link)       
-            self.logIt("Downloading " + jdk_fn, pbar=self.service_name)
-            self.jreArchive = os.path.join(Config.distAppFolder, jdk_fn)
-            base.download(self.open_jdk_archive_link, self.jreArchive)
-        else:
-            self.jreArchive = max(jre_arch_list)
-
 
     def fix_java_security(self):
         # https://github.com/OpenIdentityPlatform/OpenDJ/issues/78

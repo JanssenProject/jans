@@ -28,8 +28,8 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.DefaultScope;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.ldap.ClientAuthorization;
@@ -49,21 +49,22 @@ import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -484,7 +485,7 @@ public class AuthorizeAction {
                 String reqUriHash = reqUri.getFragment();
                 String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-                javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
                 try {
                     Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
                     clientRequest.close();
@@ -735,7 +736,7 @@ public class AuthorizeAction {
     }
 
     public void setLoginHint(String loginHint) {
-        this.loginHint = loginHint;
+        this.loginHint = StringEscapeUtils.escapeEcmaScript(loginHint);
     }
 
     public String getAcrValues() {

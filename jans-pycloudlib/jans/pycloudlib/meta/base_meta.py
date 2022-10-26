@@ -1,49 +1,73 @@
-"""
-jans.pycloudlib.meta.base_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""This module contains base class for meta adapter."""
 
-This module contains base class for meta adapter.
-"""
-
-from typing import NoReturn
+from abc import ABC
+from abc import abstractmethod
+import typing as _t
 
 
-class BaseMeta:
-    """Base class for meta client adapter. Must be sub-classed per
-    implementation details.
+class BaseMeta(ABC):
+    """Base class for meta client adapter.
+
+    !!! important
+        Must be sub-classed per implementation details.
     """
 
-    def get_containers(self, label) -> NoReturn:
+    @abstractmethod
+    def get_containers(self, label: str) -> list[_t.Any]:
         """Get list of containers based on label.
 
-        Subclass **MUST** implement this method.
-        """
-        raise NotImplementedError
+        !!! important
+            Subclass **MUST** implement this method.
 
-    def get_container_ip(self, container) -> NoReturn:
+        Args:
+            label: Label name, i.e. `APP_NAME=jans-auth`.
+        """
+
+    @abstractmethod
+    def get_container_ip(self, container: _t.Any) -> str:
         """Get container's IP address.
 
-        Subclass **MUST** implement this method.
-        """
-        raise NotImplementedError
+        !!! important
+            Subclass **MUST** implement this method.
 
-    def get_container_name(self, container) -> NoReturn:
+        Args:
+            container: Container object.
+
+        Returns:
+            IP address associated with the container.
+        """
+
+    @abstractmethod
+    def get_container_name(self, container: _t.Any) -> str:
         """Get container's name.
 
-        Subclass **MUST** implement this method.
-        """
-        raise NotImplementedError
+        !!! important
+            Subclass **MUST** implement this method.
 
-    def copy_to_container(self, container, path) -> NoReturn:
+        Args:
+            container: Container object.
+        """
+
+    @abstractmethod
+    def copy_to_container(self, container: _t.Any, path: str) -> None:
         """Copy path to container.
 
-        Subclass **MUST** implement this method.
-        """
-        raise NotImplementedError
+        !!! important
+            Subclass **MUST** implement this method.
 
-    def exec_cmd(self, container, cmd) -> NoReturn:
+        Args:
+            container: Container object.
+            path: Path to file or directory.
+        """
+
+    @abstractmethod
+    def exec_cmd(self, container: _t.Any, cmd: str) -> _t.Any:
         """Run command inside container.
 
-        Subclass **MUST** implement this method.
+        !!! important
+            Subclass **MUST** implement this method.
+
+        Args:
+            container: Container object.
+            cmd: String of command.
         """
-        raise NotImplementedError

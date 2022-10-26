@@ -6,19 +6,30 @@
 
 package io.jans.orm;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
-
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.StoredProcedureQuery;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.metamodel.Metamodel;
+import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.event.DeleteNotifier;
-import io.jans.orm.exception.extension.PersistenceExtension;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
@@ -86,6 +97,7 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	@Deprecated
 	void remove(String dn);
+	<T> void removeByDn(String dn, String[] objectClasses);
 	<T> void remove(String primaryKey, Class<T> entryClass);
 
 	<T> int remove(String primaryKey, Class<T> entryClass, Filter filter, int count);
@@ -94,6 +106,7 @@ public interface PersistenceEntryManager extends EntityManager {
     void removeRecursively(String primaryKey);
 
 	<T> void removeRecursively(String primaryKey, Class<T> entryClass);
+	<T> void removeRecursivelyFromDn(String primaryKey, String[] objectClasses);
 
     boolean hasBranchesSupport(String primaryKey);
     boolean hasExpirationSupport(String primaryKey);
@@ -115,7 +128,10 @@ public interface PersistenceEntryManager extends EntityManager {
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 
+    @Deprecated
     List<AttributeData> exportEntry(String dn);
+
+	<T> List<AttributeData> exportEntry(String dn, String objectClass);
 
     <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data);
 
@@ -123,6 +139,15 @@ public interface PersistenceEntryManager extends EntityManager {
     PersistenceEntryManager getPersistenceEntryManager(String persistenceType);
 
     void setPersistenceExtension(PersistenceExtension persistenceExtension);
+
+    <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName);
+
+    Class<?> getCustomAttributesListItemType(Object entry, AttributesList attributesList,
+			String propertyName);
+	List<AttributeData> getAttributeDataListFromCustomAttributesList(Object entry, AttributesList attributesList,
+			String propertyName);
+	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
+			String propertyName, Collection<AttributeData> attributes);
 
     boolean destroy();
 
@@ -136,6 +161,10 @@ public interface PersistenceEntryManager extends EntityManager {
 
     default Query createNamedQuery(String name) {
         throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> TypedQuery<T> createNamedQuery(String name, Class<T> resultClass) {
+        throw new UnsupportedOperationException("Method not implemented.");        
     }
 
     default Query createNativeQuery(String sqlString) {
@@ -153,6 +182,22 @@ public interface PersistenceEntryManager extends EntityManager {
     default Query createQuery(String qlString) {
         throw new UnsupportedOperationException("Method not implemented.");
     }
+    
+    default <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default Query createQuery(CriteriaUpdate updateQuery) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default Query createQuery(CriteriaDelete deleteQuery) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> TypedQuery<T> createQuery(String qlString, Class<T> resultClass) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }    
 
     default void flush() {
         throw new UnsupportedOperationException("Method not implemented.");
@@ -185,13 +230,116 @@ public interface PersistenceEntryManager extends EntityManager {
     default void lock(Object entry, LockModeType lockMode) {
         throw new UnsupportedOperationException("Method not implemented.");
     }
+    
+    default void lock(Object entity, LockModeType lockMode,
+            Map<String, Object> properties)  {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
 
     default void refresh(Object entry) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default void refresh(Object entity, Map<String, Object> properties) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    } 
+    
+    default void refresh(Object entity, LockModeType lockMode)  {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default void refresh(Object entity, LockModeType lockMode,
+            Map<String, Object> properties) {
         throw new UnsupportedOperationException("Method not implemented.");
     }
 
     default void setFlushMode(FlushModeType flushMode) {
         throw new UnsupportedOperationException("Method not implemented.");
     }
+    
+    default StoredProcedureQuery createNamedStoredProcedureQuery(String name) {
+        throw new UnsupportedOperationException("Method not implemented.");        
+    }
+    
+    default StoredProcedureQuery createStoredProcedureQuery(String procedureName) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default StoredProcedureQuery createStoredProcedureQuery(
+            String procedureName, Class... resultClasses) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default StoredProcedureQuery createStoredProcedureQuery(
+            String procedureName, String... resultSetMappings) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default boolean isJoinedToTransaction() {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> T unwrap(Class<T> cls) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default EntityManagerFactory getEntityManagerFactory() {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default CriteriaBuilder getCriteriaBuilder() {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default Metamodel getMetamodel() {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> EntityGraph<T> createEntityGraph(Class<T> rootType) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default EntityGraph<?> createEntityGraph(String graphName) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default  EntityGraph<?> getEntityGraph(String graphName) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> List<EntityGraph<? super T>> getEntityGraphs(Class<T> entityClass) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default Map<String, Object> getProperties() {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
 
+    default void setProperty(String propertyName, Object value) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+
+    default LockModeType getLockMode(Object entity) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default void detach(Object entity) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> T find(Class<T> entityClass, Object primaryKey,
+            LockModeType lockMode) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> T find(Class<T> entityClass, Object primaryKey, 
+            Map<String, Object> properties) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+    
+    default <T> T find(Class<T> entityClass, Object primaryKey,
+            LockModeType lockMode, 
+            Map<String, Object> properties) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
 }

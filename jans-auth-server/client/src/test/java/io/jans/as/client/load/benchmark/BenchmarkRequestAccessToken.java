@@ -11,6 +11,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;
@@ -23,9 +24,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertOk;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+
 
 /**
  * @author Yuriy Movchan
@@ -48,7 +47,7 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
-        assertOk(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         this.clientId = registerResponse.getClientId();
         this.clientSecret = registerResponse.getClientSecret();
@@ -78,13 +77,8 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(userId, userSecret, scope, clientId, clientSecret);
-
-        assertEquals(response1.getStatus(), 200, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getEntity(), "The entity is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
+        AssertBuilder.tokenResponse(response1)
+                .notNullRefreshToken()
+                .check();
     }
 }

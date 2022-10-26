@@ -9,23 +9,26 @@ package io.jans.as.server.service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +42,7 @@ import java.util.Set;
 @Named
 public class RedirectionUriService {
 
-    @Inject
-    private Logger log;
+    private static final Logger log = LoggerFactory.getLogger(RedirectionUriService.class);
 
     @Inject
     private ClientService clientService;
@@ -62,7 +64,7 @@ public class RedirectionUriService {
         return validateRedirectionUri(client, redirectionUri);
     }
 
-    public List<String> getSectorRedirectUris(String sectorIdentiferUri) throws Exception {
+    public List<String> getSectorRedirectUris(String sectorIdentiferUri) {
         List<String> result = Lists.newArrayList();
         if (StringUtils.isBlank(sectorIdentiferUri)) {
             return result;
@@ -73,7 +75,7 @@ public class RedirectionUriService {
             return sectorRedirectUris;
         }
 
-        javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
 
         String entity = null;
         try {
@@ -106,26 +108,43 @@ public class RedirectionUriService {
                 redirectUris = getSectorRedirectUris(sectorIdentifierUri).toArray(new String[0]);
             }
 
-            if (StringUtils.isNotBlank(redirectionUri) && redirectUris != null) {
-                log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
-                        client.getClientId(), redirectionUri, redirectUris.length);
+            if (StringUtils.isBlank(redirectionUri) && redirectUris != null && redirectUris.length == 1) {
+                log.trace("First redirect_uri is returned.");
+                return redirectUris[0];
+            }
 
-                if (isUriEqual(redirectionUri, redirectUris)) {
-                    return redirectionUri;
+            if (StringUtils.isNotBlank(redirectionUri)) {
+                if (redirectUris != null) {
+                    log.trace("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
+                            client.getClientId(), redirectionUri, redirectUris.length);
+                    if (isUriEqual(redirectionUri, redirectUris)) {
+                        log.trace("Redirect URI 'equals' found, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+
+                        return redirectionUri;
+                    } else {
+                        log.trace("RedirectionUri didn't match with any of the client redirect uris, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+                    }
+                }
+
+                if (BooleanUtils.isTrue(appConfiguration.getRedirectUrisRegexEnabled())) {
+                    if (redirectionUri.matches(client.getAttributes().getRedirectUrisRegex())) {
+                        log.trace("RedirectionUri is allowed by regexp, clientId = {}, redirectionUri = {}, regexp = {}", client.getClientId(), redirectionUri, client.getAttributes().getRedirectUrisRegex());
+                        return redirectionUri;
+                    } else {
+                        log.trace("RedirectionUri didn't match with client regular expression, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+                    }
                 }
             } else {
-                // Accept Request Without redirect_uri when One Registered
-                if (redirectUris != null && redirectUris.length == 1) {
-                    return redirectUris[0];
-                }
+                log.warn("RedirectionUri is blank, clientId = {}", client.getClientId());
             }
         } catch (Exception e) {
+            log.error(String.format("Problems validating redirection uri, clientId = %s, redirectionUri = %s", client.getClientId(), redirectionUri), e);
             return null;
         }
         return null;
     }
 
-    public boolean isUriEqual(String redirectionUri, String[] redirectUris) {
+    public static boolean isUriEqual(String redirectionUri, String[] redirectUris) {
         final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
 
         for (String uri : redirectUris) {
@@ -194,7 +213,7 @@ public class RedirectionUriService {
     }
 
     public String validatePostLogoutRedirectUri(String postLogoutRedirectUri, String[] allowedPostLogoutRedirectUris) {
-        if (appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) {
+        if (BooleanUtils.isTrue(appConfiguration.getAllowPostLogoutRedirectWithoutValidation())) {
             return postLogoutRedirectUri;
         }
 
@@ -212,7 +231,7 @@ public class RedirectionUriService {
     }
 
     public static Map<String, String> getParams(String uri) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
 
         if (uri != null) {
             int paramsIndex = uri.indexOf("?");

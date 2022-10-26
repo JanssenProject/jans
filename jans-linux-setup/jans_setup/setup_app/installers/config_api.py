@@ -17,20 +17,27 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class ConfigApiInstaller(JettyInstaller):
 
+    source_files = [
+                (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
+                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-config-api'
         self.needdb = True # we don't need backend connection in this class
-        self.check_version = False #TODO: remove this when version format is changed to 1.0.0
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installConfigApi'
+        self.install_var = 'install_config_api'
         self.register_progess()
 
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
-        self.output_folder = os.path.join(Config.outputFolder,'jans-config-api')
+        self.output_folder = os.path.join(Config.output_dir,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
         self.dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
@@ -39,31 +46,37 @@ class ConfigApiInstaller(JettyInstaller):
         self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
         self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
 
-        self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-config-api.war'), 'https://maven.jans.io/maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), 'https://maven.jans.io/maven/io/jans/scim-plugin/{0}/scim-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
-                (os.path.join(Config.install_dir, 'jans_setup/data/jans-config-api-swagger.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml'),
-                ]
+        if not base.argsp.shell:
+            self.extract_files()
 
     def install(self):
-        if not os.path.exists(self.source_files[3][0]):
-            base.download(self.source_files[3][1], self.source_files[3][0])
-
-        self.copyFile(self.source_files[2][0], '/usr/sbin')
+        self.copyFile(self.source_files[1][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-        self.war_for_jetty10(os.path.join(jettyServiceWebapps, os.path.basename(self.source_files[0][0])))
-        self.copyFile(self.source_files[1][0], self.libDir)
-        scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
-        self.add_extra_class(scim_plugin_path)
+
+        self.copyFile(self.source_files[3][0], self.libDir)
+        user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[3][0]))
+        self.add_extra_class(user_mgt_plugin_path)
+
+        if Config.install_scim_server:
+            self.copyFile(self.source_files[2][0], self.libDir)
+            scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
+            self.add_extra_class(scim_plugin_path)
+
+        if Config.installFido2:
+            self.copyFile(self.source_files[4][0], self.libDir)
+            fido2_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
+            self.add_extra_class(fido2_plugin_path)
+
         self.enable()
 
-    def installed(self):
-        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
+
+    def extract_files(self):
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', Config.data_dir)
 
 
     def create_folders(self):
@@ -74,19 +87,22 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', os.path.join(Config.jetty_base, self.service_name)])
 
 
-    def generate_configuration(self):
+    def read_config_api_swagger(self):
+        config_api_swagger_yaml_fn = os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml')
+        yml_str = self.readFile(config_api_swagger_yaml_fn)
+        yml_str = yml_str.replace('\t', ' ')
+        cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+        return cfg_yml
 
+
+    def generate_configuration(self):
         try:
-            config_api_swagger_yaml_fn = os.path.join(Config.install_dir, 'setup_app/data/jans-config-api-swagger.yaml')
-            yml_str = self.readFile(config_api_swagger_yaml_fn)
-            yml_str = yml_str.replace('\t', ' ')
-            cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+            cfg_yml = self.read_config_api_swagger()
             scopes_def = cfg_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
-            scope_type = cfg_yml['components']['securitySchemes']['oauth2']['type']
         except:
             scopes_def = {}
-            scope_type = 'oauth2'
 
+        scope_type = 'oauth'
         self.check_clients([('jca_client_id', '1800.')])
 
         if not Config.get('jca_client_pw'):
@@ -149,7 +165,7 @@ class ConfigApiInstaller(JettyInstaller):
                 'jansAccessTknAsJwt': ['false'],
                 'jansAccessTknSigAlg': ['RS256'],
                 'jansAppTyp': ['web'],
-                'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
+                'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
                 'jansClntSecret': [Config.jca_client_encoded_pw],
                 'jansDisabled': ['false'],
                 'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
@@ -157,7 +173,6 @@ class ConfigApiInstaller(JettyInstaller):
                 'jansInclClaimsInIdTkn': ['false'],
                 'jansLogoutSessRequired': ['false'],
                 'jansPersistClntAuthzs': ['true'],
-                'jansRequireAuthTime': ['false'],
                 'jansRespTyp': ['code'],
                 'jansRptAsJwt': ['false'],
                 'jansScope': jansUmaScopes_all,
@@ -175,7 +190,7 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
         Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
-        oxauth_config_str = base64.decodestring(Config.templateRenderingDict['oxauth_config_base64'].encode())
+        oxauth_config_str = base64.decodebytes(Config.templateRenderingDict['oxauth_config_base64'].encode())
         oxauth_config = json.loads(oxauth_config_str.decode())
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
             Config.templateRenderingDict[param] = oxauth_config[param]
@@ -192,15 +207,11 @@ class ConfigApiInstaller(JettyInstaller):
         self.dbUtils.import_ldif(self.load_ldif_files)
 
 
-    def load_test_data(self):
-        if not self.installed():
-            return
+    def prepare_scope_list(self):
 
-        check_result = self.check_clients([('jca_test_client_id', '1802.')])
-
-        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
         scopes = []
         scopes_id_list = []
+        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
 
         for scope in result:
             if isinstance(scope, dict):
@@ -219,6 +230,15 @@ class ConfigApiInstaller(JettyInstaller):
 
         Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
         Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+
+
+    def load_test_data(self):
+        if not self.installed():
+            return
+
+        check_result = self.check_clients([('jca_test_client_id', '1802.')])
+
+        self.prepare_scope_list()
 
         if check_result.get('1802.') == 1:
             warning = "Test data for Config Api was allready loaded."

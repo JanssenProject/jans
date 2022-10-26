@@ -13,14 +13,22 @@ import io.jans.configapi.rest.model.Logging;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
+
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 
 @Path(ApiConstants.LOGGING)
@@ -34,16 +42,31 @@ public class LoggingResource {
     @Inject
     ConfigurationService configurationService;
 
+    @Operation(summary = "Returns Jans Authorization Server logging settings", description = "Returns Jans Authorization Server logging settings", operationId = "get-config-logging", tags = {
+            "Configuration – Logging" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.LOGGING_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS })
     public Response getLogging() {
         return Response.ok(this.getLoggingConfiguration()).build();
     }
 
+    @Operation(summary = "Updates Jans Authorization Server logging settings", description = "Updates Jans Authorization Server logging settings", operationId = "put-config-logging", tags = {
+            "Configuration – Logging" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.LOGGING_WRITE_ACCESS }))
+    @RequestBody(description = "Logging object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS })
     public Response updateLogConf(@Valid Logging logging) {
-        log.debug("LOGGING configuration to be updated -logging = " + logging);
+        log.debug("LOGGING configuration to be updated -logging:{}", logging);
         Conf conf = configurationService.findConf();
 
         if (!StringUtils.isBlank(logging.getLoggingLevel())) {
@@ -60,7 +83,7 @@ public class LoggingResource {
         if (!StringUtils.isBlank(logging.getExternalLoggerConfiguration())) {
             conf.getDynamic().setExternalLoggerConfiguration(logging.getExternalLoggerConfiguration());
         }
-        conf.getDynamic().setHttpLoggingExludePaths(logging.getHttpLoggingExludePaths());
+        conf.getDynamic().setHttpLoggingExcludePaths(logging.getHttpLoggingExcludePaths());
 
         configurationService.merge(conf);
 
@@ -82,7 +105,7 @@ public class LoggingResource {
             logging.setEnabledOAuthAuditLogging(appConfiguration.getEnabledOAuthAuditLogging());
         }
         logging.setExternalLoggerConfiguration(appConfiguration.getExternalLoggerConfiguration());
-        logging.setHttpLoggingExludePaths(appConfiguration.getHttpLoggingExludePaths());
+        logging.setHttpLoggingExcludePaths(appConfiguration.getHttpLoggingExcludePaths());
         return logging;
     }
 

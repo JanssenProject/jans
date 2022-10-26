@@ -5,7 +5,7 @@ Configuration manager is a special container used to load (generate/restore) and
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-configurator/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.1_dev`.
 
 ## Environment Variables
 
@@ -26,7 +26,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Janssen configuration secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to `jans`. If left intact `jans-configuration` secret will be created.
-- `CN_SECRET_ADAPTER`: The secrets adapter, can be `vault` (default), `kubernetes`, or `google`.
+- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, or `google`.
 - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
 - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
 - `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
@@ -80,13 +80,13 @@ The load command can be used either to generate or restore config and secret for
 
     - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `client-api`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
+    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
     - `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
     - `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
     - `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-    - `couchbase_superuser_pw`: superuser's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+    - `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
 
-1. Mount the volume into container:
+2. Mount the volume into container:
 
     ```sh
     docker run \
@@ -99,7 +99,7 @@ The load command can be used either to generate or restore config and secret for
         -v /path/to/host/volume:/app/db \
         -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/configurator:1.0.0_dev load
+        janssenproject/configurator:1.0.1_dev load
     ```
 
 #### Kubernetes
@@ -124,38 +124,38 @@ The load command can be used either to generate or restore config and secret for
     - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 
-1. Create config map `config-generate-params`
+2. Create config map `config-generate-params`
 
    ```sh
    kubectl create cm config-generate-params --from-file=generate.json
    ```
 
-1. Mount the configmap into container and apply the yaml:
+3. Mount the configmap into container and apply the yaml:
 
     ```yaml
-	apiVersion: batch/v1
-	kind: Job
-	metadata:
-	  name: configurator-load-job
-	spec:
-	  template:
-	    spec:
-	      restartPolicy: Never
-	      volumes:
-	        - name: config-generate-params
-	          configMap:
-	            name: config-generate-params
-	      containers:
-	        - name: configurator-load
-	          image: janssenproject/configurator:1.0.0_dev
-	          volumeMounts:
-	            - mountPath: /app/db/generate.json
-	              name: config-generate-params
-	              subPath: generate.json
-	          envFrom:
-	          - configMapRef:
-	              name: config-cm
-	          args: ["load"]
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: configurator-load-job
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          volumes:
+            - name: config-generate-params
+              configMap:
+                name: config-generate-params
+          containers:
+            - name: configurator-load
+              image: janssenproject/configurator:1.0.1_dev
+              volumeMounts:
+                - mountPath: /app/db/generate.json
+                  name: config-generate-params
+                  subPath: generate.json
+              envFrom:
+              - configMapRef:
+                  name: config-cm
+              args: ["load"]
     ```
 
 -   To restore configuration and secrets from a backup of `/path/to/host/volume/config.json` and `/path/to/host/volume/secret.json`: mount the directory as `/app/db` inside the container:
@@ -167,39 +167,39 @@ The load command can be used either to generate or restore config and secret for
    kubectl create cm secret-params --from-file=secret.json
    ```
 
-1. Mount the configmap into container and apply the yaml:
+2. Mount the configmap into container and apply the yaml:
 
     ```yaml
-	apiVersion: batch/v1
-	kind: Job
-	metadata:
-	  name: configurator-load-job
-	spec:
-	  template:
-	    spec:
-	      restartPolicy: Never
-	      volumes:
-	        - name: config-params
-	          configMap:
-	            name: config-params
-	       	- name: secret-params
-	          configMap:
-	            name: secret-params
-	      containers:
-	        - name: configurator-load
-	          image: janssenproject/configurator:1.0.0_dev
-	          volumeMounts:
-	            - mountPath: /app/db/config.json
-	              name: config-params
-	              subPath: config.json
-	            - mountPath: /app/db/secret.json
-	              name: secret-params
-	              subPath: secret.json
-	          envFrom:
-	          - configMapRef:
-	              name: config-cm
-	          args: ["load"]
-	   ```
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: configurator-load-job
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          volumes:
+            - name: config-params
+              configMap:
+                name: config-params
+               - name: secret-params
+              configMap:
+                name: secret-params
+          containers:
+            - name: configurator-load
+              image: janssenproject/configurator:1.0.1_dev
+              volumeMounts:
+                - mountPath: /app/db/config.json
+                  name: config-params
+                  subPath: config.json
+                - mountPath: /app/db/secret.json
+                  name: secret-params
+                  subPath: secret.json
+              envFrom:
+              - configMapRef:
+                  name: config-cm
+              args: ["load"]
+       ```
 
 
 ### dump
@@ -221,7 +221,7 @@ docker run \
     -v /path/to/host/volume:/app/db \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/configurator:1.0.0_dev dump
+    janssenproject/configurator:1.0.1_dev dump
 ```
 
 #### Kubernetes
@@ -237,7 +237,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: janssenproject/configurator:1.0.0_dev
+          image: janssenproject/configurator:1.0.1_dev
           command:
             - /bin/sh
             - -c

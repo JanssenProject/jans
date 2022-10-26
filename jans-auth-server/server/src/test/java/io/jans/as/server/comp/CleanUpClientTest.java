@@ -15,7 +15,8 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,9 +26,6 @@ import java.util.List;
  */
 
 public class CleanUpClientTest extends BaseComponentTest {
-
-    @Inject
-    private ClientService clientService;
 
     @Test
     @Parameters(value = "usedClients")
@@ -42,7 +40,7 @@ public class CleanUpClientTest extends BaseComponentTest {
         int countRemoved = 0;
         boolean existsMoreClients = true;
         while (existsMoreClients && countResults < 10000) {
-            List<Client> clients = clientService.getAllClients(new String[]{"inum"}, clientsResultSetSize);
+            List<Client> clients = getClientService().getAllClients(new String[]{"inum"}, clientsResultSetSize);
 
             existsMoreClients = clients.size() == clientsResultSetSize;
             countResults += clients.size();
@@ -55,7 +53,7 @@ public class CleanUpClientTest extends BaseComponentTest {
                 String clientId = client.getClientId();
                 if (!usedClientsList.contains(clientId)) {
                     try {
-                        clientService.remove(client);
+                        getClientService().remove(client);
                     } catch (EntryPersistenceException ex) {
                         output("Failed to remove client: " + ex.getMessage());
                     }

@@ -92,9 +92,13 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
             return values.get(0).toString();
         }
 
-        StringBuilder sb = new StringBuilder(values.get(0).toString());
-        for (int i = 1; i < values.size(); i++) {
-            sb.append(", ").append(values.get(i).toString());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < values.size(); i++) {
+            if(i==0) {
+                sb.append(values.get(i).toString());
+            }else {
+                sb.append(", ").append(values.get(i).toString());
+            }
         }
 
         return sb.toString();

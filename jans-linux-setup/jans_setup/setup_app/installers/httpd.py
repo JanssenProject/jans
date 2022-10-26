@@ -4,7 +4,7 @@ import shutil
 
 from setup_app import paths
 from setup_app.utils import base
-from setup_app.static import AppType, InstallOption
+from setup_app.static import AppType, InstallOption, SetupProfiles
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
@@ -29,7 +29,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
 
         self.templates_folder = os.path.join(Config.templateFolder, 'apache')
-        self.output_folder = os.path.join(Config.outputFolder, 'apache')
+        self.output_folder = os.path.join(Config.output_dir, 'apache')
 
         self.apache2_conf = os.path.join(self.output_folder, 'httpd.conf')
         self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf')
@@ -84,7 +84,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
             self.copyFile(tmp_fn, self.server_root)
 
         # we only need these modules
-        mods_enabled = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir']
+        mods_enabled = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir', 'auth_openidc']
 
         cmd_a2enmod = shutil.which('a2enmod')
         cmd_a2dismod = shutil.which('a2dismod')
@@ -162,8 +162,11 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
             Config.httpdKeyPass = self.getPW()
 
 
-        # generate httpd self signed certificate
-        self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
+        if Config.profile == SetupProfiles.OPENBANKING:
+            self.ob_mtls_config()
+        else:
+            # generate httpd self signed certificate
+            self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
 
         self.enable()
         self.start()
@@ -189,6 +192,21 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
             self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
             self.run([paths.cmd_ln, '-s', self.https_jans_fn,
                       '/etc/apache2/sites-enabled/https_jans.conf'])
+
+    def ob_mtls_config(self):
+
+        ca_key_fn, ca_crt_fn = self.gen_ca()
+        server_key_fn, server_csr_fn, server_crt_fn = self.gen_key_cert_from_ca(fn_suffix='server')
+        ob_certs_dir = os.path.join(Config.certFolder, 'ob')
+        self.run([paths.cmd_mkdir, '-p', ob_certs_dir])
+        self.copyFile(ca_crt_fn, ob_certs_dir)
+        self.copyFile(server_key_fn, ob_certs_dir)
+        self.copyFile(server_crt_fn, ob_certs_dir)
+
+        # create client cert
+        cn = 'cli.' + Config.hostname
+        self.gen_key_cert_from_ca(fn_suffix='client', cn=cn)
+
 
     def installed(self):
         return os.path.exists(self.https_jans_fn)

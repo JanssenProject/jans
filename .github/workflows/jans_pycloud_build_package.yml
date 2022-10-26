@@ -27,9 +27,9 @@ jobs:
     steps:
       - name: Checkout
         if: github.actor != 'mo-auto'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         if: github.event_name == 'pull_request' && github.actor != 'mo-auto'
         with:
           ref: ${{ github.head_ref }}
@@ -37,7 +37,7 @@ jobs:
       - name: Import GPG key
         id: import_gpg
         if: github.actor != 'mo-auto'
-        uses: crazy-max/ghaction-import-gpg@v4
+        uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -48,7 +48,7 @@ jobs:
         if: github.actor != 'mo-auto'
         id: build_stable_reqs
         run: |
-          dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
+          dockerimages="auth-server certmanager config-api configurator fido2 persistence-loader scim"
           for image in $dockerimages; do
             sed -i '/git+https/c\git+https://github.com/${{ github.repository }}@${{ github.sha }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done
@@ -66,10 +66,10 @@ jobs:
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
       - name: Open PR
         id: cpr
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         if: github.event_name == 'pull_request' && github.actor != 'mo-auto'
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
           branch: 'update-pycloud-in-${{ github.head_ref }}'
@@ -87,19 +87,19 @@ jobs:
 
       - name: Enable Pull Request Automerge
         if: steps.cpr.outputs.pull-request-operation == 'created' && github.actor != 'mo-auto'
-        uses: peter-evans/enable-pull-request-automerge@v1
+        uses: peter-evans/enable-pull-request-automerge@v2
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
 
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
       - name: Open PR
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         if: github.event_name != 'pull_request' && github.actor != 'mo-auto'
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
           branch: ${{ env.PR_DOCKER_BRANCH_NAME }}

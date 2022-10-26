@@ -1,0 +1,9 @@
+Flow flow
+    Basepath ""
+
+x = { for: "you",
+        function: [ "properly" ], goto: {}
+
+}
+    
+//Failure reason: in maps, only commas can be surrounded by new lines

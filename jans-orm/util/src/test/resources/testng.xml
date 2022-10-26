@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="ormUtil" parallel="false">
+
+    <test name="UnitTests" enabled="true">
+        <classes>
+            <class name="io.jans.orm.util.StringHelperTest"/>
+        </classes>
+    </test>
+
+</suite>

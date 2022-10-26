@@ -15,6 +15,7 @@ import re
 import shutil
 import multiprocessing
 import ssl
+import tempfile
 
 from pathlib import Path
 from collections import OrderedDict
@@ -33,6 +34,7 @@ from setup_app.pylib.jproperties import Properties
 cur_dir = Path(__file__).parent.as_posix()
 ces_dir = Path(__file__).parent.parent.as_posix()
 par_dir = Path(__file__).parent.parent.parent.as_posix()
+pylib_dir = os.path.join(ces_dir, 'pylib')
 
 snap = os.environ.get('SNAP','')
 snap_common = snap_common_dir = os.environ.get('SNAP_COMMON','')
@@ -70,7 +72,7 @@ if not (os_type and os_version):
     sys.exit()
 
 os_name = os_type + os_version
-deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'debian9', 'debian10')
+deb_sysd_clone = os_name.startswith(('ubuntu', 'debian'))
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
@@ -90,6 +92,19 @@ else:
     clone_type = 'deb'
     httpd_name = 'apache2'
 
+def get_os_description():
+    desc_dict = { 'suse': 'SUSE', 'red': 'RHEL', 'ubuntu': 'Ubuntu', 'deb': 'Debian', 'centos': 'CentOS', 'fedora': 'Fedora' }
+    descs = desc_dict.get(os_type, os_type)
+    descs += ' ' + os_version
+
+    fipsl = subprocess.getoutput("sysctl crypto.fips_enabled").strip().split()
+
+    if fipsl and fipsl[0] == 'crypto.fips_enabled' and fipsl[-1] == '1':
+        descs += ' [FIPS]'
+    if snap:
+        descs += ' [SNAP]'
+
+    return descs
 
 if snap:
     snapctl = shutil.which('snapctl')
@@ -297,25 +312,46 @@ def find_script_names(ldif_file):
                 
     return name_list
 
-def download(url, dst):
+def download(url, dst, verbose=False):
     pardir, fn = os.path.split(dst)
     if not os.path.exists(pardir):
         logIt("Creating driectory", pardir)
         os.makedirs(pardir)
-    logIt("Downloading {} to {}".format(url, dst))
+
+    def mylog(logs):
+        logIt(logs)
+        if verbose:
+            print(logs)
+
+    mylog("Downloading {} to {}".format(url, dst))
     download_tries = 1
     while download_tries < 4:
         try:
-            result = urlretrieve(url, dst)
-            f_size = result[1].get('Content-Length','0')
-            logIt("Download size: {} bytes".format(f_size))
+            urlretrieve(url, dst)
+            mylog("Download size: {} bytes".format(os.path.getsize(dst)))
             time.sleep(0.1)
         except:
-             logIt("Error downloading {}. Download will be re-tried once more".format(url))
+             mylog("Error downloading {}. Download will be re-tried once more".format(url))
              download_tries += 1
              time.sleep(1)
         else:
             break
+
+def extract_file(zip_file, source, target, ren=False):
+    zip_obj = zipfile.ZipFile(zip_file, "r")
+    for member in zip_obj.infolist():
+        if not member.is_dir() and member.filename.endswith(source):
+            if ren:
+                target_p = Path(target)
+            else:
+                p = Path(member.filename)
+                target_p = Path(target).joinpath(p.name)
+                if not target_p.parent.exists():
+                    target_p.parent.mkdir(parents=True)
+            target_p.write_bytes(zip_obj.read(member))
+            break
+    zip_obj.close()
+
 
 def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
     zipobj = zipfile.ZipFile(zip_file, "r")
@@ -330,7 +366,8 @@ def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
     if remove_target_dir and target_dir_path.exists():
         shutil.rmtree(target_dir_path)
 
-    target_dir_path.mkdir(parents=True)
+    if not target_dir_path.exists():
+        target_dir_path.mkdir(parents=True)
 
     for member in zipobj.infolist():
         if member.filename.startswith(parent_sub_dir):
@@ -345,3 +382,26 @@ def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
                     target_fn.parent.mkdir(parents=True)
                 target_fn.write_bytes(zipobj.read(member))
     zipobj.close()
+
+def extract_subdir(zip_fn, sub_dir, target_dir):
+    zip_obj = zipfile.ZipFile(zip_fn, 'r')
+    par_dir = zip_obj.namelist()[0]
+    zip_obj.close()
+
+    if not sub_dir.endswith('/'):
+        sub_dir += '/'
+
+    target_dir_path = Path(target_dir)
+
+    if target_dir_path.exists():
+        shutil.rmtree(target_dir_path)
+
+    with tempfile.TemporaryDirectory() as unpack_dir:
+        shutil.unpack_archive(zip_fn, unpack_dir)
+        shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
+
+current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))
+current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
+
+def as_bool(val):
+    return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')

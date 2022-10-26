@@ -6,12 +6,14 @@
 
 package io.jans.scim.service.antlr.scimFilter;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -20,13 +22,16 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang.StringUtils;
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.scim2.BaseScimResource;
+import io.jans.scim.service.AttributeService;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterBaseListener;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterLexer;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterParser;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
+import io.jans.model.GluuAttribute;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.orm.util.StringHelper;
 
 import org.slf4j.Logger;
 
@@ -40,10 +45,13 @@ public class ScimFilterParserService {
     @Inject
     private Logger log;
 
-    @Inject
-    private PersistanceFactoryService persistenceFactoryService;
+	@Inject
+	private PersistanceFactoryService persistenceFactoryService;
 
-    @Inject
+	@Inject
+	private AttributeService attrService;
+
+	@Inject
 	PersistenceConfiguration persistenceConfiguration;
 
     private boolean ldapBackend;
@@ -101,7 +109,9 @@ public class ScimFilterParserService {
             if (StringUtils.isEmpty(filter))
                 ldapFilter=defaultFilter;
             else {
-                FilterListener filterListener = new FilterListener(clazz, ldapBackend);
+            	List<GluuAttribute> allAttributes = attrService.getAllAttributes();
+            	Map<String, GluuAttribute> allAttributesMap = buildAttributesMap(allAttributes);
+                FilterListener filterListener = new FilterListener(clazz, allAttributesMap, ldapBackend);
                 walkTree(FilterUtil.preprocess(filter, clazz), filterListener);
                 ldapFilter = filterListener.getFilter();
 
@@ -117,7 +127,16 @@ public class ScimFilterParserService {
 
     }
 
-    public Boolean complexAttributeMatch(ParseTree parseTree, Map<String, Object> item, String parent, Class<? extends BaseScimResource> clazz) throws Exception {
+    private Map<String, GluuAttribute> buildAttributesMap(List<GluuAttribute> attributes) {
+    	Map<String, GluuAttribute> attributesMap = new HashMap<>();
+    	for(GluuAttribute attribute : attributes ) {
+    		attributesMap.put(StringHelper.toLowerCase(attribute.getName()), attribute);
+    	}
+
+    	return attributesMap;
+	}
+
+	public Boolean complexAttributeMatch(ParseTree parseTree, Map<String, Object> item, String parent, Class<? extends BaseScimResource> clazz) throws Exception {
 
         MatchFilterVisitor matchVisitor=new MatchFilterVisitor(item, parent, clazz);
         return matchVisitor.visit(parseTree);

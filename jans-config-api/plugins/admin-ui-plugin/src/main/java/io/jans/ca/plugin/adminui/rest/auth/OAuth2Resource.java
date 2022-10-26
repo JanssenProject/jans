@@ -10,15 +10,19 @@ import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
+
+import io.swagger.v3.oas.annotations.Hidden;
+
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
+@Hidden
 @Path("/admin-ui/oauth2")
 public class OAuth2Resource {
 
@@ -52,7 +56,7 @@ public class OAuth2Resource {
         oauth2Config.setResponseType("code");
         oauth2Config.setScope(auiConfiguration.getAuthServerScope());
         oauth2Config.setRedirectUrl(auiConfiguration.getAuthServerRedirectUrl());
-        oauth2Config.setAcrValues("simple_password_auth");
+        oauth2Config.setAcrValues(auiConfiguration.getAuthServerAcrValues());
         oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuthServerFrontChannelLogoutUrl());
         oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuthServerPostLogoutRedirectUri());
         oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuthServerEndSessionEndpoint());
