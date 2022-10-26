@@ -354,7 +354,9 @@ paths:
             examples:
               Request example:
                 description: Request example
-                value: example/agama/test-agama-source.txt
+                value: "//This is a comment\nFlow test\n    Basepath \"hello\" \n\n\
+                  in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
+                  Finish \"john_doe\"\n"
       responses:
         "201":
           description: Created
@@ -476,7 +478,9 @@ paths:
             examples:
               Request example:
                 description: Request example
-                value: example/agama/test-agama-source.txt
+                value: "//This is a comment\nFlow test\n    Basepath \"hello\" \n\n\
+                  in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
+                  Finish \"john_doe\"\n"
       responses:
         "200":
           description: Ok
@@ -3317,15 +3321,15 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        userCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -3652,6 +3656,10 @@ components:
         ttl:
           type: integer
           format: int32
+        displayName:
+          type: string
+        tokenBindingSupported:
+          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3663,10 +3671,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        tokenBindingSupported:
-          type: boolean
-        displayName:
-          type: string
         baseDn:
           type: string
         inum:
@@ -3759,10 +3763,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -3770,13 +3774,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        value:
+          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
-        value:
-          type: string
     AppConfiguration:
       type: object
       properties:
@@ -4757,13 +4761,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
