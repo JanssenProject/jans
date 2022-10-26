@@ -16,7 +16,6 @@ Jans Config Api endpoints can be used to configure jans-auth-server, which is an
 
 * <https://github.com/JanssenProject/jans/jans-config-api>
 * <https://github.com/JanssenProject/jans/docker-jans-config-api>
-* <https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/config-api>
 
 ## Requirements
 
@@ -40,10 +39,10 @@ Kubernetes: `>=v1.21.0-0`
 | image.repository | string | `"janssenproject/config-api"` | Image  to use for deploying. |
 | image.tag | string | `"1.0.3_dev"` | Image  tag to use for deploying. |
 | livenessProbe | object | `{"httpGet":{"path":"/jans-config-api/api/v1/health/live","port":8074},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for the auth server if needed. |
-| livenessProbe.httpGet | object | `{"path":"/jans-config-api/api/v1/health/live","port":8074}` | Executes the python3 healthcheck. https://github.com/JanssenFederation/docker-oxauth/blob/4.3/scripts/healthcheck.py |
+| livenessProbe.httpGet | object | `{"path":"/jans-config-api/api/v1/health/live","port":8074}` | Executes the python3 healthcheck. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
-| readinessProbe | object | `{"httpGet":{"path":"/jans-config-api/api/v1/health/ready","port":8074},"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5}` | Configure the readiness healthcheck for the auth server if needed. https://github.com/JanssenFederation/docker-oxauth/blob/4.3/scripts/healthcheck.py |
+| readinessProbe | object | `{"httpGet":{"path":"/jans-config-api/api/v1/health/ready","port":8074},"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5}` | Configure the readiness healthcheck for the auth server if needed. |
 | replicas | int | `1` | Service replica number. |
 | resources | object | `{"limits":{"cpu":"2500m","memory":"2500Mi"},"requests":{"cpu":"2500m","memory":"2500Mi"}}` | Resource specs. |
 | resources.limits.cpu | string | `"2500m"` | CPU limit. |

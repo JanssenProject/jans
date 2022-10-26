@@ -1,7 +1,7 @@
-kubeVersion: '>=v1.21.0-0'
+kubeVersion: ">=v1.21.0-0"
 annotations:
   artifacthub.io/changes: |
-    - Releasing new charts
+    - Dev image preparation for chore 1.0.3 release
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
@@ -20,15 +20,13 @@ annotations:
       image: janssenproject/persistence-loader:1.0.3_dev
     - name: scim
       image: janssenproject/scim:1.0.3_dev
-    - name: monolith
-      image: janssenproject/monolith:1.0.3_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
   catalog.cattle.io/release-name: janssen
   catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
 apiVersion: v2
-
+appVersion: "1.0.3-dev"
 icon: >-
   https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
 home: https://jans.io
@@ -42,30 +40,38 @@ description: Janssen Access and Identity Management
 name: janssen
 version: 1.0.3-dev
 dependencies:
-  - name: config
-    condition: global.config.enabled
-    version: 1.0.3-dev
-  - name: config-api
-    condition: global.config-api.enabled
-    version: 1.0.3-dev
-  - name: opendj
-    condition: global.opendj.enabled
-    version: 1.0.3-dev
-  - name: auth-server
-    condition: global.auth-server.enabled
-    version: 1.0.3-dev
-  - name: fido2
-    condition: global.fido2.enabled
-    version: 1.0.3-dev
-  - name: scim
-    condition: global.scim.enabled
-    version: 1.0.3-dev
-  - name: nginx-ingress
-    condition: global.nginx-ingress.enabled
-    version: 1.0.3-dev
-  - name: auth-server-key-rotation
-    condition: global.auth-server-key-rotation.enabled
-    version: 1.0.3-dev
-  - name: persistence
-    condition: global.persistence.enabled
-    version: 1.0.3-dev
+    - name: config
+      condition: global.config.enabled
+      version: 1.0.3-dev
+
+    - name: config-api
+      condition: global.config-api.enabled
+      version: 1.0.3-dev
+
+    - name: opendj
+      condition: global.opendj.enabled
+      version: 1.0.3-dev
+
+    - name: auth-server
+      condition: global.auth-server.enabled
+      version: 1.0.3-dev
+
+    - name: fido2
+      condition: global.fido2.enabled
+      version: 1.0.3-dev
+
+    - name: scim
+      condition: global.scim.enabled
+      version: 1.0.3-dev
+
+    - name: nginx-ingress
+      condition: global.nginx-ingress.enabled
+      version: 1.0.3-dev
+
+    - name: auth-server-key-rotation
+      condition: global.auth-server-key-rotation.enabled
+      version: 1.0.3-dev
+
+    - name: persistence
+      condition: global.persistence.enabled
+      version: 1.0.3-dev

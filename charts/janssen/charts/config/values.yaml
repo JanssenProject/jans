@@ -34,7 +34,7 @@ configmap:
   containerMetadataName: kubernetes
   # -- The name of the Kubernetes ConfigMap that will hold the configuration layer
   cnConfigKubernetesConfigMap: cn
-  # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
+  # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Gluu.
   cnCouchbaseBucketPrefix: jans
   # -- Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.
   cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
@@ -78,8 +78,16 @@ configmap:
   cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
   cnMaxRamPercent: "75.0"
-  # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
-  cnPersistenceHybridMapping: default
+  # -- Specify data that should be saved in each persistence (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
+  #{
+  #  "default": "<couchbase|ldap|spanner|sql>",
+  #  "user": "<couchbase|ldap|spanner|sql>",
+  #  "site": "<couchbase|ldap|spanner|sql>",
+  #  "cache": "<couchbase|ldap|spanner|sql>",
+  #  "token": "<couchbase|ldap|spanner|sql>",
+  #  "session": "<couchbase|ldap|spanner|sql>",
+  #}
+  cnPersistenceHybridMapping: "{}"
   # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
   cnRedisSentinelGroup: ""
   # -- Redis SSL truststore. Optional. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
