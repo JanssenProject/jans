@@ -124,7 +124,9 @@ This is to avoid traversing big structures fully. You can increase the value of 
 
 ### How to add two numbers or compare numeric values in Agama?
 
-Agama only provides operators for boolean comparison in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.
+Agama only provides operators for equality check in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.
+
+_Hint_: some methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` might help.  
 
 ### How to concatenate strings in Agama?
 
@@ -138,6 +140,10 @@ Call java.lang.String#join "" strings
 ### How to know the index of a given loop iteration?
 
 See the examples in the Looping section of the DSL [full reference](./dsl-full.md#looping).
+
+## How to know the number of iterations carried out by a loop once it has finished?
+
+You can assign this value to a variable at the top of your loop declaration. See the examples in the Looping section of the DSL [full reference](./dsl-full.md#looping).
 
 ### Can Agama code be called from Java?
 

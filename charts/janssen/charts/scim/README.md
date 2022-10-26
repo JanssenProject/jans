@@ -16,7 +16,6 @@ System for Cross-domain Identity Management (SCIM) version 2.0
 
 * <https://github.com/JanssenProject/jans/jans-scim>
 * <https://github.com/JanssenProject/jans/docker-jans-scim>
-* <https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/scim>
 
 ## Requirements
 

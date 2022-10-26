@@ -43,14 +43,6 @@ ENV JANS_SOURCE_VERSION=e74ea8e27e59d35ff6e3c6f997e6c1df6a04ec83
 # cleanup
 RUN rm -rf /tmp/jans
 
-# ======
-# Python
-# ======
-COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -U pip wheel \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
-
 # =======
 # License
 # =======

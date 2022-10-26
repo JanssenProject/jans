@@ -1169,9 +1169,14 @@
     </test>
 
     <!-- SSA -->
-    <test name="SSA test (HTTP)" enabled="true">
+    <test name="SSA create test (HTTP)" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.SsaRestWebServiceHttpTest"/>
+            <class name="io.jans.as.client.ssa.SsaCreateRestTest"/>
+        </classes>
+    </test>
+    <test name="SSA get test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaGetRestTest"/>
         </classes>
     </test>
 </suite>

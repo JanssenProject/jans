@@ -1,5 +1,5 @@
 kind: CronJob
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 metadata:
   name: {{ include "auth-server-key-rotation.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -67,7 +67,7 @@ spec:
                 - configMapRef:
                     name: {{ .Release.Name }}-global-user-custom-envs
                 {{- end }}
-              {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
+              {{- if and ( .Values.global.opendj.enabled ) (or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath")) }}
               resources: {}
               {{- else if .Values.global.cloud.testEnviroment }}
               resources: {}

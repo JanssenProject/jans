@@ -15,7 +15,6 @@
 		<dependency>
 			<groupId>com.couchbase.client</groupId>
 			<artifactId>java-client</artifactId>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
@@ -27,7 +26,6 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>make-assembly-dist</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>

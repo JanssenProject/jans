@@ -4,8 +4,9 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.client;
+package io.jans.as.client.ssa.create;
 
+import io.jans.as.client.BaseClient;
 import io.jans.as.model.config.Constants;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.client.Entity;
@@ -16,11 +17,11 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class SsaClient extends BaseClient<SsaRequest, SsaResponse> {
+public class SsaCreateClient extends BaseClient<SsaCreateRequest, SsaCreateResponse> {
 
-    private static final Logger LOG = Logger.getLogger(SsaClient.class);
+    private static final Logger LOG = Logger.getLogger(SsaCreateClient.class);
 
-    public SsaClient(String url) {
+    public SsaCreateClient(String url) {
         super(url);
     }
 
@@ -29,19 +30,21 @@ public class SsaClient extends BaseClient<SsaRequest, SsaResponse> {
         return HttpMethod.POST;
     }
 
-    public SsaResponse execSsaCreate(String accessToken, Long orgId, Long expirationDate, String description, String softwareId, List<String> softwareRoles, List<String> grantTypes) {
-        setRequest(new SsaRequest());
-        getRequest().setAccessToken(accessToken);
-        getRequest().setOrgId(orgId);
-        getRequest().setExpiration(expirationDate);
-        getRequest().setDescription(description);
-        getRequest().setSoftwareId(softwareId);
-        getRequest().setSoftwareRoles(softwareRoles);
-        getRequest().setGrantTypes(grantTypes);
+    public SsaCreateResponse execSsaCreate(String accessToken, Long orgId, Long expirationDate, String description,
+                                           String softwareId, List<String> softwareRoles, List<String> grantTypes) {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setAccessToken(accessToken);
+        ssaCreateRequest.setOrgId(orgId);
+        ssaCreateRequest.setExpiration(expirationDate);
+        ssaCreateRequest.setDescription(description);
+        ssaCreateRequest.setSoftwareId(softwareId);
+        ssaCreateRequest.setSoftwareRoles(softwareRoles);
+        ssaCreateRequest.setGrantTypes(grantTypes);
+        setRequest(ssaCreateRequest);
         return exec();
     }
 
-    public SsaResponse exec() {
+    public SsaCreateResponse exec() {
         try {
             initClient();
 
@@ -55,9 +58,9 @@ public class SsaClient extends BaseClient<SsaRequest, SsaResponse> {
 
             JSONObject requestBody = getRequest().getJSONParameters();
             clientResponse = clientRequest.buildPost(Entity.json(requestBody.toString(4))).invoke();
-            final SsaResponse ssaResponse = new SsaResponse(clientResponse);
-            ssaResponse.injectDataFromJson();
-            setResponse(ssaResponse);
+            final SsaCreateResponse ssaCreateResponse = new SsaCreateResponse(clientResponse);
+            ssaCreateResponse.injectDataFromJson();
+            setResponse(ssaCreateResponse);
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
