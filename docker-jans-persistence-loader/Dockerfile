@@ -52,7 +52,7 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
     && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/
 
-RUN mkdir -p /app/templates/jans-config-api
+RUN mkdir -p /app/templates
 
 # partially sync templates from linux-setup
 RUN cd /tmp/jans \
@@ -64,7 +64,6 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
-    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # Download jans-config-api-swagger for role_scope_mapping
@@ -166,9 +165,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
-    CN_AUTH_SERVER_URL="" \
-    CN_TOKEN_SERVER_BASE_HOSTNAME=""
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
 
 # ====
 # misc

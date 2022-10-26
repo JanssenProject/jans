@@ -70,8 +70,6 @@ The following environment variables are supported by the container:
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
-- `CN_AUTH_SERVER_URL`: Base URL of Janssen Auth server, i.e. `auth-server:8080` (default to empty string).
-- `CN_TOKEN_SERVER_BASE_HOSTNAME`: Hostname of token server (default to empty string).
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
 - `CN_SQL_DB_NAME`: SQL database name (default to `jans`).
