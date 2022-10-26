@@ -6,7 +6,7 @@
 
 package io.jans.as.server.ssa.ws.rs.action;
 
-import io.jans.as.client.SsaRequest;
+import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.service.AttributeService;
@@ -38,7 +38,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -85,37 +84,37 @@ public class SsaCreateAction {
     @Inject
     private SsaContextBuilder ssaContextBuilder;
 
-    public Response create(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
+    public Response create(String requestParams, HttpServletRequest httpRequest) {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
         Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
         try {
             JSONObject jsonRequest = new JSONObject(requestParams);
-            final SsaRequest ssaRequest = SsaRequest.fromJson(jsonRequest);
-            log.debug("Attempting to create ssa: {}", ssaRequest);
+            final SsaCreateRequest ssaCreateRequest = SsaCreateRequest.fromJson(jsonRequest);
+            log.debug("Attempting to create ssa: {}", ssaCreateRequest);
 
             String ssaBaseDN = staticConfiguration.getBaseDn().getSsa();
             String inum = inumService.generateDefaultId();
-            Client client = ssaRestWebServiceValidator.validateClient();
+            Client client = ssaRestWebServiceValidator.getClientFromSession();
             ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
 
             final Date creationDate = new Date();
-            final Date expirationDate = getExpiration(ssaRequest);
+            final Date expirationDate = getExpiration(ssaCreateRequest);
 
             final Ssa ssa = new Ssa();
             ssa.setDn("inum=" + inum + "," + ssaBaseDN);
             ssa.setId(inum);
             ssa.setDeletable(true);
-            ssa.setOrgId(ssaRequest.getOrgId() != null ? ssaRequest.getOrgId().toString() : null); // should orgId be long or string? e.g. guid as orgId sounds common
+            ssa.setOrgId(ssaCreateRequest.getOrgId() != null ? ssaCreateRequest.getOrgId().toString() : null); // should orgId be long or string? e.g. guid as orgId sounds common
             ssa.setExpirationDate(expirationDate);
             ssa.setTtl(ServerUtil.calculateTtl(creationDate, expirationDate));
-            ssa.setDescription(ssaRequest.getDescription());
-            ssa.getAttributes().setSoftwareId(ssaRequest.getSoftwareId());
-            ssa.getAttributes().setSoftwareRoles(ssaRequest.getSoftwareRoles());
-            ssa.getAttributes().setGrantTypes(ssaRequest.getGrantTypes());
+            ssa.setDescription(ssaCreateRequest.getDescription());
+            ssa.getAttributes().setSoftwareId(ssaCreateRequest.getSoftwareId());
+            ssa.getAttributes().setSoftwareRoles(ssaCreateRequest.getSoftwareRoles());
+            ssa.getAttributes().setGrantTypes(ssaCreateRequest.getGrantTypes());
             ssa.getAttributes().setCustomAttributes(getCustomAttributes(jsonRequest));
             ssa.getAttributes().setClientDn(client.getDn());
-            ssa.getAttributes().setOneTimeUse(ssaRequest.getOneTimeUse());
-            ssa.getAttributes().setRotateSsa(ssaRequest.getRotateSsa());
+            ssa.getAttributes().setOneTimeUse(ssaCreateRequest.getOneTimeUse());
+            ssa.getAttributes().setRotateSsa(ssaCreateRequest.getRotateSsa());
             ssa.setCreatorType(CreatorType.CLIENT);
             ssa.setCreatorId(client.getClientId());
 
@@ -179,10 +178,10 @@ public class SsaCreateAction {
         return customAttributes;
     }
 
-    private Date getExpiration(SsaRequest ssaRequest) {
+    private Date getExpiration(SsaCreateRequest ssaCreateRequest) {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-        if (ssaRequest.getExpiration() != null && ssaRequest.getExpiration() > 0) {
-            calendar.setTimeInMillis(ssaRequest.getExpiration() * 1000L);
+        if (ssaCreateRequest.getExpiration() != null && ssaCreateRequest.getExpiration() > 0) {
+            calendar.setTimeInMillis(ssaCreateRequest.getExpiration() * 1000L);
             return calendar.getTime();
         }
         calendar.add(Calendar.DATE, appConfiguration.getSsaConfiguration().getSsaExpirationInDays());

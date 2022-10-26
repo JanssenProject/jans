@@ -38,7 +38,7 @@ public class SsaRestWebServiceValidator {
     @Inject
     private ScopeService scopeService;
 
-    public Client validateClient() {
+    public Client getClientFromSession() {
         SessionClient sessionClient = identity.getSessionClient();
         if (sessionClient != null) {
             log.debug("Client: {}, obtained from session", sessionClient.getClient().getClientId());
@@ -51,5 +51,15 @@ public class SsaRestWebServiceValidator {
         List<String> scopes = scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
         if (!scopes.contains(scope))
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
+    }
+
+    public void checkScopesPolicy(Client client, List<String> scopeList) {
+        if (client == null || scopeList == null || scopeList.isEmpty()) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
+        }
+        List<String> scopes = scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
+        if (scopeList.stream().noneMatch(scopes::contains)) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
+        }
     }
 }

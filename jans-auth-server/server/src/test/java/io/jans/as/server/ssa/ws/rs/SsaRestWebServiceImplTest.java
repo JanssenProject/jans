@@ -1,9 +1,9 @@
 package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.server.ssa.ws.rs.action.SsaCreateAction;
+import io.jans.as.server.ssa.ws.rs.action.SsaGetAction;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -24,13 +24,26 @@ public class SsaRestWebServiceImplTest {
     @Mock
     private SsaCreateAction ssaCreateAction;
 
+    @Mock
+    private SsaGetAction ssaGetAction;
+
     @Test
     public void create_validParams_validResponse() {
-        when(ssaCreateAction.create(anyString(), any(), any())).thenReturn(mock(Response.class));
-        Response response = ssaRestWebService.create("test request", mock(HttpServletRequest.class), mock(SecurityContext.class));
+        when(ssaCreateAction.create(anyString(), any())).thenReturn(mock(Response.class));
+        Response response = ssaRestWebService.create("test request", mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
 
-        verify(ssaCreateAction).create(anyString(), any(), any());
+        verify(ssaCreateAction).create(anyString(), any());
         verifyNoMoreInteractions(ssaCreateAction);
+    }
+
+    @Test
+    public void get_validParams_validResponse() {
+        when(ssaGetAction.get(anyBoolean(), anyString(), anyString(), any())).thenReturn(mock(Response.class));
+        Response response = ssaRestWebService.get(false, "testJti", "testOrgId", mock(HttpServletRequest.class));
+        assertNotNull(response, "response is null");
+
+        verify(ssaGetAction).get(anyBoolean(), anyString(), anyString(), any());
+        verifyNoMoreInteractions(ssaGetAction);
     }
 }

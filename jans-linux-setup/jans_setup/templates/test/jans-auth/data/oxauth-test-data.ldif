@@ -238,6 +238,26 @@ objectClass: jansScope
 jansDefScope: true
 objectClass: top
 
+dn: inum=SSA1-PTL1,ou=scopes,o=jans
+displayName: SSA Portal
+inum: SSA1-PTL1
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansId: https://jans.io/auth/ssa.portal
+jansScopeTyp: openid
+objectClass: jansScope
+jansDefScope: true
+objectClass: top
+
+dn: inum=SSA1-DEV1,ou=scopes,o=jans
+displayName: SSA Developer
+inum: SSA1-DEV1
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansId: https://jans.io/auth/ssa.developer
+jansScopeTyp: openid
+objectClass: jansScope
+jansDefScope: true
+objectClass: top
+
 dn: jansId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans
 jansId: a55ede29-8f5a-461d-b06e-76caee8d40b5
 jansRedirectURI: https://www.jans.org
