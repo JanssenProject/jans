@@ -118,6 +118,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthenticationMethod'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                      "defaultAcr": "basic"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -140,7 +147,10 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                value: ""
+                value: |
+                  {
+                    "defaultAcr": "basic"
+                  }
       responses:
         "200":
           description: Ok
@@ -204,6 +214,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 1,
+                        "entriesCount": 1,
+                        "entries": [
+                            {
+                                "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
+                                "qname": "test",
+                                "revision": -1,
+                                "enabled": false,
+                                "metadata": {
+                                    "timestamp": 1666786067495
+                                },
+                                "source": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+                                "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
+                            }
+                        ]
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -224,9 +256,14 @@ paths:
             schema:
               $ref: '#/components/schemas/Flow'
             examples:
-              Request json example:
-                description: Request json example
-                value: ""
+              Request example:
+                description: Request example
+                value: |
+                  {
+                    "enabled": false,
+                    "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+                    "qname": "test"
+                  }
       responses:
         "201":
           description: Created
@@ -234,6 +271,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Flow'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                      "enabled": false,
+                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+                      "qname": "test"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -266,6 +312,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Flow'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
+                        "qname": "test",
+                        "revision": -1,
+                        "enabled": false,
+                        "metadata": {
+                            "timestamp": 1666786067495
+                        },
+                        "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -291,6 +351,10 @@ paths:
           text/plain:
             schema:
               type: string
+            examples:
+              Request example:
+                description: Request example
+                value: example/agama/test-agama-source.txt
       responses:
         "201":
           description: Created
@@ -298,6 +362,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Flow'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                      "enabled": false,
+                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+                      "qname": "test"
+                    }
         "400":
           description: Bad Request
         "401":
@@ -351,6 +424,11 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request example:
+                description: Request example
+                value: |
+                  [{ "op": "replace", "path": "/source", "value": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\""}]
       responses:
         "200":
           description: Patched Agama Flow
@@ -358,6 +436,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Flow'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                      "enabled": false,
+                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+                      "qname": "test"
+                    }
         "401":
           description: Unauthorized
         "404":
@@ -386,6 +473,10 @@ paths:
           text/plain:
             schema:
               type: string
+            examples:
+              Request example:
+                description: Request example
+                value: example/agama/test-agama-source.txt
       responses:
         "200":
           description: Ok
@@ -393,6 +484,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Flow'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                      "enabled": false,
+                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
+                      "qname": "test"
+                    }
         "401":
           description: Unauthorized
         "404":
@@ -449,6 +549,83 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 78,
+                        "entriesCount": 2,
+                        "entries": [
+                            {
+                                "dn": "inum=08E2,ou=attributes,o=jans",
+                                "selected": false,
+                                "inum": "08E2",
+                                "name": "departmentNumber",
+                                "displayName": "Department",
+                                "description": "Organizational Department",
+                                "origin": "jansCustomPerson",
+                                "dataType": "string",
+                                "editType": [
+                                    "admin"
+                                ],
+                                "viewType": [
+                                    "user",
+                                    "admin"
+                                ],
+                                "claimName": "department_number",
+                                "status": "inactive",
+                                "saml1Uri": "urn:mace:dir:attribute-def:departmentNumber",
+                                "saml2Uri": "urn:oid:2.16.840.1.113730.3.1.2",
+                                "urn": "urn:mace:dir:attribute-def:departmentNumber",
+                                "oxMultiValuedAttribute": false,
+                                "custom": false,
+                                "requred": false,
+                                "whitePagesCanView": false,
+                                "adminCanEdit": true,
+                                "userCanView": true,
+                                "userCanEdit": false,
+                                "adminCanAccess": true,
+                                "adminCanView": true,
+                                "userCanAccess": true,
+                                "baseDn": "inum=08E2,ou=attributes,o=jans"
+                            },
+                            {
+                                "dn": "inum=0C18,ou=attributes,o=jans",
+                                "selected": false,
+                                "inum": "0C18",
+                                "name": "telephoneNumber",
+                                "displayName": "Home Telephone Number",
+                                "description": "Home Telephone Number",
+                                "origin": "jansCustomPerson",
+                                "dataType": "string",
+                                "editType": [
+                                    "user",
+                                    "admin"
+                                ],
+                                "viewType": [
+                                    "user",
+                                    "admin"
+                                ],
+                                "claimName": "phone_number",
+                                "status": "inactive",
+                                "saml1Uri": "urn:mace:dir:attribute-def:telephoneNumber",
+                                "saml2Uri": "urn:oid:2.5.4.20",
+                                "urn": "urn:mace:dir:attribute-def:phone_number",
+                                "oxMultiValuedAttribute": false,
+                                "custom": false,
+                                "requred": false,
+                                "whitePagesCanView": false,
+                                "adminCanEdit": true,
+                                "userCanView": true,
+                                "userCanEdit": true,
+                                "adminCanAccess": true,
+                                "adminCanView": true,
+                                "userCanAccess": true,
+                                "baseDn": "inum=0C18,ou=attributes,o=jans"
+                            }
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -469,8 +646,8 @@ paths:
             schema:
               $ref: '#/components/schemas/GluuAttribute'
             examples:
-              Attribute request example:
-                description: Attribute request example
+              Request example:
+                description: Request example
                 value: |
                   {
                       "adminCanAccess": true,
@@ -499,7 +676,6 @@ paths:
                       ],
                       "whitePagesCanView": false
                   }
-                externalValue: example/attribute.json
       responses:
         "200":
           description: Ok
@@ -508,9 +684,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/GluuAttribute'
               examples:
-                Attribute response example:
-                  description: Attribute response example
-                  externalValue: example/attribute.json
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "adminCanAccess": true,
+                        "adminCanEdit": true,
+                        "adminCanView": true,
+                        "custom": false,
+                        "dataType": "string",
+                        "description": "QAAdded Attribute",
+                        "displayName": "QAAdded Attribute",
+                        "editType": [
+                            "admin",
+                            "user"
+                        ],
+                        "name": "qaattribute",
+                        "origin": "jansPerson",
+                        "jansMultivaluedAttr": false,
+                        "requred": false,
+                        "status": "active",
+                        "urn": "urn:mace:dir:attribute-def:qaattribute",
+                        "userCanAccess": true,
+                        "userCanEdit": true,
+                        "userCanView": true,
+                        "viewType": [
+                            "admin",
+                            "user"
+                        ],
+                        "whitePagesCanView": false
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -531,8 +734,8 @@ paths:
             schema:
               $ref: '#/components/schemas/GluuAttribute'
             examples:
-              Attribute request example:
-                description: Attribute request example
+              Request example:
+                description: Request example
                 value: |
                   {
                       "adminCanAccess": true,
@@ -561,7 +764,6 @@ paths:
                       ],
                       "whitePagesCanView": false
                   }
-                externalValue: example/attribute.json
       responses:
         "201":
           description: Created
@@ -570,9 +772,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/GluuAttribute'
               examples:
-                Attribute response example:
-                  description: Attribute response example
-                  externalValue: example/attribute.json
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "adminCanAccess": true,
+                        "adminCanEdit": true,
+                        "adminCanView": true,
+                        "custom": false,
+                        "dataType": "string",
+                        "description": "QAAdded Attribute",
+                        "displayName": "QAAdded Attribute",
+                        "editType": [
+                            "admin",
+                            "user"
+                        ],
+                        "name": "qaattribute",
+                        "origin": "jansPerson",
+                        "jansMultivaluedAttr": false,
+                        "requred": false,
+                        "status": "active",
+                        "urn": "urn:mace:dir:attribute-def:qaattribute",
+                        "userCanAccess": true,
+                        "userCanEdit": true,
+                        "userCanView": true,
+                        "viewType": [
+                            "admin",
+                            "user"
+                        ],
+                        "whitePagesCanView": false
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -600,6 +829,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GluuAttribute'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "dn": "inum=08E2,ou=attributes,o=jans",
+                        "selected": false,
+                        "inum": "08E2",
+                        "name": "departmentNumber",
+                        "displayName": "Department",
+                        "description": "Organizational Department",
+                        "origin": "jansCustomPerson",
+                        "dataType": "string",
+                        "editType": [
+                            "admin"
+                        ],
+                        "viewType": [
+                            "user",
+                            "admin"
+                        ],
+                        "claimName": "department_number",
+                        "status": "inactive",
+                        "saml1Uri": "urn:mace:dir:attribute-def:departmentNumber",
+                        "saml2Uri": "urn:oid:2.16.840.1.113730.3.1.2",
+                        "urn": "urn:mace:dir:attribute-def:departmentNumber",
+                        "oxMultiValuedAttribute": false,
+                        "custom": false,
+                        "requred": false,
+                        "whitePagesCanView": false,
+                        "adminCanEdit": true,
+                        "userCanView": true,
+                        "userCanEdit": false,
+                        "adminCanAccess": true,
+                        "adminCanView": true,
+                        "userCanAccess": true,
+                        "baseDn": "inum=08E2,ou=attributes,o=jans"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -652,11 +918,10 @@ paths:
               items:
                 $ref: '#/components/schemas/PatchRequest'
             examples:
-              Attribute patch request example:
-                description: Attribute patch request example
+              Patch request example:
+                description: Patch request example
                 value: |
                   [ {op:replace, path: displayName, value: "CustomAttribute" } ]
-                externalValue: example/attribute-patch.json
       responses:
         "200":
           description: Updated GluuAttribute
@@ -665,9 +930,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/GluuAttribute'
               examples:
-                Attribute response example:
-                  description: Attribute response example
-                  externalValue: example/attribute.json
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "adminCanAccess": true,
+                        "adminCanEdit": true,
+                        "adminCanView": true,
+                        "custom": false,
+                        "dataType": "string",
+                        "description": "QAAdded Attribute",
+                        "displayName": "QAAdded Attribute",
+                        "editType": [
+                            "admin",
+                            "user"
+                        ],
+                        "name": "qaattribute",
+                        "origin": "jansPerson",
+                        "jansMultivaluedAttr": false,
+                        "requred": false,
+                        "status": "active",
+                        "urn": "urn:mace:dir:attribute-def:qaattribute",
+                        "userCanAccess": true,
+                        "userCanEdit": true,
+                        "userCanView": true,
+                        "viewType": [
+                            "admin",
+                            "user"
+                        ],
+                        "whitePagesCanView": false
+                    }
         "401":
           description: Unauthorized
         "404":
@@ -3023,19 +3315,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
         userCanAccess:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -3360,8 +3652,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -3375,6 +3665,8 @@ components:
           - none
         tokenBindingSupported:
           type: boolean
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
