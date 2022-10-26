@@ -6,7 +6,7 @@
 
 package io.jans.notify.model.conf;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
 import io.jans.notify.model.PushPlatform;
 

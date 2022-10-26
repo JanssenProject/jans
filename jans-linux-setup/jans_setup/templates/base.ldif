@@ -1,0 +1,144 @@
+dn: o=jans
+description: Welcome to oxTrust!
+displayName: %(orgName)s
+jansOrgShortName: %(orgName)s
+jansThemeColor: 166309
+jansManagerGrp: inum=60B7,ou=groups,o=jans
+o: jans
+objectClass: top
+objectClass: jansOrganization
+
+dn: ou=people,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: people
+
+dn: ou=groups,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: groups
+
+dn: ou=attributes,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: attributes
+
+dn: ou=scopes,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: scopes
+
+dn: ou=clients,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: clients
+
+dn: ou=stat,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: stat
+
+dn: ou=par,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: par
+
+dn: ou=sessions,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: sessions
+
+dn: ou=tokens,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: tokens
+
+dn: ou=authorizations,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: authorizations
+
+dn: ou=scripts,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: scripts
+
+dn: ou=resetPasswordRequests,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: resetPasswordRequests
+
+dn: ou=uma,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: uma
+
+dn: ou=resources,ou=uma,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: resources
+
+dn: ou=pct,ou=uma,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: pct
+
+dn: ou=push,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: push
+
+dn: ou=application,ou=push,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: application
+
+dn: ou=device,ou=push,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: device
+
+dn: ou=u2f,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: u2f
+
+dn: ou=registration_requests,ou=u2f,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: registration_requests
+
+dn: ou=authentication_requests,ou=u2f,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: authentication_requests
+
+dn: ou=registered_devices,ou=u2f,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: registered_devices
+
+dn: ou=metric,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: metric
+
+dn: ou=sector_identifiers,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: sector_identifiers
+
+dn: ou=ciba,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: ciba
+
+dn: ou=trustRelationships,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trustRelationships
+
+dn: ou=ssa,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: ssa

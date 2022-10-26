@@ -1,22 +1,23 @@
-FROM alpine:3.13.6
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip curl tini openjdk11-jre-headless py3-cryptography py3-grpcio py3-psycopg2 \
-    && apk add --no-cache --virtual build-deps wget git \
+    && apk upgrade --available \
+    && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps wget git \
     && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ===========
 # Auth client
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-12-23 11:47'
+ENV CN_VERSION=1.0.3-SNAPSHOT
+ENV CN_BUILD_DATE='2022-08-30 17:15'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -36,22 +37,23 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -U pip wheel \
-    && pip3 install --no-cache-dir -r /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =======
 # Cleanup
 # =======
 
-RUN apk del build-deps \
+RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 # =======
 # License
 # =======
 
-RUN mkdir -p /licenses
-COPY LICENSE /licenses/
+COPY LICENSE /licenses/LICENSE
 
 # ==========
 # Config ENV
@@ -110,28 +112,29 @@ ENV CN_WAIT_MAX_TIME=300 \
 # misc
 # ====
 
-LABEL name="configurator" \
-    maintainer="Janssen <support@jans.io>" \
-    vendor="Janssen" \
-    version="1.0.0" \
-    release="b12" \
+LABEL name="janssenproject/configurator" \
+    maintainer="Janssen Project <support@jans.io>" \
+    vendor="Janssen Project" \
+    version="1.0.3" \
+    release="dev" \
     summary="Janssen Configuration Manager" \
     description="Manage config and secret"
 
+RUN mkdir -p /etc/certs \
+    /etc/jans/conf \
+    /app/db
+
 COPY scripts /app/scripts
-RUN mkdir -p /etc/certs /app/db \
-    && chmod +x /app/scripts/entrypoint.sh
+RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
- # adjust ownership
-RUN chown -R 1000:1000 /tmp \
-    && chown -R 1000:1000 /app/db \
-    && chgrp -R 0 /app/db && chmod -R g=u /app/db \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
+# adjust ownership and permission
+RUN chmod -R g=u /app/db \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts
 
 USER 1000
 

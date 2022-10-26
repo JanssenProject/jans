@@ -1,0 +1,3 @@
+recursive-include jans_setup *
+global-exclude *.pyc
+global-exclude __pycache__

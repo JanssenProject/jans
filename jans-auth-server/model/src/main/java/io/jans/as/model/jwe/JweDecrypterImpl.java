@@ -12,6 +12,7 @@ import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.SignedJWT;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
@@ -36,6 +37,14 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
     private PrivateKey privateKey;
     private byte[] sharedSymmetricKey;
+    private boolean fapi;
+
+    public boolean isFapi() {
+        return fapi;
+    }
+    public void setFapi(boolean fapi) {
+        this.fapi = fapi;
+    }
 
     public JweDecrypterImpl(byte[] sharedSymmetricKey) {
         if (sharedSymmetricKey != null) {
@@ -109,12 +118,20 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
                 jwe.setClaims(jwt.getClaims());
             } else {
                 final String base64encodedPayload = encryptedJwt.getPayload().toString();
+                validateNestedJwt(base64encodedPayload);
                 jwe.setClaims(new JwtClaims(base64encodedPayload));
             }
 
             return jwe;
         } catch (Exception e) {
             throw new InvalidJweException(e);
+        }
+    }
+
+    private void validateNestedJwt(String base64encodedPayload) throws InvalidJwtException {
+        final Jwt jwt = Jwt.parseSilently(base64encodedPayload);
+        if (jwt != null && jwt.getHeader().getSignatureAlgorithm() == SignatureAlgorithm.NONE && isFapi()) {
+            throw new InvalidJwtException("The None algorithm in nested JWT is not allowed for FAPI");
         }
     }
 }

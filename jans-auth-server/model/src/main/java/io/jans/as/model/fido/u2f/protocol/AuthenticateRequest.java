@@ -25,7 +25,7 @@ public class AuthenticateRequest implements Serializable {
      * For the version of the protocol described herein, must be "U2F_V2"
      */
     @JsonProperty
-    private final String version = U2fConstants.U2F_PROTOCOL_VERSION;
+    private static final String VERSION = U2fConstants.U2F_PROTOCOL_VERSION;
 
     /**
      * The websafe-base64-encoded challenge.
@@ -70,7 +70,7 @@ public class AuthenticateRequest implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("AuthenticateRequest [version=").append(version).append(", challenge=").append(challenge).append(", appId=").append(appId)
+        builder.append("AuthenticateRequest [version=").append(VERSION).append(", challenge=").append(challenge).append(", appId=").append(appId)
                 .append(", keyHandle=").append(keyHandle).append("]");
         return builder.toString();
     }

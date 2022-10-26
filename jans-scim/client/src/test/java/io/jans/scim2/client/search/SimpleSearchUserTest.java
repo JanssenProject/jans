@@ -14,11 +14,11 @@ import io.jans.scim2.client.UserBaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import java.time.Instant;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.*;
 
 import static org.testng.Assert.*;
 
@@ -68,6 +68,8 @@ public class SimpleSearchUserTest extends UserBaseTest {
         assertEquals(response.getStatus(), OK.getStatusCode());
 
         ListResponse listResponse=response.readEntity(ListResponse.class);
+        assertNotNull(listResponse);
+        assertNotNull(listResponse.getResources());
         assertTrue(listResponse.getResources().size()>0);
 
         //Retrieve first user in results

@@ -15,6 +15,8 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -27,6 +29,8 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -58,12 +62,7 @@ public class SupportPromptValueLogin extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -81,10 +80,7 @@ public class SupportPromptValueLogin extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
             String authorizationCode = authorizationResponse.getCode();
             sessionId = authorizationResponse.getSessionId();
@@ -123,10 +119,7 @@ public class SupportPromptValueLogin extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
             String authorizationCode = authorizationResponse.getCode();
 

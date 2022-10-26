@@ -8,14 +8,12 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SoftwareStatementValidationType;
-import io.jans.as.model.common.WebKeyStorage;
+
+import io.jans.agama.model.EngineConfig;
+import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
+import io.jans.as.model.ssa.SsaConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,7 +26,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 30, 2021
+ * @version March 15, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -90,11 +88,13 @@ public class AppConfiguration implements Configuration {
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
     private int statTimerIntervalInSeconds;
-    private int statWebServiceIntervalLimitInSeconds;
     private String statAuthorizationScope;
 
+    private Boolean allowSpontaneousScopes;
     private int spontaneousScopeLifetime;
     private String openidSubAttribute;
+    private Boolean publicSubjectIdentifierPerClientEnabled = false;
+    private List<String> subjectIdentifiersPerClientSupported;
     private Set<Set<ResponseType>> responseTypesSupported;
     private Set<ResponseMode> responseModesSupported;
     private Set<GrantType> grantTypesSupported;
@@ -109,6 +109,8 @@ public class AppConfiguration implements Configuration {
     private List<String> idTokenSigningAlgValuesSupported;
     private List<String> idTokenEncryptionAlgValuesSupported;
     private List<String> idTokenEncryptionEncValuesSupported;
+    private List<String> accessTokenSigningAlgValuesSupported;
+    private Boolean forceSignedRequestObject = false;
     private List<String> requestObjectSigningAlgValuesSupported;
     private List<String> requestObjectEncryptionAlgValuesSupported;
     private List<String> requestObjectEncryptionEncValuesSupported;
@@ -127,6 +129,7 @@ public class AppConfiguration implements Configuration {
     private Boolean requestUriParameterSupported;
     private Boolean requestUriHashVerificationEnabled;
     private Boolean requireRequestUriRegistration;
+    private List<String> requestUriBlockList;
     private String opPolicyUri;
     private String opTosUri;
     private int authorizationCodeLifetime;
@@ -163,6 +166,10 @@ public class AppConfiguration implements Configuration {
     private Boolean useNestedJwtDuringEncryption = true;
     private int expirationNotificatorMapSizeLimit = 100000;
     private int expirationNotificatorIntervalInSeconds = 600;
+
+    //feature flags
+    private Boolean redirectUrisRegexEnabled = false;
+    private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
@@ -239,7 +246,7 @@ public class AppConfiguration implements Configuration {
     private Boolean logClientIdOnClientAuthentication;
     private Boolean logClientNameOnClientAuthentication;
     private Boolean disableJdkLogger = true;
-    private Set<String> authorizationRequestCustomAllowedParameters;
+    private Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters;
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
 
@@ -250,18 +257,20 @@ public class AppConfiguration implements Configuration {
     private String dcrSignatureValidationJwks;
     private String dcrSignatureValidationJwksUri;
     private Boolean dcrAuthorizationWithClientCredentials = false;
-    private Boolean dcrSkipSignatureValidation = false;
     private Boolean dcrAuthorizationWithMTLS = false;
     private List<String> dcrIssuers = new ArrayList<>();
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
     private Boolean forceIdTokenHintPrecense = false;
+    private Boolean rejectEndSessionIfIdTokenExpired = false;
+    private Boolean allowEndSessionWithUnmatchedSid = false;
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
     private Boolean errorReasonEnabled = false;
     private Boolean removeRefreshTokensForClientOnLogout = true;
     private Boolean skipRefreshTokenDuringRefreshing = false;
     private Boolean refreshTokenExtendLifetimeOnRotation = false;
+    private Boolean checkUserPresenceOnRefreshToken = false;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionResponseScopesBackwardCompatibility = false;
@@ -273,6 +282,7 @@ public class AppConfiguration implements Configuration {
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
+    private Boolean disableAuthnForMaxAgeZero;
     private Boolean keepAuthenticatorAttributesOnAcrChange = false;
     private int deviceAuthzRequestExpiresIn;
     private int deviceAuthzTokenPollInterval;
@@ -305,12 +315,17 @@ public class AppConfiguration implements Configuration {
 
     private int discoveryCacheLifetimeInMinutes = 60;
     private List<String> discoveryAllowedKeys;
+    private List<String> discoveryDenyKeys;
 
-    private List<String> enabledComponents;
+    private List<String> featureFlags;
 
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
-    private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
+    private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+    
+    private EngineConfig agamaConfiguration;
+
+    private SsaConfiguration ssaConfiguration;
 
     public Boolean getRequireRequestObjectEncryption() {
         if (requireRequestObjectEncryption == null) requireRequestObjectEncryption = false;
@@ -348,6 +363,15 @@ public class AppConfiguration implements Configuration {
         this.allowIdTokenWithoutImplicitGrantType = allowIdTokenWithoutImplicitGrantType;
     }
 
+    public List<String> getDiscoveryDenyKeys() {
+        if (discoveryDenyKeys == null) discoveryDenyKeys = new ArrayList<>();
+        return discoveryDenyKeys;
+    }
+
+    public void setDiscoveryDenyKeys(List<String> discoveryDenyKeys) {
+        this.discoveryDenyKeys = discoveryDenyKeys;
+    }
+
     public List<String> getDiscoveryAllowedKeys() {
         if (discoveryAllowedKeys == null) discoveryAllowedKeys = new ArrayList<>();
         return discoveryAllowedKeys;
@@ -357,28 +381,37 @@ public class AppConfiguration implements Configuration {
         this.discoveryAllowedKeys = discoveryAllowedKeys;
     }
 
-    public Set<ComponentType> getEnabledComponentTypes() {
-        return ComponentType.fromValues(getEnabledComponents());
+    public Boolean getCheckUserPresenceOnRefreshToken() {
+        if (checkUserPresenceOnRefreshToken == null) checkUserPresenceOnRefreshToken = false;
+        return checkUserPresenceOnRefreshToken;
     }
 
-    public boolean isEnabledComponent(ComponentType componentType) {
-        final Set<ComponentType> enabledComponentTypes = getEnabledComponentTypes();
-        if (enabledComponentTypes.isEmpty())
+    public void setCheckUserPresenceOnRefreshToken(Boolean checkUserPresenceOnRefreshToken) {
+        this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
+    }
+
+    public Set<FeatureFlagType> getEnabledFeatureFlags() {
+        return FeatureFlagType.fromValues(getFeatureFlags());
+    }
+
+    public boolean isFeatureEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> flags = getEnabledFeatureFlags();
+        if (flags.isEmpty())
             return true;
 
-        return enabledComponentTypes.contains(componentType);
+        return flags.contains(flagType);
     }
 
-    public List<String> getEnabledComponents() {
-        if (enabledComponents == null) enabledComponents = new ArrayList<>();
-        return enabledComponents;
+    public List<String> getFeatureFlags() {
+        if (featureFlags == null) featureFlags = new ArrayList<>();
+        return featureFlags;
     }
 
-    public void setEnabledComponents(List<String> enabledComponents) {
-        this.enabledComponents = enabledComponents;
+    public void setFeatureFlags(List<String> featureFlags) {
+        this.featureFlags = featureFlags;
     }
 
-    public Boolean getUseNestedJwtDuringEncryption() {
+    public Boolean isUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
         return useNestedJwtDuringEncryption;
     }
@@ -614,15 +647,6 @@ public class AppConfiguration implements Configuration {
         this.fapiCompatibility = fapiCompatibility;
     }
 
-    public Boolean getDcrSkipSignatureValidation() {
-        if (dcrSkipSignatureValidation == null) dcrSkipSignatureValidation = false;
-        return dcrSkipSignatureValidation;
-    }
-
-    public void setDcrSkipSignatureValidation(Boolean dcrSkipSignatureValidation) {
-        this.dcrSkipSignatureValidation = dcrSkipSignatureValidation;
-    }
-
     public Boolean getDcrAuthorizationWithClientCredentials() {
         if (dcrAuthorizationWithClientCredentials == null) dcrAuthorizationWithClientCredentials = false;
         return dcrAuthorizationWithClientCredentials;
@@ -706,6 +730,22 @@ public class AppConfiguration implements Configuration {
 
     public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
         this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
+    }
+
+    public Boolean getRejectEndSessionIfIdTokenExpired() {
+        return rejectEndSessionIfIdTokenExpired;
+    }
+
+    public void setRejectEndSessionIfIdTokenExpired(Boolean rejectEndSessionIfIdTokenExpired) {
+        this.rejectEndSessionIfIdTokenExpired = rejectEndSessionIfIdTokenExpired;
+    }
+
+    public Boolean getAllowEndSessionWithUnmatchedSid() {
+        return allowEndSessionWithUnmatchedSid;
+    }
+
+    public void setAllowEndSessionWithUnmatchedSid(Boolean allowEndSessionWithUnmatchedSid) {
+        this.allowEndSessionWithUnmatchedSid = allowEndSessionWithUnmatchedSid;
     }
 
     public Boolean getRemoveRefreshTokensForClientOnLogout() {
@@ -1029,6 +1069,30 @@ public class AppConfiguration implements Configuration {
         this.openidSubAttribute = openidSubAttribute;
     }
 
+    public Boolean getPublicSubjectIdentifierPerClientEnabled() {
+        if (publicSubjectIdentifierPerClientEnabled == null) {
+            publicSubjectIdentifierPerClientEnabled = false;
+        }
+
+        return publicSubjectIdentifierPerClientEnabled;
+    }
+
+    public void setPublicSubjectIdentifierPerClientEnabled(Boolean publicSubjectIdentifierPerClientEnabled) {
+        this.publicSubjectIdentifierPerClientEnabled = publicSubjectIdentifierPerClientEnabled;
+    }
+
+    public List<String> getSubjectIdentifiersPerClientSupported() {
+        if (subjectIdentifiersPerClientSupported == null) {
+            subjectIdentifiersPerClientSupported = new ArrayList<>();
+        }
+
+        return subjectIdentifiersPerClientSupported;
+    }
+
+    public void setSubjectIdentifiersPerClientSupported(List<String> subjectIdentifiersPerClientSupported) {
+        this.subjectIdentifiersPerClientSupported = subjectIdentifiersPerClientSupported;
+    }
+
     public String getIdGenerationEndpoint() {
         return idGenerationEndpoint;
     }
@@ -1160,14 +1224,6 @@ public class AppConfiguration implements Configuration {
         this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
     }
 
-    public int getStatWebServiceIntervalLimitInSeconds() {
-        return statWebServiceIntervalLimitInSeconds;
-    }
-
-    public void setStatWebServiceIntervalLimitInSeconds(int statWebServiceIntervalLimitInSeconds) {
-        this.statWebServiceIntervalLimitInSeconds = statWebServiceIntervalLimitInSeconds;
-    }
-
     public int getStatTimerIntervalInSeconds() {
         return statTimerIntervalInSeconds;
     }
@@ -1215,6 +1271,26 @@ public class AppConfiguration implements Configuration {
 
     public void setIdTokenEncryptionEncValuesSupported(List<String> idTokenEncryptionEncValuesSupported) {
         this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
+    }
+
+    public List<String> getAccessTokenSigningAlgValuesSupported() {
+        return accessTokenSigningAlgValuesSupported;
+    }
+
+    public void setAccessTokenSigningAlgValuesSupported(List<String> accessTokenSigningAlgValuesSupported) {
+        this.accessTokenSigningAlgValuesSupported = accessTokenSigningAlgValuesSupported;
+    }
+
+    public Boolean getForceSignedRequestObject() {
+        if (forceSignedRequestObject == null) {
+            return false;
+        }
+
+        return forceSignedRequestObject;
+    }
+
+    public void setForceSignedRequestObject(Boolean forceSignedRequestObject) {
+        this.forceSignedRequestObject = forceSignedRequestObject;
     }
 
     public List<String> getRequestObjectSigningAlgValuesSupported() {
@@ -1356,6 +1432,15 @@ public class AppConfiguration implements Configuration {
         this.requireRequestUriRegistration = requireRequestUriRegistration;
     }
 
+    public List<String> getRequestUriBlockList() {
+        if (requestUriBlockList == null) requestUriBlockList = Lists.newArrayList();
+        return requestUriBlockList;
+    }
+
+    public void setRequestUriBlockList(List<String> requestUriBlockList) {
+        this.requestUriBlockList = requestUriBlockList;
+    }
+
     public String getOpPolicyUri() {
         return opPolicyUri;
     }
@@ -1434,6 +1519,15 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaPctLifetime(int umaPctLifetime) {
         this.umaPctLifetime = umaPctLifetime;
+    }
+
+    public Boolean getAllowSpontaneousScopes() {
+        if (allowSpontaneousScopes == null) allowSpontaneousScopes = false;
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
     }
 
     public int getSpontaneousScopeLifetime() {
@@ -1928,12 +2022,12 @@ public class AppConfiguration implements Configuration {
         this.httpLoggingEnabled = httpLoggingEnabled;
     }
 
-    public Set<String> getHttpLoggingExludePaths() {
-        return httpLoggingExludePaths;
+    public Set<String> getHttpLoggingExcludePaths() {
+        return httpLoggingExcludePaths;
     }
 
-    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
-        this.httpLoggingExludePaths = httpLoggingExludePaths;
+    public void setHttpLoggingExcludePaths(Set<String> httpLoggingExcludePaths) {
+        this.httpLoggingExcludePaths = httpLoggingExcludePaths;
     }
 
     public String getLoggingLevel() {
@@ -2019,11 +2113,11 @@ public class AppConfiguration implements Configuration {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
 
-    public Set<String> getAuthorizationRequestCustomAllowedParameters() {
+    public Set<AuthorizationRequestCustomParameter> getAuthorizationRequestCustomAllowedParameters() {
         return authorizationRequestCustomAllowedParameters;
     }
 
-    public void setAuthorizationRequestCustomAllowedParameters(Set<String> authorizationRequestCustomAllowedParameters) {
+    public void setAuthorizationRequestCustomAllowedParameters(Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters) {
         this.authorizationRequestCustomAllowedParameters = authorizationRequestCustomAllowedParameters;
     }
 
@@ -2073,6 +2167,14 @@ public class AppConfiguration implements Configuration {
 
     public void setKeepAuthenticatorAttributesOnAcrChange(Boolean keepAuthenticatorAttributesOnAcrChange) {
         this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
+    }
+
+    public Boolean getDisableAuthnForMaxAgeZero() {
+        return disableAuthnForMaxAgeZero;
+    }
+
+    public void setDisableAuthnForMaxAgeZero(Boolean disableAuthnForMaxAgeZero) {
+        this.disableAuthnForMaxAgeZero = disableAuthnForMaxAgeZero;
     }
 
     public String getBackchannelClientId() {
@@ -2446,5 +2548,37 @@ public class AppConfiguration implements Configuration {
 
     public void setDpopJtiCacheTime(int dpopJtiCacheTime) {
         this.dpopJtiCacheTime = dpopJtiCacheTime;
+    }
+
+    public Boolean getRedirectUrisRegexEnabled() {
+        return redirectUrisRegexEnabled != null && redirectUrisRegexEnabled;
+    }
+
+    public void setRedirectUrisRegexEnabled(Boolean redirectUrisRegexEnabled) {
+        this.redirectUrisRegexEnabled = redirectUrisRegexEnabled;
+    }
+
+    public Boolean getUseHighestLevelScriptIfAcrScriptNotFound() {
+        return useHighestLevelScriptIfAcrScriptNotFound != null && useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public void setUseHighestLevelScriptIfAcrScriptNotFound(Boolean useHighestLevelScriptIfAcrScriptNotFound) {
+        this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public EngineConfig getAgamaConfiguration() {
+        return agamaConfiguration;
+    }
+
+    public void setAgamaConfiguration(EngineConfig agamaConfiguration) {
+        this.agamaConfiguration = agamaConfiguration;
+    }
+
+    public SsaConfiguration getSsaConfiguration() {
+        return ssaConfiguration;
+    }
+
+    public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
+        this.ssaConfiguration = ssaConfiguration;
     }
 }

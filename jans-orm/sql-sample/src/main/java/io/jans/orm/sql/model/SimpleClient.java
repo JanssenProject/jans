@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DN;
@@ -30,6 +31,12 @@ public class SimpleClient implements Serializable {
     @DN
     private String dn;
 
+    @AttributeName(name = "displayName")
+    private String clientName;
+
+    @AttributeName(name = "jansDefAcrValues")
+    private String[] defaultAcrValues;
+
     @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
@@ -46,6 +53,22 @@ public class SimpleClient implements Serializable {
 
     public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
+	}
+
+	public String[] getDefaultAcrValues() {
+		return defaultAcrValues;
+	}
+
+	public void setDefaultAcrValues(String[] defaultAcrValues) {
+		this.defaultAcrValues = defaultAcrValues;
+	}
+
+    public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
     }
 
     public void setCustomAttributes(List<CustomAttribute> customAttributes) {

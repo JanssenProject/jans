@@ -8,8 +8,9 @@ package io.jans.service.document.store.service;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.provider.DocumentStore;
@@ -32,17 +33,17 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset) {
+	public boolean saveDocument(String path, String documentContent, Charset charset, List moduleList) {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
-		return documentStoreProvider.saveDocument(path, documentContent, charset);
+		return documentStoreProvider.saveDocument(path, documentContent, charset, moduleList);
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream) {
+	public boolean saveDocumentStream(String path, InputStream documentStream, List moduleList) {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
-		return documentStoreProvider.saveDocumentStream(path, documentStream);
+		return documentStoreProvider.saveDocumentStream(path, documentStream, moduleList);
 	}
 
 	@Override

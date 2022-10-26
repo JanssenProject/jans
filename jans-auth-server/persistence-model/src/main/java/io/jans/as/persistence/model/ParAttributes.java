@@ -16,6 +16,8 @@ public class ParAttributes implements Serializable {
     @JsonProperty
     Integer maxAge;
     @JsonProperty
+    Integer nbf;
+    @JsonProperty
     private String scope;
     @JsonProperty
     private String responseType;
@@ -140,6 +142,14 @@ public class ParAttributes implements Serializable {
 
     public void setMaxAge(Integer maxAge) {
         this.maxAge = maxAge;
+    }
+
+    public Integer getNbf() {
+        return nbf;
+    }
+
+    public void setNbf(Integer nbf) {
+        this.nbf = nbf;
     }
 
     public String getUiLocales() {
@@ -268,6 +278,7 @@ public class ParAttributes implements Serializable {
                 ", display='" + display + '\'' +
                 ", prompt='" + prompt + '\'' +
                 ", maxAge=" + maxAge +
+                ", nbf=" + nbf +
                 ", uiLocales='" + uiLocales + '\'' +
                 ", idTokenHint='" + idTokenHint + '\'' +
                 ", loginHint='" + loginHint + '\'' +

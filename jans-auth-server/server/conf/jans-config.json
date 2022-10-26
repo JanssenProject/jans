@@ -27,6 +27,11 @@
     "parEndpoint":"${config.oxauth.contextPath}/restv1/par",
     "backchannelDeviceRegistrationEndpoint":"${config.oxauth.contextPath}/restv1/bc-deviceRegistration",
     "openidSubAttribute":"inum",
+    "publicSubjectIdentifierPerClientEnabled": true,
+    "subjectIdentifiersPerClientSupported": [
+        "mail",
+        "uid"
+    ],
     "responseTypesSupported":[
         ["code"],
         ["code", "id_token"],
@@ -162,6 +167,7 @@
         "A128GCM",
         "A256GCM"
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "none",
         "HS256",
@@ -359,9 +365,26 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "authorizationRequestCustomAllowedParameters" : [
-        "customParam1",
-        "customParam2",
-        "customParam3"
+        {
+            "paramName": "customParam1",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam2",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam3",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam4",
+            "returnInResponse": true
+        },
+        {
+            "paramName": "customParam5",
+            "returnInResponse": true
+        }
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "openidScopeBackwardCompatibility": false,
@@ -377,6 +400,11 @@
         "PS384",
         "PS512"
     ],
+    "ssaConfiguration": {
+        "ssaEndpoint":"${config.oxauth.contextPath}/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "backchannelClientId": "123-123-123",
     "backchannelRedirectUri": "https://ce.gluu.info:8443/ciba/home.htm",
     "backchannelUserCodeParameterSupported": true,
@@ -401,5 +429,20 @@
     },
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
-    "deviceAuthzResponseTypeToProcessAuthz": "code"
+    "deviceAuthzResponseTypeToProcessAuthz": "code",
+    "agamaConfiguration": {
+        "enabled": false,
+        "templatesPath": "/ftl",
+        "scriptsPath": "/scripts",
+        "serializerType": "KRYO",
+        "maxItemsLoggedInCollections": 7,
+        "pageMismatchErrorPage": "mismatch.ftlh",
+        "interruptionErrorPage": "timeout.ftlh",
+        "crashErrorPage": "crash.ftlh",
+        "finishedFlowPage": "finished.ftlh",
+        "bridgeScriptPage": "agama.xhtml",
+        "defaultResponseHeaders": {
+            "Cache-Control": "max-age=0, no-store"
+        }
+    }
 }

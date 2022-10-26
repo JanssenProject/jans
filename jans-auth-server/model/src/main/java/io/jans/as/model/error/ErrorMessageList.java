@@ -6,9 +6,9 @@
 
 package io.jans.as.model.error;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 
 /**
@@ -20,13 +20,13 @@ import java.util.ArrayList;
 public class ErrorMessageList {
 
     @XmlElement(name = "error")
-    private ArrayList<ErrorMessage> errors;
+    private List<ErrorMessage> errors;
 
-    public ArrayList<ErrorMessage> getErrorList() {
+    public List<ErrorMessage> getErrorList() {
         return errors;
     }
 
-    public void setErrorList(ArrayList<ErrorMessage> errorList) {
+    public void setErrorList(List<ErrorMessage> errorList) {
         this.errors = errorList;
     }
 }

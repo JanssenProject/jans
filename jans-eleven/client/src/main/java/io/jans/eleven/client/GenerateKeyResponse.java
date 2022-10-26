@@ -21,7 +21,7 @@ import static io.jans.eleven.model.GenerateKeyResponseParam.Y;
 import java.util.List;
 
 import io.jans.eleven.util.StringUtils;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 
 /**

@@ -10,23 +10,20 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.ITestContext;
@@ -38,7 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
 import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
@@ -77,12 +74,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -97,18 +89,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -125,10 +108,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -145,12 +125,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
     }
 
     @DataProvider(name = "omittedResponseTypesFailDataProvider")
@@ -190,12 +167,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -209,18 +181,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(
@@ -273,12 +236,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -293,18 +251,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(
@@ -321,34 +270,18 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String authorizationCode = authorizationResponse.getCode();
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAuthorizationCode(authorizationCode, jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(authorizationCode)
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -363,12 +296,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
     }
 
     @DataProvider(name = "responseTypesCodeIdTokenFailDataProvider")
@@ -409,12 +339,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -428,18 +353,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(
@@ -488,12 +404,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -507,18 +418,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(
@@ -536,35 +438,18 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .accessToken(accessToken)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
     }
 
     @DataProvider(name = "responseTypesTokenIdTokenFailDataProvider")
@@ -602,12 +487,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -621,18 +501,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(

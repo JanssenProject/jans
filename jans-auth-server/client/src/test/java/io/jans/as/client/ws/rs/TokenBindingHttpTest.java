@@ -13,6 +13,8 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
@@ -32,6 +34,8 @@ import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -69,7 +73,8 @@ public class TokenBindingHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId);
 
         Jwt jwt = Jwt.parse(authorizationResponse.getIdToken());
-        Assert.assertEquals(EXPECTED_ID_HASH, jwt.getClaims().getClaimAsJSON(JwtClaimName.CNF).optString(JwtClaimName.TOKEN_BINDING_HASH));
+        String idHash = jwt.getClaims().getClaimAsJSON(JwtClaimName.CNF).optString(JwtClaimName.TOKEN_BINDING_HASH);
+        Assert.assertEquals(idHash, EXPECTED_ID_HASH, "Token Binding Hash Value unexpected");
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
@@ -99,12 +104,7 @@ public class TokenBindingHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authorizeClient.exec();
         showClient(authorizeClient);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
-        assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope must be null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
         return authorizationResponse;
     }
@@ -124,12 +124,7 @@ public class TokenBindingHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse;
     }

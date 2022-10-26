@@ -25,15 +25,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.CoseService;
@@ -87,7 +87,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 
     @Override
     public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData registration, byte[] clientDataHash,
-            CredAndCounterData credIdAndCounters) {
+                        CredAndCounterData credIdAndCounters) {
         int alg = -7;
 
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));

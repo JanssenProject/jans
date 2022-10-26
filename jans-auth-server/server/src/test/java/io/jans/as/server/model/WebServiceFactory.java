@@ -10,7 +10,7 @@ import io.jans.as.server.register.ws.rs.RegisterRestWebService;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * @author Yuriy Zabrovarnyy

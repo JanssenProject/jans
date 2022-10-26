@@ -3,31 +3,29 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
-
 package io.jans.scim.service;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.exception.ConfigurationException;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.scim.model.conf.AppConfiguration;
-import io.jans.config.oxtrust.Configuration;
+import io.jans.scim.model.conf.Conf;
+import io.jans.scim.model.conf.Configuration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.scim.model.conf.Conf;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.BaseConfigurationReload;
 import io.jans.service.cdi.event.ConfigurationEvent;
@@ -38,6 +36,8 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 /**

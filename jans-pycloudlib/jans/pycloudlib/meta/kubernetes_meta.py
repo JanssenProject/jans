@@ -1,14 +1,12 @@
-"""
-jans.pycloudlib.meta.kubernetes_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""This module consists of class to interact with Kubernetes API."""
 
-This module consists of class to interact with Kubernetes API.
-"""
+from __future__ import annotations
 
 import logging
 import os
 import shlex
 import tarfile
+import typing as _t
 from tempfile import TemporaryFile
 
 import kubernetes.client
@@ -17,16 +15,25 @@ from kubernetes.stream import stream
 
 from jans.pycloudlib.meta.base_meta import BaseMeta
 
+if _t.TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from kubernetes.client.models import V1Pod
+
+
 logger = logging.getLogger(__name__)
 
 
 class KubernetesMeta(BaseMeta):
-    def __init__(self):
-        self._client = None
+    """A class to interact with a subset of Kubernetes APIs."""
+
+    def __init__(self) -> None:
+        self._client: _t.Union[kubernetes.client.CoreV1Api, None] = None
         self.kubeconfig_file = os.path.expanduser("~/.kube/config")
 
     @property
-    def client(self):
+    def client(self) -> kubernetes.client.CoreV1Api:
+        """Get kubernetes client instance."""
         if not self._client:
             # config loading priority
             try:
@@ -37,36 +44,52 @@ class KubernetesMeta(BaseMeta):
             self._client.api_client.configuration.assert_hostname = False
         return self._client
 
-    def get_containers(self, label: str) -> list:
-        """Get list of containers based on label.
+    def get_containers(self, label: str) -> list[V1Pod]:
+        """Get list of pods based on label in a namespace.
 
-        :params label: Label name, i.e. ``APP_NAME=oxauth``.
-        :returns: List of container objects.
+        The namespace is resolved from value of `CN_CONTAINER_METADATA_NAMESPACE`
+        environment variable.
+
+        Args:
+            label: Label name, i.e. `APP_NAME=jans-auth`.
+
+        Returns:
+            List of pod objects.
         """
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
-        return self.client.list_namespaced_pod(namespace, label_selector=label).items
+        pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label).items
+        return pods
 
-    def get_container_ip(self, container) -> str:
+    def get_container_ip(self, container: V1Pod) -> str:
         """Get container's IP address.
 
-        :params container: Container object.
-        :returns: IP address associated with the container.
-        """
-        return container.status.pod_ip
+        Args:
+            container: Pod object.
 
-    def get_container_name(self, container):
+        Returns:
+            IP address associated with the pod.
+        """
+        ip: str = container.status.pod_ip
+        return ip
+
+    def get_container_name(self, container: V1Pod) -> str:
         """Get container's name.
 
-        :params container: Container object.
-        :returns: Container name.
-        """
-        return container.metadata.name
+        Args:
+            container: Pod object.
 
-    def copy_to_container(self, container, path: str) -> None:
+        Returns:
+            Pod name.
+        """
+        name: str = container.metadata.name
+        return name
+
+    def copy_to_container(self, container: V1Pod, path: str) -> None:
         """Copy path to container.
 
-        :params container: Container object.
-        :params path: Path to file or directory.
+        Args:
+            container: Pod object.
+            path: Path to file or directory.
         """
         # make sure parent directory is created first
         dirname = os.path.dirname(path)
@@ -77,7 +100,7 @@ class KubernetesMeta(BaseMeta):
             self.client.connect_get_namespaced_pod_exec,
             container.metadata.name,
             container.metadata.namespace,
-            command=["tar", "xvf", "-", "-C", "/"],
+            command=["tar", "xmvf", "-", "-C", "/"],
             container=self._get_main_container_name(container),
             stderr=True,
             stdin=True,
@@ -109,13 +132,13 @@ class KubernetesMeta(BaseMeta):
                     break
             resp.close()
 
-    def exec_cmd(self, container, cmd: str):
+    def exec_cmd(self, container: V1Pod, cmd: str) -> _t.Any:
         """Run command inside container.
 
-        :params container: Container object.
-        :params cmd: String of command.
+        Args:
+            container: Pod object.
+            cmd: String of command.
         """
-
         return stream(
             self.client.connect_get_namespaced_pod_exec,
             container.metadata.name,
@@ -128,10 +151,15 @@ class KubernetesMeta(BaseMeta):
             tty=False,
         )
 
-    def _get_main_container_name(self, container) -> str:
+    def _get_main_container_name(self, container: V1Pod) -> str:
         """Get the pod's main container name.
 
-        :params container: Container object.
+        The main container name is determined from the value of `CN_CONTAINER_MAIN_NAME`
+        environment variable set in the pod.
+        If the value is empty, fallback to the first container inside the pod.
+
+        Args:
+            container: Pod object.
         """
         name = ""
         for cntr in container.spec.containers:

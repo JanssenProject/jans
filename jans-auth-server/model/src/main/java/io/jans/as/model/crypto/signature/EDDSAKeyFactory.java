@@ -16,7 +16,6 @@ import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.bouncycastle.crypto.params.Ed448PublicKeyParameters;
 import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
 import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
@@ -82,7 +81,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
         }
         this.signatureAlgorithm = signatureAlgorithm;
 
-        EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getName());
+        EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getName());
 
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), DEF_BC);
         keyGen.initialize(edSpec, new SecureRandom());
@@ -213,23 +212,13 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      */
     private static byte[] getEncodedPubKey(final SignatureAlgorithm signatureAlgorithm, final byte[] decodedPublicKey) throws SignatureException {
         byte[] encodedPubKey = null;
-        switch (signatureAlgorithm) {
-            case EDDSA:
-            case ED25519: {
-                encodedPubKey = new byte[Ed25519Prefix.length + Ed25519PublicKeyParameters.KEY_SIZE];
-                System.arraycopy(Ed25519Prefix, 0, encodedPubKey, 0, Ed25519Prefix.length);
-                System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed25519Prefix.length, decodedPublicKey.length);
-                break;
-            }
-            case ED448: {
-                encodedPubKey = new byte[Ed448Prefix.length + Ed448PublicKeyParameters.KEY_SIZE];
-                System.arraycopy(Ed448Prefix, 0, encodedPubKey, 0, Ed448Prefix.length);
-                System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed448Prefix.length, decodedPublicKey.length);
-                break;
-            }
-            default: {
-                throw new SignatureException(String.format("Wrong type of the signature algorithm (SignatureAlgorithm): %s", signatureAlgorithm.toString()));
-            }
+        if (signatureAlgorithm == SignatureAlgorithm.EDDSA) {
+            encodedPubKey = new byte[Ed25519Prefix.length + Ed25519PublicKeyParameters.KEY_SIZE];
+            System.arraycopy(Ed25519Prefix, 0, encodedPubKey, 0, Ed25519Prefix.length);
+            System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed25519Prefix.length, decodedPublicKey.length);
+        }
+        else {
+            throw new SignatureException(String.format("Wrong type of the signature algorithm (SignatureAlgorithm): %s", signatureAlgorithm.toString()));            
         }
         return encodedPubKey;
     }

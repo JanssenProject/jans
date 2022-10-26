@@ -11,6 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.CertUtils;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -19,12 +20,12 @@ import io.jans.service.custom.script.ExternalScriptService;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
 import java.security.cert.X509Certificate;
 
 /**
@@ -126,8 +127,12 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public JSONObject getSoftwareStatementJwks(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
+        if (defaultExternalCustomScript == null) {
+            return null;
+        }
+
         try {
-            log.info("Executing python 'getSoftwareStatementJwks' method, script name:" + defaultExternalCustomScript.getName());
+            log.info("Executing python 'getSoftwareStatementJwks' method, script name: {}", defaultExternalCustomScript.getName());
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, registerRequest, defaultExternalCustomScript);
             context.setSoftwareStatement(softwareStatement);
@@ -136,7 +141,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementJwks(context);
             context.throwWebApplicationExceptionIfSet();
-            log.info("Result of python 'getSoftwareStatementJwks' method: " + result);
+            log.info("Result of python 'getSoftwareStatementJwks' method: {}", result);
             return new JSONObject(result);
         } catch (WebApplicationException e) {
             throw e;
@@ -148,6 +153,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public String getSoftwareStatementHmacSecret(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
+        if (defaultExternalCustomScript == null) {
+            return "";
+        }
+
         try {
             log.trace("Executing python 'getSoftwareStatementHmacSecret' method");
 
@@ -158,7 +167,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementHmacSecret(context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'getSoftwareStatementHmacSecret' method: " + result);
+            log.trace("Result of python 'getSoftwareStatementHmacSecret' method: {}", result);
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -170,6 +179,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public JSONObject getDcrJwks(HttpServletRequest httpRequest, Jwt dcr) {
+        if (defaultExternalCustomScript == null) {
+            return null;
+        }
+
         try {
             log.trace("Executing python 'getDcrJwks' method");
 
@@ -180,7 +193,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getDcrJwks(context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'getDcrJwks' method: " + result);
+            log.trace("Result of python 'getDcrJwks' method: {}", result);
             return new JSONObject(result);
         } catch (WebApplicationException e) {
             throw e;
@@ -192,6 +205,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public String getDcrHmacSecret(HttpServletRequest httpRequest, Jwt dcr) {
+        if (defaultExternalCustomScript == null) {
+            return "";
+        }
+
         try {
             log.trace("Executing python 'getDcrHmacSecret' method");
 
@@ -202,7 +219,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getDcrHmacSecret(context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'getDcrHmacSecret' method: " + result);
+            log.trace("Result of python 'getDcrHmacSecret' method: {}", result);
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -214,6 +231,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public boolean isCertValidForClient(X509Certificate cert, DynamicClientRegistrationContext context) {
+        if (defaultExternalCustomScript == null) {
+            return true;
+        }
+
         try {
             log.trace("Executing python 'isCertValidForClient' method");
             context.setScript(defaultExternalCustomScript);
@@ -221,7 +242,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final boolean result = externalType.isCertValidForClient(cert, context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'isCertValidForClient' method: " + result);
+            log.trace("Result of python 'isCertValidForClient' method: {}", result);
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -230,5 +251,86 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
             return false;
         }
+    }
+
+    public boolean modifyPostResponse(JSONObject responseAsJsonObject, ExecutionContext context) {
+        if (defaultExternalCustomScript == null) {
+            return false;
+        }
+
+        CustomScriptConfiguration script = defaultExternalCustomScript;
+
+        try {
+            if (log.isTraceEnabled()) {
+                log.trace("Executing python 'modifyPostResponse' method, script name: {}, context: {}, response: {}", script.getName(), context, responseAsJsonObject.toString());
+            }
+            context.setScript(script);
+
+            ClientRegistrationType type = (ClientRegistrationType) script.getExternalType();
+            final boolean result = type.modifyPostResponse(responseAsJsonObject, context);
+            if (log.isTraceEnabled()) {
+                log.trace("Finished 'modifyPostResponse' method, script name: {}, context: {}, result: {}, response: {}", script.getName(), context, result, responseAsJsonObject.toString());
+            }
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+        return false;
+    }
+
+    public boolean modifyPutResponse(JSONObject responseAsJsonObject, ExecutionContext context) {
+        if (defaultExternalCustomScript == null) {
+            return false;
+        }
+
+        CustomScriptConfiguration script = defaultExternalCustomScript;
+
+        try {
+            if (log.isTraceEnabled()) {
+                log.trace("Executing python 'modifyPutResponse' method, script name: {}, context: {}, response: {}", script.getName(), context, responseAsJsonObject.toString());
+            }
+            context.setScript(script);
+
+            ClientRegistrationType type = (ClientRegistrationType) script.getExternalType();
+            final boolean result = type.modifyPutResponse(responseAsJsonObject, context);
+            if (log.isTraceEnabled()) {
+                log.trace("Finished 'modifyPutResponse' method, script name: {}, context: {}, result: {}, response: {}", script.getName(), context, result, responseAsJsonObject.toString());
+            }
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+        return false;
+    }
+
+    public boolean modifyReadResponse(JSONObject responseAsJsonObject, ExecutionContext context) {
+        if (defaultExternalCustomScript == null) {
+            return false;
+        }
+
+        CustomScriptConfiguration script = defaultExternalCustomScript;
+
+        try {
+            if (log.isTraceEnabled()) {
+                log.trace("Executing python 'modifyReadResponse' method, script name: {}, context: {}, response: {}", script.getName(), context, responseAsJsonObject.toString());
+            }
+            context.setScript(script);
+
+            ClientRegistrationType type = (ClientRegistrationType) script.getExternalType();
+            final boolean result = type.modifyReadResponse(responseAsJsonObject, context);
+            if (log.isTraceEnabled()) {
+                log.trace("Finished 'modifyReadResponse' method, script name: {}, context: {}, result: {}, response: {}", script.getName(), context, result, responseAsJsonObject.toString());
+            }
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+        return false;
     }
 }

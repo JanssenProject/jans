@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.text.SimpleDateFormat;
-import javax.inject.Singleton;
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.ext.ContextResolver;
 
 @Singleton
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
@@ -39,6 +39,9 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+        mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+        mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING); 
+
         return mapper;
     }
 

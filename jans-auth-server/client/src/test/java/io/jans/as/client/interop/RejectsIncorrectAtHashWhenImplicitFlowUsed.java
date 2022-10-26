@@ -6,13 +6,8 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -29,10 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+
+import static org.testng.Assert.*;
 
 /**
  * OC5:FeatureTest-Rejects Incorrect at hash when Implicit Flow Used
@@ -64,12 +57,7 @@ public class RejectsIncorrectAtHashWhenImplicitFlowUsed extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -95,15 +83,10 @@ public class RejectsIncorrectAtHashWhenImplicitFlowUsed extends BaseTest {
 
         // 3. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        AssertBuilder.jwt(jwt)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, "INCORRECT_AT_HASH");
 

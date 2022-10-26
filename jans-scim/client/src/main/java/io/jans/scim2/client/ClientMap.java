@@ -10,8 +10,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 /**
  * A singleton object that holds a mapping of the RestEasy clients used by objects that extend the

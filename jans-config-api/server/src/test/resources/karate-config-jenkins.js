@@ -42,16 +42,15 @@ function() {
         testProps: testProps,
         issuer: issuer,
         accessToken: '123',
+		
         statUrl: baseUrl + '/jans-config-api/api/v1/stat',
         healthUrl: baseUrl + '/jans-config-api/api/v1/health',
-        fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
         acrsUrl: baseUrl + '/jans-config-api/api/v1/acrs',
         authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
         scriptsUrl: baseUrl + '/jans-config-api/api/v1/config/scripts',
         cacheUrl: baseUrl + '/jans-config-api/api/v1/config/cache',
         jwksUrl: baseUrl + '/jans-config-api/api/v1/config/jwks',
         ldapUrl: baseUrl + '/jans-config-api/api/v1/config/database/ldap',
-        couchbaseUrl: baseUrl + '/jans-config-api/api/v1/config/database/couchbase',
         openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',
         scopes_url: baseUrl + '/jans-config-api/api/v1/scopes',
         umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
@@ -59,6 +58,10 @@ function() {
         smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp', 
         logging_url: baseUrl + '/jans-config-api/api/v1/logging',
         auth_health_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/health',
+		org_configuration_url: baseUrl + '/jans-config-api/api/v1/org',
+        user_url: baseUrl + '/jans-config-api/api/v1/user',
+		agama_url: baseUrl + '/jans-config-api/api/v1/agama',
+		session_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/session',
     };
 
     karate.configure('connectTimeout', 30000);

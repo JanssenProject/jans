@@ -24,19 +24,17 @@ import java.util.*;
  * This class provides static methods to validate whether a (SCIM) resource instance fulfills certain characteristics -
  * regarded to formatting, mutability, uniqueness, etc. This allows to adhere more closely to SCIM spec
  */
-/*
- * Created by jgomer on 2017-08-17.
- */
 public class ResourceValidator {
 
     private Logger log = LogManager.getLogger(getClass());
 
     private static final String REQUIRED_ATTR_NOTFOUND="Required attribute %s not found";
-    private static final String WRONG_SCHEMAS_ATTR ="Wrong value of schemas attribute";
+    private static final String WRONG_SCHEMAS_ATTR="Wrong value of schemas attribute";
     private static final String UNKNOWN_EXTENSION="Extension %s not recognized";
     private static final String ATTR_NOT_RECOGNIZED="Attribute %s not part of schema %s";
     private static final String ERROR_PARSING_EXTENDED="Error parsing extended attributes";
     private static final String ATTR_VALIDATION_FAILED ="Unexpected value for attribute %s";
+    private static final String WRONG_CARDINALITY="Value passed has wrong cardinality";
 
     private BaseScimResource resource;
     private Class<? extends BaseScimResource> resourceClass;
@@ -257,11 +255,14 @@ public class ResourceValidator {
                                     validateDataTypeExtendedAttr(extension, attr, value);
                             }
                             else
-                                throw new SCIMException(ERROR_PARSING_EXTENDED);
+                                throw new SCIMException(String.format(ATTR_VALIDATION_FAILED, attr) + 
+                                    "; " + WRONG_CARDINALITY);
                         }
                     }
-                }
-                catch (Exception e) {
+                } catch (SCIMException se) {
+                    log.error(se.getMessage(), se);
+                    throw se;
+                } catch (Exception e) {
                     log.error(e.getMessage(), e);
                     throw new SCIMException(ERROR_PARSING_EXTENDED);
                 }

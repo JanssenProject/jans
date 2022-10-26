@@ -11,17 +11,16 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
-import io.jans.fido2.model.entry.Fido2RegistrationEntry;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
-import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 
 /**

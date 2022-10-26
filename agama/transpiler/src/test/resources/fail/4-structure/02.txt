@@ -1,0 +1,11 @@
+Flow flow
+    Basepath ""
+
+When day is rainy
+    Log me
+Otherwise
+    Log "cowboy music"
+Otherwise    
+    Log "By Cerce"
+
+//Failure reason: unexpected second Otherwise block 

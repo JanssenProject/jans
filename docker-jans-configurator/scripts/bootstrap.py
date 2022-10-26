@@ -735,14 +735,6 @@ class CtxGenerator:
             partial(encode_template, fn, self.ctx, basedir),
         )
 
-    def scim_ctx(self):
-        self.set_config("scim_client_id", lambda: f"1201.{uuid4()}")
-        scim_client_pw = self.set_secret("scim_client_pw", get_random_chars)
-        self.set_secret(
-            "scim_client_encoded_pw",
-            partial(encode_text, scim_client_pw, self.get_secret("encoded_salt"))
-        )
-
     def couchbase_ctx(self):
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
@@ -755,20 +747,8 @@ class CtxGenerator:
         # self.set_secret("jca_pw", "admin")
         pass
 
-    def fido2_ctx(self):
-        # TODO: hardcoded in persistence-loader?
-        self.set_config("fido2ConfigFolder", "/etc/jans/conf/fido2")
-
     def sql_ctx(self):
         self.set_secret("sql_password", self.params["sql_pw"])
-
-    def casa_ctx(self):
-        self.set_config("casa_client_id", lambda: f"1902.{uuid4()}")
-        casa_client_pw = self.set_secret("casa_client_pw", get_random_chars)
-        self.set_secret(
-            "casa_client_encoded_pw",
-            partial(encode_text, casa_client_pw, self.get_secret("encoded_salt"))
-        )
 
     def generate(self):
         opt_scopes = self.params["optional_scopes"]
@@ -790,25 +770,42 @@ class CtxGenerator:
         # self.oxshibboleth_ctx()
         # self.radius_ctx()
 
-        if "scim" in opt_scopes:
-            self.scim_ctx()
-
         if "couchbase" in opt_scopes:
             self.couchbase_ctx()
 
         # self.jackrabbit_ctx()
 
-        if "fido2" in opt_scopes:
-            self.fido2_ctx()
-
         if "sql" in opt_scopes:
             self.sql_ctx()
 
-        if "casa" in opt_scopes:
-            self.casa_ctx()
+        self.admin_ui_ctx()
+        self.jans_cli_ctx()
 
         # populated config
         return self.ctx
+
+    def admin_ui_ctx(self):
+        self.set_config("admin_ui_client_id", lambda: f"1901.{uuid4()}")
+        admin_ui_client_pw = self.set_secret("admin_ui_client_pw", get_random_chars)
+        self.set_secret(
+            "admin_ui_client_encoded_pw",
+            partial(encode_text, admin_ui_client_pw, self.get_secret("encoded_salt")),
+        )
+
+        self.set_config("token_server_admin_ui_client_id", lambda: f"1901.{uuid4()}")
+        token_server_admin_ui_client_pw = self.set_secret("token_server_admin_ui_client_pw", get_random_chars)
+        self.set_secret(
+            "token_server_admin_ui_client_encoded_pw",
+            partial(encode_text, token_server_admin_ui_client_pw, self.get_secret("encoded_salt")),
+        )
+
+    def jans_cli_ctx(self):
+        self.set_config("role_based_client_id", lambda: f"2000.{uuid4()}")
+        role_based_client_pw = self.set_secret("role_based_client_pw", get_random_chars)
+        self.set_secret(
+            "role_based_client_encoded_pw",
+            partial(encode_text, role_based_client_pw, self.get_secret("encoded_salt")),
+        )
 
 
 def gen_idp3_key(storepass):

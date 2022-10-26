@@ -15,6 +15,14 @@ class WebHandler(BaseHandler):
     def patch(self):
         source = self.opts.get("source", "")
 
+        try:
+            valid_to = int(self.opts.get("valid-to", 365))
+        except ValueError:
+            valid_to = 365
+        finally:
+            if valid_to < 1:
+                valid_to = 365
+
         ssl_cert = "/etc/certs/web_https.crt"
         ssl_key = "/etc/certs/web_https.key"
         ssl_csr = "/etc/certs/web_https.csr"
@@ -45,6 +53,7 @@ class WebHandler(BaseHandler):
                 country_code,
                 state,
                 city,
+                valid_to=valid_to,
             )
 
             logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
@@ -58,6 +67,7 @@ class WebHandler(BaseHandler):
                 country_code,
                 state,
                 city,
+                valid_to=valid_to,
             )
 
         if not self.dry_run:

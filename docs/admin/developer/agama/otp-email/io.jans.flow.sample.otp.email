@@ -1,0 +1,38 @@
+Flow io.jans.flow.sample.otp.email
+    Basepath "samples/otp-email"
+
+//Launch usr/pwd authentication
+obj = Trigger io.jans.flow.sample.basic
+When obj.success is false
+    Finish obj
+    
+userId = obj.data.userId
+email = Call io.jans.agama.samples.EmailOTPUtil#emailOf userId
+
+When email is null      //stop if no e-mail was found
+    obj = { success: false, error: "Unable to proceed. No e-mail registered for this account" }
+    Finish obj
+    
+sendMail = true
+obj = {}
+Repeat 3 times max
+    
+    When sendMail is true
+        sendMail = false
+        otpCode = Call io.jans.agama.samples.EmailOTPUtil#send email
+
+        When otpCode is null
+            obj = { success: false, error: "Unable to deliver e-mail message" }
+            Finish obj
+
+    obj = RRF "otp.ftlh" obj
+
+    When obj.resend is ""       //user clicked on "resend code"
+        sendMail = true
+    Otherwise
+        When obj.passcode is otpCode
+            Finish userId
+        obj.matches = false     //wrong code entered
+
+obj = { success: false, error: "You have exceeded the number of attempts allowed" }
+Finish obj

@@ -6,78 +6,45 @@
 
 package io.jans.eleven.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import com.google.common.base.Strings;
+import io.jans.eleven.model.JwksRequestParam;
+import io.jans.eleven.model.KeyRequestParam;
+import io.jans.eleven.model.SignatureAlgorithm;
+import io.jans.eleven.model.SignatureAlgorithmFamily;
+import io.jans.eleven.util.Base64Util;
+import jakarta.enterprise.inject.Vetoed;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.enterprise.inject.Vetoed;
 import javax.security.auth.x500.X500Principal;
-
-import io.jans.eleven.model.SignatureAlgorithm;
-import io.jans.eleven.model.SignatureAlgorithmFamily;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import io.jans.eleven.model.JwksRequestParam;
-import io.jans.eleven.model.KeyRequestParam;
-import io.jans.eleven.util.Base64Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
-
-import sun.security.pkcs11.SunPKCS11;
-import sun.security.rsa.RSAPublicKeyImpl;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.spec.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version October 5, 2016
+ * @version May 18, 2022
  */
 @Vetoed
 public class PKCS11Service implements Serializable {
-	
-	private static final long serialVersionUID = -2541585376018724618L;
 
-	private Logger log = LoggerFactory.getLogger(PKCS11Service.class);
+    private static final long serialVersionUID = -2541585376018724618L;
+
+    private Logger log = LoggerFactory.getLogger(PKCS11Service.class);
 
     public static final String UTF8_STRING_ENCODING = "UTF-8";
 
@@ -85,11 +52,12 @@ public class PKCS11Service implements Serializable {
     private KeyStore keyStore;
     private char[] pin;
 
-    public PKCS11Service() {}
+    public PKCS11Service() {
+    }
 
     public void init(String pin, Map<String, String> pkcs11Config) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         this.pin = pin.toCharArray();
-        this.provider = new SunPKCS11(getTokenCfg(pkcs11Config));
+        this.provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
 
         Provider installedProvider = Security.getProvider(provider.getName());
         if (installedProvider == null) {
@@ -234,9 +202,11 @@ public class PKCS11Service implements Serializable {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(key.getAlg());
                 if (signatureAlgorithm != null) {
                     if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.RSA)) {
-                        publicKey = new RSAPublicKeyImpl(
+                        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                        RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
                                 new BigInteger(1, Base64Util.base64UrlDecode(key.getN())),
                                 new BigInteger(1, Base64Util.base64UrlDecode(key.getE())));
+                        publicKey = keyFactory.generatePublic(pubKeySpec);
                     } else if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.EC)) {
                         AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC);
                         parameters.init(new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias()));

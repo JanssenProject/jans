@@ -9,7 +9,7 @@ package io.jans.as.server.service;
 import com.google.common.collect.Lists;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.EncryptionService;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
@@ -55,21 +55,21 @@ import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.BeforeDestroyed;
+import jakarta.enterprise.context.Initialized;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -216,10 +216,9 @@ public class AppInitializer {
         List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
 
         supportedCustomScriptTypes.remove(CustomScriptType.CACHE_REFRESH);
-        supportedCustomScriptTypes.remove(CustomScriptType.UPDATE_USER);
-        supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
         supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
+        supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
 
         statService.init();
 
@@ -245,6 +244,7 @@ public class AppInitializer {
         // Notify plugins about finish application initialization
         eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
                 .fire(new ApplicationInitializedEvent());
+
     }
 
     protected void initSchedulerService() {
@@ -702,8 +702,8 @@ public class AppInitializer {
      * should be more than 0 seconds of interval
      */
     private void initCibaRequestsProcessor() {
-        final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
-        if ((enabledComponents.isEmpty() || enabledComponents.contains(ComponentType.CIBA)) && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
+        final Set<FeatureFlagType> featureFlags = appConfiguration.getEnabledFeatureFlags();
+        if ((featureFlags.isEmpty() || featureFlags.contains(FeatureFlagType.CIBA)) && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
             if (cibaRequestsProcessorJob != null) {
                 cibaRequestsProcessorJob.initTimer();
             }

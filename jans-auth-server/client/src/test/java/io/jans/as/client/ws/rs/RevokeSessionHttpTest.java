@@ -15,6 +15,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.RevokeSessionClient;
 import io.jans.as.client.RevokeSessionRequest;
 import io.jans.as.client.RevokeSessionResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
@@ -26,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -58,8 +59,7 @@ public class RevokeSessionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
-        assertNotNull(registerResponse.getRegistrationAccessToken());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(

@@ -1,0 +1,38 @@
+name: microk8s
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "charts/**"
+      - "automation/startjanssendemo.sh"
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - "charts/**"
+      - "automation/startjanssendemo.sh"
+  workflow_dispatch:
+jobs:
+  microk8s:
+    strategy:
+      max-parallel: 6
+      matrix:
+        istio: ["true", "false"]
+        # add '"pgsql" when supported
+        persistence-backends: ["LDAP","MYSQL"]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Test dev setup
+      id: start_up_script
+      run: |
+          ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+          chmod u+x automation/startjanssendemo.sh
+          sudo bash ./automation/startjanssendemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} true $ip ${{ matrix.istio }}
+          sudo bash ./automation/analyze_test_microk8s_setup.sh "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" ${{ matrix.persistence-backends }}

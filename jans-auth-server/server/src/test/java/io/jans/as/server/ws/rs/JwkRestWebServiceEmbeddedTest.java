@@ -18,9 +18,9 @@ import org.python.core.util.StringUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Arrays;
 
@@ -45,7 +45,7 @@ public class JwkRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestJwks(final String jwksPath) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + jwksPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + jwksPath).request();
         request.header("Accept", MediaType.APPLICATION_JSON);
 
         Response response = request.get();

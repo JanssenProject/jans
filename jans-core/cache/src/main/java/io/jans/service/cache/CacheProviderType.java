@@ -6,7 +6,7 @@
 
 package io.jans.service.cache;
 
-import javax.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnum;
 
 /**
  * @author yuriyz on 02/21/2017.

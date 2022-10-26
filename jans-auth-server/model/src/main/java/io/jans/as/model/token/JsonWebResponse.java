@@ -6,11 +6,17 @@
 
 package io.jans.as.model.token;
 
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
+import io.jans.as.model.jwt.JwtType;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
+import java.io.*;
+import java.util.Date;
 
 /**
  * JSON Web Token is a compact token format intended for space constrained
@@ -20,6 +26,7 @@ import java.io.Serializable;
  */
 public class JsonWebResponse implements Serializable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JsonWebResponse.class);
     private static final long serialVersionUID = -4141298937204111173L;
 
     protected JwtHeader header;
@@ -66,5 +73,30 @@ public class JsonWebResponse implements Serializable {
     @Override
     public String toString() {
         return asString();
+    }
+
+    /**
+     * method to serialize header and claims
+     */
+    private void writeObject(java.io.ObjectOutputStream oos) throws IOException {
+        try {
+            oos.writeUTF(header.toBase64JsonObject());
+            oos.writeUTF(claims.toBase64JsonObject());
+        } catch (InvalidJwtException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * method to deserialize header and claims
+     */
+    private void readObject(java.io.ObjectInputStream ois) throws IOException, ClassNotFoundException, InvalidJwtException {
+        JwtHeader readHeader = new JwtHeader();
+        readHeader.load(ois.readUTF());
+        setHeader(readHeader);
+
+        JwtClaims readClaims = new JwtClaims();
+        readClaims.load(ois.readUTF());
+        setClaims(readClaims);
     }
 }

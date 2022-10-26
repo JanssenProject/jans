@@ -7,22 +7,20 @@
 package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -60,6 +58,7 @@ public class ExecutionContext {
     private Set<String> scopes;
     private String claimsAsString;
     private List<SessionId> userSessions;
+    private OAuth2AuditLog auditLog;
 
     @NotNull
     private final Map<String, String> attributes = new HashMap<>();
@@ -90,12 +89,21 @@ public class ExecutionContext {
         return httpResponse;
     }
 
+    public OAuth2AuditLog getAuditLog() {
+        return auditLog;
+    }
+
+    public void setAuditLog(OAuth2AuditLog auditLog) {
+        this.auditLog = auditLog;
+    }
+
     public Client getClient() {
         return client;
     }
 
-    public void setClient(Client client) {
+    public ExecutionContext setClient(Client client) {
         this.client = client;
+        return this;
     }
 
     public void setHttpRequest(HttpServletRequest httpRequest) {

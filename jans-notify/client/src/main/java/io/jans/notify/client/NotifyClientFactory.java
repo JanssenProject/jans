@@ -15,7 +15,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 import java.util.Base64;
 
 /**
@@ -26,7 +26,7 @@ import java.util.Base64;
  */
 public class NotifyClientFactory {
 
-	private final static NotifyClientFactory instance = new NotifyClientFactory();
+	private static final NotifyClientFactory instance = new NotifyClientFactory();
 	private ResteasyClient client;
 	private ResteasyClient pooledClient;
 

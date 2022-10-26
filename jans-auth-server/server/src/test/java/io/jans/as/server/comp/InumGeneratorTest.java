@@ -13,8 +13,6 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 26/06/2013
@@ -22,11 +20,9 @@ import javax.inject.Inject;
 
 public class InumGeneratorTest extends BaseComponentTest {
 
-    @Inject
-    private InumGenerator inumGenerator;
-
     @Test
     public void test() {
+        InumGenerator inumGenerator = getInumGenerator();
         final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
         Assert.assertTrue(StringUtils.isNotBlank(inum));
     }

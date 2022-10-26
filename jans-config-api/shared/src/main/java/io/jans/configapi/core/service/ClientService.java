@@ -10,22 +10,24 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.Serializable;
 
 import org.slf4j.Logger;
 
 @ApplicationScoped
+@Named("cltSrv")
 public class ClientService implements Serializable {
 
     private static final long serialVersionUID = 7912416439116338984L;
 
     @Inject
-    private PersistenceEntryManager persistenceEntryManager;
+    private transient PersistenceEntryManager persistenceEntryManager;
 
     @Inject
-    private Logger logger;
+    private transient Logger logger;
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);

@@ -1,0 +1,132 @@
+
+# -- OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
+# -- Configure the HorizontalPodAutoscaler
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+  # -- metrics if targetCPUUtilizationPercentage is not set
+  metrics: []
+  # -- Scaling Policies
+  behavior: {}
+# -- Add custom normal and secret envs to the service
+usrEnvs:
+  # -- Add custom normal envs to the service
+  # variable1: value1
+  normal: {}
+  # -- Add custom secret envs to the service
+  # variable1: value1
+  secret: {}
+# -- Add custom dns policy
+dnsPolicy: ""
+# -- Add custom dns config
+dnsConfig: {}
+image:
+  # -- Image pullPolicy to use for deploying.
+  pullPolicy: IfNotPresent
+  # -- Image  to use for deploying.
+  repository: gluufederation/opendj
+  # -- Image  tag to use for deploying.
+  tag: 5.0.0_dev
+  # -- Image Pull Secrets
+  pullSecrets: [ ]
+persistence:
+  # -- OpenDJ volume size
+  size: 5Gi
+  accessModes: ReadWriteOnce
+  type: DirectoryOrCreate
+# -- servicePorts values used in StatefulSet container
+ports:
+  tcp-admin:
+    nodePort: ""
+    port: 4444
+    protocol: TCP
+    targetPort: 4444
+  tcp-ldap:
+    nodePort: ""
+    port: 1389
+    protocol: TCP
+    targetPort: 1389
+  tcp-ldaps:
+    nodePort: ""
+    port: 1636
+    protocol: TCP
+    targetPort: 1636
+  tcp-repl:
+    nodePort: ""
+    port: 8989
+    protocol: TCP
+    targetPort: 8989
+  tcp-serf:
+    nodePort: ""
+    port: 7946
+    protocol: TCP
+    targetPort: 7946
+  udp-serf:
+    nodePort: ""
+    port: 7946
+    protocol: UDP
+    targetPort: 7946
+# -- Service replica number.
+replicas: 1
+# -- Resource specs.
+resources:
+  limits:
+    # -- CPU limit.
+    cpu: 1500m
+    # -- Memory limit.
+    memory: 2000Mi
+  requests:
+    # -- CPU request.
+    cpu: 1500m
+    # -- Memory request.
+    memory: 2000Mi
+# -- Configure the liveness healthcheck for OpenDJ if needed.
+livenessProbe:
+  # -- Executes the python3 healthcheck.
+  exec:
+    command:
+    - python3
+    - /app/scripts/healthcheck.py
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 20
+# -- Configure the readiness healthcheck for OpenDJ if needed.
+readinessProbe:
+  tcpSocket:
+    port: 1636
+  initialDelaySeconds: 60
+  timeoutSeconds: 5
+  periodSeconds: 25
+  failureThreshold: 20
+# -- Configure any additional volumes that need to be attached to the pod
+volumes: []
+# -- Configure any additional volumesMounts that need to be attached to the containers
+volumeMounts: []
+nameOverride: ""
+fullnameOverride: ""
+# VolumeMounts for StatefulSet
+# opendj-init vm
+openDjVolumeMounts:
+  config:
+    mountPath: /opt/opendj/config
+    name: opendj-volume
+  ldif: 
+    mountPath: /opt/opendj/ldif
+    name: opendj-volume
+  logs: 
+    mountPath: /opt/opendj/logs
+    name: opendj-volume
+  db: 
+    mountPath: /opt/opendj/db
+    name: opendj-volume
+  flag: 
+    mountPath: /flag
+    name: opendj-volume
+
+# -- Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"}
+additionalLabels: { }
+# -- Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken
+additionalAnnotations: { }

@@ -61,6 +61,7 @@ public final class CouchbaseUpdateAttributeSample {
 
         SimpleUser userAfterUpdate = couchbaseEntryManager.find(SimpleUser.class, dn);
         LOG.info("Found user after update '{}'", userAfterUpdate);
+        LOG.info("jansLastLogonTime after update '{}'", userAfterUpdate.getAttribute("jansLastLogonTime"));
     }
 
 }

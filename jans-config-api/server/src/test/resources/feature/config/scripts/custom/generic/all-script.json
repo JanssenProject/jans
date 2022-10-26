@@ -902,35 +902,6 @@
   },
   {
     "internal": false,
-    "level": 90,
-    "programmingLanguage": "PYTHON",
-    "description": "Sample User Registration script",
-    "locationType": "LDAP",
-    "dn": "inum=6EA0-8F0C,ou=scripts,o=gluu",
-    "inum": "6EA0-8F0C",
-    "script": "# jans-auth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.\r\n# Copyright (c) 2016, Gluu\r\n#\r\n# Author: Yuriy Movchan\r\n#\r\n\r\nfrom org.gluu.model.custom.script.type.user import UserRegistrationType\r\nfrom org.gluu.util import StringHelper, ArrayHelper\r\nfrom java.util import Arrays, ArrayList\r\n\r\nimport java\r\n\r\nclass UserRegistration(UserRegistrationType):\r\n    def __init__(self, currentTimeMillis):\r\n        self.currentTimeMillis = currentTimeMillis\r\n\r\n    def init(self, customScript, configurationAttributes):\r\n        print \"User registration. Initialization\"\r\n\r\n        self.enable_user = StringHelper.toBoolean(configurationAttributes.get(\"enable_user\").getValue2(), False)\r\n\r\n        print \"User registration. Initialized successfully\"\r\n\r\n        return True   \r\n\r\n    def destroy(self, configurationAttributes):\r\n        print \"User registration. Destroy\"\r\n        print \"User registration. Destroyed successfully\"\r\n        return True   \r\n\r\n    # User registration init method\r\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\r\n    #   requestParameters is java.util.Map<String, String[]>\r\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\r\n    def initRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User registration. Init method\"\r\n\r\n        return True\r\n\r\n    # User registration pre method\r\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\r\n    #   requestParameters is java.util.Map<String, String[]>\r\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\r\n    def preRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User registration. Pre method\"\r\n\r\n        userStatus = \"active\"\r\n        if not self.enable_user:\r\n            userStatus = \"inactive\"\r\n\r\n        # Disable/Enable registered user\r\n        user.setStatus(userStatus)\r\n\r\n        return True\r\n\r\n    # User registration post method\r\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\r\n    #   requestParameters is java.util.Map<String, String[]>\r\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\r\n    def postRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User registration. Post method\"\r\n\r\n        return True\r\n    \r\n    # User confirm New Registration method\r\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\r\n    #   requestParameters is java.util.Map<String, String[]>\r\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\r\n    def confirmRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User registration. Confirm registration method\"\r\n\r\n        return True\r\n\r\n    def getApiVersion(self):\r\n        return 11\r\n",
-    "enabled": false,
-    "revision": 1,
-    "moduleProperties": [
-      {
-        "value2": "ldap",
-        "value1": "location_type"
-      }
-    ],
-    "scriptType": "USER_REGISTRATION",
-    "name": "user_registration",
-    "modified": false,
-    "configurationProperties": [
-      {
-        "hide": false,
-        "value2": "false",
-        "value1": "enable_user"
-      }
-    ],
-    "baseDn": "inum=6EA0-8F0C,ou=scripts,o=gluu"
-  },
-  {
-    "internal": false,
     "level": 100,
     "programmingLanguage": "PYTHON",
     "description": "Client authorization UMA RPT Policy for SCIM and Passport",
@@ -1228,28 +1199,6 @@
     "internal": false,
     "level": 100,
     "programmingLanguage": "PYTHON",
-    "description": "Sample Update User script",
-    "locationType": "LDAP",
-    "dn": "inum=522F-CDC5,ou=scripts,o=gluu",
-    "inum": "522F-CDC5",
-    "script": "# jans-auth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.\n# Copyright (c) 2016, Gluu\n#\n# Author: Yuriy Movchan\n#\n\nfrom org.gluu.model.custom.script.type.user import UpdateUserType\nfrom org.gluu.util import StringHelper, ArrayHelper\nfrom java.util import Arrays, ArrayList\n\nimport java\n\nclass UpdateUser(UpdateUserType):\n    def __init__(self, currentTimeMillis):\n        self.currentTimeMillis = currentTimeMillis\n\n    def init(self, customScript, configurationAttributes):\n        print \"Update user. Initialization\"\n        print \"Update user. Initialized successfully\"\n\n        return True   \n\n    def destroy(self, configurationAttributes):\n        print \"Update user. Destroy\"\n        print \"Update user. Destroyed successfully\"\n        return True   \n\n    def getApiVersion(self):\n        return 11\n\n    def newUser(self, user, configurationAttributes):\n        print \"Update user. newUser method\"\n\n        return True\n\n    def addUser(self, user, persisted, configurationAttributes):\n        print \"Update user. addUser method\"\n\n        return True\n\n    def postAddUser(self, user, configurationAttributes):\n        print \"Update user. postAddUser method\"\n\n        return True\n\n    # Update user entry before persistent it\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\n    #   persisted is boolean value to specify if operation type: add/modify\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\n    def updateUser(self, user, persisted, configurationAttributes):\n        print \"Update user. updateUser method\"\n\n        uid = user.getUid()\n        print \"Update user. User uid: {}\".format(uid)\n       \n        mail = uid + \"@example.org\"\n        user.setMail(mail)\n\n        return True\n\n    def postUpdateUser(self, user, configurationAttributes):\n        print \"Update user. postUpdateUser method\"\n\n        return True\n\n    def deleteUser(self, user, persisted, configurationAttributes):\n        print \"Update user. deleteUser method\"\n\n        return True\n\n    def postDeleteUser(self, user, configurationAttributes):\n        print \"Update user. postDeleteUser method\"\n\n        return True\n",
-    "enabled": false,
-    "revision": 1,
-    "moduleProperties": [
-      {
-        "value2": "ldap",
-        "value1": "location_type"
-      }
-    ],
-    "scriptType": "UPDATE_USER",
-    "name": "update_user",
-    "modified": false,
-    "baseDn": "inum=522F-CDC5,ou=scripts,o=gluu"
-  },
-  {
-    "internal": false,
-    "level": 100,
-    "programmingLanguage": "PYTHON",
     "description": "Sample Dynamic Scope script for work_phone",
     "locationType": "LDAP",
     "dn": "inum=031C-5622,ou=scripts,o=gluu",
@@ -1296,27 +1245,5 @@
       }
     ],
     "baseDn": "inum=2DAF-F995,ou=scripts,o=gluu"
-  },
-  {
-    "internal": false,
-    "level": 100,
-    "programmingLanguage": "PYTHON",
-    "description": "Sample Confirm User Registration  script",
-    "locationType": "LDAP",
-    "dn": "inum=6EA0-8F0D,ou=scripts,o=gluu",
-    "inum": "6EA0-8F0D",
-    "script": "# jans-auth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.\r\n# Copyright (c) 2016, Gluu\r\n#\r\n\r\nfrom org.gluu.service.cdi.util import CdiUtil\r\nfrom org.gluu.model.custom.script.type.user import UserRegistrationType\r\nfrom org.gluu.service import MailService\r\nfrom org.gluu.oxtrust.service import PersonService\r\nfrom org.gluu.util import StringHelper, ArrayHelper\r\nfrom java.util import Arrays, ArrayList\r\nfrom org.gluu.config.oxtrust import AppConfiguration\r\nfrom javax.faces.context import ExternalContext\r\nfrom org.gluu.oxtrust.service import ConfigurationService\r\n\r\nimport java\r\n\r\nclass UserRegistration(UserRegistrationType):\r\n    def __init__(self, currentTimeMillis):\r\n        self.currentTimeMillis = currentTimeMillis\r\n\r\n    def init(self, customScript, configurationAttributes):\r\n        print \"User Confirm registration. Initialization\"\r\n        print \"User Confirm registration. Initialized successfully\"\r\n\r\n        return True   \r\n\r\n    def destroy(self, configurationAttributes):\r\n        print \"User Confirm registration. Destroy\"\r\n        print \"User Confirm registration. Destroyed successfully\"\r\n        return True   \r\n\r\n    # User registration init method\r\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\r\n    #   requestParameters is java.util.Map<String, String[]>\r\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\r\n    def initRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User Confirm registration. Init method\"\r\n        #hostName = requestParameters.get(\"hostName\")[0]\r\n        #print \"HostName Initialization : %s\" % hostName\r\n        return True\r\n\r\n    # User registration pre method\r\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\r\n    #   requestParameters is java.util.Map<String, String[]>\r\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\r\n    def preRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User Confirm registration. Pre method\"\r\n        userStatus = \"inactive\"\r\n\r\n        # Disable/Enable registered user\r\n        user.setStatus(userStatus)\r\n        self.guid = StringHelper.getRandomString(16)\r\n        user.setGuid(self.guid)\r\n        return True\r\n\r\n    # User registration post method\r\n    #   user is org.gluu.oxtrust.model.GluuCustomPerson\r\n    #   requestParameters is java.util.Map<String, String[]>\r\n    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>\r\n    def postRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User Confirm registration. Post method\"\r\n        externalContext = CdiUtil.bean(ExternalContext)\r\n        contextPath = externalContext.getRequest().getContextPath()\r\n        hostName =  externalContext.getRequestServerName()\r\n        print \"HostName from context : %s\" % hostName\r\n        mailService = CdiUtil.bean(MailService)\r\n        subject = \"Registration confirmation\"\r\n        activationLink = \"https://%s%s/confirm/registration.htm?code=%s\" %(hostName, contextPath, self.guid)\r\n        body = \"<h2 style='margin-left:10%%;color: #337ab7;'>Welcome</h2><hr style='width:80%%;border: 1px solid #337ab7;'></hr><div style='text-align:center;'><p>Dear <span style='color: #337ab7;'>%s</span>,</p><p>Your Account has been created, welcome to <span style='color: #337ab7;'>%s</span>.</p><p>You are just one step way from activating your account on <span style='color: #337ab7;'>%s</span>.</p><p>Click the button and start using your account.</p></div><a class='btn' href='%s'><button style='background: #337ab7; color: white; margin-left: 30%%; border-radius: 5px; border: 0px; padding: 5px;' type='button'>Activate your account now!</button></a>\"  % (user.getUid(), hostName, hostName, activationLink)\r\n        print \"User Confirm registration. Post method. Attempting to send e-mail to '%s' message '%s'\" % (user.getMail(), body)\r\n        mailService.sendMail(user.getMail(), None, subject, body, body);\r\n        return True\r\n\r\n    def confirmRegistration(self, user, requestParameters, configurationAttributes):\r\n        print \"User Confirm registration. Confirm method\"\r\n        code_array = requestParameters.get(\"code\")\r\n        if ArrayHelper.isEmpty(code_array):\r\n            print \"User Confirm registration. Confirm method. code is empty\"\r\n            return False\r\n\r\n        confirmation_code = code_array[0]\r\n        print \"User Confirm registration. Confirm method. code: '%s'\" % confirmation_code\r\n\r\n        if confirmation_code == None:\r\n            print \"User Confirm registration. Confirm method. Confirmation code not exist in request\"\r\n            return False\r\n\r\n        personService = CdiUtil.bean(PersonService)\r\n        user = personService.getPersonByAttribute(\"oxGuid\", confirmation_code)\r\n        if user == None:\r\n            print \"User Confirm registration. Confirm method. There is no user by confirmation code: '%s'\" % confirmation_code\r\n            return False\r\n\r\n        if confirmation_code == user.getGuid():\r\n            user.setStatus(\"active\")\r\n            user.setGuid(\"\")\r\n            personService.updatePerson(user)\r\n            print \"User Confirm registration. Confirm method. User '%s' confirmed his registration\" % user.getUid()\r\n            return True\r\n\r\n        print \"User Confirm registration. Confirm method. Confirmation code for user '%s' is invalid\" % user.getUid()\r\n        return False\r\n\r\n    def getApiVersion(self):\r\n        return 11\r\n",
-    "enabled": false,
-    "revision": 1,
-    "moduleProperties": [
-      {
-        "value2": "ldap",
-        "value1": "location_type"
-      }
-    ],
-    "scriptType": "USER_REGISTRATION",
-    "name": "user_confirm_registration",
-    "modified": false,
-    "baseDn": "inum=6EA0-8F0D,ou=scripts,o=gluu"
   }
 ]

@@ -15,7 +15,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
@@ -39,12 +39,12 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.ExternalContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -546,11 +546,11 @@ public class AuthenticationService {
     private boolean checkUserStatus(User user) {
         CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jansStatus");
 
-        if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(StringHelper.toString(userStatus.getValue())))) {
+        if ((userStatus != null) && GluuStatus.ACTIVE.getValue().equalsIgnoreCase(StringHelper.toString(userStatus.getValue()))) {
             return true;
         }
 
-        log.warn("User '{}' was disabled", user.getUserId());
+        log.warn("User '{}' is disabled", user.getUserId());
         return false;
     }
 

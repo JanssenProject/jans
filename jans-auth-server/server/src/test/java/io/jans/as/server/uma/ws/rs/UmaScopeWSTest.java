@@ -16,8 +16,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 import static org.testng.Assert.assertEquals;
@@ -38,7 +38,7 @@ public class UmaScopeWSTest extends BaseTest {
         String path = umaScopePath + "/" + "modify";
         System.out.println("Path: " + path);
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + path).request();
         request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
         Response response = request.get();
         String entity = response.readEntity(String.class);

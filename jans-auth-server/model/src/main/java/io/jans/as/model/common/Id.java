@@ -9,8 +9,8 @@ package io.jans.as.model.common;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
@@ -21,29 +21,29 @@ import java.io.Serializable;
 @XmlRootElement
 public class Id implements Serializable {
 
-    private String id;
+    private String idValue;
 
     public Id() {
     }
 
     public Id(String id) {
-        this.id = id;
+        this.idValue = id;
     }
 
     @JsonProperty(value = "id")
     @XmlElement(name = "id")
     public String getId() {
-        return id;
+        return idValue;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.idValue = id;
     }
 
     @Override
     public String toString() {
         return "Id" +
-                "{id='" + id + '\'' +
+                "{id='" + idValue + '\'' +
                 '}';
     }
 }

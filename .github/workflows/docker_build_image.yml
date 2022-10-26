@@ -28,9 +28,17 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"'
+        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith"'
         required: true
-        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim'
+        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith'
+      cn_version:
+        description: 'The war version to build the image off'
+        required: false
+        default: ''
+      image_tag:
+        description: 'The manual image tag to post'
+        required: false
+        default: ''
       tags:
         description: 'Tags'
         required: false
@@ -41,10 +49,10 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
+        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -55,12 +63,13 @@ jobs:
           DEFAULT_ALL=${{ github.event.inputs.services }}
           if [ -z "$DEFAULT_ALL" ]
           then
-            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"
+            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith"
           else
             echo "$DEFAULT_ALL"
           fi
           # Detect actual docker folders that changed if error arises default to all images
-          DIRECTORIES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
             echo "A change in this images directory has occured"
             echo ::set-output name=build::${BUILD}
@@ -94,13 +103,31 @@ jobs:
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}_dev"
           fi
+          # If the user passed a manual image tag to build a custom manual image
+          MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}
+          if [ ! -z "$MANUAL_IMAGE_TAG" ]
+          then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
+            echo "Manual image tag has been inputted by the user"
+          else
+            echo "$TAGS"
+          fi
+          # If the user passed a war version to build off ,change this war version.
+          CN_VERSION=${{ github.event.inputs.cn_version }}
+          if [ ! -z "$CN_VERSION" ]
+          then
+            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs['CN_VERSION'] = '${{ github.event.inputs.cn_version }}'"
+            echo "War version has been modified."
+          else
+            echo "$CN_VERSION"
+          fi
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=build::${BUILD}
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.7
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/setup-python@v2.3.1
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
@@ -131,11 +158,11 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -144,7 +171,7 @@ jobs:
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.MOAUTO_DOCKERHUB_USERNAME }}
           password: ${{ secrets.MOAUTO_DOCKERHUB_TOKEN }}
@@ -152,7 +179,7 @@ jobs:
       - name: Build and push
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: ./docker-jans-${{ matrix.docker-images }}

@@ -1,0 +1,16 @@
+JAVA_HOME=%(jre_home)s
+JAVA=$JAVA_HOME/bin/java
+JETTY_HOME=%(jetty_home)s
+JETTY_BASE=%(jetty_base)s/jans-config-api
+JETTY_USER=%(jetty_user)s
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8074"
+TMPDIR=%(jetty_dist)s/temp
+
+LOG4J_CONFIG_FILES="";
+for filename in $JETTY_BASE/custom/config/log4j2*.xml; do
+  LOG4J_CONFIG_FILES="${LOG4J_CONFIG_FILES}${LOG4J_CONFIG_FILES:+,}$filename"
+done
+
+JAVA_OPTIONS="-server -Xms%(jans-config-api_min_heap_mem)sm -Xmx%(jans-config-api_max_heap_mem)sm -XX:+DisableExplicitGC -Djans.base=%(jansBaseFolder)s -Dserver.base=%(jetty_base)s/jans-config-api -Dlog.base=%(jetty_base)s/jans-config-api -Dpython.home=%(jython_home)s -Dlog4j.configurationFile=$LOG4J_CONFIG_FILES"
+
+export PYTHON_HOME=%(jython_home)s

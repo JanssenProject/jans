@@ -8,16 +8,16 @@ package io.jans.jsf2.component;
 
 import io.jans.util.StringHelper;
 
-import javax.faces.FacesException;
-import javax.faces.application.FacesMessage;
-import javax.faces.component.*;
-import javax.faces.component.html.HtmlOutputLabel;
-import javax.faces.context.FacesContext;
-import javax.faces.validator.BeanValidator;
-import javax.validation.Validation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import jakarta.faces.FacesException;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.*;
+import jakarta.faces.component.html.HtmlOutputLabel;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.validator.BeanValidator;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,7 +37,7 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     private boolean beanValidationPresent = false;
 
     public UIInputContainer() {
-        beanValidationPresent = isClassPresent("javax.validation.Validator");
+        beanValidationPresent = isClassPresent("jakarta.validation.Validator");
     }
 
     @Override

@@ -1,6 +1,0 @@
-# Steps to upgrade custom scripts to cope with new structure.
-
-## Packages renamed
-   1. All packages starting **org.xdi** has been renamed to start with **org.gluu**.
-## Packages moved
-  1. The class named **GluuStatus** has been move from **org.gluu.ldap.model** to **io.jans.model**

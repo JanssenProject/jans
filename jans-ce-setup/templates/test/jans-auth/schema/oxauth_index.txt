@@ -1,1 +1,0 @@
-Create indexes myCustomAttr1, myCustomAttr2

@@ -6,7 +6,7 @@
 
 package io.jans.eleven.model;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 import java.util.HashMap;
 import java.util.Map;
 

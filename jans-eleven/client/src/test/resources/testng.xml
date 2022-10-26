@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="oxElevenClient">
-    <parameter name="generateKeyEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/generateKey"/>
-    <parameter name="signEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/sign"/>
-    <parameter name="verifySignatureEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/verifySignature"/>
-    <parameter name="deleteKeyEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/deleteKey"/>
+    <parameter name="generateKeyEndpoint" value="https://jenkins-dev1.jans.io/jans-eleven/restv1/generateKey"/>
+    <parameter name="signEndpoint" value="https://jenkins-dev1.jans.io/jans-eleven/restv1/sign"/>
+    <parameter name="verifySignatureEndpoint" value="https://jenkins-dev1.jans.io/jans-eleven/restv1/verifySignature"/>
+    <parameter name="deleteKeyEndpoint" value="https://jenkins-dev1.jans.io/jans-eleven/restv1/deleteKey"/>
     <parameter name="signingInput" value="Signing Input"/>
     <parameter name="sharedSecret" value="Secret"/>
     <parameter name="testModeToken" value="5be64765-7052-466b-ad1a-bd7dddcfdee4"/>
 
-    <!--
-        <parameter name="generateKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/generateKey"/>
-        <parameter name="signEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/sign"/>
-        <parameter name="verifySignatureEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/verifySignature"/>
-        <parameter name="deleteKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/deleteKey"/>
-        <parameter name="signingInput" value="Signing Input"/>
-        <parameter name="sharedSecret" value="Secret"/>
-        <parameter name="testModeToken" value="5be64765-7052-466b-ad1a-bd7dddcfdee4"/>
-    -->
+    <!--    <parameter name="generateKeyEndpoint" value="https://gluu/jans-eleven/restv1/generateKey"/>-->
+    <!--    <parameter name="signEndpoint" value="https://gluu/jans-eleven/restv1/sign"/>-->
+    <!--    <parameter name="verifySignatureEndpoint" value="https://gluu/jans-eleven/restv1/verifySignature"/>-->
+    <!--    <parameter name="deleteKeyEndpoint" value="https://gluu/jans-eleven/restv1/deleteKey"/>-->
+    <!--    <parameter name="signingInput" value="Signing Input"/>-->
+    <!--    <parameter name="sharedSecret" value="Secret"/>-->
+    <!--    <parameter name="testModeToken" value="5be64765-7052-466b-ad1a-bd7dddcfdee4"/>-->
+
+    <!--    <parameter name="generateKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/generateKey"/>-->
+    <!--    <parameter name="signEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/sign"/>-->
+    <!--    <parameter name="verifySignatureEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/verifySignature"/>-->
+    <!--    <parameter name="deleteKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/deleteKey"/>-->
+    <!--    <parameter name="signingInput" value="Signing Input"/>-->
+    <!--    <parameter name="sharedSecret" value="Secret"/>-->
+    <!--    <parameter name="testModeToken" value="5be64765-7052-466b-ad1a-bd7dddcfdee4"/>-->
+
     <test name="PKCS11 Rest Service Test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.eleven.PKCS11RestServiceTest"/>
