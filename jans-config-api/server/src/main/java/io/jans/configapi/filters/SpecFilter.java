@@ -82,21 +82,27 @@ public class SpecFilter extends AbstractSpecFilter {
                 }
             }
 
-        } catch (
-
-        Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return Optional.of(operation);
+    }
+    
+    private String setRequestExample(final String fileName) throws IOException {
+        //???-TO_DO??
+        if (StringUtils.isBlank(fileName)) {
+            return "";
+        }
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
+        return getExampleContent(inputStream);
+
     }
 
     private String getExample(final String fileName) throws IOException {
         if (StringUtils.isBlank(fileName)) {
             return "";
         }
-
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
-
         return getExampleContent(inputStream);
 
     }

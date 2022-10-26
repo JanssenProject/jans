@@ -987,6 +987,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CacheConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "cacheProviderType": "NATIVE_PERSISTENCE",
+                        "memcachedConfiguration": {
+                            "servers": "localhost:11211",
+                            "maxOperationQueueLength": 100000,
+                            "bufferSize": 32768,
+                            "defaultPutExpiration": 60,
+                            "connectionFactoryType": "DEFAULT"
+                        },
+                        "inMemoryConfiguration": {
+                            "defaultPutExpiration": 60
+                        },
+                        "redisConfiguration": {
+                            "redisProviderType": "STANDALONE",
+                            "servers": "localhost:6379",
+                            "defaultPutExpiration": 60,
+                            "useSSL": false,
+                            "maxIdleConnections": 10,
+                            "maxTotalConnections": 500,
+                            "connectionTimeout": 3000,
+                            "soTimeout": 3000,
+                            "maxRetryAttempts": 5
+                        },
+                        "nativePersistenceConfiguration": {
+                            "defaultPutExpiration": 60,
+                            "defaultCleanupBatchSize": 10000,
+                            "deleteExpiredOnGetRequest": false,
+                            "disableAttemptUpdateBeforeInsert": false
+                        }
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1008,8 +1042,14 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/JsonPatch'
-            example: "[{op:replace, path: memcachedConfiguration, value: response.memcachedConfiguration\
-              \ }]"
+            examples:
+              Request json example:
+                description: Request json example
+                value: "[{ \"op\": \"replace\", \"path\": \"/memcachedConfiguration\"\
+                  , \"value\": {\n        \"servers\": \"localhost:11211\",\n    \
+                  \    \"maxOperationQueueLength\": 100000,\n        \"bufferSize\"\
+                  : 32768,\n        \"defaultPutExpiration\":80,\n        \"connectionFactoryType\"\
+                  : \"DEFAULT\"\n    }}] \n"
       responses:
         "200":
           description: Cache configuration details
@@ -1017,6 +1057,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CacheConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "cacheProviderType": "NATIVE_PERSISTENCE",
+                        "memcachedConfiguration": {
+                            "servers": "localhost:11211",
+                            "maxOperationQueueLength": 100000,
+                            "bufferSize": 32768,
+                            "defaultPutExpiration": 60,
+                            "connectionFactoryType": "DEFAULT"
+                        },
+                        "inMemoryConfiguration": {
+                            "defaultPutExpiration": 60
+                        },
+                        "redisConfiguration": {
+                            "redisProviderType": "STANDALONE",
+                            "servers": "localhost:6379",
+                            "defaultPutExpiration": 60,
+                            "useSSL": false,
+                            "maxIdleConnections": 10,
+                            "maxTotalConnections": 500,
+                            "connectionTimeout": 3000,
+                            "soTimeout": 3000,
+                            "maxRetryAttempts": 5
+                        },
+                        "nativePersistenceConfiguration": {
+                            "defaultPutExpiration": 60,
+                            "defaultCleanupBatchSize": 10000,
+                            "deleteExpiredOnGetRequest": false,
+                            "disableAttemptUpdateBeforeInsert": false
+                        }
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1038,6 +1112,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InMemoryConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "defaultPutExpiration": 60
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1057,6 +1138,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/InMemoryConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "defaultPutExpiration": 60
+                  }
       responses:
         "200":
           description: In-Memory cache configuration details
@@ -1064,6 +1152,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InMemoryConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "defaultPutExpiration": 60
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1085,6 +1180,11 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: "[{ \"op\": \"replace\", \"path\": \"/defaultPutExpiration\"\
+                  , \"value\":80}] \n"
       responses:
         "200":
           description: In-Memory cache configuration details
@@ -1092,6 +1192,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InMemoryConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "defaultPutExpiration": 60
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1113,6 +1220,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MemcachedConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "servers": "localhost:11211",
+                        "maxOperationQueueLength": 100000,
+                        "bufferSize": 32768,
+                        "defaultPutExpiration": 80,
+                        "connectionFactoryType": "DEFAULT"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1132,6 +1250,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/MemcachedConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "servers": "localhost:11211",
+                      "maxOperationQueueLength": 100000,
+                      "bufferSize": 32768,
+                      "defaultPutExpiration": 80,
+                      "connectionFactoryType": "DEFAULT"
+                  }
       responses:
         "200":
           description: Native persistence cache configuration details
@@ -1139,6 +1268,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MemcachedConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "servers": "localhost:11211",
+                        "maxOperationQueueLength": 100000,
+                        "bufferSize": 32768,
+                        "defaultPutExpiration": 80,
+                        "connectionFactoryType": "DEFAULT"
+                    }
         "401":
           description: Unauthorized
         "404":
@@ -1162,6 +1302,11 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: "[{ \"op\": \"replace\", \"path\": \"/maxOperationQueueLength\"\
+                  , \"value\":10001}] \n"
       responses:
         "200":
           description: Memcached cache configuration details
@@ -1169,6 +1314,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MemcachedConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "servers": "localhost:11211",
+                        "maxOperationQueueLength": 100000,
+                        "bufferSize": 32768,
+                        "defaultPutExpiration": 80,
+                        "connectionFactoryType": "DEFAULT"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1190,6 +1346,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NativePersistenceConfiguration'
+              examples:
+                Request json example:
+                  description: Request json example
+                  value: |
+                    {
+                        "defaultPutExpiration": 60,
+                        "defaultCleanupBatchSize": 10000,
+                        "deleteExpiredOnGetRequest": false,
+                        "disableAttemptUpdateBeforeInsert": false
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1209,6 +1375,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/NativePersistenceConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "defaultPutExpiration": 60,
+                      "defaultCleanupBatchSize": 10000,
+                      "deleteExpiredOnGetRequest": false,
+                      "disableAttemptUpdateBeforeInsert": false
+                  }
       responses:
         "200":
           description: Native persistence cache configuration details
@@ -1216,6 +1392,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NativePersistenceConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "defaultPutExpiration": 60,
+                        "defaultCleanupBatchSize": 10000,
+                        "deleteExpiredOnGetRequest": false,
+                        "disableAttemptUpdateBeforeInsert": false
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1237,6 +1423,11 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: "[{ \"op\": \"replace\", \"path\": \"/defaultCleanupBatchSize\"\
+                  , \"value\":10001}] \n"
       responses:
         "200":
           description: Native persistence cache configuration details
@@ -1244,6 +1435,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NativePersistenceConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "defaultPutExpiration": 60,
+                        "defaultCleanupBatchSize": 10000,
+                        "deleteExpiredOnGetRequest": false,
+                        "disableAttemptUpdateBeforeInsert": false
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1265,6 +1466,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RedisConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "redisProviderType": "STANDALONE",
+                        "servers": "localhost:6379",
+                        "defaultPutExpiration": 60,
+                        "useSSL": false,
+                        "maxIdleConnections": 10,
+                        "maxTotalConnections": 500,
+                        "connectionTimeout": 3000,
+                        "soTimeout": 3000,
+                        "maxRetryAttempts": 5
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1284,6 +1500,21 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RedisConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "redisProviderType": "STANDALONE",
+                      "servers": "localhost:6379",
+                      "defaultPutExpiration": 60,
+                      "useSSL": false,
+                      "maxIdleConnections": 10,
+                      "maxTotalConnections": 500,
+                      "connectionTimeout": 3000,
+                      "soTimeout": 3000,
+                      "maxRetryAttempts": 5
+                  }
       responses:
         "200":
           description: Redis cache configuration details
@@ -1291,6 +1522,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RedisConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "redisProviderType": "STANDALONE",
+                        "servers": "localhost:6379",
+                        "defaultPutExpiration": 60,
+                        "useSSL": false,
+                        "maxIdleConnections": 10,
+                        "maxTotalConnections": 500,
+                        "connectionTimeout": 3000,
+                        "soTimeout": 3000,
+                        "maxRetryAttempts": 5
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -1312,6 +1558,11 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: "[{ \"op\": \"replace\", \"path\": \"/defaultPutExpiration\"\
+                  , \"value\":80}] \n"
       responses:
         "200":
           description: Redis cache configuration details
@@ -1319,6 +1570,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RedisConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "redisProviderType": "STANDALONE",
+                        "servers": "localhost:6379",
+                        "defaultPutExpiration": 60,
+                        "useSSL": false,
+                        "maxIdleConnections": 10,
+                        "maxTotalConnections": 500,
+                        "connectionTimeout": 3000,
+                        "soTimeout": 3000,
+                        "maxRetryAttempts": 5
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -3321,17 +3587,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        userCanAccess:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -4476,8 +4742,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -4505,6 +4769,8 @@ components:
             - STAT
             - PAR
             - SSA
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -4761,13 +5027,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
