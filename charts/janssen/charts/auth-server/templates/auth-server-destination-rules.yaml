@@ -1,5 +1,4 @@
 {{- if .Values.global.istio.enabled }}
-
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:

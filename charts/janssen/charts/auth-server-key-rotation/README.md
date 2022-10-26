@@ -15,7 +15,6 @@ Responsible for regenerating auth-keys per x hours
 ## Source Code
 
 * <https://github.com/JanssenProject/docker-jans-certmanager>
-* <https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/auth-server-key-rotation>
 
 ## Requirements
 

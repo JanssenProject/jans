@@ -10,11 +10,10 @@ keywords:
   - OpenDJ
 home: https://jans.io
 sources:
-  - https://github.com/JanssenFederation/docker-opendj
-  - https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/opendj
+  - https://github.com/GluuFederation/docker-opendj
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io
     url: https://github.com/moabu
-icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
 appVersion: "1.0.3-dev"

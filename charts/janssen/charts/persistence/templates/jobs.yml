@@ -1,4 +1,3 @@
-
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -15,7 +14,7 @@ metadata:
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
 {{- end }}
 spec:
-  ttlSecondsAfterFinished: 120
+  ttlSecondsAfterFinished: {{ .Values.global.jobTtlSecondsAfterFinished }}
   template:
     metadata:
       name: {{ include "persistence.name" . }}
