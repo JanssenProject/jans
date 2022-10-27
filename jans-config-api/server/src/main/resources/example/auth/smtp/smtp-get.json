@@ -1,0 +1,7 @@
+{
+    "valid": false,
+    "port": 0,
+    "requires_ssl": false,
+    "trust_host": false,
+    "requires_authentication": false
+}
