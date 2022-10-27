@@ -8,7 +8,6 @@ from string import Template
 from urllib.parse import urlparse
 from uuid import uuid4
 
-import ruamel.yaml
 from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
@@ -36,6 +35,7 @@ from jans.pycloudlib.utils import encode_text
 from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
 from plugins import discover_plugins
+from utils import parse_config_api_swagger
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -310,13 +310,6 @@ def generate_hex(size: int = 3):
     return os.urandom(size).hex().upper()
 
 
-def get_config_api_swagger(path="/app/static/jans-config-api-swagger-auto.yaml"):
-    with open(path) as f:
-        txt = f.read()
-    txt = txt.replace("\t", " ")
-    return ruamel.yaml.load(txt, Loader=ruamel.yaml.RoundTripLoader)
-
-
 class PersistenceSetup:
     def __init__(self, manager) -> None:
         self.manager = manager
@@ -455,7 +448,7 @@ class PersistenceSetup:
         existing_jans_ids = self.get_scope_jans_ids()
 
         def generate_config_api_scopes():
-            swagger = get_config_api_swagger()
+            swagger = parse_config_api_swagger()
             scopes = swagger["components"]["securitySchemes"]["oauth2"]["flows"]["clientCredentials"]["scopes"]
 
             generated_scopes = []
@@ -504,8 +497,11 @@ class PersistenceSetup:
             return generated_scopes
 
         # prepare required scopes (if any)
-        # scopes = generate_config_api_scopes()
         scopes = []
+
+        config_api_scopes = generate_config_api_scopes()
+        scopes += config_api_scopes
+
         scim_scopes = generate_scim_scopes()
         scopes += scim_scopes
 

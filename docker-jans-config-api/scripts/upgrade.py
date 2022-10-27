@@ -14,6 +14,7 @@ from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
 
 from settings import LOGGING_CONFIG
+from utils import parse_config_api_swagger
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -305,7 +306,6 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def get_all_scopes(self):
-        # ldap
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "jansScope"}
             entries = self.backend.search_entries(None, **kwargs)
@@ -350,18 +350,32 @@ class Upgrade:
         if not isinstance(client_scopes, list):
             client_scopes = [client_scopes]
 
-        current_scopes = self.get_all_scopes()
+        # all scopes mapping from persistence
+        all_scopes = self.get_all_scopes()
+
+        # all potential scopes for client
+        new_client_scopes = []
+
+        # extract config_api scopes within range of jansId defined in swagger
+        swagger = parse_config_api_swagger()
+        config_api_jans_ids = list(swagger["components"]["securitySchemes"]["oauth2"]["flows"]["clientCredentials"]["scopes"].keys())
+        config_api_scopes = [
+            dn for jid, dn in all_scopes.items()
+            if jid in config_api_jans_ids
+        ]
+        new_client_scopes += config_api_scopes
 
         # extract scim scopes within range of jansId defined in swagger
         scim_jans_ids = ["https://jans.io/scim/users.read", "https://jans.io/scim/users.write"]
-        scim_scopes = {
-            jid: dn
-            for jid, dn in current_scopes.items()
+        scim_scopes = [
+            dn for jid, dn in all_scopes.items()
             if jid in scim_jans_ids
-        }
+        ]
+        new_client_scopes += scim_scopes
 
         # find missing scopes from the client
-        diff = list(set(scim_scopes.values()).difference(client_scopes))
+        diff = list(set(new_client_scopes).difference(client_scopes))
+
         if diff:
             if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
                 entry.attrs["jansScope"]["v"] = client_scopes + diff
