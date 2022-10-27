@@ -9,9 +9,6 @@ import io.jans.as.model.common.GrantType;
  */
 public class TokenExchangeGrant extends AuthorizationGrant {
 
-    public TokenExchangeGrant() {
-    }
-
     public void init(User user, Client client) {
         super.init(user, AuthorizationGrantType.TOKEN_EXCHANGE, client, null);
     }
