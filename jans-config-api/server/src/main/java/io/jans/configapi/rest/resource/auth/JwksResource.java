@@ -15,7 +15,6 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.model.SmtpConfiguration;
 import io.jans.configapi.core.util.Jackson;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,7 +68,7 @@ public class JwksResource extends ConfigBaseResource {
     @Operation(summary = "Replaces JSON Web Keys", description = "Replaces JSON Web Keys", operationId = "put-config-jwks", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JWKS_WRITE_ACCESS}))
-    @RequestBody(description = "SmtpConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/jwks/web-keys-all.json")))
+    @RequestBody(description = "JSON Web Keys object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/jwks/web-keys-all.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/web-keys-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

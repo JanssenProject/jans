@@ -396,12 +396,6 @@
 				<artifactId>swagger-core-jakarta</artifactId>
 				<version>${swagger.version}</version>
 			</dependency>
-			<dependency>
-			    <groupId>io.swagger.core.v3</groupId>
-			    <artifactId>swagger-jaxrs2-jakarta</artifactId>
-			  	<version>${swagger.version}</version>
-			</dependency>
-
 
 		</dependencies>
 	</dependencyManagement>

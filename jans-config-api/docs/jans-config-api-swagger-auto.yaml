@@ -4210,11 +4210,11 @@ paths:
       description: Replaces JSON Web Keys
       operationId: put-config-jwks
       requestBody:
-        description: SmtpConfiguration object
+        description: JSON Web Keys object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SmtpConfiguration'
+              $ref: '#/components/schemas/WebKeysConfiguration'
             examples:
               Request json example:
                 description: Request json example
@@ -7182,15 +7182,15 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8326,6 +8326,17 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        fapi:
+          type: boolean
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8353,17 +8364,6 @@ components:
             - STAT
             - PAR
             - SSA
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
