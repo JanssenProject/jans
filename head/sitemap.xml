@@ -1066,6 +1066,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/install/setup/</loc>
+         <lastmod>2022-10-27</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/</loc>
          <lastmod>2022-10-27</lastmod>
          <changefreq>daily</changefreq>
@@ -1142,126 +1147,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/vm-requirements/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/casa/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/custom-web/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/integration-faq/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/passport-js/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saml/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/drupal/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/magento/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/moodle/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/nextcloud/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/rancher/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/rocket/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/teleport/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/apps/wordpress/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/aws/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/docusign/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/google/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/jira/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/office365/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/salesforce/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/webex/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/integration/saas/zoom/</loc>
          <lastmod>2022-10-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -2157,11 +2042,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/restarting-services/</loc>
-         <lastmod>2022-10-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/vm-ops/running-setup/</loc>
          <lastmod>2022-10-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
