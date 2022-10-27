@@ -24,7 +24,7 @@ Download the latest package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases)
 
 !!! note
-`curl`  is required to run the command below
+    `curl`  is required to run the command below
 
 ```
 zypper --no-gpg-checks install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*suse15.x86_64.rpm' | head -n 1)
@@ -38,7 +38,7 @@ zypper --no-gpg-checks install -y https:$(curl -s -L https://api.github.com/repo
 python3 /opt/jans/jans-setup/setup.py
 ```
 
-See more detailed [instructions](setup-script.md) on the setup script if you're
+See more detailed [instructions](../setup.md) on the setup script if you're
 confused how to answer any of the questions, for details about command line
 arguments, or you would prefer to use a properties file instead of
 interactive mode.
