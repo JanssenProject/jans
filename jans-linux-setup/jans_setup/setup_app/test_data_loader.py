@@ -88,8 +88,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         prop_src_fn = os.path.join(agama_out_dir, 'config-agama-test.properties')
         self.renderTemplateInOut(prop_src_fn, agama_temp_dir, os.path.join(Config.output_dir, 'test/jans-auth'))
 
-        dn, oxAuthConfDynamic = self.dbUtils.get_oxAuthConfDynamic()
-        agama_config=oxAuthConfDynamic["agamaConfiguration"].copy()
+        dn, oxauth_conf_dynamic = self.dbUtils.get_oxAuthConfDynamic()
+        agama_config=oxauth_conf_dynamic["agamaConfiguration"].copy()
         agama_config['disableTCHV'] = True
         self.dbUtils.set_oxAuthConfDynamic({'agamaConfiguration': agama_config})
 
