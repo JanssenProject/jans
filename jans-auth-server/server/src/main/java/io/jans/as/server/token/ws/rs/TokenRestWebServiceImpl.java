@@ -66,6 +66,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.jans.as.model.config.Constants.*;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
@@ -134,6 +135,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private TokenRestWebServiceValidator tokenRestWebServiceValidator;
 
+    @Inject
+    private TokenInternalService tokenInternalService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -201,7 +205,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else if (gt == GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(executionContext, deviceCode, scope);
             } else if (gt == GrantType.TOKEN_EXCHANGE) {
-                return processTokenExchange(scope, executionContext);
+                return processTokenExchange(scope, idTokenPreProcessing, executionContext);
             }
         } catch (WebApplicationException e) {
             throw e;
@@ -213,19 +217,70 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         throw new WebApplicationException(tokenRestWebServiceValidator.error(400, TokenErrorResponseType.UNSUPPORTED_GRANT_TYPE, "Unsupported Grant Type.").build());
     }
 
-    private Response processTokenExchange(String scope, ExecutionContext executionContext) {
+    private Response processTokenExchange(String scope, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
         final HttpServletRequest httpRequest = executionContext.getHttpRequest();
+        final Client client = executionContext.getClient();
+        final OAuth2AuditLog auditLog = executionContext.getAuditLog();
 
-        String audience = httpRequest.getParameter("audience");
-        String subjectToken = httpRequest.getParameter("subject_token");
-        String subjectTokenType = httpRequest.getParameter("subject_token_type");
-        String actorToken = httpRequest.getParameter("actor_token");
-        String actorTokenType = httpRequest.getParameter("actor_token_type");
+        final String audience = httpRequest.getParameter("audience");
+        final String subjectToken = httpRequest.getParameter("subject_token");
+        final String subjectTokenType = httpRequest.getParameter("subject_token_type");
+        final String actorToken = httpRequest.getParameter("actor_token");
+        final String actorTokenType = httpRequest.getParameter("actor_token_type");
 
-        tokenRestWebServiceValidator.validateSubjectTokenType(subjectTokenType, executionContext.getAuditLog());
-        tokenRestWebServiceValidator.validateActorTokenType(actorTokenType, executionContext.getAuditLog());
-        // todo
-        return null;
+        tokenRestWebServiceValidator.validateAudience(audience, auditLog);
+        tokenRestWebServiceValidator.validateSubjectTokenType(subjectTokenType, auditLog);
+        tokenRestWebServiceValidator.validateActorTokenType(actorTokenType, auditLog);
+        tokenRestWebServiceValidator.validateActorToken(actorToken, auditLog);
+
+        final SessionId sessionId = sessionIdService.getSessionByDeviceSecret(actorToken);
+        tokenRestWebServiceValidator.validateSessionForTokenExchange(sessionId, actorToken, auditLog);
+        checkNotNull(sessionId); // it checked by validator, added it only to relax static bugs checker
+
+        tokenRestWebServiceValidator.validateSubjectToken(subjectToken, sessionId, auditLog);
+
+        TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(new User(), client);
+        tokenExchangeGrant.setSessionDn(sessionId.getDn());
+
+        executionContext.setGrant(tokenExchangeGrant);
+
+        scope = tokenExchangeGrant.checkScopesPolicy(scope);
+
+        AccessToken accessToken = tokenExchangeGrant.createAccessToken(executionContext); // create token after scopes are checked
+
+        IdToken idToken = null;
+        if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && tokenExchangeGrant.getScopes().contains(OPENID)) {
+            boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                    appConfiguration.getLegacyIdTokenClaims());
+
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, tokenExchangeGrant, client, appConfiguration, attributeService);
+
+            executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
+            executionContext.setPreProcessing(idTokenPreProcessing);
+            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+
+            idToken = tokenExchangeGrant.createIdToken(
+                    null, null, null, null, null, executionContext);
+        }
+
+        RefreshToken reToken = createRefreshToken(executionContext, scope);
+
+        executionContext.getAuditLog().updateOAuth2AuditLog(tokenExchangeGrant, true);
+
+        String rotatedDeviceSecret = tokenInternalService.rotateDeviceSecret(sessionId, actorToken);
+
+        JSONObject jsonObj = new JSONObject();
+        try {
+            fillJsonObject(jsonObj, accessToken, accessToken.getTokenType(), accessToken.getExpiresIn(), reToken, scope, idToken);
+            jsonObj.put("issued_token_type", TOKEN_TYPE_ACCESS_TOKEN);
+            if (StringUtils.isNotBlank(rotatedDeviceSecret)) {
+                jsonObj.put("device_secret", rotatedDeviceSecret);
+            }
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return response(Response.ok().entity(jsonObj.toString()), executionContext.getAuditLog());
     }
 
     private Response processROPC(String username, String password, String scope, GrantType gt, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) throws SearchException {
@@ -649,25 +704,31 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                   IdToken idToken) {
         JSONObject jsonObj = new JSONObject();
         try {
-            jsonObj.put("access_token", accessToken.getCode()); // Required
-            jsonObj.put("token_type", tokenType.toString()); // Required
-            if (expiresIn != null) { // Optional
-                jsonObj.put("expires_in", expiresIn);
-            }
-            if (refreshToken != null) { // Optional
-                jsonObj.put("refresh_token", refreshToken.getCode());
-            }
-            if (scope != null) { // Optional
-                jsonObj.put("scope", scope);
-            }
-            if (idToken != null) {
-                jsonObj.put("id_token", idToken.getCode());
-            }
+            fillJsonObject(jsonObj, accessToken, tokenType, expiresIn, refreshToken, scope, idToken);
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
         }
 
         return jsonObj.toString();
+    }
+
+    public void fillJsonObject(JSONObject jsonObj, AccessToken accessToken, TokenType tokenType,
+                                     Integer expiresIn, RefreshToken refreshToken, String scope,
+                                     IdToken idToken) {
+        jsonObj.put("access_token", accessToken.getCode()); // Required
+        jsonObj.put("token_type", tokenType.toString()); // Required
+        if (expiresIn != null) { // Optional
+            jsonObj.put("expires_in", expiresIn);
+        }
+        if (refreshToken != null) { // Optional
+            jsonObj.put("refresh_token", refreshToken.getCode());
+        }
+        if (scope != null) { // Optional
+            jsonObj.put("scope", scope);
+        }
+        if (idToken != null) {
+            jsonObj.put("id_token", idToken.getCode());
+        }
     }
 
     private Response processCIBA(String scope, String authReqId, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {

@@ -249,6 +249,7 @@ public class AppConfiguration implements Configuration {
     private Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters;
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
+    private Boolean rotateDeviceSecret = false;
 
     private Boolean dcrSignatureValidationEnabled = false;
     private String dcrSignatureValidationSharedSecret;
@@ -343,6 +344,15 @@ public class AppConfiguration implements Configuration {
 
     public void setAllowAllValueForRevokeEndpoint(Boolean allowAllValueForRevokeEndpoint) {
         this.allowAllValueForRevokeEndpoint = allowAllValueForRevokeEndpoint;
+    }
+
+    public Boolean getRotateDeviceSecret() {
+        if (rotateDeviceSecret == null) rotateDeviceSecret = false;
+        return rotateDeviceSecret;
+    }
+
+    public void setRotateDeviceSecret(Boolean rotateDeviceSecret) {
+        this.rotateDeviceSecret = rotateDeviceSecret;
     }
 
     public Boolean getRequirePkce() {

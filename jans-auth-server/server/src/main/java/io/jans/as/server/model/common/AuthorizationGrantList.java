@@ -131,6 +131,13 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
+    public TokenExchangeGrant createTokenExchangeGrant(User user, Client client) {
+        TokenExchangeGrant grant = grantInstance.select(TokenExchangeGrant.class).get();
+        grant.init(user, client);
+        return grant;
+    }
+
+    @Override
     public CIBAGrant createCIBAGrant(CibaRequestCacheControl request) {
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
         grant.init(request);
@@ -307,6 +314,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                         deviceCodeGrant.init(user, AuthorizationGrantType.DEVICE_CODE, client, tokenEntity.getCreationDate());
 
                         result = deviceCodeGrant;
+                        break;
+                    case TOKEN_EXCHANGE:
+                        TokenExchangeGrant tokenExchangeGrant = grantInstance.select(TokenExchangeGrant.class).get();
+                        tokenExchangeGrant.init(user, AuthorizationGrantType.TOKEN_EXCHANGE, client, tokenEntity.getCreationDate());
+
+                        result = tokenExchangeGrant;
                         break;
                     default:
                         return null;

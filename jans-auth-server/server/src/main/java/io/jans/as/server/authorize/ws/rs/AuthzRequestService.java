@@ -116,7 +116,7 @@ public class AuthzRequestService {
             return;
         }
 
-        final String newDeviceSecret = HandleTokenFactory.generateHandleToken();
+        final String newDeviceSecret = HandleTokenFactory.generateDeviceSecret();
 
         final List<String> deviceSecrets = sessionId.getDeviceSecrets();
         deviceSecrets.add(newDeviceSecret);
