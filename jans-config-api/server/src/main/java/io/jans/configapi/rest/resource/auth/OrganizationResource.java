@@ -45,7 +45,7 @@ public class OrganizationResource extends ConfigBaseResource {
             "Organization Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ORG_CONFIG_READ_ACCESS  }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuOrganization.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuOrganization.class), examples = @ExampleObject(name = "Response json example", value = "example/org/org.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -57,10 +57,9 @@ public class OrganizationResource extends ConfigBaseResource {
     @Operation(summary = "Patch organization configuration", description = "Patch organization configuration", operationId = "patch-organization-config", tags = {
             "Organization Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS }))
-    @RequestBody(description = "String representing JsonPatch request.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
-            @ExampleObject(value = "[{\"op\": \"add\", \"path\": \"/jsFaviconPath\", \"value\": \"/opt/jans/jetty/jans-auth/custom/static/\"}]") }))
+    @RequestBody(description = "String representing JsonPatch request.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/org/org-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuOrganization.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuOrganization.class), examples = @ExampleObject(name = "Response json example", value = "example/org/org-patch-response.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH

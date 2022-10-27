@@ -397,7 +397,6 @@
 				<version>${swagger.version}</version>
 			</dependency>
 
-
 		</dependencies>
 	</dependencyManagement>
 
@@ -572,6 +571,7 @@
 								<outputFormat>YAML</outputFormat>
 								<outputPath>${project.parent.basedir}/docs</outputPath>
 								<prettyPrint>true</prettyPrint>
+								<filterClass>io.jans.configapi.filters.SpecFilter</filterClass>
 							</configuration>
 							<phase>compile</phase>
 							<goals>

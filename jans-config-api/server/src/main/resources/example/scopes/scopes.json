@@ -1,0 +1,22 @@
+{
+    "dn": "inum=9c4c6027-86b8-4afc-a68f-6b50579e6d21,ou=scopes,o=jans",
+    "inum": "9c4c6027-86b8-4afc-a68f-6b50579e6d21",
+    "displayName": "Test Display Scope 5",
+    "id": "Scope5",
+    "iconUrl": "http://google.com",
+    "description": "TEST Description for Scope 5",
+    "scopeType": "spontaneous",
+    "defaultScope": false,
+    "umaAuthorizationPolicies": [
+        "inum=2DAF-F9A5,ou=scripts,o=jans",
+        "inum=2DAF-F995,ou=scripts,o=jans"
+    ],
+    "attributes": {
+        "showInConfigurationEndpoint": true
+    },
+    "creatorId": "2000.99b53b02-dfa1-42cd-aaef-b940d58bb03f",
+    "creatorType": "user",
+    "creationDate": "2022-10-27T21:09:45",
+    "umaType": false,
+    "baseDn": "inum=9c4c6027-86b8-4afc-a68f-6b50579e6d21,ou=scopes,o=jans"
+}

@@ -54,7 +54,7 @@ public class JwksResource extends ConfigBaseResource {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JWKS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/web-keys-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -68,8 +68,9 @@ public class JwksResource extends ConfigBaseResource {
     @Operation(summary = "Replaces JSON Web Keys", description = "Replaces JSON Web Keys", operationId = "put-config-jwks", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JWKS_WRITE_ACCESS}))
+    @RequestBody(description = "JSON Web Keys object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/jwks/web-keys-all.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/web-keys-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
@@ -86,10 +87,9 @@ public class JwksResource extends ConfigBaseResource {
     @Operation(summary = "Patches JSON Web Keys", description = "Patches JSON Web Keys", operationId = "patch-config-jwks", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JWKS_WRITE_ACCESS }))
-    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
-            @ExampleObject(value = "[{\"op\": \"add\",\"path\": \"/keys/1\", \"value\": { \"kty\": \"RSA\", \"e\": \"AQAB\",\"use\": \"sig\",\"crv\": \"\",\"kid\": \"dd570bfb-276a-44aa-a97d-667b57587108_sig_rs256\",\"x5c\": [\"MIIDBDCC...\"],\"exp\": 1599751946863,\"alg\": \"RS256\",\"n\": \"zj1NE..\"}}]") }))
+    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/auth/jwks/web-keys-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebKeysConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/web-keys-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
@@ -109,9 +109,9 @@ public class JwksResource extends ConfigBaseResource {
     @Operation(summary = "Configuration – JWK - JSON Web Key (JWK)", description = "Configuration – JWK - JSON Web Key (JWK)", operationId = "post-config-jwks-key", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JWKS_WRITE_ACCESS }))
-    @RequestBody(description = "JSONWebKey object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class)))
+    @RequestBody(description = "JSONWebKey object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class) , examples = @ExampleObject(name = "Request json example", value = "example/auth/jwks/jwks-post.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class) , examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/jwks-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -141,7 +141,7 @@ public class JwksResource extends ConfigBaseResource {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JWKS_READ_ACCESS  }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/jwks-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -158,10 +158,9 @@ public class JwksResource extends ConfigBaseResource {
     @Operation(summary = "Patch a specific JSON Web Key based on kid", description = "Patch a specific JSON Web Key based on kid", operationId = "patch-config-jwk-kid", tags = {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JWKS_WRITE_ACCESS }))
-    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
-            @ExampleObject(value = "[{\"op\": \"add\",\"path\": \"/kty\", \"value\": \"RSA\"}]") }))
+    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/auth/jwks/jwks-patch.json") ))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JSONWebKey.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/jwks/jwks-patch-response.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
