@@ -22,9 +22,15 @@ testing and zero downtime updates.
 
 As Janssen Auth Server doesn't really care what load balancer you use, some
 options you might want to consider are:
+
 1. **Apache HTTPD**
+
 1. **nginx**
+
 1. **istio**
+
 1. **f5**
+
 1. **Amazon Elastic Load Balancing**
+
 1. **Google Cloud Load Balancing**
