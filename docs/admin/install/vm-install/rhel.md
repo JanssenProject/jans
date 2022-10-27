@@ -37,7 +37,7 @@ to the one shown below:
 
 ![](../../../assets/image-jans-install-success.png)
 
-See more detailed [instructions](setup-script.md) on the setup script if you're
+See more detailed [instructions](../setup.md) on the setup script if you're
 confused how to answer any of the questions, for details about command line
 arguments, or you would prefer to use a properties file instead of
 interactive mode.
