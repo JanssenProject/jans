@@ -29,72 +29,73 @@ public class SpecFilter extends AbstractSpecFilter {
 
             if (operation != null) {
 
-                // request example
-                if (operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
-                    for (MediaType mediaType : operation.getRequestBody().getContent().values()) {
-                        if (mediaType == null || mediaType.getExamples() == null
-                                || mediaType.getExamples().values() == null)
-                            continue;
-                        for (Example example : mediaType.getExamples().values()) {
-                            if (example == null) {
-                                continue;
-                            }
-
-                            if (example.getValue() != null && example.getValue().toString().endsWith(".json")) {
-                                example.setValue(getExample(example.getValue().toString()));
-                            }
-
-                        }
-                    }
-                }
-
-                // response example
-                if (operation.getResponses() != null && !operation.getResponses().isEmpty()) {
-
-                    for (Map.Entry<String, ApiResponse> responseEntry : operation.getResponses().entrySet()) {
-
-                        ApiResponse apiResponse = responseEntry.getValue();
-                        if (apiResponse == null) {
-                            continue;
-                        }
-
-                        if (apiResponse.getContent() != null) {
-                            for (Map.Entry<String, MediaType> mediaEntry : apiResponse.getContent().entrySet()) {
-
-                                if (mediaEntry.getValue() != null && mediaEntry.getValue().getExamples() != null) {
-                                    for (Example example : mediaEntry.getValue().getExamples().values()) {
-                                        if (example == null) {
-                                            continue;
-                                        }
-
-                                        if (example.getValue() != null
-                                                && example.getValue().toString().endsWith(".json")) {
-                                            example.setValue(getExample(example.getValue().toString()));
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-
-                }
+                setRequestExample(operation);
+                setResponseExample(operation);
             }
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         return Optional.of(operation);
     }
-    
-    private String setRequestExample(final String fileName) throws IOException {
-        //???-TO_DO??
-        if (StringUtils.isBlank(fileName)) {
-            return "";
+
+    private void setRequestExample(Operation operation) {
+        // request example
+        if (operation != null && operation.getRequestBody() != null
+                && operation.getRequestBody().getContent() != null) {
+            try {
+                for (MediaType mediaType : operation.getRequestBody().getContent().values()) {
+                    if (mediaType == null || mediaType.getExamples() == null
+                            || mediaType.getExamples().values() == null)
+                        continue;
+                    for (Example example : mediaType.getExamples().values()) {
+                        setExample(example);
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
-        return getExampleContent(inputStream);
+
+    }
+
+    private void setResponseExample(Operation operation) {
+        // response example
+        if (operation != null && operation.getResponses() != null && !operation.getResponses().isEmpty()) {
+            try {
+                for (Map.Entry<String, ApiResponse> responseEntry : operation.getResponses().entrySet()) {
+
+                    ApiResponse apiResponse = responseEntry.getValue();
+                    if (apiResponse == null) {
+                        continue;
+                    }
+
+                    if (apiResponse.getContent() != null) {
+                        for (Map.Entry<String, MediaType> mediaEntry : apiResponse.getContent().entrySet()) {
+
+                            if (mediaEntry.getValue() != null && mediaEntry.getValue().getExamples() != null) {
+                                for (Example example : mediaEntry.getValue().getExamples().values()) {
+                                    setExample(example);
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    private void setExample(Example example) throws IOException {
+        if (example == null) {
+            return;
+        }
+
+        if (example.getValue() != null && example.getValue().toString().endsWith(".json")) {
+            example.setValue(getExample(example.getValue().toString()));
+        }
 
     }
 

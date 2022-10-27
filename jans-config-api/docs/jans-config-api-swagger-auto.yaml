@@ -1347,8 +1347,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/NativePersistenceConfiguration'
               examples:
-                Request json example:
-                  description: Request json example
+                Response json example:
+                  description: Response json example
                   value: |
                     {
                         "defaultPutExpiration": 60,
@@ -3585,19 +3585,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
-          type: boolean
-        adminCanAccess:
           type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -3924,8 +3924,6 @@ components:
           format: int32
         displayName:
           type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -3937,6 +3935,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
         baseDn:
           type: string
         inum:
@@ -4733,6 +4733,8 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -4769,8 +4771,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
