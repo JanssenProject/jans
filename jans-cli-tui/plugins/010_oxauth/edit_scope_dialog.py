@@ -131,12 +131,49 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 current_value=self.data.get('scopeType'),
                                 values=scope_types,
                                 on_selection_changed=self.scope_selection_changed,
+                                jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
+                                    'scopeType'),
+
                                 style='class:outh-scope-radiobutton'),
 
-                self.myparent.getTitledText(_("id"), name='id', value=self.data.get('id',''), style='class:outh-scope-text'),
-                self.myparent.getTitledText(_("inum"), name='inum', value=self.data.get('inum',''), style='class:outh-scope-text',read_only=True,),
-                self.myparent.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:outh-scope-text'),
-                self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-scope-text'),
+                self.myparent.getTitledText(
+                    _("id"), 
+                    name='id', 
+                    value=self.data.get('id',''), 
+                    jans_help=self.myparent.get_help_from_schema(
+                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
+                        'id'),
+                    style='class:outh-scope-text'),
+
+                self.myparent.getTitledText(
+                    _("inum"), 
+                    name='inum', 
+                    value=self.data.get('inum',''), 
+                    jans_help=self.myparent.get_help_from_schema(
+                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
+                        'inum'),
+                    style='class:outh-scope-text',
+                    read_only=True,),
+
+                self.myparent.getTitledText(
+                    _("Display Name"), 
+                    name='displayName', 
+                    value=self.data.get('displayName',''),
+                    jans_help=self.myparent.get_help_from_schema(
+                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
+                        'displayName'),
+                    style='class:outh-scope-text'),
+
+                self.myparent.getTitledText(
+                    _("Description"), 
+                    name='description', 
+                    value=self.data.get('description',''), 
+                    jans_help=self.myparent.get_help_from_schema(
+                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
+                        'description'),
+                    style='class:outh-scope-text'),
+
                 DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
             ], style='class:outh-scope-tabs'),
              button_functions=buttons,
@@ -240,13 +277,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
+                                    jans_help=self.myparent.get_help_from_schema(schema,'defaultScope'),
                                     style='class:outh-scope-checkbox',
                             ),
 
                             self.myparent.getTitledCheckBox(
                                     _("Show in configuration endpoint"),
                                     name='showInConfigurationEndpoint',
-                                    checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
+                                    checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint',''),
+                                    jans_help='Configuration Endpoint',
                                     style='class:outh-scope-checkbox',
                             ),
 
@@ -258,13 +297,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
+                                    jans_help=self.myparent.get_help_from_schema(schema,'defaultScope'),
                                     style='class:outh-scope-checkbox',
                             ),
 
                             self.myparent.getTitledCheckBox(
                                     _("Show in configuration endpoint"),
                                     name='showInConfigurationEndpoint',
-                                    checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint','') ,
+                                    checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint',''),
+                                    jans_help='Configuration Endpoint',
                                     style='class:outh-scope-checkbox',
                             ),
 
@@ -291,6 +332,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText(_("Dynamic Scope Script"),
                             name='dynamicScopeScripts',
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
+                            jans_help=self.myparent.get_help_from_schema(schema,'dynamicScopeScripts'),
                             height=3, 
                             style='class:outh-scope-text'),
                         
@@ -306,6 +348,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 name='claims',
                                 value='\n'.join(self.data.get('claims', [])),
                                 height=3, 
+                                jans_help=self.myparent.get_help_from_schema(schema,'claims'),
                                 style='class:outh-scope-text'),
 
                         # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
@@ -314,8 +357,22 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     )
 
         self.alt_tabs['spontaneous'] = HSplit([
-                    self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='class:outh-scope-text',read_only=True,height=3,),## Not fount
-                    self.myparent.getTitledText(_("Creationg time"), name='creationDate', value=self.data.get('creationDate',''), style='class:outh-scope-text',read_only=True,),
+                    self.myparent.getTitledText(
+                        _("Associated Client"), 
+                        name='none', 
+                        value=self.data.get('none',''), 
+                        style='class:outh-scope-text',
+                        read_only=True,
+                        jans_help=self.myparent.get_help_from_schema(schema,'none'),
+                        height=3,),## Not fount
+
+                    self.myparent.getTitledText(
+                        _("Creationg time"), 
+                        name='creationDate', 
+                        value=self.data.get('creationDate',''), 
+                        jans_help=self.myparent.get_help_from_schema(schema,'creationDate'),
+                        style='class:outh-scope-text',
+                        read_only=True,),
 
                                                 ],width=D(),
                     )
@@ -324,21 +381,43 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
         self.alt_tabs['uma'] = HSplit([
-                    self.myparent.getTitledText(_("IconURL"), name='iconUrl', value=self.data.get('iconUrl',''), style='class:outh-scope-text'),
+                    self.myparent.getTitledText(
+                        _("IconURL"), 
+                        name='iconUrl', 
+                        value=self.data.get('iconUrl',''), 
+                        jans_help=self.myparent.get_help_from_schema(schema,'iconUrl'),
+                        style='class:outh-scope-text'),
                     
 
                     self.myparent.getTitledText(_("Authorization Policies"),
                             name='umaAuthorizationPolicies',
                             value='\n'.join(self.data.get('umaAuthorizationPolicies', [])),
                             height=3, 
+                            jans_help=self.myparent.get_help_from_schema(schema,'umaAuthorizationPolicies'),
                             style='class:outh-scope-text'),
 
-                    self.myparent.getTitledText(_("Associated Client"), name='none', value=self.data.get('none',''), style='class:outh-scope-text',read_only=True,height=3,), ## Not fount
-                    self.myparent.getTitledText(_("Creationg time"), name='description', value=self.data.get('description',''), style='class:outh-scope-text',read_only=True,),
+                    self.myparent.getTitledText(
+                        _("Associated Client"), 
+                        name='none', 
+                        value=self.data.get('none',''), 
+                        jans_help=self.myparent.get_help_from_schema(schema,'none'),
+                        style='class:outh-scope-text',
+                        read_only=True,
+                        height=3,), ## Not fount
+
+                    self.myparent.getTitledText(
+                        _("Creationg time"), 
+                        name='description', 
+                        value=self.data.get('description',''), 
+                        jans_help=self.myparent.get_help_from_schema(schema,'description'),
+                        style='class:outh-scope-text',
+                        read_only=True,),
+
                     self.myparent.getTitledText(
                                     _("Creator"), 
                                     name='Creator',
                                     style='class:outh-scope-text',
+                                    jans_help=self.myparent.get_help_from_schema(schema,'Creator'),
                                     read_only=True,
                                     value=uma_creator
                                     ),
