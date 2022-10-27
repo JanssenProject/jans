@@ -209,7 +209,7 @@ class Plugin():
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('configuration', '[D]ynamic Configuration'), ('static', 'S[t]atic Configuration'), ('registration', 'R[e]gistrations')],
+                    entries=[('configuration', '[D]ynamic Configuration'), ('static', 'S[t]atic Configuration')],
                     selection_changed=self.nav_selection_changed,
                     select=0,
                     jans_name='fido:nav_bar'
