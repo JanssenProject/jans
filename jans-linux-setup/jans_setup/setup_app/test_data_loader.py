@@ -91,6 +91,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         dn, oxauth_conf_dynamic = self.dbUtils.get_oxAuthConfDynamic()
         agama_config=oxauth_conf_dynamic["agamaConfiguration"].copy()
         agama_config['disableTCHV'] = True
+        agama_config['enabled'] = True
         self.dbUtils.set_oxAuthConfDynamic({'agamaConfiguration': agama_config})
 
 
