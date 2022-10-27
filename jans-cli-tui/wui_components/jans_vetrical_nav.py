@@ -86,7 +86,8 @@ class JansVerticalNav():
         self.on_display = on_display
         if get_help:
             self.get_help, self.scheme = get_help
-            self.get_help(data=self.data[self.selectes],scheme=self.scheme)
+            if self.data :
+                self.get_help(data=self.data[self.selectes],scheme=self.scheme)
         else:
             self.get_help= None
         self.all_data=all_data
