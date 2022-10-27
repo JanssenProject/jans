@@ -166,7 +166,14 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                         ['DISCOVERY', 'Discovery'],
                         ]
 
-        self.location_widget = self.myparent.getTitledText(_("          Path"), name='locationPath', value=self.data.get('locationPath',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'locationPath'))
+        self.location_widget = self.myparent.getTitledText(
+            _("          Path"), 
+            name='locationPath', 
+            value=self.data.get('locationPath',''), 
+            style='class:script-titledtext', 
+            jans_help="locationPath"
+            )
+
         self.set_location_widget_state(self.data.get('locationPath') == 'file')
 
         config_properties_title = _("Conf. Properties: ")
@@ -185,6 +192,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 on_enter=self.edit_property,
                 on_delete=self.delete_config_property,
                 on_display=self.myparent.data_display_dialog,
+                get_help=(self.get_help,'Properties'),
                 selectes=0,
                 headerColor='class:outh-client-navbar-headcolor',
                 entriesColor='class:outh-client-navbar-entriescolor',
@@ -207,6 +215,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 on_enter=self.edit_property,
                 on_delete=self.delete_config_property,
                 on_display=self.myparent.data_display_dialog,
+                get_help=(self.get_help,'Properties'),
                 selectes=0,
                 headerColor='class:outh-client-navbar-headcolor',
                 entriesColor='class:outh-client-navbar-entriescolor',
@@ -307,6 +316,17 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
             )
+    
+    
+    def get_help(self, **kwargs: Any):
+
+        # schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/{}'.format(str(kwargs['scheme'])))
+    
+        if kwargs['scheme'] == 'Properties':
+            self.myparent.status_bar_text= kwargs['data'][0]
+
+
+
 
     def script_lang_changed(
         self, 

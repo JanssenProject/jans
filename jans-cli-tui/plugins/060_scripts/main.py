@@ -153,6 +153,7 @@ class Plugin():
                     data=data,
                     on_enter=self.add_script_dialog,
                     on_display=self.app.data_display_dialog,
+                    get_help=(self.get_help,'Scripts'),
                     #on_delete=self.delete_scope,
                     # selection_changed=self.data_selection_changed,
                     selectes=0,
@@ -183,6 +184,15 @@ class Plugin():
 
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.scripts_main_area)
+
+    def get_help(self, **kwargs: Any):
+
+        # schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/{}'.format(str(kwargs['scheme'])))
+    
+        if kwargs['scheme'] == 'Scripts':
+            self.app.status_bar_text= kwargs['data'][2]
+
+
 
     def search_scripts(self, tbuffer:Buffer,) -> None:
         if not len(tbuffer.text) > 2:
