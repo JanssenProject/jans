@@ -90,10 +90,11 @@ class JansNavBar():
         if not self._set_tab_for_view(self.myparent.nav_bar, ev):
         # then set sub navbar
             cur_plugin = self.myparent.nav_bar.cur_navbar_selection
-            cur_view = self.myparent._plugins[cur_plugin].nav_bar
-
-            self._set_tab_for_view(cur_view, ev)
-
+            try: ## i couldnt access the plugin content from here
+                cur_view = self.myparent._plugins[cur_plugin].nav_bar
+                self._set_tab_for_view(cur_view, ev)
+            except:
+                pass
 
     def add_key_binding(
         self, 
