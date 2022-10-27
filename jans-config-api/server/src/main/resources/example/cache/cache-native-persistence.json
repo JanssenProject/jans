@@ -1,0 +1,6 @@
+{
+    "defaultPutExpiration": 60,
+    "defaultCleanupBatchSize": 10000,
+    "deleteExpiredOnGetRequest": false,
+    "disableAttemptUpdateBeforeInsert": false
+}

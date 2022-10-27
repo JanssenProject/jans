@@ -1,0 +1,21 @@
+[
+    {
+        "configId": "auth_ldap_server",
+        "bindDN": "cn=directory manager",
+        "bindPassword": "password==",
+        "servers": [
+            "jans.server:1636"
+        ],
+        "maxConnections": 1000,
+        "useSSL": true,
+        "baseDNs": [
+            "ou=people,o=jans"
+        ],
+        "primaryKey": "uid",
+        "localPrimaryKey": "uid",
+        "useAnonymousBind": false,
+        "enabled": false,
+        "version": 0,
+        "level": 0
+    }
+]

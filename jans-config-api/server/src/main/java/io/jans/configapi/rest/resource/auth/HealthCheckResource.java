@@ -8,6 +8,7 @@ import io.jans.configapi.util.ApiConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -31,7 +32,7 @@ public class HealthCheckResource extends ConfigBaseResource {
     @Operation(summary = "Returns auth server health status", description = "Returns auth server health status", operationId = "get-auth-server-health", tags = {
             "Auth Server Health - Check" })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/health/health.json"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Produces(MediaType.APPLICATION_JSON)

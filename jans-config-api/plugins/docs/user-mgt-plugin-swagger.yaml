@@ -56,6 +56,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserPagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 23,
+                        "entriesCount": 2,
+                        "entries": [
+                            {
+                                "dn": "inum=XXXX.DDDD-4444,ou=people,o=jans",
+                                "userId": "dddd4444",
+                                "customAttributes": [
+                                    {
+                                        "name": "sn",
+                                        "multiValued": false,
+                                        "values": [
+                                            "FilterTest"
+                                        ],
+                                        "value": "FilterTest",
+                                        "displayValue": "FilterTest"
+                                    }
+                                ],
+                                "customObjectClasses": [
+                                    "top",
+                                    "jansCustomPerson"
+                                ],
+                                "inum": "XXXX.DDDD-4444",
+                                "displayName": "Test Dddd 4444",
+                                "jansStatus": "active",
+                                "givenName": "(special chars\\)/*",
+                                "baseDn": "inum=XXXX.DDDD-4444,ou=people,o=jans"
+                            },
+                            {
+                                "dn": "inum=XXXX.EEEE-1111,ou=people,o=jans",
+                                "userId": "eeee1111",
+                                "customObjectClasses": [
+                                    "top",
+                                    "jansCustomPerson"
+                                ],
+                                "inum": "XXXX.EEEE-1111",
+                                "jansStatus": "active",
+                                "baseDn": "inum=XXXX.EEEE-1111,ou=people,o=jans"
+                            }
+                        ]
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -70,10 +116,95 @@ paths:
       description: Update User
       operationId: put-user
       requestBody:
+        description: User object
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CustomUser'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                      "userId": "testUser1",
+                      "createdAt": "2022-10-27T22:45:48",
+                      "customAttributes": [
+                          {
+                              "name": "birthdate",
+                              "multiValued": false,
+                              "values": [
+                                  "20001231041508.553Z"
+                              ],
+                              "value": "20001231041508.553Z",
+                              "displayValue": "20001231041508.553Z"
+                          },
+                          {
+                              "name": "emailVerified",
+                              "multiValued": false,
+                              "values": [
+                                  "TRUE"
+                              ],
+                              "value": "TRUE",
+                              "displayValue": "TRUE"
+                          },
+                          {
+                              "name": "jansAdminUIRole",
+                              "multiValued": false,
+                              "values": [
+                                  "api-admin"
+                              ],
+                              "value": "api-admin",
+                              "displayValue": "api-admin"
+                          },
+                          {
+                              "name": "memberOf",
+                              "multiValued": false,
+                              "values": [
+                                  "inum=60B7,ou=groups,o=jans"
+                              ],
+                              "value": "inum=60B7,ou=groups,o=jans",
+                              "displayValue": "inum=60B7,ou=groups,o=jans"
+                          },
+                          {
+                              "name": "middleName",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "nickname",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "sn",
+                              "multiValued": false,
+                              "values": [
+                                  "User3"
+                              ],
+                              "value": "User3",
+                              "displayValue": "User3"
+                          }
+                      ],
+                      "customObjectClasses": [
+                          "top",
+                          "jansCustomPerson"
+                      ],
+                      "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                      "mail": "test3@jans.server",
+                      "displayName": "Default Test User 32",
+                      "jansStatus": "active",
+                      "givenName": "Test3",
+                      "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                  }
       responses:
         "200":
           description: Ok
@@ -81,6 +212,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
         "401":
           description: Unauthorized
         "404":
@@ -97,10 +312,92 @@ paths:
       description: Create new User
       operationId: post-user
       requestBody:
+        description: User object
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CustomUser'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "userId": "testUser1",
+                      "createdAt": "2022-05-30T20:06:57",
+                      "customAttributes": [
+                          {
+                              "name": "emailVerified",
+                              "multiValued": false,
+                              "values": [
+                                  "TRUE"
+                              ],
+                              "value": "TRUE",
+                              "displayValue": "TRUE"
+                          },
+                          {
+                              "name": "jansAdminUIRole",
+                              "multiValued": false,
+                              "values": [
+                                  "api-admin"
+                              ],
+                              "value": "api-admin",
+                              "displayValue": "api-admin"
+                          },
+                          {
+                              "name": "memberOf",
+                              "multiValued": false,
+                              "values": [
+                                  "inum=60B7,ou=groups,o=jans"
+                              ],
+                              "value": "inum=60B7,ou=groups,o=jans",
+                              "displayValue": "inum=60B7,ou=groups,o=jans"
+                          },
+                          {
+                              "name": "middleName",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "nickname",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "sn",
+                              "multiValued": false,
+                              "values": [
+                                  "User3"
+                              ],
+                              "value": "User3",
+                              "displayValue": "User3"
+                          },{
+                                  "name": "birthdate",
+                                  "multiValued": false,
+                                  "values": [
+                                      "20001231041508.553Z"
+                                  ],
+                                  "value": "20001231041508.553Z",
+                                  "displayValue": "20001231041508.553Z"
+                              }
+                      ],
+                      "customObjectClasses": [
+                          "top",
+                          "jansCustomPerson"
+                      ],
+                      "mail": "test3@jans.server",
+                      "displayName": "Default Test User 32",
+                      "jansStatus": "active",
+                      "givenName": "Test3",
+                      "userPassword": "test123"
+                  }
       responses:
         "201":
           description: Created
@@ -108,6 +405,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -135,6 +516,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
         "401":
           description: Unauthorized
         "404":
@@ -186,16 +651,27 @@ paths:
           application/json-patch+json:
             schema:
               $ref: '#/components/schemas/UserPatchRequest'
-            example:
-            - jsonPatchString:
-                op: add
-                path: userId
-                value: test-user
-              customAttributes:
-              - name: "name, displayName, birthdate, email"
-                multiValued: true
-                values:
-                - string
+            examples:
+              Request json example:
+                description: Request json example
+                value: "{\n   \"jsonPatchString\": \"[ {\\\"op\\\":\\\"add\\\", \\\
+                  \"path\\\": \\\"/userId\\\", \\\"value\\\":\\\"config_test_user_100_final_patch\\\
+                  \" } ]\",\n   \"customAttributes\": [{\n            \"name\": \"\
+                  emailVerified\",\n            \"multiValued\": false,\n        \
+                  \    \"values\": [\n                \"TRUE\"\n            ],\n \
+                  \           \"value\": \"TRUE\",\n            \"displayValue\":\
+                  \ \"TRUE\"\n        },\n\t\t{\n            \"name\": \"secretAnswer\"\
+                  ,\n            \"multiValued\": false,\n            \"values\":\
+                  \ [\n                \"james-bond@123\"\n            ],\n      \
+                  \      \"value\": \"james-bond@123\",\n            \"displayValue\"\
+                  : \"james-bond@123\"\n        },\n        {\n            \"name\"\
+                  : \"jansImsValue\",\n            \"multiValued\": true,\n      \
+                  \      \"values\": [{\n\t\t\t  \"value\": \"123456\",\n\t\t\t  \"\
+                  display\": \"Home phone\",\n\t\t\t  \"type\": \"home\",\n\t\t\t\
+                  \  \"primary\": true\t\t\t\n\t\t\t},\n\t\t\t{\n\t\t\t  \"value\"\
+                  : \"9821789\",\n\t\t\t  \"display\": \"Work phone\",\n\t\t\t  \"\
+                  type\": \"work\",\n\t\t\t  \"primary\": false\t\t\t\n\t\t\t}\n \
+                  \               \n            ]\n        }\n        ]\n}\n"
       responses:
         "200":
           description: Ok
@@ -203,6 +679,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
         "401":
           description: Unauthorized
         "404":
