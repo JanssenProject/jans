@@ -208,17 +208,57 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 read_only=True,
                                 style='class:outh-client-text'),
 
-                        self.myparent.getTitledCheckBox(_("Active"), name='disabled', checked= not self.data.get('disabled'), jans_help=self.myparent.get_help_from_schema(schema, 'disabled'), style='class:outh-client-checkbox'),
-                        self.myparent.getTitledText(_("Client Name"), name='displayName', value=self.data.get('displayName',''), jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), style='class:outh-client-text'),
-                        self.myparent.getTitledText(_("Client Secret"), name='clientSecret', value=self.data.get('clientSecret',''), jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), style='class:outh-client-text'),
-                        self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:outh-client-text'),
-                        
-                        self.myparent.getTitledText(_("Authn Method token endpoint"),## TODO not titledtext
-                            name='tokenEndpointAuthMethodsSupported',  ## TODO AppConfiguration
-                            value='\n'.join(self.data.get('tokenEndpointAuthMethodsSupported', [])),## TODO Not in attributes >> in get-properties
-                            height=3, 
+                        self.myparent.getTitledCheckBox(
+                            _("Active"), 
+                            name='disabled', 
+                            checked= not self.data.get('disabled'), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'disabled'), 
+                            style='class:outh-client-checkbox'),
+
+                        self.myparent.getTitledText(
+                            _("Client Name"), 
+                            name='displayName', 
+                            value=self.data.get('displayName',''), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), 
                             style='class:outh-client-text'),
-                            
+
+                        self.myparent.getTitledText(
+                            _("Client Secret"), 
+                            name='clientSecret', 
+                            value=self.data.get('clientSecret',''), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), 
+                            style='class:outh-client-text'),
+
+                        self.myparent.getTitledText(
+                            _("Description"), 
+                            name='description', 
+                            value=self.data.get('description',''), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'description'),
+                            style='class:outh-client-text'),
+                        
+                        # self.myparent.getTitledText(_("Authn Method token endpoint"),## TODO not titledtext
+                        #     name='tokenEndpointAuthMethodsSupported',  ## TODO AppConfiguration
+                        #     value='\n'.join(self.data.get('tokenEndpointAuthMethodsSupported', [])),## TODO Not in attributes >> in get-properties
+                        #     height=3, 
+                        #     style='class:outh-client-text'),
+
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
+                        self.myparent.getTitledCheckBoxList(
+                                _("Authn Method token endpoint"),
+                                name='tokenEndpointAuthMethodsSupported', 
+                                values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
+                                current_values=self.data.get('tokenEndpointAuthMethodsSupported', []), 
+                                jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    'tokenEndpointAuthMethodsSupported'),
+                                style='class:outh-client-checkboxlist'),
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
+
+
                         self.myparent.getTitledRadioButton(
                                 _("Subject Type"), 
                                 name='subjectType', 
@@ -227,7 +267,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 jans_help=self.myparent.get_help_from_schema(schema, 'subjectType'),
                                 style='class:outh-client-radiobutton'),
 
-                        self.myparent.getTitledText(_("Sector Identifier URI"), name='sectorIdentifierUri', value=self.data.get('sectorIdentifierUri',''), jans_help=self.myparent.get_help_from_schema(schema, 'sectorIdentifierUri'), style='class:outh-client-text'),
+                        self.myparent.getTitledText(
+                            _("Sector Identifier URI"), 
+                            name='sectorIdentifierUri', 
+                            value=self.data.get('sectorIdentifierUri',''), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'sectorIdentifierUri'), 
+                            style='class:outh-client-text'),
                                 
                         self.myparent.getTitledCheckBoxList(
                                 _("Grant"), 
@@ -244,20 +289,50 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 current_values=self.data.get('responseTypes', []), 
                                 jans_help=self.myparent.get_help_from_schema(schema, 'responseTypes'),
                                 style='class:outh-client-checkboxlist'),
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
+                        self.myparent.getTitledCheckBox(_("Supress Authorization"),## TODO AppConfiguration
+                                name='dynamicRegistrationPersistClientAuthorizations',
+                                checked=self.data.get('dynamicRegistrationPersistClientAuthorizations'),
+                                jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    'tokenEndpointAuthMethodsSupported'),
+                                style='class:outh-client-checkbox'),
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------------#
 
-                        self.myparent.getTitledCheckBox(_("Supress Authorization"),
-                        name='dynamicRegistrationPersistClientAuthorizations',
-                        checked=self.data.get('dynamicRegistrationPersistClientAuthorizations'),
-                        style='class:outh-client-checkbox'),
-
-                        self.myparent.getTitledRadioButton(_("Application Type"), name='applicationType', values=['native','web'], current_value=self.data.get('applicationType'), style='class:outh-client-radiobutton'),
+                        self.myparent.getTitledRadioButton(
+                            _("Application Type"), 
+                            name='applicationType', 
+                            values=['native','web'], 
+                            current_value=self.data.get('applicationType'), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'applicationType'),
+                            style='class:outh-client-radiobutton'),
                         
-                        self.myparent.getTitledText(_("Redirect Uris"), name='redirectUris', value='\n'.join(self.data.get('redirectUris', [])), height=3, style='class:outh-client-textrequired'),
-                        self.myparent.getTitledText(_("Redirect Regex"), name='redirectUrisRegex', value=self.data.get('attributes', {}).get('redirectUrisRegex',''), style='class:outh-client-text'), 
-                        self.myparent.getTitledText(_("Scopes"),
+                        self.myparent.getTitledText(
+                            _("Redirect Uris"), 
+                            name='redirectUris', 
+                            value='\n'.join(self.data.get('redirectUris', [])), 
+                            height=3, 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'redirectUris'),
+                            style='class:outh-client-textrequired'),
+
+                        self.myparent.getTitledText( ## ClientAttributes
+                            _("Redirect Regex"), 
+                            name='redirectUrisRegex', 
+                            value=self.data.get('attributes', {}).get('redirectUrisRegex',''), 
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'redirectUrisRegex'),
+                            style='class:outh-client-text'), 
+
+                        self.myparent.getTitledText(_("Scopes"), 
                             name='scopes',
                             value='\n'.join(self.data.get('scopes', [])),
                             height=3, 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'scopes'),
                             style='class:outh-client-text'),
 
                         ],width=D(),
@@ -277,49 +352,100 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             _("Incliude Claims in id_token"),
                             name='includeClaimsInIdToken',
                             checked=self.data.get('includeClaimsInIdToken'),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'includeClaimsInIdToken'),
                             style='class:outh-client-checkbox'),
 
                         self.myparent.getTitledCheckBox(
                             _("Run introspection script before JWT access token creation"),
                             name='runIntrospectionScriptBeforeJwtCreation',
                             checked=self.data.get('attributes', {}).get('runIntrospectionScriptBeforeJwtCreation'),
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'runIntrospectionScriptBeforeJwtCreation'),
                             style='class:outh-client-checkbox'),
 
                         self.myparent.getTitledText(
                             title=_("Token binding confirmation  method for id_token"),
                             name='idTokenTokenBindingCnf',
                             value=self.data.get('idTokenTokenBindingCnf',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'idTokenTokenBindingCnf'),
                             style='class:outh-client-text'),
+
                         self.myparent.getTitledText(
                             title=_("Access token additional audiences"),
                             name='additionalAudience',
                             value='\n'.join(self.data.get('attributes', {}).get('additionalAudience',[])),
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'additionalAudience'),                                
                             style='class:outh-client-text',
                             height = 3),
 
-                        self.myparent.getTitledText(_("Access token lifetime"), name='accessTokenLifetime', value=self.data.get('accessTokenLifetime',''),style='class:outh-client-text'),
-                        self.myparent.getTitledText(_("Refresh token lifetime"), name='refreshTokenLifetime', value=self.data.get('refreshTokenLifetime',''),style='class:outh-client-text'),
-                        self.myparent.getTitledText(_("Defult max authn age"), name='defaultMaxAge', value=self.data.get('defaultMaxAge',''),style='class:outh-client-text'),
+                        self.myparent.getTitledText(
+                            _("Access token lifetime"), 
+                            name='accessTokenLifetime', 
+                            value=self.data.get('accessTokenLifetime',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'accessTokenLifetime'),
+                            style='class:outh-client-text'),
+
+                        self.myparent.getTitledText(
+                            _("Refresh token lifetime"), 
+                            name='refreshTokenLifetime', 
+                            value=self.data.get('refreshTokenLifetime',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'refreshTokenLifetime'),
+                            style='class:outh-client-text'),
+
+                        self.myparent.getTitledText(
+                            _("Defult max authn age"), 
+                            name='defaultMaxAge', 
+                            value=self.data.get('defaultMaxAge',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'defaultMaxAge'),
+                            style='class:outh-client-text'),
 
                     ],width=D(),style='class:outh-client-tabs')
 
         self.tabs['Logout'] = HSplit([
             
-                        self.myparent.getTitledText(_("Front channel logout URI"), name='frontChannelLogoutUri', value=self.data.get('frontChannelLogoutUri',''), style='class:outh-client-text'),
-                        self.myparent.getTitledText(_("Post logout redirect URIs"), name='postLogoutRedirectUris', value='\n'.join(self.data.get('postLogoutRedirectUris',[])), height=3, style='class:outh-client-text'),
+                        self.myparent.getTitledText(
+                            _("Front channel logout URI"), 
+                            name='frontChannelLogoutUri', 
+                            value=self.data.get('frontChannelLogoutUri',''), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'frontChannelLogoutUri'), ## No Descritption
+                            style='class:outh-client-text'),
+
+                        self.myparent.getTitledText(
+                            _("Post logout redirect URIs"), 
+                            name='postLogoutRedirectUris', 
+                            value='\n'.join(self.data.get('postLogoutRedirectUris',[])), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'postLogoutRedirectUris'),
+                            height=3, style='class:outh-client-text'),
+
                         self.myparent.getTitledText(
                             _("Back channel logout URI"), 
                             name='backchannelLogoutUri', 
                             value='\n'.join(self.data.get('attributes', {}).get('backchannelLogoutUri',[]) ),
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'backchannelLogoutUri'), 
                             height=3, style='class:outh-client-text'
                             ),
+                        
                         self.myparent.getTitledCheckBox(
                             _("Back channel logout session required"), 
                             name='backchannelLogoutSessionRequired', 
                             checked=self.data.get('attributes', {}).get('backchannelLogoutSessionRequired'),
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'backchannelLogoutSessionRequired'),                             
                             style='class:outh-client-checkbox'
                             ),
-                        self.myparent.getTitledCheckBox(_("Front channel logout session required"), name='frontChannelLogoutSessionRequired', checked=self.data.get('frontChannelLogoutSessionRequired'),style='class:outh-client-checkbox'),
+                        
+                        self.myparent.getTitledCheckBox(
+                            _("Front channel logout session required"), 
+                            name='frontChannelLogoutSessionRequired', 
+                            checked=self.data.get('frontChannelLogoutSessionRequired'),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'frontChannelLogoutSessionRequired'),## No Descritption
+                            style='class:outh-client-checkbox'),
 
                         ],width=D(),style='class:outh-client-tabs'
                     )
@@ -340,17 +466,36 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='contacts',
                             value='\n'.join(self.data.get('contacts', [])), 
                             height=3,
+                            jans_help=self.myparent.get_help_from_schema(schema, 'contacts'),
                             style='class:outh-client-text'),
 
             self.myparent.getTitledText(_("Authorized JS origins"),  ### height =3 insted of the <+> button
                             name='authorizedOrigins',
                             value='\n'.join(self.data.get('authorizedOrigins', [])), 
                             height=3,
+                            jans_help=self.myparent.get_help_from_schema(schema, 'authorizedOrigins'),
                             style='class:outh-client-text'),
 
-            self.myparent.getTitledText(title =_("Software id"), name='softwareId', value=self.data.get('softwareId',''),style='class:outh-client-text'),
-            self.myparent.getTitledText(title =_("Software version"), name='softwareVersion', value=self.data.get('softwareVersion',''), style='class:outh-client-text'),
-            self.myparent.getTitledText(title =_("Software statement"), name='softwareStatement', value=self.data.get('softwareStatement',''), style='class:outh-client-text'),
+            self.myparent.getTitledText(
+                title =_("Software id"), 
+                name='softwareId', 
+                value=self.data.get('softwareId',''),
+                jans_help=self.myparent.get_help_from_schema(schema, 'softwareId'),
+                style='class:outh-client-text'),
+
+            self.myparent.getTitledText(
+                title =_("Software version"), 
+                name='softwareVersion', 
+                value=self.data.get('softwareVersion',''), 
+                jans_help=self.myparent.get_help_from_schema(schema, 'softwareVersion'),
+                style='class:outh-client-text'),
+
+            self.myparent.getTitledText(
+                title =_("Software statement"), 
+                name='softwareStatement', 
+                value=self.data.get('softwareStatement',''), 
+                jans_help=self.myparent.get_help_from_schema(schema, 'softwareStatement'),
+                style='class:outh-client-text'),
             
         ],width=D(),style='class:outh-client-tabs')
 
@@ -370,30 +515,62 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.tabs['CIBA/PAR/UMA'] = HSplit([
                         Label(text=_("CIBA"),style='class:outh-client-label'),
-                        self.myparent.getTitledRadioButton(_("Token delivery method"), name='backchannelTokenDeliveryMode', current_value=self.data.get('backchannelTokenDeliveryMode'), values=['poll','push', 'ping'],style='class:outh-client-radiobutton'),
-                        self.myparent.getTitledText(title =_("Client notification endpoint"), name='backchannelClientNotificationEndpoint', value=self.data.get('backchannelClientNotificationEndpoint',''),style='class:outh-client-text'),
+                        self.myparent.getTitledRadioButton(
+                            _("Token delivery method"), 
+                            name='backchannelTokenDeliveryMode', 
+                            current_value=self.data.get('backchannelTokenDeliveryMode'), 
+                            values=['poll','push', 'ping'],
+                            jans_help=self.myparent.get_help_from_schema(schema, 'backchannelTokenDeliveryMode'),
+                            style='class:outh-client-radiobutton'),
+
+                        self.myparent.getTitledText(
+                            title =_("Client notification endpoint"), 
+                            name='backchannelClientNotificationEndpoint', 
+                            value=self.data.get('backchannelClientNotificationEndpoint',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'backchannelClientNotificationEndpoint'),
+                            style='class:outh-client-text'),
+                        
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
                         self.myparent.getTitledCheckBox(
                             _("Require user code param"), 
                             name='backchannelUserCodeParameterSupported',   ## TODO AppConfiguration
                             checked=self.data.get('attributes', {}).get('backchannelUserCodeParameterSupported'),## TODO Not in attributes >> in get-properties
-                            style='class:outh-client-checkbox'
+                            style='class:outh-client-checkbox',
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    'backchannelUserCodeParameterSupported'),
                             ),
-                        
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+
                         Label(text=_("PAR"),style='class:outh-client-label'),
 
                         self.myparent.getTitledText(
                             title =_("Request lifetime"), 
                             name='parLifetime', 
                             value=self.data.get('attributes', {}).get('parLifetime',0),
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'parLifetime'),                            
                             style='class:outh-client-text'),
-                            
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
                         self.myparent.getTitledCheckBox(
                             _("Request PAR"), 
                             name='sessionIdRequestParameterEnabled', ## TODO AppConfiguration
                             checked=self.data.get('attributes', {}).get('sessionIdRequestParameterEnabled'),## TODO Not in attributes >> in get-properties
-                            style='class:outh-client-checkbox'
-                            ),
-
+                            style='class:outh-client-checkbox',
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    'sessionIdRequestParameterEnabled'),
+                                ),
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
                         Label(_("UMA"), style='class:outh-client-label'),
 
                         self.myparent.getTitledRadioButton(
@@ -401,21 +578,32 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='rptAsJwt',  
                             values=[('jwt', 'JWT'), ('reference', 'Reference')], 
                             current_value='jwt' if self.data.get('rptAsJwt') else 'reference',
+                            jans_help=self.myparent.get_help_from_schema(schema, 'rptAsJwt'),
                             style='class:outh-client-radiobutton'),
 
                         self.myparent.getTitledText(
                             title =_("Claims redirect URI"),
                              name='claimRedirectUris',
                               value='\n'.join(self.data.get('claimRedirectUris','')),
+                              jans_help=self.myparent.get_help_from_schema(schema, 'claimRedirectUris'),
                               height=3,
                               style='class:outh-client-text'),
-
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
                         self.myparent.getTitledText(_("UMA Authorization Policies"),
                             name='umaAuthorizationPolicies',  ## TODO Scopes!!
                             value='\n'.join(self.data.get('attributes', {}).get('umaAuthorizationPolicies',[]) ),
                             height=3,
-                            style='class:outh-client-text'),
-                            
+                            style='class:outh-client-text',
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
+                                    'umaAuthorizationPolicies'),
+                                ),
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+                        #-------------------------------------------------------------------#
+
                     self.resources if self.data.get('inum','') else  HSplit([],width=D())
 
                         ],width=D(),style='class:outh-client-tabs'
@@ -423,8 +611,19 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
 
         encryption_signing = [
-                        self.myparent.getTitledText(title =_("Client JWKS URI"), name='jwksUri', value=self.data.get('jwksUri',''),style='class:outh-client-text'),
-                        self.myparent.getTitledText(title =_("Client JWKS"), name='jwks', value=self.data.get('jwks',''),style='class:outh-client-text'),
+                        self.myparent.getTitledText(
+                            title =_("Client JWKS URI"), 
+                            name='jwksUri', 
+                            value=self.data.get('jwksUri',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'jwksUri'),
+                            style='class:outh-client-text'),
+
+                        self.myparent.getTitledText(
+                            title =_("Client JWKS"), 
+                            name='jwks', 
+                            value=self.data.get('jwks',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'jwks'),
+                            style='class:outh-client-text'),
                         ]
 
 
@@ -478,6 +677,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     value='\n'.join(self.data.get('attributes', {}).get('spontaneousScopeScriptDns',[]) ),
                     read_only=False if 'allowSpontaneousScopes' in self.data and self.data.get('attributes', {}).get('allowSpontaneousScopes') else True,
                     focusable=True,
+                    jans_help=self.myparent.get_help_from_schema(
+                            self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                            'spontaneousScopeScriptDns'),
                     height=3,
                     style='class:outh-client-text')
 
@@ -488,14 +690,28 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             _("Default Prompt login"), 
                             name='jansDefaultPromptLogin', 
                             checked=self.data.get('attributes', {}).get('jansDefaultPromptLogin'),
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'jansDefaultPromptLogin'),
+
                             style='class:outh-client-checkbox'
                             ),
-                        self.myparent.getTitledCheckBox(_("Persist Authorizations"), name='persistClientAuthorizations', checked=self.data.get('persistClientAuthorizations'), style='class:outh-client-checkbox'),
+                        
+                        self.myparent.getTitledCheckBox(
+                            _("Persist Authorizations"), 
+                            name='persistClientAuthorizations', 
+                            checked=self.data.get('persistClientAuthorizations'), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'persistClientAuthorizations'),
+                            style='class:outh-client-checkbox'),
+
                         self.myparent.getTitledCheckBox(
                             _("Allow spontaneos scopes"), 
                             name='allowSpontaneousScopes', 
                             checked=self.data.get('attributes', {}).get('allowSpontaneousScopes'),
                             on_selection_changed=allow_spontaneous_changed, 
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    'allowSpontaneousScopes'),
                             style='class:outh-client-checkbox'
                             ),
 
@@ -504,37 +720,61 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         VSplit([   ## TODO what the functionality would be?
                                 Label(text=_("Spontaneous scopes"),style='class:outh-client-label',width=len(_("Spontaneous scopes")*2)), ## TODO
-                                Button(_("View current"), handler=self.show_client_scopes,left_symbol='<',right_symbol='>',width=len(_("View current"))+2)
+                                Button(
+                                    _("View current"), 
+                                    handler=self.show_client_scopes,
+                                    left_symbol='<',
+                                    right_symbol='>',
+                                    width=len(_("View current"))+2)
+
                         ])  if self.data.get('inum','') else  HSplit([],width=D()),
 
-                        self.myparent.getTitledText(_("Initial Login URI"), name='initiateLoginUri', value=self.data.get('initiateLoginUri',''),style='class:outh-client-text'),
+                        self.myparent.getTitledText(
+                            _("Initial Login URI"), 
+                            name='initiateLoginUri', 
+                            value=self.data.get('initiateLoginUri',''),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'initiateLoginUri'),
+                            style='class:outh-client-text'),
 
                         self.myparent.getTitledText(_("Request URIs"), ### height =3 insted of the <+> button
                             name='requestUris',
                             value='\n'.join(self.data.get('requestUris', [])),
                             height=3,
+                            jans_help=self.myparent.get_help_from_schema(schema, 'requestUris'),
                             style='class:outh-client-text'),
 
                         self.myparent.getTitledText(_("Default  ACR"), ### height =3 >> "the type is array" cant be dropdown
                             name='defaultAcrValues',
                             value='\n'.join(self.data.get('defaultAcrValues', [])), 
                             height=3,
+                            jans_help=self.myparent.get_help_from_schema(schema, 'defaultAcrValues'),
                             style='class:outh-client-text'),
 
                         self.myparent.getTitledText(_("Allowed  ACR"), ### height =3 insted of the <+> button
                             name='jansAuthorizedAcr',
                             value='\n'.join(self.data.get('attributes', {}).get('jansAuthorizedAcr',[])),
                             height=3,
+                            jans_help=self.myparent.get_help_from_schema(
+                            self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                            'jansAuthorizedAcr'),
                             style='class:outh-client-text'),
 
 
-
+                        #-----------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------#
                         self.myparent.getTitledText(
                             _("TLS Subject DN"), 
                             name='x5c',   ## TODO >> JsonWebKey
                             value='\n'.join(self.data.get('attributes', {}).get('x5c',[])),
-                            height=3, style='class:outh-client-text'
-                            ),
+                            height=3, style='class:outh-client-text',
+                            jans_help=self.myparent.get_help_from_schema(
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/JsonWebKey'), 
+                                    'x5c'),
+                                ),
+                        #-----------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------#
+                        #-----------------------------------------------------------------------#
 
                         self.myparent.getTitledWidget(
                                 _("Client Expiration Date"),
@@ -556,44 +796,62 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 name='spontaneousScopes',
                 value='\n'.join(self.data.get('attributes', {}).get('spontaneousScopes',[])), 
                 height=3,
+                jans_help=self.myparent.get_help_from_schema(
+                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                    'spontaneousScopes'),
                 style='class:outh-client-text'),
 
-            # --------------------------------------------------------------------------------------# 
             self.myparent.getTitledText(_("Update Token"),
                 name='updateTokenScriptDns',
                 value='\n'.join(self.data.get('attributes', {}).get('updateTokenScriptDns',[])), 
                 height=3,
+                jans_help=self.myparent.get_help_from_schema(
+                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                    'updateTokenScriptDns'),                
                 style='class:outh-client-text'),
 
-            # --------------------------------------------------------------------------------------# 
             self.myparent.getTitledText(_("Post Authn"),
                 name='postAuthnScripts',
                 value='\n'.join(self.data.get('attributes', {}).get('postAuthnScripts',[])),
                 height=3,
+                jans_help=self.myparent.get_help_from_schema(
+                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                    'postAuthnScripts'),                
                 style='class:outh-client-text'),
 
-            # --------------------------------------------------------------------------------------# 
             self.myparent.getTitledText(_("Introspection"),
                 name='introspectionScripts',
                 value='\n'.join(self.data.get('attributes', {}).get('introspectionScripts',[])), 
                 height=3,
+                jans_help=self.myparent.get_help_from_schema(
+                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                    'introspectionScripts'),                    
                 style='class:outh-client-text'),
 
+            # --------------------------------------------------------------------------------------# 
+            # --------------------------------------------------------------------------------------# 
             # --------------------------------------------------------------------------------------# 
             self.myparent.getTitledText(_("Password Grant"),  ## TODO >> AppConfiguration
                 name='dynamicRegistrationAllowedPasswordGrantScopes',
                 value='\n'.join(self.data.get('attributes', {}).get('dynamicRegistrationAllowedPasswordGrantScopes',[])), 
                 height=3,
-                style='class:outh-client-text'),
+                style='class:outh-client-text',
+                jans_help=self.myparent.get_help_from_schema(
+                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                    'dynamicRegistrationAllowedPasswordGrantScopes'),
+                    ),
                 
+            # --------------------------------------------------------------------------------------# 
+            # --------------------------------------------------------------------------------------# 
             # --------------------------------------------------------------------------------------# 
             self.myparent.getTitledText(_("OAuth Consent"),
                 name='consentGatheringScripts',
                 value='\n'.join(self.data.get('attributes', {}).get('consentGatheringScripts',[]) ),
                 height=3,
+                jans_help=self.myparent.get_help_from_schema(
+                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                    'consentGatheringScripts'),                 
                 style='class:outh-client-text'),
-
-
                         ],width=D(),style='class:outh-client-tabs'
                         )
 
