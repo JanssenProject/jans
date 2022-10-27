@@ -159,7 +159,7 @@ nav:
             - 'Microsoft Azure AKS': 'admin/install/helm-install/microsoft-azure.md'
 #            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
             - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
-        - 'Setup Instructions': 'admin/install/setup.md
+        - 'Setup Instructions': 'admin/install/setup.md'
         - 'CORS configuration': 'admin/install/cors.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
