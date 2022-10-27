@@ -7,7 +7,7 @@ tags:
 - CentOS
 ---
 
-# Ubuntu Janssen Installation
+# Red Hat EL Janssen Installation
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
@@ -18,7 +18,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 ## Install the Package
 
 !!! note
-`curl`  is required to run the command below
+    `curl`  is required to run the command below
 
 ```
 yum install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*el8.x86_64.rpm' | head -n 1)
@@ -37,7 +37,7 @@ to the one shown below:
 
 ![](../../../assets/image-jans-install-success.png)
 
-See more detailed [instructions](setup-script.md) on the setup script if you're
+See more detailed [instructions](../setup.md) on the setup script if you're
 confused how to answer any of the questions, for details about command line
 arguments, or you would prefer to use a properties file instead of
 interactive mode.

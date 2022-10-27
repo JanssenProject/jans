@@ -20,7 +20,7 @@ Download the latest package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases)
 
 !!! note
-`curl`  and `wget` are required to run the command below which
+    `curl`  and `wget` are required to run the command below which
 strips the version number from the package.
 
 ```
@@ -41,7 +41,7 @@ apt install -y ~/jans.ubuntu20.04_amd64.deb
 python3 /opt/jans/jans-setup/setup.py
 ```
 
-See more detailed [instructions](setup-script.md) on the setup script if you're
+See more detailed [instructions](../setup.md) on the setup script if you're
 confused how to answer any of the questions, for details about command line
 arguments, or you would prefer to use a properties file instead of
 interactive mode.
