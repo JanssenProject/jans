@@ -33,13 +33,12 @@ import org.testng.annotations.BeforeSuite;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-//import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class BaseTest {
     
     private static String AGAMA_ACR = "agama";
-    private Map<String, String> map = null;
+    private static Map<String, String> MAP = null;
 
     Logger logger = LogManager.getLogger(getClass());
     WebClient client = null;
@@ -65,23 +64,23 @@ public class BaseTest {
         Properties prop = new Properties();
         prop.load(Files.newBufferedReader(Paths.get(propertiesFile), UTF_8));
 		        
-        map = new Hashtable<>();
+        MAP = new Hashtable<>();
         //do not bother about empty keys... but
         //If a value is found null, this will throw a NPE since we are using a Hashtable
-        prop.forEach((key, value) -> map.put(key.toString(), value.toString()));
-        context.getSuite().getXmlSuite().setParameters(map);
+        prop.forEach((key, value) -> MAP.put(key.toString(), value.toString()));
+        context.getSuite().getXmlSuite().setParameters(MAP);
 
     }
     
     String authzRequestUrl(String flowQName, Map<String, Object> inputs) {
 
         OAuthParams p = new OAuthParams();
-        p.setAuthzEndpoint(map.get("authzEndpoint"));
-        p.setClientId(map.get("clientId"));
-        p.setRedirectUri(map.get("redirectUri"));
+        p.setAuthzEndpoint(MAP.get("authzEndpoint"));
+        p.setClientId(MAP.get("clientId"));
+        p.setRedirectUri(MAP.get("redirectUri"));
         p.setScopes(Collections.singletonList("openid"));
 
-        String queryParam = URLEncoder.encode(map.get("custParamName"), UTF_8);
+        String queryParam = URLEncoder.encode(MAP.get("custParamName"), UTF_8);
         
         StringBuilder builder = new StringBuilder(flowQName);        
         if (inputs != null) {
@@ -108,6 +107,10 @@ public class BaseTest {
     }
     
     HtmlPage launch(String flowQName, Map<String, Object> parameters) {
+        return launch(flowQName, parameters, true);
+    }
+    
+    HtmlPage launch(String flowQName, Map<String, Object> parameters, boolean ensureOKStatus) {
         
         //Generate an authn request and launch it in the htmlUnit browser        
         String url = authzRequestUrl(flowQName, parameters);        
@@ -116,8 +119,10 @@ public class BaseTest {
             Page p = client.getPage(url);
     
             //Check it is an ok web page
-            assertTrue(p.isHtmlPage(), "Not an html page");        
-            assertOK(p);
+            assertTrue(p.isHtmlPage(), "Not an html page");
+            if (ensureOKStatus) {
+                assertOK(p);
+            }
             return (HtmlPage) p;
 
         } catch (IOException e) {
