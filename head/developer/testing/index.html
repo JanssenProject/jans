@@ -10082,13 +10082,36 @@ Janssen Project uses <a href="https://squidfunk.github.io/mkdocs-material/">Mate
 </ol>
 <h1 id="open-banking">Open Banking<a class="headerlink" href="#open-banking" title="Permanent link">#</a></h1>
 <p>We are working on developing this content under <a href="https://github.com/JanssenProject/jans/issues/2548">issue 2548</a>. If you’d like to contribute the content, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a> </p>
+<h2 id="how-to-test-openbanking">How to test OpenBanking?<a class="headerlink" href="#how-to-test-openbanking" title="Permanent link">#</a></h2>
+<p>This test uses a Gluu Testing Certificate.</p>
+<h3 id="device-authentication">device authentication<a class="headerlink" href="#device-authentication" title="Permanent link">#</a></h3>
+<div class="codehilite"><pre><span></span><code>    After installation, we have to complete device authentication to use OpenBanking.
+</code></pre></div>
+
+<h3 id="testing-using-im-mode">Testing using IM mode<a class="headerlink" href="#testing-using-im-mode" title="Permanent link">#</a></h3>
+<div class="codehilite"><pre><span></span><code>launch jans-cli using the below command.
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>    further testing is same as jans server
+</code></pre></div>
+
+<h3 id="testing-using-commnd-line-mode">Testing using commnd line mode<a class="headerlink" href="#testing-using-commnd-line-mode" title="Permanent link">#</a></h3>
+<p>We can run the below command on the command line..
+for ex:
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
+</code></pre></div></p>
+<p>in the same way we can run other commands.</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">rest</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">same</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">jans</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">openbanking</span><span class="w"></span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-05T14:47:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-05</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-28T06:35:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-28</span>
       
         <br>
         Created:
