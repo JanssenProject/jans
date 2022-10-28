@@ -55,6 +55,7 @@ from prompt_toolkit.widgets import Button, Dialog, Label
 
 # -------------------------------------------------------------------------- #
 from cli import config_cli
+from validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
@@ -311,21 +312,24 @@ class JansCliApp(Application):
 
     def getTitledText(
             self,
-            title: AnyFormattedText= "",
-            name: AnyFormattedText= "",
-            value: AnyFormattedText= "",
+            title: AnyFormattedText = "",
+            name: AnyFormattedText = "",
+            value: AnyFormattedText = "",
             height: Optional[int] = 1,
-            jans_help: AnyFormattedText= "",
-            accept_handler: Callable= None,
+            jans_help: AnyFormattedText = "",
+            accept_handler: Callable = None,
             read_only: Optional[bool] = False,
             focusable: Optional[bool] = None,
-            width: AnyDimension= None,
-            style: AnyFormattedText= "",
+            width: AnyDimension = None,
+            style: AnyFormattedText = '',
             scrollbar: Optional[bool] = False,
             line_numbers: Optional[bool] = False,
-            lexer: PygmentsLexer= None
+            lexer: PygmentsLexer = None,
+            text_type: Optional[str] = 'string'
             ) -> AnyContainer:
+
         title += ': '
+
         ta = TextArea(
                 text=str(value),
                 multiline=height > 1,
@@ -339,10 +343,13 @@ class JansCliApp(Application):
                 line_numbers=line_numbers,
                 lexer=lexer,
             )
+
+        if text_type == 'integer':
+            ta.buffer.on_text_insert=IntegerValidator(ta)
+
+        ta.window.text_type = text_type
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
-
-        #li, cd, width = self.handle_long_string(title,[1]*num_lines,ta)
 
         v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta], padding=1)
         v.me = ta
