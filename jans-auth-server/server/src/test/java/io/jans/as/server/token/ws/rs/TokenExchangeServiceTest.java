@@ -48,6 +48,19 @@ public class TokenExchangeServiceTest {
     private TokenExchangeService tokenExchangeService;
 
     @Test
+    public void putNewDeviceSecret_whenScopeIsNull_shouldNotGenerateDeviceSecretAndShouldNotThrowNPE() {
+        SessionId sessionId = new SessionId();
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[] {GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+
+        final JSONObject jsonObj = new JSONObject();
+        tokenExchangeService.putNewDeviceSecret(jsonObj, "sessionDn", client, null);
+
+        assertTrue(sessionId.getDeviceSecrets().isEmpty());
+        assertFalse(jsonObj.has("device_token"));
+    }
+
+    @Test
     public void putNewDeviceSecret_whenScopeDeviceSSOIsNotPresent_shouldNotGenerateDeviceSecret() {
         SessionId sessionId = new SessionId();
         Client client = new Client();
@@ -59,7 +72,6 @@ public class TokenExchangeServiceTest {
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
         assertFalse(jsonObj.has("device_token"));
     }
-
 
     @Test
     public void putNewDeviceSecret_whenTokenExchangeGrantIsNotPresent_shouldNotGenerateDeviceSecret() {
