@@ -390,7 +390,6 @@ nav:
         - 'Javadocs / OpenAPI': 'admin/reference/openapi.md'
         - 'Database Reference':
             - 'admin/reference/database/README.md'
-            - 'Database Overview': 'admin/reference/database/index.md'
             - 'RDBMS Erwin Table': 'admin/reference/database/rdbms-erwin.md'
             - 'LDAP Schema': 'admin/reference/database/ldap-schema.md'
             - 'LDAP Configuration': 'admin/reference/database/ldap-config.md'
