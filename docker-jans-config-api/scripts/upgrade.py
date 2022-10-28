@@ -4,6 +4,8 @@ import logging.config
 import os
 from collections import namedtuple
 
+from ldif import LDIFWriter
+
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import CouchbaseClient
 from jans.pycloudlib.persistence import LdapClient
@@ -15,6 +17,7 @@ from jans.pycloudlib.persistence import id_from_dn
 
 from settings import LOGGING_CONFIG
 from utils import parse_config_api_swagger
+from utils import generate_hex
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -325,6 +328,38 @@ class Upgrade:
             for entry in entries
         }
 
+    def generate_scim_plugin_scopes(self):
+        all_scopes = self.get_all_scopes()
+        plugin_scopes = {
+            "https://jans.io/scim/users.read": "Query user resources",
+            "https://jans.io/scim/users.write": "Manage user resources",
+        }
+        generated_scopes = []
+
+        for jans_id, desc in plugin_scopes.items():
+            if jans_id in all_scopes:
+                continue
+
+            inum = f"1200.{generate_hex()}-{generate_hex()}"
+            attrs = {
+                "description": [desc],
+                "displayName": [f"SCIM scope {jans_id}"],
+                "inum": [inum],
+                "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
+                "jansId": [jans_id],
+                "jansScopeTyp": ["oauth"],
+                "objectClass": ["top", "jansScope"],
+                "jansDefScope": ["false"],
+            }
+            generated_scopes.append(attrs)
+
+        with open("/app/templates/jans-config-api/scim-scopes.ldif", "wb") as fd:
+            writer = LDIFWriter(fd)
+
+            for scope in generated_scopes:
+                writer.unparse(f"inum={scope['inum'][0]},ou=scopes,o=jans", scope)
+        self.backend.client.create_from_ldif("/app/templates/jans-config-api/scim-scopes.ldif", {})
+
     def update_client_scopes(self):
         kwargs = {}
         client_id = self.manager.config.get("jca_client_id")
@@ -350,6 +385,9 @@ class Upgrade:
         if not isinstance(client_scopes, list):
             client_scopes = [client_scopes]
 
+        # prepare scim plugin scopes
+        self.generate_scim_plugin_scopes()
+
         # all scopes mapping from persistence
         all_scopes = self.get_all_scopes()
 
@@ -359,18 +397,18 @@ class Upgrade:
         # extract config_api scopes within range of jansId defined in swagger
         swagger = parse_config_api_swagger()
         config_api_jans_ids = list(swagger["components"]["securitySchemes"]["oauth2"]["flows"]["clientCredentials"]["scopes"].keys())
-        config_api_scopes = [
+        config_api_scopes = list({
             dn for jid, dn in all_scopes.items()
             if jid in config_api_jans_ids
-        ]
+        })
         new_client_scopes += config_api_scopes
 
         # extract scim scopes within range of jansId defined in swagger
         scim_jans_ids = ["https://jans.io/scim/users.read", "https://jans.io/scim/users.write"]
-        scim_scopes = [
+        scim_scopes = list({
             dn for jid, dn in all_scopes.items()
             if jid in scim_jans_ids
-        ]
+        })
         new_client_scopes += scim_scopes
 
         # find missing scopes from the client

@@ -263,10 +263,10 @@ class Upgrade:
         # extract config_api scopes within range of jansId defined in swagger
         swagger = parse_swagger_file()
         scim_jans_ids = list(swagger["components"]["securitySchemes"]["scim_oauth"]["flows"]["clientCredentials"]["scopes"].keys())
-        scim_scopes = [
+        scim_scopes = list({
             dn for jid, dn in all_scopes.items()
             if jid in scim_jans_ids
-        ]
+        })
         new_client_scopes += scim_scopes
 
         # find missing scopes from the client

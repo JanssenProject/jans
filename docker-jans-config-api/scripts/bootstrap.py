@@ -36,6 +36,7 @@ from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
 from plugins import discover_plugins
 from utils import parse_config_api_swagger
+from utils import generate_hex
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -306,10 +307,6 @@ def configure_admin_ui_logging():
         f.write(tmpl.safe_substitute(config))
 
 
-def generate_hex(size: int = 3):
-    return os.urandom(size).hex().upper()
-
-
 class PersistenceSetup:
     def __init__(self, manager) -> None:
         self.manager = manager
@@ -471,39 +468,11 @@ class PersistenceSetup:
                 generated_scopes.append(attrs)
             return generated_scopes
 
-        def generate_scim_scopes():
-            scopes = {
-                "https://jans.io/scim/users.read": "Query user resources",
-                "https://jans.io/scim/users.write": "Manage user resources",
-            }
-
-            generated_scopes = []
-            for jans_id, desc in scopes.items():
-                if jans_id in existing_jans_ids:
-                    continue
-
-                inum = f"1200.{generate_hex()}-{generate_hex()}"
-                attrs = {
-                    "description": [desc],
-                    "displayName": [f"SCIM scope {jans_id}"],
-                    "inum": [inum],
-                    "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
-                    "jansId": [jans_id],
-                    "jansScopeTyp": ["oauth"],
-                    "objectClass": ["top", "jansScope"],
-                    "jansDefScope": ["false"],
-                }
-                generated_scopes.append(attrs)
-            return generated_scopes
-
         # prepare required scopes (if any)
         scopes = []
 
         config_api_scopes = generate_config_api_scopes()
         scopes += config_api_scopes
-
-        scim_scopes = generate_scim_scopes()
-        scopes += scim_scopes
 
         with open("/app/templates/jans-config-api/scopes.ldif", "wb") as fd:
             writer = LDIFWriter(fd, cols=1000)
