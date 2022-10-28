@@ -4,43 +4,43 @@
 
     <parameter name="propertiesFile" value="target/test-classes/testng.properties" />
 
-    <test name="math" enabled="false">
+    <test name="math" enabled="true">
         <classes>
             <class name="io.jans.agama.test.MathFlowTest" />
         </classes>
     </test>
 
-    <test name="uid" enabled="false">
+    <test name="uid" enabled="true">
         <classes>
             <class name="io.jans.agama.test.UidOnlyAuthTest" />
         </classes>
     </test>
 
-    <test name="say-something" enabled="false">
+    <test name="say-something" enabled="true">
         <classes>
             <class name="io.jans.agama.test.SaySomethingFlowTest" />
         </classes>
     </test>
 
-    <test name="say-something-2" enabled="false">
+    <test name="say-something-2" enabled="true">
         <classes>
             <class name="io.jans.agama.test.SaySomething2FlowTest" />
         </classes>
     </test>
 
-    <test name="say-something-3" enabled="false">
+    <test name="say-something-3" enabled="true">
         <classes>
             <class name="io.jans.agama.test.SaySomething3FlowTest" />
         </classes>
     </test>
 
-    <test name="custom-config" enabled="false">
+    <test name="custom-config" enabled="true">
         <classes>
             <class name="io.jans.agama.test.CustomConfigsFlowTest" />
         </classes>
     </test>
 
-    <test name="inexistent" enabled="false">
+    <test name="inexistent" enabled="true">
         <classes>
             <class name="io.jans.agama.test.InexistentFlowTest" />
         </classes>
