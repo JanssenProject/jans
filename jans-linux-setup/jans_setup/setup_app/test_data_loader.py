@@ -93,7 +93,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         agama_config['disableTCHV'] = True
         agama_config['enabled'] = True
         self.dbUtils.set_oxAuthConfDynamic({'agamaConfiguration': agama_config})
-
+        self.dbUtils.enable_script('BADA-BADA')
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
