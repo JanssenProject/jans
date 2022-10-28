@@ -37,3 +37,31 @@ High-level steps involve:
 # Open Banking
 
 We are working on developing this content under [issue 2548](https://github.com/JanssenProject/jans/issues/2548). If you’d like to contribute the content, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation) 
+## How to test OpenBanking?
+
+This test uses a Gluu Testing Certificate.
+
+### device authentication
+
+		After installation, we have to complete device authentication to use OpenBanking.
+
+### Testing using IM mode
+	launch jans-cli using the below command.
+
+```
+/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+```
+
+		further testing is same as jans server
+
+###  Testing using commnd line mode
+
+We can run the below command on the command line..
+for ex:
+```
+/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
+```
+
+in the same way we can run other commands.
+
+		rest is same for jans and openbanking
