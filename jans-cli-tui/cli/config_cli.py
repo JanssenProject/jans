@@ -10,7 +10,6 @@ import readline
 import argparse
 import random
 import datetime
-import ruamel.yaml
 import code
 import traceback
 import ast
@@ -85,11 +84,8 @@ if os.path.exists(debug_json):
     with open(debug_json) as f:
         cfg_yml = json.load(f, object_pairs_hook=OrderedDict)
 else:
-    with open(os.path.join(cur_dir, my_op_mode+'.yaml')) as f:
-        cfg_yml = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
-        if os.environ.get('dump_yaml'):
-            with open(debug_json, 'w') as w:
-                json.dump(cfg_yml, w, indent=2)
+    with open(os.path.join(cur_dir, my_op_mode+'.json')) as f:
+        cfg_yml = json.load(f)
 
 op_list = []
 
@@ -226,6 +222,9 @@ class JCA_CLI:
         self.openid_configuration = {}
         self.set_user()
         self.plugins()
+
+        if my_op_mode == 'jca':
+            self.host += '/jans-config-api'
 
         if my_op_mode == 'scim':
             self.host += '/jans-scim/restv1/v2'
