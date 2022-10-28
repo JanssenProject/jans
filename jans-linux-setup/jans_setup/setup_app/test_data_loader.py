@@ -69,6 +69,31 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         for inum in custom_scripts:
             self.dbUtils.enable_script(inum)
 
+    def load_agama_test_data(self):
+        agama_temp_dir = os.path.join(self.template_base, 'agama')
+        agama_out_dir = os.path.join(Config.output_dir, 'test/agama')
+
+        ldif_fn = os.path.join(agama_out_dir, 'agama-test-data.ldif')
+        self.renderTemplateInOut(ldif_fn, agama_temp_dir, agama_out_dir)
+        self.dbUtils.import_ldif([ldif_fn])
+
+        target_dir = os.path.join(base.current_app.JansAuthInstaller.agama_root, 'ftl')
+        base.extract_from_zip(
+                base.current_app.jans_zip,
+                'agama/engine/src/test/resources/templates',
+                target_dir
+                )
+        self.chown(target_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
+        prop_src_fn = os.path.join(agama_out_dir, 'config-agama-test.properties')
+        self.renderTemplateInOut(prop_src_fn, agama_temp_dir, os.path.join(Config.output_dir, 'test/jans-auth'))
+
+        dn, oxauth_conf_dynamic = self.dbUtils.get_oxAuthConfDynamic()
+        agama_config=oxauth_conf_dynamic["agamaConfiguration"].copy()
+        agama_config['disableTCHV'] = True
+        agama_config['enabled'] = True
+        self.dbUtils.set_oxAuthConfDynamic({'agamaConfiguration': agama_config})
+        self.dbUtils.enable_script('BADA-BADA')
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
@@ -373,6 +398,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.set_configuration('jansDbAuth', oxIDPAuthentication_js)
 
         self.create_test_client_keystore()
+
+        self.load_agama_test_data()
+
 
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):
