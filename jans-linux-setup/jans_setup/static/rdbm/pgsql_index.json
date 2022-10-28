@@ -99,7 +99,8 @@
   "jansSessId": {
     "fields": [
       "jansUsrDN",
-      "sid"
+      "sid",
+      "deviceSecret"
     ],
     "custom": [
       "(\"del\", \"exp\")"

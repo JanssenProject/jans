@@ -114,6 +114,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
+    private static final String SUCCESSFUL_RP_REDIRECT_COUNT = "successful_rp_redirect_count";
+
     @Inject
     private Logger log;
 
@@ -502,7 +504,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getHttpRequest());
 
         addCustomHeaders(builder, authzRequest);
-        updateSessionRpRedirect(sessionUser);
+        updateSession(authzRequest, sessionUser);
 
         runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         processDeviceAuthorization(deviceAuthzUserCode, user);
@@ -910,11 +912,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private void updateSessionRpRedirect(SessionId sessionUser) {
-        int rpRedirectCount = Util.parseIntSilently(sessionUser.getSessionAttributes().get("successful_rp_redirect_count"), 0);
+    private void updateSession(AuthzRequest authzRequest, SessionId sessionUser) {
+        authzRequestService.addDeviceSecretToSession(authzRequest, sessionUser);
+
+        int rpRedirectCount = Util.parseIntSilently(sessionUser.getSessionAttributes().get(SUCCESSFUL_RP_REDIRECT_COUNT), 0);
         rpRedirectCount++;
 
-        sessionUser.getSessionAttributes().put("successful_rp_redirect_count", Integer.toString(rpRedirectCount));
+        sessionUser.getSessionAttributes().put(SUCCESSFUL_RP_REDIRECT_COUNT, Integer.toString(rpRedirectCount));
         sessionIdService.updateSessionId(sessionUser);
     }
 
@@ -925,7 +929,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private boolean unauthenticateSession(String sessionId, HttpServletRequest httpRequest, boolean isPromptFromJwt) {
         SessionId sessionUser = identity.getSessionId();
 
-        if (isPromptFromJwt && sessionUser != null && !sessionUser.getSessionAttributes().containsKey("successful_rp_redirect_count")) {
+        if (isPromptFromJwt && sessionUser != null && !sessionUser.getSessionAttributes().containsKey(SUCCESSFUL_RP_REDIRECT_COUNT)) {
             return false; // skip unauthentication because there were no at least one successful rp redirect
         }
 

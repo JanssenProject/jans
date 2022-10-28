@@ -49,6 +49,9 @@ public class Constants {
     public static final String NO_CACHE = "no-cache";
     public static final String X_CLIENTCERT = "X-ClientCert";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+    public static final String SUBJECT_TOKEN_TYPE_ID_TOKEN = "urn:ietf:params:oauth:token-type:id_token";
+    public static final String ACTOR_TOKEN_TYPE_DEVICE_SECRET = "urn:x-oath:params:oauth:token-type:device-secret";
+    public static final String TOKEN_TYPE_ACCESS_TOKEN = "urn:ietf:params:oauth:token-type:access_token";
 
     public static final String CONTENT_TYPE_APPLICATION_JSON_UTF_8 = "application/json;charset=UTF-8";
 
