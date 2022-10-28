@@ -38,8 +38,8 @@
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
 		<jakarta.el.api.version>5.0.0-RC1</jakarta.el.api.version>
 
-		<jackson.version>2.14.0-rc2</jackson.version>
-		<jackson.databind.version>2.14.0-rc2</jackson.databind.version>
+		<jackson.version>2.13.4.2</jackson.version>
+		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20220924</json.version>
 
 		<log4j.version>2.19.0</log4j.version>
@@ -731,9 +731,9 @@
 				<version>2.9.0</version>
 			</dependency>
 			<dependency>
-			    <groupId>mysql</groupId>
-			    <artifactId>mysql-connector-java</artifactId>
-			    <version>8.0.31</version>
+				<groupId>com.mysql</groupId>
+				<artifactId>mysql-connector-j</artifactId>
+				<version>8.0.31</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
