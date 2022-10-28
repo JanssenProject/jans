@@ -2,8 +2,12 @@ package io.jans.as.server.token.ws.rs;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
@@ -46,8 +50,109 @@ public class TokenRestWebServiceValidatorTest {
     @Mock
     private ErrorResponseFactory errorResponseFactory;
 
+    @Mock
+    private AbstractCryptoProvider cryptoProvider;
+
     @InjectMocks
     private TokenRestWebServiceValidator validator;
+
+    @Test
+    public void validateSessionForTokenExchange_whenSessionIsNull_shouldThrowError() {
+        try {
+            validator.validateSessionForTokenExchange(null, "test_device_secret", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for invalid session.");
+    }
+
+    @Test
+    public void validateSessionForTokenExchange_whenSessionIsNotAuthenticated_shouldThrowError() {
+        try {
+            SessionId sessionId =  new SessionId();
+            sessionId.setState(SessionIdState.UNAUTHENTICATED);
+
+            validator.validateSessionForTokenExchange(sessionId, "test_device_secret", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for unauthenticated session.");
+    }
+
+    @Test
+    public void validateSessionForTokenExchange_whenSessionIsAuthenticated_shouldPassSuccessfully() {
+        SessionId sessionId =  new SessionId();
+        sessionId.setState(SessionIdState.AUTHENTICATED);
+
+        validator.validateSessionForTokenExchange(sessionId, "test_device_secret", AUDIT_LOG);
+    }
+
+    @Test
+    public void validateActorToken_withEmptyActorToken_shouldThrowError() {
+        try {
+            validator.validateActorToken(null, AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for invalid actor token.");
+    }
+
+    @Test
+    public void validateActorToken_withNotBlankActorToken_shouldPassSuccessfully() {
+        validator.validateActorToken("not_blank_actor_token", AUDIT_LOG);
+    }
+
+    @Test
+    public void validateAudience_withEmptyAudience_shouldThrowError() {
+        try {
+            validator.validateAudience(null, AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for invalid audience.");
+    }
+
+    @Test
+    public void validateAudience_withNotBlankAudience_shouldPassSuccessfully() {
+        validator.validateAudience("not_blank_audience", AUDIT_LOG);
+    }
+
+    @Test
+    public void validateSubjectTokenType_withInvalidTokenType_shouldThrowError() {
+        try {
+            validator.validateSubjectTokenType("urn:mytype", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for invalid subject token type.");
+    }
+
+    @Test
+    public void validateSubjectTokenType_withValidTokenType_shouldPassSuccessfully() {
+        validator.validateSubjectTokenType(Constants.SUBJECT_TOKEN_TYPE_ID_TOKEN, AUDIT_LOG);
+    }
+
+    @Test
+    public void validateActorTokenType_withInvalidTokenType_shouldThrowError() {
+        try {
+            validator.validateActorTokenType("urn:mytype", AUDIT_LOG);
+        } catch (WebApplicationException e) {
+            assertBadRequest(e.getResponse());
+            return;
+        }
+        fail("No error for invalid actor token type.");
+    }
+
+    @Test
+    public void validateActorTokenType_withValidTokenType_shouldPassSuccessfully() {
+        validator.validateActorTokenType(Constants.ACTOR_TOKEN_TYPE_DEVICE_SECRET, AUDIT_LOG);
+    }
+
 
     @Test
     public void validateParams_whenGrantTypeIsBlank_shouldRaiseError() {

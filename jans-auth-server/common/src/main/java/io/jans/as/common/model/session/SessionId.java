@@ -16,9 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -76,6 +74,9 @@ public class SessionId implements Deletable, Serializable {
     @AttributeName(name = "jansSessAttr")
     private Map<String, String> sessionAttributes;
 
+    @AttributeName(name = "deviceSecret")
+    private List<String> deviceSecrets;
+
     @AttributeName(name = "exp")
     private Date expirationDate;
 
@@ -93,6 +94,16 @@ public class SessionId implements Deletable, Serializable {
 
     @Expiration
     private int ttl;
+
+    @NotNull
+    public List<String> getDeviceSecrets() {
+        if (deviceSecrets == null) deviceSecrets = new ArrayList<>();
+        return deviceSecrets;
+    }
+
+    public void setDeviceSecrets(List<String> deviceSecrets) {
+        this.deviceSecrets = deviceSecrets;
+    }
 
     public int getTtl() {
         return ttl;
@@ -305,6 +316,7 @@ public class SessionId implements Deletable, Serializable {
         sb.append(", permissionGrantedMap=").append(permissionGrantedMap);
         sb.append(", sessionAttributes=").append(sessionAttributes);
         sb.append(", persisted=").append(persisted);
+        sb.append(", deviceSecrets=").append(deviceSecrets);
         sb.append("}");
         return sb.toString();
     }
