@@ -12,7 +12,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-
 ## Supported versions
 - SUSE Linux Enterprise Server (SLES) 15
 - openSUSE Leap 15.4
@@ -48,7 +47,7 @@ interactive mode.
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
-## Uninstall
+## Un-installation
 
 Uninstall process involves two steps
 
