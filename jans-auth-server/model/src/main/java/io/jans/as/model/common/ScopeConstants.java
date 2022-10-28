@@ -13,6 +13,7 @@ public class ScopeConstants {
 
     public static final String OPENID = "openid";
     public static final String OFFLINE_ACCESS = "offline_access";
+    public static final String DEVICE_SSO = "device_sso";
 
     private ScopeConstants() {
     }

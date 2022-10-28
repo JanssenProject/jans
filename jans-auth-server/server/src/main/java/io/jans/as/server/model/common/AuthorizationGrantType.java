@@ -61,6 +61,8 @@ public enum AuthorizationGrantType implements HasParamName {
      * grant types are not available (such as an authorization code).
      */
     RESOURCE_OWNER_PASSWORD_CREDENTIALS("resource_owner_password_credentials"),
+
+    TOKEN_EXCHANGE("urn:ietf:params:oauth:grant-type:token-exchange"),
     /**
      * An extension grant for Client Initiated Backchannel Authentication.
      */
