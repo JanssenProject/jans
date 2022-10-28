@@ -9988,14 +9988,43 @@
 
   <h1>Discovery</h1>
 
-<p>This is a placeholder</p>
+<p>In a federated identity topology, you can authenticate a person by redirecting
+their browser to the correct IDP. But what happens when there is more then
+one IDP? Before the person authenticates, how do you know to which IDP to send
+them? This challenge is called "discovery", "where are you from", or "WAYF".</p>
+<p>There are a few ways to handle discovery. Here are a few:</p>
+<ol>
+<li>
+<p>Display a list of logos and enable the end user to pick the IDP. If you
+ever clicked on a social login button, you've experienced this approach.</p>
+</li>
+<li>
+<p>Use a different URL for each IDP, like <code>https://customer1.saas.com</code> or
+<code>https://saas.com/customer2</code>. Based on which URL the person hits, you know
+where to send them.</p>
+</li>
+<li>
+<p>Prompt the person to enter something identifying, like their email address.
+You can use this to look up their home IDP.</p>
+</li>
+<li>
+<p>Use contextual information, like network address, geolocation, or browser
+data.</p>
+</li>
+</ol>
+<p>Once you've figured out the person behind the browser, it may make sense to
+write a cookie so next time, you don't have to bother them.</p>
+<p>While it's possible to implement a discovery workflow using an Agama script
+or an Auth Server person authentication interception script, you also write
+a simple web application, and then redirect to the authorization endpoint
+with a hint as an extra parameter and a specific <code>acr_values</code>. </p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T16:08:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-28T03:26:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-28</span>
       
         <br>
         Created:
