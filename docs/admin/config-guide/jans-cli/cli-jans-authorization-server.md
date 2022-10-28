@@ -98,7 +98,8 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "urn:ietf:params:oauth:grant-type:device_code",
     "client_credentials",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
-    "implicit"
+    "implicit",
+    "urn:ietf:params:oauth:grant-type:token-exchange"
   ],
   "subjectTypesSupported": [
     "public",
@@ -368,6 +369,7 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "urn:ietf:params:oauth:grant-type:device_code",
     "client_credentials",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
+    "urn:ietf:params:oauth:grant-type:token-exchange",
     "implicit"
   ],
   "cssLocation": null,

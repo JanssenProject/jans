@@ -71,6 +71,7 @@ Select 1 to get all the details about Jans authorization server configuration. I
     "refresh_token",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
     "urn:ietf:params:oauth:grant-type:device_code",
+    "urn:ietf:params:oauth:grant-type:token-exchange",
     "implicit",
     "authorization_code"
   ],
@@ -341,6 +342,7 @@ Select 1 to get all the details about Jans authorization server configuration. I
     "refresh_token",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
     "urn:ietf:params:oauth:grant-type:device_code",
+    "urn:ietf:params:oauth:grant-type:token-exchange",
     "implicit",
     "authorization_code"
   ],
