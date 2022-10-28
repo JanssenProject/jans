@@ -5,9 +5,10 @@ from typing import OrderedDict
 from prompt_toolkit.widgets import Button, TextArea
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
-from static import DialogResult
-from wui_components.jans_dialog import JansDialog
 from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.layout.dimension import AnyDimension
 
 from prompt_toolkit.widgets import (
     Button,
@@ -31,7 +32,8 @@ from prompt_toolkit.layout.containers import (
     VerticalAlign,
     DynamicContainer,
     FloatContainer,
-    Window
+    Window,
+    AnyContainer
 )
 from prompt_toolkit.widgets import (
     Box,
@@ -41,24 +43,21 @@ from prompt_toolkit.widgets import (
     RadioList,
     TextArea,
  )
+
+from utils.static import DialogResult
+from wui_components.jans_dialog import JansDialog
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_side_nav_bar import JansSideNavBar
-from utils import DialogUtils
+from utils.utils import DialogUtils
 
 from wui_components.jans_cli_dialog import JansGDialog
 
 from wui_components.jans_drop_down import DropDownWidget
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
-from prompt_toolkit.buffer import Buffer
 
-from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.dimension import AnyDimension
 from typing import Optional, Sequence, Union
 from typing import TypeVar, Callable
-from multi_lang import _
+from utils.multi_lang import _
 import cli_style
 
 class ViewProperty(JansGDialog, DialogUtils):

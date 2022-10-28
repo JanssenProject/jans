@@ -27,14 +27,17 @@ from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from asyncio import Future, ensure_future
 
+
+import cli_style
 from cli import config_cli
-from static import DialogResult
+from utils.static import DialogResult
+from utils.multi_lang import _
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
-from utils import DialogUtils
+from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
 import threading
@@ -52,8 +55,7 @@ from typing import Optional, Sequence, Union
 from typing import TypeVar, Callable
 
 import json
-from multi_lang import _
-import cli_style
+
 
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client

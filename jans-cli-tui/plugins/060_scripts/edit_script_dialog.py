@@ -1,3 +1,6 @@
+import re
+import threading
+
 from typing import OrderedDict
 from asyncio import ensure_future
 from functools import partial
@@ -25,13 +28,13 @@ from pygments.lexers.python import PythonLexer
 from pygments.lexers.jvm import JavaLexer
 
 from cli import config_cli
-from static import DialogResult
+from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
-from utils import DialogUtils
+from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_spinner import Spinner
 from prompt_toolkit.layout.containers import (
@@ -46,10 +49,9 @@ from typing import Any, Optional
 
 
 from view_uma_dialog import ViewUMADialog
-import threading
 
-from multi_lang import _
-import re
+from utils.multi_lang import _
+
 
 class EditScriptDialog(JansGDialog, DialogUtils):
     """This Script editing dialog

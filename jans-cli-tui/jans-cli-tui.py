@@ -55,7 +55,7 @@ from prompt_toolkit.widgets import Button, Dialog, Label
 
 # -------------------------------------------------------------------------- #
 from cli import config_cli
-from validators import IntegerValidator
+from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
@@ -64,7 +64,7 @@ from cli_style import style
 
 import cli_style
 
-from multi_lang import _
+from utils.multi_lang import _
 # -------------------------------------------------------------------------- #
 
 home_dir = Path.home()

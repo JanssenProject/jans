@@ -8,7 +8,7 @@ from prompt_toolkit.layout.containers import (
 )
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
-from multi_lang import _
+from utils.multi_lang import _
 
 class JansGDialog:
     """This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar

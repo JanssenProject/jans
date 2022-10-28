@@ -27,7 +27,7 @@ from prompt_toolkit.widgets import (
 from typing import Any, Optional
 from prompt_toolkit.buffer import Buffer
 
-from static import DialogResult
+from utils.static import DialogResult
 
 from cli import config_cli
 from wui_components.jans_nav_bar import JansNavBar
@@ -41,8 +41,10 @@ from wui_components.jans_data_picker import DateSelectWidget
 from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
 
-from multi_lang import _
+from utils.multi_lang import _
 import cli_style
+
+
 class Plugin():
     """This is a general class for plugins 
     """

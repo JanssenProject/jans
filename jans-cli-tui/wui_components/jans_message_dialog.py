@@ -9,7 +9,7 @@ from prompt_toolkit.layout.containers import (
 )
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
-from multi_lang import _
+from utils.multi_lang import _
 
 class JansMessageDialog:
     """This is a Dialog to show Message

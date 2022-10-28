@@ -19,7 +19,7 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
 
 
-from multi_lang import _
+from utils.multi_lang import _
 import cli_style
 
 class Plugin():

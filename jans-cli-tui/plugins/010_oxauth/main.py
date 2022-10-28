@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import json
 
 import threading
 from asyncio import Future, ensure_future
@@ -31,13 +32,13 @@ from prompt_toolkit.widgets import (
 )
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 
-import json
-from static import DialogResult
+
+from utils.static import DialogResult
 from prompt_toolkit.layout import ScrollablePane
 from asyncio import Future
 
 from cli import config_cli
-from utils import DialogUtils
+from utils.utils import DialogUtils
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -53,7 +54,7 @@ from edit_scope_dialog import EditScopeDialog
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 
-from multi_lang import _
+from utils.multi_lang import _
 import cli_style
 
 class Plugin(DialogUtils):
