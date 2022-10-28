@@ -42,8 +42,14 @@
 			<artifactId>commons-dbcp2</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>mysql</groupId>
-		    <artifactId>mysql-connector-java</artifactId>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+		</dependency>
+		<!-- remove after nupdate mysql-libs -->
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.19.6</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.postgresql</groupId>
@@ -78,5 +84,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 </project>
