@@ -174,3 +174,14 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
+
+dn: inum=C4F8,ou=scopes,o=jans
+description: Native SSO scope which allows to issue device_secret
+displayName: device_sso
+inum: C4F8
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: true
+jansId: device_sso
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
