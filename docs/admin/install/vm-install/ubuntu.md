@@ -10,7 +10,6 @@ tags:
 
 Before you install, check the [VM system requirements](vm-requirements.md).
 
-
 ## Supported Versions
 - Ubuntu 20.04
 
@@ -50,7 +49,7 @@ interactive mode.
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
-# Ubuntu Janssen Un-Installation
+## Ubuntu Janssen Un-Installation
 
 Removing Janssen is a two step process:
 
