@@ -173,10 +173,10 @@ public class TokenExchangeService {
     }
 
     public void putNewDeviceSecret(JSONObject jsonObj, String sessionDn, Client client, String scope) {
-        if (!scope.contains(ScopeConstants.DEVICE_SSO)) {
+        if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
             return;
         }
-        if (!ArrayUtils.contains(client.getGrantTypes(), GrantType.TOKEN_EXCHANGE)) {
+        if (client == null || !ArrayUtils.contains(client.getGrantTypes(), GrantType.TOKEN_EXCHANGE)) {
             log.debug("Skip device secret. Scope has {} value but client does not have Token Exchange Grant Type enabled ('urn:ietf:params:oauth:grant-type:token-exchange')", ScopeConstants.DEVICE_SSO);
             return;
         }
