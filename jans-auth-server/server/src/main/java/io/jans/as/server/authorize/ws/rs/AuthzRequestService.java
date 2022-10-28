@@ -49,6 +49,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -108,6 +109,9 @@ public class AuthzRequestService {
     private RedirectionUriService redirectionUriService;
 
     public void addDeviceSecretToSession(AuthzRequest authzRequest, SessionId sessionId) {
+        if (BooleanUtils.isFalse(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint())) {
+            return;
+        }
         if (!Arrays.asList(authzRequest.getScope().split(" ")).contains(ScopeConstants.DEVICE_SSO)) {
             return;
         }

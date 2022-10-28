@@ -4,6 +4,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -218,11 +219,10 @@ public class TokenRestWebServiceValidator {
         }
     }
 
-    public Jwt validateSubjectToken(String subjectToken, SessionId sidSession, OAuth2AuditLog auditLog) {
+    public void validateSubjectToken(String subjectToken, String deviceSecret, SessionId sidSession, OAuth2AuditLog auditLog) {
         try {
             final Jwt jwt = Jwt.parse(subjectToken);
-            validateSubjectTokenSignature(sidSession, jwt, auditLog);
-            return jwt;
+            validateSubjectTokenSignature(deviceSecret, sidSession, jwt, auditLog);
         } catch (InvalidJwtException e) {
             log.error("Unable to parse subject_token as JWT.", e);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Unable to parse subject_token as JWT."), auditLog));
@@ -234,7 +234,7 @@ public class TokenRestWebServiceValidator {
         }
     }
 
-    private void validateSubjectTokenSignature(SessionId sidSession, Jwt jwt, OAuth2AuditLog auditLog) throws InvalidJwtException, CryptoProviderException {
+    private void validateSubjectTokenSignature(String deviceSecret, SessionId sidSession, Jwt jwt, OAuth2AuditLog auditLog) throws InvalidJwtException, CryptoProviderException {
         // verify jwt signature if we can't find it in db
         if (!cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
                 null, null, jwt.getHeader().getSignatureAlgorithm())) {
@@ -242,12 +242,18 @@ public class TokenRestWebServiceValidator {
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "subject_token signature verification failed."), auditLog));
         }
 
-        final String sidClaim = jwt.getClaims().getClaimAsString("sid");
-        if (sidSession != null && org.apache.commons.lang.StringUtils.equals(sidSession.getOutsideSid(), sidClaim)) {
-            return;
+        final String sid = jwt.getClaims().getClaimAsString("sid");
+        if (StringUtils.isBlank(sid) || !StringUtils.equals(sidSession.getOutsideSid(), sid)) {
+            log.error("sid claim from subject_token does not match to session sid.");
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "sid claim from subject_token does not match to session sid."), auditLog));
         }
-        log.error("sid claim from subject_token does not match to session sid.");
-        throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "sid claim from subject_token does not match to session sid."), auditLog));
+
+        final String dsHash = jwt.getClaims().getClaimAsString("ds_hash");
+        if (StringUtils.isBlank(dsHash) || !dsHash.equals(CodeVerifier.s256(deviceSecret))) {
+            final String msg = "ds_hash claim from subject_token does not match to hash of device_secret";
+            log.error(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+        }
     }
 
     public void validateAudience(String audience, OAuth2AuditLog auditLog) {

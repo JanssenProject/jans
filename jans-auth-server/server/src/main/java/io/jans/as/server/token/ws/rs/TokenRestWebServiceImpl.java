@@ -194,9 +194,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
-            }
-
-            if (gt == GrantType.REFRESH_TOKEN) {
+            } else if (gt == GrantType.REFRESH_TOKEN) {
                 return processRefreshTokenGrant(scope, refreshToken, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
                 return processClientGredentials(scope, request, auditLog, client, idTokenPreProcessing, executionContext);
@@ -368,6 +366,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             grantService.removeByCode(refreshToken); // remove refresh token after access token and id_token is created.
         }
 
+        tokenExchangeService.rotateDeviceSecretOnRefreshToken(executionContext.getHttpRequest(), authorizationGrant, scope);
+
         auditLog.updateOAuth2AuditLog(authorizationGrant, true);
 
         return response(Response.ok().entity(getJSonResponse(accToken,
@@ -426,8 +426,15 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
 
-        final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
-        return response(Response.ok().entity(entity), executionContext.getAuditLog());
+        JSONObject jsonObj = new JSONObject();
+        try {
+            fillJsonObject(jsonObj, accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
+            tokenExchangeService.putNewDeviceSecret(jsonObj, authorizationCodeGrant.getSessionDn(), client, scope);
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return response(Response.ok().entity(jsonObj.toString()), executionContext.getAuditLog());
     }
 
     @Nullable

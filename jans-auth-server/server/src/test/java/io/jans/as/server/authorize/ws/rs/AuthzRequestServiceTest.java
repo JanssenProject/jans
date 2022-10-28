@@ -24,6 +24,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -70,7 +71,27 @@ public class AuthzRequestServiceTest {
     private RedirectionUriService redirectionUriService;
 
     @Test
+    public void addDeviceSecretToSession_withoutUnabledConfiguration_shouldNotGenerateDeviceSecret() {
+        when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(false);
+
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setScope("openid device_sso");
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+        authzRequest.setClient(client);
+
+        SessionId sessionId = new SessionId();
+
+        authzRequestService.addDeviceSecretToSession(authzRequest, sessionId);
+        assertTrue(sessionId.getDeviceSecrets().isEmpty());
+    }
+
+    @Test
     public void addDeviceSecretToSession_withoutDeviceSsoScope_shouldNotGenerateDeviceSecret() {
+        when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(true);
+
         Client client = new Client();
         client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
@@ -87,6 +108,8 @@ public class AuthzRequestServiceTest {
 
     @Test
     public void addDeviceSecretToSession_withDeviceSsoScope_shouldGenerateDeviceSecret() {
+        when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(true);
+
         Client client = new Client();
         client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
@@ -105,6 +128,8 @@ public class AuthzRequestServiceTest {
 
     @Test
     public void addDeviceSecretToSession_withClientWithoutTokenExchangeGrantType_shouldNotGenerateDeviceSecret() {
+        when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(true);
+
         Client client = new Client();
         client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE});
 

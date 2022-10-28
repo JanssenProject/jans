@@ -4,6 +4,8 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
@@ -16,6 +18,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONException;
@@ -36,6 +39,8 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 @Stateless
 @Named
 public class TokenExchangeService {
+
+    public static final String DEVICE_SECRET = "device_secret";
 
     @Inject
     private Logger log;
@@ -61,15 +66,39 @@ public class TokenExchangeService {
     @Inject
     private AttributeService attributeService;
 
-    public String rotateDeviceSecret(SessionId sessionId, String actorToken) {
-        if (BooleanUtils.isFalse(appConfiguration.getRotateDeviceSecret())) {
+    public void rotateDeviceSecretOnRefreshToken(HttpServletRequest httpRequest, AuthorizationGrant refreshGrant, String scope) {
+        if (!scope.contains(ScopeConstants.DEVICE_SSO)) {
+            return;
+        }
+        if (StringUtils.isBlank(refreshGrant.getSessionDn())) {
+            return;
+        }
+        final SessionId sessionId = sessionIdService.getSessionByDn(refreshGrant.getSessionDn());
+        if (sessionId == null) {
+            return;
+        }
+
+        final String deviceSecret = httpRequest.getParameter(DEVICE_SECRET);
+
+        // spec: rotate only if device_secret is not specified
+        if (StringUtils.isBlank(deviceSecret)) {
+            rotateDeviceSecret(sessionId, deviceSecret, true);
+        }
+    }
+
+    public String rotateDeviceSecret(SessionId sessionId, String deviceSecret) {
+        return rotateDeviceSecret(sessionId, deviceSecret, false);
+    }
+
+    public String rotateDeviceSecret(SessionId sessionId, String deviceSecret, boolean forceRotation) {
+        if (BooleanUtils.isFalse(appConfiguration.getRotateDeviceSecret()) && !forceRotation) {
             return null;
         }
 
         String newDeviceSecret = HandleTokenFactory.generateDeviceSecret();
 
         final List<String> deviceSecrets = sessionId.getDeviceSecrets();
-        deviceSecrets.remove(actorToken);
+        deviceSecrets.remove(deviceSecret);
         deviceSecrets.add(newDeviceSecret);
 
         sessionIdService.updateSessionId(sessionId, false);
@@ -85,19 +114,19 @@ public class TokenExchangeService {
         final String audience = httpRequest.getParameter("audience");
         final String subjectToken = httpRequest.getParameter("subject_token");
         final String subjectTokenType = httpRequest.getParameter("subject_token_type");
-        final String actorToken = httpRequest.getParameter("actor_token");
+        final String deviceSecret = httpRequest.getParameter("actor_token");
         final String actorTokenType = httpRequest.getParameter("actor_token_type");
 
         tokenRestWebServiceValidator.validateAudience(audience, auditLog);
         tokenRestWebServiceValidator.validateSubjectTokenType(subjectTokenType, auditLog);
         tokenRestWebServiceValidator.validateActorTokenType(actorTokenType, auditLog);
-        tokenRestWebServiceValidator.validateActorToken(actorToken, auditLog);
+        tokenRestWebServiceValidator.validateActorToken(deviceSecret, auditLog);
 
-        final SessionId sessionId = sessionIdService.getSessionByDeviceSecret(actorToken);
-        tokenRestWebServiceValidator.validateSessionForTokenExchange(sessionId, actorToken, auditLog);
+        final SessionId sessionId = sessionIdService.getSessionByDeviceSecret(deviceSecret);
+        tokenRestWebServiceValidator.validateSessionForTokenExchange(sessionId, deviceSecret, auditLog);
         checkNotNull(sessionId); // it checked by validator, added it only to relax static bugs checker
 
-        tokenRestWebServiceValidator.validateSubjectToken(subjectToken, sessionId, auditLog);
+        tokenRestWebServiceValidator.validateSubjectToken(deviceSecret, subjectToken, sessionId, auditLog);
 
         TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(new User(), client);
         tokenExchangeGrant.setSessionDn(sessionId.getDn());
@@ -127,19 +156,46 @@ public class TokenExchangeService {
 
         executionContext.getAuditLog().updateOAuth2AuditLog(tokenExchangeGrant, true);
 
-        String rotatedDeviceSecret = rotateDeviceSecret(sessionId, actorToken);
+        String rotatedDeviceSecret = rotateDeviceSecret(sessionId, deviceSecret);
 
         JSONObject jsonObj = new JSONObject();
         try {
             TokenRestWebServiceImpl.fillJsonObject(jsonObj, accessToken, accessToken.getTokenType(), accessToken.getExpiresIn(), reToken, scope, idToken);
             jsonObj.put("issued_token_type", TOKEN_TYPE_ACCESS_TOKEN);
             if (StringUtils.isNotBlank(rotatedDeviceSecret)) {
-                jsonObj.put("device_secret", rotatedDeviceSecret);
+                jsonObj.put(DEVICE_SECRET, rotatedDeviceSecret);
             }
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
         }
 
         return jsonObj;
+    }
+
+    public void putNewDeviceSecret(JSONObject jsonObj, String sessionDn, Client client, String scope) {
+        if (!scope.contains(ScopeConstants.DEVICE_SSO)) {
+            return;
+        }
+        if (!ArrayUtils.contains(client.getGrantTypes(), GrantType.TOKEN_EXCHANGE)) {
+            log.debug("Skip device secret. Scope has {} value but client does not have Token Exchange Grant Type enabled ('urn:ietf:params:oauth:grant-type:token-exchange')", ScopeConstants.DEVICE_SSO);
+            return;
+        }
+
+        try {
+            final SessionId sessionId = sessionIdService.getSessionByDn(sessionDn);
+            if (sessionId == null) {
+                log.debug("Unable to find session by dn: {}", sessionDn);
+                return;
+            }
+
+            String newDeviceSecret = HandleTokenFactory.generateDeviceSecret();
+            sessionId.getDeviceSecrets().add(newDeviceSecret);
+
+            sessionIdService.updateSessionId(sessionId, false);
+
+            jsonObj.put("device_token", newDeviceSecret);
+        } catch (Exception e) {
+            log.error("Failed to generate device_secret", e);
+        }
     }
 }

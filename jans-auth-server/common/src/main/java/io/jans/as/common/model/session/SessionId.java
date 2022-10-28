@@ -95,6 +95,7 @@ public class SessionId implements Deletable, Serializable {
     @Expiration
     private int ttl;
 
+    @NotNull
     public List<String> getDeviceSecrets() {
         if (deviceSecrets == null) deviceSecrets = new ArrayList<>();
         return deviceSecrets;
