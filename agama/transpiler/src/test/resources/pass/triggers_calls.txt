@@ -7,8 +7,9 @@ When pepperoni is forgotten
     o."-x" = Trigger oh.no some params.here
     
 Trigger $bah.humbug no params
-    Override templates "pea/body.ftl" "" "pea/media.ftl" "fluff.ftl" 
-    "caravan.ftl" "../whoops.ftlh"
+    Override templates "pea/body.ftl" "" "pea/media.ftl" "fluff.ftl"
+        
+    "caravan.ftl"  "../whoops.ftlh"
 
 x256 = Call java.lang.Math#incrementExact 255
 

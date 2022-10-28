@@ -17,7 +17,7 @@ public class MathFlowTest extends BaseTest {
 
     @Test
     public void runEmpty() {
-        HtmlPage page = launch(QNAME, Collections.singletonMap("numbers",Collections.emptyList()));
+        HtmlPage page = launch(QNAME, Collections.singletonMap("numbers",Collections.emptyList()), false);
         logger.info("Landed at {}", page.getUrl());
         assertServerError(page);
     }
