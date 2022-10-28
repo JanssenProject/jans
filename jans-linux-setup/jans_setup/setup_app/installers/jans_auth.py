@@ -43,6 +43,7 @@ class JansAuthInstaller(JettyInstaller):
         self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.p12')
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
+        self.agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
 
         if Config.profile == SetupProfiles.OPENBANKING:
             Config.enable_ob_auth_script = '0' if base.argsp.disable_ob_auth_script else '1'
@@ -185,12 +186,11 @@ class JansAuthInstaller(JettyInstaller):
             self.import_key_cert_into_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
 
     def setup_agama(self):
-        agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
-        self.createDirs(agama_root)
+        self.createDirs(self.agama_root)
         for adir in ('fl', 'ftl', 'scripts'):
-            self.createDirs(os.path.join(agama_root, adir))
-        base.extract_from_zip(base.current_app.jans_zip, 'agama/misc', agama_root)
-        self.chown(agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
+            self.createDirs(os.path.join(self.agama_root, adir))
+        base.extract_from_zip(base.current_app.jans_zip, 'agama/misc', self.agama_root)
+        self.chown(self.agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
 
         tmp_dir = os.path.join(Config.templateFolder, 'jetty')
         src_xml = os.path.join(tmp_dir, 'agama_web_resources.xml')
