@@ -46,7 +46,7 @@ interactive mode.
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
-### Red Hat / Centos Un-installation
+## Red Hat / Centos Un-installation
 
 Removing Janssen is a two step process:
 
