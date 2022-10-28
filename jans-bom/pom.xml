@@ -38,7 +38,8 @@
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
 		<jakarta.el.api.version>5.0.0-RC1</jakarta.el.api.version>
 
-		<jackson.version>2.13.4.2</jackson.version>
+		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
+		<jackson.version>2.13.4</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20220924</json.version>
 
@@ -510,7 +511,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson.bom.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
