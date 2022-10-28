@@ -150,11 +150,12 @@ class JansCliApp(Application):
     def _load_plugins(self) -> None:
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
-            sys.path.append(plugin_file.parent.as_posix())
-            spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file.as_posix())
-            plugin = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(plugin)
-            self._plugins.append(plugin.Plugin(self))
+            if plugin_file.parent.joinpath('.enabled').exists():
+                sys.path.append(plugin_file.parent.as_posix())
+                spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file.as_posix())
+                plugin = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(plugin)
+                self._plugins.append(plugin.Plugin(self))
 
     def init_plugins(self) -> None:
         for plugin in self._plugins:
