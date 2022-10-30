@@ -10,7 +10,6 @@ import sys
 
 from pathlib import Path
 from asyncio import Future, ensure_future
-from pynput.keyboard import Key, Controller
 
 import prompt_toolkit
 from prompt_toolkit.application import Application
@@ -99,8 +98,6 @@ class JansCliApp(Application):
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
                             height=D())
 
-        self.keyboard = Controller()
-
         self.yes_button = Button(text=_("Yes"), handler=accept_yes)
         self.no_button = Button(text=_("No"), handler=accept_no)
         self.status_bar = Window(
@@ -181,9 +178,6 @@ class JansCliApp(Application):
         self.logger.addHandler(file_handler)
         self.logger.debug('JANS CLI Started')
 
-    def press_tab(self) -> None:
-        self.keyboard.press(Key.tab)
-        self.keyboard.release(Key.tab)
 
     def create_cli(self) -> None:
         test_client = config_cli.client_id if config_cli.test_client else None
@@ -199,7 +193,7 @@ class JansCliApp(Application):
 
         self.logger.info("OpenID Configuration: %s", self.cli_object.openid_configuration)
 
-        self.press_tab()
+        self.invalidate()
 
         if status not in (True, 'ID Token is expired'):
             buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
@@ -586,7 +580,7 @@ class JansCliApp(Application):
         dialog.me = float_
         dialog.focus_on_exit = focused_before
         self.layout.focus(dialog)
-        self.press_tab()
+        self.invalidate()
 
     def show_again(self) -> None:
         self.show_message(_("Again"), _("Nasted Dialogs"),)

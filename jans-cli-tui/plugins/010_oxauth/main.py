@@ -258,7 +258,6 @@ class Plugin(DialogUtils):
             result = rsponse.json()
         except Exception:
             self.app.show_message(_("Error getting clients"), str(rsponse.text))
-            #press_tab
             return
 
         data =[]

@@ -959,7 +959,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             result = rsponse.json()
         except Exception:
             self.myparent.show_message(_("Error getting clients"), str(rsponse.text))
-            #press_tab
             return
         data =[]
 
