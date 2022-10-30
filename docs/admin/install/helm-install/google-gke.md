@@ -154,7 +154,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
       helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
       ```
 
-        Add this to override.yaml:
+        Create a file named `mysql.yaml` and this to it:
       
         ```yaml
         global:
