@@ -97,6 +97,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
         ```yaml
         global:
             lbIp: "" #Add LoadBalancer IP from previous command
+            isFqdnRegistered: true
             fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
         nginx:
           ingress:
@@ -120,23 +121,25 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
           Add this to override.yaml:
           ```yaml
-          cnPersistenceType: ldap
-          storageClass:
-            provisioner: kubernetes.io/gce-pd
-          opendj:
-            enabled: true
+          global:
+            cnPersistenceType: ldap
+            storageClass:
+              provisioner: kubernetes.io/gce-pd
+            opendj:
+              enabled: true
           ```
 
           So now configuring both LDAP and no-FQDN will look something like that:
 
           ```yaml
-            cnPersistenceType: ldap
-            lbIp: #Add Load Balancer IP from previous command
-            isFqdnRegistered: false
-            storageClass:
-              provisioner: kubernetes.io/gce-pd
-            opendj:
-              enabled: true
+           global:
+             cnPersistenceType: ldap
+             lbIp: #Add Load Balancer IP from previous command
+             isFqdnRegistered: false
+             storageClass:
+               provisioner: kubernetes.io/gce-pd
+             opendj:
+               enabled: true
           ```
 
 
@@ -156,8 +159,6 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
         ```yaml
         global:
           cnPersistenceType: sql
-          lbIp: #Add Load Balancer IP from previous command
-          isFqdnRegistered: false
         config:
           configmap:
             cnSqlDbName: jans
