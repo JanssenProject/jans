@@ -52,9 +52,9 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 5.  Install [Helm3](https://helm.sh/docs/intro/install/)    
 
-6.  Configure enviroment variable `KUBECONFIG` to be able to authenticate against the cluster
+6.  Create `jans` namespace where our resources will reside
     ```
-    export KUBECONFIG=~/.kube/config 
+    kubectl create namespace jans
     ```
 
 ## Jans Installation using Helm
@@ -150,8 +150,8 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
     - MySQL for persistence storage
       ```
-      sudo helm repo add bitnami https://charts.bitnami.com/bitnami
-      sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans --kubeconfig="$KUBECONFIG"
+      helm repo add bitnami https://charts.bitnami.com/bitnami
+      helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
       ```
 
         Add this to override.yaml:
@@ -172,7 +172,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
           Install the MySQL database:
             ```
-            sudo helm install janssen janssen/janssen -n jans -f mysql.yaml --kubeconfig=$KUBECONFIG
+            helm install janssen janssen/janssen -n jans -f mysql.yaml
             ```
 
 3.  Install Jans
@@ -182,8 +182,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
       After finishing all the tweaks to the `override.yaml` file, we can use it to install jans.
 
       ```
-      sudo helm repo add janssen https://docs.jans.io
-      sudo helm repo update
-      kubectl create namespace jans
-      sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig=$KUBECONFIG
+      helm repo add janssen https://docs.jans.io
+      helm repo update
+      helm install janssen janssen/janssen -n jans -f override.yaml
       ```
