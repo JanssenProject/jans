@@ -5036,33 +5036,39 @@
     Building blocks of an authentication workflow
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-a-custom-script" class="md-nav__link">
-    Writing a custom script
+    <nav class="md-nav" aria-label="Building blocks of an authentication workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-writing-a-custom-script" class="md-nav__link">
+    A. Writing a custom script
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-ui-pages" class="md-nav__link">
-    Writing UI pages:
+        
+          <li class="md-nav__item">
+  <a href="#b-writing-ui-pages" class="md-nav__link">
+    B. Writing UI pages:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#building-business-logic-in-custom-script" class="md-nav__link">
-    Building business logic in Custom script:
+        
+          <li class="md-nav__item">
+  <a href="#c-building-business-logic-in-custom-script" class="md-nav__link">
+    C. Building business logic in Custom script:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-libraries-for-use-in-the-custom-script" class="md-nav__link">
-    Adding libraries for use in the custom script
+        
+          <li class="md-nav__item">
+  <a href="#d-adding-libraries-for-use-in-the-custom-script" class="md-nav__link">
+    D. Adding libraries for use in the custom script
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -10163,33 +10169,39 @@
     Building blocks of an authentication workflow
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-a-custom-script" class="md-nav__link">
-    Writing a custom script
+    <nav class="md-nav" aria-label="Building blocks of an authentication workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-writing-a-custom-script" class="md-nav__link">
+    A. Writing a custom script
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-ui-pages" class="md-nav__link">
-    Writing UI pages:
+        
+          <li class="md-nav__item">
+  <a href="#b-writing-ui-pages" class="md-nav__link">
+    B. Writing UI pages:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#building-business-logic-in-custom-script" class="md-nav__link">
-    Building business logic in Custom script:
+        
+          <li class="md-nav__item">
+  <a href="#c-building-business-logic-in-custom-script" class="md-nav__link">
+    C. Building business logic in Custom script:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-libraries-for-use-in-the-custom-script" class="md-nav__link">
-    Adding libraries for use in the custom script
+        
+          <li class="md-nav__item">
+  <a href="#d-adding-libraries-for-use-in-the-custom-script" class="md-nav__link">
+    D. Adding libraries for use in the custom script
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -10345,20 +10357,16 @@ A client may also specify <code>default_acr_values</code> during registration (a
 <p>Enabled scripts can be confirmed by checking  the Janssen OP configuration URL, <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>, and finding the "<strong>acr_values_supported</strong>".</p>
 <p>Learn more about acr_values in the <a href="http://openid.net/specs/openid-connect-core-1_0.html#acrSemantics">OpenID Connect core spec</a>.</p>
 <h2 id="building-blocks-of-an-authentication-workflow">Building blocks of an authentication workflow<a class="headerlink" href="#building-blocks-of-an-authentication-workflow" title="Permanent link">#</a></h2>
-<p>A. Custom script
-B. UI pages, stylesheets, javascript files, image files and resource bundles
-C. Managed Beans
-D. Third party libraries.</p>
 <p>Jans-auth comprises of a number of beans, configuration files and Facelets (JSF) views, packaged as a WAR module. That means custom scripts and custom pages (JSF facelets) can make use of business logic already encapsulated in the Weld managed beans. The following sections explain how authentication flow can be built using a custom script. </p>
-<h2 id="writing-a-custom-script">Writing a custom script<a class="headerlink" href="#writing-a-custom-script" title="Permanent link">#</a></h2>
+<h3 id="a-writing-a-custom-script">A. Writing a custom script<a class="headerlink" href="#a-writing-a-custom-script" title="Permanent link">#</a></h3>
 <p>The <strong>PersonAuthenticationType</strong> script is described by a java interface whose methods should be overridden to implement an authentication workflow.
 The <a href="https://jans.io/docs/admin/developer/scripts/person-authentication-interface">article</a> talks about these methods in detail and the psuedo code in each method will help drive home the point.</p>
-<h2 id="writing-ui-pages">Writing UI pages:<a class="headerlink" href="#writing-ui-pages" title="Permanent link">#</a></h2>
+<h3 id="b-writing-ui-pages">B. Writing UI pages:<a class="headerlink" href="#b-writing-ui-pages" title="Permanent link">#</a></h3>
 <p>All pages are <strong>xhtml</strong> files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages. </p>
 <p>This <a href="https://github.com/maduvena/jans-docs/wiki/Writing-UI-pages">article</a> covers all the details you need to write your own web page. </p>
-<h2 id="building-business-logic-in-custom-script">Building business logic in Custom script:<a class="headerlink" href="#building-business-logic-in-custom-script" title="Permanent link">#</a></h2>
+<h3 id="c-building-business-logic-in-custom-script">C. Building business logic in Custom script:<a class="headerlink" href="#c-building-business-logic-in-custom-script" title="Permanent link">#</a></h3>
 <p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this <a href="../../managed-beans/">article</a></p>
-<h2 id="adding-libraries-for-use-in-the-custom-script">Adding libraries for use in the custom script<a class="headerlink" href="#adding-libraries-for-use-in-the-custom-script" title="Permanent link">#</a></h2>
+<h3 id="d-adding-libraries-for-use-in-the-custom-script">D. Adding libraries for use in the custom script<a class="headerlink" href="#d-adding-libraries-for-use-in-the-custom-script" title="Permanent link">#</a></h3>
 <p>Java or Python libraries to be imported and used very easily. Remember incase you opt for a python library, it should be written in "pure python" only.
 More details of this mentioned <a href="../../interception-scripts/#using-python-libraries-in-a-script">here</a></p>
 <h2 id="uses-of-person-authentication-script">Uses of Person Authentication script<a class="headerlink" href="#uses-of-person-authentication-script" title="Permanent link">#</a></h2>
@@ -10464,7 +10472,7 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T09:25:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-31T16:06:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-31</span>
       
         <br>
         Created:
