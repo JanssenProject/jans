@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#customization-and-localization" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -712,10 +717,64 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Customization/Localization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Customization/Localization
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-of-endpoints" class="md-nav__link">
+    Behavior of endpoints
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-content" class="md-nav__link">
+    Web content
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-messages" class="md-nav__link">
+    Error messages
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#localization-for-openid-connect-client-metadata" class="md-nav__link">
+    Localization for OpenID Connect client metadata
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9938,6 +9997,44 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-of-endpoints" class="md-nav__link">
+    Behavior of endpoints
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-content" class="md-nav__link">
+    Web content
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-messages" class="md-nav__link">
+    Error messages
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#localization-for-openid-connect-client-metadata" class="md-nav__link">
+    Localization for OpenID Connect client metadata
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -9964,6 +10061,21 @@
         <span class="md-tag">planning</span>
       
     
+      
+      
+        <span class="md-tag">localization</span>
+      
+    
+      
+      
+        <span class="md-tag">international</span>
+      
+    
+      
+      
+        <span class="md-tag">language</span>
+      
+    
   </nav>
 
 
@@ -9974,16 +10086,73 @@
   </a>
 
 
-  <h1>Customization/Localization</h1>
-
-<p>blah blah</p>
+<h1 id="customization-and-localization">Customization and Localization<a class="headerlink" href="#customization-and-localization" title="Permanent link">#</a></h1>
+<p>You can customize just about everything in the Janssen Platform.  That's
+pretty much the point of running your own identity platform. This includes
+the look and feel of the web pages, the language of the user-facing
+content, the behavior of endpoints, error messages, and more.</p>
+<h2 id="behavior-of-endpoints">Behavior of endpoints<a class="headerlink" href="#behavior-of-endpoints" title="Permanent link">#</a></h2>
+<p>Almost every endpoint has an interception script, which enables you to implement
+custom business logic. For a more general discussion of the extensibility of the
+Janssen platform, see the <a href="../../developer/">Developer Guide</a>.</p>
+<h2 id="web-content">Web content<a class="headerlink" href="#web-content" title="Permanent link">#</a></h2>
+<p>There are several front channel flows in Auth Server (front channel = web
+browser):</p>
+<ol>
+<li>OpenID User Authentication</li>
+<li>OpenID Consent</li>
+<li>Post-Authentication</li>
+<li>UMA Claims Gathering</li>
+</ol>
+<p>Each of these scripts contains a method which is similar to <code>getPageForStep</code>
+which fetches the respective <a href="https://en.wikipedia.org/wiki/Facelets">Facelets</a>
+<code>xhtml</code> file for that step. Facelets is very friendly to designers, as
+it's possible to mix content such as regular HTML with JSF components.
+Thus Facelets pages can have both static and <strong>dynamic content</strong> and leverage
+all your "normal" web design tools like CSS and JavaScript. Facelets also
+supports templates. Each <code>.xhtml</code> page has access to the authentication context,
+and you can insert data from the respective interception script. Also, each
+<code>.xhtml</code> page is unique, and has a built in state identifier, preventing Auth
+Server from responding to any page which it did not render. For more information,
+see the <a href="../../developer/">Developer Guide</a>.</p>
+<p>Note, in the <code>getPageForStep</code> method, you can have a conditional statement
+to return different pages based either on the detected or requested language
+of the subject.</p>
+<h2 id="error-messages">Error messages<a class="headerlink" href="#error-messages" title="Permanent link">#</a></h2>
+<p>You can change the descriptions for the various front-channel Auth Server
+error messages, for example, what would Auth Server return for a bad
+request to the Authorization Endpoint. Of course you can also customize the web
+server error messages, like 404, by configuring your web server.  Auth Server
+should <strong>never</strong> return a stackTrace.</p>
+<h2 id="localization-for-openid-connect-client-metadata">Localization for OpenID Connect client metadata<a class="headerlink" href="#localization-for-openid-connect-client-metadata" title="Permanent link">#</a></h2>
+<p>Because client information may be displayed via the OpenID protocol, language
+support is needed at the client level. For example, the client name,
+description, terms of service URI, or logo may differ based on the end user's
+language.</p>
+<p><a href="https://openid.net/specs/openid-connect-registration-1_0.html#LanguagesAndScripts">Section 2.1 of OpenID Connect Client Registration, Metadata Languages and Scripts</a> states:</p>
+<blockquote>
+<blockquote>
+<p>Human-readable Client Metadata values and Client Metadata values that
+reference human-readable values MAY be represented in multiple languages and
+scripts. For example, values such as client_name, tos_uri, policy_uri,
+logo_uri, and client_uri might have multiple locale-specific values in some
+Client registrations.</p>
+</blockquote>
+</blockquote>
+<p>To specify the languages and scripts, <a href="https://www.rfc-editor.org/rfc/rfc5646">BCP47</a>
+language tags are added to Client Metadata member names, delimited by a
+<code>#</code> character. For example, the value for <code>tos_uri#ja-Hani-JP</code> would direct the
+subject to the terms of service agreement in Japanese.</p>
+<p>Janssen does not <a href="https://github.com/JanssenProject/jans/issues/2776">yet</a>
+support languages syntax for OpenID user claims, as
+described in <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClaimsLanguagesAndScripts">OpenID Core Section 5.2, Claims Languages and Scripts</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-28T18:06:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-31T16:04:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-31</span>
       
         <br>
         Created:

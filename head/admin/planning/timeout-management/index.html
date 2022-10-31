@@ -9976,14 +9976,59 @@
 
   <h1>Timeout Management</h1>
 
-<p>This is a placeholder</p>
+<p>Warning: business expectations regarding timeouts may drive you crazy. There
+are several timeout values in Janssen Auth Server. And web application and
+mobile apps may have their own timeout thresholds. The holy grail of timeouts
+is when everything times out at the same time--IDP and applications. This
+is rarely attainable. Normally the application needs to handle gracefully the
+case when the IDP session expires first. And if the application session expires
+first, it may need to trigger a logout event at the OpenID Provider.</p>
+<p>Below is a list of some of the timeouts to consider:</p>
+<ol>
+<li>
+<p><strong>sessionIdLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>serverSessionIdLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>sessionIdUnusedLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>sessionIdUnauthenticatedUnusedLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>spontaneousScopeLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>refreshTokenLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>idTokenLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>accessTokenLifetime</strong>:</p>
+</li>
+<li>
+<p><strong>cleanServiceInterval</strong>:</p>
+</li>
+<li>
+<p><strong>dynamicRegistrationExpirationTime</strong>:</p>
+</li>
+<li>
+<p><strong>refreshTokenExtendLifetimeOnRotation</strong>:</p>
+</li>
+<li>
+<p><strong>CIBA, UMA and Device Flow</strong>: have their own specific timeouts.</p>
+</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T16:08:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-31T16:04:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-31</span>
       
         <br>
         Created:

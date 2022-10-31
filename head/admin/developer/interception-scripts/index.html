@@ -9984,17 +9984,29 @@
 
 
 <h1 id="interception-scripts-or-custom-scripts">Interception Scripts (or custom scripts)<a class="headerlink" href="#interception-scripts-or-custom-scripts" title="Permanent link">#</a></h1>
-<p>Interception scripts (or custom scripts)  allow you to define custom business logic for various features offered by the OpenID Provider (Jans-auth server). Some examples of features which can be customized are - implementing a 2FA authentication method, consent gathering, client registration, adding business specific claims to ID token or Access token etc.
-Scripts can easily be upgraded and doesn't require forking the Jans Server code or re-building it. </p>
+<p>Interception scripts (or custom scripts)  allow you to define custom business
+logic for various features offered by the OpenID Provider (Jans-auth server).
+Some examples of features which can be customized are - implementing a 2FA
+authentication method, consent gathering, client registration, adding business
+specific claims to ID token or Access token etc.
+Scripts can easily be upgraded and doesn't require forking the Jans Server code
+or re-building it.</p>
 <h1 id="types-of-interception-scripts-in-jans-server">Types of Interception scripts in Jans server<a class="headerlink" href="#types-of-interception-scripts-in-jans-server" title="Permanent link">#</a></h1>
-<p>Listed below, are custom scripts classified into various types, each of which represents a feature of the Jans server that can be extended as per the business need. Each script type is described by a java interface whose methods should be overridden to implement your business case. </p>
+<p>Listed below, are custom scripts classified into various types, each of which
+represents a feature of the Jans server that can be extended as per the business
+need. Each script type is described by a java interface whose methods should be
+overridden to implement your business case.</p>
 <ol>
-<li><a href="../scripts/person-authentication/">Person Authentication</a> : Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.</li>
-<li><a href="../scripts/consent-gathering/">Consent Gathering</a> : Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.</li>
-<li><a href="">User Registration</a></li>
+<li><a href="../scripts/person-authentication/">Person Authentication</a> : Allows the
+definition of multi-step authentication workflows, including adaptive
+authentication - where the number of steps varies depending on the context.</li>
+<li><a href="../scripts/consent-gathering/">Consent Gathering</a> : Allows exact
+customization of the authorization (or consent) process. By default, the OP will
+request authorization for each scope, and display the respective scope description.</li>
 <li>Update User</li>
 <li><a href="../scripts/client-registration/">Client Registration</a></li>
-<li>Dynamic scopes : Enables admin to generate scopes on the fly, for example by calling external APIs</li>
+<li>Dynamic scopes : Enables admin to generate scopes on the fly, for example by
+calling external APIs</li>
 <li>ID Generator</li>
 <li>Cache Refresh</li>
 <li>Session Management</li>
@@ -10005,14 +10017,16 @@ Scripts can easily be upgraded and doesn't require forking the Jans Server code 
 <li>UMA 2 Claims-Gathering</li>
 </ol>
 <h1 id="implementation-languages-jython-or-pure-java">Implementation languages - Jython or pure Java<a class="headerlink" href="#implementation-languages-jython-or-pure-java" title="Permanent link">#</a></h1>
-<p>Interception scripts are written in <strong><a href="http://www.jython.org/">Jython</a></strong> or in <strong>pure Java</strong>, enabling Java or Python libraries to be imported. </p>
+<p>Interception scripts are written in <strong><a href="http://www.jython.org/">Jython</a></strong> or in
+<strong>pure Java</strong>, enabling Java or Python libraries to be imported.</p>
 <hr />
 <h2 id="implementation-in-pure-java">Implementation in Pure Java<a class="headerlink" href="#implementation-in-pure-java" title="Permanent link">#</a></h2>
-<p>A script in Java refers to a java source file (e.g. <code>Discovery.java</code>) which is compiled by AS and executed at runtime. </p>
+<p>A script in Java refers to a java source file (e.g. <code>Discovery.java</code>) which is
+compiled by AS and executed at runtime.</p>
 <p>Some rules:</p>
 <ul>
 <li>The java class file containing the script should not have a package set.</li>
-<li>The name of the class must match to the name set in <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java">CustomScriptType source code</a> (e.g. for discovery script it is "Discovery") </li>
+<li>The name of the class must match to the name set in <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/CustomScriptType.java">CustomScriptType source code</a> (e.g. for discovery script it is "Discovery")</li>
 <li>Scripts must implement predefined interface which can be found against the <a href="https://github.com/JanssenProject/jans/tree/main/jans-core/script/src/main/java/io/jans/model/custom/script/type">CustomScriptType</a>. For e.g. if you are writing a Person authentication script then your class should implement the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java">following interface</a></li>
 <li>All libraries available at runtime to server are available also to pure java script</li>
 <li>To log to <code>jans-auth_script.log</code> use <code>scriptLogger</code></li>
@@ -10077,7 +10091,7 @@ public class Discovery implements DiscoveryType {
 <div class="highlight"><pre><span></span><code>&lt;Set name=&quot;extraClasspath&quot;&gt;/opt/jans/jetty/jans-auth/custom/libs/library-name.jar&lt;/Set&gt;
 </code></pre></div>
 3. Restart jans-auth service
-<code>systemctl restart jans-auth</code> </p>
+<code>systemctl restart jans-auth</code></p>
 <hr />
 <h2 id="implementation-in-jython">Implementation in Jython<a class="headerlink" href="#implementation-in-jython" title="Permanent link">#</a></h2>
 <p>The example below is only meant to convey the concept, we will cover the details in later parts of the documentation.
@@ -10087,7 +10101,7 @@ Suppose, we are implementing an Openbanking Identity platform and we have to add
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        &lt; initialization code comes here &gt; 
+        &lt; initialization code comes here &gt;
         return True
 
     def destroy(self, configurationAttributes):
@@ -10113,11 +10127,15 @@ Suppose, we are implementing an Openbanking Identity platform and we have to add
 <div class="highlight"><pre><span></span><code>&lt;Set name=&quot;extraClasspath&quot;&gt;/opt/jans/jetty/jans-auth/custom/libs/library-name.jar&lt;/Set&gt;
 </code></pre></div>
 3. Restart jans-auth service
-<code>systemctl restart jans-auth</code> </p>
+<code>systemctl restart jans-auth</code></p>
 <h3 id="using-python-libraries-in-a-script">Using Python libraries in a script:<a class="headerlink" href="#using-python-libraries-in-a-script" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p>You can only use libraries (packages and modules) that are written in <strong>Pure Python</strong>. Importing a Python class which is a wrapper around a library written in C is not supported by the Jans server. As an example, the psycopg2 library used to connect to PostgreSQL from Python. Since it is a C wrapper around libpq, it won't work with Jython.  </p>
+<p>You can only use libraries (packages and modules) that are written in
+<strong>Pure Python</strong>. Importing a Python class which is a wrapper around a library
+written in C is not supported by the Jans server. As an example, the psycopg2
+library used to connect to PostgreSQL from Python. Since it is a C wrapper
+around libpq, it won't work with Jython.  </p>
 </li>
 <li>
 <p>Python 3 packages / modules are not supported.</p>
@@ -10127,63 +10145,81 @@ Suppose, we are implementing an Openbanking Identity platform and we have to add
 1. Pure Python libraries should be added to <code>/opt/jans/python/libs</code></p>
 <ol>
 <li>
-<p>Using pip to install additional Python packages: </p>
+<p>Using pip to install additional Python packages:</p>
 </li>
 <li>
-<p>Find out about your Jython version first. cd into the /opt directory in your Jans Server container and run ls. A directory named jython-<version> should be listed too where <version> will correspond to the Jython version. Note the version.</p>
+<p>Find out about your Jython version first. cd into the /opt directory in your
+Jans Server container and run ls. A directory named jython-<version> should be
+listed too where <version> will correspond to the Jython version. Note the
+version.</p>
 </li>
-<li>Open the file <code>/etc/jans/conf/jans.properties</code> and look for the line starting with <code>pythonModulesDir=</code>. Append the value <code>/opt/jython-&lt;version&gt;/Lib/site-packages</code> to any existing value. Each value is separater by a colon (:). It should look something like this <code>pythonModulesDir=/opt/jans/python/libs:/opt/jython-2.7.2a/Lib/site-packages</code> 
+<li>Open the file <code>/etc/jans/conf/jans.properties</code> and look for the line starting
+with <code>pythonModulesDir=</code>. Append the value <code>/opt/jython-&lt;version&gt;/Lib/site-packages</code>
+to any existing value. Each value is separater by a colon (:). It should look
+something like this <code>pythonModulesDir=/opt/jans/python/libs:/opt/jython-2.7.2a/Lib/site-packages</code>
 Run the following command <code>/opt/jython-&lt;version&gt;/bin/jython -m ensurepip</code>
-Install your library with <code>/opt/jython-&lt;version&gt;/bin/pip install &lt;library_name&gt;</code> where <library_name> is the name of the library to install.</li>
+Install your library with <code>/opt/jython-&lt;version&gt;/bin/pip install &lt;library_name&gt;</code>
+where <library_name> is the name of the library to install.</li>
 <li>Restart the jans-auth service : <code>systemctl restart jans-auth</code></li>
 </ol>
 <h3 id="debugging-a-jython-script">Debugging a Jython script<a class="headerlink" href="#debugging-a-jython-script" title="Permanent link">#</a></h3>
 <p>This <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/interception-scripts-debug">article</a> covers the details.</p>
 <hr />
 <h3 id="mandatory-methods-to-be-overridden">Mandatory methods to be overridden<a class="headerlink" href="#mandatory-methods-to-be-overridden" title="Permanent link">#</a></h3>
-<p>This is the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/BaseExternalType.java">base class of all custom script types</a> and all custom scripts should implement the following methods.
-* <code>init(self, customScript, configurationAttributes)</code> : This method is only called once during the script initialization (or jans-auth service restarts). It can be used for global script initialization, initiate objects etc</p>
+<p>This is the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/BaseExternalType.java">base class of all custom script types</a> and all custom
+scripts should implement the following methods.
+* <code>init(self, customScript, configurationAttributes)</code> : This method is only
+called once during the script initialization (or jans-auth service restarts). It
+can be used for global script initialization, initiate objects etc</p>
 <ul>
 <li>
-<p><code>destroy(self, configurationAttributes)</code>: This method is called when a custom script fails to initialize or upon jans-auth service restarts. It can be used to free resource and objects created in the init() method</p>
+<p><code>destroy(self, configurationAttributes)</code>: This method is called when a custom
+script fails to initialize or upon jans-auth service restarts. It can be used to
+free resource and objects created in the init() method</p>
 </li>
 <li>
-<p><code>getApiVersion(self, configurationAttributes, customScript)</code> : The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</p>
+<p><code>getApiVersion(self, configurationAttributes, customScript)</code> : The
+getApiVersion method allows API changes in order to do transparent migration
+from an old script to a new API. Only include the customScript variable if the
+value for getApiVersion is greater than 10</p>
 </li>
 </ul>
 <hr />
 <h3 id="configurable-properties-of-a-custom-script">Configurable properties of a custom script<a class="headerlink" href="#configurable-properties-of-a-custom-script" title="Permanent link">#</a></h3>
-<table>
-<tr><td> Name </td><td>unique identifier(name) for the custom script e.g. person_authentication_google</td></tr>
-<tr><td> Description </td><td>Description text</td></tr>
-<tr><td> Programming Languages </td><td>Python </td></tr>
-<tr><td> Level </td><td>Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated.</td></tr>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Name <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>unique identifier(name) for the custom script e.g. person_authentication_google<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Description <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Description text<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Programming Languages <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Python <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Level <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated.<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
 
-<tr><td> Location type </td><td>
-<ul><li>Database - Stored in persistence (LDAP, MYSQL or PLSQL whichever applicable ) </li><li>File - stored as a file</li></ul>
- </td></tr>
-<tr><td> Interactive </td><td>
-<ul><li>Web - web application</li><li>native - mobile application</li><li>both</li></ul>
- </td></tr>
-<tr><td> Custom properties</td><td>Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc </td></tr>
- </table>
-
+<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Location type <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Database - Stored in persistence (LDAP, MYSQL or PLSQL whichever applicable ) <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>File - stored as a file<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+ <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Interactive <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Web - web application<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>native - mobile application<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>both<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+ <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Custom properties<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+ <span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</code></pre></div>
 <hr />
 <h3 id="building-business-logic-in-a-custom-script">Building business logic in a custom script<a class="headerlink" href="#building-business-logic-in-a-custom-script" title="Permanent link">#</a></h3>
-<p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. This <a href="https://jans.io/docs/admin/developer/managed-beans/">article</a> presents many ready-to-use beans which can be used to build a script.</p>
+<p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most
+important aspects of business logic are implemented through a set of beans. This
+<a href="https://jans.io/docs/admin/developer/managed-beans/">article</a> presents many
+ready-to-use beans which can be used to build a script.</p>
 <hr />
 <h3 id="operations-on-custom-scripts-using-jans-cli">Operations on custom scripts using jans-cli<a class="headerlink" href="#operations-on-custom-scripts-using-jans-cli" title="Permanent link">#</a></h3>
-<p>Jans-cli supports the following six operations on custom scripts: </p>
+<p>Jans-cli supports the following six operations on custom scripts:</p>
 <ol>
 <li><code>get-config-scripts</code>, gets a list of custom scripts.</li>
 <li><code>post-config-scripts</code>, adds a new custom script.</li>
 <li><code>put-config-scripts</code>, updates a custom script.</li>
 <li><code>get-config-scripts-by-type</code>, requires an argument <code>--url-suffix TYPE: ______</code>.<br />
-    You can specify the following types: PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, UPDATE_USER, USER_REGISTRATION, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP, or UPDATE_TOKEN. </li>
+    You can specify the following types: PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, UPDATE_USER, USER_REGISTRATION, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP, or UPDATE_TOKEN.</li>
 <li><code>get-config-scripts-by-inum</code>, requires an argument <code>--url-suffix inum: _____</code></li>
 <li><code>delete-config-scripts-by-inum</code>, requires an argument <code>--url-suffix inum: _____</code></li>
 </ol>
-<p>The post-config-scripts and put-config-scripts require various details about the scripts. The following command gives the basic schema of the custom scripts to pass to these operations. </p>
+<p>The post-config-scripts and put-config-scripts require various details about the scripts. The following command gives the basic schema of the custom scripts to pass to these operations.</p>
 <h3 id="basic-schema-of-a-custom-script">Basic schema of a custom script<a class="headerlink" href="#basic-schema-of-a-custom-script" title="Permanent link">#</a></h3>
 <p>Command:</p>
 <p><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript</code></p>
@@ -10246,36 +10282,36 @@ To add or modify a script first, we need to create the script's python file (e.g
 </code></pre></div></p>
 <hr />
 <h3 id="add-modify-and-delete-a-script">Add, Modify and Delete a script<a class="headerlink" href="#add-modify-and-delete-a-script" title="Permanent link">#</a></h3>
-<p>The following command will add a new script with details given in /tmp/sample.json file. <strong>The jans-cli will generate a unique inum of this new script if we skip inum in the json file.</strong> 
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/sampleadd.json 
+<p>The following command will add a new script with details given in /tmp/sample.json file. <strong>The jans-cli will generate a unique inum of this new script if we skip inum in the json file.</strong>
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/sampleadd.json
 </code></pre></div>
-The following command will modify/update the existing script with details given in /tmp/samplemodify.json file. <strong>Remember to set inum field in samplemodify.json to the inum of the script to update.</strong> </p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-scripts --data /tmp/samplemodify.json 
+The following command will modify/update the existing script with details given in /tmp/samplemodify.json file. <strong>Remember to set inum field in samplemodify.json to the inum of the script to update.</strong></p>
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-scripts --data /tmp/samplemodify.json
 </code></pre></div>
-<p>To delete a custom script by its inum, use the following command: </p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:SAMPLE-TEST-INUM 
+<p>To delete a custom script by its inum, use the following command:</p>
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:SAMPLE-TEST-INUM
 </code></pre></div>
 <h3 id="list-existing-custom-scripts">List existing custom scripts<a class="headerlink" href="#list-existing-custom-scripts" title="Permanent link">#</a></h3>
 <p>These commands to print the details are important, as using them we can get the inum of these scripts which is required to perform update or delete operation.</p>
 <ol>
 <li>
-<p>The following command will display the details of all the existing custom scripts. This will be helpful to get the inum of scripts to perform the update and delete operation. 
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts 
+<p>The following command will display the details of all the existing custom scripts. This will be helpful to get the inum of scripts to perform the update and delete operation.
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts
 </code></pre></div></p>
 </li>
 <li>
-<p>Following command displays the details of selected custom script (by inum). </p>
+<p>Following command displays the details of selected custom script (by inum).</p>
 </li>
 </ol>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:_____  
 </code></pre></div>
 <ol>
-<li>Use the following command to display the details of existing custom scripts of a given type (for example: INTROSPECTION). 
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:INTROSPECTION 
+<li>Use the following command to display the details of existing custom scripts of a given type (for example: INTROSPECTION).
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:INTROSPECTION
 </code></pre></div>
-:memo: <strong>Note:</strong> Incase the AS's Access token is bound to the client's MTLS certificate, you need to add the certificate and key files to the above commands. 
-E.g: 
-<code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/sampleadd.json -cert-file sampleCert.pem -key-file sampleKey.key</code> </li>
+:memo: <strong>Note:</strong> Incase the AS's Access token is bound to the client's MTLS certificate, you need to add the certificate and key files to the above commands.
+E.g:
+<code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/sampleadd.json -cert-file sampleCert.pem -key-file sampleKey.key</code></li>
 </ol>
 <h2 id="client-specific-implementations">Client specific implementations<a class="headerlink" href="#client-specific-implementations" title="Permanent link">#</a></h2>
 <h2 id="useful-links">Useful links<a class="headerlink" href="#useful-links" title="Permanent link">#</a></h2>
@@ -10288,7 +10324,7 @@ E.g:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-18T21:51:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-18</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-31T16:04:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-31</span>
       
         <br>
         Created:
