@@ -247,8 +247,11 @@ class Plugin(DialogUtils):
                         )
 
         except Exception as e:
+            self.app.stop_progressing()
             self.app.show_message(_("Error getting clients"), str(e))
             return
+
+        self.app.stop_progressing()
 
         if rsponse.status_code not in (200, 201):
             self.app.show_message(_("Error getting clients"), str(rsponse.text))
@@ -316,6 +319,7 @@ class Plugin(DialogUtils):
         """ 
         self.oauth_data_container['clients'] = HSplit([Label(_("Please wait while getting clients"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_clients, daemon=True)
+        self.app.start_progressing()
         t.start()
 
     def oauth_update_scopes(

@@ -7,9 +7,10 @@ import time
 import logging
 import importlib
 import sys
+import asyncio
 
 from pathlib import Path
-from asyncio import Future, ensure_future
+from itertools import cycle
 
 import prompt_toolkit
 from prompt_toolkit.application import Application
@@ -89,6 +90,9 @@ class JansCliApp(Application):
         self.set_keybindings()
         self.init_logger()
         self.status_bar_text = ''
+        self.progress_char = ' '
+        self.progress_active = False
+        self.progress_iterator = cycle(['⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽'])
         self.styles = dict(style.style_rules)
         self._plugins = []
         self._load_plugins()
@@ -100,9 +104,12 @@ class JansCliApp(Application):
 
         self.yes_button = Button(text=_("Yes"), handler=accept_yes)
         self.no_button = Button(text=_("No"), handler=accept_no)
-        self.status_bar = Window(
-                        FormattedTextControl(self.update_status_bar), style='class:status', height=1
-                    )
+        self.pbar_window = Window(char=lambda: self.progress_char, style='class:status', width=1)
+        self.status_bar = VSplit([
+                                Window(FormattedTextControl(self.update_status_bar), style='class:status', height=1),
+                                self.pbar_window,
+                                ], height=1
+                                )
 
         self.center_container = self.not_implemented
 
@@ -137,12 +144,29 @@ class JansCliApp(Application):
                 mouse_support=True, ## added
             )
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
+        self.create_background_task(self.progress_coroutine())
 
         self.plugins_initialised = False
         self.check_jans_cli_ini()
         if self.cli_object_ok:
             self.init_plugins()
 
+    async def progress_coroutine(self) -> None:
+        """asyncio corotune for progress bar
+        """
+        while True:
+            if self.progress_active:
+                self.progress_char = next(self.progress_iterator)
+                self.invalidate()
+            await asyncio.sleep(0.15)
+
+    def start_progressing(self):
+        self.progress_active = True
+
+    def stop_progressing(self):
+        self.progress_active = False
+        self.progress_char = ' '
+        self.invalidate()
 
     def _load_plugins(self) -> None:
         plugin_dir = os.path.join(cur_dir, 'plugins')
@@ -228,7 +252,7 @@ class JansCliApp(Application):
                         self.cli_object_ok = True
                         if not self.plugins_initialised:
                             self.init_plugins()
-                    ensure_future(coroutine())
+                    asyncio.ensure_future(coroutine())
 
             else:
                 self.cli_object_ok = True
@@ -250,7 +274,6 @@ class JansCliApp(Application):
 
         buttons = [Button(_("Save"), handler=self.save_creds)]
         dialog = JansGDialog(self, title=_("Janssen Config Api Client Credidentials"), body=body, buttons=buttons)
-
         async def coroutine():
             app = get_app()
             focused_before = app.layout.current_window
@@ -262,7 +285,7 @@ class JansCliApp(Application):
 
             self.create_cli()
 
-        ensure_future(coroutine())
+        asyncio.ensure_future(coroutine())
 
     def set_keybindings(self) -> None:
         # Global key bindings.
@@ -526,7 +549,7 @@ class JansCliApp(Application):
 
             return result
 
-        ensure_future(coroutine())
+        asyncio.ensure_future(coroutine())
 
     def data_display_dialog(self, **params: Any) -> None:
 
