@@ -152,6 +152,14 @@ def _transform_auth_dynamic_config(conf):
             ]
             should_update = True
 
+        for grant_type in [
+            "urn:ietf:params:oauth:grant-type:device_code",
+            "urn:ietf:params:oauth:grant-type:token-exchange",
+        ]:
+            if grant_type not in conf["dynamicGrantTypeDefault"]:
+                conf["dynamicGrantTypeDefault"].append(grant_type)
+                should_update = True
+
     if "forceSignedRequestObject" not in conf:
         conf["forceSignedRequestObject"] = False
         should_update = True
@@ -204,6 +212,14 @@ def _transform_auth_dynamic_config(conf):
             "ssaExpirationInDays": 30
         }
         should_update = True
+
+    for grant_type in [
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+    ]:
+        if grant_type not in conf["grantTypesSupported"]:
+            conf["grantTypesSupported"].append(grant_type)
+            should_update = True
 
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
