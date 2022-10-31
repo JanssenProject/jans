@@ -122,8 +122,8 @@ jobs:
           # move generated chart from a previous step
           mv ../janssen-*.tgz ./charts/
           cd ./charts
-          helm repo index .
           git add janssen-*.tgz && git update-index --refresh
+          helm repo index .
           git add index.yaml && git update-index --refresh
           cd ..
           # END move generated chart from a previous step
