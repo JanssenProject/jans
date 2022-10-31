@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.jans.as.client.BaseTest.clientEngine;
+import static io.jans.as.client.client.Asserter.assertNotBlank;
 import static org.testng.Assert.*;
 
 public class JwtAssertBuilder extends BaseAssertBuilder {
@@ -28,6 +29,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
     private boolean notNullAuthenticationMethodReferences;
     private boolean notNullClaimsAddressdata;
     private boolean checkMemberOfClaimNoEmpty;
+    private boolean notBlankDsHash;
     private String[] claimsPresence;
     private String[] claimsNoPresence;
 
@@ -50,6 +52,11 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
 
     public JwtAssertBuilder notNullAccesTokenHash() {
         this.notNullAccesTokenHash = true;
+        return this;
+    }
+
+    public JwtAssertBuilder notBlankDsHash() {
+        notBlankDsHash = true;
         return this;
     }
 
@@ -179,6 +186,10 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
         if (checkMemberOfClaimNoEmpty) {
             assertNotNull(jwt.getClaims().getClaimAsStringList("member_of"));
             assertTrue(jwt.getClaims().getClaimAsStringList("member_of").size() > 1);
+        }
+
+        if (notBlankDsHash) {
+            assertNotBlank(jwt.getClaims().getClaimAsString("ds_hash"), "ds_hash claim is not present");
         }
 
         if (notNullClaimsAddressdata) {
