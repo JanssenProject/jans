@@ -19,6 +19,7 @@ import html
 import glob
 import logging
 import http.client
+import jwt
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -35,10 +36,6 @@ config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
-try:
-    import jwt
-except ModuleNotFoundError:
-    from pylib import jwt
 
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
