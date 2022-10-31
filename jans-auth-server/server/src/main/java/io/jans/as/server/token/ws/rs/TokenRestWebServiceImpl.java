@@ -398,6 +398,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         scope = authorizationCodeGrant.checkScopesPolicy(scope);
 
         AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
+        final String deviceSecret = tokenExchangeService.createNewDeviceSecret(authorizationCodeGrant.getSessionDn(), client, authorizationCodeGrant.getScopesAsString());
 
         IdToken idToken = null;
         if (authorizationCodeGrant.getScopes().contains(OPENID)) {
@@ -414,6 +415,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), authorizationCodeGrant, client, appConfiguration, attributeService);
 
+            executionContext.setDeviceSecret(deviceSecret);
             executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
             executionContext.setPreProcessing(JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
             executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
@@ -429,7 +431,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         JSONObject jsonObj = new JSONObject();
         try {
             fillJsonObject(jsonObj, accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
-            tokenExchangeService.putNewDeviceSecret(jsonObj, authorizationCodeGrant.getSessionDn(), client, scope);
+            if (StringUtils.isNotBlank(deviceSecret)) {
+                jsonObj.put("device_token", deviceSecret);
+            }
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
         }
