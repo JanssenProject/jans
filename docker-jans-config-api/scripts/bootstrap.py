@@ -110,8 +110,7 @@ def main():
     persistence_setup.import_ldif_files()
 
     plugins = discover_plugins()
-    logger.info(f"Loaded config-api plugins: {', '.join(plugins)}")
-    modify_config_api_xml(plugins)
+    logger.info(f"Loaded config-api plugins: {plugins}")
 
     if "admin-ui" in plugins:
         admin_ui_plugin = AdminUiPlugin(manager)
@@ -228,18 +227,6 @@ def configure_logging():
         f.write(tmpl.safe_substitute(config))
 
 
-def modify_config_api_xml(plugins=None):
-    plugins = plugins or []
-    fn = "/opt/jans/jetty/jans-config-api/webapps/jans-config-api.xml"
-
-    with open(fn) as f:
-        txt = f.read()
-
-    with open(fn, "w") as f:
-        ctx = {
-            "extra_classpath": ",".join([f"./custom/libs/{plugin}-plugin.jar" for plugin in plugins])
-        }
-        f.write(txt % ctx)
 
 
 def configure_admin_ui_logging():
