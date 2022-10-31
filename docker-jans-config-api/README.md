@@ -70,6 +70,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, and `user-mgt`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
+- `CN_TOKEN_SERVER_BASE_HOSTNAME`: Hostname of token server (default to empty string).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
