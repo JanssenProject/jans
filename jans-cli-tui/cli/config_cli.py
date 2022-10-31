@@ -230,7 +230,6 @@ class JCA_CLI:
         self.ssl_settings()
 
 
-
     def getCredentials(self): 
         if self.host == '' or self.client_id == '' or self.client_secret == '' :
             if config_ini_fn.exists():
@@ -269,18 +268,17 @@ class JCA_CLI:
 
 
     def set_logging(self):
-        if debug:
-            self.cli_logger = logging.getLogger("urllib3")
-            self.cli_logger.setLevel(logging.DEBUG)
-            self.cli_logger.propagate = True
-            HTTPConnection.debuglevel = 1
-            file_handler = logging.FileHandler(os.path.join(log_dir, 'cli_debug.log'))
-            file_handler.setLevel(logging.DEBUG)
-            file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
-            self.cli_logger.addHandler(file_handler)
-            def print_to_log(*args):
-                self.cli_logger.debug(" ".join(args))
-            http.client.print = print_to_log
+        self.cli_logger = logging.getLogger("urllib3")
+        self.cli_logger.setLevel(logging.DEBUG)
+        self.cli_logger.propagate = True
+        HTTPConnection.debuglevel = 1
+        file_handler = logging.FileHandler(os.path.join(log_dir, 'cli_debug.log'))
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
+        self.cli_logger.addHandler(file_handler)
+        def print_to_log(*args):
+            self.cli_logger.debug(" ".join(args))
+        http.client.print = print_to_log
 
 
     def log_response(self, response):
