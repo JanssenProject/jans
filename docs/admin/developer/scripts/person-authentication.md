@@ -46,26 +46,22 @@ Learn more about acr_values in the [OpenID Connect core spec](http://openid.net/
 
 
 ## Building blocks of an authentication workflow
-A. Custom script
-B. UI pages, stylesheets, javascript files, image files and resource bundles
-C. Managed Beans
-D. Third party libraries.
 
 Jans-auth comprises of a number of beans, configuration files and Facelets (JSF) views, packaged as a WAR module. That means custom scripts and custom pages (JSF facelets) can make use of business logic already encapsulated in the Weld managed beans. The following sections explain how authentication flow can be built using a custom script. 
 
-## Writing a custom script
+### A. Writing a custom script
 The **PersonAuthenticationType** script is described by a java interface whose methods should be overridden to implement an authentication workflow.
 The [article](https://jans.io/docs/admin/developer/scripts/person-authentication-interface) talks about these methods in detail and the psuedo code in each method will help drive home the point.
  
-## Writing UI pages:
+### B. Writing UI pages:
 All pages are **xhtml** files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages. 
 
 This [article](https://github.com/maduvena/jans-docs/wiki/Writing-UI-pages) covers all the details you need to write your own web page. 
 
-## Building business logic in Custom script:  
+### C. Building business logic in Custom script:  
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this [article](../managed-beans.md)
 
-## Adding libraries for use in the custom script
+### D. Adding libraries for use in the custom script
 Java or Python libraries to be imported and used very easily. Remember incase you opt for a python library, it should be written in "pure python" only.
 More details of this mentioned [here](../interception-scripts.md#using-python-libraries-in-a-script)
 
