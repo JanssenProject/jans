@@ -46,9 +46,9 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 4.  Create cluster using a command such as the following example:
 
     ```  
-    gcloud container clusters create CLUSTER_NAME --num-nodes 2 --machine-type e2-highcpu-8 --zone ZONE_NAME
+    gcloud container clusters create jans-cluster --num-nodes 2 --machine-type e2-highcpu-8 --zone us-west1-a
     ```
-    where `CLUSTER_NAME` is the name you choose for the cluster and `ZONE_NAME` is the name of Availability Zone, for example: us-west1-a (https://cloud.google.com/compute/docs/regions-zones/) where the cluster resources live in.
+    You can adjust `num-nodes` and `machine-type` as per your desired cluster size
 
 5.  Install [Helm3](https://helm.sh/docs/intro/install/)    
 
@@ -67,9 +67,9 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
       helm install nginx ingress-nginx/ingress-nginx
       ```
 
-2.  Create override.yaml file and add changes as per your desired configuration:
+2.  Create a file named `override.yaml` and add changes as per your desired configuration:
 
-    - FQDN/domain not registered:
+    - FQDN/domain *not* registered:
     
         
         Get the Loadbalancer IP: 
@@ -79,29 +79,25 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
       
         
-        Add this to override.yaml:
+        Add the following yaml snippet to your `override.yaml` file:
 
         ```yaml
         global:
-            lbIp: #Add IP from previous command
+            lbIp: #Add the Loadbalance IP from the previous command
             isFqdnRegistered: false
         ```
 
     - FQDN/domain registered:
-    
-        If the FQDN for jans i.e `demoexample.jans.org` is registered and globally resolvable, you have to map it to the loadbalancer IP created in the previous step by Nginx-Ingress.
-        More details in this [guide](https://medium.com/@kungusamuel90/custom-domain-name-mapping-for-k8s-on-gcp-4dc263b2dabe).
 
-        Add this to override.yaml:
+        Add the following yaml snippet to your `override.yaml` file`:
 
         ```yaml
         global:
-            lbIp: "" #Add LoadBalancer IP from previous command
+            lbIp: #Add the LoadBalancer IP from the previous command
             isFqdnRegistered: true
             fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
-        nginx:
+        nginx-ingress:
           ingress:
-              enabled: true
               path: /
               hosts:
               - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
@@ -116,10 +112,10 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 
 
-    -  LDAP/Opendj for persitence storage
+    -  LDAP/Opendj for persistence storage
 
 
-          Add this to override.yaml:
+          Add the following yaml snippet to your `override.yaml` file:
           ```yaml
           global:
             cnPersistenceType: ldap
@@ -129,12 +125,12 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
               enabled: true
           ```
 
-          So now configuring both LDAP and no-FQDN will look something like that:
+          So if your desired configuration has no-FQDN and LDAP, the final `override.yaml` file will look something like that:
 
           ```yaml
            global:
              cnPersistenceType: ldap
-             lbIp: #Add Load Balancer IP from previous command
+             lbIp: #Add the Loadbalancer IP from the previous command
              isFqdnRegistered: false
              storageClass:
                provisioner: kubernetes.io/gce-pd
@@ -149,14 +145,20 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 
     - MySQL for persistence storage
+
+      In production environment, you would deploy the database on `Cloud SQL`
+
+      For testing purposes, you can deploy it on the GKE cluster using the following commands:
+
       ```
       helm repo add bitnami https://charts.bitnami.com/bitnami
       helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
       ```
 
-        Create a file named `mysql.yaml` and this to it:
+      Add the following yaml snippet to your `override.yaml` file:
       
         ```yaml
+        
         global:
           cnPersistenceType: sql
         config:
@@ -170,10 +172,33 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             cnSqldbUserPassword: Test1234#
         ```
 
-          Install the MySQL database:
-            ```
-            helm install janssen janssen/janssen -n jans -f mysql.yaml
-            ```
+      So if your desired configuration has FQDN and MySQL, the final `override.yaml` file will look something like that:
+
+          ```yaml
+          global:
+            cnPersistenceType: sql
+            lbIp: "" #Add the LoadBalancer IP from previous command
+            isFqdnRegistered: true
+            fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+          nginx-ingress:
+            ingress:
+                path: /
+                hosts:
+                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+                tls:
+                - secretName: tls-certificate
+                  hosts:
+                  - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans  
+          config:
+            configmap:
+              cnSqlDbName: jans
+              cnSqlDbPort: 3306
+              cnSqlDbDialect: mysql
+              cnSqlDbHost: my-release-mysql.jans.svc
+              cnSqlDbUser: root
+              cnSqlDbTimezone: UTC
+              cnSqldbUserPassword: Test1234#
+          ```
 
 3.  Install Jans
 
@@ -182,7 +207,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
       After finishing all the tweaks to the `override.yaml` file, we can use it to install jans.
 
       ```
-      helm repo add janssen https://docs.jans.io
+      helm repo add janssen https://docs.jans.io/charts
       helm repo update
       helm install janssen janssen/janssen -n jans -f override.yaml
       ```
