@@ -771,7 +771,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value='\n'.join(self.data.get('attributes', {}).get('x5c',[])),
                             height=3, style='class:outh-client-text',
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/JsonWebKey'), 
+                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/JSONWebKey'), 
                                     'x5c'),
                                 ),
                         #-----------------------------------------------------------------------#
