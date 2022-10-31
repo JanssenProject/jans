@@ -203,13 +203,7 @@ class JansCliApp(Application):
             if not test_client and not self.cli_object.access_token:
 
                     response = self.cli_object.get_device_verification_code()
-                    try:
-                        result = response.json()
-                    except Exception as e:
-                        self.show_message(_("Error getting device verification code"), str(e))
-                        self.cli_object_ok = False
-                        self.create_cli()
-                        return
+                    result = response.json()
 
                     msg = _("Please visit verification url %s and enter user code %s in %d seconds.")
                     body = HSplit([Label(msg % (result['verification_uri'], result['user_code'], result['expires_in']),style='class:jans-main-verificationuri.text')],style='class:jans-main-verificationuri')

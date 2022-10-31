@@ -440,7 +440,7 @@ class JCA_CLI:
             scope_text = " for scope {}\n".format(scope) if scope else ''
             sys.stderr.write("Getting access token{}".format(scope_text))
 
-        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
+        url = 'https://{}/jans-auth/restv1/token'.format(self.idp_host)
 
         if self.askuser:
             post_params = {"grant_type": "password", "scope": scope, "username": self.auth_username,
@@ -472,7 +472,7 @@ class JCA_CLI:
 
     def get_device_authorization (self):
         response = requests.post(
-            url='https://{}/jans-auth/restv1/device_authorization'.format(self.host),
+            url='https://{}/jans-auth/restv1/device_authorization'.format(self.idp_host),
             auth=(self.client_id, self.client_secret),
             data={'client_id': self.client_id, 'scope': 'openid+profile+email+offline_access'},
             verify=self.verify_ssl,
@@ -488,7 +488,7 @@ class JCA_CLI:
 
     def get_device_verification_code(self):
         response = requests.post(
-            url='https://{}/jans-auth/restv1/device_authorization'.format(self.host),
+            url='https://{}/jans-auth/restv1/device_authorization'.format(self.idp_host),
             auth=(self.client_id, self.client_secret),
             data={'client_id': self.client_id, 'scope': 'openid+profile+email+offline_access'},
             verify=self.verify_ssl,
@@ -547,7 +547,7 @@ class JCA_CLI:
         After device code was verified, we use it to retreive refresh token
         """
         response = requests.post(
-            url='https://{}/jans-auth/restv1/token'.format(self.host),
+            url='https://{}/jans-auth/restv1/token'.format(self.idp_host),
             auth=(self.client_id, self.client_secret),
             data=[
                 ('client_id',self.client_id),
@@ -572,7 +572,7 @@ class JCA_CLI:
         refresh token is used for retreiving user information to identify user roles
         """
         response = requests.post(
-            url='https://{}/jans-auth/restv1/userinfo'.format(self.host),
+            url='https://{}/jans-auth/restv1/userinfo'.format(self.idp_host),
             headers=headers_basic_auth,
             data={'access_token': result['access_token']},
             verify=self.verify_ssl,
@@ -599,7 +599,7 @@ class JCA_CLI:
         Since introception script will be executed, access token will have permissions with all scopes
         """
         response = requests.post(
-            url='https://{}/jans-auth/restv1/token'.format(self.host),
+            url='https://{}/jans-auth/restv1/token'.format(self.idp_host),
             headers=headers_basic_auth,
             data={'grant_type': 'client_credentials', 'scope': 'openid', 'ujwt': result},
             verify=self.verify_ssl,
