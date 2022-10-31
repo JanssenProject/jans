@@ -2,7 +2,8 @@
 tags:
   - administration
   - auth-server
-  - cryptography
+  - openidc
+  - feature
 ---
 
 This is a placeholder
