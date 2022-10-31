@@ -73,7 +73,9 @@
     "grantTypesSupported":[
         "client_credentials",
         "authorization_code",
-        "refresh_token"
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange"
     ],
     "allowIdTokenWithoutImplicitGrantType": true,
     "subjectTypesSupported":[

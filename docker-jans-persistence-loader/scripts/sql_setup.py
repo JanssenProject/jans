@@ -367,6 +367,7 @@ class SQLBackend:
             ("jansScope", "creatorAttrs"),
             ("jansScope", "creationDate"),
             ("jansStatEntry", "jansData"),
+            ("jansSessId", "deviceSecret"),
         ]:
             add_column(mod[0], mod[1])
 
