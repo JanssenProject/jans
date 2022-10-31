@@ -46,7 +46,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.0.3-SNAPSHOT
-ENV CN_BUILD_DATE='2022-10-24 13:32'
+ENV CN_BUILD_DATE='2022-10-31 11:03'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -220,7 +220,11 @@ LABEL name="janssenproject/scim" \
 
 RUN mkdir -p /etc/certs \
     /etc/jans/conf \
-    ${JETTY_BASE}/jans-scim/logs
+    ${JETTY_BASE}/jans-scim/logs \
+    ${JETTY_BASE}/jans-scim/custom/libs \
+    ${JETTY_BASE}/common/libs/spanner \
+    ${JETTY_BASE}/common/libs/couchbase \
+    /usr/share/java
 
 COPY jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
@@ -240,7 +244,9 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
     && chmod -R g=u /etc/jans \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
-    && chmod 664 /opt/jetty/etc/webdefault.xml
+    && chmod 664 /opt/jetty/etc/webdefault.xml \
+    && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 /usr/share/java
 
 USER 1000
 
