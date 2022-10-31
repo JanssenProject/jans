@@ -123,6 +123,7 @@ jobs:
           mv ../janssen-*.tgz ./charts/
           cd ./charts
           helm repo index .
+          git add janssen-*.tgz && git update-index --refresh
           cd ..
           # END move generated chart from a previous step
           echo "${STABLE}" > stable.txt
