@@ -258,7 +258,11 @@ public class IdTokenFactory {
             return;
         }
 
-        String deviceSecret = executionContext.getHttpRequest().getParameter(DEVICE_SECRET);
+        String deviceSecret = executionContext.getDeviceSecret();
+        if (StringUtils.isBlank(deviceSecret)) {
+            deviceSecret = executionContext.getHttpRequest().getParameter(DEVICE_SECRET);
+        }
+
         if (StringUtils.isNotBlank(deviceSecret) && sessionId.getDeviceSecrets().contains(deviceSecret)) {
             jwr.setClaim("ds_hash", CodeVerifier.s256(deviceSecret));
         }

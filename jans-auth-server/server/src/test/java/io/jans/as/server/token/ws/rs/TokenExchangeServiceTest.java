@@ -9,7 +9,6 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.service.SessionIdService;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -17,6 +16,8 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import static io.jans.as.server.util.TestUtil.assertEmpty;
+import static io.jans.as.server.util.TestUtil.assertNotEmpty;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
@@ -48,56 +49,53 @@ public class TokenExchangeServiceTest {
     private TokenExchangeService tokenExchangeService;
 
     @Test
-    public void putNewDeviceSecret_whenScopeIsNull_shouldNotGenerateDeviceSecretAndShouldNotThrowNPE() {
+    public void createNewDeviceSecret_whenScopeIsNull_shouldNotGenerateDeviceSecretAndShouldNotThrowNPE() {
         SessionId sessionId = new SessionId();
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] {GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
-        final JSONObject jsonObj = new JSONObject();
-        tokenExchangeService.putNewDeviceSecret(jsonObj, "sessionDn", client, null);
+        String deviceSecret = tokenExchangeService.createNewDeviceSecret("sessionDn", client, null);
 
+        assertEmpty(deviceSecret);
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
-        assertFalse(jsonObj.has("device_token"));
     }
 
     @Test
-    public void putNewDeviceSecret_whenScopeDeviceSSOIsNotPresent_shouldNotGenerateDeviceSecret() {
+    public void createNewDeviceSecret_whenScopeDeviceSSOIsNotPresent_shouldNotGenerateDeviceSecret() {
         SessionId sessionId = new SessionId();
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] {GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
-        final JSONObject jsonObj = new JSONObject();
-        tokenExchangeService.putNewDeviceSecret(jsonObj, "sessionDn", client, "openid");
+        final String deviceSecret = tokenExchangeService.createNewDeviceSecret("sessionDn", client, "openid");
 
+        assertEmpty(deviceSecret);
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
-        assertFalse(jsonObj.has("device_token"));
     }
 
     @Test
-    public void putNewDeviceSecret_whenTokenExchangeGrantIsNotPresent_shouldNotGenerateDeviceSecret() {
+    public void createNewDeviceSecret_whenTokenExchangeGrantIsNotPresent_shouldNotGenerateDeviceSecret() {
         SessionId sessionId = new SessionId();
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] {GrantType.AUTHORIZATION_CODE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE});
 
-        final JSONObject jsonObj = new JSONObject();
-        tokenExchangeService.putNewDeviceSecret(jsonObj, "sessionDn", client, "openid device_sso");
+        final String deviceSecret = tokenExchangeService.createNewDeviceSecret("sessionDn", client, "openid device_sso");
 
+        assertEmpty(deviceSecret);
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
-        assertFalse(jsonObj.has("device_token"));
     }
 
     @Test
-    public void putNewDeviceSecret_whenAllConditionsMet_shouldGenerateDeviceSecret() {
+    public void createNewDeviceSecret_whenAllConditionsMet_shouldGenerateDeviceSecret() {
         SessionId sessionId = new SessionId();
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] {GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
         when(sessionIdService.getSessionByDn("sessionDn")).thenReturn(sessionId);
 
-        final JSONObject jsonObj = new JSONObject();
-        tokenExchangeService.putNewDeviceSecret(jsonObj, "sessionDn", client, "openid device_sso");
+        final String deviceSecret = tokenExchangeService.createNewDeviceSecret("sessionDn", client, "openid device_sso");
 
-        assertTrue(sessionId.getDeviceSecrets().contains(jsonObj.getString("device_token")));
+        assertNotEmpty(deviceSecret);
+        assertTrue(sessionId.getDeviceSecrets().contains(deviceSecret));
     }
 
     @Test
