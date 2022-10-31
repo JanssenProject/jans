@@ -182,10 +182,10 @@ class JansCliApp(Application):
     def create_cli(self) -> None:
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
-                host=config_cli.host, 
+                host=config_cli.host,
                 client_id=config_cli.client_id,
-                client_secret=config_cli.client_secret, 
-                access_token=config_cli.access_token, 
+                client_secret=config_cli.client_secret,
+                access_token=config_cli.access_token,
                 test_client=test_client
             )
 
@@ -259,7 +259,7 @@ class JansCliApp(Application):
                 app.layout.focus(focused_before)
             except:
                 app.layout.focus(self.center_frame)
-            
+
             self.create_cli()
 
         ensure_future(coroutine())
@@ -501,6 +501,7 @@ class JansCliApp(Application):
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         self.layout.focus(dialog)
+        self.invalidate()
         result = await dialog.future
 
         if float_ in self.root_layout.floats:
@@ -550,7 +551,10 @@ class JansCliApp(Application):
         for child in dialog.body.children:
             prop_name = child.children[1].jans_name
             prop_val = child.children[1].content.buffer.text
-            config_cli.config['DEFAULT'][prop_name] = prop_val
+            if prop_name == 'jca_client_secret':
+                config_cli.config['DEFAULT']['jca_client_secret_enc'] = config_cli.obscure(prop_val)
+            else:
+                config_cli.config['DEFAULT'][prop_name] = prop_val
             config_cli.write_config()
 
         config_cli.config['DEFAULT']['user_data'] = ''
@@ -558,7 +562,10 @@ class JansCliApp(Application):
 
         config_cli.host = config_cli.config['DEFAULT']['jans_host']
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
-        config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
+        if 'jca_client_secret' in config_cli.config['DEFAULT']:
+            config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
+        else:
+            config_cli.client_secret = config_cli.unobscure(config_cli.config['DEFAULT']['jca_client_secret_enc'])
         config_cli.access_token = None
 
     def show_message(

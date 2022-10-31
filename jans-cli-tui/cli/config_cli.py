@@ -20,6 +20,8 @@ import glob
 import logging
 import http.client
 import jwt
+import pyDes
+import stat
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -62,19 +64,31 @@ access_token = None
 debug = os.environ.get('jans_client_debug')
 log_dir = os.environ.get('cli_log_dir', cur_dir)
 
-def encode_decode(s, decode=False):
-    cmd = '/opt/jans/bin/encode.py '
-    if decode:
-        cmd += '-D '
-    result = os.popen(cmd + s + ' 2>/dev/null').read()
-    return result.strip()
+salt_fn = '/etc/jans/conf/salt'
+if not os.path.exists(salt_fn):
+    salt_fn = os.path.join(config_dir, 'jans-cli-salt')
+    if not os.path.exists(salt_fn):
+        with open(salt_fn, 'w') as w:
+            w.write('encodeSalt = {}'.format(os.urandom(12).hex()))
+        os.chmod(salt_fn, stat.S_IREAD|stat.S_IWRITE)
 
+with open(salt_fn) as f:
+    salt_property = f.read()
 
-##################### arguments #####################
+key = salt_property.split("=")[1].strip()
 
-# load yaml file
+def obscure(data=''):
+    engine = pyDes.triple_des(key, pyDes.ECB, pad=None, padmode=pyDes.PAD_PKCS5)
+    data = data.encode('utf-8')
+    en_data = engine.encrypt(data)
+    return base64.b64encode(en_data).decode('utf-8')
 
-my_op_mode
+def unobscure(s=''):
+    engine = pyDes.triple_des(key, pyDes.ECB, pad=None, padmode=pyDes.PAD_PKCS5)
+    cipher = pyDes.triple_des(key)
+    decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
+    return decrypted.decode('utf-8')
+
 
 debug_json = os.path.join(cur_dir, 'swagger_yaml.json')
 if os.path.exists(debug_json):
@@ -181,12 +195,12 @@ if not(host and (client_id and client_secret or access_token)):
             client_secret = config['DEFAULT'][secret_key_str]
         elif config['DEFAULT'].get(secret_enc_key_str):
             client_secret_enc = config['DEFAULT'][secret_enc_key_str]
-            client_secret = encode_decode(client_secret_enc, decode=True)
+            client_secret = unobscure(client_secret_enc)
 
         if 'access_token' in config['DEFAULT']:
             access_token = config['DEFAULT']['access_token']
         elif 'access_token_enc' in config['DEFAULT']:
-            access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
+            access_token = unobscure(config['DEFAULT']['access_token_enc'])
 
         debug = config['DEFAULT'].get('debug')
         log_dir = config['DEFAULT'].get('log_dir', log_dir)
@@ -200,6 +214,7 @@ def get_bool(val):
 def write_config():
     with open(config_ini_fn, 'w') as w:
         config.write(w)
+    os.chmod(config_ini_fn, stat.S_IREAD|stat.S_IWRITE)
 
 debug = get_bool(debug)
 
@@ -248,7 +263,7 @@ class JCA_CLI:
                     client_secret_data = config['DEFAULT'][secret_key_str]
                 elif config['DEFAULT'].get(secret_enc_key_str):
                     client_secret_enc = config['DEFAULT'][secret_enc_key_str]
-                    client_secret_data = encode_decode(client_secret_enc, decode=True)
+                    client_secret_data = unobscure(client_secret_enc)
 
                 self.host = self.idp_host=host_data.replace("'","")  
                 self.client_id = client_id_data.replace("'","")
@@ -607,7 +622,7 @@ class JCA_CLI:
         result = response.json()
 
         self.access_token = result['access_token']
-        access_token_enc = encode_decode(self.access_token)
+        access_token_enc = obscure(self.access_token)
         config['DEFAULT']['access_token_enc'] = access_token_enc
         write_config()
 
