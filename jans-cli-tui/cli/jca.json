@@ -5799,7 +5799,7 @@
         ]
       }
     },
-    "/plugins/admin-ui/adminUIPermissions": {
+    "/admin-ui/adminUIPermissions": {
       "get": {
         "tags": [
           "Admin UI - Permission"

@@ -1,7 +1,9 @@
 import glob
 import ruamel.yaml
+from ruamel.yaml.representer import RoundTripRepresenter
 import jsonmerge
 import json
+from collections import OrderedDict
 
 main_yaml_fn = 'jans-config-api-swagger-auto.yaml'
 
@@ -23,3 +25,14 @@ for yaml_fn in glob.glob('*.yaml'):
 
 with open('jca.json', 'w') as w:
     json.dump(main_doc, w, indent=2)
+
+
+class MyRepresenter(RoundTripRepresenter):
+    pass
+
+ruamel.yaml.add_representer(OrderedDict, MyRepresenter.represent_dict, representer=MyRepresenter)
+yaml = ruamel.yaml.YAML()
+yaml.Representer = MyRepresenter
+
+with open('jca.yaml', 'w') as w:
+    yaml.dump(main_doc, w)
