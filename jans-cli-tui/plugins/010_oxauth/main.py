@@ -349,10 +349,11 @@ class Plugin(DialogUtils):
                 data_fn=None,
                 data={}
                         )
-
         except Exception as e:
+            self.app.stop_progressing()
             self.app.show_message(_("Error getting scopes"), str(e))
             return
+        self.app.stop_progressing()
 
         if rsponse.status_code not in (200, 201):
             self.app.show_message(_("Error getting scopes"), str(rsponse.text))
@@ -422,6 +423,7 @@ class Plugin(DialogUtils):
         """
         self.oauth_data_container['scopes'] = HSplit([Label(_("Please wait while getting Scopes"),style='class:outh-waitscopedata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_scopes, daemon=True)
+        self.app.start_progressing()
         t.start()
 
     # ---------------------------------------------------------------------- #
@@ -456,11 +458,12 @@ class Plugin(DialogUtils):
                         data_fn=None,
                         data={}
                         )
-
         except Exception as e:
+            self.app.stop_progressing()
             self.app.show_message(_("Error getting properties"), str(e))
             return
 
+        self.app.stop_progressing()
         if rsponse.status_code not in (200, 201):
             self.app.show_message(_("Error getting properties"), str(rsponse.text))
             return
@@ -568,6 +571,7 @@ class Plugin(DialogUtils):
         """ 
         self.oauth_data_container['properties'] = HSplit([Label(_("Please wait while getting properties"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_properties, daemon=True)
+        self.app.start_progressing()
         t.start()
 
     def view_property(self, **params: Any) -> None:
@@ -591,6 +595,7 @@ class Plugin(DialogUtils):
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['properties'])
             return
         t = threading.Thread(target=self.oauth_update_properties, args=(0,tbuffer.text), daemon=True)
+        self.app.start_progressing()
         t.start()
 
     # ---------------------------------------------------------------------- #
@@ -611,9 +616,11 @@ class Plugin(DialogUtils):
                 data={}
                         )
         except Exception as e:
+            self.app.stop_progressing()
             self.app.show_message(_("Error getting keys"), str(e))
             return
 
+        self.app.stop_progressing()
         if rsponse.status_code not in (200, 201):
             self.app.show_message(_("Error getting keys"), str(rsponse.text))
             return
@@ -665,6 +672,7 @@ class Plugin(DialogUtils):
         """
         self.oauth_data_container['keys'] = HSplit([Label(_("Please wait while getting Keys"), style='class:outh-waitscopedata.label')], width=D(), style='class:outh-waitclientdata')
         t = threading.Thread(target=self.oauth_update_keys, daemon=True)
+        self.app.start_progressing()
         t.start()
   
     def edit_scope_dialog(self, **params: Any) -> None:
@@ -699,7 +707,7 @@ class Plugin(DialogUtils):
             data_fn='',
             data=dialog.data
         )
-
+        self.app.stop_progressing()
         if response.status_code in (200, 201):
             self.oauth_get_clients()
             return True
@@ -723,7 +731,7 @@ class Plugin(DialogUtils):
             data_fn='',
             data=dialog.data
         )
-
+        self.app.stop_progressing()
         if response.status_code in (200, 201):
             self.oauth_get_scopes()
             return True
@@ -736,6 +744,7 @@ class Plugin(DialogUtils):
             return
 
         t = threading.Thread(target=self.oauth_update_scopes, args=(0,tbuffer.text), daemon=True)
+        self.app.start_progressing()
         t.start()
 
     def search_clients(self, tbuffer:Buffer,) -> None:
@@ -744,6 +753,7 @@ class Plugin(DialogUtils):
             return
 
         t = threading.Thread(target=self.oauth_update_clients, args=(0,tbuffer.text), daemon=True)
+        self.app.start_progressing()
         t.start()
 
     def add_scope(self) -> None:
