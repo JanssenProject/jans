@@ -40,6 +40,7 @@
 		<dependency>
 			<groupId>com.couchbase.client</groupId>
 			<artifactId>java-client</artifactId>
+		    <scope>provided</scope>
 		</dependency>
 
 		<!-- Weld -->
