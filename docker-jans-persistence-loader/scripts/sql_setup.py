@@ -362,6 +362,11 @@ class SQLBackend:
             ("jansUmaPCT", "dpop"),
             ("jansClnt", "o"),
             ("jansClnt", "jansGrp"),
+            ("jansScope", "creatorId"),
+            ("jansScope", "creatorTyp"),
+            ("jansScope", "creatorAttrs"),
+            ("jansScope", "creationDate"),
+            ("jansStatEntry", "jansData"),
         ]:
             add_column(mod[0], mod[1])
 
@@ -401,6 +406,13 @@ class SQLBackend:
             ("jansU2fReq", "jansReq"),
             ("jansFido2AuthnEntry", "jansAuthData"),
             ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
+            ("agmFlowRun", "agFlowEncCont"),
+            ("agmFlowRun", "agFlowSt"),
+            ("agmFlowRun", "jansCustomMessage"),
+            ("agmFlow", "agFlowMeta"),
+            ("agmFlow", "agFlowTrans"),
+            ("agmFlow", "jansCustomMessage"),
+            ("jansOrganization", "jansCustomMessage"),
         ]:
             change_column_type(mod[0], mod[1])
 

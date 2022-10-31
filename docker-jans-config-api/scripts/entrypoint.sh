@@ -24,6 +24,7 @@ get_prometheus_opt() {
 
 python3 /app/scripts/wait.py
 python3 /app/scripts/bootstrap.py
+python3 /app/scripts/upgrade.py
 
 # run config-api
 cd /opt/jans/jetty/jans-config-api
@@ -35,6 +36,7 @@ exec java \
     -Djans.base=/etc/jans \
     -Dserver.base=/opt/jans/jetty/jans-config-api \
     -Dlog.base=/opt/jans/jetty/jans-config-api \
+    -Dpython.home=/opt/jython \
     -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=$(get_logging_files) \
     $(get_prometheus_opt) \
