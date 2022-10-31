@@ -15,6 +15,7 @@ get_prometheus_opt() {
 
 python3 /app/scripts/wait.py
 python3 /app/scripts/bootstrap.py
+python3 /app/scripts/mod_context.py jans-fido2
 
 cd /opt/jans/jetty/jans-fido2
 exec java \
