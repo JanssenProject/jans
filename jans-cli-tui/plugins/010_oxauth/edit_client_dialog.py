@@ -388,6 +388,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='accessTokenLifetime', 
                             value=self.data.get('accessTokenLifetime',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'accessTokenLifetime'),
+                            text_type='integer',
                             style='class:outh-client-text'),
 
                         self.myparent.getTitledText(
@@ -395,6 +396,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='refreshTokenLifetime', 
                             value=self.data.get('refreshTokenLifetime',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'refreshTokenLifetime'),
+                            text_type='integer',
                             style='class:outh-client-text'),
 
                         self.myparent.getTitledText(
@@ -402,6 +404,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='defaultMaxAge', 
                             value=self.data.get('defaultMaxAge',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'defaultMaxAge'),
+                            text_type='integer',
                             style='class:outh-client-text'),
 
                     ],width=D(),style='class:outh-client-tabs')
@@ -556,7 +559,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value=self.data.get('attributes', {}).get('parLifetime',0),
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
-                                    'parLifetime'),                            
+                                    'parLifetime'),  
+                            text_type='integer',                          
                             style='class:outh-client-text'),
                         #-------------------------------------------------------------------#
                         #-------------------------------------------------------------------#

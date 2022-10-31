@@ -155,8 +155,11 @@ class ViewProperty(JansGDialog, DialogUtils):
 
     def get_type(self,prop):
         try :
-            if self.schema.get('properties', {})[prop]['type'] in ['string', 'integer']:
+            if self.schema.get('properties', {})[prop]['type'] == 'string':
                 prop_type= 'TitledText'
+
+            elif self.schema.get('properties', {})[prop]['type'] == 'integer':
+                prop_type= 'int-TitledText'
 
             elif self.schema.get('properties', {})[prop]['type'] == 'boolean':
                 prop_type= 'TitledCheckBox'
@@ -198,6 +201,16 @@ class ViewProperty(JansGDialog, DialogUtils):
                 ),
                 ],width=D())
 
+        elif prop_type == 'int-TitledText':
+                self.value_content= HSplit([self.myparent.getTitledText(
+                self.property, 
+                name=self.property, 
+                value=self.value, 
+                text_type='integer',
+                style='class:outh-scope-text'
+                ),
+                ],width=D())
+
         elif prop_type == 'long-TitledText':
             self.value_content= HSplit([self.myparent.getTitledText(
                                 self.property, 
@@ -227,11 +240,21 @@ class ViewProperty(JansGDialog, DialogUtils):
             for tab in self.value:  
                 tab_list=[]
                 for item in tab:
-                    if type(tab[item]) == str or type(tab[item]) == int :
+                    if type(tab[item]) == str:
                         tab_list.append(HSplit([self.myparent.getTitledText(
                             item ,
                             name=item, 
                             value=tab[item], 
+                            style='class:outh-scope-text'
+                            ),
+                            ],width=D()))
+
+                    if type(tab[item]) == int :
+                        tab_list.append(HSplit([self.myparent.getTitledText(
+                            item ,
+                            name=item, 
+                            value=tab[item], 
+                            text_type='integer',
                             style='class:outh-scope-text'
                             ),
                             ],width=D()))
@@ -282,11 +305,21 @@ class ViewProperty(JansGDialog, DialogUtils):
         elif prop_type == 'dict':
             dict_list=[]
             for item in self.value:
-                if type(self.value[item]) == str or type(self.value[item]) == int :
+                if type(self.value[item]) == str:
                         dict_list.append(HSplit([self.myparent.getTitledText(
                         item ,
                         name=item, 
                         value=self.value[item], 
+                        style='class:outh-scope-text'
+                        ),
+                        ],width=D()))
+
+                elif type(self.value[item]) == int :
+                        dict_list.append(HSplit([self.myparent.getTitledText(
+                        item ,
+                        name=item, 
+                        value=self.value[item], 
+                        text_type='integer',
                         style='class:outh-scope-text'
                         ),
                         ],width=D()))
