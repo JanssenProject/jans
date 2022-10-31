@@ -31,6 +31,12 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Container image
       run: docker build ./docker-jans-${{ matrix.docker-images }} --file ./docker-jans-${{ matrix.docker-images }}/Dockerfile --tag localbuild/scanimage:latest
+    - uses: anchore/scan-action@v3
+      id: scan
+      with:
+        image: "localbuild/scanimage:latest"
+        acs-report-enable: true
+        fail-build: false
     - name: Send sarif report
       if: github.event_name == 'workflow_dispatch'
       run: |
@@ -41,12 +47,6 @@ jobs:
             -F "description=Scan detailed report" \
             -H "X-Auth-Token: ${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" \
             -H "X-User-Id: ${{ secrets.MOAUTO_ROCKETCHAT_ID }}"
-    - uses: anchore/scan-action@v3
-      id: scan
-      with:
-        image: "localbuild/scanimage:latest"
-        acs-report-enable: true
-        fail-build: false
     - name: upload Anchore scan SARIF report
       uses: github/codeql-action/upload-sarif@v2
       with:
