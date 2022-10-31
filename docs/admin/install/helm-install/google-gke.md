@@ -157,48 +157,47 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
       Add the following yaml snippet to your `override.yaml` file:
       
-        ```yaml
-        
-        global:
-          cnPersistenceType: sql
-        config:
-          configmap:
-            cnSqlDbName: jans
-            cnSqlDbPort: 3306
-            cnSqlDbDialect: mysql
-            cnSqlDbHost: my-release-mysql.jans.svc
-            cnSqlDbUser: root
-            cnSqlDbTimezone: UTC
-            cnSqldbUserPassword: Test1234#
-        ```
+      ```yaml        
+      global:
+        cnPersistenceType: sql
+      config:
+        configmap:
+          cnSqlDbName: jans
+          cnSqlDbPort: 3306
+          cnSqlDbDialect: mysql
+          cnSqlDbHost: my-release-mysql.jans.svc
+          cnSqlDbUser: root
+          cnSqlDbTimezone: UTC
+          cnSqldbUserPassword: Test1234#
+      ```
 
       So if your desired configuration has FQDN and MySQL, the final `override.yaml` file will look something like that:
 
-          ```yaml
-          global:
-            cnPersistenceType: sql
-            lbIp: "" #Add the LoadBalancer IP from previous command
-            isFqdnRegistered: true
-            fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
-          nginx-ingress:
-            ingress:
-                path: /
-                hosts:
-                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
-                tls:
-                - secretName: tls-certificate
-                  hosts:
-                  - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans  
-          config:
-            configmap:
-              cnSqlDbName: jans
-              cnSqlDbPort: 3306
-              cnSqlDbDialect: mysql
-              cnSqlDbHost: my-release-mysql.jans.svc
-              cnSqlDbUser: root
-              cnSqlDbTimezone: UTC
-              cnSqldbUserPassword: Test1234#
-          ```
+      ```yaml
+      global:
+        cnPersistenceType: sql
+        lbIp: "" #Add the LoadBalancer IP from previous command
+        isFqdnRegistered: true
+        fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+      nginx-ingress:
+        ingress:
+            path: /
+            hosts:
+            - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+            tls:
+            - secretName: tls-certificate
+              hosts:
+              - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans  
+      config:
+        configmap:
+          cnSqlDbName: jans
+          cnSqlDbPort: 3306
+          cnSqlDbDialect: mysql
+          cnSqlDbHost: my-release-mysql.jans.svc
+          cnSqlDbUser: root
+          cnSqlDbTimezone: UTC
+          cnSqldbUserPassword: Test1234#
+      ```
 
 3.  Install Jans
 
