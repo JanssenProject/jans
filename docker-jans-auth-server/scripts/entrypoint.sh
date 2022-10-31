@@ -42,7 +42,7 @@ move_builtin_jars
 python3 /app/scripts/wait.py
 python3 /app/scripts/bootstrap.py
 python3 /app/scripts/jks_sync.py &
-python3 /app/scripts/mod_context.py
+python3 /app/scripts/mod_context.py jans-auth
 python3 /app/scripts/auth_conf.py
 
 # run auth-server

@@ -35,7 +35,7 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.3-SNAPSHOT
-ENV CN_BUILD_DATE='2022-10-14 16:32'
+ENV CN_BUILD_DATE='2022-10-31 08:50'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -217,7 +217,11 @@ LABEL name="janssenproject/fido2" \
     description="FIDO2 server"
 
 RUN mkdir -p /etc/certs \
-    ${JETTY_BASE}/jans-fido2/logs
+    ${JETTY_BASE}/jans-fido2/logs \
+    ${JETTY_BASE}/jans-fido2/custom/libs \
+    ${JETTY_BASE}/common/libs/spanner \
+    ${JETTY_BASE}/common/libs/couchbase \
+    /usr/share/java
 
 COPY jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
@@ -237,7 +241,9 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-fido2/resources \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
-    && chown -R 1000:0 /etc/jans/conf/fido2/mds/toc
+    && chown -R 1000:0 /etc/jans/conf/fido2/mds/toc \
+    && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 /usr/share/java
 
 USER 1000
 

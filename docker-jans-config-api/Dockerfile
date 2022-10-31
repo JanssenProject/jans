@@ -43,7 +43,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.3-SNAPSHOT
-ENV CN_BUILD_DATE='2022-10-24 13:36'
+ENV CN_BUILD_DATE='2022-10-31 11:06'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -252,7 +252,9 @@ RUN mkdir -p /etc/certs \
     /etc/jans/conf \
     ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/custom/config \
-    ${JETTY_BASE}/jans-config-api/logs
+    ${JETTY_BASE}/jans-config-api/logs \
+    ${JETTY_BASE}/common/libs/spanner \
+    ${JETTY_BASE}/common/libs/couchbase
 
 RUN touch /etc/hosts.back
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
@@ -280,7 +282,9 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
-    && chmod -R g=u /app/templates/jans-config-api
+    && chmod -R g=u /app/templates/jans-config-api \
+    && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 /usr/share/java
 
 USER 1000
 
