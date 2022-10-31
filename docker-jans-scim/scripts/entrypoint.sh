@@ -15,6 +15,7 @@ get_prometheus_opt() {
 
 python3 /app/scripts/wait.py
 python3 /app/scripts/bootstrap.py
+python3 /app/scripts/upgrade.py
 
 cd /opt/jans/jetty/jans-scim
 exec java \

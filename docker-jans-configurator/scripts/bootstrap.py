@@ -351,14 +351,6 @@ class CtxGenerator:
                 partial(encode_text, fr.read(), encoded_salt),
             )
 
-    def config_api_ctx(self):
-        self.set_config("jca_client_id", lambda: f"1801.{uuid4()}")
-        jca_client_pw = self.set_secret("jca_client_pw", get_random_chars)
-        self.set_secret(
-            "jca_client_encoded_pw",
-            partial(encode_text, jca_client_pw, self.get_secret("encoded_salt"))
-        )
-
     def passport_rs_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
         self.set_config("passport_rs_client_id", lambda: f"1501.{uuid4()}")
@@ -755,7 +747,6 @@ class CtxGenerator:
 
         self.base_ctx()
         self.auth_ctx()
-        self.config_api_ctx()
         self.web_ctx()
 
         if "ldap" in opt_scopes:
@@ -778,26 +769,10 @@ class CtxGenerator:
         if "sql" in opt_scopes:
             self.sql_ctx()
 
-        self.admin_ui_ctx()
         self.jans_cli_ctx()
 
         # populated config
         return self.ctx
-
-    def admin_ui_ctx(self):
-        self.set_config("admin_ui_client_id", lambda: f"1901.{uuid4()}")
-        admin_ui_client_pw = self.set_secret("admin_ui_client_pw", get_random_chars)
-        self.set_secret(
-            "admin_ui_client_encoded_pw",
-            partial(encode_text, admin_ui_client_pw, self.get_secret("encoded_salt")),
-        )
-
-        self.set_config("token_server_admin_ui_client_id", lambda: f"1901.{uuid4()}")
-        token_server_admin_ui_client_pw = self.set_secret("token_server_admin_ui_client_pw", get_random_chars)
-        self.set_secret(
-            "token_server_admin_ui_client_encoded_pw",
-            partial(encode_text, token_server_admin_ui_client_pw, self.get_secret("encoded_salt")),
-        )
 
     def jans_cli_ctx(self):
         self.set_config("role_based_client_id", lambda: f"2000.{uuid4()}")
