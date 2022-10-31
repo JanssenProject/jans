@@ -35,14 +35,14 @@ jobs:
       id: scan
       with:
         image: "localbuild/scanimage:latest"
-        acs-report-enable: true
+        output-format: sarif
         fail-build: false
     - name: Send sarif report
       if: github.event_name == 'workflow_dispatch'
       run: |
-        cat results.sarif
+        cp results.sarif ${{ matrix.docker-images }}.results.sarif
         curl "https://chat.gluu.org/api/v1/rooms.upload/YNz6rg7eNpngiygkv" \
-            -F "file=@results.sarif" \
+            -F "file=@${{ matrix.docker-images }}.results.sarif" \
             -F "msg=${{ matrix.docker-images }} sarif report. You may use https://microsoft.github.io/sarif-web-component/ to view it" \
             -F "description=Scan detailed report" \
             -H "X-Auth-Token: ${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" \
