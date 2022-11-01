@@ -14,7 +14,7 @@ specific claims to ID token or Access token etc.
 Scripts can easily be upgraded and doesn't require forking the Jans Server code
 or re-building it.
 
-# Types of Interception scripts in Jans server
+## Types of Interception scripts in Jans server
 Listed below, are custom scripts classified into various types, each of which
 represents a feature of the Jans server that can be extended as per the business
 need. Each script type is described by a java interface whose methods should be
@@ -40,7 +40,7 @@ calling external APIs
 1. UMA 2 Claims-Gathering
 
 
-# Implementation languages - Jython or pure Java
+## Implementation languages - Jython or pure Java
 
 Interception scripts are written in **[Jython](http://www.jython.org/)** or in
 **pure Java**, enabling Java or Python libraries to be imported.
@@ -62,7 +62,7 @@ Some rules:
 * Normal log will log in to `jans-auth.log`
 
 **Example pure java script**
-```
+```java
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.discovery.DiscoveryType;
@@ -129,8 +129,8 @@ public class Discovery implements DiscoveryType {
 
 ## Implementation in Jython
 The example below is only meant to convey the concept, we will cover the details in later parts of the documentation.
-Suppose, we are implementing an Openbanking Identity platform and we have to add business specific claims say `openbanking_intent_id` to the ID token. The custom script which will help us accomplish our goal is of the type `UpdateTokenType` where the `modifyIdToken` method has to be implemented. A sample custom script with this business logic will be as stated below :
-```
+Suppose, we are implementing an Openbanking Identity platform and we have to add business specific claims say `openbanking_intent_id` to the ID token. The custom script which will help us accomplish our goal is of the type `UpdateTokenType` where the `modifyIdToken` method has to be implemented. A sample custom script with this business logic will be as stated below:
+```python
 class UpdateToken(UpdateTokenType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
@@ -218,24 +218,18 @@ value for getApiVersion is greater than 10
 
 ***
 
-### Configurable properties of a custom script
+## Configurable properties of a custom script
 
-```html
-<table>
-<tr><td> Name </td><td>unique identifier(name) for the custom script e.g. person_authentication_google</td></tr>
-<tr><td> Description </td><td>Description text</td></tr>
-<tr><td> Programming Languages </td><td>Python </td></tr>
-<tr><td> Level </td><td>Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated.</td></tr>
+| Property | Description |
+| -------- | ----------- |
+| Name | unique identifier(name) for the custom script e.g. person_authentication_google |
+| Description | Description Text |
+| Programming Languages | Python/Java |
+| Level | Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated. |
+| Location type | <ul> <li> Database - Stored in persistence (LDAP, MYSQL or PLSQL whichever applicable ) </li><li>File - stored as a file </ul> |
+| Interactive | <ul><li>Web - web application</li><li>native - mobile application</li><li>both</li></ul> |
+| Custom Properties | Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc |
 
-<tr><td> Location type </td><td>
-<ul><li>Database - Stored in persistence (LDAP, MYSQL or PLSQL whichever applicable ) </li><li>File - stored as a file</li></ul>
- </td></tr>
-<tr><td> Interactive </td><td>
-<ul><li>Web - web application</li><li>native - mobile application</li><li>both</li></ul>
- </td></tr>
-<tr><td> Custom properties</td><td>Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc </td></tr>
- </table>
-```
 
 ***
 ### Building business logic in a custom script
