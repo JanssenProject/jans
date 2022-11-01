@@ -1,5 +1,87 @@
 # Changelog
 
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* admin-ui apis refactoring [#2388](https://github.com/JanssenProject/jans/issues/2388) ([#2390](https://github.com/JanssenProject/jans/issues/2390)) ([c7b26e9](https://github.com/JanssenProject/jans/commit/c7b26e90430a1db5d4788d510fc8bf5ce63c4fd3))
+* **config-api:** multiple pattern handling for search request ([#2590](https://github.com/JanssenProject/jans/issues/2590)) ([46886fb](https://github.com/JanssenProject/jans/commit/46886fb1ec80724ddb0b948fc25f4554566ee8ab))
+* **config-api:** multiple pattern search in attribute api ([#2491](https://github.com/JanssenProject/jans/issues/2491)) ([9f646ff](https://github.com/JanssenProject/jans/commit/9f646ff066b9bcb6525e77e29664832e5f20077e))
+* **jans-auth-server:** added allowSpontaneousScopes AS json config [#2074](https://github.com/JanssenProject/jans/issues/2074) ([#2111](https://github.com/JanssenProject/jans/issues/2111)) ([3083a3f](https://github.com/JanssenProject/jans/commit/3083a3f28f6d6c6a9de319f23fd745ac69477249))
+* **jans-auth-server:** allow authentication for max_age=0 [#2361](https://github.com/JanssenProject/jans/issues/2361) ([#2362](https://github.com/JanssenProject/jans/issues/2362)) ([aed6ee3](https://github.com/JanssenProject/jans/commit/aed6ee3dd570e15fa91a9baf3ffb2461a212cdc0))
+* **jans-auth-server:** allow end session with expired id_token_hint (by checking signature and sid) [#2430](https://github.com/JanssenProject/jans/issues/2430) ([#2431](https://github.com/JanssenProject/jans/issues/2431)) ([1b46b44](https://github.com/JanssenProject/jans/commit/1b46b44c6a1bac9c52c7d45358ced4c2c60a9314))
+* **jans-auth-server:** renamed "enabledComponents" conf property -&gt; "featureFlags" [#2290](https://github.com/JanssenProject/jans/issues/2290) ([#2319](https://github.com/JanssenProject/jans/issues/2319)) ([56a33c4](https://github.com/JanssenProject/jans/commit/56a33c40a2bf58ebeb87c6f1724f60a836dc29d2))
+* **jans-config-api:** added new attributes ([#1940](https://github.com/JanssenProject/jans/issues/1940)) ([757b22f](https://github.com/JanssenProject/jans/commit/757b22fcc03c28d950eb98b4503d1915fa15b025))
+* **jans-config-api:** agama flow endpoint ([#1898](https://github.com/JanssenProject/jans/issues/1898)) ([0e73306](https://github.com/JanssenProject/jans/commit/0e73306f7642a74a3ed2cf8a8687a1ea447aa7bd))
+* **jans-config-api:** agama patch endpoint ([#2028](https://github.com/JanssenProject/jans/issues/2028)) ([0b96a95](https://github.com/JanssenProject/jans/commit/0b96a95399cac02fee614523ae5b552c99c1e254))
+* **jans-config-api:** endpoint to get UmaResource based on clientId and swagger changes ([#1912](https://github.com/JanssenProject/jans/issues/1912)) ([a3f9145](https://github.com/JanssenProject/jans/commit/a3f91453dd8fa5e9c903827b458bc58e735eda55))
+* **jans-config-api:** enhancement to agama and uma resource endpoint  ([#2015](https://github.com/JanssenProject/jans/issues/2015)) ([f2c19a1](https://github.com/JanssenProject/jans/commit/f2c19a14b0b5b869eb97afd24ac7169328f22b2f))
+* **jans-config-api:** fetch the associated clients_id in GET scopes api response  ([#1946](https://github.com/JanssenProject/jans/issues/1946)) ([ffe743c](https://github.com/JanssenProject/jans/commit/ffe743ca007d3a1ca7011f47df9c0a4124c93e5c))
+* **jans-config-api:** new endpoint to fetch scope by creator and type ([#2098](https://github.com/JanssenProject/jans/issues/2098)) ([cf15d67](https://github.com/JanssenProject/jans/commit/cf15d678f26de3bb2e645040ad25bcb21a03691f))
+* **jans-config-api:** pagination functionality for attribute endoint ([#2232](https://github.com/JanssenProject/jans/issues/2232)) ([8bb8b70](https://github.com/JanssenProject/jans/commit/8bb8b700ae4986707d35af39e8811c80a5073023))
+* **jans-config-api:** pagination functionality for endpoints and swagger spec rectification ([#2397](https://github.com/JanssenProject/jans/issues/2397)) ([d893e13](https://github.com/JanssenProject/jans/commit/d893e13efd57871ed0a09688b9b02f4294a10d4f))
+* **jans-config-api:** Scope object changes for creator details ([#2033](https://github.com/JanssenProject/jans/issues/2033)) ([a8b8d76](https://github.com/JanssenProject/jans/commit/a8b8d76640ff6520a462ff2bb477db50c2b60207))
+* **jans-config-api:** session management endpoint ([#2158](https://github.com/JanssenProject/jans/issues/2158)) ([30f6e1a](https://github.com/JanssenProject/jans/commit/30f6e1a4bacb90a711ed6f91bc124267d44b9d44))
+* need to fetch the associated clients_id in GET scopes api response [#1923](https://github.com/JanssenProject/jans/issues/1923) ([#1949](https://github.com/JanssenProject/jans/issues/1949)) ([88606a5](https://github.com/JanssenProject/jans/commit/88606a5ad01b9444f533ee4ea85ea0ca57dc49d8))
+* upgrade javax.servlet:javax.servlet-api from 3.1.0 to 4.0.1 ([#646](https://github.com/JanssenProject/jans/issues/646)) ([d186a05](https://github.com/JanssenProject/jans/commit/d186a05fd566095860f3b17ce4aa2b32551b2bc6))
+* upgrade org.jboss.resteasy:resteasy-servlet-initializer from 4.5.10.Final to 5.0.1.Final ([#645](https://github.com/JanssenProject/jans/issues/645)) ([a9a712d](https://github.com/JanssenProject/jans/commit/a9a712dcaa69c63ffac46206d5dfc13978efc7fb))
+
+
+### Bug Fixes
+
+* admin-ui plugin should use encoded client_secret for authentication [#2717](https://github.com/JanssenProject/jans/issues/2717) ([#2718](https://github.com/JanssenProject/jans/issues/2718)) ([cc0020e](https://github.com/JanssenProject/jans/commit/cc0020ec94b8cfe18c75310eb77c26bfa6e85750))
+* **config-api:** client default value handling ([#2585](https://github.com/JanssenProject/jans/issues/2585)) ([fbcbbad](https://github.com/JanssenProject/jans/commit/fbcbbad0817cd17e645a2491d1732a18b5159cf1))
+* **config-api:** fix for acr error handling and spec enhancement for example ([#2443](https://github.com/JanssenProject/jans/issues/2443)) ([8113841](https://github.com/JanssenProject/jans/commit/8113841f160f937b765b005bc9078bbcc7bb3ec7))
+* **config-api:** fix for assosiated client not fetched for scope ([#2540](https://github.com/JanssenProject/jans/issues/2540)) ([08488d1](https://github.com/JanssenProject/jans/commit/08488d158841a8c074e68cba4d2a12df6feab9b6))
+* **config-api:** fix for returning associated-clients for scope ([#2567](https://github.com/JanssenProject/jans/issues/2567)) ([e623f64](https://github.com/JanssenProject/jans/commit/e623f644d1a410a95edf9c0d66085dd4503e7cb3))
+* **config-api:** fixing discrepancies in the api ([#2216](https://github.com/JanssenProject/jans/issues/2216)) ([af4d3a5](https://github.com/JanssenProject/jans/commit/af4d3a51ce2cbe8c531f8dca213d0c3ef087aad5))
+* **config-api:** rectified sortBy field for Agama resource ([#2513](https://github.com/JanssenProject/jans/issues/2513)) ([bb3ac95](https://github.com/JanssenProject/jans/commit/bb3ac957615a46d53b8622d1aeead1b26a703b70))
+* **config-api:** removing CB and MySqlDB endpoints and swagger fixes ([#2480](https://github.com/JanssenProject/jans/issues/2480)) ([cc68cc9](https://github.com/JanssenProject/jans/commit/cc68cc9209c3612dbd002daf5775f3dd5916427b))
+* **config-api:** scope addiotion while client creation ([#2714](https://github.com/JanssenProject/jans/issues/2714)) ([d51ae24](https://github.com/JanssenProject/jans/commit/d51ae2421b77dd88f7a1751235200b19f4a0b305))
+* **config-api:** search filter logic for attribute resource ([#2310](https://github.com/JanssenProject/jans/issues/2310)) ([c75ff1d](https://github.com/JanssenProject/jans/commit/c75ff1dff7a1c4262704320a309de540bae40cc2))
+* **config-api:** specifying JSON values for Attribute enum properties ([#2663](https://github.com/JanssenProject/jans/issues/2663)) ([55d20c8](https://github.com/JanssenProject/jans/commit/55d20c8c4812cee333e63335772ff6da9a43d188))
+* **config-api:** swagger fixes for missing scope and admin-ui paths ([#2697](https://github.com/JanssenProject/jans/issues/2697)) ([6dcbff3](https://github.com/JanssenProject/jans/commit/6dcbff37d0e37502b7383bded22f04bf708d7afc))
+* **config-api:** swagger spec changes for session, properties endpoint and ignoring customobject for non LDAP DB ([#2348](https://github.com/JanssenProject/jans/issues/2348)) ([c6acaac](https://github.com/JanssenProject/jans/commit/c6acaacf06f564b1acde7ed9bb466e5e9528ccbc))
+* jans-config-api parameter month is not mandatory for endpoint /stat ([#2459](https://github.com/JanssenProject/jans/issues/2459)) ([0654f98](https://github.com/JanssenProject/jans/commit/0654f981953da31b2b06b98ae93f4ffe27032155))
+* jans-config-api/plugins/sample/demo/pom.xml to reduce vulnerabilities ([#2625](https://github.com/JanssenProject/jans/issues/2625)) ([14dd8a6](https://github.com/JanssenProject/jans/commit/14dd8a646b433bbbd655b02cabe548f8afb78196))
+* jans-config-api/plugins/sample/demo/pom.xml to reduce vulnerabilities ([#853](https://github.com/JanssenProject/jans/issues/853)) ([2792b53](https://github.com/JanssenProject/jans/commit/2792b53c4e1baa4a06dc9d0fbdc3c15f285c08de))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#2630](https://github.com/JanssenProject/jans/issues/2630)) ([0e39fb7](https://github.com/JanssenProject/jans/commit/0e39fb7409be631418bcc9de58e2a4bb2d692268))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#2727](https://github.com/JanssenProject/jans/issues/2727)) ([5f42948](https://github.com/JanssenProject/jans/commit/5f42948b9453154fe795373f673fa872fa45e75b))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-config-api/pom.xml to reduce vulnerabilities ([#1464](https://github.com/JanssenProject/jans/issues/1464)) ([c832f98](https://github.com/JanssenProject/jans/commit/c832f9885bdec3a6fecffa2c2e3b7aa2ea7c8dd4))
+* jans-config-api/pom.xml to reduce vulnerabilities ([#1746](https://github.com/JanssenProject/jans/issues/1746)) ([9dfe60e](https://github.com/JanssenProject/jans/commit/9dfe60e66f957d837bdeb0eb1c8bf9bedd30b60c))
+* jans-config-api/pom.xml to reduce vulnerabilities ([#1780](https://github.com/JanssenProject/jans/issues/1780)) ([3252ff7](https://github.com/JanssenProject/jans/commit/3252ff75445603d955cd73214b47e3421dc5227b))
+* jans-config-api/pom.xml to reduce vulnerabilities ([#2655](https://github.com/JanssenProject/jans/issues/2655)) ([499ff89](https://github.com/JanssenProject/jans/commit/499ff895f3b00ddeeaf3244e0becf35d7ede328a))
+* **jans-config-api:** avoid loss of attributes in agama endpoints ([#2058](https://github.com/JanssenProject/jans/issues/2058)) ([3c8f816](https://github.com/JanssenProject/jans/commit/3c8f816b62b0efdfffc0e3f53d8371f4510d3ef6))
+* **jans-config-api:** config-api compilation failed in main [#2030](https://github.com/JanssenProject/jans/issues/2030) ([#2031](https://github.com/JanssenProject/jans/issues/2031)) ([1659da1](https://github.com/JanssenProject/jans/commit/1659da1ff4d1d930300ef9c3b3e040eabc7bc0fb))
+* **jans-config-api:** Fix to not update Metadata for PUT and PATCH agama endpoint ([#2046](https://github.com/JanssenProject/jans/issues/2046)) ([da93050](https://github.com/JanssenProject/jans/commit/da93050442d3bc1812d3a8076686ca3e02800c26))
+* **jans-config-api:** issue UMA scope request being saved as OAUTH ([#2063](https://github.com/JanssenProject/jans/issues/2063)) ([81472aa](https://github.com/JanssenProject/jans/commit/81472aa3da4b02af7ed1bd47753d6938ec0c3e01))
+* **jans-config-api:** rectified endpoint url in swagger spec for uma resource ([#1965](https://github.com/JanssenProject/jans/issues/1965)) ([0dc3b2e](https://github.com/JanssenProject/jans/commit/0dc3b2e60825f9921f28c9eeff30ffefa8bda269))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* **jans:** config api and client api ([#2408](https://github.com/JanssenProject/jans/issues/2408)) ([003af55](https://github.com/JanssenProject/jans/commit/003af55fc3657c3138b98f18d549ffa985d4c873))
+* **orm:** length check added before accessing CustomObjectAttribute values ([#2505](https://github.com/JanssenProject/jans/issues/2505)) ([6ff718f](https://github.com/JanssenProject/jans/commit/6ff718f2b2369e7669b3ce15d5442e4b0584ae7b))
+* remove request-body from delete endpoints of admin-ui plugin [#2341](https://github.com/JanssenProject/jans/issues/2341) ([#2342](https://github.com/JanssenProject/jans/issues/2342)) ([1429a85](https://github.com/JanssenProject/jans/commit/1429a854e4fe2a80765d85ad8006706cc0cac15d))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
+
+### Documentation
+
+* **agama:** work on TODOs ([#2093](https://github.com/JanssenProject/jans/issues/2093)) ([157ac8b](https://github.com/JanssenProject/jans/commit/157ac8bb097321d33333440c4780abb9c5c67c74))
+* **config-api:** added json payload examples to the generated swagger ([#2747](https://github.com/JanssenProject/jans/issues/2747)) ([b47c611](https://github.com/JanssenProject/jans/commit/b47c61181fbcbd74f99ae5f3511a69bf9722070a))
+* **config-api:** auto generation of swagger spec  ([#2347](https://github.com/JanssenProject/jans/issues/2347)) ([57a1748](https://github.com/JanssenProject/jans/commit/57a17482c2d1edeefa46d1099772553a171ca3b4))
+* **config-api:** default value for Client attribute applicationType set ([#2432](https://github.com/JanssenProject/jans/issues/2432)) ([5ba4341](https://github.com/JanssenProject/jans/commit/5ba43412b61c4e2562513ac4110d77e0f1ca489b))
+* no docs ([3083a3f](https://github.com/JanssenProject/jans/commit/3083a3f28f6d6c6a9de319f23fd745ac69477249))
+* no docs ([1659da1](https://github.com/JanssenProject/jans/commit/1659da1ff4d1d930300ef9c3b3e040eabc7bc0fb))
+* no docs (config-api swagger updated) ([56a33c4](https://github.com/JanssenProject/jans/commit/56a33c40a2bf58ebeb87c6f1724f60a836dc29d2))
+* no docs (swagger is updated) ([1b46b44](https://github.com/JanssenProject/jans/commit/1b46b44c6a1bac9c52c7d45358ced4c2c60a9314))
+* no docs (swagger updated) ([aed6ee3](https://github.com/JanssenProject/jans/commit/aed6ee3dd570e15fa91a9baf3ffb2461a212cdc0))
+* updated ([739b939](https://github.com/JanssenProject/jans/commit/739b9393fe4d5fe2a99868d15dc514b69ed44419))
+
 ## 1.0.2 (2022-08-30)
 
 
