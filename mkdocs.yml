@@ -138,7 +138,6 @@ nav:
         - 'Delegated User Administration': 'admin/planning/delegated-user-admin.md'
         - 'Passwordless Authentication': 'admin/planning/passwordless-auth.md'
         - 'Machine-to-Machine Authentication': 'admin/planning/machine-to-machine.md'
-        - 'FAQ': 'admin/planning/faq.md'
     - 'Installation':
         - 'admin/install/README.md'
         - 'VM Installation':
@@ -160,7 +159,6 @@ nav:
 #            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
             - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
         - 'Setup Instructions': 'admin/install/setup.md'
-        - 'CORS configuration': 'admin/install/cors.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
         - 'admin/kubernetes-ops/README.md'
@@ -227,10 +225,7 @@ nav:
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
     - 'Auth Server Admin Guide':
         - 'admin/auth-server/README.md'
-        - 'Configuration':
-            - 'admin/auth-server/configuration/README.md'
-            - 'JSON Properties': 'admin/auth-server/configuration/json-properties.md'
-            - 'JVM Considerations': 'admin/auth-server/configuration/jvm-considerations.md'
+        - 'Configuration': 'admin/auth-server/config.md'
         - 'Session Management':
             - 'admin/auth-server/session-management/README.md'
             - 'What is a session?': 'admin/auth-server/session-management/what-is.md'
@@ -250,6 +245,7 @@ nav:
             - 'Client Registration': 'admin/auth-server/endpoints/client-registration.md'
             - 'Authorization': 'admin/auth-server/endpoints/authorization.md'
             - 'Token': 'admin/auth-server/endpoints/token.md'
+            - 'SSA': 'admin/auth-server/ssa.md'
             - 'Userinfo': 'admin/auth-server/endpoints/userinfo.md'
             - 'Token Revocation': 'admin/auth-server/endpoints/token-revocation.md'
             - 'Session Revocation': 'admin/auth-server/endpoints/session-revocation.md'
@@ -262,8 +258,7 @@ nav:
             - 'admin/auth-server/crypto/README.md'
             - 'Supported Algorithms': 'admin/auth-server/crypto/supported-algorithms.md'
             - 'Key Storage': 'admin/auth-server/crypto/key-storage.md'
-            - 'Key Rotation': 'admin/auth-server/crypto/key-rotation.md'
-            - 'Manual Key Rotation': 'admin/auth-server/crypto/manual-key-regeneration.md'
+            - 'Key Generation': 'admin/auth-server/crypto/key-generation.md'
         - 'OpenID Features':
             - 'admin/auth-server/openid-features/README.md'
             - 'Pairwise/Public Subject Identifiers': 'admin/auth-server/openid-features/subject-identifiers.md'
@@ -278,6 +273,7 @@ nav:
             - 'CIBA': 'admin/auth-server/openid-features/ciba.md'
             - 'JARM': 'admin/auth-server/openid-features/jarm.md'
             - 'SIOP': 'admin/auth-server/openid-features/siop.md'
+            - 'Native SSO': 'admin/auther-server/openid-features/native-sso.md'
             - 'User Claims':
                 - 'admin/auth-server/openid-features/user-claims/README.md'
                 - 'Built-in Claims': 'admin/auth-server/openid-features/user-claims/built-in-claims.md'
@@ -354,6 +350,7 @@ nav:
         - 'Interception Script Overview': 'admin/developer/interception-scripts.md'
         - 'Script Debugging': 'admin/developer/interception-scripts-debug.md'
         - 'External Libraries': 'admin/developer/external-libraries.md'
+        - 'CORS': 'admin/developer/cors.md'
         - 'Front Channel Scripts': 'admin/developer/front-channel-scripts.md'
         - 'Back Channel Scripts': 'admin/developer/back-channel-scripts.md'
         - 'Managed Beans': 'admin/developer/managed-beans.md'
