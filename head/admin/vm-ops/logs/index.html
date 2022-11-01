@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#overview" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -1470,9 +1475,119 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Logs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Logs
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#log-levels" class="md-nav__link">
+    Log Levels
+  </a>
+  
+    <nav class="md-nav" aria-label="Log Levels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuring-log-levels" class="md-nav__link">
+    Configuring Log Levels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-logs" class="md-nav__link">
+    Setup Logs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-logs" class="md-nav__link">
+    Core Logs
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-api-logs" class="md-nav__link">
+    Config API logs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jans-auth-server-logs" class="md-nav__link">
+    Jans Auth server logs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-logs" class="md-nav__link">
+    Server Logs
+  </a>
+  
+    <nav class="md-nav" aria-label="Server Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os-logs" class="md-nav__link">
+    OS Logs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apache2-server-logs" class="md-nav__link">
+    Apache2 Server Logs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9874,6 +9989,102 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#log-levels" class="md-nav__link">
+    Log Levels
+  </a>
+  
+    <nav class="md-nav" aria-label="Log Levels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuring-log-levels" class="md-nav__link">
+    Configuring Log Levels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-logs" class="md-nav__link">
+    Setup Logs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-logs" class="md-nav__link">
+    Core Logs
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-api-logs" class="md-nav__link">
+    Config API logs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jans-auth-server-logs" class="md-nav__link">
+    Jans Auth server logs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-logs" class="md-nav__link">
+    Server Logs
+  </a>
+  
+    <nav class="md-nav" aria-label="Server Logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os-logs" class="md-nav__link">
+    OS Logs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apache2-server-logs" class="md-nav__link">
+    Apache2 Server Logs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -9916,14 +10127,187 @@
 
   <h1>Logs</h1>
 
-<p>This is a placeholder</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>The Janssen logs can be viewed via SSH access to the server running the Janssen installation.</p>
+<h2 id="log-levels">Log Levels<a class="headerlink" href="#log-levels" title="Permanent link">#</a></h2>
+<p>The following log levels can be configured through the configuration CLI:</p>
+<table>
+<thead>
+<tr>
+<th>Log Level</th>
+<th>Messages Logged</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trace</td>
+<td>All messages</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Debug level and above</td>
+</tr>
+<tr>
+<td>Info</td>
+<td>Informational level and above</td>
+</tr>
+<tr>
+<td>Warn</td>
+<td>Warning level and above</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>Error level and above</td>
+</tr>
+<tr>
+<td>Fatal</td>
+<td>Only fatal errors</td>
+</tr>
+<tr>
+<td>Off</td>
+<td>Logging is disabled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configuring-log-levels">Configuring Log Levels<a class="headerlink" href="#configuring-log-levels" title="Permanent link">#</a></h3>
+<p>Use the following commands to get information on the logging module configuration:</p>
+<div class="highlight"><pre><span></span><code>$ /opt/jans/jans-cli/config-cli.py --info ConfigurationLogging
+<span class="c1"># Log configuration operations</span>
+Operation ID: get-config-logging
+  Description: Returns Jans Authorization Server logging settings.
+Operation ID: put-config-logging
+  Description: Updates Jans Authorization Server logging settings.
+  Schema: /components/schemas/LoggingConfiguration
+
+To get sample schema <span class="nb">type</span> /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, <span class="k">for</span> example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
+
+$ /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
+<span class="c1"># Generic configuration schema</span>
+<span class="o">{</span>
+  <span class="s2">&quot;loggingLevel&quot;</span>: <span class="s2">&quot;TRACE&quot;</span>,
+  <span class="s2">&quot;loggingLayout&quot;</span>: <span class="s2">&quot;json&quot;</span>,
+  <span class="s2">&quot;httpLoggingEnabled&quot;</span>: true,
+  <span class="s2">&quot;disableJdkLogger&quot;</span>: false,
+  <span class="s2">&quot;enabledOAuthAuditLogging&quot;</span>: true,
+  <span class="s2">&quot;externalLoggerConfiguration&quot;</span>: null,
+  <span class="s2">&quot;httpLoggingExcludePaths&quot;</span>: <span class="o">[</span>
+    <span class="s2">&quot;/auth/img&quot;</span>,
+    <span class="s2">&quot;/auth/stylesheet&quot;</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+
+$ /opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
+<span class="c1"># Current log configuration</span>
+<span class="o">{</span>
+  <span class="s2">&quot;loggingLevel&quot;</span>: <span class="s2">&quot;INFO&quot;</span>,
+  <span class="s2">&quot;loggingLayout&quot;</span>: <span class="s2">&quot;text&quot;</span>,
+  <span class="s2">&quot;httpLoggingEnabled&quot;</span>: false,
+  <span class="s2">&quot;disableJdkLogger&quot;</span>: true,
+  <span class="s2">&quot;enabledOAuthAuditLogging&quot;</span>: false,
+  <span class="s2">&quot;externalLoggerConfiguration&quot;</span>: null,
+  <span class="s2">&quot;httpLoggingExcludePaths&quot;</span>: null
+<span class="o">}</span>
+</code></pre></div>
+<p>Let's assume we want to update logging configuration to <code>TRACE</code>. To do this, create a file <code>/tmp/log.json</code> with the following content:
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TRACE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabledOAuthAuditLogging&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;externalLoggerConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingExcludePaths&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+And use the PUT operation with this file as the payload:
+<div class="highlight"><pre><span></span><code>$ /opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log.json
+</code></pre></div>
+The server will now have logs set to TRACE.</p>
+<h2 id="setup-logs">Setup Logs<a class="headerlink" href="#setup-logs" title="Permanent link">#</a></h2>
+<p>The Jans setup logs are available under <code>/opt/jans/jans-setup/logs/</code>. There are several log files available involving the setup process:</p>
+<ol>
+<li>mysql.log (Only used if MySQL backend is chosen during setup)</li>
+<li>os-changes.log</li>
+<li>setup.log</li>
+<li>setup_error.log</li>
+</ol>
+<h2 id="core-logs">Core Logs<a class="headerlink" href="#core-logs" title="Permanent link">#</a></h2>
+<p>The available logs for Jans server are listed below:</p>
+<h3 id="config-api-logs">Config API logs<a class="headerlink" href="#config-api-logs" title="Permanent link">#</a></h3>
+<p><code>/opt/jans/jetty/jans-config-api/logs/</code></p>
+<table>
+<thead>
+<tr>
+<th>Log File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>configapi.log</strong></td>
+<td>Config API main log</td>
+</tr>
+<tr>
+<td><strong>configapi_persistence.log</strong></td>
+<td>Config API LDAP log</td>
+</tr>
+<tr>
+<td><strong>configapi_persistence_duration.log</strong></td>
+<td>Config API LDAP operation duration log</td>
+</tr>
+<tr>
+<td><strong>configapi_persistence_ldap_statistics.log</strong></td>
+<td>Config API LDAP statistics</td>
+</tr>
+<tr>
+<td><strong>[date].jetty.log</strong></td>
+<td>Config API Jetty log</td>
+</tr>
+<tr>
+<td><strong>configapi_script.log</strong></td>
+<td>Config API custom script log</td>
+</tr>
+</tbody>
+</table>
+<h3 id="jans-auth-server-logs">Jans Auth server logs<a class="headerlink" href="#jans-auth-server-logs" title="Permanent link">#</a></h3>
+<p><code>/opt/jans/jetty/jans-auth/logs/</code></p>
+<p>The most important log files here are described below:</p>
+<ol>
+<li><code>jans-auth.log</code>: This log file contains most authentication related information. Generally this is the first log to review for any authentication-related troubleshooting, like authentication failure or missing clients etc.</li>
+<li><code>jans-auth_persistence.log</code>: This log file contains information about the Jans Auth server communicating with the persistence backend. </li>
+<li><code>jans-auth_script.log</code>: This log file contains debug messages printed from <a href="../../developer/interception-scripts/">interception scripts</a>.</li>
+</ol>
+<h2 id="server-logs">Server Logs<a class="headerlink" href="#server-logs" title="Permanent link">#</a></h2>
+<p>In some cases, it may be necessary to examine the server logs themselves.</p>
+<h3 id="os-logs">OS Logs<a class="headerlink" href="#os-logs" title="Permanent link">#</a></h3>
+<ul>
+<li>For Debian based systems: <code>/var/log/syslog</code></li>
+<li>For RPM based systems: <code>/var/log/messages</code></li>
+</ul>
+<h3 id="apache2-server-logs">Apache2 Server Logs<a class="headerlink" href="#apache2-server-logs" title="Permanent link">#</a></h3>
+<ul>
+<li>For Debian based systems: <code>/var/log/apache2/</code></li>
+<li>For RPM based systems: <code>/var/log/httpd/</code></li>
+</ul>
+<p>Apache2 logs are as follows:</p>
+<ol>
+<li>
+<p><code>access_log</code>: This log contains information about requests coming into the Jans Server, success status or requests, execution time for any request etc.     </p>
+</li>
+<li>
+<p><code>error_log</code>: This log shows error messages if the web server encounter any issue while processing incoming requests.    </p>
+</li>
+<li>
+<p><code>other_vhosts_access.log</code>: This log is specific to the Jans Server setup and those links which are being requested by a user from a web browser.</p>
+</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T17:04:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
       
         <br>
         Created:

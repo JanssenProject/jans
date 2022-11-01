@@ -4645,9 +4645,170 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Interception Script Overview
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Interception Script Overview
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-interception-scripts-in-jans-server" class="md-nav__link">
+    Types of Interception scripts in Jans server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-languages-jython-or-pure-java" class="md-nav__link">
+    Implementation languages - Jython or pure Java
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-in-pure-java" class="md-nav__link">
+    Implementation in Pure Java
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation in Pure Java">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-java-libraries-in-a-script" class="md-nav__link">
+    Using Java libraries in a script:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-in-jython" class="md-nav__link">
+    Implementation in Jython
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation in Jython">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-java-libraries-in-a-jython-script" class="md-nav__link">
+    Using Java libraries in a Jython script:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-python-libraries-in-a-script" class="md-nav__link">
+    Using Python libraries in a script:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-a-jython-script" class="md-nav__link">
+    Debugging a Jython script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mandatory-methods-to-be-overridden" class="md-nav__link">
+    Mandatory methods to be overridden
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurable-properties-of-a-custom-script" class="md-nav__link">
+    Configurable properties of a custom script
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurable properties of a custom script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-business-logic-in-a-custom-script" class="md-nav__link">
+    Building business logic in a custom script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operations-on-custom-scripts-using-jans-cli" class="md-nav__link">
+    Operations on custom scripts using jans-cli
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-schema-of-a-custom-script" class="md-nav__link">
+    Basic schema of a custom script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-modify-and-delete-a-script" class="md-nav__link">
+    Add, Modify and Delete a script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-existing-custom-scripts" class="md-nav__link">
+    List existing custom scripts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-specific-implementations" class="md-nav__link">
+    Client specific implementations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#useful-links" class="md-nav__link">
+    Useful links
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9883,6 +10044,151 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-interception-scripts-in-jans-server" class="md-nav__link">
+    Types of Interception scripts in Jans server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-languages-jython-or-pure-java" class="md-nav__link">
+    Implementation languages - Jython or pure Java
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-in-pure-java" class="md-nav__link">
+    Implementation in Pure Java
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation in Pure Java">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-java-libraries-in-a-script" class="md-nav__link">
+    Using Java libraries in a script:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-in-jython" class="md-nav__link">
+    Implementation in Jython
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation in Jython">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-java-libraries-in-a-jython-script" class="md-nav__link">
+    Using Java libraries in a Jython script:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-python-libraries-in-a-script" class="md-nav__link">
+    Using Python libraries in a script:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-a-jython-script" class="md-nav__link">
+    Debugging a Jython script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mandatory-methods-to-be-overridden" class="md-nav__link">
+    Mandatory methods to be overridden
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurable-properties-of-a-custom-script" class="md-nav__link">
+    Configurable properties of a custom script
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurable properties of a custom script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-business-logic-in-a-custom-script" class="md-nav__link">
+    Building business logic in a custom script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operations-on-custom-scripts-using-jans-cli" class="md-nav__link">
+    Operations on custom scripts using jans-cli
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-schema-of-a-custom-script" class="md-nav__link">
+    Basic schema of a custom script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-modify-and-delete-a-script" class="md-nav__link">
+    Add, Modify and Delete a script
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-existing-custom-scripts" class="md-nav__link">
+    List existing custom scripts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-specific-implementations" class="md-nav__link">
+    Client specific implementations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#useful-links" class="md-nav__link">
+    Useful links
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -9926,7 +10232,7 @@ authentication method, consent gathering, client registration, adding business
 specific claims to ID token or Access token etc.
 Scripts can easily be upgraded and doesn't require forking the Jans Server code
 or re-building it.</p>
-<h1 id="types-of-interception-scripts-in-jans-server">Types of Interception scripts in Jans server<a class="headerlink" href="#types-of-interception-scripts-in-jans-server" title="Permanent link">#</a></h1>
+<h2 id="types-of-interception-scripts-in-jans-server">Types of Interception scripts in Jans server<a class="headerlink" href="#types-of-interception-scripts-in-jans-server" title="Permanent link">#</a></h2>
 <p>Listed below, are custom scripts classified into various types, each of which
 represents a feature of the Jans server that can be extended as per the business
 need. Each script type is described by a java interface whose methods should be
@@ -9951,7 +10257,7 @@ calling external APIs</li>
 <li>UMA 2 RPT Authorization Policies</li>
 <li>UMA 2 Claims-Gathering</li>
 </ol>
-<h1 id="implementation-languages-jython-or-pure-java">Implementation languages - Jython or pure Java<a class="headerlink" href="#implementation-languages-jython-or-pure-java" title="Permanent link">#</a></h1>
+<h2 id="implementation-languages-jython-or-pure-java">Implementation languages - Jython or pure Java<a class="headerlink" href="#implementation-languages-jython-or-pure-java" title="Permanent link">#</a></h2>
 <p>Interception scripts are written in <strong><a href="http://www.jython.org/">Jython</a></strong> or in
 <strong>pure Java</strong>, enabling Java or Python libraries to be imported.</p>
 <hr />
@@ -9968,56 +10274,56 @@ compiled by AS and executed at runtime.</p>
 <li>Normal log will log in to <code>jans-auth.log</code></li>
 </ul>
 <p><strong>Example pure java script</strong>
-<div class="highlight"><pre><span></span><code>import io.jans.model.SimpleCustomProperty;
-import io.jans.model.custom.script.model.CustomScript;
-import io.jans.model.custom.script.type.discovery.DiscoveryType;
-import io.jans.service.custom.script.CustomScriptManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.json.JSONObject;
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.discovery.DiscoveryType</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.json.JSONObject</span><span class="p">;</span><span class="w"></span>
 
-import java.util.Map;
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
 
-/**
- * @author Yuriy Zabrovarnyy
- */
-public class Discovery implements DiscoveryType {
+<span class="cm">/**</span>
+<span class="cm"> * @author Yuriy Zabrovarnyy</span>
+<span class="cm"> */</span><span class="w"></span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Discovery</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">DiscoveryType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 
-    private static final Logger log = LoggerFactory.getLogger(Discovery.class);
-    private static final Logger scriptLogger = LoggerFactory.getLogger(CustomScriptManager.class);
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">Discovery</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">scriptLogger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
 
-    @Override
-    public boolean init(Map&lt;String, SimpleCustomProperty&gt; configurationAttributes) {
-        log.info(&quot;Init of Discovery Java custom script&quot;);
-        return true;
-    }
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Init of Discovery Java custom script&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    @Override
-    public boolean init(CustomScript customScript, Map&lt;String, SimpleCustomProperty&gt; configurationAttributes) {
-        log.info(&quot;Init of Discovery Java custom script&quot;);
-        return true;
-    }
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Init of Discovery Java custom script&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    @Override
-    public boolean destroy(Map&lt;String, SimpleCustomProperty&gt; configurationAttributes) {
-        log.info(&quot;Destroy of Discovery Java custom script&quot;);
-        return true;
-    }
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Destroy of Discovery Java custom script&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    @Override
-    public int getApiVersion() {
-        log.info(&quot;getApiVersion Discovery Java custom script: 11&quot;);
-        return 11;
-    }
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;getApiVersion Discovery Java custom script: 11&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    @Override
-    public boolean modifyResponse(Object responseAsJsonObject, Object context) {
-        scriptLogger.info(&quot;write to script logger&quot;);
-        JSONObject response = (JSONObject) responseAsJsonObject;
-        response.accumulate(&quot;key_from_java&quot;, &quot;value_from_script_on_java&quot;);
-        return true;
-    }
-}
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;write to script logger&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JSONObject</span><span class="p">)</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">response</span><span class="p">.</span><span class="na">accumulate</span><span class="p">(</span><span class="s">&quot;key_from_java&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value_from_script_on_java&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div></p>
 <h3 id="using-java-libraries-in-a-script">Using Java libraries in a script:<a class="headerlink" href="#using-java-libraries-in-a-script" title="Permanent link">#</a></h3>
 <p><br> <strong>Steps:</strong>
@@ -10030,30 +10336,30 @@ public class Discovery implements DiscoveryType {
 <hr />
 <h2 id="implementation-in-jython">Implementation in Jython<a class="headerlink" href="#implementation-in-jython" title="Permanent link">#</a></h2>
 <p>The example below is only meant to convey the concept, we will cover the details in later parts of the documentation.
-Suppose, we are implementing an Openbanking Identity platform and we have to add business specific claims say <code>openbanking_intent_id</code> to the ID token. The custom script which will help us accomplish our goal is of the type <code>UpdateTokenType</code> where the <code>modifyIdToken</code> method has to be implemented. A sample custom script with this business logic will be as stated below :
-<div class="highlight"><pre><span></span><code>class UpdateToken(UpdateTokenType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
+Suppose, we are implementing an Openbanking Identity platform and we have to add business specific claims say <code>openbanking_intent_id</code> to the ID token. The custom script which will help us accomplish our goal is of the type <code>UpdateTokenType</code> where the <code>modifyIdToken</code> method has to be implemented. A sample custom script with this business logic will be as stated below:
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">UpdateToken</span><span class="p">(</span><span class="n">UpdateTokenType</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
 
-    def init(self, customScript, configurationAttributes):
-        &lt; initialization code comes here &gt;
-        return True
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="o">&lt;</span> <span class="n">initialization</span> <span class="n">code</span> <span class="n">comes</span> <span class="n">here</span> <span class="o">&gt;</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
-    def destroy(self, configurationAttributes):
-        &lt; clean up code comes here&gt;
-        return True
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="o">&lt;</span> <span class="n">clean</span> <span class="n">up</span> <span class="n">code</span> <span class="n">comes</span> <span class="n">here</span><span class="o">&gt;</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
-    def getApiVersion(self):
-        return &lt;version number&gt;
+    <span class="k">def</span> <span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">&lt;</span><span class="n">version</span> <span class="n">number</span><span class="o">&gt;</span>
 
-   def modifyIdToken(self, jsonWebResponse, context):
+   <span class="k">def</span> <span class="nf">modifyIdToken</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsonWebResponse</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
 
-       # Step1: &lt;get openbanking_intent_id from session &gt;
-              sessionId = context.getSession()
-              openbanking_intent_id = sessionId.getSessionAttributes().get(&quot;openbanking_intent_id &quot;)   
+       <span class="c1"># Step1: &lt;get openbanking_intent_id from session &gt;</span>
+              <span class="n">sessionId</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getSession</span><span class="p">()</span>
+              <span class="n">openbanking_intent_id</span> <span class="o">=</span> <span class="n">sessionId</span><span class="o">.</span><span class="n">getSessionAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;openbanking_intent_id &quot;</span><span class="p">)</span>   
 
-       # Step2: &lt;add custom claims to ID token here&gt;
-              jsonWebResponse.getClaims().setClaim(&quot;openbanking_intent_id &quot;, openbanking_intent_id )
+       <span class="c1"># Step2: &lt;add custom claims to ID token here&gt;</span>
+              <span class="n">jsonWebResponse</span><span class="o">.</span><span class="n">getClaims</span><span class="p">()</span><span class="o">.</span><span class="n">setClaim</span><span class="p">(</span><span class="s2">&quot;openbanking_intent_id &quot;</span><span class="p">,</span> <span class="n">openbanking_intent_id</span> <span class="p">)</span>
 </code></pre></div></p>
 <h3 id="using-java-libraries-in-a-jython-script">Using Java libraries in a Jython script:<a class="headerlink" href="#using-java-libraries-in-a-jython-script" title="Permanent link">#</a></h3>
 <p><br> <strong>Steps:</strong>
@@ -10120,22 +10426,45 @@ value for getApiVersion is greater than 10</p>
 </li>
 </ul>
 <hr />
-<h3 id="configurable-properties-of-a-custom-script">Configurable properties of a custom script<a class="headerlink" href="#configurable-properties-of-a-custom-script" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Name <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>unique identifier(name) for the custom script e.g. person_authentication_google<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Description <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Description text<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Programming Languages <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Python <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Level <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated.<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
-
-<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Location type <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Database - Stored in persistence (LDAP, MYSQL or PLSQL whichever applicable ) <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>File - stored as a file<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
- <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Interactive <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Web - web application<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>native - mobile application<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">li</span><span class="p">&gt;</span>both<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
- <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span> Custom properties<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
- <span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
-</code></pre></div>
+<h2 id="configurable-properties-of-a-custom-script">Configurable properties of a custom script<a class="headerlink" href="#configurable-properties-of-a-custom-script" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>unique identifier(name) for the custom script e.g. person_authentication_google</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Description Text</td>
+</tr>
+<tr>
+<td>Programming Languages</td>
+<td>Python/Java</td>
+</tr>
+<tr>
+<td>Level</td>
+<td>Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated.</td>
+</tr>
+<tr>
+<td>Location type</td>
+<td><ul> <li> Database - Stored in persistence (LDAP, MYSQL or PLSQL whichever applicable ) </li><li>File - stored as a file </ul></td>
+</tr>
+<tr>
+<td>Interactive</td>
+<td><ul><li>Web - web application</li><li>native - mobile application</li><li>both</li></ul></td>
+</tr>
+<tr>
+<td>Custom Properties</td>
+<td>Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h3 id="building-business-logic-in-a-custom-script">Building business logic in a custom script<a class="headerlink" href="#building-business-logic-in-a-custom-script" title="Permanent link">#</a></h3>
 <p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most
@@ -10259,7 +10588,7 @@ E.g:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T14:26:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T17:04:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
       
         <br>
         Created:
