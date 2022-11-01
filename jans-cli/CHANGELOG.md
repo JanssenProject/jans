@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.0.3 (2022-11-01)
+
+
+### Bug Fixes
+
+* Jans cli SCIM fixes ([#2394](https://github.com/JanssenProject/jans/issues/2394)) ([a009943](https://github.com/JanssenProject/jans/commit/a009943847238f2d115f794a21b5e229c851db5e))
+* jans-cli access token expiration ([#2352](https://github.com/JanssenProject/jans/issues/2352)) ([d506c8e](https://github.com/JanssenProject/jans/commit/d506c8e8960fbc899e3ad1072ccaa40e0713720a))
+* jans-cli displayName for OpenID Clients with MySQL backend (ref: [#2314](https://github.com/JanssenProject/jans/issues/2314)) ([#2315](https://github.com/JanssenProject/jans/issues/2315)) ([e0dff68](https://github.com/JanssenProject/jans/commit/e0dff68524102aa78252725f6de4620bee944a29))
+* jans-cli endpint param ([#2569](https://github.com/JanssenProject/jans/issues/2569)) ([f6faa71](https://github.com/JanssenProject/jans/commit/f6faa71b4c4803f42785f968c3cfef5d1c59affe))
+* jans-cli fixes ([#2429](https://github.com/JanssenProject/jans/issues/2429)) ([c9673dc](https://github.com/JanssenProject/jans/commit/c9673dc12ab4f49fb4107b3695efebbf5b1652bd))
+* jans-cli fixes ([#2515](https://github.com/JanssenProject/jans/issues/2515)) ([ccaacc8](https://github.com/JanssenProject/jans/commit/ccaacc8ae564e8f2ef5fd91134bc1c6512634bd5))
+* jans-cli info for ConfigurationAgamaFlow ([#2561](https://github.com/JanssenProject/jans/issues/2561)) ([2c446a7](https://github.com/JanssenProject/jans/commit/2c446a7ce64407274e35639dda7e9a48f926988b))
+* jans-cli tabulate attrbiutes ([#2321](https://github.com/JanssenProject/jans/issues/2321)) ([cb1e40d](https://github.com/JanssenProject/jans/commit/cb1e40d727bd652c71681509972097be5fae9b54))
+* jans-cli user patch ([#2334](https://github.com/JanssenProject/jans/issues/2334)) ([fa3592b](https://github.com/JanssenProject/jans/commit/fa3592bbf76872a95524ec6bf9e2d24796d3f6e5))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
+
+### Documentation
+
+* add remote connection section ([#2499](https://github.com/JanssenProject/jans/issues/2499)) ([8eb1376](https://github.com/JanssenProject/jans/commit/8eb1376a9216a170e65d428ad0d3fa9f7f320c2f))
+* **jans-cli:** fix broken link ([110cb14](https://github.com/JanssenProject/jans/commit/110cb14894be2171a8c1535954a99031082402f9))
+
 ## 1.0.2 (2022-08-30)
 
 
