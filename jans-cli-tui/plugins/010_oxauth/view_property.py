@@ -83,7 +83,7 @@ class ViewProperty(JansGDialog, DialogUtils):
         self.value_content = HSplit([],width=D())
         self.tabs = {}
         self.selected_tab = 'tab0'
-        self.schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
+        self.schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
         self.prepare_properties()
         self.create_window()

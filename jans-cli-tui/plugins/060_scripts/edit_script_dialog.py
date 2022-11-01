@@ -137,7 +137,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
     def create_window(self) -> None:
 
-        schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/CustomScript')
+        schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/CustomScript')
 
         script_types = [
                         ['PERSON_AUTHENTICATION', 'Person Authentication'],

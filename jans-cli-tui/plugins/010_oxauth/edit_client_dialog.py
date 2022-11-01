@@ -197,7 +197,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         """Prepare the tabs for Edil Client Dialogs
         """
 
-        schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Client')
+        schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Client')
 
         self.tabs = OrderedDict()
 
@@ -253,7 +253,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
                                 current_values=self.data.get('tokenEndpointAuthMethodsSupported', []), 
                                 jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
                                     'tokenEndpointAuthMethodsSupported'),
                                 style='class:outh-client-checkboxlist'),
                         #-----------------------------------------------------------------------------#
@@ -298,7 +298,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 name='dynamicRegistrationPersistClientAuthorizations',
                                 checked=self.data.get('dynamicRegistrationPersistClientAuthorizations'),
                                 jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
                                     'tokenEndpointAuthMethodsSupported'),
                                 style='class:outh-client-checkbox'),
                         #-----------------------------------------------------------------------------#
@@ -326,7 +326,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='redirectUrisRegex', 
                             value=self.data.get('attributes', {}).get('redirectUrisRegex',''), 
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                                     'redirectUrisRegex'),
                             style='class:outh-client-text'), 
 
@@ -362,7 +362,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='runIntrospectionScriptBeforeJwtCreation',
                             checked=self.data.get('attributes', {}).get('runIntrospectionScriptBeforeJwtCreation'),
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                                     'runIntrospectionScriptBeforeJwtCreation'),
                             style='class:outh-client-checkbox'),
 
@@ -378,8 +378,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='additionalAudience',
                             value='\n'.join(self.data.get('attributes', {}).get('additionalAudience',[])),
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
-                                    'additionalAudience'),                                
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
+                                    'additionalAudience'),
                             style='class:outh-client-text',
                             height = 3),
 
@@ -430,7 +430,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='backchannelLogoutUri', 
                             value='\n'.join(self.data.get('attributes', {}).get('backchannelLogoutUri',[]) ),
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                                     'backchannelLogoutUri'), 
                             height=3, style='class:outh-client-text'
                             ),
@@ -440,8 +440,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='backchannelLogoutSessionRequired', 
                             checked=self.data.get('attributes', {}).get('backchannelLogoutSessionRequired'),
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
-                                    'backchannelLogoutSessionRequired'),                             
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
+                                    'backchannelLogoutSessionRequired'),
                             style='class:outh-client-checkbox'
                             ),
                         
@@ -544,7 +544,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             checked=self.data.get('attributes', {}).get('backchannelUserCodeParameterSupported'),## TODO Not in attributes >> in get-properties
                             style='class:outh-client-checkbox',
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
                                     'backchannelUserCodeParameterSupported'),
                             ),
                         #-------------------------------------------------------------------#
@@ -558,7 +558,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='parLifetime', 
                             value=self.data.get('attributes', {}).get('parLifetime',0),
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                                     'parLifetime'),  
                             text_type='integer',                          
                             style='class:outh-client-text'),
@@ -571,7 +571,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             checked=self.data.get('attributes', {}).get('sessionIdRequestParameterEnabled'),## TODO Not in attributes >> in get-properties
                             style='class:outh-client-checkbox',
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
                                     'sessionIdRequestParameterEnabled'),
                                 ),
                         #-------------------------------------------------------------------#
@@ -603,7 +603,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             height=3,
                             style='class:outh-client-text',
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Scope'), 
                                     'umaAuthorizationPolicies'),
                                 ),
                         #-------------------------------------------------------------------#
@@ -684,7 +684,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     read_only=False if 'allowSpontaneousScopes' in self.data and self.data.get('attributes', {}).get('allowSpontaneousScopes') else True,
                     focusable=True,
                     jans_help=self.myparent.get_help_from_schema(
-                            self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                            self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                             'spontaneousScopeScriptDns'),
                     height=3,
                     style='class:outh-client-text')
@@ -697,7 +697,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='jansDefaultPromptLogin', 
                             checked=self.data.get('attributes', {}).get('jansDefaultPromptLogin'),
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                                     'jansDefaultPromptLogin'),
 
                             style='class:outh-client-checkbox'
@@ -716,7 +716,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             checked=self.data.get('attributes', {}).get('allowSpontaneousScopes'),
                             on_selection_changed=allow_spontaneous_changed, 
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                                     'allowSpontaneousScopes'),
                             style='class:outh-client-checkbox'
                             ),
@@ -761,7 +761,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value='\n'.join(self.data.get('attributes', {}).get('jansAuthorizedAcr',[])),
                             height=3,
                             jans_help=self.myparent.get_help_from_schema(
-                            self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                            self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                             'jansAuthorizedAcr'),
                             style='class:outh-client-text'),
 
@@ -775,7 +775,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value='\n'.join(self.data.get('attributes', {}).get('x5c',[])),
                             height=3, style='class:outh-client-text',
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/JSONWebKey'), 
+                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/JSONWebKey'), 
                                     'x5c'),
                                 ),
                         #-----------------------------------------------------------------------#
@@ -803,7 +803,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 value='\n'.join(self.data.get('attributes', {}).get('spontaneousScopes',[])), 
                 height=3,
                 jans_help=self.myparent.get_help_from_schema(
-                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                     'spontaneousScopes'),
                 style='class:outh-client-text'),
 
@@ -812,7 +812,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 value='\n'.join(self.data.get('attributes', {}).get('updateTokenScriptDns',[])), 
                 height=3,
                 jans_help=self.myparent.get_help_from_schema(
-                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
+                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                     'updateTokenScriptDns'),                
                 style='class:outh-client-text'),
 
@@ -821,8 +821,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 value='\n'.join(self.data.get('attributes', {}).get('postAuthnScripts',[])),
                 height=3,
                 jans_help=self.myparent.get_help_from_schema(
-                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
-                    'postAuthnScripts'),                
+                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
+                    'postAuthnScripts'),
                 style='class:outh-client-text'),
 
             self.myparent.getTitledText(_("Introspection"),
@@ -830,8 +830,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 value='\n'.join(self.data.get('attributes', {}).get('introspectionScripts',[])), 
                 height=3,
                 jans_help=self.myparent.get_help_from_schema(
-                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
-                    'introspectionScripts'),                    
+                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
+                    'introspectionScripts'),
                 style='class:outh-client-text'),
 
             # --------------------------------------------------------------------------------------# 
@@ -843,7 +843,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 height=3,
                 style='class:outh-client-text',
                 jans_help=self.myparent.get_help_from_schema(
-                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration'), 
+                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
                     'dynamicRegistrationAllowedPasswordGrantScopes'),
                     ),
                 
@@ -855,8 +855,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 value='\n'.join(self.data.get('attributes', {}).get('consentGatheringScripts',[]) ),
                 height=3,
                 jans_help=self.myparent.get_help_from_schema(
-                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/ClientAttributes'), 
-                    'consentGatheringScripts'),                 
+                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
+                    'consentGatheringScripts'),
                 style='class:outh-client-text'),
                         ],width=D(),style='class:outh-client-tabs'
                         )

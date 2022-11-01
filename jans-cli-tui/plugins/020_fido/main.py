@@ -52,7 +52,7 @@ class Plugin():
 
     def edit_requested_party(self, **kwargs: Any) -> None:
         title = _("Enter Request Party Properties")
-        schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/RequestedParties')
+        schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedParties')
         cur_data = kwargs.get('passed', ['', ''])
         name_widget = self.app.getTitledText(_("Name"), name='name', value=cur_data[0], jans_help=self.app.get_help_from_schema(schema, 'name'), style='class:outh-scope-text')
         domains_widget = self.app.getTitledText(_("Domains"), name='domains', value='\n'.join(cur_data[1].split(', ')),  height=3, jans_help=self.app.get_help_from_schema(schema, 'domains'), style='class:dialog-titled-widget')
@@ -77,9 +77,9 @@ class Plugin():
         self.requested_parties_container.remove_item(kwargs['selected'])
 
     def create_widgets(self):
-        self.schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
+        self.schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/AppConfiguration')
 
-        schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/JansFido2DynConfiguration')
+        schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/JansFido2DynConfiguration')
 
         self.containers['configuration'] = HSplit([
                                 self.app.getTitledText(_("Issuer"), name='issuer', value=self.data.get('issuer',''), jans_help=self.app.get_help_from_schema(schema, 'issuer'), style='class:outh-scope-text'),
@@ -116,7 +116,7 @@ class Plugin():
                                 )
 
 
-        static_schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/Fido2Configuration')
+        static_schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/Fido2Configuration')
         fido2_static_config = self.data.get('fido2Configuration', {})
 
         requested_parties_title = _("Requested Parties")

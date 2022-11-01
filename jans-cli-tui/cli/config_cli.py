@@ -1331,7 +1331,7 @@ class JCA_CLI:
         path = self.get_path_by_id(operation_id)
 
         if not path:
-            self.exit_with_error("No such Operation ID")
+            self.exit_with_error("No Operation ID {} was found.".format(operation_id))
 
         suffix_param = self.parse_command_args(url_suffix)
         endpoint_params = self.parse_command_args(endpoint_args)

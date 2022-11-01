@@ -82,7 +82,7 @@ class Plugin(DialogUtils):
     def init_plugin(self) -> None:
 
         self.app.create_background_task(self.get_appconfiguration())
-        self.schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
+        self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
 
     async def get_appconfiguration(self) -> None:
@@ -477,7 +477,7 @@ class Plugin(DialogUtils):
         # ------------------------------------------------------------------------------- #
         # ----------------------------------- Search ------------------------------------ #
         # ------------------------------------------------------------------------------- #
-        porp_schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/AppConfiguration')
+        porp_schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
         data =[]
         if pattern:
@@ -808,8 +808,8 @@ class Plugin(DialogUtils):
 
         self.app.logger.debug("get_help: "+str(kwargs['data']))
         self.app.logger.debug("get_help: "+str(kwargs['scheme']))
-        schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/{}'.format(str(kwargs['scheme'])))
-        
+        schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/{}'.format(str(kwargs['scheme'])))
+
         self.app.logger.debug("schema: "+str(schema))
         if kwargs['scheme'] == 'AppConfiguration':
             self.app.status_bar_text= self.app.get_help_from_schema(schema, kwargs['data'][0])

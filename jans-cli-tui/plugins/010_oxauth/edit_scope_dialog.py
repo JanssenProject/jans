@@ -73,8 +73,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.save_handler = save_handler
         self.data = data
         self.title=title
-        self.showInConfigurationEndpoint = self.data.get('attributes',{}).get('showInConfigurationEndpoint','')
-        self.defaultScope = self.data.get('defaultScope','')
+        self.showInConfigurationEndpoint = self.data.get('attributes', {}).get('showInConfigurationEndpoint', '')
+        self.defaultScope = self.data.get('defaultScope', '')
+        self.schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Scope')
         self.tbuffer = None
         self.prepare_tabs()
         self.create_window()
@@ -104,12 +105,11 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             close_me = self.save_handler(self)
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
-    
+
     def cancel(self) -> None:
         self.future.set_result(DialogResult.CANCEL)
 
     def create_window(self) -> None:
-
         scope_types = [('oauth', 'OAuth'), ('openid', 'OpenID'), ('dynamic', 'Dynamic'), ('uma', 'UMA')]
         buttons = [(self.save, _("Save")), (self.cancel, _("Cancel"))]
         if self.data:
@@ -133,9 +133,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 current_value=self.data.get('scopeType'),
                                 values=scope_types,
                                 on_selection_changed=self.scope_selection_changed,
-                                jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
-                                    'scopeType'),
+                                jans_help=self.myparent.get_help_from_schema(self.schema, 'scopeType'),
 
                                 style='class:outh-scope-radiobutton'),
 
@@ -143,18 +141,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     _("id"), 
                     name='id', 
                     value=self.data.get('id',''), 
-                    jans_help=self.myparent.get_help_from_schema(
-                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
-                        'id'),
+                    jans_help=self.myparent.get_help_from_schema(self.schema, 'id'),
                     style='class:outh-scope-text'),
 
                 self.myparent.getTitledText(
                     _("inum"), 
                     name='inum', 
                     value=self.data.get('inum',''), 
-                    jans_help=self.myparent.get_help_from_schema(
-                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
-                        'inum'),
+                    jans_help=self.myparent.get_help_from_schema(self.schema, 'inum'),
                     style='class:outh-scope-text',
                     read_only=True,),
 
@@ -162,18 +156,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     _("Display Name"), 
                     name='displayName', 
                     value=self.data.get('displayName',''),
-                    jans_help=self.myparent.get_help_from_schema(
-                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
-                        'displayName'),
+                    jans_help=self.myparent.get_help_from_schema(self.schema, 'displayName'),
                     style='class:outh-scope-text'),
 
                 self.myparent.getTitledText(
                     _("Description"), 
                     name='description', 
                     value=self.data.get('description',''), 
-                    jans_help=self.myparent.get_help_from_schema(
-                        self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope'), 
-                        'description'),
+                    jans_help=self.myparent.get_help_from_schema(self.schema, 'description'),
                     style='class:outh-scope-text'),
 
                 DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
@@ -195,7 +185,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         ) -> list:
         try :
             responce = self.myparent.cli_object.process_command_by_id(
-                        operation_id='get-all-attribute',
+                        operation_id='get-attributes',
                         url_suffix='',
                         endpoint_args='',
                         data_fn=None,
@@ -269,7 +259,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Scope Dialogs
         """
-        schema = self.myparent.cli_object.get_schema_from_reference('#/components/schemas/Scope')
 
         self.alt_tabs = {}
 
@@ -279,7 +268,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
-                                    jans_help=self.myparent.get_help_from_schema(schema,'defaultScope'),
+                                    jans_help=self.myparent.get_help_from_schema(self.schema, 'defaultScope'),
                                     style='class:outh-scope-checkbox',
                             ),
 
@@ -299,7 +288,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
-                                    jans_help=self.myparent.get_help_from_schema(schema,'defaultScope'),
+                                    jans_help=self.myparent.get_help_from_schema(self.schema, 'defaultScope'),
                                     style='class:outh-scope-checkbox',
                             ),
 
@@ -334,7 +323,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledText(_("Dynamic Scope Script"),
                             name='dynamicScopeScripts',
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
-                            jans_help=self.myparent.get_help_from_schema(schema,'dynamicScopeScripts'),
+                            jans_help=self.myparent.get_help_from_schema(self.schema, 'dynamicScopeScripts'),
                             height=3, 
                             style='class:outh-scope-text'),
                         
@@ -350,7 +339,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 name='claims',
                                 value='\n'.join(self.data.get('claims', [])),
                                 height=3, 
-                                jans_help=self.myparent.get_help_from_schema(schema,'claims'),
+                                jans_help=self.myparent.get_help_from_schema(self.schema, 'claims'),
                                 style='class:outh-scope-text'),
 
                         # Label(text=_("Claims"),style='red'),  ## name = claims TODO 
@@ -365,14 +354,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         value=self.data.get('none',''), 
                         style='class:outh-scope-text',
                         read_only=True,
-                        jans_help=self.myparent.get_help_from_schema(schema,'none'),
+                        jans_help=self.myparent.get_help_from_schema(self.schema, 'none'),
                         height=3,),## Not fount
 
                     self.myparent.getTitledText(
                         _("Creationg time"), 
                         name='creationDate', 
                         value=self.data.get('creationDate',''), 
-                        jans_help=self.myparent.get_help_from_schema(schema,'creationDate'),
+                        jans_help=self.myparent.get_help_from_schema(self.schema, 'creationDate'),
                         style='class:outh-scope-text',
                         read_only=True,),
 
@@ -387,7 +376,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         _("IconURL"), 
                         name='iconUrl', 
                         value=self.data.get('iconUrl',''), 
-                        jans_help=self.myparent.get_help_from_schema(schema,'iconUrl'),
+                        jans_help=self.myparent.get_help_from_schema(self.schema, 'iconUrl'),
                         style='class:outh-scope-text'),
                     
 
@@ -395,14 +384,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             name='umaAuthorizationPolicies',
                             value='\n'.join(self.data.get('umaAuthorizationPolicies', [])),
                             height=3, 
-                            jans_help=self.myparent.get_help_from_schema(schema,'umaAuthorizationPolicies'),
+                            jans_help=self.myparent.get_help_from_schema(self.schema, 'umaAuthorizationPolicies'),
                             style='class:outh-scope-text'),
 
                     self.myparent.getTitledText(
                         _("Associated Client"), 
                         name='none', 
                         value=self.data.get('none',''), 
-                        jans_help=self.myparent.get_help_from_schema(schema,'none'),
+                        jans_help=self.myparent.get_help_from_schema(self.schema, 'none'),
                         style='class:outh-scope-text',
                         read_only=True,
                         height=3,), ## Not fount
@@ -411,7 +400,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         _("Creationg time"), 
                         name='description', 
                         value=self.data.get('description',''), 
-                        jans_help=self.myparent.get_help_from_schema(schema,'description'),
+                        jans_help=self.myparent.get_help_from_schema(self.schema, 'description'),
                         style='class:outh-scope-text',
                         read_only=True,),
 
@@ -419,7 +408,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     _("Creator"), 
                                     name='Creator',
                                     style='class:outh-scope-text',
-                                    jans_help=self.myparent.get_help_from_schema(schema,'Creator'),
+                                    jans_help=self.myparent.get_help_from_schema(self.schema, 'Creator'),
                                     read_only=True,
                                     value=uma_creator
                                     ),
@@ -434,7 +423,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         try :
             responce = self.myparent.cli_object.process_command_by_id(
-                        operation_id='get-all-attribute',
+                        operation_id='get-attributes',
                         url_suffix='',
                         endpoint_args='pattern:{}'.format(textbuffer.text),
                         data_fn=None,
