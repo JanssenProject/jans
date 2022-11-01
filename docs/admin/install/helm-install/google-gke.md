@@ -146,7 +146,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
     - MySQL for persistence storage
 
-      In production environment, you would deploy the database on `Cloud SQL`
+      In a production environment, a production grade MySQL server should be used such as `Cloud SQL`
 
       For testing purposes, you can deploy it on the GKE cluster using the following commands:
 
