@@ -3,6 +3,7 @@ package io.jans.as.server.ssa.ws.rs.action;
 import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.config.BaseDnConfiguration;
@@ -94,7 +95,7 @@ public class SsaCreateActionTest {
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("test description");
         ssa.getAttributes().setSoftwareId("gluu-scan-api");
-        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("password"));
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
@@ -170,6 +171,8 @@ public class SsaCreateActionTest {
         assertEquals(ssaAux.getAttributes().getOneTimeUse(), ssa.getAttributes().getOneTimeUse());
         assertNotNull(ssaAux.getAttributes().getRotateSsa(), "ssa rotate_ssa is null");
         assertEquals(ssaAux.getAttributes().getRotateSsa(), ssa.getAttributes().getRotateSsa());
+        assertNotNull(ssaAux.getState(), "ssa state is null");
+        assertEquals(ssaAux.getState(), SsaState.ACTIVE);
     }
 
     @Test

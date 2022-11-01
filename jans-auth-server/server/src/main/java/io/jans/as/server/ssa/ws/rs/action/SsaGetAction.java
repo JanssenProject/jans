@@ -8,6 +8,7 @@ package io.jans.as.server.ssa.ws.rs.action;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
@@ -66,7 +67,7 @@ public class SsaGetAction {
     @Inject
     private SsaContextBuilder ssaContextBuilder;
 
-    public Response get(Boolean softwareRoles, String jti, String orgId, HttpServletRequest httpRequest) {
+    public Response get(Boolean softwareRoles, String jti, Long orgId, HttpServletRequest httpRequest) {
         log.debug("Attempting to read ssa: softwareRoles = {}, jti = '{}', orgId = {}", softwareRoles, jti, orgId);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
@@ -75,7 +76,7 @@ public class SsaGetAction {
             final Client client = ssaRestWebServiceValidator.getClientFromSession();
             ssaRestWebServiceValidator.checkScopesPolicy(client, Arrays.asList(SsaScopeType.SSA_ADMIN.getValue(), SsaScopeType.SSA_PORTAL.getValue()));
 
-            final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, client.getClientId(), client.getScopes());
+            final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(), client.getScopes());
 
             JSONArray jsonArray = ssaJsonService.getJSONArray(ssaList);
             ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, null, client, appConfiguration, attributeService);

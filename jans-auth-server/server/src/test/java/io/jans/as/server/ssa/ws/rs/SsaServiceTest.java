@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -21,6 +22,9 @@ import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
+import jakarta.ws.rs.core.Response;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -136,7 +140,7 @@ public class SsaServiceTest {
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("Test description");
         ssa.getAttributes().setSoftwareId("scan-api-test");
-        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("password"));
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
@@ -167,16 +171,44 @@ public class SsaServiceTest {
     }
 
     @Test
+    public void findSsaByJti_jtiValid_ssaValid() {
+        String jti = "my-jti";
+        BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
+        baseDnConfiguration.setSsa("ou=ssa,o=jans");
+        when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
+        when(persistenceEntryManager.find(any(), anyString())).thenReturn(ssa);
+
+        Ssa ssaAux = ssaService.findSsaByJti(jti);
+        assertNotNull(ssaAux, "ssa is null");
+        verifyNoMoreInteractions(persistenceEntryManager);
+    }
+
+    @Test
+    public void findSsaByJti_jtiNotFound_ssaNull() {
+        String jti = "my-jti";
+        BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
+        baseDnConfiguration.setSsa("ou=ssa,o=jans");
+        when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
+        EntryPersistenceException error = new EntryPersistenceException(" Failed to lookup entry by key");
+        when(persistenceEntryManager.find(any(), anyString())).thenThrow(error);
+
+        Ssa ssaAux = ssaService.findSsaByJti(jti);
+        assertNull(ssaAux, "ssa is not null");
+        verifyNoMoreInteractions(persistenceEntryManager);
+    }
+
+    @Test
     public void getSsaList_withPortalScope_valid() {
         BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
         baseDnConfiguration.setSsa("ou=ssa,o=jans");
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = null;
-        String orgId = null;
+        Long orgId = null;
+        SsaState status = null;
         String clientId = "test-client";
         String[] scopes = new String[]{SsaScopeType.SSA_PORTAL.getValue()};
-        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         verify(log).trace(eq("Filter with AND created: " + String.format("[(creatorId=%s)]", clientId)));
         verify(persistenceEntryManager).findEntries(any(), any(), any());
@@ -190,10 +222,11 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = "test-jti";
-        String orgId = null;
+        Long orgId = null;
+        SsaState status = null;
         String clientId = "test-client";
         String[] scopes = new String[]{};
-        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         verify(log).trace(eq("Filter with AND created: " + String.format("[(inum=%s)]", jti)));
         verify(persistenceEntryManager).findEntries(any(), any(), any());
@@ -207,12 +240,31 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = null;
-        String orgId = "test-org";
+        Long orgId = 1000L;
+        SsaState status = null;
         String clientId = "test-client";
         String[] scopes = new String[]{};
-        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         verify(log).trace(eq("Filter with AND created: " + String.format("[(o=%s)]", orgId)));
+        verify(persistenceEntryManager).findEntries(any(), any(), any());
+        verifyNoMoreInteractions(log);
+    }
+
+    @Test
+    public void getSsaList_withStatus_valid() {
+        BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
+        baseDnConfiguration.setSsa("ou=ssa,o=jans");
+        when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
+
+        String jti = null;
+        Long orgId = null;
+        SsaState status = SsaState.ACTIVE;
+        String clientId = "test-client";
+        String[] scopes = new String[]{};
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
+        assertNotNull(ssaList);
+        verify(log).trace(eq("Filter with AND created: " + String.format("[(jansState=%s)]", status)));
         verify(persistenceEntryManager).findEntries(any(), any(), any());
         verifyNoMoreInteractions(log);
     }
@@ -224,10 +276,11 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = null;
-        String orgId = null;
+        Long orgId = null;
+        SsaState status = null;
         String clientId = null;
         String[] scopes = new String[]{};
-        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, clientId, scopes);
+        List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         assertTrue(ssaList.isEmpty());
         verify(persistenceEntryManager).findEntries(any(), any(), any());
@@ -292,6 +345,13 @@ public class SsaServiceTest {
         }
         verify(log).isErrorEnabled();
         verify(log).error(anyString(), any(Throwable.class));
+    }
+
+    @Test
+    public void createUnprocessableEntityResponse_valid_response() {
+        Response response = ssaService.createUnprocessableEntityResponse().build();
+        assertNotNull(response, "Response is null");
+        assertEquals(response.getStatus(), HttpStatus.SC_UNPROCESSABLE_ENTITY);
     }
 
     private static void assertSsaJwt(JSONWebKey jsonWebKey, String ssaSigningAlg, String issuer, Ssa ssa, Jwt jwt) {
