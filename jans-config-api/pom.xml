@@ -216,11 +216,6 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>uma-rs-core</artifactId>
-				<version>${jans.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
 				<artifactId>agama-model</artifactId>
 				<version>${jans.version}</version>
 			</dependency>

@@ -58,10 +58,6 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>uma-rs-core</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>io.jans</groupId>
