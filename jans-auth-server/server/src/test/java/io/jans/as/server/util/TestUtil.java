@@ -3,10 +3,10 @@ package io.jans.as.server.util;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.error.ErrorResponse;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 
 import static io.jans.as.model.uma.TestUtil.assertNotBlank;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * @author yuriyz
@@ -14,6 +14,14 @@ import static org.testng.Assert.assertNotNull;
 public class TestUtil {
 
     private TestUtil() {
+    }
+
+    public static void assertEmpty(String s) {
+        assertTrue(StringUtils.isBlank(s));
+    }
+
+    public static void assertNotEmpty(String s) {
+        assertTrue(StringUtils.isNotBlank(s));
     }
 
     public static void assert_(RegisterResponse response) {
