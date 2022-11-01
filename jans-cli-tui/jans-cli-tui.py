@@ -399,15 +399,15 @@ class JansCliApp(Application):
         return v
 
     def getTitledCheckBox(
-        self, 
-        title: AnyFormattedText,
-        name: AnyFormattedText, 
-        text: AnyFormattedText= "",
-        checked: Optional[bool] = False, 
-        on_selection_changed: Callable= None, 
-        jans_help: AnyFormattedText= "",
-        style: AnyFormattedText= "",
-        ) -> AnyContainer:
+            self,
+            title: AnyFormattedText,
+            name: AnyFormattedText,
+            text: AnyFormattedText= "",
+            checked: Optional[bool] = False,
+            on_selection_changed: Callable= None,
+            jans_help: AnyFormattedText= "",
+            style: AnyFormattedText= "",
+            ) -> AnyContainer:
 
         title += ': '
         cb = Checkbox(text)
@@ -431,15 +431,15 @@ class JansCliApp(Application):
         return v
 
     def getTitledRadioButton(
-        self, 
-        title: AnyFormattedText, 
-        name: AnyFormattedText,
-        values: Optional[list] = [],
-        current_value: AnyFormattedText= "", 
-        on_selection_changed: Callable= None,  
-        jans_help: AnyFormattedText= "", 
-        style: AnyFormattedText= "",
-        ) -> AnyContainer:
+            self, 
+            title: AnyFormattedText, 
+            name: AnyFormattedText,
+            values: Optional[list] = [],
+            current_value: AnyFormattedText= "",
+            on_selection_changed: Callable= None,
+            jans_help: AnyFormattedText= "",
+            style: AnyFormattedText= "",
+            ) -> AnyContainer:
 
         title += ': '
         if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
