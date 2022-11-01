@@ -196,7 +196,7 @@ where <library_name> is the name of the library to install.
 
 ### Debugging a Jython script
 
-This [article](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/interception-scripts-debug) covers the details.
+This [article](../interception-scripts-debug) covers the details.
 
 ***
 
