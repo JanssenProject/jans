@@ -46,7 +46,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 4.  Install [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html) 
 
-5.  Create cluster using eksctl such as the following example::
+5.  Create cluster using eksctl such as the following example:
 
     ```  
     eksctl create cluster --name jans-cluster --nodegroup-name jans-nodes --node-type NODE_TYPE --nodes 2  --managed --region REGION_CODE
