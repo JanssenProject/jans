@@ -4865,6 +4865,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-pages" class="md-nav__link">
+    Example pages:
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -10021,6 +10028,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-pages" class="md-nav__link">
+    Example pages:
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -10065,7 +10079,7 @@
 
   <h1>Customize Web pages</h1>
 
-<p>All web pages are <strong>xhtml</strong> files. </p>
+<p>All web pages are <strong>xhtml</strong> files.</p>
 <h3 id="default-pages-bundled-in-the-jans-authwar-are">Default pages bundled in the <code>jans-auth.war</code> are:<a class="headerlink" href="#default-pages-bundled-in-the-jans-authwar-are" title="Permanent link">#</a></h3>
 <ul>
 <li>Login page: <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/login.xhtml">login.xhtml</a></li>
@@ -10081,7 +10095,7 @@
 |   |-- i18n (resource bundles)
 |   |-- libs (library files used by custom script)
 |   |-- pages (web pages)
-|   |-- static (images and css files) 
+|   |-- static (images and css files)
 </code></pre></div>
 <h3 id="adding-a-new-web-page-for-person-authentication-scripts">Adding a new web page for Person Authentication scripts<a class="headerlink" href="#adding-a-new-web-page-for-person-authentication-scripts" title="Permanent link">#</a></h3>
 <ol>
@@ -10098,11 +10112,11 @@
 <h3 id="customized-resource-bundles">Customized resource bundles:<a class="headerlink" href="#customized-resource-bundles" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p>Resource bundles that are present in the jans-auth.war are present in this <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/">folder</a> </p>
+<p>Resource bundles that are present in the jans-auth.war are present in this <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/">folder</a></p>
 </li>
 <li>
 <p>To override the defaults, custom <code>.properties</code> files should be placed in the following file under this path : <code>/opt/jans/jetty/jans-auth/custom/i18n/jans-auth.properties</code>
-Resource bundle names to support other languages should be placed under the same folder <code>/opt/jans/jetty/jans-auth/custom/i18n/</code>. Some examples of file names are : </p>
+Resource bundle names to support other languages should be placed under the same folder <code>/opt/jans/jetty/jans-auth/custom/i18n/</code>. Some examples of file names are :</p>
 <ul>
 <li>jans-auth_en.properties</li>
 <li>jans-auth_bg.properties</li>
@@ -10134,13 +10148,15 @@ Resource bundle names to support other languages should be placed under the same
 <li><code>mkdir -p /opt/jans/jetty/jans-auth/custom/pages/WEB-INF/incl/layout/</code>    </li>
 <li>Place a modified <code>template.xhtml</code> in the above location which will override the <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml">default template file</a> from the war</li>
 </ol>
+<h3 id="example-pages">Example pages:<a class="headerlink" href="#example-pages" title="Permanent link">#</a></h3>
+<p><a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth">Here</a> you will find several login pages for different authentication methods.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T14:26:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
       
         <br>
         Created:

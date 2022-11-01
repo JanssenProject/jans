@@ -10265,7 +10265,7 @@
  3. offer Social logins<br />
  4. proactively perform fraud detection and block the user.</p>
 <h2 id="default-authentication-method">Default authentication method:<a class="headerlink" href="#default-authentication-method" title="Permanent link">#</a></h2>
-<p>In an OpenID Connect authentication request, one of the optional parameters defined is <code>acr_values</code>. This is the primary way for a client to signal to the OpenID Provider (OP) the preferred way to authenticate the subject. 
+<p>In an OpenID Connect authentication request, one of the optional parameters defined is <code>acr_values</code>. This is the primary way for a client to signal to the OpenID Provider (OP) the preferred way to authenticate the subject.
 A client may also specify <code>default_acr_values</code> during registration (and omit the parameter while making an authentication request). <strong>In the Jansssen Server configuration, <code>acr</code> is used to name the authentication workflow.</strong></p>
 <p><code>default_acr</code>: This is the default authentication mechanism exposed to all applications that send users to the Janssen Server for sign-in. Unless an app specifically requests a different form of authentication using the OpenID Connect acr_values parameter (as specified below), users will receive the form of authentication specified in this field.</p>
 <p>If a default ACR is not specified, Janssen will determine it based on enabled scripts and the internal user/password ACR. This internal ACR, <code>simple_password_auth</code>, is set to level -1. This means that it has lower priority than any scripts, so Janssen server will use it only if no other authentication method is set.</p>
@@ -10276,8 +10276,8 @@ A client may also specify <code>default_acr_values</code> during registration (a
 <p>By default, users will get the default authentication mechanism as specified above. However, <strong>using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism</strong>.</p>
 <ol>
 <li>
-<p>Obtain the json contents of a custom script by using a jans-cli command like <code>get-config-scripts-by-type</code>, <code>get-config-scripts-by-inum</code> etc. 
-    Example : </p>
+<p>Obtain the json contents of a custom script by using a jans-cli command like <code>get-config-scripts-by-type</code>, <code>get-config-scripts-by-inum</code> etc.
+    Example :</p>
 <ul>
 <li><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION</code></li>
 <li><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7</code></li>
@@ -10292,13 +10292,13 @@ A client may also specify <code>default_acr_values</code> during registration (a
 <p>Enabled scripts can be confirmed by checking  the Janssen OP configuration URL, <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>, and finding the "<strong>acr_values_supported</strong>".</p>
 <p>Learn more about acr_values in the <a href="http://openid.net/specs/openid-connect-core-1_0.html#acrSemantics">OpenID Connect core spec</a>.</p>
 <h2 id="building-blocks-of-an-authentication-workflow">Building blocks of an authentication workflow<a class="headerlink" href="#building-blocks-of-an-authentication-workflow" title="Permanent link">#</a></h2>
-<p>Jans-auth comprises of a number of beans, configuration files and Facelets (JSF) views, packaged as a WAR module. That means custom scripts and custom pages (JSF facelets) can make use of business logic already encapsulated in the Weld managed beans. The following sections explain how authentication flow can be built using a custom script. </p>
+<p>Jans-auth comprises of a number of beans, configuration files and Facelets (JSF) views, packaged as a WAR module. That means custom scripts and custom pages (JSF facelets) can make use of business logic already encapsulated in the Weld managed beans. The following sections explain how authentication flow can be built using a custom script.</p>
 <h3 id="a-writing-a-custom-script">A. Writing a custom script<a class="headerlink" href="#a-writing-a-custom-script" title="Permanent link">#</a></h3>
 <p>The <strong>PersonAuthenticationType</strong> script is described by a java interface whose methods should be overridden to implement an authentication workflow.
-The <a href="https://jans.io/docs/admin/developer/scripts/person-authentication-interface">article</a> talks about these methods in detail and the psuedo code in each method will help drive home the point.</p>
+The <a href="./person-authentication-interface">article</a> talks about these methods in detail and the psuedo code in each method will help drive home the point.</p>
 <h3 id="b-writing-ui-pages">B. Writing UI pages:<a class="headerlink" href="#b-writing-ui-pages" title="Permanent link">#</a></h3>
-<p>All pages are <strong>xhtml</strong> files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages. </p>
-<p>This <a href="https://github.com/maduvena/jans-docs/wiki/Writing-UI-pages">article</a> covers all the details you need to write your own web page. </p>
+<p>All pages are <strong>xhtml</strong> files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.</p>
+<p>This <a href="../../customization/customize-web-pages">article</a> covers all the details you need to write your own web page. </p>
 <h3 id="c-building-business-logic-in-custom-script">C. Building business logic in Custom script:<a class="headerlink" href="#c-building-business-logic-in-custom-script" title="Permanent link">#</a></h3>
 <p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this <a href="../../managed-beans/">article</a></p>
 <h3 id="d-adding-libraries-for-use-in-the-custom-script">D. Adding libraries for use in the custom script<a class="headerlink" href="#d-adding-libraries-for-use-in-the-custom-script" title="Permanent link">#</a></h3>
@@ -10309,11 +10309,11 @@ More details of this mentioned <a href="../../interception-scripts/#using-python
 <ol>
 <li><a href="../../../script-catalog/person_authentication/fido2-external-authenticator/README">FIDO2</a> : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer</li>
 <li>SMS OTP :  </li>
-<li>Email OTP </li>
+<li>Email OTP</li>
 </ol>
 <h3 id="b-implementing-multistep-authentication">B. Implementing Multistep authentication<a class="headerlink" href="#b-implementing-multistep-authentication" title="Permanent link">#</a></h3>
 <ol>
-<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py">Redirect to previous step</a>: The script here an example of how the number of steps can be varied depending on the context or business requirement. </li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py">Redirect to previous step</a>: The script here an example of how the number of steps can be varied depending on the context or business requirement.</li>
 </ol>
 <h3 id="c-implementing-social-logins">C. Implementing Social logins<a class="headerlink" href="#c-implementing-social-logins" title="Permanent link">#</a></h3>
 <p>You can use a <code>PersonAuthenticationType</code> script to allow users to sign using credentials from popular <strong>Social Identity providers</strong> or <strong>Inbound Identity Providers</strong> like Facebook, Google and Apple. After users authenticate, thier Social Identity Provider credentials are provisioned into the Jans-auth server. More on this topic in this <a href="../../../recipes/social-login/">article</a></p>
@@ -10322,7 +10322,7 @@ More details of this mentioned <a href="../../interception-scripts/#using-python
 <li>Impossible travel</li>
 </ol>
 <h2 id="testing-an-authentication-flow">Testing an authentication flow<a class="headerlink" href="#testing-an-authentication-flow" title="Permanent link">#</a></h2>
-<p>An example of a complete URL looks like this - 
+<p>An example of a complete URL looks like this -
         ```</p>
 <div class="codehilite"><pre><span></span><code>    https://&lt;your.jans.server&gt;/jans-auth/authorize.htm? \
     response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin \
@@ -10336,13 +10336,13 @@ More details of this mentioned <a href="../../interception-scripts/#using-python
 <h2 id="faqs">FAQs<a class="headerlink" href="#faqs" title="Permanent link">#</a></h2>
 <h3 id="1-how-can-error-messages-be-displayed-on-a-web-page">1. How can error messages be displayed on a web page?<a class="headerlink" href="#1-how-can-error-messages-be-displayed-on-a-web-page" title="Permanent link">#</a></h3>
 <ol>
-<li>FacesMessage bean is used for this purpose. 
+<li>FacesMessage bean is used for this purpose.
     <div class="highlight"><pre><span></span><code>from org.jans.jsf2.message import FacesMessages
 from org.jans.service.cdi.util import CdiUtil
 from javax.faces.application import FacesMessage
 ...
 
-facesMessages = CdiUtil.bean(FacesMessages) 
+facesMessages = CdiUtil.bean(FacesMessages)
 facesMessages.setKeepMessages()
 facesMessages.add(FacesMessage.SEVERITY_ERROR, &quot;Please enter a valid username&quot;)
 </code></pre></div></li>
@@ -10390,9 +10390,9 @@ So create an xhtml page postlogin.xhtml which will look like this :
 
 &lt;/html&gt;
 </code></pre></div>
-The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&gt;</code> in step 4 takes us to the authenticate method inside the custom script <code>def authenticate(self, configurationAttributes, requestParameters, step):</code>. Here you can </li>
+The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&gt;</code> in step 4 takes us to the authenticate method inside the custom script <code>def authenticate(self, configurationAttributes, requestParameters, step):</code>. Here you can</li>
 <li>use parameters from request
-    <div class="highlight"><pre><span></span><code>param = ServerUtil.getFirstValue(requestParameters, &quot;param-name&quot;)) 
+    <div class="highlight"><pre><span></span><code>param = ServerUtil.getFirstValue(requestParameters, &quot;param-name&quot;))
 </code></pre></div></li>
 <li>
 <p>perform the <code>state</code> check (state : Opaque value used to maintain state between the request and the callback.)</p>
@@ -10407,7 +10407,7 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-31T16:06:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-31</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T14:26:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
       
         <br>
         Created:

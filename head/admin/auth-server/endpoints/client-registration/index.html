@@ -2836,13 +2836,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#customizing-the-behavior-of-op-during-dcr-using-an-interception-script" class="md-nav__link">
-    Customizing the behavior of OP during DCR using an interception script:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#security-pointers" class="md-nav__link">
     Security Pointers
   </a>
@@ -2859,6 +2852,13 @@
         <li class="md-nav__item">
   <a href="#client-metadata" class="md-nav__link">
     Client metadata
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-the-behavior-of-the-as-using-interception-script" class="md-nav__link">
+    Customizing the behavior of the AS using Interception script
   </a>
   
 </li>
@@ -10097,13 +10097,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#customizing-the-behavior-of-op-during-dcr-using-an-interception-script" class="md-nav__link">
-    Customizing the behavior of OP during DCR using an interception script:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#security-pointers" class="md-nav__link">
     Security Pointers
   </a>
@@ -10120,6 +10113,13 @@
         <li class="md-nav__item">
   <a href="#client-metadata" class="md-nav__link">
     Client metadata
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-the-behavior-of-the-as-using-interception-script" class="md-nav__link">
+    Customizing the behavior of the AS using Interception script
   </a>
   
 </li>
@@ -10202,9 +10202,9 @@
 <h3 id="dynamic-client-registration-dcr">Dynamic Client Registration (DCR)<a class="headerlink" href="#dynamic-client-registration-dcr" title="Permanent link">#</a></h3>
 <p>Dynamic client registration refers to the process by which a client submits a registration request to the Authorization server and how that request is served by the Authorization server. It is explained in the following specifications:</p>
 <ol>
-<li>For OpenID Connect relying parties - <a href="https://openid.net/specs/openid-connect-registration-1_0.html">OpenID Connect Dynamic Client Registration 1.0</a>. </li>
+<li>For OpenID Connect relying parties - <a href="https://openid.net/specs/openid-connect-registration-1_0.html">OpenID Connect Dynamic Client Registration 1.0</a>.</li>
 <li>For OAuth 2.0 client (without OpenID Connect features) - <a href="https://tools.ietf.org/html/rfc7591">OAuth 2.0 Dynamic Client Registration Protocol - RFC 7591</a>.</li>
-<li>CRUD operations on client - <a href="https://tools.ietf.org/html/rfc7592">OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592</a>. </li>
+<li>CRUD operations on client - <a href="https://tools.ietf.org/html/rfc7592">OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592</a>.</li>
 </ol>
 <h3 id="client-registration-endpoint">Client Registration endpoint<a class="headerlink" href="#client-registration-endpoint" title="Permanent link">#</a></h3>
 <p>The URI to dynamically register a client to a Janssen Auth Server can be found by checking the <code>registration_endpoint</code> claim of the OpenID Connect configuration reponse, typically deployed at <code>https://&lt;my.jans.server&gt;/.well-known/openid-configuration</code></p>
@@ -10219,16 +10219,16 @@
 <h4 id="1-a-simple-client-registration-request-with-mandatory-parameter">1. A simple client registration request (with mandatory parameter):<a class="headerlink" href="#1-a-simple-client-registration-request-with-mandatory-parameter" title="Permanent link">#</a></h4>
 <div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="w"></span>
 <span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">X</span><span class="w"> </span><span class="n">POST</span><span class="w"> </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="o">-</span><span class="n">i</span><span class="w"> </span><span class="p">&#39;</span><span class="nl">https:</span><span class="c1">//my.jans.server/jans-auth/restv1/register&#39;  \</span>
-<span class="c1">     --data &#39;{ \ </span>
-<span class="w">              </span><span class="s">&quot;redirect_uris&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;https://client.example.org/cb&quot;</span><span class="p">]</span><span class="w"> </span><span class="se">\</span><span class="w"></span>
-<span class="w">             </span><span class="p">}&#39;</span><span class="w"> </span><span class="se">\</span><span class="w"></span>
-<span class="err">```</span><span class="w"></span>
+<span class="c1">     --data &#39;{ \</span>
+<span class="c1">              &quot;redirect_uris&quot;: [&quot;https://client.example.org/cb&quot;] \</span>
+<span class="c1">             }&#39; \</span>
+<span class="c1">```</span>
 </code></pre></div>
 
 <h4 id="2-a-typical-client-registration-request">2. A typical client registration request :<a class="headerlink" href="#2-a-typical-client-registration-request" title="Permanent link">#</a></h4>
 <p>A typical client registration request : A client or developer calls the client registration endpoint with a set of client metadata as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC7591</a></p>
 <div class="highlight"><pre><span></span><code>   curl -X POST -k -i &#39;https://my.jans.server/jans-auth/restv1/register&#39;  \
-        --data &#39;{ \ 
+        --data &#39;{ \
                       &quot;redirect_uris&quot;: [&quot;https://client.example.org/cb&quot;] \
                   &quot;client_id&quot;: &quot;c3BhdRkqfX&quot;, \
                   &quot;client_secret&quot;: &quot;bd136123eeffeef234235805d&quot;, \
@@ -10240,12 +10240,12 @@
             }&#39; \
 </code></pre></div>
 <h4 id="3-client-registration-request-using-a-signed-request-object">3. Client Registration Request Using a signed request object<a class="headerlink" href="#3-client-registration-request-using-a-signed-request-object" title="Permanent link">#</a></h4>
-<p>In some usecases like FAPI implementation,  DCR request payload is a JWT. 
+<p>In some usecases like FAPI implementation,  DCR request payload is a JWT.
 Example:<br />
 <div class="highlight"><pre><span></span><code>  curl -X POST -k -H &#39;Content-Type: application/jwt&#39; \
        -H &#39;Accept: application/json&#39; \
        -i &#39;https://my-jans-server/jans-auth/restv1/register&#39;  \
-       --data &#39;eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q&#39; 
+       --data &#39;eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q&#39;
 </code></pre></div>
 When such will be the nature of client registration requests, the following configuration properties should be set in the authorization server:
 - <code>dcrSignatureValidationEnabled</code> - enables DCR signature validation
@@ -10254,7 +10254,7 @@ When such will be the nature of client registration requests, the following conf
 Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="4-client-registration-using-software-statement">4. Client registration using software statement<a class="headerlink" href="#4-client-registration-using-software-statement" title="Permanent link">#</a></h4>
 <p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to dynamically register clients to an Authorization server.
-Example: 
+Example:
 <div class="highlight"><pre><span></span><code>  #!/bin/bash curl -X POST https://my.jans.server/jans-auth/restv1/register \
                    -H &quot;Content-Type: application/json&quot; \
                --data-binary @- &lt;&lt;DATA \
@@ -10264,7 +10264,7 @@ Example:
             } DATA
 </code></pre></div>
 For Client registrations using Software statements, the AS should be configured using the following configuration parameters:
- - <code>softwareStatementValidationType</code> - The value of this variable is one of the following: 
+ - <code>softwareStatementValidationType</code> - The value of this variable is one of the following:
         - NONE - validation is skipped for software statement
         - SCRIPT - (default), invokes <code>getSoftwareStatementJwks</code> of dynamic registration script which has to return jwks.
     - JWKS - claim name within software statement that has inlined JWKS
@@ -10274,9 +10274,6 @@ For Client registrations using Software statements, the AS should be configured 
 <p>Configure the AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="5-special-mention-about-fapi">5. Special mention about FAPI:<a class="headerlink" href="#5-special-mention-about-fapi" title="Permanent link">#</a></h4>
 <p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>, the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and OBIE respectively.</p>
-<h3 id="customizing-the-behavior-of-op-during-dcr-using-an-interception-script">Customizing the behavior of OP during DCR using an interception script:<a class="headerlink" href="#customizing-the-behavior-of-op-during-dcr-using-an-interception-script" title="Permanent link">#</a></h3>
-<p>The Janssen Authorization Server uses <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/client/ClientRegistrationType.java"><code>ClientRegistrationType</code></a> interception scripts to enable you to customize the behavior of the OpenID Provider during client registration. Examples of business customizations in the client registration script are validating certificates against a certificate directory, manage client claims, modify scopes, perform validation and checks.</p>
-<p>Reference : </p>
 <h3 id="security-pointers">Security Pointers<a class="headerlink" href="#security-pointers" title="Permanent link">#</a></h3>
 <p>If <code>dynamicRegistrationEnabled</code> is enabled in the Authorization Server, assess the following points to minimize potential exposure of sensitive personal data:</p>
 <ol>
@@ -10289,13 +10286,13 @@ For Client registrations using Software statements, the AS should be configured 
 </ol>
 <h3 id="curl-commands-to-configure-jans-auth-server">CURL commands to configure Jans-auth server<a class="headerlink" href="#curl-commands-to-configure-jans-auth-server" title="Permanent link">#</a></h3>
 <p>Jans-auth server is configured using <a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> :
-1. Obtain the access token 
+1. Obtain the access token
    <div class="highlight"><pre><span></span><code>   curl -u &quot;put_client_id_here:put_config_api_client_secret_here&quot; https://&lt;your.jans.server&gt;/jans-auth/restv1/token \
         -d  &quot;grant_type=client_credentials&amp;scope=https://jans.io/oauth/jans-auth-server/config/properties.write&quot;
 </code></pre></div>
 2. Patch jans-auth server configurations to reflect <code>anExampleConfigField</code> with the value <code>anExampleConfigField_value</code></p>
-<p><div class="highlight"><pre><span></span><code> curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \ 
-    -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \ 
+<p><div class="highlight"><pre><span></span><code> curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \
+    -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \
     -H &quot;Authorization: Bearer put_access_token_here&quot; --data &#39;[
        {
         &quot;op&quot;: &quot;add&quot;,
@@ -10306,8 +10303,8 @@ For Client registrations using Software statements, the AS should be configured 
 </code></pre></div>
  Example : Patch jans-auth server configurations to reflect <code>dynamicRegistrationEnabled</code> with value as <code>true</code></p>
 <div class="codehilite"><pre><span></span><code>  ```
-   curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \ 
-   -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \ 
+   curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \
+   -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \
    -H &quot;Authorization: Bearer put_access_token_here&quot; --data &#39;[
       {
        &quot;op&quot;: &quot;add&quot;,
@@ -10476,6 +10473,9 @@ Output:
   &quot;description&quot;: &quot;string&quot;
 }
 </code></pre></div></p>
+<h3 id="customizing-the-behavior-of-the-as-using-interception-script">Customizing the behavior of the AS using Interception script<a class="headerlink" href="#customizing-the-behavior-of-the-as-using-interception-script" title="Permanent link">#</a></h3>
+<p>Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the <a href="https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3">Software Statement</a> that is sent with the registration request.</p>
+<p>Further reading <a href="../../../developer/scripts/client-registration/">here</a></p>
 <h3 id="dynamic-registration-custom-attributes">Dynamic registration custom attributes<a class="headerlink" href="#dynamic-registration-custom-attributes" title="Permanent link">#</a></h3>
 <h3 id="crud-operations">CRUD Operations<a class="headerlink" href="#crud-operations" title="Permanent link">#</a></h3>
 <h3 id="internationalization-for-client-metadata">Internationalization for Client metadata<a class="headerlink" href="#internationalization-for-client-metadata" title="Permanent link">#</a></h3>
@@ -10485,7 +10485,7 @@ Output:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-19T06:40:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-19</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T14:26:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
       
         <br>
         Created:
