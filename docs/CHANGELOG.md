@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+* **agama:** add utility classes for inbound identity ([#2231](https://github.com/JanssenProject/jans/issues/2231)) ([96e32a4](https://github.com/JanssenProject/jans/commit/96e32a407ec6c545b73a6fd103ed2ae5876bd500))
+* **agama:** add utility classes for inbound identity ([#2280](https://github.com/JanssenProject/jans/issues/2280)) ([ca6fdc9](https://github.com/JanssenProject/jans/commit/ca6fdc90256e4ef103bf50dc27cb694c940ba70b))
+* **agama:** add utility classes for inbound identity ([#2417](https://github.com/JanssenProject/jans/issues/2417)) ([2878bdd](https://github.com/JanssenProject/jans/commit/2878bdd737b4bd7f8f080113826a4bc4bf49ffba))
+* **jans-linux-setup:** added token exchange grant type ([#2768](https://github.com/JanssenProject/jans/issues/2768)) ([b3abcfe](https://github.com/JanssenProject/jans/commit/b3abcfeb8fbaddd6d39eeacba018b6baaf6a2d75))
+* **jans-scim:** make max no. of operations and payload size of bulks operations parameterizable ([#1872](https://github.com/JanssenProject/jans/issues/1872)) ([c27a45b](https://github.com/JanssenProject/jans/commit/c27a45bb0a19257c824c4e195f203e9b9b45ec88))
+
+
+### Bug Fixes
+
+* [#2143](https://github.com/JanssenProject/jans/issues/2143) ([#2144](https://github.com/JanssenProject/jans/issues/2144)) ([ff7f9f4](https://github.com/JanssenProject/jans/commit/ff7f9f4110d72b333aae0d2332b429dcbd067da3))
+* [#2157](https://github.com/JanssenProject/jans/issues/2157) ([#2159](https://github.com/JanssenProject/jans/issues/2159)) ([dc8cb60](https://github.com/JanssenProject/jans/commit/dc8cb60990052256b46842f85ebf4961beee82dd))
+* [#776](https://github.com/JanssenProject/jans/issues/776) ([#2503](https://github.com/JanssenProject/jans/issues/2503)) ([a564431](https://github.com/JanssenProject/jans/commit/a564431c8b6e503a36dbaf7ccc8f79e6b8adb95f))
+* [#817](https://github.com/JanssenProject/jans/issues/817) - script for DUO should have the universal prompt, other APIs are deprecated + documentation minor fixes ([#2363](https://github.com/JanssenProject/jans/issues/2363)) ([ccc13af](https://github.com/JanssenProject/jans/commit/ccc13afdd2cfefecc19aa926a46815d119e6ad76))
+* [#817](https://github.com/JanssenProject/jans/issues/817) ([#2364](https://github.com/JanssenProject/jans/issues/2364)) ([bbcd87a](https://github.com/JanssenProject/jans/commit/bbcd87a374f2efca3f87b00bfa21900b2b450c1b))
+* **docs:** fix MarkupSafe hash ([#2699](https://github.com/JanssenProject/jans/issues/2699)) ([adf2a6d](https://github.com/JanssenProject/jans/commit/adf2a6d929082da8884973855a095153c1268269))
+* **docs:** revert MarkupSafe hash ([#2701](https://github.com/JanssenProject/jans/issues/2701)) ([e722aed](https://github.com/JanssenProject/jans/commit/e722aedd2b8fbbba770cea1112e2757f6e32d10c))
+* incorrect contents [#817](https://github.com/JanssenProject/jans/issues/817) ([#2365](https://github.com/JanssenProject/jans/issues/2365)) ([746b33f](https://github.com/JanssenProject/jans/commit/746b33f16c46e2be7381f266e631047e21f17565))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* **jans-linux-setup:** review columns size for Agama tables ([#2324](https://github.com/JanssenProject/jans/issues/2324)) ([55d7a7e](https://github.com/JanssenProject/jans/commit/55d7a7e855d1a2ba2cf550e0ddb3a8e9f948456a))
+* **jans-scim:** improper handling response of get user operation ([#2420](https://github.com/JanssenProject/jans/issues/2420)) ([b9e00af](https://github.com/JanssenProject/jans/commit/b9e00af483f81280ae80ab6ad732d4f98c30c8a5))
+* **jans-scim:** X509 cert not set after successful POST request ([#2407](https://github.com/JanssenProject/jans/issues/2407)) ([fd616c4](https://github.com/JanssenProject/jans/commit/fd616c49df088dfa7c6fae4bd56ed4ecf4e26418))
+* minor ([#2470](https://github.com/JanssenProject/jans/issues/2470)) ([657b9f7](https://github.com/JanssenProject/jans/commit/657b9f7589538bb4f1d61ce44fbf6f4da0e63d39))
+* minor ([#2786](https://github.com/JanssenProject/jans/issues/2786)) ([3f67763](https://github.com/JanssenProject/jans/commit/3f677636cc2f871e5a9c683634334578405f18f3))
+* moved contents under scripts-catalog ([#2370](https://github.com/JanssenProject/jans/issues/2370)) ([fa2273a](https://github.com/JanssenProject/jans/commit/fa2273a6400d512d13fb08ea6685d6ff56faf973))
+* update error pages ([#1957](https://github.com/JanssenProject/jans/issues/1957)) ([3d63f4d](https://github.com/JanssenProject/jans/commit/3d63f4d3d58e86d499271ebafdbc0dd56f5c4e98))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 
