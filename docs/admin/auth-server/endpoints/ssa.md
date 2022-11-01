@@ -1,7 +1,8 @@
 ---
 tags:
   - administration
-  - deployment
+  - auth-server
+  - endpoint
 ---
 
 This is a placeholder
