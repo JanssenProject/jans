@@ -174,8 +174,8 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL name="janssenproject/persistence-loader" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.3" \
-    release="1" \
+    version="1.0.4" \
+    release="dev" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 

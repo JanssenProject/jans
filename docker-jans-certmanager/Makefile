@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.3
+CN_VERSION?=1.0.4
 IMAGE_NAME=janssenproject/certmanager
 UNSTABLE_VERSION?=dev
 
