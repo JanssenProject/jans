@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.3-1 (2022-11-01)
+
+
+### Features
+
+* **docker-jans-fido2:** allow creating initial persistence entry ([#2029](https://github.com/JanssenProject/jans/issues/2029)) ([41dfab7](https://github.com/JanssenProject/jans/commit/41dfab7a6d09d10b05954d4f5fae2437eb81a885))
+* **docker-jans-scim:** allow creating initial persistence entry ([#2035](https://github.com/JanssenProject/jans/issues/2035)) ([e485618](https://github.com/JanssenProject/jans/commit/e4856186d566f9ac7b08395b59cd75e389e5c161))
+* **image:** add token-exchange and device secret ([#2788](https://github.com/JanssenProject/jans/issues/2788)) ([87c4676](https://github.com/JanssenProject/jans/commit/87c467631a60567d6de8d3ed8d9815be85f4f1d0))
+* **image:** generate scopes from swagger/openapi files ([#2759](https://github.com/JanssenProject/jans/issues/2759)) ([63722ea](https://github.com/JanssenProject/jans/commit/63722ea7372f33bf2ad2c3ff01b068383e81e746))
+
+
+### Bug Fixes
+
+* **image:** add missing script for openbanking installation ([#2618](https://github.com/JanssenProject/jans/issues/2618)) ([de775a7](https://github.com/JanssenProject/jans/commit/de775a731fe00ccd6044aa331cb039625231a174))
+* **image:** add missing ssa configuration ([#2613](https://github.com/JanssenProject/jans/issues/2613)) ([b70b8b2](https://github.com/JanssenProject/jans/commit/b70b8b2b06f08d82bca0e47292dd68b0651c8dee))
+* **image:** missing configuration for openbanking discovery ([#2796](https://github.com/JanssenProject/jans/issues/2796)) ([ba664f0](https://github.com/JanssenProject/jans/commit/ba664f012a39d5e43df6e0d42993f4a1a5ba5d3a))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* **pycloudlib:** handle type mismatch for iterable ([#2004](https://github.com/JanssenProject/jans/issues/2004)) ([46e0b2e](https://github.com/JanssenProject/jans/commit/46e0b2e4aff70a97cdcdcd0102dc83d294e45fdc))
+* **pycloudlib:** set default values for JSONB column ([#2651](https://github.com/JanssenProject/jans/issues/2651)) ([9b536ab](https://github.com/JanssenProject/jans/commit/9b536ab2b5d398a41733790f2eeb70339f993fb7))
+* scan docs/script-catalog for custom scripts ([#2533](https://github.com/JanssenProject/jans/issues/2533)) ([5a0521e](https://github.com/JanssenProject/jans/commit/5a0521e78e701d16ce6a7ebead0ad40c3b2f638c))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2-1 ([d01b51a](https://github.com/JanssenProject/jans/commit/d01b51a847bb2f67b52da433ebd1c5e4a66b7c1a))
+
 ## 1.0.2-1 (2022-08-30)
 
 
