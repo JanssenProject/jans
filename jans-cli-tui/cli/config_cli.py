@@ -22,6 +22,8 @@ import http.client
 import jwt
 import pyDes
 import stat
+import ruamel.yaml
+
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -90,32 +92,36 @@ def unobscure(s=''):
     return decrypted.decode('utf-8')
 
 
-debug_json = os.path.join(cur_dir, 'swagger_yaml.json')
-if os.path.exists(debug_json):
-    with open(debug_json) as f:
-        cfg_yml = json.load(f, object_pairs_hook=OrderedDict)
-else:
-    with open(os.path.join(cur_dir, my_op_mode+'.json')) as f:
-        cfg_yml = json.load(f)
-
-op_list = []
-
 name_regex = re.compile('[^a-zA-Z0-9]')
 
 def get_named_tag(tag):
     return name_regex.sub('', tag.title())
 
-for path in cfg_yml['paths']:
-    for method in cfg_yml['paths'][path]:
-        if isinstance(cfg_yml['paths'][path][method], dict):
-            for tag_ in cfg_yml['paths'][path][method].get('tags', []):
-                tag = get_named_tag(tag_)
-                if not tag in op_list:
-                    op_list.append(tag)
+def get_plugin_name_from_title(title):
+    n = title.find('-')
+    if n > -1:
+        return title[n+1:].strip()
+    return ''
 
-for yml_fn in glob.glob(os.path.join(cur_dir, '*.yaml')):
-    fname, fext = os.path.splitext(os.path.basename(yml_fn))
-    op_list.append(fname)
+# load yaml files
+cfg_yaml = {}
+op_list = []
+for opmode in os.listdir(os.path.join(cur_dir, 'ops')):
+    cfg_yaml[opmode] = {}
+    for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', opmode, '*.yaml')):
+        fn, ext = os.path.splitext(os.path.basename(yaml_fn))
+        with open(yaml_fn) as f:
+            config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
+            plugin_name = get_plugin_name_from_title(config_['info']['title'])
+            cfg_yaml[opmode][plugin_name] = config_
+
+            for path in config_['paths']:
+                for method in config_['paths'][path]:
+                    if isinstance(config_['paths'][path][method], dict):
+                        for tag_ in config_['paths'][path][method].get('tags', []):
+                            tag = get_named_tag(tag_)
+                            if not tag in op_list:
+                                op_list.append(tag)
 
 op_list.sort()
 
@@ -947,14 +953,15 @@ class JCA_CLI:
 
     def get_path_by_id(self, operation_id):
         retVal = {}
-        for path in cfg_yml['paths']:
-            for method in cfg_yml['paths'][path]:
-                if 'operationId' in cfg_yml['paths'][path][method] and cfg_yml['paths'][path][method][
-                    'operationId'] == operation_id:
-                    retVal = cfg_yml['paths'][path][method].copy()
-                    retVal['__path__'] = path
-                    retVal['__method__'] = method
-                    retVal['__urlsuffix__'] = self.get_url_param(path)
+        for plugin in cfg_yaml[my_op_mode]:
+            for path in cfg_yaml[my_op_mode][plugin]['paths']:
+                for method in cfg_yaml[my_op_mode][plugin]['paths'][path]:
+                    if 'operationId' in cfg_yaml[my_op_mode][plugin]['paths'][path][method] and cfg_yaml[my_op_mode][plugin]['paths'][path][method][
+                        'operationId'] == operation_id:
+                        retVal = cfg_yaml[my_op_mode][plugin]['paths'][path][method].copy()
+                        retVal['__path__'] = path
+                        retVal['__method__'] = method
+                        retVal['__urlsuffix__'] = self.get_url_param(path)
 
         return retVal
 
@@ -994,9 +1001,15 @@ class JCA_CLI:
             return response
         
         if response.status_code in (404, 401):
-            print(self.colored_text("Server returned {}".format(response.status_code), error_color))
-            print(self.colored_text(response.text, error_color))
-            return None
+            if response.text == 'ID Token is expired':
+                self.access_token = None
+                self.get_access_token(security)
+                self.get_requests(endpoint, params)
+                return
+            else:
+                print(self.colored_text("Server returned {}".format(response.status_code), error_color))
+                print(self.colored_text(response.text, error_color))
+                return None
 
         try:
             return response.json()
@@ -1004,48 +1017,6 @@ class JCA_CLI:
         except Exception as e:
             print("An error ocurred while retreiving data")
             self.print_exception(e)
-
-    def get_schema_from_reference(self, ref):
-        schema_path_list = ref.strip('/#').split('/')
-        schema = cfg_yml[schema_path_list[0]]
-
-        schema_ = schema.copy()
-
-        for p in schema_path_list[1:]:
-            schema_ = schema_[p]
-
-        if 'allOf' in schema_:
-            all_schema = OrderedDict()
-            all_schema['required'] = []
-
-            all_schema['properties'] = OrderedDict()
-            for sch in schema_['allOf']:
-                if '$ref' in sch:
-                    all_schema.update(self.get_schema_from_reference(sch['$ref']))
-                elif 'properties' in sch:
-                    for sprop in sch['properties']:
-                        all_schema['properties'][sprop] = sch['properties'][sprop]
-                all_schema['required'] += sch.get('required', [])
-
-            schema_ = all_schema
-
-        for key_ in schema_.get('properties', []):
-            if '$ref' in schema_['properties'][key_]:
-                schema_['properties'][key_] = self.get_schema_from_reference(schema_['properties'][key_]['$ref'])
-            elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
-                ref_path = schema_['properties'][key_]['items'].pop('$ref')
-                ref_schema = self.get_schema_from_reference(ref_path)
-                schema_['properties'][key_]['properties'] = ref_schema['properties']
-                schema_['properties'][key_]['title'] = ref_schema['title']
-                schema_['properties'][key_]['description'] = ref_schema.get('description', '')
-                schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
-
-        if not 'title' in schema_:
-            schema_['title'] = p
-
-        schema_['__schema_name__'] = p
-
-        return schema_
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):
         for key in endpoint.info[req]['content']:
@@ -1173,51 +1144,53 @@ class JCA_CLI:
 
         return args_dict
 
+
+
+
     def help_for(self, op_name):
 
         schema_path = None
 
-        for path_name in cfg_yml['paths']:
-            for method in cfg_yml['paths'][path_name]:
-                path = cfg_yml['paths'][path_name][method]
-                if isinstance(path, dict):
-                    for tag_ in path['tags']:
-                        tag = get_named_tag(tag_)
-                        if tag != op_name:
-                            continue
+        for plugin in cfg_yaml[my_op_mode]:
+            for path_name in cfg_yaml[my_op_mode][plugin]['paths']:
+                for method in cfg_yaml[my_op_mode][plugin]['paths'][path_name]:
+                    path = cfg_yaml[my_op_mode][plugin]['paths'][path_name][method]
+                    if isinstance(path, dict):
+                        for tag_ in path['tags']:
+                            tag = get_named_tag(tag_)
+                            if tag == op_name:
+                                title = cfg_yaml[my_op_mode][plugin]['info']['title']
+                                mode_suffix = plugin+ ':' if plugin else ''
+                                print('Operation ID:', path['operationId'])
+                                print('  Description:', path['description'])
+                                if path.get('__urlsuffix__'):
+                                    print('  url-suffix:', path['__urlsuffix__'])
+                                if 'parameters' in path:
+                                    param_names = []
+                                    for param in path['parameters']:
+                                        desc = param.get('description', 'No description is provided for this parameter')
+                                        param_type = param.get('schema', {}).get('type')
+                                        if param_type:
+                                            desc += ' [{}]'.format(param_type)
+                                        param_names.append((param['name'], desc))
+                                    if param_names:
+                                        print('  Parameters:')
+                                        for param in param_names:
+                                            print('  {}: {}'.format(param[0], param[1]))
 
-                        print('Operation ID:', path['operationId'])
-                        print('  Description:', path['description'])
-                        if path.get('__urlsuffix__'):
-                            print('  url-suffix:', path['__urlsuffix__'])
-                        if 'parameters' in path:
-                            param_names = []
-                            for param in path['parameters']:
-                                desc = param.get('description', 'No description is provided for this parameter')
-                                param_type = param.get('schema', {}).get('type')
-                                if param_type:
-                                    desc += ' [{}]'.format(param_type)
-                                param_names.append((param['name'], desc))
-                            if param_names:
-                                print('  Parameters:')
-                                for param in param_names:
-                                    print('  {}: {}'.format(param[0], param[1]))
-
-                        if 'requestBody' in path:
-                            for apptype in path['requestBody'].get('content', {}):
-                                if 'schema' in path['requestBody']['content'][apptype]:
-                                    if path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
-                                        schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
-                                        print('  Schema: Array of {}'.format(schema_path[1:]))
-                                    else:
-                                        schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                        print('  Schema: {}'.format(schema_path[1:]))
-
+                                if 'requestBody' in path:
+                                    for apptype in path['requestBody'].get('content', {}):
+                                        if 'schema' in path['requestBody']['content'][apptype]:
+                                            if path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                                schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
+                                                print('  Schema: Array of {}{}'.format(mode_suffix, os.path.basename(schema_path)))
+                                            else:
+                                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
+                                                print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
+                            break
         if schema_path:
             print()
-            print("To get sample schema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0],
-                                                                                                        schema_path[
-                                                                                                        1:]))
+            print("To get sample schema type {0} --schema <schma>, for example {0} --schema {2}{1}".format(sys.argv[0], os.path.basename(schema_path), mode_suffix))
 
     def render_json_entry(self, val):
         if isinstance(val, str) and val.startswith('_file '):
@@ -1394,8 +1367,73 @@ class JCA_CLI:
         return caller_function(path, suffix_param, endpoint_params, data_fn, data=data)
 
 
-    def get_sample_schema(self, ref):
-        schema = self.get_schema_from_reference('#' + args.schema)
+    def get_schema_reference_from_name(self, plugin_name, schema_name):
+        for plugin in cfg_yaml[my_op_mode]:
+            if plugin_name == get_plugin_name_from_title(title = cfg_yaml[my_op_mode][plugin]['info']['title']):
+                for schema in cfg_yaml[my_op_mode][plugin]['components']['schemas']:
+                    if schema == schema_name:
+                        return '#/components/schemas/' + schema
+
+    def get_schema_from_reference(self, plugin_name, ref):
+        
+        schema_path_list = ref.strip('/#').split('/')
+        schema = cfg_yaml[my_op_mode][plugin_name][schema_path_list[0]]
+
+        schema_ = schema.copy()
+
+        for p in schema_path_list[1:]:
+            schema_ = schema_[p]
+
+        if 'allOf' in schema_:
+            all_schema = OrderedDict()
+            all_schema['required'] = []
+
+            all_schema['properties'] = OrderedDict()
+            for sch in schema_['allOf']:
+                if '$ref' in sch:
+                    all_schema.update(self.get_schema_from_reference(plugin_name, sch['$ref']))
+                elif 'properties' in sch:
+                    for sprop in sch['properties']:
+                        all_schema['properties'][sprop] = sch['properties'][sprop]
+                all_schema['required'] += sch.get('required', [])
+
+            schema_ = all_schema
+
+        for key_ in schema_.get('properties', []):
+            if '$ref' in schema_['properties'][key_]:
+                schema_['properties'][key_] = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
+            elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
+                ref_path = schema_['properties'][key_]['items'].pop('$ref')
+                ref_schema = self.get_schema_from_reference(plugin_name, ref_path)
+                schema_['properties'][key_]['properties'] = ref_schema['properties']
+                schema_['properties'][key_]['title'] = ref_schema['title']
+                schema_['properties'][key_]['description'] = ref_schema.get('description', '')
+                schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
+
+        if not 'title' in schema_:
+            schema_['title'] = p
+
+        schema_['__schema_name__'] = p
+
+        return schema_
+
+
+    def get_sample_schema(self, schema_name):
+
+        if ':' in schema_name:
+            plugin_name, schema_str = schema_name.split(':')
+        else:
+            plugin_name, schema_str = '', schema_name
+
+        schema = None
+        schema_reference = self.get_schema_reference_from_name(plugin_name, schema_str)
+        if schema_reference:
+            schema = self.get_schema_from_reference(plugin_name, schema_reference)
+
+        if schema is None:
+            print(self.colored_text("Schema not found.", error_color))
+            return
+
         sample_schema = OrderedDict()
         for prop_name in schema.get('properties', {}):
             prop = schema['properties'][prop_name]
@@ -1406,7 +1444,7 @@ class JCA_CLI:
             elif 'enum' in prop:
                 sample_schema[prop_name] = random.choice(prop['enum'])
             elif prop.get('type') == 'object':
-                sample_schema[prop_name] = {}
+                sample_schema[prop_name] = prop.get('properties', {})
             elif prop.get('type') == 'array':
                 if 'items' in prop:
                     if 'enum' in prop['items']:

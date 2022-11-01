@@ -37,13 +37,6 @@ tags:
 - name: Auth - Session Management
 - name: Organization Configuration
 - name: Auth Server Health - Check
-- name: Fido2 - Configuration
-- name: Configuration – User Management
-- name: Admin UI - Role
-- name: Admin UI - Permission
-- name: Admin UI - Role-Permissions Mapping
-- name: Admin UI - License
-- name: SCIM - Config Management
 paths:
   /api/v1/health:
     get:
@@ -53,7 +46,7 @@ paths:
       description: Returns application health status
       operationId: get-config-health
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -61,7 +54,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/HealthStatus'
-        '500':
+        "500":
           description: InternalServerError
   /api/v1/health/live:
     get:
@@ -71,13 +64,13 @@ paths:
       description: Returns application liveness status
       operationId: get-config-health-live
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Status'
-        '500':
+        "500":
           description: InternalServerError
   /api/v1/health/ready:
     get:
@@ -87,13 +80,13 @@ paths:
       description: Returns application readiness status
       operationId: get-config-health-ready
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Status'
-        '500':
+        "500":
           description: InternalServerError
   /api/v1/health/server-stat:
     get:
@@ -103,13 +96,13 @@ paths:
       description: Returns application server status
       operationId: get-server-stat
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatsData'
-        '500':
+        "500":
           description: InternalServerError
   /api/v1/acrs:
     get:
@@ -119,7 +112,7 @@ paths:
       description: Gets default authentication method.
       operationId: get-acrs
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -132,9 +125,9 @@ paths:
                     {
                       "defaultAcr": "basic"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -159,17 +152,17 @@ paths:
                     "defaultAcr": "basic"
                   }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthenticationMethod'
-        '400':
+        "400":
           description: Bad Request
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -186,7 +179,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: limit
         in: query
         schema:
@@ -215,7 +208,7 @@ paths:
           type: boolean
           default: false
       responses:
-        '200':
+        "200":
           description: Agama Flows
           content:
             application/json:
@@ -243,9 +236,9 @@ paths:
                             }
                         ]
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -272,7 +265,7 @@ paths:
                     "qname": "test"
                   }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -287,9 +280,9 @@ paths:
                       "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
                       "qname": "test"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -313,7 +306,7 @@ paths:
           type: boolean
           default: false
       responses:
-        '200':
+        "200":
           description: Agama Flow
           content:
             application/json:
@@ -333,9 +326,9 @@ paths:
                         },
                         "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -365,7 +358,7 @@ paths:
                   in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
                   Finish \"john_doe\"\n"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -380,11 +373,11 @@ paths:
                       "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
                       "qname": "test"
                     }
-        '400':
+        "400":
           description: Bad Request
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -402,13 +395,13 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -439,7 +432,7 @@ paths:
                 value: |
                   [{ "op": "replace", "path": "/source", "value": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\""}]
       responses:
-        '200':
+        "200":
           description: Patched Agama Flow
           content:
             application/json:
@@ -454,11 +447,11 @@ paths:
                       "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
                       "qname": "test"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -489,7 +482,7 @@ paths:
                   in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
                   Finish \"john_doe\"\n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -504,11 +497,11 @@ paths:
                       "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
                       "qname": "test"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -531,7 +524,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: status
         in: query
         schema:
@@ -554,7 +547,7 @@ paths:
           type: string
           default: ascending
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -637,9 +630,9 @@ paths:
                                 "baseDn": "inum=0C18,ou=attributes,o=jans"
                             }
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -688,7 +681,7 @@ paths:
                       "whitePagesCanView": false
                   }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -725,9 +718,9 @@ paths:
                         ],
                         "whitePagesCanView": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -776,7 +769,7 @@ paths:
                       "whitePagesCanView": false
                   }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -813,9 +806,9 @@ paths:
                         ],
                         "whitePagesCanView": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -834,7 +827,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -877,9 +870,9 @@ paths:
                         "userCanAccess": true,
                         "baseDn": "inum=08E2,ou=attributes,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -897,13 +890,13 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -934,7 +927,7 @@ paths:
                 value: |
                   [ {op:replace, path: displayName, value: "CustomAttribute" } ]
       responses:
-        '200':
+        "200":
           description: Updated GluuAttribute
           content:
             application/json:
@@ -971,11 +964,11 @@ paths:
                         ],
                         "whitePagesCanView": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -988,7 +981,7 @@ paths:
       description: Returns cache configuration.
       operationId: get-config-cache
       responses:
-        '200':
+        "200":
           description: Cache configuration details
           content:
             application/json:
@@ -1028,9 +1021,9 @@ paths:
                             "disableAttemptUpdateBeforeInsert": false
                         }
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1058,7 +1051,7 @@ paths:
                   : 32768,\n        \"defaultPutExpiration\":80,\n        \"connectionFactoryType\"\
                   : \"DEFAULT\"\n    }}] \n"
       responses:
-        '200':
+        "200":
           description: Cache configuration details
           content:
             application/json:
@@ -1098,9 +1091,9 @@ paths:
                             "disableAttemptUpdateBeforeInsert": false
                         }
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1113,7 +1106,7 @@ paths:
       description: Returns in-Memory cache configuration.
       operationId: get-config-cache-in-memory
       responses:
-        '200':
+        "200":
           description: In-Memory configuration details
           content:
             application/json:
@@ -1126,9 +1119,9 @@ paths:
                     {
                         "defaultPutExpiration": 60
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1153,7 +1146,7 @@ paths:
                       "defaultPutExpiration": 60
                   }
       responses:
-        '200':
+        "200":
           description: In-Memory cache configuration details
           content:
             application/json:
@@ -1166,9 +1159,9 @@ paths:
                     {
                         "defaultPutExpiration": 60
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1193,7 +1186,7 @@ paths:
                 value: "[{ \"op\": \"replace\", \"path\": \"/defaultPutExpiration\"\
                   , \"value\":80}] \n"
       responses:
-        '200':
+        "200":
           description: In-Memory cache configuration details
           content:
             application/json:
@@ -1206,9 +1199,9 @@ paths:
                     {
                         "defaultPutExpiration": 60
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1221,7 +1214,7 @@ paths:
       description: Returns memcached cache configuration.
       operationId: get-config-cache-memcached
       responses:
-        '200':
+        "200":
           description: Memcached configuration details
           content:
             application/json:
@@ -1238,9 +1231,9 @@ paths:
                         "defaultPutExpiration": 80,
                         "connectionFactoryType": "DEFAULT"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1269,7 +1262,7 @@ paths:
                       "connectionFactoryType": "DEFAULT"
                   }
       responses:
-        '200':
+        "200":
           description: Native persistence cache configuration details
           content:
             application/json:
@@ -1286,11 +1279,11 @@ paths:
                         "defaultPutExpiration": 80,
                         "connectionFactoryType": "DEFAULT"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1315,7 +1308,7 @@ paths:
                 value: "[{ \"op\": \"replace\", \"path\": \"/maxOperationQueueLength\"\
                   , \"value\":10001}] \n"
       responses:
-        '200':
+        "200":
           description: Memcached cache configuration details
           content:
             application/json:
@@ -1332,9 +1325,9 @@ paths:
                         "defaultPutExpiration": 80,
                         "connectionFactoryType": "DEFAULT"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1347,7 +1340,7 @@ paths:
       description: Returns native persistence cache configuration.
       operationId: get-config-cache-native-persistence
       responses:
-        '200':
+        "200":
           description: Native persistence configuration details
           content:
             application/json:
@@ -1363,9 +1356,9 @@ paths:
                         "deleteExpiredOnGetRequest": false,
                         "disableAttemptUpdateBeforeInsert": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1393,7 +1386,7 @@ paths:
                       "disableAttemptUpdateBeforeInsert": false
                   }
       responses:
-        '200':
+        "200":
           description: Native persistence cache configuration details
           content:
             application/json:
@@ -1409,9 +1402,9 @@ paths:
                         "deleteExpiredOnGetRequest": false,
                         "disableAttemptUpdateBeforeInsert": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1436,7 +1429,7 @@ paths:
                 value: "[{ \"op\": \"replace\", \"path\": \"/defaultCleanupBatchSize\"\
                   , \"value\":10001}] \n"
       responses:
-        '200':
+        "200":
           description: Native persistence cache configuration details
           content:
             application/json:
@@ -1452,9 +1445,9 @@ paths:
                         "deleteExpiredOnGetRequest": false,
                         "disableAttemptUpdateBeforeInsert": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1467,7 +1460,7 @@ paths:
       description: Returns Redis cache configuration
       operationId: get-config-cache-redis
       responses:
-        '200':
+        "200":
           description: Redis cache configuration details
           content:
             application/json:
@@ -1488,9 +1481,9 @@ paths:
                         "soTimeout": 3000,
                         "maxRetryAttempts": 5
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1523,7 +1516,7 @@ paths:
                       "maxRetryAttempts": 5
                   }
       responses:
-        '200':
+        "200":
           description: Redis cache configuration details
           content:
             application/json:
@@ -1544,9 +1537,9 @@ paths:
                         "soTimeout": 3000,
                         "maxRetryAttempts": 5
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1571,7 +1564,7 @@ paths:
                 value: "[{ \"op\": \"replace\", \"path\": \"/defaultPutExpiration\"\
                   , \"value\":80}] \n"
       responses:
-        '200':
+        "200":
           description: Redis cache configuration details
           content:
             application/json:
@@ -1592,9 +1585,9 @@ paths:
                         "soTimeout": 3000,
                         "maxRetryAttempts": 5
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -1617,7 +1610,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: startIndex
         in: query
         schema:
@@ -1633,7 +1626,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -2431,9 +2424,9 @@ paths:
                             }
                         ]
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -2520,7 +2513,7 @@ paths:
                       "displayName": "Api Client"
                   }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -2654,11 +2647,11 @@ paths:
                         "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
                         "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -2742,7 +2735,7 @@ paths:
                       "displayName": "Api Client"
                   }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -2876,9 +2869,9 @@ paths:
                         "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
                         "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -2897,7 +2890,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -3031,9 +3024,9 @@ paths:
                         "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
                         "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3051,13 +3044,13 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3088,7 +3081,7 @@ paths:
                 value: "[{ \"op\": \"replace\", \"path\": \"/responseTypes\", \"value\"\
                   :[\"code\",\"token\"]}] \n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -3222,11 +3215,11 @@ paths:
                         "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
                         "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3239,15 +3232,15 @@ paths:
       description: Gets all Jans authorization server configuration properties.
       operationId: get-properties
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AppConfiguration'
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3277,15 +3270,15 @@ paths:
                   {"op":"add","path":"/loggingLevel","value":"TRACE"}
                   ]
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AppConfiguration'
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3298,7 +3291,7 @@ paths:
       description: Returns persistence type configured for Jans authorization server.
       operationId: get-properties-persistence
       responses:
-        '200':
+        "200":
           description: Jans Authorization Server persistence type
           content:
             application/json:
@@ -3311,9 +3304,9 @@ paths:
                     {
                         "persistenceType": "ldap"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3326,7 +3319,7 @@ paths:
       description: Returns SMTP server configuration
       operationId: get-config-smtp
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -3343,9 +3336,9 @@ paths:
                         "trust_host": false,
                         "requires_authentication": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3379,7 +3372,7 @@ paths:
                       "password": "password"
                   }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -3396,11 +3389,11 @@ paths:
                         "trust_host": false,
                         "requires_authentication": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3434,7 +3427,7 @@ paths:
                       "password": "password"
                   }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -3451,9 +3444,9 @@ paths:
                         "trust_host": false,
                         "requires_authentication": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3465,11 +3458,11 @@ paths:
       description: Deletes SMTP server configuration
       operationId: delete-config-smtp
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3482,16 +3475,16 @@ paths:
       description: Test SMTP server configuration
       operationId: test-config-smtp
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 type: boolean
                 description: boolean value true if successful
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3514,7 +3507,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: startIndex
         in: query
         schema:
@@ -3532,7 +3525,7 @@ paths:
           type: string
           default: ascending
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -3593,9 +3586,9 @@ paths:
                             }
                         ]
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3636,7 +3629,7 @@ paths:
                               "locationType": "ldap"
                           }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -3668,11 +3661,11 @@ paths:
                         "locationType": "ldap",
                         "baseDn": "inum=4144edf6-af99-451d-be29-f3eb5c0e9143,ou=scripts,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3713,7 +3706,7 @@ paths:
                               "locationType": "ldap"
                           }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -3745,9 +3738,9 @@ paths:
                         "locationType": "ldap",
                         "baseDn": "inum=4144edf6-af99-451d-be29-f3eb5c0e9143,ou=scripts,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3766,13 +3759,13 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3804,17 +3797,17 @@ paths:
                   :false},{ \"op\": \"replace\", \"path\": \"/revision\", \"value\"\
                   :2}] \n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3833,7 +3826,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -3865,11 +3858,11 @@ paths:
                         "locationType": "ldap",
                         "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3888,7 +3881,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: CustomScript
           content:
             application/json:
@@ -3920,11 +3913,11 @@ paths:
                         "locationType": "ldap",
                         "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -3952,7 +3945,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: startIndex
         in: query
         schema:
@@ -3970,7 +3963,7 @@ paths:
           type: string
           default: ascending
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4009,11 +4002,11 @@ paths:
                             }
                         ]
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4026,7 +4019,7 @@ paths:
       description: Returns auth server health status
       operationId: get-auth-server-health
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4040,7 +4033,7 @@ paths:
                         "status": "running",
                         "db_status": "online"
                     }
-        '500':
+        "500":
           description: InternalServerError
   /api/v1/config/jwks/{kid}:
     get:
@@ -4056,7 +4049,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4078,9 +4071,9 @@ paths:
                         "n": "EFZbw1Jw7dlz4Xrdj12pQlLVuEhyVaTziQp3LvspqxyACHQb8XSKFdKZaa1eBF8PGN5zDN_d-tIrAZYnQS2gH8BoPIuB3Z9AoCLTzifnPvmOwW_e-_Wags_ApZiEfF2Po0InV5NeJAyoIpaGhlwjqqOWXm_GpCASAk9ZD8Ebnmy9RM71zDCgmvq_hPueKnbNTZdQ3TQdzEuSwxbWEHu16v5MbF7QtNzvFSFlllhgwqI2ccEljDbs18j3DUS2B1VTTAr_DLR3SVyCYbKBbRQ",
                         "e": "AQAB"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4098,13 +4091,13 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '406':
+        "406":
           description: Not Acceptable
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4136,7 +4129,7 @@ paths:
                   :\"enc\"},\n    { \"op\": \"replace\", \"path\": \"/e\", \"value\"\
                   :\"Updated_XYZ\"}\n] \n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4158,11 +4151,11 @@ paths:
                         "n": "EFZbw1Jw7dlz4Xrdj12pQlLVuEhyVaTziQp3LvspqxyACHQb8XSKFdKZaa1eBF8PGN5zDN_d-tIrAZYnQS2gH8BoPIuB3Z9AoCLTzifnPvmOwW_e-_Wags_ApZiEfF2Po0InV5NeJAyoIpaGhlwjqqOWXm_GpCASAk9ZD8Ebnmy9RM71zDCgmvq_hPueKnbNTZdQ3TQdzEuSwxbWEHu16v5MbF7QtNzvFSFlllhgwqI2ccEljDbs18j3DUS2B1VTTAr_DLR3SVyCYbKBbRQ",
                         "e": "Updated_XYZ"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4175,7 +4168,7 @@ paths:
       description: Gets list of JSON Web Key (JWK) used by server
       operationId: get-config-jwks
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4203,9 +4196,9 @@ paths:
                     \        \"y\": \"7n6oS9y5vN2XrTKMKilo\",\n            \"exp\"\
                     : 1666775666429,\n            \"alg\": \"ECDH-ES\"\n        }\n\
                     \    ]\n}\n"
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4244,7 +4237,7 @@ paths:
                   \      \"y\": \"7n6oS9y5vN2XrTKMKilo\",\n            \"exp\": 1666775666429,\n\
                   \            \"alg\": \"ECDH-ES\"\n        }\n    ]\n}\n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4272,9 +4265,9 @@ paths:
                     \        \"y\": \"7n6oS9y5vN2XrTKMKilo\",\n            \"exp\"\
                     : 1666775666429,\n            \"alg\": \"ECDH-ES\"\n        }\n\
                     \    ]\n}\n"
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4306,7 +4299,7 @@ paths:
                   ,\n            \"exp\": 1666775666429,\n            \"alg\": \"\
                   ECDH-ES\"\n        }\n\t}\n] \n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4334,9 +4327,9 @@ paths:
                     \        \"y\": \"7n6oS9y5vN2XrTKMKilo\",\n            \"exp\"\
                     : 1666775666429,\n            \"alg\": \"ECDH-ES\"\n        }\n\
                     \    ]\n}\n"
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4372,7 +4365,7 @@ paths:
                         "n": "EFZbw1Jw7dlz4Xrdj12pQlLVuEhyVaTziQp3LvspqxyACHQb8XSKFdKZaa1eBF8PGN5zDN_d-tIrAZYnQS2gH8BoPIuB3Z9AoCLTzifnPvmOwW_e-_Wags_ApZiEfF2Po0InV5NeJAyoIpaGhlwjqqOWXm_GpCASAk9ZD8Ebnmy9RM71zDCgmvq_hPueKnbNTZdQ3TQdzEuSwxbWEHu16v5MbF7QtNzvFSFlllhgwqI2ccEljDbs18j3DUS2B1VTTAr_DLR3SVyCYbKBbRQ"
                       }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -4394,11 +4387,11 @@ paths:
                         "n": "EFZbw1Jw7dlz4Xrdj12pQlLVuEhyVaTziQp3LvspqxyACHQb8XSKFdKZaa1eBF8PGN5zDN_d-tIrAZYnQS2gH8BoPIuB3Z9AoCLTzifnPvmOwW_e-_Wags_ApZiEfF2Po0InV5NeJAyoIpaGhlwjqqOWXm_GpCASAk9ZD8Ebnmy9RM71zDCgmvq_hPueKnbNTZdQ3TQdzEuSwxbWEHu16v5MbF7QtNzvFSFlllhgwqI2ccEljDbs18j3DUS2B1VTTAr_DLR3SVyCYbKBbRQ",
                         "e": "AQAB"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '406':
+        "406":
           description: Not Acceptable
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4411,7 +4404,7 @@ paths:
       description: Gets list of existing LDAP configurations.
       operationId: get-config-database-ldap
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4444,9 +4437,9 @@ paths:
                             "level": 0
                         }
                     ]
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4487,7 +4480,7 @@ paths:
                       "level": 0
                   }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4516,11 +4509,11 @@ paths:
                         "version": 0,
                         "level": 0
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4561,7 +4554,7 @@ paths:
                       "level": 0
                   }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -4590,11 +4583,11 @@ paths:
                         "version": 0,
                         "level": 0
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '406':
+        "406":
           description: Not Acceptable
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4613,7 +4606,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4642,9 +4635,9 @@ paths:
                         "version": 0,
                         "level": 0
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4662,17 +4655,17 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GluuLdapConfiguration'
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4702,7 +4695,7 @@ paths:
                 description: Request json example
                 value: example/auth/database/ldap/ldap-patch
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4731,11 +4724,11 @@ paths:
                         "version": 0,
                         "level": 0
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4759,16 +4752,16 @@ paths:
                 value: "[{ \"op\": \"replace\", \"path\": \"/maxConnections\", \"\
                   value\":800}] \n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
                 type: boolean
                 description: boolean value true if successful
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4781,7 +4774,7 @@ paths:
       description: Returns Jans Authorization Server logging settings
       operationId: get-config-logging
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4798,9 +4791,9 @@ paths:
                         "disableJdkLogger": true,
                         "enabledOAuthAuditLogging": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4829,7 +4822,7 @@ paths:
                       "enabledOAuthAuditLogging": false
                   }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4846,9 +4839,9 @@ paths:
                         "disableJdkLogger": true,
                         "enabledOAuthAuditLogging": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4861,7 +4854,7 @@ paths:
       description: Retrieves organization configuration
       operationId: get-organization-config
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4882,9 +4875,9 @@ paths:
                         "organizationTitle": "Gluu",
                         "baseDn": "o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4911,7 +4904,7 @@ paths:
                   op\": \"add\", \"path\": \"/jsFaviconPath\", \"value\": \"/opt/jans/jetty/jans-auth/custom/static\"\
                   \ }\n] \n"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -4937,9 +4930,9 @@ paths:
                         "organizationTitle": "Gluu",
                         "baseDn": "o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -4956,7 +4949,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: limit
         in: query
         schema:
@@ -4967,7 +4960,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: startIndex
         in: query
         schema:
@@ -4988,7 +4981,7 @@ paths:
           type: boolean
           default: false
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -5054,9 +5047,9 @@ paths:
                             }
                         ]
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -5100,7 +5093,7 @@ paths:
                       "baseDn": "inum=9c4c6027-86b8-4afc-a68f-6b50579e6d21,ou=scopes,o=jans"
                   }
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -5132,11 +5125,11 @@ paths:
                         "umaType": false,
                         "baseDn": "inum=9c4c6027-86b8-4afc-a68f-6b50579e6d21,ou=scopes,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -5178,7 +5171,7 @@ paths:
                       "creatorId": "2000.99b53b02-dfa1-42cd-aaef-b940d58bb03f"
                   }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -5210,9 +5203,9 @@ paths:
                         "umaType": false,
                         "baseDn": "inum=9c4c6027-86b8-4afc-a68f-6b50579e6d21,ou=scopes,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -5236,7 +5229,7 @@ paths:
           type: boolean
           default: false
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -5587,11 +5580,11 @@ paths:
                         "umaType": false,
                         "baseDn": "inum=764C,ou=scopes,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -5609,13 +5602,13 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -5647,7 +5640,7 @@ paths:
 
                   [{ "op": "replace", "path": "/umaAuthorizationPolicies", "value": ["inum=2DAF-F995,ou=scripts,o=jans"] }]
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -5679,11 +5672,11 @@ paths:
                         "umaType": false,
                         "baseDn": "inum=9c4c6027-86b8-4afc-a68f-6b50579e6d21,ou=scopes,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -5702,7 +5695,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -6055,9 +6048,9 @@ paths:
                         "umaType": false,
                         "baseDn": "inum=764C,ou=scopes,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6076,7 +6069,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -6429,11 +6422,11 @@ paths:
                         "umaType": false,
                         "baseDn": "inum=764C,ou=scopes,o=jans"
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6446,7 +6439,7 @@ paths:
       description: Returns current session
       operationId: get-sessions
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -6454,9 +6447,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SessionId'
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6476,13 +6469,13 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6517,7 +6510,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Stats
           content:
             application/json:
@@ -6525,9 +6518,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/JsonNode'
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6551,7 +6544,7 @@ paths:
         in: query
         schema:
           type: string
-          default: ''
+          default: ""
       - name: startIndex
         in: query
         schema:
@@ -6567,7 +6560,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -6628,9 +6621,9 @@ paths:
                             }
                         ]
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6666,7 +6659,7 @@ paths:
                       "deletable": false
                   }
       responses:
-        '200':
+        "200":
           description: UmaResource
           content:
             application/json:
@@ -6690,11 +6683,11 @@ paths:
                         "description": "Uma resource config api",
                         "deletable": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6728,7 +6721,7 @@ paths:
                           "deletable": false
                       }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -6752,9 +6745,9 @@ paths:
                         "description": "Uma resource config api",
                         "deletable": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6773,7 +6766,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -6797,11 +6790,11 @@ paths:
                         "description": "Uma resource config api",
                         "deletable": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6819,13 +6812,13 @@ paths:
         schema:
           type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6855,7 +6848,7 @@ paths:
                 description: Request json example
                 value: example/uma/resources/uma-resources-patch
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -6879,11 +6872,11 @@ paths:
                         "description": "Uma resource config api",
                         "deletable": false
                     }
-        '401':
+        "401":
           description: Unauthorized
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
@@ -6902,7 +6895,7 @@ paths:
         schema:
           type: string
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
@@ -6946,1461 +6939,13 @@ paths:
                             "deletable": false
                         }
                     ]
-        '401':
+        "401":
           description: Unauthorized
-        '500':
+        "500":
           description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/config/uma/resources.readonly
-  /fido2/config:
-    get:
-      tags:
-      - Fido2 - Configuration
-      summary: Gets Jans Authorization Server Fido2 configuration properties
-      description: Gets Jans Authorization Server Fido2 configuration properties
-      operationId: get-properties-fido2
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DbApplicationConfiguration'
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.readonly
-    put:
-      tags:
-      - Fido2 - Configuration
-      summary: Updates Fido2 configuration properties
-      description: Updates Fido2 configuration properties
-      operationId: put-properties-fido2
-      requestBody:
-        description: Fido2Config
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DbApplicationConfiguration'
-      responses:
-        '200':
-          description: Fido2Config
-          content:
-            application/json:
-              schema:
-                type: string
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
-  /fido2/registration/entries/{username}:
-    get:
-      tags:
-      - Fido2 - Registration
-      summary: Get details of connected FIDO2 devices registered to user
-      description: Get details of connected FIDO2 devices registered to user
-      operationId: get-registration-entries-fido2
-      parameters:
-      - name: username
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Fido2RegistrationEntry'
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.readonly
-  /mgt/configuser:
-    get:
-      tags:
-      - Configuration – User Management
-      summary: Gets list of users
-      description: Gets list of users
-      operationId: get-user
-      parameters:
-      - name: limit
-        in: query
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: pattern
-        in: query
-        schema:
-          type: string
-          default: ''
-      - name: startIndex
-        in: query
-        schema:
-          type: integer
-          format: int32
-          default: 1
-      - name: sortBy
-        in: query
-        schema:
-          type: string
-      - name: sortOrder
-        in: query
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserPagedResult'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "start": 0,
-                        "totalEntriesCount": 23,
-                        "entriesCount": 2,
-                        "entries": [
-                            {
-                                "dn": "inum=XXXX.DDDD-4444,ou=people,o=jans",
-                                "userId": "dddd4444",
-                                "customAttributes": [
-                                    {
-                                        "name": "sn",
-                                        "multiValued": false,
-                                        "values": [
-                                            "FilterTest"
-                                        ],
-                                        "value": "FilterTest",
-                                        "displayValue": "FilterTest"
-                                    }
-                                ],
-                                "customObjectClasses": [
-                                    "top",
-                                    "jansCustomPerson"
-                                ],
-                                "inum": "XXXX.DDDD-4444",
-                                "displayName": "Test Dddd 4444",
-                                "jansStatus": "active",
-                                "givenName": "(special chars\\)/*",
-                                "baseDn": "inum=XXXX.DDDD-4444,ou=people,o=jans"
-                            },
-                            {
-                                "dn": "inum=XXXX.EEEE-1111,ou=people,o=jans",
-                                "userId": "eeee1111",
-                                "customObjectClasses": [
-                                    "top",
-                                    "jansCustomPerson"
-                                ],
-                                "inum": "XXXX.EEEE-1111",
-                                "jansStatus": "active",
-                                "baseDn": "inum=XXXX.EEEE-1111,ou=people,o=jans"
-                            }
-                        ]
-                    }
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/user.readonly
-    put:
-      tags:
-      - Configuration – User Management
-      summary: Update User
-      description: Update User
-      operationId: put-user
-      requestBody:
-        description: User object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomUser'
-            examples:
-              Request json example:
-                description: Request json example
-                value: |
-                  {
-                      "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
-                      "userId": "testUser1",
-                      "createdAt": "2022-10-27T22:45:48",
-                      "customAttributes": [
-                          {
-                              "name": "birthdate",
-                              "multiValued": false,
-                              "values": [
-                                  "20001231041508.553Z"
-                              ],
-                              "value": "20001231041508.553Z",
-                              "displayValue": "20001231041508.553Z"
-                          },
-                          {
-                              "name": "emailVerified",
-                              "multiValued": false,
-                              "values": [
-                                  "TRUE"
-                              ],
-                              "value": "TRUE",
-                              "displayValue": "TRUE"
-                          },
-                          {
-                              "name": "jansAdminUIRole",
-                              "multiValued": false,
-                              "values": [
-                                  "api-admin"
-                              ],
-                              "value": "api-admin",
-                              "displayValue": "api-admin"
-                          },
-                          {
-                              "name": "memberOf",
-                              "multiValued": false,
-                              "values": [
-                                  "inum=60B7,ou=groups,o=jans"
-                              ],
-                              "value": "inum=60B7,ou=groups,o=jans",
-                              "displayValue": "inum=60B7,ou=groups,o=jans"
-                          },
-                          {
-                              "name": "middleName",
-                              "multiValued": false,
-                              "values": [
-                                  "Test USer 3"
-                              ],
-                              "value": "Test USer 3",
-                              "displayValue": "Test USer 3"
-                          },
-                          {
-                              "name": "nickname",
-                              "multiValued": false,
-                              "values": [
-                                  "Test USer 3"
-                              ],
-                              "value": "Test USer 3",
-                              "displayValue": "Test USer 3"
-                          },
-                          {
-                              "name": "sn",
-                              "multiValued": false,
-                              "values": [
-                                  "User3"
-                              ],
-                              "value": "User3",
-                              "displayValue": "User3"
-                          }
-                      ],
-                      "customObjectClasses": [
-                          "top",
-                          "jansCustomPerson"
-                      ],
-                      "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
-                      "mail": "test3@jans.server",
-                      "displayName": "Default Test User 32",
-                      "jansStatus": "active",
-                      "givenName": "Test3",
-                      "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
-                  }
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomUser'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
-                        "userId": "testUser1",
-                        "createdAt": "2022-10-27T22:45:48",
-                        "customAttributes": [
-                            {
-                                "name": "birthdate",
-                                "multiValued": false,
-                                "values": [
-                                    "20001231041508.553Z"
-                                ],
-                                "value": "20001231041508.553Z",
-                                "displayValue": "20001231041508.553Z"
-                            },
-                            {
-                                "name": "emailVerified",
-                                "multiValued": false,
-                                "values": [
-                                    "TRUE"
-                                ],
-                                "value": "TRUE",
-                                "displayValue": "TRUE"
-                            },
-                            {
-                                "name": "jansAdminUIRole",
-                                "multiValued": false,
-                                "values": [
-                                    "api-admin"
-                                ],
-                                "value": "api-admin",
-                                "displayValue": "api-admin"
-                            },
-                            {
-                                "name": "memberOf",
-                                "multiValued": false,
-                                "values": [
-                                    "inum=60B7,ou=groups,o=jans"
-                                ],
-                                "value": "inum=60B7,ou=groups,o=jans",
-                                "displayValue": "inum=60B7,ou=groups,o=jans"
-                            },
-                            {
-                                "name": "middleName",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "nickname",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "sn",
-                                "multiValued": false,
-                                "values": [
-                                    "User3"
-                                ],
-                                "value": "User3",
-                                "displayValue": "User3"
-                            }
-                        ],
-                        "customObjectClasses": [
-                            "top",
-                            "jansCustomPerson"
-                        ],
-                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
-                        "mail": "test3@jans.server",
-                        "displayName": "Default Test User 32",
-                        "jansStatus": "active",
-                        "givenName": "Test3",
-                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
-                    }
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/user.write
-    post:
-      tags:
-      - Configuration – User Management
-      summary: Create new User
-      description: Create new User
-      operationId: post-user
-      requestBody:
-        description: User object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomUser'
-            examples:
-              Request json example:
-                description: Request json example
-                value: |
-                  {
-                      "userId": "testUser1",
-                      "createdAt": "2022-05-30T20:06:57",
-                      "customAttributes": [
-                          {
-                              "name": "emailVerified",
-                              "multiValued": false,
-                              "values": [
-                                  "TRUE"
-                              ],
-                              "value": "TRUE",
-                              "displayValue": "TRUE"
-                          },
-                          {
-                              "name": "jansAdminUIRole",
-                              "multiValued": false,
-                              "values": [
-                                  "api-admin"
-                              ],
-                              "value": "api-admin",
-                              "displayValue": "api-admin"
-                          },
-                          {
-                              "name": "memberOf",
-                              "multiValued": false,
-                              "values": [
-                                  "inum=60B7,ou=groups,o=jans"
-                              ],
-                              "value": "inum=60B7,ou=groups,o=jans",
-                              "displayValue": "inum=60B7,ou=groups,o=jans"
-                          },
-                          {
-                              "name": "middleName",
-                              "multiValued": false,
-                              "values": [
-                                  "Test USer 3"
-                              ],
-                              "value": "Test USer 3",
-                              "displayValue": "Test USer 3"
-                          },
-                          {
-                              "name": "nickname",
-                              "multiValued": false,
-                              "values": [
-                                  "Test USer 3"
-                              ],
-                              "value": "Test USer 3",
-                              "displayValue": "Test USer 3"
-                          },
-                          {
-                              "name": "sn",
-                              "multiValued": false,
-                              "values": [
-                                  "User3"
-                              ],
-                              "value": "User3",
-                              "displayValue": "User3"
-                          },{
-                                  "name": "birthdate",
-                                  "multiValued": false,
-                                  "values": [
-                                      "20001231041508.553Z"
-                                  ],
-                                  "value": "20001231041508.553Z",
-                                  "displayValue": "20001231041508.553Z"
-                              }
-                      ],
-                      "customObjectClasses": [
-                          "top",
-                          "jansCustomPerson"
-                      ],
-                      "mail": "test3@jans.server",
-                      "displayName": "Default Test User 32",
-                      "jansStatus": "active",
-                      "givenName": "Test3",
-                      "userPassword": "test123"
-                  }
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomUser'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
-                        "userId": "testUser1",
-                        "createdAt": "2022-10-27T22:45:48",
-                        "customAttributes": [
-                            {
-                                "name": "birthdate",
-                                "multiValued": false,
-                                "values": [
-                                    "20001231041508.553Z"
-                                ],
-                                "value": "20001231041508.553Z",
-                                "displayValue": "20001231041508.553Z"
-                            },
-                            {
-                                "name": "emailVerified",
-                                "multiValued": false,
-                                "values": [
-                                    "TRUE"
-                                ],
-                                "value": "TRUE",
-                                "displayValue": "TRUE"
-                            },
-                            {
-                                "name": "jansAdminUIRole",
-                                "multiValued": false,
-                                "values": [
-                                    "api-admin"
-                                ],
-                                "value": "api-admin",
-                                "displayValue": "api-admin"
-                            },
-                            {
-                                "name": "memberOf",
-                                "multiValued": false,
-                                "values": [
-                                    "inum=60B7,ou=groups,o=jans"
-                                ],
-                                "value": "inum=60B7,ou=groups,o=jans",
-                                "displayValue": "inum=60B7,ou=groups,o=jans"
-                            },
-                            {
-                                "name": "middleName",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "nickname",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "sn",
-                                "multiValued": false,
-                                "values": [
-                                    "User3"
-                                ],
-                                "value": "User3",
-                                "displayValue": "User3"
-                            }
-                        ],
-                        "customObjectClasses": [
-                            "top",
-                            "jansCustomPerson"
-                        ],
-                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
-                        "mail": "test3@jans.server",
-                        "displayName": "Default Test User 32",
-                        "jansStatus": "active",
-                        "givenName": "Test3",
-                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
-                    }
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/user.write
-  /mgt/configuser/{inum}:
-    get:
-      tags:
-      - Configuration – User Management
-      summary: Get User by Inum
-      description: Get User by Inum
-      operationId: get-user-by-inum
-      parameters:
-      - name: inum
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomUser'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
-                        "userId": "testUser1",
-                        "createdAt": "2022-10-27T22:45:48",
-                        "customAttributes": [
-                            {
-                                "name": "birthdate",
-                                "multiValued": false,
-                                "values": [
-                                    "20001231041508.553Z"
-                                ],
-                                "value": "20001231041508.553Z",
-                                "displayValue": "20001231041508.553Z"
-                            },
-                            {
-                                "name": "emailVerified",
-                                "multiValued": false,
-                                "values": [
-                                    "TRUE"
-                                ],
-                                "value": "TRUE",
-                                "displayValue": "TRUE"
-                            },
-                            {
-                                "name": "jansAdminUIRole",
-                                "multiValued": false,
-                                "values": [
-                                    "api-admin"
-                                ],
-                                "value": "api-admin",
-                                "displayValue": "api-admin"
-                            },
-                            {
-                                "name": "memberOf",
-                                "multiValued": false,
-                                "values": [
-                                    "inum=60B7,ou=groups,o=jans"
-                                ],
-                                "value": "inum=60B7,ou=groups,o=jans",
-                                "displayValue": "inum=60B7,ou=groups,o=jans"
-                            },
-                            {
-                                "name": "middleName",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "nickname",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "sn",
-                                "multiValued": false,
-                                "values": [
-                                    "User3"
-                                ],
-                                "value": "User3",
-                                "displayValue": "User3"
-                            }
-                        ],
-                        "customObjectClasses": [
-                            "top",
-                            "jansCustomPerson"
-                        ],
-                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
-                        "mail": "test3@jans.server",
-                        "displayName": "Default Test User 32",
-                        "jansStatus": "active",
-                        "givenName": "Test3",
-                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
-                    }
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/user.readonly
-    delete:
-      tags:
-      - Configuration – User Management
-      summary: Delete User
-      description: Delete User
-      operationId: delete-user
-      parameters:
-      - name: inum
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '204':
-          description: No Content
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/user.delete
-    patch:
-      tags:
-      - Configuration – User Management
-      summary: Patch user properties by Inum
-      description: Patch user properties by Inum
-      operationId: patch-user-by-inum
-      parameters:
-      - name: inum
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: UserPatchRequest
-        content:
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/UserPatchRequest'
-            examples:
-              Request json example:
-                description: Request json example
-                value: "{\n   \"jsonPatchString\": \"[ {\\\"op\\\":\\\"add\\\", \\\
-                  \"path\\\": \\\"/userId\\\", \\\"value\\\":\\\"config_test_user_100_final_patch\\\
-                  \" } ]\",\n   \"customAttributes\": [{\n            \"name\": \"\
-                  emailVerified\",\n            \"multiValued\": false,\n        \
-                  \    \"values\": [\n                \"TRUE\"\n            ],\n \
-                  \           \"value\": \"TRUE\",\n            \"displayValue\":\
-                  \ \"TRUE\"\n        },\n\t\t{\n            \"name\": \"secretAnswer\"\
-                  ,\n            \"multiValued\": false,\n            \"values\":\
-                  \ [\n                \"james-bond@123\"\n            ],\n      \
-                  \      \"value\": \"james-bond@123\",\n            \"displayValue\"\
-                  : \"james-bond@123\"\n        },\n        {\n            \"name\"\
-                  : \"jansImsValue\",\n            \"multiValued\": true,\n      \
-                  \      \"values\": [{\n\t\t\t  \"value\": \"123456\",\n\t\t\t  \"\
-                  display\": \"Home phone\",\n\t\t\t  \"type\": \"home\",\n\t\t\t\
-                  \  \"primary\": true\t\t\t\n\t\t\t},\n\t\t\t{\n\t\t\t  \"value\"\
-                  : \"9821789\",\n\t\t\t  \"display\": \"Work phone\",\n\t\t\t  \"\
-                  type\": \"work\",\n\t\t\t  \"primary\": false\t\t\t\n\t\t\t}\n \
-                  \               \n            ]\n        }\n        ]\n}\n"
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomUser'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
-                        "userId": "testUser1",
-                        "createdAt": "2022-10-27T22:45:48",
-                        "customAttributes": [
-                            {
-                                "name": "birthdate",
-                                "multiValued": false,
-                                "values": [
-                                    "20001231041508.553Z"
-                                ],
-                                "value": "20001231041508.553Z",
-                                "displayValue": "20001231041508.553Z"
-                            },
-                            {
-                                "name": "emailVerified",
-                                "multiValued": false,
-                                "values": [
-                                    "TRUE"
-                                ],
-                                "value": "TRUE",
-                                "displayValue": "TRUE"
-                            },
-                            {
-                                "name": "jansAdminUIRole",
-                                "multiValued": false,
-                                "values": [
-                                    "api-admin"
-                                ],
-                                "value": "api-admin",
-                                "displayValue": "api-admin"
-                            },
-                            {
-                                "name": "memberOf",
-                                "multiValued": false,
-                                "values": [
-                                    "inum=60B7,ou=groups,o=jans"
-                                ],
-                                "value": "inum=60B7,ou=groups,o=jans",
-                                "displayValue": "inum=60B7,ou=groups,o=jans"
-                            },
-                            {
-                                "name": "middleName",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "nickname",
-                                "multiValued": false,
-                                "values": [
-                                    "Test USer 3"
-                                ],
-                                "value": "Test USer 3",
-                                "displayValue": "Test USer 3"
-                            },
-                            {
-                                "name": "sn",
-                                "multiValued": false,
-                                "values": [
-                                    "User3"
-                                ],
-                                "value": "User3",
-                                "displayValue": "User3"
-                            }
-                        ],
-                        "customObjectClasses": [
-                            "top",
-                            "jansCustomPerson"
-                        ],
-                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
-                        "mail": "test3@jans.server",
-                        "displayName": "Default Test User 32",
-                        "jansStatus": "active",
-                        "givenName": "Test3",
-                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
-                    }
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/user.write
-  /admin-ui/license/activateLicense:
-    post:
-      tags:
-      - Admin UI - License
-      summary: Activate license using license-key
-      description: Activate license using license-key
-      operationId: activate-adminui-license
-      requestBody:
-        description: LicenseRequest object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LicenseRequest'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/license/licenseDetails:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Get admin ui license details
-      description: Get admin ui license details
-      operationId: get-adminui-license
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseResponse'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/isActive:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Check if admin-ui license is active
-      description: Check if admin-ui license is active
-      operationId: is-license-active
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/saveApiCredentials:
-    post:
-      tags:
-      - Admin UI - License
-      summary: Save license api credentials
-      description: Save license api credentials
-      operationId: save-license-api-credentials
-      requestBody:
-        description: LicenseSpringCredentials object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LicenseSpringCredentials'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/adminUIPermissions:
-    get:
-      tags:
-      - Admin UI - Permission
-      summary: Get all admin ui permissions
-      description: Get all admin ui permissions
-      operationId: get-all-adminui-permissions
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminPermission'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
-    put:
-      tags:
-      - Admin UI - Permission
-      summary: Edit admin ui permissions
-      description: Edit admin ui permissions
-      operationId: edit-adminui-permission
-      requestBody:
-        description: AdminPermission object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminPermission'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminPermission'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
-    post:
-      tags:
-      - Admin UI - Permission
-      summary: Add admin ui permissions
-      description: Add admin ui permissions
-      operationId: add-adminui-permission
-      requestBody:
-        description: AdminPermission object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminPermission'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminPermission'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
-  /admin-ui/adminUIRolePermissionsMapping:
-    get:
-      tags:
-      - Admin UI - Role-Permissions Mapping
-      summary: Get all admin ui role-permissions mapping
-      description: Get all admin ui role-permissions mapping
-      operationId: get-all-adminui-role-permissions
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RolePermissionMapping'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
-    put:
-      tags:
-      - Admin UI - Role-Permissions Mapping
-      summary: Map permissions to role
-      description: Map permissions to role
-      operationId: map-permissions-to-role
-      requestBody:
-        description: RolePermissionMapping object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RolePermissionMapping'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RolePermissionMapping'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
-    post:
-      tags:
-      - Admin UI - Role-Permissions Mapping
-      summary: Add role-permissions mapping
-      description: Add role-permissions mapping
-      operationId: add-role-permissions-mapping
-      requestBody:
-        description: RolePermissionMapping object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RolePermissionMapping'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RolePermissionMapping'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
-  /admin-ui/adminUIRoles:
-    get:
-      tags:
-      - Admin UI - Role
-      summary: Get all admin ui roles
-      description: Get all admin ui roles
-      operationId: get-all-adminui-roles
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminRole'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
-    put:
-      tags:
-      - Admin UI - Role
-      summary: Edit admin ui role
-      description: Edit admin ui role
-      operationId: edit-adminui-role
-      requestBody:
-        description: AdminRole object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminRole'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminRole'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
-    post:
-      tags:
-      - Admin UI - Role
-      summary: Add admin ui role
-      description: Add admin ui role
-      operationId: add-adminui-role
-      requestBody:
-        description: AdminRole object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminRole'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminRole'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
-  /admin-ui/adminUIPermissions/{adminUIPermission}:
-    get:
-      tags:
-      - Admin UI - Permission
-      summary: Get admin ui permission by permission-name
-      description: Get admin ui permission by permission-name
-      operationId: get-adminui-permission
-      parameters:
-      - name: adminUIPermission
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminPermission'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
-    delete:
-      tags:
-      - Admin UI - Permission
-      summary: Delete admin ui permission by permission-name
-      description: Delete admin ui permission by permission-name
-      operationId: delete-adminui-permission
-      parameters:
-      - name: adminUIPermission
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminPermission'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
-  /admin-ui/adminUIRoles/{adminUIRole}:
-    get:
-      tags:
-      - Admin UI - Role
-      summary: Get admin ui role details by role-name
-      description: Get admin ui role details by role-name
-      operationId: get-adminui-role
-      parameters:
-      - name: adminUIRole
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminRole'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
-    delete:
-      tags:
-      - Admin UI - Role
-      summary: Delete admin ui role by role-name
-      description: Delete admin ui role by role-name
-      operationId: delete-adminui-role
-      parameters:
-      - name: adminUIRole
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AdminRole'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
-  /admin-ui/adminUIRolePermissionsMapping/{adminUIRole}:
-    get:
-      tags:
-      - Admin UI - Role-Permissions Mapping
-      summary: Get admin ui role-permissions mapping by role-name
-      description: Get admin ui role-permissions mapping by role-name
-      operationId: get-adminui-role-permissions
-      parameters:
-      - name: adminUIRole
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RolePermissionMapping'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
-    delete:
-      tags:
-      - Admin UI - Role-Permissions Mapping
-      summary: Remove role-permissions mapping by role-name
-      description: Remove role-permissions mapping by role-name
-      operationId: remove-role-permissions-permission
-      parameters:
-      - name: adminUIRole
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RolePermissionMapping'
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
-  /scim/scim-config:
-    get:
-      tags:
-      - SCIM - Config Management
-      summary: Retrieves SCIM App configuration
-      description: Retrieves SCIM App configuration
-      operationId: get-scim-config
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AppConfiguration'
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/scim/config.readonly
-    patch:
-      tags:
-      - SCIM - Config Management
-      summary: Patch SCIM App configuration
-      description: Patch SCIM App configuration
-      operationId: patch-scim-config
-      requestBody:
-        description: String representing patch-document.
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/JsonPatch'
-            example: '[ {op:replace, path: loggingLevel, value: DEBUG } ]'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AppConfiguration'
-        '401':
-          description: Unauthorized
-        '500':
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/scim/config.write
 components:
   schemas:
     HealthStatus:
@@ -8554,7 +7099,7 @@ components:
         name:
           maxLength: 30
           minLength: 1
-          pattern: ^[a-zA-Z0-9_]+$
+          pattern: "^[a-zA-Z0-9_]+$"
           type: string
         displayName:
           maxLength: 60
@@ -9819,32 +8364,6 @@ components:
             - STAT
             - PAR
             - SSA
-        baseDN:
-          type: string
-        applicationUrl:
-          type: string
-        personCustomObjectClass:
-          type: string
-        oxAuthIssuer:
-          type: string
-        protectionMode:
-          type: string
-          enum:
-          - OAUTH
-          - BYPASS
-        maxCount:
-          type: integer
-          format: int32
-        bulkMaxOperations:
-          type: integer
-          format: int32
-        bulkMaxPayloadSize:
-          type: integer
-          format: int64
-        userExtensionSchemaURI:
-          type: string
-        metricReporterEnabled:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10037,7 +8556,7 @@ components:
         name:
           maxLength: 60
           minLength: 2
-          pattern: ^[a-zA-Z0-9_\-\:\/\.]+$
+          pattern: "^[a-zA-Z0-9_\\-\\:\\/\\.]+$"
           type: string
         aliases:
           type: array
@@ -10208,13 +8727,13 @@ components:
           type: array
           items:
             type: string
-        n:
+        "n":
           type: string
         e:
           type: string
         x:
           type: string
-        y:
+        "y":
           type: string
     WebKeysConfiguration:
       type: object
@@ -10610,255 +9129,12 @@ components:
         ttl:
           type: integer
           format: int32
-    DbApplicationConfiguration:
-      type: object
-      properties:
-        dn:
-          type: string
-        dynamicConf:
-          type: string
-        revision:
-          type: integer
-          format: int64
-    Fido2RegistrationData:
-      type: object
-      properties:
-        createdDate:
-          type: string
-          format: date-time
-        updatedDate:
-          type: string
-          format: date-time
-        createdBy:
-          type: string
-        updatedBy:
-          type: string
-        username:
-          type: string
-        domain:
-          type: string
-        userId:
-          type: string
-        challenge:
-          type: string
-        attenstationRequest:
-          type: string
-        attenstationResponse:
-          type: string
-        uncompressedECPoint:
-          type: string
-        publicKeyId:
-          type: string
-        type:
-          type: string
-        status:
-          type: string
-          enum:
-          - pending
-          - registered
-          - compromised
-        counter:
-          type: integer
-          format: int32
-        attestationType:
-          type: string
-        signatureAlgorithm:
-          type: integer
-          format: int32
-        applicationId:
-          type: string
-    Fido2RegistrationEntry:
-      type: object
-      properties:
-        dn:
-          type: string
-        id:
-          type: string
-        challange:
-          type: string
-        creationDate:
-          type: string
-          format: date-time
-        userInum:
-          type: string
-        publicKeyId:
-          type: string
-        displayName:
-          type: string
-        registrationData:
-          $ref: '#/components/schemas/Fido2RegistrationData'
-        counter:
-          type: integer
-          format: int32
-        registrationStatus:
-          type: string
-          enum:
-          - pending
-          - registered
-          - compromised
-        deviceNotificationConf:
-          type: string
-        challangeHash:
-          type: string
-        baseDn:
-          type: string
-    CustomUser:
-      type: object
-      properties:
-        dn:
-          type: string
-        userId:
-          type: string
-        updatedAt:
-          type: string
-          format: date-time
-        createdAt:
-          type: string
-          format: date-time
-        oxAuthPersistentJwt:
-          type: array
-          items:
-            type: string
-        customAttributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomObjectAttribute'
-        customObjectClasses:
-          type: array
-          items:
-            type: string
-        inum:
-          type: string
-        mail:
-          type: string
-        displayName:
-          type: string
-        jansStatus:
-          type: string
-        givenName:
-          type: string
-        userPassword:
-          type: string
-        status:
-          type: string
-        baseDn:
-          type: string
-    UserPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomUser'
-    UserPatchRequest:
-      type: object
-      properties:
-        jsonPatchString:
-          type: string
-        customAttributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomObjectAttribute'
-    LicenseRequest:
-      type: object
-      properties:
-        licenseKey:
-          type: string
-    LicenseApiResponse:
-      type: object
-      properties:
-        apiResult:
-          type: boolean
-        responseMessage:
-          type: string
-        responseCode:
-          type: integer
-          format: int32
-    LicenseResponse:
-      type: object
-      properties:
-        licenseEnabled:
-          type: boolean
-        productName:
-          type: string
-        productCode:
-          type: string
-        licenseType:
-          type: string
-        maxActivations:
-          type: integer
-          format: int32
-        licenseKey:
-          type: string
-        licenseActive:
-          type: boolean
-        validityPeriod:
-          type: string
-        companyName:
-          type: string
-        customerEmail:
-          type: string
-        customerFirstName:
-          type: string
-        customerLastName:
-          type: string
-    LicenseSpringCredentials:
-      type: object
-      properties:
-        apiKey:
-          type: string
-        productCode:
-          type: string
-        sharedKey:
-          type: string
-        managementKey:
-          type: string
-        hardwareId:
-          type: string
-        licenseKey:
-          type: string
-    AdminPermission:
-      type: object
-      properties:
-        permission:
-          type: string
-        description:
-          type: string
-        defaultPermissionInToken:
-          type: boolean
-    RolePermissionMapping:
-      type: object
-      properties:
-        role:
-          type: string
-        permissions:
-          type: array
-          items:
-            type: string
-    AdminRole:
-      type: object
-      properties:
-        role:
-          type: string
-        description:
-          type: string
-        deletable:
-          type: boolean
   securitySchemes:
     oauth2:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: https://{op-hostname}/.../token
+          tokenUrl: "https://{op-hostname}/.../token"
           scopes:
             https://jans.io/oauth/jans-auth-server/config/properties.readonly: View
               Auth Server properties related information
@@ -10918,29 +9194,3 @@ components:
               related information
             https://jans.io/oauth/jans-auth-server/session.delete: Delete Session
               information
-            https://jans.io/oauth/config/fido2.readonly: View fido2 configuration
-              related information
-            https://jans.io/oauth/config/fido2.write: Manage fido2 configuration related
-              information
-            https://jans.io/oauth/config/user.readonly: View user related information
-            https://jans.io/oauth/config/user.write: Manage user related information
-            https://jans.io/oauth/config/user.delete: Delete user related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read: View
-              admin user role related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write: Manage
-              admin user role related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read: View
-              admin permission related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write: Manage
-              admin permission related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly: View
-              role-permission mapping related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write: Manage
-              role-permission mapping related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly: Delete
-              admin-ui license related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/license.write: View
-              admin-ui license related information
-            https://jans.io/scim/config.readonly: View SCIM configuration related
-              information
-            https://jans.io/scim/config.write: Manage SCIM configuration related information
