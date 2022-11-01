@@ -1,5 +1,86 @@
 # Changelog
 
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2280](https://github.com/JanssenProject/jans/issues/2280)) ([ca6fdc9](https://github.com/JanssenProject/jans/commit/ca6fdc90256e4ef103bf50dc27cb694c940ba70b))
+* disable TLS in CB client by default ([#2167](https://github.com/JanssenProject/jans/issues/2167)) ([8ec5dd3](https://github.com/JanssenProject/jans/commit/8ec5dd3dc9818a53949468389a1918ed385c28a9))
+* **jans-auth-server:** add access_token_singing_alg_values_supported to discovery [#2372](https://github.com/JanssenProject/jans/issues/2372) ([#2403](https://github.com/JanssenProject/jans/issues/2403)) ([3784c83](https://github.com/JanssenProject/jans/commit/3784c837073c7a45871efc11dac1b721ae710cf1))
+* **jans-auth-server:** added allowSpontaneousScopes AS json config [#2074](https://github.com/JanssenProject/jans/issues/2074) ([#2111](https://github.com/JanssenProject/jans/issues/2111)) ([3083a3f](https://github.com/JanssenProject/jans/commit/3083a3f28f6d6c6a9de319f23fd745ac69477249))
+* **jans-auth-server:** added convenient idTokenLifetime client property [#2656](https://github.com/JanssenProject/jans/issues/2656) ([#2668](https://github.com/JanssenProject/jans/issues/2668)) ([f97bfce](https://github.com/JanssenProject/jans/commit/f97bfceae5917442e7d6c3134e5601149d5235e0))
+* **jans-auth-server:** added creator info to scope (time/id/type) [#1934](https://github.com/JanssenProject/jans/issues/1934) ([#2023](https://github.com/JanssenProject/jans/issues/2023)) ([ca65b24](https://github.com/JanssenProject/jans/commit/ca65b246808d30a9f8965806c4ce963cc6dea8db))
+* **jans-auth-server:** allow authentication for max_age=0 [#2361](https://github.com/JanssenProject/jans/issues/2361) ([#2362](https://github.com/JanssenProject/jans/issues/2362)) ([aed6ee3](https://github.com/JanssenProject/jans/commit/aed6ee3dd570e15fa91a9baf3ffb2461a212cdc0))
+* **jans-auth-server:** allow end session with expired id_token_hint (by checking signature and sid) [#2430](https://github.com/JanssenProject/jans/issues/2430) ([#2431](https://github.com/JanssenProject/jans/issues/2431)) ([1b46b44](https://github.com/JanssenProject/jans/commit/1b46b44c6a1bac9c52c7d45358ced4c2c60a9314))
+* **jans-auth-server:** Draft support of OpenID Connect Native SSO  ([#2711](https://github.com/JanssenProject/jans/issues/2711)) ([595d1aa](https://github.com/JanssenProject/jans/commit/595d1aa8ce93c00aa13fb726499ca26d8f2a41b6))
+* **jans-auth-server:** extended client schema - added jansClientGroup [#1824](https://github.com/JanssenProject/jans/issues/1824) ([#2299](https://github.com/JanssenProject/jans/issues/2299)) ([29cfd4e](https://github.com/JanssenProject/jans/commit/29cfd4edaff1248c65d43d956b7b1db0f684d294))
+* **jans-auth-server:** renamed "enabledComponents" conf property -&gt; "featureFlags" [#2290](https://github.com/JanssenProject/jans/issues/2290) ([#2319](https://github.com/JanssenProject/jans/issues/2319)) ([56a33c4](https://github.com/JanssenProject/jans/commit/56a33c40a2bf58ebeb87c6f1724f60a836dc29d2))
+* **jans-auth-server:** updating arquillian tests 1247 ([#2017](https://github.com/JanssenProject/jans/issues/2017)) ([ee200a7](https://github.com/JanssenProject/jans/commit/ee200a7dce5d750f3c4a9d536aa8d92a89926711))
+* **jans-linux-setup:** added token exchange grant type ([#2768](https://github.com/JanssenProject/jans/issues/2768)) ([b3abcfe](https://github.com/JanssenProject/jans/commit/b3abcfeb8fbaddd6d39eeacba018b6baaf6a2d75))
+* ssa creation endpoint ([#2495](https://github.com/JanssenProject/jans/issues/2495)) ([61c83e3](https://github.com/JanssenProject/jans/commit/61c83e3305beeaf1a3dbde39d70324153281f218))
+* update Coucbase ORM to conform SDK 3.x (config updates) [#1851](https://github.com/JanssenProject/jans/issues/1851) ([#2118](https://github.com/JanssenProject/jans/issues/2118)) ([fceec83](https://github.com/JanssenProject/jans/commit/fceec8332fb36826e5dccb797ee79b769859e126))
+* upgrade org.jetbrains:annotations from 18.0.0 to 23.0.0 ([#637](https://github.com/JanssenProject/jans/issues/637)) ([e5fca5a](https://github.com/JanssenProject/jans/commit/e5fca5a09e8aa68dc834de6115490a80fb9da3ff))
+
+
+### Bug Fixes
+
+* **config-api:** client default value handling ([#2585](https://github.com/JanssenProject/jans/issues/2585)) ([fbcbbad](https://github.com/JanssenProject/jans/commit/fbcbbad0817cd17e645a2491d1732a18b5159cf1))
+* fixed multiple encoding issue during authz ([#2152](https://github.com/JanssenProject/jans/issues/2152)) ([fb0b6d7](https://github.com/JanssenProject/jans/commit/fb0b6d738e3e6292453958d44cb14fdcf03ab416))
+* include idtoken with dynamic scopes for ciba ([#2108](https://github.com/JanssenProject/jans/issues/2108)) ([d9b5341](https://github.com/JanssenProject/jans/commit/d9b5341d50de972c910883c12785ce6d2758588f))
+* **jans auth server:** well known uppercase grant_types response_mode ([#2706](https://github.com/JanssenProject/jans/issues/2706)) ([39f613d](https://github.com/JanssenProject/jans/commit/39f613dbba9a218d9498baa43cc6baba0269b56a))
+* **jans-auth-server:** "login:prompt" property passed in request object JWT breaks authentication [#2493](https://github.com/JanssenProject/jans/issues/2493) ([#2537](https://github.com/JanssenProject/jans/issues/2537)) ([9d4d84a](https://github.com/JanssenProject/jans/commit/9d4d84a617999ba120a0b42376aa890e96f7c933))
+* jans-auth-server/pom.xml to reduce vulnerabilities ([#2466](https://github.com/JanssenProject/jans/issues/2466)) ([86e62f9](https://github.com/JanssenProject/jans/commit/86e62f97362e7d834300fdd8300aee5db3f242fc))
+* jans-auth-server/pom.xml to reduce vulnerabilities ([#2520](https://github.com/JanssenProject/jans/issues/2520)) ([f927692](https://github.com/JanssenProject/jans/commit/f92769225ad2e799c32621af8258fd4f9fead87e))
+* **jans-auth-server:** added schema for ssa, corrected persistence, added ttl [#2543](https://github.com/JanssenProject/jans/issues/2543) ([#2544](https://github.com/JanssenProject/jans/issues/2544)) ([ce2bc3f](https://github.com/JanssenProject/jans/commit/ce2bc3f34d78dd9e11414d0db2c5870c77265177))
+* **jans-auth-server:** client tests expects "scope to claim" mapping which are disabled by default [#1873](https://github.com/JanssenProject/jans/issues/1873) ([958cc92](https://github.com/JanssenProject/jans/commit/958cc9232fafa618cb326c7251486f0add7a15c1))
+* **jans-auth-server:** fixing client tests effected by "scope to claim" mapping which is disabled by default [#1873](https://github.com/JanssenProject/jans/issues/1873) ([#1910](https://github.com/JanssenProject/jans/issues/1910)) ([6d81792](https://github.com/JanssenProject/jans/commit/6d81792a141ca725004c23f1bdd0a42314ffcb5f))
+* **jans-auth-server:** generate description during built-in key rotation [#1790](https://github.com/JanssenProject/jans/issues/1790) ([#2068](https://github.com/JanssenProject/jans/issues/2068)) ([cd1a77d](https://github.com/JanssenProject/jans/commit/cd1a77dd36a59b19e975c013c8081610a23106ba))
+* **jans-auth-server:** increased period of session authn time check ([#1918](https://github.com/JanssenProject/jans/issues/1918)) ([a41905a](https://github.com/JanssenProject/jans/commit/a41905abba38c051acc7e7d57131da4b7c3a1616))
+* **jans-auth-server:** native sso - return device secret if device_sso scope is present [#2790](https://github.com/JanssenProject/jans/issues/2790) ([#2791](https://github.com/JanssenProject/jans/issues/2791)) ([9fa213f](https://github.com/JanssenProject/jans/commit/9fa213f12d4b2bafa399fb03ca207f692c44e01f))
+* **jans-auth-server:** npe - regression in token endpoint ([#2763](https://github.com/JanssenProject/jans/issues/2763)) ([fe659d7](https://github.com/JanssenProject/jans/commit/fe659d76daf18439a72ca61421904a0f724a6755))
+* **jans-auth-server:** npe in discovery if SSA endpoint is absent [#2497](https://github.com/JanssenProject/jans/issues/2497) ([#2498](https://github.com/JanssenProject/jans/issues/2498)) ([c3b00b4](https://github.com/JanssenProject/jans/commit/c3b00b4dac70f164216642cfa5b7f4e8e6a6d9dc))
+* **jans-auth-server:** perform redirect_uri validation if FAPI flag is true [#2500](https://github.com/JanssenProject/jans/issues/2500) ([#2502](https://github.com/JanssenProject/jans/issues/2502)) ([aad0460](https://github.com/JanssenProject/jans/commit/aad04603ca714ed3b01dcaeddf2b80a8dccccdf4))
+* **jans-auth-server:** PKCE parameters from first SSO request retains in further calls ([#2620](https://github.com/JanssenProject/jans/issues/2620)) ([de98b41](https://github.com/JanssenProject/jans/commit/de98b41ebd9285a087535d42a82dc004e885bd60))
+* **jans-auth-server:** ssa get endpoint ([#2719](https://github.com/JanssenProject/jans/issues/2719)) ([35ffbf0](https://github.com/JanssenProject/jans/commit/35ffbf041e7da7376e07d8e7425a2925ce31f403))
+* **jans-auth-server:** structure, instance customAttributes, initial data for ssa ([#2577](https://github.com/JanssenProject/jans/issues/2577)) ([f11f789](https://github.com/JanssenProject/jans/commit/f11f789e595762af0c38f1b93de4541ac456d282))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* select first sig key if none requested ([#2494](https://github.com/JanssenProject/jans/issues/2494)) ([31fb464](https://github.com/JanssenProject/jans/commit/31fb464560563cf1463e94682d5939e531cabe81))
+* upgrade com.google.http-client:google-http-client-jackson2 from 1.26.0 to 1.40.1 ([#644](https://github.com/JanssenProject/jans/issues/644)) ([31bc823](https://github.com/JanssenProject/jans/commit/31bc823e1625e76b8f5d4b2b17357a62fde6e6a2))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
+
+### Documentation
+
+* no docs ([529745d](https://github.com/JanssenProject/jans/commit/529745dddc72a99ace9f49abcba9374f32d90f1d))
+* no docs ([ce2bc3f](https://github.com/JanssenProject/jans/commit/ce2bc3f34d78dd9e11414d0db2c5870c77265177))
+* no docs ([9d4d84a](https://github.com/JanssenProject/jans/commit/9d4d84a617999ba120a0b42376aa890e96f7c933))
+* no docs ([abfd466](https://github.com/JanssenProject/jans/commit/abfd466bf835a4360395f8d9e02360693dce04f6))
+* no docs ([aad0460](https://github.com/JanssenProject/jans/commit/aad04603ca714ed3b01dcaeddf2b80a8dccccdf4))
+* no docs ([c3b00b4](https://github.com/JanssenProject/jans/commit/c3b00b4dac70f164216642cfa5b7f4e8e6a6d9dc))
+* no docs ([f1f0b8d](https://github.com/JanssenProject/jans/commit/f1f0b8d6248c4fb13ce74c78c5355770d4d09a83))
+* no docs ([3784c83](https://github.com/JanssenProject/jans/commit/3784c837073c7a45871efc11dac1b721ae710cf1))
+* no docs ([2e02d5e](https://github.com/JanssenProject/jans/commit/2e02d5e3a426361da72ae10849cd9affe0607c75))
+* no docs ([5c752d1](https://github.com/JanssenProject/jans/commit/5c752d1218997a6b0611f316a6df56a888aa3a14))
+* no docs ([3083a3f](https://github.com/JanssenProject/jans/commit/3083a3f28f6d6c6a9de319f23fd745ac69477249))
+* no docs ([e488d10](https://github.com/JanssenProject/jans/commit/e488d10d2cf40a368a0ef9c90d019fb128bbb688))
+* no docs ([685be30](https://github.com/JanssenProject/jans/commit/685be30f555af5f8844eb47eb7df77f23552cefb))
+* no docs ([cd1a77d](https://github.com/JanssenProject/jans/commit/cd1a77dd36a59b19e975c013c8081610a23106ba))
+* no docs ([ca65b24](https://github.com/JanssenProject/jans/commit/ca65b246808d30a9f8965806c4ce963cc6dea8db))
+* no docs ([9b54357](https://github.com/JanssenProject/jans/commit/9b543572bcb893683b4d425ebe2b36f5ccfc0ee9))
+* no docs (config-api swagger updated) ([56a33c4](https://github.com/JanssenProject/jans/commit/56a33c40a2bf58ebeb87c6f1724f60a836dc29d2))
+* no docs (swagger is updated) ([1b46b44](https://github.com/JanssenProject/jans/commit/1b46b44c6a1bac9c52c7d45358ced4c2c60a9314))
+* no docs (swagger updated) ([aed6ee3](https://github.com/JanssenProject/jans/commit/aed6ee3dd570e15fa91a9baf3ffb2461a212cdc0))
+* no docs (swagger updated) ([29cfd4e](https://github.com/JanssenProject/jans/commit/29cfd4edaff1248c65d43d956b7b1db0f684d294))
+* no docs required ([a41905a](https://github.com/JanssenProject/jans/commit/a41905abba38c051acc7e7d57131da4b7c3a1616))
+* no docs required ([958cc92](https://github.com/JanssenProject/jans/commit/958cc9232fafa618cb326c7251486f0add7a15c1))
+* updated ([739b939](https://github.com/JanssenProject/jans/commit/739b9393fe4d5fe2a99868d15dc514b69ed44419))
+
 ## 1.0.2 (2022-08-30)
 
 
