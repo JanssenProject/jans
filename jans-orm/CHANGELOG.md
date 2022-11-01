@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* add new methods to allow get/set list of custom attributes from ([#2105](https://github.com/JanssenProject/jans/issues/2105)) ([5ac23a1](https://github.com/JanssenProject/jans/commit/5ac23a18adf3b34fd41fd1199ab168bfc9602fc6)), closes [#2104](https://github.com/JanssenProject/jans/issues/2104)
+* disable TLS in CB client by default ([#2167](https://github.com/JanssenProject/jans/issues/2167)) ([8ec5dd3](https://github.com/JanssenProject/jans/commit/8ec5dd3dc9818a53949468389a1918ed385c28a9))
+* fix susrefire tests in filter module ([#2141](https://github.com/JanssenProject/jans/issues/2141)) ([118d77c](https://github.com/JanssenProject/jans/commit/118d77cd7025dcbe3031bc41450ec285afff4b9f))
+* generate zip files with CB/Spanner dependencies ([#2715](https://github.com/JanssenProject/jans/issues/2715)) ([e4e2670](https://github.com/JanssenProject/jans/commit/e4e2670a33c6753ab2309ee473ab6b23fe5577d2))
+* jans-linux-setup postgresql support ([#2409](https://github.com/JanssenProject/jans/issues/2409)) ([08ecaf9](https://github.com/JanssenProject/jans/commit/08ecaf96d94c9741fe52b99cc55d3459109034a3))
+* merge ORM from Gluu ([#2468](https://github.com/JanssenProject/jans/issues/2468)) ([93149fd](https://github.com/JanssenProject/jans/commit/93149fd2d1db1eacf37d76af9df25ed40fb16b79))
+* update search by example to use multivalued property ([#2298](https://github.com/JanssenProject/jans/issues/2298)) ([8ed3007](https://github.com/JanssenProject/jans/commit/8ed3007ec3406ac7c0adf81ce339f6672b76a147))
+* use entry in contain entry ([#2311](https://github.com/JanssenProject/jans/issues/2311)) ([de9d00a](https://github.com/JanssenProject/jans/commit/de9d00a9e3cf053cfad70726317becf3b2d9eac5))
+
+
+### Bug Fixes
+
+* backticks CB attributes in N1QL ([#2313](https://github.com/JanssenProject/jans/issues/2313)) ([d6db13d](https://github.com/JanssenProject/jans/commit/d6db13d15fa0176eab52d37e01f01c6d60f1d124))
+* cb ttl update sdk 3 ([#2434](https://github.com/JanssenProject/jans/issues/2434)) ([534c6cb](https://github.com/JanssenProject/jans/commit/534c6cb01d2e3e2a3e066d2af71780c28e01e282))
+* close connections after reading metadata ([#2327](https://github.com/JanssenProject/jans/issues/2327)) ([00f4f79](https://github.com/JanssenProject/jans/commit/00f4f790fc01292e23139072bd0d19925349c7a6))
+* don't backticks all in N1QL ([#2316](https://github.com/JanssenProject/jans/issues/2316)) ([7cc721e](https://github.com/JanssenProject/jans/commit/7cc721e9d0d831b7d11804511e0279c8c292c0b2))
+* don't execute next paged search if current result count less than ([#2171](https://github.com/JanssenProject/jans/issues/2171)) ([94a162f](https://github.com/JanssenProject/jans/commit/94a162f4471ec6e4798721894b4a5a583ad71370))
+* fix search with % ([#2307](https://github.com/JanssenProject/jans/issues/2307)) ([90987d7](https://github.com/JanssenProject/jans/commit/90987d74118b93637c568c73d747233861b2bd9b))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* localized String should be converted to JSON ([#2542](https://github.com/JanssenProject/jans/issues/2542)) ([30225f9](https://github.com/JanssenProject/jans/commit/30225f99035fc023bd7b159f64b1a53cf03bf9ac))
+* **orm:** length check added before accessing CustomObjectAttribute values ([#2505](https://github.com/JanssenProject/jans/issues/2505)) ([6ff718f](https://github.com/JanssenProject/jans/commit/6ff718f2b2369e7669b3ce15d5442e4b0584ae7b))
+* use iterator to correcly remove OC attribute ([#2138](https://github.com/JanssenProject/jans/issues/2138)) ([b590981](https://github.com/JanssenProject/jans/commit/b590981c53c26f4b1a8b6a0865ddc552e0a347b8))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 
