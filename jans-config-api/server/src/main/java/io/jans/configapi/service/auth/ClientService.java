@@ -233,7 +233,7 @@ public class ClientService implements Serializable {
 
         if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
             if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
-                if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
+                if (responseTypeSet!=null && responseTypeSet.isEmpty() && grantTypeSet!=null && grantTypeSet.isEmpty()) {
                     responseTypeSet.add(ResponseType.CODE);
                 }
                 if (responseTypeSet.contains(ResponseType.CODE)) {
@@ -261,7 +261,7 @@ public class ClientService implements Serializable {
         Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
-        if (!update || !responseTypeSet.isEmpty()) {
+        if (!update || (responseTypeSet!=null &&!responseTypeSet.isEmpty())) {
             client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
         }
         if (!update || (isTrue(appConfiguration.getEnableClientGrantTypeUpdate()))

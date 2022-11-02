@@ -7180,15 +7180,15 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
@@ -7355,6 +7355,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         applicationType:
@@ -7515,10 +7516,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -7530,6 +7527,10 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -7633,13 +7634,13 @@ components:
           type: object
           additionalProperties:
             type: string
-        value:
-          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
+        value:
+          type: string
     AppConfiguration:
       type: object
       properties:
@@ -7796,6 +7797,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         subjectTypesSupported:
@@ -8056,6 +8058,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         cssLocation:
@@ -8170,6 +8173,10 @@ components:
         openidScopeBackwardCompatibility:
           type: boolean
         disableU2fEndpoint:
+          type: boolean
+        rotateDeviceSecret:
+          type: boolean
+        returnDeviceSecretFromAuthzEndpoint:
           type: boolean
         dcrSignatureValidationEnabled:
           type: boolean
@@ -8328,15 +8335,6 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         fapi:
           type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8364,6 +8362,15 @@ components:
             - STAT
             - PAR
             - SSA
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -9027,6 +9034,10 @@ components:
         sessionAttributes:
           type: object
           additionalProperties:
+            type: string
+        deviceSecrets:
+          type: array
+          items:
             type: string
         expirationDate:
           type: string
