@@ -10,7 +10,6 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.client.AssertBuilder;
-import io.jans.as.client.ssa.create.SsaCreateClient;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
 import io.jans.as.client.ssa.get.SsaGetClient;
 import io.jans.as.client.ssa.get.SsaGetResponse;
@@ -48,8 +47,7 @@ public class SsaGetRestTest extends BaseTest {
         Long orgId1 = 1000L;
         Long orgId2 = 2000L;
         List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1, orgId2);
-        SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
-        List<String> jtiList = createSsaList(ssaCreateClient, accessToken, ssaCreateOrgId);
+        List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
 
         // Ssa get
         SsaGetClient ssaGetClient = new SsaGetClient(ssaEndpoint);
@@ -79,8 +77,7 @@ public class SsaGetRestTest extends BaseTest {
         // Create ssa
         Long orgId1 = 1000L;
         List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1);
-        SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
-        List<String> jtiList = createSsaList(ssaCreateClient, accessToken, ssaCreateOrgId);
+        List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
         String jti = jtiList.get(0);
 
         // Ssa get
@@ -112,8 +109,7 @@ public class SsaGetRestTest extends BaseTest {
         Long orgId1 = 1000L;
         Long orgId2 = 2000L;
         List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1, orgId2);
-        SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
-        List<String> jtiList = createSsaList(ssaCreateClient, accessToken, ssaCreateOrgId);
+        List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
         String jti = jtiList.get(0);
 
         // Ssa get
@@ -144,8 +140,7 @@ public class SsaGetRestTest extends BaseTest {
         // Create ssa
         Long orgId1 = 1000L;
         List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1);
-        SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
-        List<String> jtiList = createSsaList(ssaCreateClient, accessToken, ssaCreateOrgId);
+        List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
         String jti = "jti-not-found";
 
         // Ssa get
@@ -157,14 +152,11 @@ public class SsaGetRestTest extends BaseTest {
                 .check();
     }
 
-    private List<String> createSsaList(SsaCreateClient ssaCreateClient, String accessToken, List<Long> ssaCreateRequestList) {
+    private List<String> createSsaList(String accessToken, List<Long> ssaCreateRequestList) {
         List<String> jtiList = new ArrayList<>();
         for (int i = 0; i < ssaCreateRequestList.size(); i++) {
             Long orgId = ssaCreateRequestList.get(i);
-            SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, null,
-                    "test description", "gluu-scan-api", Collections.singletonList("passwurd"),
-                    Collections.singletonList("client_credentials"));
-            showClient(ssaCreateClient);
+            SsaCreateResponse ssaCreateResponse = createSsaWithDefaultValues(accessToken, orgId, null, Boolean.TRUE);
             Assert.assertNotNull(ssaCreateResponse, "Ssa create response is null, index: " + i);
             jtiList.add(ssaCreateResponse.getJti());
         }
