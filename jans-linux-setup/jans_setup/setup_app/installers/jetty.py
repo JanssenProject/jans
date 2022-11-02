@@ -219,7 +219,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             self.renderTemplateInOut(
                     web_context,
                     os.path.join(Config.templateFolder, NAME_STR),
-                    out_file=os.path.join(self.jetty_base, serviceName, 'webapps/{}.xml'.format(serviceName))
+                    out_file=os.path.join(self.jetty_base, service_name, 'webapps/{}.xml'.format(service_name))
                 )
         except:
             self.logIt("Error rendering service '%s' context xml" % service_name, True)
