@@ -226,7 +226,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     /usr/share/java
 
-COPY jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
+COPY --chown=1000:0 jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
 COPY conf/*.tmpl /app/templates/
 COPY templates /app/templates
@@ -246,7 +246,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
-    && chown -R 1000:0 /usr/share/java
+    && chown -R 1000:0 /usr/share/java \
+    && chmod -R g=u /app/templates/jans-scim \
 
 USER 1000
 
