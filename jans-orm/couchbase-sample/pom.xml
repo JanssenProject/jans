@@ -43,6 +43,12 @@
 			<artifactId>slf4j-simple</artifactId>
 		</dependency>
 
+		<!-- Couchbase -->
+		<dependency>
+			<groupId>com.couchbase.client</groupId>
+			<artifactId>java-client</artifactId>
+		</dependency>
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
