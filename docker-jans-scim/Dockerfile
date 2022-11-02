@@ -247,7 +247,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
-    && chmod -R g=u /app/templates/jans-scim \
+    && chmod -R g=u /app/templates/jans-scim
 
 USER 1000
 
