@@ -48,9 +48,10 @@ public class SsaCreateRestTest extends BaseTest {
         Long expirationDate = DateUtil.dateToUnixEpoch(calendar.getTime());
         String description = "test description";
         String softwareId = "gluu-scan-api";
-        List<String> softwareRoles = Collections.singletonList("passwurd");
+        List<String> softwareRoles = Collections.singletonList("password");
         List<String> ssaGrantTypes = Collections.singletonList("client_credentials");
-        SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, expirationDate, description, softwareId, softwareRoles, ssaGrantTypes);
+        SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, expirationDate, description,
+                softwareId, softwareRoles, ssaGrantTypes, Boolean.TRUE, Boolean.TRUE);
 
         showClient(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), ssaCreateResponse).check();
@@ -80,9 +81,10 @@ public class SsaCreateRestTest extends BaseTest {
         Long expirationDate = DateUtil.dateToUnixEpoch(calendar.getTime());
         String description = "test description";
         String softwareId = "gluu-scan-api";
-        List<String> softwareRoles = Collections.singletonList("passwurd");
+        List<String> softwareRoles = Collections.singletonList("password");
         List<String> ssaGrantTypes = Collections.singletonList("client_credentials");
-        SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, expirationDate, description, softwareId, softwareRoles, ssaGrantTypes);
+        SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, expirationDate, description,
+                softwareId, softwareRoles, ssaGrantTypes, Boolean.TRUE, Boolean.TRUE);
 
         showClient(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), ssaCreateResponse)
@@ -110,9 +112,10 @@ public class SsaCreateRestTest extends BaseTest {
         Long orgId = 1L;
         String description = "test description";
         String softwareId = "gluu-scan-api";
-        List<String> softwareRoles = Collections.singletonList("passwurd");
+        List<String> softwareRoles = Collections.singletonList("password");
         List<String> ssaGrantTypes = Collections.singletonList("client_credentials");
-        SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, null, description, softwareId, softwareRoles, ssaGrantTypes);
+        SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, null, description,
+                softwareId, softwareRoles, ssaGrantTypes, Boolean.FALSE, Boolean.FALSE);
 
         showClient(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), ssaCreateResponse).check();
