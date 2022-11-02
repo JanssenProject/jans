@@ -43,6 +43,12 @@
 			<artifactId>slf4j-simple</artifactId>
 		</dependency>
 
+		<!-- Cloud Spanner -->
+		<dependency>
+		    <groupId>com.google.cloud</groupId>
+		    <artifactId>google-cloud-spanner</artifactId>
+		</dependency>
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>

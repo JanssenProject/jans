@@ -123,16 +123,16 @@ public class SqlFilterConverter {
                 	if (!canJoinOrFilters) {
                 		continue;
                 	}
-                	
-                	if (tmpFilter.getMultiValued() != null) {
-                		canJoinOrFilters = false;
-                    	continue;
-                	}
 
                 	if ((FilterType.EQUALITY != tmpFilter.getType()) || (tmpFilter.getFilters() != null)) {
                     	canJoinOrFilters = false;
                     	continue;
                     }
+
+                	if (tmpFilter.getMultiValued() != null) {
+                		canJoinOrFilters = false;
+                    	continue;
+                	}
 
                     Boolean isMultiValuedDetected = determineMultiValuedByType(tmpFilter.getAttributeName(), propertiesAnnotationsMap);
                 	if (!Boolean.FALSE.equals(isMultiValuedDetected)) {
