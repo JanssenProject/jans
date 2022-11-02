@@ -69,7 +69,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 2.  Create a file named `override.yaml` and add changes as per your desired configuration:
 
-    - FQDN/domain *not* registered:
+    - FQDN/domain is *not* registered:
     
         
         Get the Loadbalancer IP: 
@@ -87,7 +87,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             isFqdnRegistered: false
         ```
 
-    - FQDN/domain registered:
+    - FQDN/domain is registered:
 
         Add the following yaml snippet to your `override.yaml` file`:
 
