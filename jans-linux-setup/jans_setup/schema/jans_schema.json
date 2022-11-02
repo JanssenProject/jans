@@ -3359,6 +3359,7 @@
         "description",
         "exp",
         "del",
+        "jansState",
         "creatorId",
         "creatorTyp",
         "creationDate"
