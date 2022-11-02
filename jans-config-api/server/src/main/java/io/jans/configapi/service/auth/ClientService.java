@@ -212,9 +212,10 @@ public class ClientService implements Serializable {
             claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
             client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
         }
-        logger.trace("After setting client.getApplicationType:{}, client.getRedirectUris():{}, client.getClaimRedirectUris():{}",
+        logger.trace(
+                "After setting client.getApplicationType:{}, client.getRedirectUris():{}, client.getClaimRedirectUris():{}",
                 client.getApplicationType(), client.getRedirectUris(), client.getClaimRedirectUris());
-        
+
         client.setApplicationType(
                 client.getApplicationType() != null ? client.getApplicationType() : ApplicationType.WEB);
 
@@ -222,18 +223,18 @@ public class ClientService implements Serializable {
             client.setSectorIdentifierUri(client.getSectorIdentifierUri());
         }
 
-        logger.trace("client.getApplicationType():{}, client.getResponseTypes():{}, client.getGrantTypes():{}",client.getApplicationType(), client.getResponseTypes(),
-                client.getGrantTypes());
+        logger.trace("client.getApplicationType():{}, client.getResponseTypes():{}, client.getGrantTypes():{}",
+                client.getApplicationType(), client.getResponseTypes(), client.getGrantTypes());
         Set<ResponseType> responseTypeSet = client.getResponseTypes() != null
                 ? new HashSet<>(Arrays.asList(client.getResponseTypes()))
-                : null;
+                : new HashSet<>();
         Set<GrantType> grantTypeSet = client.getGrantTypes() != null
                 ? new HashSet<>(Arrays.asList(client.getGrantTypes()))
-                : null;
+                : new HashSet<>();
 
         if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
             if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
-                if (responseTypeSet!=null && responseTypeSet.isEmpty() && grantTypeSet!=null && grantTypeSet.isEmpty()) {
+                if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
                     responseTypeSet.add(ResponseType.CODE);
                 }
                 if (responseTypeSet.contains(ResponseType.CODE)) {
@@ -255,13 +256,13 @@ public class ClientService implements Serializable {
 
         responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
         grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
-        logger.trace("After setting - client.getResponseTypes():{}, client.getGrantTypes():{}", client.getResponseTypes(),
-                client.getGrantTypes());
-        
+        logger.trace("After setting - client.getResponseTypes():{}, client.getGrantTypes():{}",
+                client.getResponseTypes(), client.getGrantTypes());
+
         Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
-        if (!update || (responseTypeSet!=null &&!responseTypeSet.isEmpty())) {
+        if (!update || (responseTypeSet != null && !responseTypeSet.isEmpty())) {
             client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
         }
         if (!update || (isTrue(appConfiguration.getEnableClientGrantTypeUpdate()))
@@ -298,7 +299,8 @@ public class ClientService implements Serializable {
             client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
         }
 
-        logger.debug("client.getGroups():{}, client.getPostLogoutRedirectUris():{}", client.getGroups(), client.getPostLogoutRedirectUris());
+        logger.debug("client.getGroups():{}, client.getPostLogoutRedirectUris():{}", client.getGroups(),
+                client.getPostLogoutRedirectUris());
         List<String> postLogoutRedirectUris = client.getPostLogoutRedirectUris() != null
                 ? Arrays.asList(client.getPostLogoutRedirectUris())
                 : null;
@@ -320,16 +322,18 @@ public class ClientService implements Serializable {
             authorizedOrigins = new ArrayList<>(new HashSet<>(authorizedOrigins)); // Remove repeated elements
             client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
         }
-           
-        logger.debug("client.getScopes():{}, appConfiguration.getDynamicRegistrationScopesParamEnabled():{}",client.getScopes(), appConfiguration.getDynamicRegistrationScopesParamEnabled());
-       
+
+        logger.debug("client.getScopes():{}, appConfiguration.getDynamicRegistrationScopesParamEnabled():{}",
+                client.getScopes(), appConfiguration.getDynamicRegistrationScopesParamEnabled());
+
         List<String> claims = client.getClaims() != null ? Arrays.asList(client.getClaims()) : null;
         if (claims != null && !claims.isEmpty()) {
             List<String> claimsDn = attributeService.getAttributesDn(claims);
             client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
         }
-        logger.debug("client.getClaims():{}, client.getAttributes().getAuthorizedAcrValues():{}",client.getClaims(), client.getAttributes().getAuthorizedAcrValues());
-        
+        logger.debug("client.getClaims():{}, client.getAttributes().getAuthorizedAcrValues():{}", client.getClaims(),
+                client.getAttributes().getAuthorizedAcrValues());
+
         List<String> authorizedAcrValues = client.getAttributes().getAuthorizedAcrValues();
         if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
             authorizedAcrValues = new ArrayList<>(new HashSet<>(authorizedAcrValues)); // Remove repeated elements
@@ -365,8 +369,7 @@ public class ClientService implements Serializable {
         logger.debug("ClientService::updateCustomAttributes() - client.getCustomAttributes():{}, attrList:{}",
                 client.getCustomAttributes(), attrList);
         for (String attr : attrList) {
-            logger.debug(
-                    "ClientService::updateCustomAttributes() - attr:{}",      attr);
+            logger.debug("ClientService::updateCustomAttributes() - attr:{}", attr);
 
         }
     }
