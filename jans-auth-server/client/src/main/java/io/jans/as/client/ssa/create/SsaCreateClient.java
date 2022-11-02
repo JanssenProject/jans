@@ -31,7 +31,8 @@ public class SsaCreateClient extends BaseClient<SsaCreateRequest, SsaCreateRespo
     }
 
     public SsaCreateResponse execSsaCreate(String accessToken, Long orgId, Long expirationDate, String description,
-                                           String softwareId, List<String> softwareRoles, List<String> grantTypes) {
+                                           String softwareId, List<String> softwareRoles, List<String> grantTypes,
+                                           Boolean oneTimeUse, Boolean rotateSsa) {
         SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
         ssaCreateRequest.setAccessToken(accessToken);
         ssaCreateRequest.setOrgId(orgId);
@@ -40,6 +41,8 @@ public class SsaCreateClient extends BaseClient<SsaCreateRequest, SsaCreateRespo
         ssaCreateRequest.setSoftwareId(softwareId);
         ssaCreateRequest.setSoftwareRoles(softwareRoles);
         ssaCreateRequest.setGrantTypes(grantTypes);
+        ssaCreateRequest.setOneTimeUse(oneTimeUse);
+        ssaCreateRequest.setRotateSsa(rotateSsa);
         setRequest(ssaCreateRequest);
         return exec();
     }

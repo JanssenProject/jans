@@ -67,7 +67,7 @@ public class SsaJsonServiceTest {
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("Test description");
         ssa.getAttributes().setSoftwareId("scan-api-test");
-        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("password"));
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);

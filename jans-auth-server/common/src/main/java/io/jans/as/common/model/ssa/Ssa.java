@@ -36,6 +36,9 @@ public class Ssa extends DeletableEntity implements Serializable {
     @AttributeName(name = "description")
     private String description;
 
+    @AttributeName(name = "jansState")
+    private SsaState state;
+
     @AttributeName(name = "creationDate")
     private Date creationDate = new Date();
 
@@ -107,6 +110,14 @@ public class Ssa extends DeletableEntity implements Serializable {
         this.description = description;
     }
 
+    public SsaState getState() {
+        return state;
+    }
+
+    public void setState(SsaState state) {
+        this.state = state;
+    }
+
     public Date getCreationDate() {
         return creationDate;
     }
@@ -122,6 +133,7 @@ public class Ssa extends DeletableEntity implements Serializable {
                 ", attributes=" + attributes +
                 ", orgId='" + orgId + '\'' +
                 ", description='" + description + '\'' +
+                ", state='" + state + '\'' +
                 ", creationDate=" + creationDate +
                 ", creatorId='" + creatorId + '\'' +
                 ", creatorType=" + creatorType +
