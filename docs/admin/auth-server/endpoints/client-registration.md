@@ -12,9 +12,9 @@ tags:
 
 Dynamic client registration refers to the process by which a client submits a registration request to the Authorization server and how that request is served by the Authorization server. It is explained in the following specifications:
 
-1. For OpenID Connect relying parties - [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html). 
+1. For OpenID Connect relying parties - [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html).
 1. For OAuth 2.0 client (without OpenID Connect features) - [OAuth 2.0 Dynamic Client Registration Protocol - RFC 7591](https://tools.ietf.org/html/rfc7591).
-1. CRUD operations on client - [OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592](https://tools.ietf.org/html/rfc7592). 
+1. CRUD operations on client - [OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592](https://tools.ietf.org/html/rfc7592).
 
 ### Client Registration endpoint
 The URI to dynamically register a client to a Janssen Auth Server can be found by checking the `registration_endpoint` claim of the OpenID Connect configuration reponse, typically deployed at `https://<my.jans.server>/.well-known/openid-configuration`
@@ -32,17 +32,17 @@ Configure the Janssen AS using steps explained in the [link](#curl-commands-to-c
 #### 1. A simple client registration request (with mandatory parameter):
 	```
 	curl -X POST -k -i 'https://my.jans.server/jans-auth/restv1/register'  \
-	     --data '{ \ 
+	     --data '{ \
 	              "redirect_uris": ["https://client.example.org/cb"] \
 	             }' \
 	```
 
-#### 2. A typical client registration request : 
+#### 2. A typical client registration request :
 A typical client registration request : A client or developer calls the client registration endpoint with a set of client metadata as specified in [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#page-8)
 
 ```
    curl -X POST -k -i 'https://my.jans.server/jans-auth/restv1/register'  \
-        --data '{ \ 
+        --data '{ \
                       "redirect_uris": ["https://client.example.org/cb"] \
 	              "client_id": "c3BhdRkqfX", \
 	              "client_secret": "bd136123eeffeef234235805d", \
@@ -54,13 +54,13 @@ A typical client registration request : A client or developer calls the client r
 	        }' \
 ```
 #### 3. Client Registration Request Using a signed request object
-In some usecases like FAPI implementation,  DCR request payload is a JWT. 
+In some usecases like FAPI implementation,  DCR request payload is a JWT.
 Example:  
 ```
   curl -X POST -k -H 'Content-Type: application/jwt' \
        -H 'Accept: application/json' \
        -i 'https://my-jans-server/jans-auth/restv1/register'  \
-       --data 'eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q' 
+       --data 'eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q'
 ```
 When such will be the nature of client registration requests, the following configuration properties should be set in the authorization server:
 - `dcrSignatureValidationEnabled` - enables DCR signature validation
@@ -68,9 +68,9 @@ When such will be the nature of client registration requests, the following conf
 - `dcrSignatureValidationJwks` - specifies JWKS for all DCR's validations.
 Configure the Janssen AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
-#### 4. Client registration using software statement 
+#### 4. Client registration using software statement
 A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to dynamically register clients to an Authorization server.
-Example: 
+Example:
 ```
   #!/bin/bash curl -X POST https://my.jans.server/jans-auth/restv1/register \
                    -H "Content-Type: application/json" \
@@ -81,7 +81,7 @@ Example:
 		    } DATA
 ```
 For Client registrations using Software statements, the AS should be configured using the following configuration parameters:
- - `softwareStatementValidationType` - The value of this variable is one of the following: 
+ - `softwareStatementValidationType` - The value of this variable is one of the following:
         - NONE - validation is skipped for software statement
         - SCRIPT - (default), invokes `getSoftwareStatementJwks` of dynamic registration script which has to return jwks.
 	- JWKS - claim name within software statement that has inlined JWKS
@@ -90,15 +90,10 @@ For Client registrations using Software statements, the AS should be configured 
  - `dcrSignatureValidationSoftwareStatementJwksClaim` - specifies claim name inside software statement. Value of claim should point to inlined JWKS.
 
 Configure the AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
- 
+
 #### 5. Special mention about FAPI:
 In case of a typical [client registration request in FAPI implementation]( https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html), the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and OBIE respectively.
- 
 
-### Customizing the behavior of OP during DCR using an interception script: 
-The Janssen Authorization Server uses [`ClientRegistrationType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/client/ClientRegistrationType.java) interception scripts to enable you to customize the behavior of the OpenID Provider during client registration. Examples of business customizations in the client registration script are validating certificates against a certificate directory, manage client claims, modify scopes, perform validation and checks.
-
-Reference : 
 
 ### Security Pointers
 If `dynamicRegistrationEnabled` is enabled in the Authorization Server, assess the following points to minimize potential exposure of sensitive personal data:
@@ -107,18 +102,18 @@ If `dynamicRegistrationEnabled` is enabled in the Authorization Server, assess t
 
 2. `dynamicRegistrationScopesParamEnabled` controls whether default scopes are globally enabled. If `dynamicRegistrationScopesParamEnabled` is `true` then scopes defined as default will be automatically added to any dynamically registered client entry without consent of OP's administrator. Therefore, make an informed decision before setting this field to `true`.
 
-### CURL commands to configure Jans-auth server 
+### CURL commands to configure Jans-auth server
 Jans-auth server is configured using [Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) :
-1. Obtain the access token 
+1. Obtain the access token
    ```
       curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
            -d  "grant_type=client_credentials&scope=https://jans.io/oauth/jans-auth-server/config/properties.write"
    ```
 2. Patch jans-auth server configurations to reflect `anExampleConfigField` with the value `anExampleConfigField_value`
-  
+
    ```
-	curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \ 
-	   -i 'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \ 
+	curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \
+	   -i 'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \
 	   -H "Authorization: Bearer put_access_token_here" --data '[
 	      {
 	       "op": "add",
@@ -130,8 +125,8 @@ Jans-auth server is configured using [Jans Config Api](https://github.com/Jansse
  Example : Patch jans-auth server configurations to reflect `dynamicRegistrationEnabled` with value as `true`
 
       ```
-	   curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \ 
-	   -i 'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \ 
+	   curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \
+	   -i 'https://<your.jans.server>/jans-config-api/api/v1/jans-auth-server/config' \
 	   -H "Authorization: Bearer put_access_token_here" --data '[
 	      {
 	       "op": "add",
@@ -301,11 +296,14 @@ Output:
   "description": "string"
 }
 ```
+### Customizing the behavior of the AS using Interception script
+Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the [Software Statement](https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3) that is sent with the registration request.
+
+Further reading [here](../../developer/scripts/client-registration.md)
+
 ### Dynamic registration custom attributes
 
 
-### CRUD Operations 
+### CRUD Operations
 
 ### Internationalization for Client metadata
-
-
