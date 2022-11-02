@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#configuration-parameters-of-janssens-fido2-server" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -6217,9 +6222,99 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Configuration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-parameters-of-janssens-fido2-server" class="md-nav__link">
+    Configuration Parameters of Janssen's FIDO2 server:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-the-fido2-server" class="md-nav__link">
+    Configuring the FIDO2 server:
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuring the FIDO2 server:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-read-configuration-parameters" class="md-nav__link">
+    1. Read Configuration parameters:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-update-configuration-parameters" class="md-nav__link">
+    2. Update configuration parameters:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-change-log-level-of-fido2-server" class="md-nav__link">
+    3. Change log level of FIDO2 server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-locating-fido2-configuration-in-persistence-layer" class="md-nav__link">
+    4. Locating FIDO2 configuration in Persistence Layer
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Locating FIDO2 configuration in Persistence Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-mysql" class="md-nav__link">
+    A. MySQL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-ldap" class="md-nav__link">
+    B. LDAP
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9874,6 +9969,82 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-parameters-of-janssens-fido2-server" class="md-nav__link">
+    Configuration Parameters of Janssen's FIDO2 server:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-the-fido2-server" class="md-nav__link">
+    Configuring the FIDO2 server:
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuring the FIDO2 server:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-read-configuration-parameters" class="md-nav__link">
+    1. Read Configuration parameters:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-update-configuration-parameters" class="md-nav__link">
+    2. Update configuration parameters:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-change-log-level-of-fido2-server" class="md-nav__link">
+    3. Change log level of FIDO2 server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-locating-fido2-configuration-in-persistence-layer" class="md-nav__link">
+    4. Locating FIDO2 configuration in Persistence Layer
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Locating FIDO2 configuration in Persistence Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-mysql" class="md-nav__link">
+    A. MySQL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-ldap" class="md-nav__link">
+    B. LDAP
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -9896,7 +10067,7 @@
     
       
       
-        <span class="md-tag">fido</span>
+        <span class="md-tag">fido2</span>
       
     
   </nav>
@@ -9911,14 +10082,208 @@
 
   <h1>Configuration</h1>
 
-<p>This page will be the landing page for the Janssen Project admin documentation</p>
+<h3 id="configuration-parameters-of-janssens-fido2-server">Configuration Parameters of Janssen's FIDO2 server:<a class="headerlink" href="#configuration-parameters-of-janssens-fido2-server" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field named</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>issuer</td>
+<td>https://my-jans-server.jans.io</td>
+<td>URL using the https scheme with no query or fragment component. The OP asserts this as its Issuer Identifier</td>
+</tr>
+<tr>
+<td>baseEndpoint</td>
+<td>https://my-jans-server/jans-fido2/restv1</td>
+<td>Base URL of the FIDO2 server Endpoints</td>
+</tr>
+<tr>
+<td>cleanServiceInterval</td>
+<td>60</td>
+<td>Time interval for the Clean Service in seconds.</td>
+</tr>
+<tr>
+<td>cleanServiceBatchChunkSize</td>
+<td>10000</td>
+<td>Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.</td>
+</tr>
+<tr>
+<td>useLocalCache</td>
+<td>true</td>
+<td>Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration</td>
+</tr>
+<tr>
+<td>disableJdkLogger</td>
+<td>true</td>
+<td>Boolean value specifying whether to enable JDK Loggers</td>
+</tr>
+<tr>
+<td>loggingLevel</td>
+<td>"INFO" or "TRACE" or "DEBUG"</td>
+<td>Logging level for FIDO2 server</td>
+</tr>
+<tr>
+<td>loggingLayout</td>
+<td>"text" or "json"</td>
+<td>Contents of logs as plain text or json format</td>
+</tr>
+<tr>
+<td>externalLoggerConfiguration</td>
+<td></td>
+<td>Path to external log4j2 logging configuration</td>
+</tr>
+<tr>
+<td>metricReporterInterval</td>
+<td>300</td>
+<td>The interval for metric reporter in seconds.</td>
+</tr>
+<tr>
+<td>metricReporterKeepDataDays</td>
+<td>15</td>
+<td>The number of days to retain metric reported data in the system</td>
+</tr>
+<tr>
+<td>metricReporterEnabled</td>
+<td>true</td>
+<td>Boolean value specifying whether to enable Metric Reporter</td>
+</tr>
+<tr>
+<td>personCustomObjectClassList</td>
+<td>["jansCustomPerson", "jansPerson"  ]</td>
+<td>LDAP custom object class list for dynamic person enrollment.</td>
+</tr>
+<tr>
+<td>fido2Configuration</td>
+<td>See JSON contents in the below example</td>
+<td>FIDO2 Configuration</td>
+</tr>
+<tr>
+<td>authenticatorCertsFolder</td>
+<td>/etc/jans/conf/fido2/authenticator_cert</td>
+<td>Authenticators certificates fodler.</td>
+</tr>
+<tr>
+<td>mdsCertsFolder</td>
+<td>/etc/jans/conf/fido2/mds/cert</td>
+<td>MDS TOC root certificates folder.</td>
+</tr>
+<tr>
+<td>mdsTocsFolder</td>
+<td>/etc/jans/conf/fido2/mds/toc</td>
+<td>MDS TOC files folder.</td>
+</tr>
+<tr>
+<td>serverMetadataFolder</td>
+<td>/etc/jans/conf/fido2/server_metadata</td>
+<td>Authenticators metadata in json format. Example: virtual devices.</td>
+</tr>
+<tr>
+<td>requestedCredentialTypes</td>
+<td>["RS256","ES256"]</td>
+<td></td>
+</tr>
+<tr>
+<td>requestedParties</td>
+<td>[{"name":"https://my-jans-server.jans.io","domains":["my-jans-server.jans.io"]}]</td>
+<td>Requested party name.</td>
+</tr>
+<tr>
+<td>userAutoEnrollment</td>
+<td>false</td>
+<td>Allow to enroll users on enrollment/authentication requests.</td>
+</tr>
+<tr>
+<td>unfinishedRequestExpiration</td>
+<td>180</td>
+<td>Expiration time in seconds for pending enrollment/authentication requests</td>
+</tr>
+<tr>
+<td>authenticationHistoryExpiration</td>
+<td>1296000</td>
+<td>Expiration time in seconds for approved authentication requests.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configuring-the-fido2-server">Configuring the FIDO2 server:<a class="headerlink" href="#configuring-the-fido2-server" title="Permanent link">#</a></h3>
+<h4 id="1-read-configuration-parameters">1. Read Configuration parameters:<a class="headerlink" href="#1-read-configuration-parameters" title="Permanent link">#</a></h4>
+<p>Use the following command to obtain configuration parameters:</p>
+<p><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2</code></p>
+<p>Response:
+<div class="highlight"><pre><span></span><code>{
+   &quot;issuer&quot;:&quot;https://.jans.io&quot;,
+   &quot;baseEndpoint&quot;:&quot;https://my-jans-server.jans.io/jans-fido2/restv1&quot;,
+   &quot;cleanServiceInterval&quot;:60,
+   &quot;cleanServiceBatchChunkSize&quot;:10000,
+   &quot;useLocalCache&quot;:true,
+   &quot;disableJdkLogger&quot;:true,
+   &quot;loggingLevel&quot;:&quot;INFO&quot;,
+   &quot;loggingLayout&quot;:&quot;text&quot;,
+   &quot;externalLoggerConfiguration&quot;:&quot;&quot;,
+   &quot;metricReporterInterval&quot;:300,
+   &quot;metricReporterKeepDataDays&quot;:15,
+   &quot;metricReporterEnabled&quot;:true,
+   &quot;personCustomObjectClassList&quot;:[
+      &quot;jansCustomPerson&quot;,
+      &quot;jansPerson&quot;
+   ],
+   &quot;fido2Configuration&quot;:{
+      &quot;authenticatorCertsFolder&quot;:&quot;/etc/jans/conf/fido2/authenticator_cert&quot;,
+      &quot;mdsCertsFolder&quot;:&quot;/etc/jans/conf/fido2/mds/cert&quot;,
+      &quot;mdsTocsFolder&quot;:&quot;/etc/jans/conf/fido2/mds/toc&quot;,
+      &quot;serverMetadataFolder&quot;:&quot;/etc/jans/conf/fido2/server_metadata&quot;,
+      &quot;requestedCredentialTypes&quot;:[
+         &quot;RS256&quot;,
+         &quot;ES256&quot;
+      ],
+      &quot;requestedParties&quot;:[
+         {
+            &quot;name&quot;:&quot;https://my-jans-server.jans.io&quot;,
+            &quot;domains&quot;:[
+               &quot;my-jans-server.jans.io&quot;
+            ]
+         }
+      ],
+      &quot;userAutoEnrollment&quot;:false,
+      &quot;unfinishedRequestExpiration&quot;:180,
+      &quot;authenticationHistoryExpiration&quot;:1296000
+   }
+}
+</code></pre></div></p>
+<h4 id="2-update-configuration-parameters">2. Update configuration parameters:<a class="headerlink" href="#2-update-configuration-parameters" title="Permanent link">#</a></h4>
+<p>Steps:
+  A. Create a JSON file say <code>/tmp/config_values.json</code> by editing the JSON from Point 1
+  B. Use the following command
+  <code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/config_values.json</code></p>
+<h4 id="3-change-log-level-of-fido2-server">3. Change log level of FIDO2 server<a class="headerlink" href="#3-change-log-level-of-fido2-server" title="Permanent link">#</a></h4>
+<p>Steps:
+  A. Create a JSON file say <code>/tmp/config_values.json</code> by editing the JSON from Point 1. Edit <code>loggingLevel</code> to <code>TRACE</code> or <code>DEBUG</code> or <code>INFO</code>
+  B. Use the following command
+    <code>/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido --data /tmp/config_values.json</code></p>
+<h4 id="4-locating-fido2-configuration-in-persistence-layer">4. Locating FIDO2 configuration in Persistence Layer<a class="headerlink" href="#4-locating-fido2-configuration-in-persistence-layer" title="Permanent link">#</a></h4>
+<p>While it is not recommended that an administrator directly edits a configuration at the persistence layer, it may be useful information for a developer.</p>
+<h5 id="a-mysql">A. MySQL<a class="headerlink" href="#a-mysql" title="Permanent link">#</a></h5>
+<pre class="mermaid"><code>erDiagram
+    jansAppConf {
+        string doc_id PK ""
+        string ou  "jans-fido2"
+        string jansConfDyn "json configuration for the app"
+    }</code></pre>
+<h5 id="b-ldap">B. LDAP<a class="headerlink" href="#b-ldap" title="Permanent link">#</a></h5>
+<pre class="mermaid"><code>graph LR
+A[ou=jans] --&gt; V(ou=configuration)
+     V --&gt; V5[ou=jans-fido2]</code></pre>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-02T12:47:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-02</span>
       
         <br>
         Created:
