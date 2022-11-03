@@ -9,6 +9,7 @@ package io.jans.as.server.ssa.ws.rs.action;
 import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.CreatorType;
@@ -91,6 +92,7 @@ public class SsaCreateAction {
             JSONObject jsonRequest = new JSONObject(requestParams);
             final SsaCreateRequest ssaCreateRequest = SsaCreateRequest.fromJson(jsonRequest);
             log.debug("Attempting to create ssa: {}", ssaCreateRequest);
+            log.trace("Ssa request = {}", requestParams);
 
             String ssaBaseDN = staticConfiguration.getBaseDn().getSsa();
             String inum = inumService.generateDefaultId();
@@ -116,6 +118,7 @@ public class SsaCreateAction {
             ssa.getAttributes().setOneTimeUse(ssaCreateRequest.getOneTimeUse());
             ssa.getAttributes().setRotateSsa(ssaCreateRequest.getRotateSsa());
             ssa.setCreatorType(CreatorType.CLIENT);
+            ssa.setState(SsaState.ACTIVE);
             ssa.setCreatorId(client.getClientId());
 
             ssa.setCreationDate(creationDate);

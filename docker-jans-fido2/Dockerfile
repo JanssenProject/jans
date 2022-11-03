@@ -223,7 +223,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     /usr/share/java
 
-COPY jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
+COPY --chown=1000:0 jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
 COPY conf/*.tmpl /app/templates/
 

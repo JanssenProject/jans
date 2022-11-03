@@ -14,6 +14,8 @@ import io.jans.as.client.page.AbstractPage;
 import io.jans.as.client.page.PageConfig;
 import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
+import io.jans.as.client.ssa.create.SsaCreateClient;
+import io.jans.as.client.ssa.create.SsaCreateResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -25,6 +27,7 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.DateUtil;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
@@ -1161,11 +1164,11 @@ public abstract class BaseTest {
 
         return registerResponse;
     }
-    
-	public RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
-			final List<GrantType> grantTypes, final String sectorIdentifierUri, final String clientJwksUri,
-			final SignatureAlgorithm signatureAlgorithm, final KeyEncryptionAlgorithm keyEncryptionAlgorithm,
-			final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
+
+    public RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
+                                           final List<GrantType> grantTypes, final String sectorIdentifierUri, final String clientJwksUri,
+                                           final SignatureAlgorithm signatureAlgorithm, final KeyEncryptionAlgorithm keyEncryptionAlgorithm,
+                                           final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
@@ -1190,7 +1193,7 @@ public abstract class BaseTest {
         AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse;
-	}
+    }
 
     public AuthorizationResponse authorizationRequest(
             final List<ResponseType> responseTypes, final ResponseMode responseMode, final ResponseMode expectedResponseMode,
@@ -1242,5 +1245,34 @@ public abstract class BaseTest {
         showClient(tokenClient);
         AssertBuilder.tokenResponse(tokenResponse).ok().check();
         return tokenResponse;
+    }
+
+    public SsaCreateResponse createSsaWithDefaultValues(String accessToken, Long orgId, Long expiration, Boolean oneTimeUse) {
+        Long orgIdAux = orgId != null ? orgId : 1000L;
+        String descriptionAux = "test description";
+        String softwareIdAux = "gluu-scan-api";
+        Long expirationAux;
+        if (expiration == null) {
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            calendar.add(Calendar.HOUR, 24);
+            expirationAux = DateUtil.dateToUnixEpoch(calendar.getTime());
+        } else {
+            expirationAux = expiration;
+        }
+        List<String> softwareRolesAux = Collections.singletonList("password");
+        List<String> grantTypesAux = Collections.singletonList("client_credentials");
+        return createSsa(accessToken, orgIdAux, expirationAux, descriptionAux, softwareIdAux, softwareRolesAux,
+                grantTypesAux, oneTimeUse, Boolean.TRUE);
+    }
+
+    public SsaCreateResponse createSsa(String accessToken, Long orgId, Long expiration, String description,
+                                       String softwareId, List<String> softwareRoles, List<String> grantTypes,
+                                       Boolean oneTimeUse, Boolean rotateSsa) {
+        SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
+        SsaCreateResponse response = ssaCreateClient.execSsaCreate(accessToken, orgId, expiration, description, softwareId,
+                softwareRoles, grantTypes, oneTimeUse, rotateSsa);
+        showClient(ssaCreateClient);
+        AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), response);
+        return response;
     }
 }
