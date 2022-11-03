@@ -6,8 +6,6 @@
 
 package io.jans.configapi.plugin.fido2.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.fido2.service.Fido2Service;
@@ -57,7 +55,7 @@ public class Fido2ConfigResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_READ_ACCESS })
-    public Response getFido2Configuration() throws JsonProcessingException {
+    public Response getFido2Configuration() {
         AppConfiguration appConfiguration = this.fido2Service.find();
         logger.debug("FIDO2 details appConfiguration():{}", appConfiguration);
         return Response.ok(appConfiguration).build();
