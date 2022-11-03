@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#metadata-service" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -6231,9 +6236,66 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Vendor Metadata Management
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Vendor Metadata Management
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#metadata-service" class="md-nav__link">
+    Metadata Service:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-local-metadata-service" class="md-nav__link">
+    1. Local metadata service:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-metadata-service-for-authenticators-approved-by-fido-alliance-mds3" class="md-nav__link">
+    2. Metadata service for authenticators approved by FIDO Alliance (MDS3)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-skip-metadata-validation" class="md-nav__link">
+    3. Skip metadata validation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References:
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9874,6 +9936,49 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#metadata-service" class="md-nav__link">
+    Metadata Service:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-local-metadata-service" class="md-nav__link">
+    1. Local metadata service:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-metadata-service-for-authenticators-approved-by-fido-alliance-mds3" class="md-nav__link">
+    2. Metadata service for authenticators approved by FIDO Alliance (MDS3)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-skip-metadata-validation" class="md-nav__link">
+    3. Skip metadata validation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References:
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -9896,7 +10001,17 @@
     
       
       
-        <span class="md-tag">fido</span>
+        <span class="md-tag">fido2</span>
+      
+    
+      
+      
+        <span class="md-tag">metadata Service</span>
+      
+    
+      
+      
+        <span class="md-tag">attestation</span>
       
     
   </nav>
@@ -9911,14 +10026,228 @@
 
   <h1>Vendor Metadata Management</h1>
 
-<p>This page will be the landing page for the Janssen Project admin documentation</p>
+<h3 id="metadata-service">Metadata Service:<a class="headerlink" href="#metadata-service" title="Permanent link">#</a></h3>
+<p>The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device. If implemented in organizations like government, federal agencies, banking and healthcare organizations for example) and/or organizations handling sensitive data (media companies, R&amp;D institutions, corporations, etc), this information can help protect organizations against security vulnerabilities.</p>
+<h3 id="1-local-metadata-service">1. Local metadata service:<a class="headerlink" href="#1-local-metadata-service" title="Permanent link">#</a></h3>
+<p>Janssen's FIDO server has a <a href="../config/">configuration parameter</a> called <code>serverMetadataFolder</code> which by default points to a directory location <code>/etc/jans/conf/fido2/server_metadata</code> where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.</p>
+<p>Example of authenticator metadata:
+<div class="highlight"><pre><span></span><code>{
+            &quot;aaguid&quot;: &quot;83c44309-....-8be444b573cb&quot;,
+            &quot;metadataStatement&quot;: {
+                &quot;legalHeader&quot;: &quot;Submission of this statement and retrieval and use of this statement indicates acceptance of the appropriate agreement located at https://fidoalliance.org/metadata/metadata-legal-terms/.&quot;,
+                &quot;aaguid&quot;: &quot;83c44309-....-8be444b573cb&quot;,
+                &quot;description&quot;: &quot;Just an example&quot;,
+                &quot;authenticatorVersion&quot;: 448962,
+                &quot;protocolFamily&quot;: &quot;fido2&quot;,
+                &quot;schema&quot;: 3,
+                &quot;upv&quot;: [
+                    {
+                        &quot;major&quot;: 1,
+                        &quot;minor&quot;: 0
+                    },
+                    {
+                        &quot;major&quot;: 1,
+                        &quot;minor&quot;: 1
+                    }
+                ],
+                &quot;authenticationAlgorithms&quot;: [
+                    &quot;ed25519_eddsa_sha512_raw&quot;,
+                    &quot;secp256r1_ecdsa_sha256_raw&quot;
+                ],
+                &quot;publicKeyAlgAndEncodings&quot;: [
+                    &quot;cose&quot;
+                ],
+                &quot;attestationTypes&quot;: [
+                    &quot;basic_full&quot;
+                ],
+                &quot;userVerificationDetails&quot;: [
+                    [
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;passcode_external&quot;,
+                            &quot;caDesc&quot;: {
+                                &quot;base&quot;: 64,
+                                &quot;minLength&quot;: 4,
+                                &quot;maxRetries&quot;: 8,
+                                &quot;blockSlowdown&quot;: 0
+                            }
+                        },
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;presence_internal&quot;
+                        }
+                    ],
+                    [
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;passcode_external&quot;,
+                            &quot;caDesc&quot;: {
+                                &quot;base&quot;: 64,
+                                &quot;minLength&quot;: 4,
+                                &quot;maxRetries&quot;: 8,
+                                &quot;blockSlowdown&quot;: 0
+                            }
+                        }
+                    ],
+                    [
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;fingerprint_internal&quot;,
+                            &quot;baDesc&quot;: {
+                                &quot;selfAttestedFRR&quot;: 0,
+                                &quot;selfAttestedFAR&quot;: 0,
+                                &quot;maxTemplates&quot;: 5,
+                                &quot;maxRetries&quot;: 5,
+                                &quot;blockSlowdown&quot;: 0
+                            }
+                        },
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;presence_internal&quot;
+                        }
+                    ],
+                    [
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;none&quot;
+                        }
+                    ],
+                    [
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;fingerprint_internal&quot;,
+                            &quot;baDesc&quot;: {
+                                &quot;selfAttestedFRR&quot;: 0,
+                                &quot;selfAttestedFAR&quot;: 0,
+                                &quot;maxTemplates&quot;: 5,
+                                &quot;maxRetries&quot;: 5,
+                                &quot;blockSlowdown&quot;: 0
+                            }
+                        }
+                    ],
+                    [
+                        {
+                            &quot;userVerificationMethod&quot;: &quot;presence_internal&quot;
+                        }
+                    ]
+                ],
+                &quot;keyProtection&quot;: [
+                    &quot;hardware&quot;,
+                    &quot;secure_element&quot;
+                ],
+                &quot;matcherProtection&quot;: [
+                    &quot;on_chip&quot;
+                ],
+                &quot;cryptoStrength&quot;: 128,
+                &quot;attachmentHint&quot;: [
+                    &quot;external&quot;,
+                    &quot;wired&quot;
+                ],
+                &quot;tcDisplay&quot;: [],
+                &quot;attestationRootCertificates&quot;: [
+                    &quot;MII....psmyPzK+Vsgw2jeRQ5JlKDyqE0hebfC1tvFu0CCrJFcw==&quot;
+                ],
+                &quot;icon&quot;: &quot;data:image/png;base64,iVBORw0KGgoAAAA....k5+36hF7vXAAAAAElFTkSuQmCC&quot;,
+                &quot;authenticatorGetInfo&quot;: {
+                    &quot;versions&quot;: [
+                        &quot;FIDO_2_0&quot;,
+                        &quot;FIDO_2_1_PRE&quot;,
+                        &quot;FIDO_2_1&quot;
+                    ],
+                    &quot;extensions&quot;: [
+                        &quot;credProtect&quot;,
+                        &quot;hmac-secret&quot;,
+                        &quot;largeBlobKey&quot;,
+                        &quot;credBlob&quot;,
+                        &quot;minPinLength&quot;
+                    ],
+                    &quot;aaguid&quot;: &quot;83c.....73cb&quot;,
+                    &quot;options&quot;: {
+                        &quot;plat&quot;: false,
+                        &quot;rk&quot;: true,
+                        &quot;clientPin&quot;: true,
+                        &quot;up&quot;: true,
+                        &quot;uv&quot;: false,
+                        &quot;pinUvAuthToken&quot;: true,
+                        &quot;largeBlobs&quot;: true,
+                        &quot;ep&quot;: false,
+                        &quot;bioEnroll&quot;: false,
+                        &quot;userVerificationMgmtPreview&quot;: false,
+                        &quot;authnrCfg&quot;: true,
+                        &quot;credMgmt&quot;: true,
+                        &quot;credentialMgmtPreview&quot;: true,
+                        &quot;setMinPINLength&quot;: true,
+                        &quot;makeCredUvNotRqd&quot;: false,
+                        &quot;alwaysUv&quot;: true
+                    },
+                    &quot;maxMsgSize&quot;: 1200,
+                    &quot;pinUvAuthProtocols&quot;: [
+                        2,
+                        1
+                    ],
+                    &quot;maxCredentialCountInList&quot;: 8,
+                    &quot;maxCredentialIdLength&quot;: 128,
+                    &quot;transports&quot;: [
+                        &quot;usb&quot;
+                    ],
+                    &quot;algorithms&quot;: [
+                        {
+                            &quot;type&quot;: &quot;public-key&quot;,
+                            &quot;alg&quot;: -7
+                        },
+                        {
+                            &quot;type&quot;: &quot;public-key&quot;,
+                            &quot;alg&quot;: -8
+                        }
+                    ],
+                    &quot;maxSerializedLargeBlobArray&quot;: 1024,
+                    &quot;forcePINChange&quot;: false,
+                    &quot;minPINLength&quot;: 4,
+                    &quot;firmwareVersion&quot;: 328965,
+                    &quot;maxCredBlobLength&quot;: 32,
+                    &quot;maxRPIDsForSetMinPINLength&quot;: 1,
+                    &quot;preferredPlatformUvAttempts&quot;: 3,
+                    &quot;uvModality&quot;: 2,
+                    &quot;remainingDiscoverableCredentials&quot;: 25
+                }
+            },
+            &quot;statusReports&quot;: [
+                {
+                    &quot;status&quot;: &quot;FIDO_CERTIFIED_L1&quot;,
+                    &quot;effectiveDate&quot;: &quot;2021-08-06&quot;,
+                    &quot;url&quot;: &quot;www.yubico.com&quot;,
+                    &quot;certificationDescriptor&quot;: &quot;An example&quot;,
+                    &quot;certificateNumber&quot;: &quot;FIDO2.....001&quot;,
+                    &quot;certificationPolicyVersion&quot;: &quot;1.3&quot;,
+                    &quot;certificationRequirementsVersion&quot;: &quot;1.4&quot;
+                },
+                {
+                    &quot;status&quot;: &quot;FIDO_CERTIFIED&quot;,
+                    &quot;effectiveDate&quot;: &quot;2021-08-06&quot;
+                }
+            ],
+            &quot;timeOfLastStatusChange&quot;: &quot;2021-08-16&quot;
+        }
+</code></pre></div></p>
+<h3 id="2-metadata-service-for-authenticators-approved-by-fido-alliance-mds3">2. Metadata service for authenticators approved by <a href="https://fidoalliance.org/metadata/">FIDO Alliance (MDS3)</a><a class="headerlink" href="#2-metadata-service-for-authenticators-approved-by-fido-alliance-mds3" title="Permanent link">#</a></h3>
+<p>Metadata entries for trusted authenticators registered with FIDO Alliance can be found on - https://fidoalliance.org/certification/fido-certified-products/</p>
+<p><img alt="Metadata" src="../../assets/fido2_metadata.png" /></p>
+<p>Draw.io reference for image:
+<div class="highlight"><pre><span></span><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;mxfile host=&quot;app.diagrams.net&quot; modified=&quot;2022-11-03T13:17:35.619Z&quot; agent=&quot;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.52&quot; etag=&quot;MPAHjBuOoBSpVro-BGSI&quot; version=&quot;20.5.1&quot; type=&quot;google&quot;&gt;&lt;diagram id=&quot;An1oD0C01MiJfx2t8ul6&quot; name=&quot;Page-1&quot;&gt;7Vlbc6M2FP41nrYPyXAx2Hl07HUv052kdWe7fVRAAU0EokLEdn/9noOEsQBnva6ZnZ3ZJ3M+ISG+79yEJ/4y2/0sSZG+FzHlE8+JdxN/NfE8158F8IPIXiOzYKqBRLLY3NQCG/YfNaBj0IrFtLRuVEJwxQobjESe00hZGJFSbO3bngW3n1qQhPaATUR4H/2bxSrV6DxwWvwXypK0ebLrmJGMNDcboExJLLZHkP9u4i+lEEpfZbsl5Uhew4uetz4xetiYpLk6Z0L6cRW7f/0ZB+E2cD9U+8dy+ceNUeeV8Mq88G8kL2/Wv64eEN9Q+Uql2b/aN6SUW5ZxkoN1/yxyZVRz52Cb9ahUdHdyo+7h9cFvqMioknu4xUyY+oYx4zJzY25b/g9Yesx9aEBiNE8OS7e0wIVh5gtY8nssIUGALDhnJI/oDyUY76kiMVGk5ooomuH7wm7yGJ1WVqW2olQMMJqSAi9zoZDVbcoU3RQkQmwLkQVYqjKOLMPlE4leEimqPH6oFGc5NXhM5MsDzGIKqXNuneBcRU47x0mZvMBSaRr0VLoL+iLNg5E0mvY0+l1AGNu6bFpdvn0B3FlHgbCnwGxAgdlYCsx6CvRYpnm8wKQMVsRJWbLI5rWmlOJDnJO5hca9jH0ZjUc8BQPppMEk5USxV/uZQ+SZJzwKVsf9zqbbiORNO0mqFJWMqJl0nL7fXsf1O+soIhOqeuvUSh5e+nJxwy9NgVg6GISPF3KFEQM5L0zw6sdUKSzeC9yjt35msSBmjVshE9zdYZX1Tz0Xsl3kM3E6QnUKHLs6+d655amr/NUCbz4QeJp1fH+LvvDfSjQDN2XNDOjguF6xq+lpxhuxoGPJuSBIOPZYBWw2JBmynD+Vhb6R6wlr/TA9rycbEK5sbQhnSY6JAIiHHsO/R1kYpOyFGchYHOP0e0lhp+SpXgpFL9DJaxKD+0mwwrUqJUqjM5ilkuKFLgWHSospXXcqjPMuNL57eGHfPVxvwD1G8467/+8d8xPe0aSASqVAD2insLU5zyEujmPvOkK5ri3UoXE/Fmo2FMfeWEo1OxqvggI3cv/RDNbGP3WfEjTmanc8uNo31o4pnObeOk5obD0TD3jabqeicTzzkUoGDGGQ19gZddxAuji+RZlpzXX1+1z9+lo9gD/r1Iy7C5uAqddZqJs1Ru4CXHd0D208zfKyt33siv5091XdZN6pHe6lbtI5QfdOxmO7iTdeR7JQiuLxmon8e+9hlzS/W9L8fkkb6kxHaz3c/oeTq/UenabD+QB559vpPuzDnD/UJA4pNR9Nqf7nk6tFLLCiyAvFLUDIOsNNoxNhBD6jeRTZ7amxe+7QX9UkTViJEYzUAXOH1ZsT5fcU0el65x3PG/q4OlTiLvi2Cmb7dVuXlvY/Av/dJw==&lt;/diagram&gt;&lt;/mxfile&gt;
+</code></pre></div></p>
+<p>Janssen's FIDO2 server -</p>
+<ol>
+<li>Downloads, verifies and caches metadata BLOBs from the FIDO Metadata Service.</li>
+<li>Re-downloads the metadata BLOB when it expires.</li>
+<li>Provides trust root certificates for verifying attestation statements during credential registrations.</li>
+</ol>
+<h3 id="3-skip-metadata-validation">3. Skip metadata validation<a class="headerlink" href="#3-skip-metadata-validation" title="Permanent link">#</a></h3>
+<p>Metadata validation is recommended but not mandatory as per FIDO2 specifications. As per the current implementation, there is no provision in the jans-fido2 server to turn this feature off. However, the intention is to implement it in the future.</p>
+<h3 id="references">References:<a class="headerlink" href="#references" title="Permanent link">#</a></h3>
+<ol>
+<li>https://fidoalliance.org/announcing-the-new-streamlined-and-simplified-metadata-service-for-authenticator-vendors-and-customers/</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-03T16:13:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-03</span>
       
         <br>
         Created:
