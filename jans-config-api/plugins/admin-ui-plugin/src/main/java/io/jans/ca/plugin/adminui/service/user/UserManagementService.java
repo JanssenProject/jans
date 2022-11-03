@@ -339,6 +339,9 @@ public class UserManagementService {
                 throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(), ErrorResponse.ROLE_PERMISSION_MAP_NOT_FOUND.getDescription());
             }
             return roleScopeMapping.stream().findFirst().get();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription());
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription());
