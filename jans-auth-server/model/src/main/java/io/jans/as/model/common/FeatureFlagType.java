@@ -1,5 +1,6 @@
 package io.jans.as.model.common;
 
+import io.jans.util.properties.JansConfigProperty;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.Set;
 public enum FeatureFlagType {
 
     UNKNOWN("unknown"),
+    @JansConfigProperty(description = "Enable/Disable health-check endpoint")
     HEALTH_CHECK("health_check"),
     USERINFO("userinfo"),
     CLIENTINFO("clientinfo"),
