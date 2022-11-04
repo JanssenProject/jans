@@ -640,7 +640,8 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
         localizedString.getLanguageTags().forEach(languageTag -> {
             String value = localizedString.getValue(languageTag);
-            String key = localizedString.addLdapLanguageTag(ldapAttributeName, languageTag);
+            String ldapAttributeNameLocalized = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG);
+            String key = localizedString.addLdapLanguageTag(ldapAttributeNameLocalized, languageTag);
             AttributeData attributeData = new AttributeData(key, value);
 
             listAttributes.add(attributeData);

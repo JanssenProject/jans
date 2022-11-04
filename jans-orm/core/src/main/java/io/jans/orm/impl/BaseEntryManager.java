@@ -40,6 +40,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import static io.jans.orm.model.base.LocalizedString.*;
+
 /**
  * Abstract Entry Manager
  *
@@ -994,7 +996,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                         }
 
                         LocalizedString localizedString = (LocalizedString) propertyValue;
-                        final String finalLdapAttributeName = ldapAttributeName;
+                        final String finalLdapAttributeName = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG);
                         Map<String, AttributeData> filteredAttrs = attributesMap.entrySet().stream()
                                 .filter(x -> x.getKey().toLowerCase().startsWith(finalLdapAttributeName.toLowerCase()))
                                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));

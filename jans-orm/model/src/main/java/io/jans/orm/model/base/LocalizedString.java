@@ -32,6 +32,8 @@ public class LocalizedString implements Serializable {
     public static final String LANG_PREFIX = "lang";
     public static final String LANG_JOINER = "-";
 
+    public static final String LOCALIZED = "Localized";
+
     public LocalizedString() {
         values = new HashMap<>();
     }
