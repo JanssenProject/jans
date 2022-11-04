@@ -55,6 +55,8 @@ public class JansConfigPropertyProcessor extends AbstractProcessor {
                 markdownContent.append("| "+propertyAnnotation.defaultValue()+" |");
                 markdownContent.append("</br>");
             }
+
+            // This would be replaced by code to write into a markdown file
             System.out.println(markdownContent.toString());
         }
         return false;
