@@ -212,7 +212,7 @@ Example of authenticator metadata:
 
 Metadata entries for trusted authenticators registered with FIDO Alliance can be found on - https://fidoalliance.org/certification/fido-certified-products/
 
-![Metadata](../../assets/fido2_metadata.png)
+![Metadata](../../../assets/fido2_metadata.png)
 
 Draw.io reference for image:
 ```
