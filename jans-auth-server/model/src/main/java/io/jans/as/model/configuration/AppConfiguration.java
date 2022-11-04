@@ -14,6 +14,7 @@ import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
+import io.jans.util.properties.JansConfigProperty;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,7 +37,11 @@ public class AppConfiguration implements Configuration {
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
 
     private String issuer;
+
+    @JansConfigProperty(description = "This is base end point", isMandatory = true, defaultValue = "https://sampleBase/")
     private String baseEndpoint;
+
+    @JansConfigProperty(description = "This is authorization end point", isMandatory = false, defaultValue = "https://sampleAuth/")
     private String authorizationEndpoint;
     private String tokenEndpoint;
     private String tokenRevocationEndpoint;
