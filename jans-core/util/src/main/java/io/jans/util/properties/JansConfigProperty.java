@@ -8,6 +8,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface JansConfigProperty {
-    String optionalType() default "Optional";
     String description() default "None";
+
+    boolean isMandatory() default false;
+
+    String defaultValue() default "None";
 }
