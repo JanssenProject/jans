@@ -1,10 +1,11 @@
 import os
 import sys
-import threading
+import asyncio
 
 from typing import Sequence
 
 from prompt_toolkit.application import Application
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, VSplit, Window, DynamicContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame
@@ -58,12 +59,6 @@ class Plugin(DialogUtils):
                     ],style='class:outh_containers_scopes')
 
 
-    def get_users(self) -> None:
-        """Function to get users.
-        """
-        t = threading.Thread(target=self.get_users_thread, daemon=True)
-        self.app.start_progressing()
-        t.start()
 
     def update_user_list_container(self) -> None:
         """User management list
@@ -92,34 +87,25 @@ class Plugin(DialogUtils):
         self.user_list_container = users_list_box
         self.app.invalidate()
 
-    def get_users_thread(self, start_index: int=0) -> None:
+    def get_users(self, start_index: int=0) -> None:
         """Gets Users from server.
         """
+
         endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                        operation_id='get-user',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-        except Exception as e:
+        cli_args = {'operation_id': 'get-user'}
+
+        async def coroutine():
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            self.app.show_message(_("Error getting Users"), str(e))
-            return
-        self.app.stop_progressing()
+            self.users = response.json()
+            self.app.logger.debug("Users: {}".format(self.users))
 
-        try:
-            self.users = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting Users"), str(rsponse.text))
-            return
+            if not self.widgets_ready:
+                self.update_user_list_container()
 
-        self.app.logger.debug("Users: {}".format(self.users))
+        asyncio.ensure_future(coroutine())
 
-        if not self.widgets_ready:
-            self.update_user_list_container()
 
 
     def edit_user_dialog(self):

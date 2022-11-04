@@ -4,13 +4,14 @@ import time
 import json
 
 import threading
-from asyncio import Future, ensure_future
+import asyncio
 from functools import partial
 from typing import Any, Optional
 
 
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import (
@@ -322,113 +323,93 @@ class Plugin(DialogUtils):
         self.app.start_progressing()
         t.start()
 
-    def oauth_update_scopes(
-        self, 
-        start_index: Optional[int]= 0,  
-        pattern: Optional[str]= '', 
-        ) -> None:
+    def oauth_get_scopes(
+            self, 
+            start_index: Optional[int]= 0,  
+            pattern: Optional[str]= '', 
+            ) -> None:
         """update the current Scopes data to server
 
         Args:
             start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
         """
         def get_next(
-            start_index: int,  
-            pattern: Optional[str]= '', 
+            start_index: int,
+            pattern: Optional[str]= '',
             ) -> None:
-            self.oauth_update_scopes(start_index, pattern='')
+            self.oauth_get_scopes(start_index, pattern='')
 
-        endpoint_args ='withAssociatedClients:true,limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
-        if pattern:
-            endpoint_args +=',pattern:'+pattern
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                operation_id='get-oauth-scopes',
-                url_suffix='',
-                endpoint_args=endpoint_args,
-                data_fn=None,
-                data={}
-                        )
-        except Exception as e:
+
+        async def coroutine():
+
+            endpoint_args ='withAssociatedClients:true,limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
+            if pattern:
+                endpoint_args +=',pattern:'+pattern
+
+
+            cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':endpoint_args}
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            self.app.show_message(_("Error getting scopes"), str(e))
-            return
-        self.app.stop_progressing()
+            result = response.json()
 
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting scopes"), str(rsponse.text))
-            return
 
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting scopes"), str(rsponse.text))
-            return
-        
-        data =[]
-        
-        for d in result.get('entries', []): 
-            data.append(
-                [
-                d['id'],
-                d.get('description', ''),
-                d.get('scopeType',''),   ## some scopes have no scopetypr
-                d['inum']
-                ]
-            )
-        
-        if data:
+            data =[]
 
-            scopes = JansVerticalNav(
-                    myparent=self.app,
-                    headers=['id', 'Description', 'Type','inum'],
-                    preferred_size= [30,40,8,12],
-                    data=data,
-                    on_enter=self.edit_scope_dialog,
-                    on_display=self.app.data_display_dialog,
-                    on_delete=self.delete_scope,
-                    get_help=(self.get_help,'Scope'),
-                    selectes=0,
-                    headerColor='class:outh-verticalnav-headcolor',
-                    entriesColor='class:outh-verticalnav-entriescolor',
-                    all_data=result['entries']
+            for d in result.get('entries', []): 
+                data.append(
+                    [
+                    d['id'],
+                    d.get('description', ''),
+                    d.get('scopeType',''),   ## some scopes have no scopetypr
+                    d['inum']
+                    ]
                 )
+            
+            if data:
 
-            buttons = []
-            if start_index > 0:
-                handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
-                prev_button = Button(_("Prev"), handler=handler_partial)
-                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                buttons.append(prev_button)
-            if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
-                next_button = Button(_("Next"), handler=handler_partial)
-                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                buttons.append(next_button)
+                scopes = JansVerticalNav(
+                        myparent=self.app,
+                        headers=['id', 'Description', 'Type','inum'],
+                        preferred_size= [30,40,8,12],
+                        data=data,
+                        on_enter=self.edit_scope_dialog,
+                        on_display=self.app.data_display_dialog,
+                        on_delete=self.delete_scope,
+                        get_help=(self.get_help,'Scope'),
+                        selectes=0,
+                        headerColor='class:outh-verticalnav-headcolor',
+                        entriesColor='class:outh-verticalnav-entriescolor',
+                        all_data=result['entries']
+                    )
 
-            self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
-            self.oauth_data_container['scopes'] = HSplit([
-                scopes,
-                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-            ])
+                buttons = []
+                if start_index > 0:
+                    handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
+                    prev_button = Button(_("Prev"), handler=handler_partial)
+                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                    buttons.append(prev_button)
+                if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
+                    handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
+                    next_button = Button(_("Next"), handler=handler_partial)
+                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                    buttons.append(next_button)
 
-            get_app().invalidate()
-            self.app.layout.focus(scopes)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+                self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
+                self.oauth_data_container['scopes'] = HSplit([
+                    scopes,
+                    VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
+                ])
 
-        else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['scopes'])
+                get_app().invalidate()
+                self.app.layout.focus(scopes)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
 
-    def oauth_get_scopes(self) -> None:
-        """Method to get the Scopes data from server
-        """
-        self.oauth_data_container['scopes'] = HSplit([Label(_("Please wait while getting Scopes"),style='class:outh-waitscopedata.label')], width=D(),style='class:outh-waitclientdata')
-        t = threading.Thread(target=self.oauth_update_scopes, daemon=True)
-        self.app.start_progressing()
-        t.start()
+            else:
+                self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['scopes'])
 
-    # ---------------------------------------------------------------------- #
-    # ---------------------------------------------------------------------- #
-    # ---------------------------------------------------------------------- #
+        asyncio.ensure_future(coroutine())
+
+
     def oauth_update_properties(
         self,
         start_index: Optional[int]= 0, 
@@ -801,7 +782,7 @@ class Plugin(DialogUtils):
                 self.oauth_get_clients()
             return result
 
-        ensure_future(coroutine())
+        asyncio.ensure_future(coroutine())
 
 
     def get_help(self, **kwargs: Any):
@@ -856,7 +837,7 @@ class Plugin(DialogUtils):
                 self.oauth_get_scopes()
             return result
 
-        ensure_future(coroutine())
+        asyncio.ensure_future(coroutine())
 
     def delete_UMAresource(self, **kwargs: Any):
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(kwargs ['selected'][0]))
@@ -880,7 +861,7 @@ class Plugin(DialogUtils):
 
             return result
 
-        ensure_future(coroutine())
+        asyncio.ensure_future(coroutine())
 
     def oauth_logging(self) -> None:
         self.oauth_data_container['logging'] = HSplit([
@@ -958,4 +939,4 @@ class Plugin(DialogUtils):
                 except:
                     self.app.layout.focus(self.app.center_frame)
 
-            ensure_future(coroutine())
+            asyncio.ensure_future(coroutine())

@@ -8,9 +8,11 @@ import logging
 import importlib
 import sys
 import asyncio
+import concurrent.futures
 
 from pathlib import Path
 from itertools import cycle
+from requests.models import Response
 
 import prompt_toolkit
 from prompt_toolkit.application import Application
@@ -87,6 +89,7 @@ class JansCliApp(Application):
     entries_per_page = 20 # we can make this configurable
 
     def __init__(self):
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
         self.init_logger()
         self.status_bar_text = ''
@@ -159,6 +162,17 @@ class JansCliApp(Application):
                 self.progress_char = next(self.progress_iterator)
                 self.invalidate()
             await asyncio.sleep(0.15)
+
+
+    def cli_requests(self, args: dict) -> Response:
+        response = self.cli_object.process_command_by_id(
+                        operation_id=args['operation_id'],
+                        url_suffix=args.get('url_suffix', ''),
+                        endpoint_args=args.get('endpoint_args', ''),
+                        data_fn=args.get('data_fn'),
+                        data=args.get('data', {})
+                        )
+        return response
 
     def start_progressing(self):
         self.progress_active = True
