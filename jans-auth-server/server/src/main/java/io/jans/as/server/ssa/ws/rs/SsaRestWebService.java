@@ -36,4 +36,13 @@ public interface SsaRestWebService {
     @Path("/ssa")
     @Produces({MediaType.APPLICATION_JSON})
     Response validate(@HeaderParam("jti") String jti);
+
+    @DELETE
+    @Path("/ssa")
+    @Produces({MediaType.APPLICATION_JSON})
+    Response revoke(
+            @QueryParam("jti") String jti,
+            @QueryParam("org_id") Long orgId,
+            @Context HttpServletRequest httpRequest
+    );
 }

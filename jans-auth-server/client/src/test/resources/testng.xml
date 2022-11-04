@@ -1171,12 +1171,22 @@
     <!-- SSA -->
     <test name="SSA create test (HTTP)" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ssa.SsaCreateRestTest"/>
+            <class name="io.jans.as.client.ssa.SsaCreateTest"/>
         </classes>
     </test>
     <test name="SSA get test (HTTP)" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ssa.SsaGetRestTest"/>
+            <class name="io.jans.as.client.ssa.SsaGetTest"/>
+        </classes>
+    </test>
+    <test name="SSA validate test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaValidateTest"/>
+        </classes>
+    </test>
+    <test name="SSA revoke test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaRevokeTest"/>
         </classes>
     </test>
 </suite>
