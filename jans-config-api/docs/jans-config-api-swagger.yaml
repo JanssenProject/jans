@@ -3622,34 +3622,34 @@ components:
           type: string
           description: Type of script.
           enum:
-            - PERSON_AUTHENTICATION
-            - INTROSPECTION
-            - RESOURCE_OWNER_PASSWORD_CREDENTIALS
-            - APPLICATION_SESSION
-            - CACHE_REFRESH
-            - CLIENT_REGISTRATION
-            - ID_GENERATOR
-            - UMA_RPT_POLICY
-            - UMA_RPT_CLAIMS
-            - UMA_CLAIMS_GATHERING
-            - CONSENT_GATHERING
-            - DYNAMIC_SCOPE
-            - SPONTANEOUS_SCOPE
-            - END_SESSION
-            - POST_AUTHN
-            - SCIM
-            - CIBA_END_USER_NOTIFICATION
-            - REVOKE_TOKEN
-            - PERSISTENCE_EXTENSION
-            - IDP
-            - DISCOVERY
-            - UPDATE_TOKEN
-            - CONFIG_API
+            - person_authentication
+            - introspection
+            - resource_owner_password_credentials
+            - application_session
+            - cache_refresh
+            - client_registration
+            - id_generator
+            - uma_rpt_policy
+            - uma_rpt_claims
+            - uma_claims_gathering
+            - consent_gathering
+            - dynamic_scope
+            - spontaneous_scope
+            - end_session
+            - post_authn
+            - scim
+            - ciba_end_user_notification
+            - revoke_token
+            - persistence_extension
+            - idp
+            - discovery
+            - update_token
+            - config_api
         programmingLanguage:
           type: string
           enum:
-            - PYTHON
-            - JAVA
+            - python
+            - java
           description: Programming language of the custom script.
         moduleProperties:
           type: array
