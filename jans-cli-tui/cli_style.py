@@ -15,7 +15,8 @@ style = Style.from_dict(
         "textarea-readonly": "bg:#ffffff fg:#4D4D4D",
         "required-field": "#8b000a",
         "textarea":"bg:#ffffff fg:#0000ff",
-        "status": "reverse",
+        "status": "bg:ansigray fg:black",
+        "progress": "bg:ansigray fg:ansired",
         "select-box cursor-line": "nounderline bg:ansired fg:ansiwhite",
         "checkbox":"nounderline bg:#ffffff fg:#d1c0c0 #ff0000",
         ### Jans_cli_tui
@@ -27,13 +28,13 @@ style = Style.from_dict(
         "jans-main-usercredintial.titletext":"",
         "jans-main-datadisplay":"",
         "jans-main-datadisplay.text":"",
-        
+
         ### Styling for Scripts plugin
         ### main
-        "script_maincontainer":"bg:#908F90",  
+        "script_maincontainer":"bg:#908F90",
         "script-sidenav":"red",  
         "script-mainarea":"yellow",  
-        "script-navbar-bgcolor":"#2600ff",  
+        "script-navbar-bgcolor":"#2600ff",
         "script-checkbox":"green",
         "script-titledtext":"green",
         "script-label":"blue",
@@ -51,13 +52,13 @@ style = Style.from_dict(
         "outh-verticalnav-headcolor":'green',
         "outh-verticalnav-entriescolor":'white',
 
-        "outh-waitclientdata":'' , 
-        "outh-waitclientdata.label":'' , 
+        "outh-waitclientdata":'',
+        "outh-waitclientdata.label":'',
         "outh-waitscopedata":'' , 
-        "outh-waitscopedata.label":'' , 
+        "outh-waitscopedata.label":'',
 
         "outh-titledtext":"green",
-        "outh-label":"blue",  
+        "outh-label":"blue",
         ## edit_client_dialog
         "outh-client-navbar":"#2600ff",
         "outh-client-navbar-headcolor":"green",

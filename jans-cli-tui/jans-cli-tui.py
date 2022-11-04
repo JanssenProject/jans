@@ -107,7 +107,7 @@ class JansCliApp(Application):
 
         self.yes_button = Button(text=_("Yes"), handler=accept_yes)
         self.no_button = Button(text=_("No"), handler=accept_no)
-        self.pbar_window = Window(char=lambda: self.progress_char, style='class:status', width=1)
+        self.pbar_window = Window(char=lambda: self.progress_char, style='class:progress', width=1)
         self.status_bar = VSplit([
                                 Window(FormattedTextControl(self.update_status_bar), style='class:status', height=1),
                                 self.pbar_window,
