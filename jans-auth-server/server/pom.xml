@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.3-SNAPSHOT</version>
+		<version>1.0.4-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -637,7 +637,21 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- We have to explicitly specify version because arquillian-jetty-container depends on 1.1.11-->
+		<!-- Test: External DB drivers-->
+		<!-- Couchbase -->
+		<dependency>
+			<groupId>com.couchbase.client</groupId>
+			<artifactId>java-client</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Cloud Spanner -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-spanner</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- We have to explicitly specify version because arquillian-jetty-container depends on 1.1.11 -->
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
 			<artifactId>arquillian-container-test-impl-base</artifactId>
@@ -983,7 +997,7 @@
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-client</artifactId>
-					<version>3.0.21.Final</version>
+					<version>3.14.0.Final</version>
 					<scope>test</scope>
 				</dependency>
 				<dependency>

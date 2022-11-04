@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<name>Jans authentication server parent</name>
     <distributionManagement>
 	  <repository>
@@ -27,7 +27,7 @@
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
 		<activemq.version>5.15.14</activemq.version>
 
-		<jettison.version>1.4.1</jettison.version>
+		<jettison.version>1.5.1</jettison.version>
 
 		<slf4j.version>1.7.25</slf4j.version>
 
@@ -271,7 +271,7 @@
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
-                <version>18.0.0</version>
+                <version>23.0.0</version>
             </dependency>
 
 	        <dependency>

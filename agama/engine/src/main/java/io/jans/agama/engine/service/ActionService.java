@@ -105,7 +105,9 @@ public class ActionService {
                     throw new InstantiationException(msg);
                 }
 
-                logger.debug("Constructor found");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Constructor found: {}", constr.toGenericString());
+                }
                 Object[] args = getArgsForCall(constr, arity, rhinoArgs);
 
                 logger.debug("Creating an instance");
@@ -128,7 +130,9 @@ public class ActionService {
             throw new NoSuchMethodException(msg);
         }
 
-        logger.debug("Found method {}", methodName);        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Method found: {}", javaMethod.toGenericString());
+        }
         Object[] args = getArgsForCall(javaMethod, arity, rhinoArgs);
 
         logger.debug("Performing method call");
@@ -166,6 +170,7 @@ public class ActionService {
             Class<?> argClass = arg.getClass();
 
             //Try to apply cheaper conversions first (in comparison to mapper-based conversion)
+            //Note: A numeric literal coming from Javascript code lands as a Double
             Boolean primCompat = PrimitiveUtils.compatible(argClass, paramType);
             if (primCompat != null) {
 
@@ -173,9 +178,8 @@ public class ActionService {
                     logger.trace("Parameter is a primitive (or wrapped) {}", typeName);
                     javaArgs[i] = arg;
 
-                } else if (argClass.equals(Double.class)) {
-                    //Any numeric literal coming from Javascript code lands as a Double
-                    Object number = PrimitiveUtils.primitiveNumberFrom((Double) arg, paramType);
+                } else if (Number.class.isAssignableFrom(argClass)) {
+                    Object number = PrimitiveUtils.primitiveNumberFrom((Number) arg, paramType);
                     
                     if (number != null) {
                         logger.trace("Parameter is a primitive (or wrapped) {}", typeName);

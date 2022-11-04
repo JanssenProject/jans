@@ -24,10 +24,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.10"
           cache: pip
           cache-dependency-path: docs/requirements.txt
 
@@ -49,6 +49,11 @@ jobs:
           github.event_name == 'workflow_dispatch'
         run: |
           mv ../mkdocs.yml mkdocs.yml
+
+      - name: Copy generated chart from main
+        run: |
+          helm package charts/janssen/
+          cp janssen-*.tgz ../
 
       - name: Generate docs
         run: echo "Custom work on generating docs can go here."
@@ -114,6 +119,14 @@ jobs:
           LATEST=${{ steps.set_versions.outputs.LATEST }}
           STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout gh-pages
+          # move generated chart from a previous step
+          mv ../janssen-*.tgz ./charts/
+          cd ./charts
+          git add janssen-*.tgz && git update-index --refresh
+          helm repo index .
+          git add index.yaml && git update-index --refresh
+          cd ..
+          # END move generated chart from a previous step
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -m "Set stable to ${STABLE}"
@@ -121,40 +134,3 @@ jobs:
           git add latest.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -m "Set latest to ${LATEST}"
           git push origin gh-pages
-
-  # Because the output of the index.yaml is also in gh-pages we want to ensure the jobs run after each other
-  # This releases the helm chart
-  release-helm-chart:
-    if: >-
-      github.event_name == 'release' &&
-      github.event.action == 'published' &&
-      startsWith(github.event.release.name, 'v') &&
-      !github.event.release.draft &&
-      !github.event.release.prerelease ||
-      github.event_name == 'workflow_dispatch'
-    # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
-    # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
-    needs: build
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Install Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.8.1
-
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.4.0
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

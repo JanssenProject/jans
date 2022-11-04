@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+* **agama:** add utility classes for inbound identity ([#2231](https://github.com/JanssenProject/jans/issues/2231)) ([96e32a4](https://github.com/JanssenProject/jans/commit/96e32a407ec6c545b73a6fd103ed2ae5876bd500))
+* **agama:** add utility classes for inbound identity ([#2280](https://github.com/JanssenProject/jans/issues/2280)) ([ca6fdc9](https://github.com/JanssenProject/jans/commit/ca6fdc90256e4ef103bf50dc27cb694c940ba70b))
+* **agama:** add utility classes for inbound identity ([#2417](https://github.com/JanssenProject/jans/issues/2417)) ([2878bdd](https://github.com/JanssenProject/jans/commit/2878bdd737b4bd7f8f080113826a4bc4bf49ffba))
+* **jans-config-api:** agama flow endpoint ([#1898](https://github.com/JanssenProject/jans/issues/1898)) ([0e73306](https://github.com/JanssenProject/jans/commit/0e73306f7642a74a3ed2cf8a8687a1ea447aa7bd))
+
+
+### Bug Fixes
+
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
+
+### Documentation
+
+* add instructions to setup inbound identity flows [#2198](https://github.com/JanssenProject/jans/issues/2198) ([#2222](https://github.com/JanssenProject/jans/issues/2222)) ([d959b32](https://github.com/JanssenProject/jans/commit/d959b32cc9de0b8311d13ce25fcba162d0b0c5a3))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 

@@ -15,9 +15,6 @@ servers:
   variables: {}
 tags:
 - name: Fido2 - Configuration
-- name: Admin UI - Permission
-- name: Admin UI - Role-Permissions Mapping
-- name: Admin UI - License
 paths:
   /fido2/config:
     get:
@@ -32,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DbApplicationConfiguration'
+                $ref: '#/components/schemas/AppConfiguration'
         "401":
           description: Unauthorized
         "500":
@@ -51,14 +48,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DbApplicationConfiguration'
+              $ref: '#/components/schemas/AppConfiguration'
       responses:
         "200":
           description: Fido2Config
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/AppConfiguration'
         "401":
           description: Unauthorized
         "500":
@@ -97,16 +94,83 @@ paths:
         - https://jans.io/oauth/config/fido2.readonly
 components:
   schemas:
-    DbApplicationConfiguration:
+    AppConfiguration:
       type: object
       properties:
-        dn:
+        issuer:
           type: string
-        dynamicConf:
+        baseEndpoint:
           type: string
-        revision:
+        cleanServiceInterval:
           type: integer
-          format: int64
+          format: int32
+        cleanServiceBatchChunkSize:
+          type: integer
+          format: int32
+        useLocalCache:
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        metricReporterInterval:
+          type: integer
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+        personCustomObjectClassList:
+          type: array
+          items:
+            type: string
+        fido2Configuration:
+          $ref: '#/components/schemas/Fido2Configuration'
+    Fido2Configuration:
+      type: object
+      properties:
+        authenticatorCertsFolder:
+          type: string
+        mdsAccessToken:
+          type: string
+        mdsCertsFolder:
+          type: string
+        mdsTocsFolder:
+          type: string
+        checkU2fAttestations:
+          type: boolean
+        userAutoEnrollment:
+          type: boolean
+        unfinishedRequestExpiration:
+          type: integer
+          format: int32
+        authenticationHistoryExpiration:
+          type: integer
+          format: int32
+        serverMetadataFolder:
+          type: string
+        requestedCredentialTypes:
+          type: array
+          items:
+            type: string
+        requestedParties:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedParty'
+    RequestedParty:
+      type: object
+      properties:
+        name:
+          type: string
+        domains:
+          type: array
+          items:
+            type: string
     Fido2RegistrationData:
       type: object
       properties:

@@ -1,0 +1,12 @@
+ {
+        "name": "config-api-resource",
+        "iconUri": "https://config-api.com",
+        "clients": [
+            "inum=1800.e9131b86-f39f-421c-9dde-b7f90c21a2fe,ou=clients,o=jans"
+        ],
+        "scopes":[
+            "inum=ab47c599-d188-44b6-a32a-91e6b173856a,ou=scopes,o=jans"
+        ],
+        "description": "Uma resource config api",
+        "deletable": false
+    }

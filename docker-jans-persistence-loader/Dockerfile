@@ -24,7 +24,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=e74ea8e27e59d35ff6e3c6f997e6c1df6a04ec83
+ENV JANS_SOURCE_VERSION=c3e3f537e4e85c1ee718f7a7b79a203e7ed57e42
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 
@@ -52,7 +52,7 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
     && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/
 
-RUN mkdir -p /app/templates/jans-config-api
+RUN mkdir -p /app/templates
 
 # partially sync templates from linux-setup
 RUN cd /tmp/jans \
@@ -64,7 +64,6 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
-    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # Download jans-config-api-swagger for role_scope_mapping
@@ -166,9 +165,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
-    CN_AUTH_SERVER_URL="" \
-    CN_TOKEN_SERVER_BASE_HOSTNAME=""
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
 
 # ====
 # misc
@@ -177,7 +174,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL name="janssenproject/persistence-loader" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.3" \
+    version="1.0.4" \
     release="dev" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"

@@ -1,8 +1,9 @@
 package io.jans.as.server.ssa.ws.rs.action;
 
-import io.jans.as.client.SsaRequest;
+import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.config.BaseDnConfiguration;
@@ -12,6 +13,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaErrorResponseType;
+import io.jans.as.model.util.DateUtil;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.external.ModifySsaResponseService;
 import io.jans.as.server.service.external.context.ModifySsaResponseContext;
@@ -23,7 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -94,20 +95,20 @@ public class SsaCreateActionTest {
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("test description");
         ssa.getAttributes().setSoftwareId("gluu-scan-api");
-        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("password"));
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
 
         requestJson = new JSONObject();
-        requestJson.put(ORG_ID.toString(), ssa.getOrgId());
-        requestJson.put(EXPIRATION.toString(), ssa.getExpirationDate().getTime() / 1000L);
-        requestJson.put(DESCRIPTION.toString(), ssa.getDescription());
-        requestJson.put(SOFTWARE_ID.toString(), ssa.getAttributes().getSoftwareId());
-        requestJson.put(SOFTWARE_ROLES.toString(), ssa.getAttributes().getSoftwareRoles());
-        requestJson.put(GRANT_TYPES.toString(), ssa.getAttributes().getGrantTypes());
-        requestJson.put(ONE_TIME_USE.toString(), ssa.getAttributes().getOneTimeUse());
-        requestJson.put(ROTATE_SSA.toString(), ssa.getAttributes().getRotateSsa());
+        requestJson.put(ORG_ID.getName(), ssa.getOrgId());
+        requestJson.put(EXPIRATION.getName(), DateUtil.dateToUnixEpoch(ssa.getExpirationDate()));
+        requestJson.put(DESCRIPTION.getName(), ssa.getDescription());
+        requestJson.put(SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
+        requestJson.put(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
+        requestJson.put(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
+        requestJson.put(ONE_TIME_USE.getName(), ssa.getAttributes().getOneTimeUse());
+        requestJson.put(ROTATE_SSA.getName(), ssa.getAttributes().getRotateSsa());
     }
 
     @Test
@@ -118,10 +119,7 @@ public class SsaCreateActionTest {
         when(inumService.generateDefaultId()).thenReturn(UUID.randomUUID().toString());
         Client client = new Client();
         client.setDn("inum=0000,ou=clients,o=jans");
-        when(ssaRestWebServiceValidator.validateClient()).thenReturn(client);
-
-        HttpServletRequest httpRequest = mock(HttpServletRequest.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
+        when(ssaRestWebServiceValidator.getClientFromSession()).thenReturn(client);
 
         ExecutionContext executionContext = mock(ExecutionContext.class);
         ModifySsaResponseContext context = mock(ModifySsaResponseContext.class);
@@ -133,15 +131,15 @@ public class SsaCreateActionTest {
         when(ssaJsonService.jsonObjectToString(any())).thenReturn("{\"ssa\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}");
         when(appConfiguration.getSsaConfiguration()).thenReturn(new SsaConfiguration());
 
-        Response response = ssaCreateAction.create(requestJson.toString(), httpRequest, securityContext);
+        Response response = ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
         assertNotNull(response.getEntity(), "response entity is null");
         assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode());
 
         verify(errorResponseFactory).validateFeatureEnabled(any());
-        verify(log).debug(anyString(), any(SsaRequest.class));
+        verify(log).debug(anyString(), any(SsaCreateRequest.class));
         verify(staticConfiguration).getBaseDn();
-        verify(ssaRestWebServiceValidator).validateClient();
+        verify(ssaRestWebServiceValidator).getClientFromSession();
         verify(ssaRestWebServiceValidator).checkScopesPolicy(any(), anyString());
         verify(ssaService).persist(any());
         verify(log).info(anyString(), any(Ssa.class));
@@ -173,6 +171,8 @@ public class SsaCreateActionTest {
         assertEquals(ssaAux.getAttributes().getOneTimeUse(), ssa.getAttributes().getOneTimeUse());
         assertNotNull(ssaAux.getAttributes().getRotateSsa(), "ssa rotate_ssa is null");
         assertEquals(ssaAux.getAttributes().getRotateSsa(), ssa.getAttributes().getRotateSsa());
+        assertNotNull(ssaAux.getState(), "ssa state is null");
+        assertEquals(ssaAux.getState(), SsaState.ACTIVE);
     }
 
     @Test
@@ -185,7 +185,7 @@ public class SsaCreateActionTest {
         doThrow(error).when(errorResponseFactory).validateFeatureEnabled(any());
 
         try {
-            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class), mock(SecurityContext.class));
+            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class));
         } catch (WebApplicationException e) {
             assertNotNull(e, "Exception is null");
             assertNotNull(e.getResponse(), "Exception Response is null");
@@ -204,16 +204,16 @@ public class SsaCreateActionTest {
                 Response.status(Response.Status.BAD_REQUEST)
                         .entity("Invalid client")
                         .build());
-        doThrow(error).when(ssaRestWebServiceValidator).validateClient();
+        doThrow(error).when(ssaRestWebServiceValidator).getClientFromSession();
         when(log.isErrorEnabled()).thenReturn(Boolean.FALSE);
 
         try {
-            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class), mock(SecurityContext.class));
+            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class));
         } catch (WebApplicationException e) {
             assertNotNull(e, "Exception is null");
             assertNotNull(e.getResponse(), "Exception Response is null");
         }
-        verify(ssaRestWebServiceValidator).validateClient();
+        verify(ssaRestWebServiceValidator).getClientFromSession();
         verify(log).isErrorEnabled();
         verify(log, never()).error(anyString(), any(WebApplicationException.class));
         verify(ssaRestWebServiceValidator, never()).checkScopesPolicy(any(), anyString());
@@ -231,16 +231,16 @@ public class SsaCreateActionTest {
                 Response.status(Response.Status.BAD_REQUEST)
                         .entity("Invalid client")
                         .build());
-        doThrow(error).when(ssaRestWebServiceValidator).validateClient();
+        doThrow(error).when(ssaRestWebServiceValidator).getClientFromSession();
         when(log.isErrorEnabled()).thenReturn(Boolean.TRUE);
 
         try {
-            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class), mock(SecurityContext.class));
+            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class));
         } catch (WebApplicationException e) {
             assertNotNull(e, "Exception is null");
             assertNotNull(e.getResponse(), "Exception Response is null");
         }
-        verify(ssaRestWebServiceValidator).validateClient();
+        verify(ssaRestWebServiceValidator).getClientFromSession();
         verify(log).isErrorEnabled();
         verify(log).error(anyString(), any(WebApplicationException.class));
         verify(ssaRestWebServiceValidator, never()).checkScopesPolicy(any(), anyString());
@@ -257,12 +257,12 @@ public class SsaCreateActionTest {
         when(errorResponseFactory.createWebApplicationException(any(Response.Status.class), any(SsaErrorResponseType.class), anyString())).thenThrow(error);
 
         try {
-            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class), mock(SecurityContext.class));
+            ssaCreateAction.create(requestJson.toString(), mock(HttpServletRequest.class));
         } catch (WebApplicationException e) {
             assertNotNull(e, "Exception is null");
         }
         verify(staticConfiguration).getBaseDn();
-        verify(log).debug(anyString(), any(SsaRequest.class));
+        verify(log).debug(anyString(), any(SsaCreateRequest.class));
         verify(log).error(eq(null), any(NullPointerException.class));
         verify(ssaRestWebServiceValidator, never()).checkScopesPolicy(any(), anyString());
         verify(ssaService, never()).persist(any(Ssa.class));

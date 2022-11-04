@@ -1,0 +1,9 @@
+Flow flow
+    Basepath ""
+    
+When day is rainy
+ Log me
+    Log "cowboy music"
+    Log "By Cerce"
+
+//Failure reason: second and third log statements mis-aligned 

@@ -1,6 +1,6 @@
 # persistence
 
-![Version: 1.0.3-dev](https://img.shields.io/badge/Version-1.0.3--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.3-dev](https://img.shields.io/badge/AppVersion-1.0.3--dev-informational?style=flat-square)
+![Version: 1.0.4-dev](https://img.shields.io/badge/Version-1.0.4--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.4-dev](https://img.shields.io/badge/AppVersion-1.0.4--dev-informational?style=flat-square)
 
 Job to generate data and initial config for Janssen Server persistence layer.
 
@@ -15,7 +15,6 @@ Job to generate data and initial config for Janssen Server persistence layer.
 ## Source Code
 
 * <https://github.com/JanssenProject/jans/docker-jans-persistence-loader>
-* <https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/persistence>
 
 ## Requirements
 
@@ -32,8 +31,8 @@ Kubernetes: `>=v1.21.0-0`
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"janssenfederation/persistence"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.3_dev"` | Image  tag to use for deploying. |
+| image.repository | string | `"janssenproject/persistence"` | Image  to use for deploying. |
+| image.tag | string | `"1.0.4_dev"` | Image  tag to use for deploying. |
 | imagePullSecrets | list | `[]` |  |
 | nameOverride | string | `""` |  |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |

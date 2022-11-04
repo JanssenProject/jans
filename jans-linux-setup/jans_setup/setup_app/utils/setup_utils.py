@@ -385,18 +385,20 @@ class SetupUtils(Crypto64):
         return text % dictionary
 
 
-    def renderTemplateInOut(self, file_path, template_folder, output_dir, pystring=False):
+    def renderTemplateInOut(self, file_path, template_folder, output_dir=None, pystring=False, out_file=None):
         fn = os.path.basename(file_path)
         in_fp = os.path.join(template_folder, fn)
-        out_fp = os.path.join(output_dir, fn)
         self.logIt("Rendering template %s" % in_fp)
+
+        if not output_dir:
+            output_dir = os.path.dirname(out_file)
 
         # Create output folder if needed
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         rendered_text = self.render_template(in_fp, pystring)
-
+        out_fp = out_file or os.path.join(output_dir, fn)
         self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):

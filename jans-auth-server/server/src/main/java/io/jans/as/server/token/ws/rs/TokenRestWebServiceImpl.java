@@ -13,7 +13,10 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
-import io.jans.as.model.common.*;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.FeatureFlagType;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.TokenType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -52,9 +55,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,7 +63,6 @@ import org.slf4j.Logger;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -134,6 +134,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private TokenRestWebServiceValidator tokenRestWebServiceValidator;
 
+    @Inject
+    private TokenExchangeService tokenExchangeService;
+
+    @Inject
+    private TokenCreatorService tokenCreatorService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -188,9 +194,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
-            }
-
-            if (gt == GrantType.REFRESH_TOKEN) {
+            } else if (gt == GrantType.REFRESH_TOKEN) {
                 return processRefreshTokenGrant(scope, refreshToken, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
                 return processClientGredentials(scope, request, auditLog, client, idTokenPreProcessing, executionContext);
@@ -200,6 +204,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return processCIBA(scope, authReqId, idTokenPreProcessing, executionContext);
             } else if (gt == GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(executionContext, deviceCode, scope);
+            } else if (gt == GrantType.TOKEN_EXCHANGE) {
+                final JSONObject responseJson = tokenExchangeService.processTokenExchange(scope, idTokenPreProcessing, executionContext);
+                return response(Response.ok().entity(responseJson.toString()), auditLog);
             }
         } catch (WebApplicationException e) {
             throw e;
@@ -245,7 +252,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             }
         }
 
-        RefreshToken reToken = createRefreshToken(executionContext, scope);
+        RefreshToken reToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
         scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
 
@@ -327,7 +334,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         RefreshToken reToken = null;
         if (isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
             if (isTrue(appConfiguration.getRefreshTokenExtendLifetimeOnRotation())) {
-                reToken = createRefreshToken(executionContext, scope); // extend lifetime
+                reToken = tokenCreatorService.createRefreshToken(executionContext, scope); // extend lifetime
             } else {
                 log.trace("Create refresh token with fixed (not extended) lifetime taken from previous refresh token.");
 
@@ -359,6 +366,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             grantService.removeByCode(refreshToken); // remove refresh token after access token and id_token is created.
         }
 
+        tokenExchangeService.rotateDeviceSecretOnRefreshToken(executionContext.getHttpRequest(), authorizationGrant, scope);
+
         auditLog.updateOAuth2AuditLog(authorizationGrant, true);
 
         return response(Response.ok().entity(getJSonResponse(accToken,
@@ -384,11 +393,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
         authorizationCodeGrant.save();
 
-        RefreshToken reToken = createRefreshToken(executionContext, scope);
+        RefreshToken reToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
         scope = authorizationCodeGrant.checkScopesPolicy(scope);
 
         AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
+        final String deviceSecret = tokenExchangeService.createNewDeviceSecret(authorizationCodeGrant.getSessionDn(), client, authorizationCodeGrant.getScopesAsString());
 
         IdToken idToken = null;
         if (authorizationCodeGrant.getScopes().contains(OPENID)) {
@@ -405,6 +415,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), authorizationCodeGrant, client, appConfiguration, attributeService);
 
+            executionContext.setDeviceSecret(deviceSecret);
             executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
             executionContext.setPreProcessing(JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
             executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
@@ -417,8 +428,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
 
-        final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
-        return response(Response.ok().entity(entity), executionContext.getAuditLog());
+        JSONObject jsonObj = new JSONObject();
+        try {
+            fillJsonObject(jsonObj, accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
+            if (StringUtils.isNotBlank(deviceSecret)) {
+                jsonObj.put("device_token", deviceSecret);
+            }
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return response(Response.ok().entity(jsonObj.toString()), executionContext.getAuditLog());
     }
 
     @Nullable
@@ -454,37 +474,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return user;
     }
 
-    private void checkUser(AuthorizationGrant authorizationGrant) {
-        if (BooleanUtils.isFalse(appConfiguration.getCheckUserPresenceOnRefreshToken())) {
-            return;
-        }
-
-        final User user = authorizationGrant.getUser();
-        if (user == null || "inactive".equalsIgnoreCase(user.getStatus())) {
-            log.trace("The user associated with this grant is not found or otherwise with status=inactive.");
-            throw new WebApplicationException(error(400, TokenErrorResponseType.INVALID_GRANT, "The user associated with this grant is not found or otherwise with status=inactive.").build());
-        }
-    }
-
-    @Nullable
-    private RefreshToken createRefreshToken(@NotNull ExecutionContext executionContext, @NotNull String scope) {
-        final AuthorizationGrant grant = executionContext.getGrant();
-        if (!isRefreshTokenAllowed(executionContext.getClient(), scope, grant)) {
-            return null;
-        }
-
-        checkUser(grant);
-
-        final ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), grant, executionContext.getClient(), appConfiguration, attributeService);
-        context.setExecutionContext(executionContext);
-
-        final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
-        if (refreshTokenLifetimeInSeconds > 0) {
-            return grant.createRefreshToken(executionContext, refreshTokenLifetimeInSeconds);
-        }
-        return grant.createRefreshToken(executionContext);
-    }
-
     /**
      * Processes token request for device code grant type.
      *
@@ -505,7 +494,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), executionContext.getAuditLog()));
             }
 
-            RefreshToken refToken = createRefreshToken(executionContext, scope);
+            RefreshToken refToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
             AccessToken accessToken = deviceCodeGrant.createAccessToken(executionContext);
 
@@ -562,13 +551,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), executionContext.getAuditLog()));
         }
-    }
-
-    private boolean isRefreshTokenAllowed(Client client, String requestedScope, AbstractAuthorizationGrant grant) {
-        if (isTrue(appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken()) && !grant.getScopes().contains(ScopeConstants.OFFLINE_ACCESS) && !Strings.nullToEmpty(requestedScope).contains(ScopeConstants.OFFLINE_ACCESS)) {
-            return false;
-        }
-        return Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN);
     }
 
     private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog) {
@@ -632,25 +614,31 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                   IdToken idToken) {
         JSONObject jsonObj = new JSONObject();
         try {
-            jsonObj.put("access_token", accessToken.getCode()); // Required
-            jsonObj.put("token_type", tokenType.toString()); // Required
-            if (expiresIn != null) { // Optional
-                jsonObj.put("expires_in", expiresIn);
-            }
-            if (refreshToken != null) { // Optional
-                jsonObj.put("refresh_token", refreshToken.getCode());
-            }
-            if (scope != null) { // Optional
-                jsonObj.put("scope", scope);
-            }
-            if (idToken != null) {
-                jsonObj.put("id_token", idToken.getCode());
-            }
+            fillJsonObject(jsonObj, accessToken, tokenType, expiresIn, refreshToken, scope, idToken);
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
         }
 
         return jsonObj.toString();
+    }
+
+    public static void fillJsonObject(JSONObject jsonObj, AccessToken accessToken, TokenType tokenType,
+                                     Integer expiresIn, RefreshToken refreshToken, String scope,
+                                     IdToken idToken) {
+        jsonObj.put("access_token", accessToken.getCode()); // Required
+        jsonObj.put("token_type", tokenType.toString()); // Required
+        if (expiresIn != null) { // Optional
+            jsonObj.put("expires_in", expiresIn);
+        }
+        if (refreshToken != null) { // Optional
+            jsonObj.put("refresh_token", refreshToken.getCode());
+        }
+        if (scope != null) { // Optional
+            jsonObj.put("scope", scope);
+        }
+        if (idToken != null) {
+            jsonObj.put("id_token", idToken.getCode());
+        }
     }
 
     private Response processCIBA(String scope, String authReqId, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
@@ -670,7 +658,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                     cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
                 if (!cibaGrant.isTokensDelivered()) {
-                    RefreshToken refToken = createRefreshToken(executionContext, scope);
+                    RefreshToken refToken = tokenCreatorService.createRefreshToken(executionContext, scope);
                     AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
 
                     ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), cibaGrant, client, appConfiguration, attributeService);
@@ -687,7 +675,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     cibaGrant.save();
 
                     RefreshToken reToken = null;
-                    if (isRefreshTokenAllowed(client, scope, cibaGrant)) {
+                    if (tokenCreatorService.isRefreshTokenAllowed(client, scope, cibaGrant)) {
                         reToken = refToken;
                     }
 

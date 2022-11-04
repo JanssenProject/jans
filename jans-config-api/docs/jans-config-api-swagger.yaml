@@ -27,7 +27,6 @@ tags:
   - name: Configuration – JWK - JSON Web Key (JWK)
   - name: Custom Scripts
   - name: Database - LDAP configuration
-  - name: Database - Couchbase configuration
   - name: OAuth - OpenID Connect - Clients
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
@@ -1585,7 +1584,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oauth2: [https://jans.io/oauth/config/jwks.write]
+        - oauth2: [https://jans.io/oauth/config/jwks.delete]
   /jans-config-api/api/v1/openid/clients:
     get:
       tags:
@@ -2965,7 +2964,7 @@ paths:
         '500':
           description: Internal Server Error
 
-  /jans-config-api/admin-ui/user/roles:
+  /jans-config-api/admin-ui/adminUIRoles:
     get:
       tags:
         - Admin UI - Role
@@ -3087,7 +3086,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/admin-ui/user/permissions:
+  /jans-config-api/admin-ui/adminUIPermissions:
     get:
       tags:
         - Admin UI - Permission
@@ -3209,7 +3208,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/admin-ui/user/rolePermissionsMapping:
+  /jans-config-api/admin-ui/adminUIRolePermissionsMapping:
     get:
       tags:
         - Admin UI - Role-Permissions Mapping
@@ -3495,9 +3494,6 @@ components:
             https://jans.io/oauth/config/database/ldap.readonly: View LDAP database related information
             https://jans.io/oauth/config/database/ldap.write: Manage LDAP database related information
             https://jans.io/oauth/config/database/ldap.delete: Delete LDAP database related information
-            https://jans.io/oauth/config/database/couchbase.readonly: View Couchbase database information
-            https://jans.io/oauth/config/database/couchbase.write: Manage Couchbase database related information
-            https://jans.io/oauth/config/database/couchbase.delete: Delete Couchbase database related information
             https://jans.io/oauth/config/scripts.readonly: View cache scripts information
             https://jans.io/oauth/config/scripts.write: Manage scripts related information
             https://jans.io/oauth/config/scripts.delete: Delete scripts related information
@@ -3510,6 +3506,7 @@ components:
             https://jans.io/oauth/config/logging.write: Manage logging related information
             https://jans.io/oauth/config/jwks.readonly: View JWKS related information
             https://jans.io/oauth/config/jwks.write: Manage JWKS related information
+            https://jans.io/oauth/config/jwks.delete: Delete JWKS related information
             https://jans.io/oauth/config/openid/clients.readonly: View clients related information
             https://jans.io/oauth/config/openid/clients.write: Manage clients related information
             https://jans.io/oauth/config/openid/clients.delete: Delete clients related information
@@ -3519,9 +3516,6 @@ components:
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
             https://jans.io/oauth/config/uma/resources.write: Manage UMA Resource related information
             https://jans.io/oauth/config/uma/resources.delete: Delete UMA Resource related information
-            https://jans.io/oauth/config/database/sql.readonly: View SQL database related information
-            https://jans.io/oauth/config/database/sql.write: Manage SQL database related information
-            https://jans.io/oauth/config/database/sql.delete: Delete SQL database related information
             https://jans.io/oauth/config/stats.readonly: Vew server with basic statistic
             https://jans.io/oauth/config/scim/users.read: Vew scim user related information
             https://jans.io/oauth/config/scim/users.write: Manage scim user related information
@@ -3628,34 +3622,34 @@ components:
           type: string
           description: Type of script.
           enum:
-            - PERSON_AUTHENTICATION
-            - INTROSPECTION
-            - RESOURCE_OWNER_PASSWORD_CREDENTIALS
-            - APPLICATION_SESSION
-            - CACHE_REFRESH
-            - CLIENT_REGISTRATION
-            - ID_GENERATOR
-            - UMA_RPT_POLICY
-            - UMA_RPT_CLAIMS
-            - UMA_CLAIMS_GATHERING
-            - CONSENT_GATHERING
-            - DYNAMIC_SCOPE
-            - SPONTANEOUS_SCOPE
-            - END_SESSION
-            - POST_AUTHN
-            - SCIM
-            - CIBA_END_USER_NOTIFICATION
-            - REVOKE_TOKEN
-            - PERSISTENCE_EXTENSION
-            - IDP
-            - DISCOVERY
-            - UPDATE_TOKEN
-            - CONFIG_API
+            - person_authentication
+            - introspection
+            - resource_owner_password_credentials
+            - application_session
+            - cache_refresh
+            - client_registration
+            - id_generator
+            - uma_rpt_policy
+            - uma_rpt_claims
+            - uma_claims_gathering
+            - consent_gathering
+            - dynamic_scope
+            - spontaneous_scope
+            - end_session
+            - post_authn
+            - scim
+            - ciba_end_user_notification
+            - revoke_token
+            - persistence_extension
+            - idp
+            - discovery
+            - update_token
+            - config_api
         programmingLanguage:
           type: string
           enum:
-            - PYTHON
-            - JAVA
+            - python
+            - java
           description: Programming language of the custom script.
         moduleProperties:
           type: array

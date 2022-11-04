@@ -9,6 +9,7 @@ package io.jans.as.client.client;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.register.RegisterRequestParam;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
 
@@ -22,6 +23,22 @@ import static org.testng.Assert.*;
 public class Asserter {
 
     private Asserter() {
+    }
+
+    public static void assertBlank(String value) {
+        assertTrue(StringUtils.isNotBlank(value));
+    }
+
+    public static void assertBlank(String value, String message) {
+        assertTrue(StringUtils.isBlank(value), message);
+    }
+
+    public static void assertNotBlank(String value) {
+        assertTrue(StringUtils.isNotBlank(value));
+    }
+
+    public static void assertNotBlank(String value, String message) {
+        assertTrue(StringUtils.isNotBlank(value), message);
     }
 
     public static void assertRegisterResponseClaimsNotNull(RegisterResponse response, RegisterRequestParam... claimsToVerify) {

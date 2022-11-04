@@ -18,6 +18,10 @@ from setup_app.utils.package_utils import packageUtils
 
 class RDBMInstaller(BaseInstaller, SetupUtils):
 
+    source_files = [
+                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-orm-spanner-libs/{0}/jans-orm-spanner-libs-{0}-distribution.zip'.format(base.current_app.app_info['ox_version']))),
+                    ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.needdb = False # we will connect later
@@ -27,9 +31,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'rdbm_install'
         self.register_progess()
         self.output_dir = os.path.join(Config.output_dir, Config.rdbm_type)
+        self.common_lib_dir = os.path.join(Config.jetty_base, 'common/libs/spanner')
+
+    @property
+    def qchar(self):
+        return '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
 
     def install(self):
-        self.qchar = '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
+        if Config.rdbm_type == 'spanner':
+            self.extract_libs()
         self.local_install()
         if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
             self.reset_rdbm_db()
@@ -389,6 +399,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def create_folders(self):
         self.createDirs(Config.static_rdbm_dir)
+
+    def extract_libs(self):
+        self.logIt("Extracting {}".format(self.source_files[0][0]))
+        if not os.path.exists(self.common_lib_dir):
+            self.createDirs(self.common_lib_dir)
+        shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
+        self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
 
     def installed(self):
         # to be implemented

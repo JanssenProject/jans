@@ -1,8 +1,13 @@
 package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.DateUtil;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -17,6 +22,9 @@ public class SsaJsonServiceTest {
 
     @InjectMocks
     private SsaJsonService ssaJsonService;
+
+    @Mock
+    private AppConfiguration appConfiguration;
 
     @Test
     public void jsonObjectToString_jsonObject_validJsonString() {
@@ -34,7 +42,22 @@ public class SsaJsonServiceTest {
     }
 
     @Test
-    public void getJSONObject_ssa_validJsonObject() {
+    public void jsonArrayToString_jsonArray_validJsonString() {
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put("val1");
+        jsonArray.put("val2");
+
+        String json = ssaJsonService.jsonArrayToString(jsonArray);
+        assertNotNull(json, "json response is null");
+        JSONArray jsonResponse = new JSONArray(json);
+        assertEquals(jsonResponse.getString(0), "val1");
+        assertEquals(jsonResponse.getString(1), "val2");
+    }
+
+    @Test
+    public void getJSONArray_ssaList_validJson() {
+        Mockito.when(appConfiguration.getIssuer()).thenReturn("https://jans.io");
+
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 24);
 
@@ -44,29 +67,57 @@ public class SsaJsonServiceTest {
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("Test description");
         ssa.getAttributes().setSoftwareId("scan-api-test");
-        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("passwurd"));
+        ssa.getAttributes().setSoftwareRoles(Collections.singletonList("password"));
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
+        ssa.setCreatorId("test@localhost");
 
-        JSONObject jsonObject = ssaJsonService.getJSONObject(ssa);
-        assertNotNull(jsonObject, "jsonObject response is null");
-        assertTrue(jsonObject.has(ORG_ID.toString()));
-        assertEquals(jsonObject.get(ORG_ID.toString()), ssa.getOrgId());
-        assertTrue(jsonObject.has(EXPIRATION.toString()));
-        assertEquals(jsonObject.get(EXPIRATION.toString()), ssa.getExpirationDate());
-        assertTrue(jsonObject.has(DESCRIPTION.toString()));
-        assertEquals(jsonObject.get(DESCRIPTION.toString()), ssa.getDescription());
-        assertTrue(jsonObject.has(SOFTWARE_ID.toString()));
-        assertEquals(jsonObject.get(SOFTWARE_ID.toString()), ssa.getAttributes().getSoftwareId());
-        assertTrue(jsonObject.has(SOFTWARE_ROLES.toString()));
-        assertEquals(jsonObject.get(SOFTWARE_ROLES.toString()), ssa.getAttributes().getSoftwareRoles());
-        assertTrue(jsonObject.has(GRANT_TYPES.toString()));
-        assertEquals(jsonObject.get(GRANT_TYPES.toString()), ssa.getAttributes().getGrantTypes());
-        assertTrue(jsonObject.has(ONE_TIME_USE.toString()));
-        assertEquals(jsonObject.get(ONE_TIME_USE.toString()), ssa.getAttributes().getOneTimeUse());
-        assertTrue(jsonObject.has(ROTATE_SSA.toString()));
-        assertEquals(jsonObject.get(ROTATE_SSA.toString()), ssa.getAttributes().getRotateSsa());
+        JSONArray jsonArray = ssaJsonService.getJSONArray(Collections.singletonList(ssa));
+        assertNotNull(jsonArray, "jsonObject response is null");
+        assertEquals(jsonArray.length(), 1);
+
+        JSONObject jsonObject = jsonArray.getJSONObject(0);
+        assertNotNull(jsonObject);
+        assertTrue(jsonObject.has(SSA.getName()));
+        assertTrue(jsonObject.has(CREATED_AT.getName()));
+        assertEquals(jsonObject.get(CREATED_AT.getName()), DateUtil.dateToUnixEpoch(ssa.getCreationDate()));
+        assertTrue(jsonObject.has(EXPIRATION.getName()));
+        assertEquals(jsonObject.get(EXPIRATION.getName()), DateUtil.dateToUnixEpoch(ssa.getExpirationDate()));
+        assertTrue(jsonObject.has(ISSUER.getName()));
+
+        JSONObject ssaJsonObject = jsonObject.getJSONObject(SSA.getName());
+        assertNotNull(ssaJsonObject);
+        assertTrue(ssaJsonObject.has(ORG_ID.getName()));
+        assertEquals(ssaJsonObject.get(ORG_ID.getName()), Long.parseLong(ssa.getOrgId()));
+        assertTrue(ssaJsonObject.has(SOFTWARE_ID.getName()));
+        assertEquals(ssaJsonObject.get(SOFTWARE_ID.getName()), ssa.getAttributes().getSoftwareId());
+        assertTrue(ssaJsonObject.has(SOFTWARE_ROLES.getName()));
+        assertEquals(ssaJsonObject.get(SOFTWARE_ROLES.getName()), ssa.getAttributes().getSoftwareRoles());
+        assertTrue(ssaJsonObject.has(GRANT_TYPES.getName()));
+        assertEquals(ssaJsonObject.get(GRANT_TYPES.getName()), ssa.getAttributes().getGrantTypes());
+        assertTrue(ssaJsonObject.has(EXP.getName()));
+        assertEquals(ssaJsonObject.get(EXP.getName()), DateUtil.dateToUnixEpoch(ssa.getExpirationDate()));
+        assertTrue(ssaJsonObject.has(JTI.getName()));
+        assertEquals(ssaJsonObject.get(JTI.getName()), ssa.getId());
+        assertTrue(ssaJsonObject.has(IAT.getName()));
+        assertEquals(ssaJsonObject.get(IAT.getName()), DateUtil.dateToUnixEpoch(ssa.getCreationDate()));
+        assertTrue(ssaJsonObject.has(ISS.getName()));
+        assertEquals(ssaJsonObject.get(ISS.getName()), appConfiguration.getIssuer());
+    }
+
+    @Test
+    public void getJSONArray_emptySsaList_validEmptyJson() {
+        JSONArray jsonArray = ssaJsonService.getJSONArray(Collections.emptyList());
+        assertNotNull(jsonArray, "jsonArray response is null");
+        assertEquals(jsonArray.length(), 0);
+    }
+
+    @Test
+    public void getJSONArray_nullSsaList_validEmptyJson() {
+        JSONArray jsonArray = ssaJsonService.getJSONArray(null);
+        assertNotNull(jsonArray, "jsonArray response is null");
+        assertEquals(jsonArray.length(), 0);
     }
 
     @Test
@@ -75,8 +126,8 @@ public class SsaJsonServiceTest {
 
         JSONObject jsonObject = ssaJsonService.getJSONObject(jwt);
         assertNotNull(jsonObject, "jsonObject response is null");
-        assertTrue(jsonObject.has("ssa"));
-        assertEquals(jsonObject.get("ssa"), jwt);
+        assertTrue(jsonObject.has(SSA.getName()));
+        assertEquals(jsonObject.get(SSA.getName()), jwt);
     }
 
     @Test
@@ -94,7 +145,7 @@ public class SsaJsonServiceTest {
 
         JSONObject jsonObject = ssaJsonService.getJSONObject(jwt);
         assertNotNull(jsonObject, "jsonObject response is null");
-        assertTrue(jsonObject.has("ssa"));
-        assertEquals(jsonObject.get("ssa"), "");
+        assertTrue(jsonObject.has(SSA.getName()));
+        assertEquals(jsonObject.get(SSA.getName()), "");
     }
 }

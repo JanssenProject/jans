@@ -22,7 +22,7 @@ plugins:
        enable_creation_date: true
    - git-committers:
        repository: JanssenProject/jans
-       token: !ENV GH_TOKEN
+       branch: main
 # Configuration
 theme:
     name: material
@@ -138,28 +138,27 @@ nav:
         - 'Delegated User Administration': 'admin/planning/delegated-user-admin.md'
         - 'Passwordless Authentication': 'admin/planning/passwordless-auth.md'
         - 'Machine-to-Machine Authentication': 'admin/planning/machine-to-machine.md'
-        - 'FAQ': 'admin/planning/faq.md'
     - 'Installation':
         - 'admin/install/README.md'
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
-            - 'Quick Start Installation': 'admin/install/vm-install/quick-start-install.md'
+            - 'Docker Quick Start': 'admin/install/vm-install/quick-start-install.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
             - 'Suse': 'admin/install/vm-install/suse.md'
-            - 'FIPS DISA STIG': 'admin/install/vm-install/disa-stig.md'
+#            - 'FIPS DISA STIG': 'admin/install/vm-install/disa-stig.md'
             - 'Dynamic Download': 'admin/install/vm-install/dynamic-download.md'
         - 'Helm Deployments':
             - 'admin/install/helm-install/README.md'
             - 'Local Kubernetes Cluster': 'admin/install/helm-install/local.md'
             - 'Amazon EKS': 'admin/install/helm-install/amazon-eks.md'
             - 'Google GKE': 'admin/install/helm-install/google-gke.md'
-            - 'Digital Ocean DOK': 'admin/install/helm-install/digitalocean-dok.md'
+#            - 'Digital Ocean DOK': 'admin/install/helm-install/digitalocean-dok.md'
             - 'Microsoft Azure AKS': 'admin/install/helm-install/microsoft-azure.md'
-            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
+#            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
             - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
-        - 'CORS configuration': 'admin/install/cors.md'
+        - 'Setup Instructions': 'admin/install/setup.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
         - 'admin/kubernetes-ops/README.md'
@@ -173,7 +172,6 @@ nav:
         - 'FAQ': 'admin/kubernetes-ops/faq.md'
     - 'VM Operation Guide':
         - 'admin/vm-ops/README.md'
-        - 'Running Setup': 'admin/vm-ops/running-setup.md'
         - 'Backup': 'admin/vm-ops/backup.md'
         - 'Logs': 'admin/vm-ops/logs.md'
         - 'Checking Service Status': 'admin/vm-ops/checking-service-status.md'
@@ -227,10 +225,7 @@ nav:
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
     - 'Auth Server Admin Guide':
         - 'admin/auth-server/README.md'
-        - 'Configuration':
-            - 'admin/auth-server/configuration/README.md'
-            - 'JSON Properties': 'admin/auth-server/configuration/json-properties.md'
-            - 'JVM Considerations': 'admin/auth-server/configuration/jvm-considerations.md'
+        - 'Configuration': 'admin/auth-server/config.md'
         - 'Session Management':
             - 'admin/auth-server/session-management/README.md'
             - 'What is a session?': 'admin/auth-server/session-management/what-is.md'
@@ -250,6 +245,7 @@ nav:
             - 'Client Registration': 'admin/auth-server/endpoints/client-registration.md'
             - 'Authorization': 'admin/auth-server/endpoints/authorization.md'
             - 'Token': 'admin/auth-server/endpoints/token.md'
+            - 'SSA': 'admin/auth-server/ssa.md'
             - 'Userinfo': 'admin/auth-server/endpoints/userinfo.md'
             - 'Token Revocation': 'admin/auth-server/endpoints/token-revocation.md'
             - 'Session Revocation': 'admin/auth-server/endpoints/session-revocation.md'
@@ -262,8 +258,7 @@ nav:
             - 'admin/auth-server/crypto/README.md'
             - 'Supported Algorithms': 'admin/auth-server/crypto/supported-algorithms.md'
             - 'Key Storage': 'admin/auth-server/crypto/key-storage.md'
-            - 'Key Rotation': 'admin/auth-server/crypto/key-rotation.md'
-            - 'Manual Key Rotation': 'admin/auth-server/crypto/manual-key-regeneration.md'
+            - 'Key Generation': 'admin/auth-server/crypto/key-generation.md'
         - 'OpenID Features':
             - 'admin/auth-server/openid-features/README.md'
             - 'Pairwise/Public Subject Identifiers': 'admin/auth-server/openid-features/subject-identifiers.md'
@@ -278,6 +273,7 @@ nav:
             - 'CIBA': 'admin/auth-server/openid-features/ciba.md'
             - 'JARM': 'admin/auth-server/openid-features/jarm.md'
             - 'SIOP': 'admin/auth-server/openid-features/siop.md'
+            - 'Native SSO': 'admin/auther-server/openid-features/native-sso.md'
             - 'User Claims':
                 - 'admin/auth-server/openid-features/user-claims/README.md'
                 - 'Built-in Claims': 'admin/auth-server/openid-features/user-claims/built-in-claims.md'
@@ -304,7 +300,6 @@ nav:
             - 'Claims Gathering Endpoint': 'admin/auth-server/uma-features/claims-gathering-endpoint.md'
         - 'Client Management':
             - 'admin/auth-server/client-management/README.md'
-            - 'Overview': 'admin/auth-server/client-management/index.md'
             - 'Client Schema': 'admin/auth-server/client-management/client-schema.md'
             - 'Client Authentication': 'admin/auth-server/client-management/client-authn.md'
             - 'Configuration':
@@ -355,6 +350,7 @@ nav:
         - 'Interception Script Overview': 'admin/developer/interception-scripts.md'
         - 'Script Debugging': 'admin/developer/interception-scripts-debug.md'
         - 'External Libraries': 'admin/developer/external-libraries.md'
+        - 'CORS': 'admin/developer/cors.md'
         - 'Front Channel Scripts': 'admin/developer/front-channel-scripts.md'
         - 'Back Channel Scripts': 'admin/developer/back-channel-scripts.md'
         - 'Managed Beans': 'admin/developer/managed-beans.md'
@@ -391,7 +387,6 @@ nav:
         - 'Javadocs / OpenAPI': 'admin/reference/openapi.md'
         - 'Database Reference':
             - 'admin/reference/database/README.md'
-            - 'Database Overview': 'admin/reference/database/index.md'
             - 'RDBMS Erwin Table': 'admin/reference/database/rdbms-erwin.md'
             - 'LDAP Schema': 'admin/reference/database/ldap-schema.md'
             - 'LDAP Configuration': 'admin/reference/database/ldap-config.md'
@@ -463,32 +458,6 @@ nav:
         - 'Security Considerations': 'admin/scim/security.md'
         - 'Bulk Adding Users': 'admin/scim/bulk-users.md'
         - 'Adding Custom Attributes': 'admin/scim/custom-attributes.md'
-    - 'Integration Guide':
-        - 'admin/integration/README.md'
-        - 'Custom Web Development': 'admin/integration/custom-web.md'
-        - 'SAML': 'admin/integration/saml.md'
-        - 'Applications':
-            - 'admin/integration/apps/README.md'
-            - 'Rancher': 'admin/integration/apps/rancher.md'
-            - 'Rocket': 'admin/integration/apps/rocket.md'
-            - 'NextCloud': 'admin/integration/apps/nextcloud.md'
-            - 'Wordpress': 'admin/integration/apps/wordpress.md'
-            - 'Magento': 'admin/integration/apps/magento.md'
-            - 'Teleport': 'admin/integration/apps/teleport.md'
-            - 'Moodle': 'admin/integration/apps/moodle.md'
-            - 'Drupal': 'admin/integration/apps/drupal.md'
-        - 'SaaS provider':
-            - 'admin/integration/saas/README.md'
-            - 'Office365': 'admin/integration/saas/office365.md'
-            - 'Salesforce': 'admin/integration/saas/salesforce.md'
-            - 'Google': 'admin/integration/saas/google.md'
-            - 'Zoom': 'admin/integration/saas/zoom.md'
-            - 'Webex': 'admin/integration/saas/webex.md'
-            - 'Amazon AWS': 'admin/integration/saas/aws.md'
-            - 'Jira': 'admin/integration/saas/jira.md'
-            - 'Docusign': 'admin/integration/saas/docusign.md'
-        - 'Gluu Casa': 'admin/integration/casa.md'
-        - 'FAQ': 'admin/integration/integration-faq.md'
     - 'Config API Admin Guide':
         - 'admin/config-api/README.md'
         - 'Configuration': 'admin/config-api/config.md'

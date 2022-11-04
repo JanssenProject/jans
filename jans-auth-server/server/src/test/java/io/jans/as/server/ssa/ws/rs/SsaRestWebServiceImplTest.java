@@ -1,9 +1,10 @@
 package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.server.ssa.ws.rs.action.SsaCreateAction;
+import io.jans.as.server.ssa.ws.rs.action.SsaGetAction;
+import io.jans.as.server.ssa.ws.rs.action.SsaValidateAction;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -19,18 +20,44 @@ import static org.testng.Assert.assertNotNull;
 public class SsaRestWebServiceImplTest {
 
     @InjectMocks
-    private SsaRestWebServiceImpl ssaRestWebService;
+    private SsaRestWebServiceImpl ssaRestWebServiceImpl;
 
     @Mock
     private SsaCreateAction ssaCreateAction;
 
+    @Mock
+    private SsaGetAction ssaGetAction;
+
+    @Mock
+    private SsaValidateAction ssaValidateAction;
+
     @Test
     public void create_validParams_validResponse() {
-        when(ssaCreateAction.create(anyString(), any(), any())).thenReturn(mock(Response.class));
-        Response response = ssaRestWebService.create("test request", mock(HttpServletRequest.class), mock(SecurityContext.class));
-        assertNotNull(response, "response is null");
+        when(ssaCreateAction.create(anyString(), any())).thenReturn(mock(Response.class));
 
-        verify(ssaCreateAction).create(anyString(), any(), any());
+        Response response = ssaRestWebServiceImpl.create("test request", mock(HttpServletRequest.class));
+        assertNotNull(response, "response is null");
+        verify(ssaCreateAction).create(anyString(), any());
         verifyNoMoreInteractions(ssaCreateAction);
+    }
+
+    @Test
+    public void get_validParams_validResponse() {
+        when(ssaGetAction.get(anyBoolean(), anyString(), any(), any())).thenReturn(mock(Response.class));
+
+        Response response = ssaRestWebServiceImpl.get(false, "testJti", 1000L, mock(HttpServletRequest.class));
+        assertNotNull(response, "response is null");
+        verify(ssaGetAction).get(anyBoolean(), anyString(), any(), any());
+        verifyNoMoreInteractions(ssaGetAction);
+    }
+
+    @Test
+    public void validate_validParams_validResponse() {
+        when(ssaValidateAction.validate(anyString())).thenReturn(mock(Response.class));
+
+        Response response = ssaRestWebServiceImpl.validate("testJti");
+        assertNotNull(response, "response is null");
+        verify(ssaValidateAction).validate(anyString());
+        verifyNoMoreInteractions(ssaValidateAction);
     }
 }

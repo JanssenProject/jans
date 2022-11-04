@@ -27,12 +27,23 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
     && rm -rf /tmp/jetty.tar.gz
 
+# ======
+# Jython
+# ======
+
+ARG JYTHON_VERSION=2.7.3
+ARG JYTHON_BUILD_DATE='2022-08-01 07:49'
+RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+    && mkdir -p /opt/jython \
+    && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
+    && rm -f /tmp/jython-installer.jar /tmp/*.properties
+
 # ==========
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.3-SNAPSHOT
-ENV CN_BUILD_DATE='2022-10-14 16:35'
+ENV CN_VERSION=1.0.4-SNAPSHOT
+ENV CN_BUILD_DATE='2022-11-01 11:06'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -98,6 +109,41 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 RUN mkdir -p /opt/prometheus \
     && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JAVAAGENT_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JAVAAGENT_VERSION}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-module=jmx,stats
+
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ENV JANS_SOURCE_VERSION=c3e3f537e4e85c1ee718f7a7b79a203e7ed57e42
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+ARG JANS_CONFIG_API_DOCS=jans-config-api/docs
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add ${JANS_CONFIG_API_DOCS}
+
+RUN mkdir -p /etc/jans/conf \
+    /app/static/rdbm \
+    /app/schema \
+    /app/templates/jans-config-api
+
+# sync static files from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
+    && cp ${JANS_CONFIG_API_DOCS}/jans-config-api-swagger-auto.yaml /app/static/
 
 # =======
 # Cleanup
@@ -196,7 +242,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/config-api" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.3" \
+    version="1.0.4" \
     release="dev" \
     summary="Janssen Config API" \
     description=""
@@ -206,14 +252,20 @@ RUN mkdir -p /etc/certs \
     /etc/jans/conf \
     ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/custom/config \
-    ${JETTY_BASE}/jans-config-api/logs
+    ${JETTY_BASE}/jans-config-api/logs \
+    ${JETTY_BASE}/common/libs/spanner \
+    ${JETTY_BASE}/common/libs/couchbase
 
 RUN touch /etc/hosts.back
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
 COPY conf/*.tmpl /app/templates/
 COPY plugins /app/plugins
+COPY templates /app/templates
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
+
+# unquote apiApprovedIssuer
+RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
@@ -229,7 +281,10 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod 664 /etc/hosts.back \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
-    && chmod 664 /opt/jetty/etc/webdefault.xml
+    && chmod 664 /opt/jetty/etc/webdefault.xml \
+    && chmod -R g=u /app/templates/jans-config-api \
+    && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 /usr/share/java
 
 USER 1000
 

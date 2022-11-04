@@ -10,7 +10,9 @@ import com.google.common.collect.Lists;
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidClaimException;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -20,15 +22,7 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.common.AbstractToken;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCode;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IAuthorizationGrant;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
@@ -39,26 +33,19 @@ import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.model.GluuAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import jakarta.ejb.Stateless;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static io.jans.as.model.common.ScopeType.DYNAMIC;
+import static io.jans.as.server.token.ws.rs.TokenExchangeService.DEVICE_SECRET;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -133,10 +120,15 @@ public class IdTokenFactory {
                             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
                             ExecutionContext executionContext) throws Exception {
 
+        final Client client = authorizationGrant.getClient();
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
-        Audience.setAudience(jwr.getClaims(), authorizationGrant.getClient());
+        Audience.setAudience(jwr.getClaims(), client);
 
         int lifeTime = appConfiguration.getIdTokenLifetime();
+        if (client.getAttributes().getIdTokenLifetime() != null && client.getAttributes().getIdTokenLifetime() > 0) {
+            lifeTime = client.getAttributes().getIdTokenLifetime();
+            log.trace("Override id token lifetime with value from client: {}", client.getClientId());
+        }
         int lifetimeFromScript = externalUpdateTokenService.getIdTokenLifetimeInSeconds(ExternalUpdateTokenContext.of(executionContext));
         if (lifetimeFromScript > 0) {
             lifeTime = lifetimeFromScript;
@@ -159,6 +151,8 @@ public class IdTokenFactory {
         if (session != null) {
             jwr.setClaim("sid", session.getOutsideSid());
         }
+
+        addTokenExchangeClaims(jwr, executionContext, session);
 
         if (authorizationGrant.getAcrValues() != null) {
             jwr.setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
@@ -191,7 +185,7 @@ public class IdTokenFactory {
 
         User user = authorizationGrant.getUser();
         List<Scope> dynamicScopes = new ArrayList<>();
-        if (executionContext.isIncludeIdTokenClaims() && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
+        if (executionContext.isIncludeIdTokenClaims() && client.isIncludeClaimsInIdToken()) {
             for (String scopeName : executionContext.getScopes()) {
                 Scope scope = scopeService.getScopeById(scopeName);
                 if (scope == null) {
@@ -256,6 +250,21 @@ public class IdTokenFactory {
 
         if (executionContext.getPostProcessor() != null) {
             executionContext.getPostProcessor().apply(jwr);
+        }
+    }
+
+    private void addTokenExchangeClaims(JsonWebResponse jwr, ExecutionContext executionContext, SessionId sessionId) {
+        if (sessionId == null) { // unable to find session
+            return;
+        }
+
+        String deviceSecret = executionContext.getDeviceSecret();
+        if (StringUtils.isBlank(deviceSecret)) {
+            deviceSecret = executionContext.getHttpRequest().getParameter(DEVICE_SECRET);
+        }
+
+        if (StringUtils.isNotBlank(deviceSecret) && sessionId.getDeviceSecrets().contains(deviceSecret)) {
+            jwr.setClaim("ds_hash", CodeVerifier.s256(deviceSecret));
         }
     }
 

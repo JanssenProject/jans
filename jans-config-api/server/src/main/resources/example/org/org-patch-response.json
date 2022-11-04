@@ -1,0 +1,16 @@
+{
+    "dn": "o=jans",
+    "displayName": "Jans Server",
+    "description": "Welcome to oxTrust!",
+    "organization": "jans",
+    "managerGroup": "inum=60B7,ou=groups,o=jans",
+    "themeColor": "166309",
+    "shortName": "Jans Server",
+    "customMessages": [
+        "customMessages1",
+        "customMessages2"
+    ],
+    "jsFaviconPath": "/opt/jans/jetty/jans-auth/custom/static",
+    "organizationTitle": "Gluu",
+    "baseDn": "o=jans"
+}

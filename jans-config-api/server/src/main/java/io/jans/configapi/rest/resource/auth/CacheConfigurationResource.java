@@ -68,9 +68,9 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Returns cache configuration.", description = "Returns cache configuration.", operationId = "get-config-cache", tags = {
             "Cache Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.readonly" }))
+                    ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -81,11 +81,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch cache configuration.", description = "Patch cache configuration", operationId = "patch-config-cache", tags = {
             "Cache Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
-            @ExampleObject(value = "[{op:replace, path: memcachedConfiguration, value: response.memcachedConfiguration }]") }))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
@@ -105,9 +104,9 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Returns Redis cache configuration.", description = "Returns Redis cache configuration", operationId = "get-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.readonly" }))
+                    ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -119,10 +118,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates Redis cache configuration.", description = "Updates Redis cache configuration", operationId = "put-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "RedisConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class)))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "RedisConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-redis.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
@@ -139,15 +138,15 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch Redis cache configuration.", description = "Patch Redis cache configuration", operationId = "patch-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-redis-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Path(ApiConstants.REDIS)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON) 
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchRedisConfiguration(@NotNull String requestString) {
         logger.debug("REDIS CACHE details to patch - requestString:{} ", requestString);
@@ -165,9 +164,9 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Returns in-Memory cache configuration.", description = "Returns in-Memory cache configuration.", operationId = "get-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.readonly" }))
+                    ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "In-Memory configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "In-Memory configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -179,10 +178,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates in-Memory cache configuration.", description = "Updates in-Memory cache configuration", operationId = "put-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "inMemoryConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class)))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "inMemoryConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-in-memory.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class)  , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
@@ -200,10 +199,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch In-Memory cache configuration.", description = "Patch In-Memory cache configuration", operationId = "patch-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-in-memory-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class)  , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
@@ -225,9 +224,9 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Returns native persistence cache configuration.", description = "Returns native persistence cache configuration.", operationId = "get-config-cache-native-persistence", tags = {
             "Cache Configuration – Native-Persistence" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.readonly" }))
+                    ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Native persistence configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Native persistence configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-native-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -239,10 +238,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates native persistence cache configuration.", description = "Updates native persistence cache configuration", operationId = "put-config-cache-native-persistence", tags = {
             "Cache Configuration – Native-Persistence" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "NativePersistenceConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class)))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "NativePersistenceConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-native-persistence.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-native-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
@@ -261,10 +260,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch native persistence cache configuration.", description = "Patch native persistence cache configuration", operationId = "patch-config-cache-native-persistence", tags = {
             "Cache Configuration – Native-Persistence" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-native-persistence-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-native-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
@@ -287,9 +286,9 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Returns memcached cache configuration.", description = "Returns memcached cache configuration.", operationId = "get-config-cache-memcached", tags = {
             "Cache Configuration – Memcached" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.readonly" }))
+                    ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Memcached configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Memcached configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-memcached.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -301,10 +300,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Updates memcached cache configuration.", description = "Updates memcached cache configuration", operationId = "put-config-cache-memcached", tags = {
             "Cache Configuration – Memcached" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "Memcached Configuration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class)))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "Memcached Configuration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-memcached.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-memcached.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -322,10 +321,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Operation(summary = "Patch memcached cache configuration.", description = "Patch memcached cache configuration", operationId = "patch-config-cache-memcached", tags = {
             "Cache Configuration – Memcached" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/cache.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+                    ApiAccessConstants.CACHE_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-memcached-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Memcached cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Memcached cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-memcached.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH

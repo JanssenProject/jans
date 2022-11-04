@@ -1,6 +1,5 @@
 {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
 {{- if .Values.global.istio.enabled }}
-
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:

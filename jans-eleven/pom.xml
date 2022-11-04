@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-eleven-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<name>eleven</name>
 
     <distributionManagement>
@@ -20,7 +20,7 @@
 
 		<jans.bom.version>${project.version}</jans.bom.version>
 
-		<jettison.version>1.3.2</jettison.version>
+		<jettison.version>1.5.1</jettison.version>
 		<bouncycastle.version>1.54</bouncycastle.version>
 
 		<httpcore.version>4.4.6</httpcore.version>
@@ -80,7 +80,7 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>

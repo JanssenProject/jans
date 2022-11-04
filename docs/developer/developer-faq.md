@@ -46,4 +46,29 @@ Use external key? [Y|n] : y
 
 ### Test
 
-Janssen Server open-banking is ready for testing. Visit [testing]() instructions to know more. 
+
+## How to test OpenBanking?
+
+This test uses Gluu Testing certificate.
+
+### device authentication
+After installation we have to complete device authentication to use openbanking.
+
+### Testing using IM mode
+launch jans-cli using below command
+
+```
+/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+```
+further testing is same as jans server
+
+### Testing using commnd line mode
+
+we can run below command at command line.
+for ex:
+```
+/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
+```
+
+same way we can run  other commands.
+rest is same for jans and openbanking
