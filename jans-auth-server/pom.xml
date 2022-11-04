@@ -406,6 +406,11 @@
 						<source>1.8</source>
 						<target>1.8</target>
 						<encoding>UTF-8</encoding>
+						<annotationProcessors>
+							<annotationProcessor>
+								io.jans.util.properties.JansConfigPropertyProcessor
+							</annotationProcessor>
+						</annotationProcessors>
 					</configuration>
 				</plugin>
 				<plugin>
