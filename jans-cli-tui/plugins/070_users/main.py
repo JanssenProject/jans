@@ -2,16 +2,17 @@ import os
 import sys
 import asyncio
 
-from typing import Sequence
+from typing import Sequence, Any
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, VSplit, Window, DynamicContainer
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Frame
+from prompt_toolkit.widgets import Button, Label, Frame, Dialog
 from prompt_toolkit.formatted_text import HTML
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
+from edit_user_dialog import EditUserDialog
 
 from utils.utils import DialogUtils
 from utils.multi_lang import _
@@ -31,7 +32,7 @@ class Plugin(DialogUtils):
         """
         self.app = app
         self.pid = 'users'
-        self.name = '[U]SERS'
+        self.name = '[U]sers'
         self.users = {}
         self.widgets_ready = False
 
@@ -108,14 +109,33 @@ class Plugin(DialogUtils):
 
 
 
-    def edit_user_dialog(self):
-        pass
+    def edit_user_dialog(self, **kwargs: Any) -> None:
+        """Method to display the edit user dialog
+        """
+        if kwargs:
+            data = kwargs.get('data', {})
+        else:
+            data = {}
+
+        title = _("Edit User") if data else _("Add User")
+
+        dialog = EditUserDialog(self.app, title=title, data=data, save_handler=self.save_user)
+        result = self.app.show_jans_dialog(dialog)
 
     def delete_user(self):
         pass
 
+    def save_user(self, dialog: Dialog) -> None:
+        """This method to save user data to server
+
+        Args:
+            dialog (_type_): the main dialog to save data in
+
+        Returns:
+            _type_: bool value to check the status code response
+        """
+
+
     def search_user(self):
         pass
 
-    def edit_user_dialog(self):
-        pass
