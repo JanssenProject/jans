@@ -324,13 +324,6 @@ class Plugin(DialogUtils):
         t.start()
 
     def delete_client(self, **kwargs: Any) -> None:
-        """Method to get the clients data from server
-        """ 
-        t = threading.Thread(target=self.oauth_delete_client(kwargs), daemon=True)
-        self.app.start_progressing()
-        t.start()
-
-    def oauth_delete_client(self, kwargs: Any):
         """This method for the deletion of the clients data
 
         Args:
@@ -625,10 +618,6 @@ class Plugin(DialogUtils):
         self.app.start_progressing()
         t.start()
 
-    # ---------------------------------------------------------------------- #
-    # ---------------------------------------------------------------------- #
-    # ---------------------------------------------------------------------- #
-
     def oauth_update_keys(self) -> None:
 
         """update the current Keys fromserver
@@ -740,15 +729,6 @@ class Plugin(DialogUtils):
             return True
 
         self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
-
-
-    # def oauth_save_client(self, dialog: Dialog) -> None:
-    #     """Method to get the clients data from server
-    #     """ 
-    #     t = threading.Thread(target=self.oauth_delete_client, daemon=True)
-    #     self.app.start_progressing()
-    #     t.start()
-
 
 
     def save_scope(self, dialog: Dialog) -> None:
