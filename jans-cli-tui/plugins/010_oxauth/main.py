@@ -323,6 +323,92 @@ class Plugin(DialogUtils):
         self.app.start_progressing()
         t.start()
 
+    def delete_client(self) -> None:
+        """Method to get the clients data from server
+        """ 
+        t = threading.Thread(target=self.oauth_update_delete_client, daemon=True)
+        self.app.start_progressing()
+        t.start()
+
+
+    def oauth_update_delete_client(self, **kwargs: Any):
+        """This method for the deletion of the clients data
+
+        Args:
+            selected (_type_): The selected Client
+            event (_type_): _description_
+
+        Returns:
+            str: The server response
+        """
+
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete client inum:")+"\n {} ?".format(kwargs ['selected'][0]))
+
+        async def coroutine():
+            focused_before = self.app.layout.current_window
+            result = await self.app.show_dialog_as_float(dialog)
+            try:
+                self.app.layout.focus(focused_before)
+            except:
+                self.app.stop_progressing()
+                self.app.layout.focus(self.app.center_frame)
+
+            if result.lower() == 'yes':
+                result = self.app.cli_object.process_command_by_id(
+                    operation_id='delete-oauth-openid-client-by-inum',
+                    url_suffix='inum:{}'.format(kwargs ['selected'][0]),
+                    endpoint_args='',
+                    data_fn='',
+                    data={}
+                )
+                # TODO Need to do `self.oauth_get_clients()` only if clients list is not empty
+                self.app.stop_progressing()
+                self.oauth_get_clients()
+                
+            return result
+
+        asyncio.ensure_future(coroutine())
+
+
+
+
+    # def delete_client(self, **kwargs: Any):
+    #     """This method for the deletion of the clients data
+
+    #     Args:
+    #         selected (_type_): The selected Client
+    #         event (_type_): _description_
+
+    #     Returns:
+    #         str: The server response
+    #     """
+
+    #     dialog = self.app.get_confirm_dialog(_("Are you sure want to delete client inum:")+"\n {} ?".format(kwargs ['selected'][0]))
+
+    #     async def coroutine():
+    #         focused_before = self.app.layout.current_window
+    #         result = await self.app.show_dialog_as_float(dialog)
+    #         try:
+    #             self.app.layout.focus(focused_before)
+    #         except:
+    #             self.app.layout.focus(self.app.center_frame)
+
+    #         if result.lower() == 'yes':
+    #             result = self.app.cli_object.process_command_by_id(
+    #                 operation_id='delete-oauth-openid-clients-by-inum',
+    #                 url_suffix='inum:{}'.format(kwargs ['selected'][0]),
+    #                 endpoint_args='',
+    #                 data_fn='',
+    #                 data={}
+    #             )
+    #             # TODO Need to do `self.oauth_get_clients()` only if clients list is not empty
+    #             self.oauth_get_clients()
+    #         return result
+
+    #     asyncio.ensure_future(coroutine())
+
+
+
     def oauth_get_scopes(
             self, 
             start_index: Optional[int]= 0,  
@@ -682,7 +768,7 @@ class Plugin(DialogUtils):
         # self.app.logger.debug('Saved DATA: '+str(dialog.data))
 
         response = self.app.cli_object.process_command_by_id(
-            operation_id='put-oauth-openid-clients' if dialog.data.get('inum') else 'post-oauth-openid-clients',
+            operation_id='put-oauth-openid-client' if dialog.data.get('inum') else 'post-oauth-openid-client',
             url_suffix='',
             endpoint_args='',
             data_fn='',
@@ -748,42 +834,6 @@ class Plugin(DialogUtils):
         """
         dialog = EditClientDialog(self.app, title=_("Add Client"), data={}, save_handler=self.save_client)
         result = self.app.show_jans_dialog(dialog)
-
-    def delete_client(self, **kwargs: Any):
-        """This method for the deletion of the clients data
-
-        Args:
-            selected (_type_): The selected Client
-            event (_type_): _description_
-
-        Returns:
-            str: The server response
-        """
-
-        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete client inum:")+"\n {} ?".format(kwargs ['selected'][0]))
-
-        async def coroutine():
-            focused_before = self.app.layout.current_window
-            result = await self.app.show_dialog_as_float(dialog)
-            try:
-                self.app.layout.focus(focused_before)
-            except:
-                self.app.layout.focus(self.app.center_frame)
-
-            if result.lower() == 'yes':
-                result = self.app.cli_object.process_command_by_id(
-                    operation_id='delete-oauth-openid-clients-by-inum',
-                    url_suffix='inum:{}'.format(kwargs ['selected'][0]),
-                    endpoint_args='',
-                    data_fn='',
-                    data={}
-                )
-                # TODO Need to do `self.oauth_get_clients()` only if clients list is not empty
-                self.oauth_get_clients()
-            return result
-
-        asyncio.ensure_future(coroutine())
-
 
     def get_help(self, **kwargs: Any):
 
