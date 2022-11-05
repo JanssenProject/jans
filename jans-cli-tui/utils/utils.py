@@ -36,7 +36,8 @@ class DialogUtils:
                 return
 
             if getattr(me.window, 'text_type', None) == 'integer':
-                value_ = int(value_)
+                if value_:
+                    value_ = int(value_)
 
             return {'key':key_, 'value':value_}
 
