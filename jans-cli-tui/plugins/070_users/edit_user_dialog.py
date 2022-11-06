@@ -119,26 +119,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 )
 
 
-        member_of = [[grp] for grp in get_custom_attribute('memberOf', multi=True) ]
-        member_of_label = _("Member of")
-        add_group_label = _("Add Group")
-        self.member_of_container = JansVerticalNav(
-                myparent=self.app,
-                headers=['Group'],
-                preferred_size=[40],
-                data=member_of,
-                on_delete=self.delete_group,
-                selectes=0,
-                headerColor='class:outh-client-navbar-headcolor',
-                entriesColor='class:outh-client-navbar-entriescolor',
-                all_data=member_of,
-                underline_headings=False,
-                max_width=40,
-                jans_name='configurationProperties',
-                max_height=False
-                )
-
-
         self.edit_user_content = [
                     self.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'inum'), read_only=True),
                     self.app.getTitledText(_("First Name"), name='givenName', value=self.data.get('givenName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'givenName')),
@@ -157,16 +137,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
                         HSplit([
                                 Window(height=1),
                                 Button(text=add_admin_ui_role_label, width=len(add_admin_ui_role_label)+4, handler=self.add_admin_ui_role),
-                                ]),
-                        ], height=4, width=D()),
-
-                    VSplit([ 
-                        Label(text=member_of_label, style='class:script-label', width=len(member_of_label)+1), 
-                        self.member_of_container,
-                        Window(width=2),
-                        HSplit([
-                                Window(height=1),
-                                Button(text=add_group_label, width=len(add_group_label)+4, handler=self.add_group),
                                 ]),
                         ], height=4, width=D()),
 
@@ -227,12 +197,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
     def delete_admin_ui_role(self, **kwargs: Any) -> None:
         self.admin_ui_roles_container.remove_item(kwargs['selected'])
 
-
-    def delete_group(self, **kwargs: Any) -> None:
-        pass
-
-    def add_group(self):
-        pass
 
     def __pt_container__(self)-> Dialog:
         return self.dialog
