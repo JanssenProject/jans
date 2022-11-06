@@ -20,6 +20,7 @@ from prompt_toolkit.widgets import (
     Label,
     TextArea,
     RadioList,
+    CheckboxList,
     Button,
     Dialog,
 )
@@ -85,7 +86,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         schema = self.app.cli_object.get_schema_from_reference('User-Mgt', '#/components/schemas/CustomUser')
 
         def get_custom_attribute(attribute, multi=False):
-            for ca in self.data['customAttributes']:
+            for ca in self.data.get('customAttributes', []):
                 if ca['name'] == attribute:
                     if multi:
                         return ca['values']
@@ -98,7 +99,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             active_checked = True
 
 
-        admin_ui_roles = [(role,) for role in get_custom_attribute('jansAdminUIRole', multi=True) ]
+        admin_ui_roles = [[role] for role in get_custom_attribute('jansAdminUIRole', multi=True) ]
         admin_ui_roles_label = _("jansAdminUIRole")
         add_admin_ui_role_label = _("Add Admin UI Role")
         self.admin_ui_roles_container = JansVerticalNav(
@@ -118,7 +119,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 )
 
 
-        member_of = [(grp,) for grp in get_custom_attribute('memberOf', multi=True) ]
+        member_of = [[grp] for grp in get_custom_attribute('memberOf', multi=True) ]
         member_of_label = _("Member of")
         add_group_label = _("Add Group")
         self.member_of_container = JansVerticalNav(
@@ -169,7 +170,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
                                 ]),
                         ], height=4, width=D()),
 
-
                             ]
 
 
@@ -185,19 +185,47 @@ class EditUserDialog(JansGDialog, DialogUtils):
             width=self.app.dialog_width,
             )
 
-    def delete_admin_ui_role(self, **kwargs: Any) -> None:
-        pass
 
-    def add_admin_ui_role(self):
-        if not self.admin_ui_roles:
-            async def coroutine():
-                cli_args = {'operation_id': 'get-all-adminui-roles'}
-                self.app.start_progressing()
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
-                result = response.json()
+    def get_admin_ui_roles(self) -> None:
+        async def coroutine():
+            cli_args = {'operation_id': 'get-all-adminui-roles'}
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            self.admin_ui_roles = response.json()
+            self.add_admin_ui_role()
         asyncio.ensure_future(coroutine())
 
+    def add_admin_ui_role(self) -> None:
+        if not self.admin_ui_roles:
+            self.get_admin_ui_roles()
+            return
+
+        ui_roles_to_be_added = []
+        for role in self.admin_ui_roles:
+            for cur_role in self.admin_ui_roles_container.data:
+                if cur_role[0] == role['role']:
+                    break
+            else:
+                ui_roles_to_be_added.append([role['role'], role['role']])
+
+        admin_ui_roles_checkbox = CheckboxList(values=ui_roles_to_be_added)
+
+        def add_role(dialog) -> None:
+            for role_ in admin_ui_roles_checkbox.current_values:
+                self.app.logger.debug('ADDING ROLE: ' + str(role_))
+                self.admin_ui_roles_container.add_item([role_])
+
+            self.app.logger.debug('NEW ROLES: ' + str(self.admin_ui_roles_container.data))
+
+        body = HSplit([Label(_("Select Admin-UI role to be added to current user.")), admin_ui_roles_checkbox])
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_role)]
+        dialog = JansGDialog(self.app, title=_("Select Admin-UI"), body=body, buttons=buttons, width=self.app.dialog_width-20)
+        self.app.show_jans_dialog(dialog)
+
+
+    def delete_admin_ui_role(self, **kwargs: Any) -> None:
+        self.admin_ui_roles_container.remove_item(kwargs['selected'])
 
 
     def delete_group(self, **kwargs: Any) -> None:
