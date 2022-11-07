@@ -46,7 +46,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.0.4-SNAPSHOT
-ENV CN_BUILD_DATE='2022-11-01 11:06'
+ENV CN_BUILD_DATE='2022-11-03 13:40'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -84,7 +84,7 @@ RUN mkdir -p /opt/prometheus \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c3e3f537e4e85c1ee718f7a7b79a203e7ed57e42
+ENV JANS_SOURCE_VERSION=be03a3841541b852d7409e4a8bf190ea46256368
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
