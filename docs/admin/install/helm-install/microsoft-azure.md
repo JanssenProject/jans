@@ -41,12 +41,12 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 2.  Create a [Resource Group](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-cli#create-a-resource-group)
     ```
-    az group create --name myResourceGroup --location eastus
+    az group create --name janssen-resource-group --location eastus
     ```
   
 3.  Create an [AKS cluster](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-cli#create-aks-cluster) such as the following example:
     ```
-    az aks create -g myResourceGroup -n myAKSCluster --enable-managed-identity --node-vm-size NODE_TYPE --node-count 2 --enable-addons monitoring --enable-msi-auth-for-monitoring  --generate-ssh-keys 
+    az aks create -g janssen-resource-group -n janssen-cluster --enable-managed-identity --node-vm-size NODE_TYPE --node-count 2 --enable-addons monitoring --enable-msi-auth-for-monitoring  --generate-ssh-keys 
     ``` 
     You can adjust `node-count` and `node-vm-size` as per your desired cluster size
 
@@ -54,7 +54,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 4.  Connect to the [cluster](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-cli#connect-to-the-cluster) 
     ```
     az aks install-cli
-    az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+    az aks get-credentials --resource-group janssen-resource-group --name janssen-cluster
     ```
 
 5.  Install [Helm3](https://helm.sh/docs/intro/install/)
@@ -143,6 +143,15 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
                provisioner: disk.csi.azure.com
              opendj:
                enabled: true
+           nginx-ingress:
+            ingress:
+                path: /
+                hosts:
+                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+                tls:
+                - secretName: tls-certificate
+                  hosts:
+                  - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans      
           ```
 
 

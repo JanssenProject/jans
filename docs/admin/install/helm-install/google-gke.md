@@ -46,7 +46,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 4.  Create cluster using a command such as the following example:
 
     ```  
-    gcloud container clusters create jans-cluster --num-nodes 2 --machine-type e2-highcpu-8 --zone us-west1-a
+    gcloud container clusters create janssen-cluster --num-nodes 2 --machine-type e2-highcpu-8 --zone us-west1-a
     ```
     You can adjust `num-nodes` and `machine-type` as per your desired cluster size
 
@@ -136,6 +136,15 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
                provisioner: kubernetes.io/gce-pd
              opendj:
                enabled: true
+           nginx-ingress:
+            ingress:
+                path: /
+                hosts:
+                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+                tls:
+                - secretName: tls-certificate
+                  hosts:
+                  - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans    
           ```
 
 

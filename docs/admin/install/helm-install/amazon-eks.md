@@ -49,7 +49,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 5.  Create cluster using eksctl such as the following example:
 
     ```  
-    eksctl create cluster --name jans-cluster --nodegroup-name jans-nodes --node-type NODE_TYPE --nodes 2  --managed --region REGION_CODE
+    eksctl create cluster --name janssen-cluster --nodegroup-name jans-nodes --node-type NODE_TYPE --nodes 2  --managed --region REGION_CODE
     ```
     You can adjust `node-type` and `nodes` number as per your desired cluster size
 
@@ -145,7 +145,16 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
                enabled: true
            config:
             configmap:
-                lbAddr: http:// #Add LB address from previous command   
+                lbAddr: http:// #Add LB address from previous command
+           nginx-ingress:
+            ingress:
+                path: /
+                hosts:
+                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+                tls:
+                - secretName: tls-certificate
+                  hosts:
+                  - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans          
           ```
 
 
