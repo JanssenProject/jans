@@ -72,8 +72,10 @@ class EditUserDialog(JansGDialog, DialogUtils):
         self.save_handler = save_handler
         self.data = data
         self.title=title
+        self.schema = self.app.cli_object.get_schema_from_reference('User-Mgt', '#/components/schemas/CustomUser')
         self.create_window()
         self.admin_ui_roles = {}
+        self.claims = []
 
     def save(self) -> None:
         pass
@@ -82,8 +84,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
         self.future.set_result(DialogResult.CANCEL)
 
     def create_window(self) -> None:
-
-        schema = self.app.cli_object.get_schema_from_reference('User-Mgt', '#/components/schemas/CustomUser')
 
         def get_custom_attribute(attribute, multi=False):
             for ca in self.data.get('customAttributes', []):
@@ -120,15 +120,15 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
 
         self.edit_user_content = [
-                    self.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'inum'), read_only=True),
-                    self.app.getTitledText(_("First Name"), name='givenName', value=self.data.get('givenName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'givenName')),
-                    self.app.getTitledText(_("Middle Name"), name='middleName', value=get_custom_attribute('middleName'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'middleName')),
-                    self.app.getTitledText(_("Last Name"), name='sn', value=get_custom_attribute('sn'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'sn')),
-                    self.app.getTitledText(_("Username"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'userId')),
-                    self.app.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'displayName')),
-                    self.app.getTitledText(_("Email"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(schema, 'mail')),
-                    self.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(schema, 'enabled')),
-                    self.app.getTitledText(_("Nickname"), name='nickname', value='\n'.join(get_custom_attribute('nickname', multi=True)), style='class:script-titledtext', height=3, jans_help=self.app.get_help_from_schema(schema, 'nickname')),
+                    self.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'inum'), read_only=True),
+                    self.app.getTitledText(_("First Name"), name='givenName', value=self.data.get('givenName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'givenName')),
+                    self.app.getTitledText(_("Middle Name"), name='middleName', value=get_custom_attribute('middleName'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'middleName')),
+                    self.app.getTitledText(_("Last Name"), name='sn', value=get_custom_attribute('sn'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'sn')),
+                    self.app.getTitledText(_("Username"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userId')),
+                    self.app.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'displayName')),
+                    self.app.getTitledText(_("Email"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'mail')),
+                    self.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, 'enabled')),
+                    self.app.getTitledText(_("Nickname"), name='nickname', value='\n'.join(get_custom_attribute('nickname', multi=True)), style='class:script-titledtext', height=3, jans_help=self.app.get_help_from_schema(self.schema, 'nickname')),
 
                     VSplit([ 
                         Label(text=admin_ui_roles_label, style='class:script-label', width=len(admin_ui_roles_label)+1), 
@@ -140,16 +140,15 @@ class EditUserDialog(JansGDialog, DialogUtils):
                                 ]),
                         ], height=4, width=D()),
 
-                            ]
+                    Button(_("Add Cliam"), handler=self.add_claim),
 
+                ]
+
+        self.edit_user_container = HSplit(self.edit_user_content, height=D(), width=D())
 
         self.dialog = JansDialogWithNav(
             title=self.title,
-            content= HSplit(
-                self.edit_user_content,
-                width=D(),
-                height=D()
-                ),
+            content=DynamicContainer(lambda: self.edit_user_container),
             button_functions=[(self.cancel, _("Cancel")), (self.save, _("Save"))],
             height=self.app.dialog_height,
             width=self.app.dialog_width,
@@ -183,10 +182,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         def add_role(dialog) -> None:
             for role_ in admin_ui_roles_checkbox.current_values:
-                self.app.logger.debug('ADDING ROLE: ' + str(role_))
                 self.admin_ui_roles_container.add_item([role_])
-
-            self.app.logger.debug('NEW ROLES: ' + str(self.admin_ui_roles_container.data))
 
         body = HSplit([Label(_("Select Admin-UI role to be added to current user.")), admin_ui_roles_checkbox])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_role)]
@@ -196,6 +192,59 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
     def delete_admin_ui_role(self, **kwargs: Any) -> None:
         self.admin_ui_roles_container.remove_item(kwargs['selected'])
+
+
+
+    def get_claims(self) -> None:
+        async def coroutine():
+            cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            result = response.json()
+            self.claims = result['entries']
+            self.add_claim()
+
+        asyncio.ensure_future(coroutine())
+
+
+    def add_claim(self) -> None:
+        if not self.claims:
+            self.get_claims()
+            return
+
+        cur_claims = []
+        for w in self.edit_user_content:
+            if hasattr(w, 'me'):
+                cur_claims.append(w.me.window.jans_name)
+
+        claims_list = []
+        for claim in self.claims:
+            if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
+                continue
+            if claim['name'] in ('memberOf', 'userPassword'):
+                continue
+            claims_list.append((claim['name'], claim['displayName']))
+
+        claims_checkbox = CheckboxList(values=claims_list)
+
+        def add_claim(dialog) -> None:
+            for claim_ in claims_checkbox.current_values:
+                for claim_prop in self.claims:
+                    if claim_prop['name'] == claim_:
+                        break
+                display_name = claim_prop['displayName']
+                if claim_prop['dataType'] == 'boolean':
+                    widget = self.app.getTitledCheckBox(_(display_name), name=claim_, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, claim_))
+                else:
+                    widget = self.app.getTitledText(_(display_name), name=claim_, value='', style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, claim_))
+                self.edit_user_content.insert(-1, widget)
+            self.edit_user_container = HSplit(self.edit_user_content, height=D(), width=D())
+
+        body = HSplit([Label(_("Select claim to be added to current user.")), claims_checkbox])
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
+        dialog = JansGDialog(self.app, title=_("Claims"), body=body, buttons=buttons, width=self.app.dialog_width-20)
+        self.app.show_jans_dialog(dialog)
 
 
     def __pt_container__(self)-> Dialog:
