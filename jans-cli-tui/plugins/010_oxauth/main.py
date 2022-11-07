@@ -235,85 +235,89 @@ class Plugin(DialogUtils):
             ) -> None:
             self.oauth_update_clients(start_index, pattern='')
 
-        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
-        if pattern:
-            endpoint_args +=',pattern:'+pattern
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                        operation_id='get-oauth-openid-clients',
-                        url_suffix='',
-                        endpoint_args=endpoint_args,
-                        data_fn=None,
-                        data={}
-                        )
+        async def coroutine():
+            endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
+            if pattern:
+                endpoint_args +=',pattern:'+pattern
+            try :
+                rsponse = self.app.cli_object.process_command_by_id(
+                            operation_id='get-oauth-openid-clients',
+                            url_suffix='',
+                            endpoint_args=endpoint_args,
+                            data_fn=None,
+                            data={}
+                            )
 
-        except Exception as e:
+            except Exception as e:
+                self.app.stop_progressing()
+                self.app.show_message(_("Error getting clients"), str(e))
+                return
+
             self.app.stop_progressing()
-            self.app.show_message(_("Error getting clients"), str(e))
-            return
 
-        self.app.stop_progressing()
+            if rsponse.status_code not in (200, 201):
+                self.app.show_message(_("Error getting clients"), str(rsponse.text))
+                return
 
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting clients"), str(rsponse.text))
-            return
+            try:
+                result = rsponse.json()
+            except Exception:
+                self.app.show_message(_("Error getting clients"), str(rsponse.text))
+                return
 
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting clients"), str(rsponse.text))
-            return
+            data =[]
 
-        data =[]
+            for d in result.get('entries', []):
+                data.append(
+                    [
+                    d['inum'],
+                    d.get('clientName', {}).get('values', {}).get('', ''),
+                    ','.join(d.get('grantTypes', [])),
+                    d.get('subjectType', '') 
+                    ]
+                )
 
-        for d in result.get('entries', []):
-            data.append(
-                [
-                d['inum'],
-                d.get('clientName', {}).get('values', {}).get('', ''),
-                ','.join(d.get('grantTypes', [])),
-                d.get('subjectType', '') 
-                ]
-            )
+            if data:
+                clients = JansVerticalNav(
+                    myparent=self.app,
+                    headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
+                    preferred_size= [0,0,30,0],
+                    data=data,
+                    on_enter=self.edit_client_dialog,
+                    on_display=self.app.data_display_dialog,
+                    on_delete=self.delete_client,
+                    get_help=(self.get_help,'Client'),
+                    selectes=0,
+                    headerColor='class:outh-verticalnav-headcolor',
+                    entriesColor='class:outh-verticalnav-entriescolor',
+                    all_data=result['entries']
+                )
+                buttons = []
+                if start_index > 0:
+                    handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
+                    prev_button = Button(_("Prev"), handler=handler_partial)
+                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                    buttons.append(prev_button)
+                if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
+                    handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
+                    next_button = Button(_("Next"), handler=handler_partial)
+                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                    buttons.append(next_button)
 
-        if data:
-            clients = JansVerticalNav(
-                myparent=self.app,
-                headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
-                preferred_size= [0,0,30,0],
-                data=data,
-                on_enter=self.edit_client_dialog,
-                on_display=self.app.data_display_dialog,
-                on_delete=self.delete_client,
-                get_help=(self.get_help,'Client'),
-                selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=result['entries']
-            )
-            buttons = []
-            if start_index > 0:
-                handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
-                prev_button = Button(_("Prev"), handler=handler_partial)
-                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                buttons.append(prev_button)
-            if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
-                next_button = Button(_("Next"), handler=handler_partial)
-                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                buttons.append(next_button)
+                self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
+                self.oauth_data_container['clients'] = HSplit([
+                    clients,
+                    VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
+                ])
 
-            self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
-            self.oauth_data_container['clients'] = HSplit([
-                clients,
-                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-            ])
+                get_app().invalidate()
+                self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
 
-            get_app().invalidate()
-            self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+            else:
+                self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
+        
+        asyncio.ensure_future(coroutine())
 
-        else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
 
     def oauth_get_clients(self) -> None:
         """Method to get the clients data from server

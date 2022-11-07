@@ -4,6 +4,7 @@ import sys
 import threading
 from asyncio import ensure_future
 from functools import partial
+import asyncio
 
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
@@ -108,84 +109,89 @@ class Plugin():
         def get_next(start_index, pattern=''):
             self.scripts_update_list(start_index, pattern='')
 
-        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
-        #endpoint_args=''
-        if pattern:
-            endpoint_args +=',pattern:'+pattern
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                operation_id='get-config-scripts',
-                url_suffix='',
-                endpoint_args=endpoint_args,
-                data_fn=None,
-                data={}
-                        )
+        async def coroutine():
 
-        except Exception as e:
-            self.app.show_message(_("Error getting scripts"), str(e))
-            return
+            endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
+            #endpoint_args=''
+            if pattern:
+                endpoint_args +=',pattern:'+pattern
+            try :
+                rsponse = self.app.cli_object.process_command_by_id(
+                    operation_id='get-config-scripts',
+                    url_suffix='',
+                    endpoint_args=endpoint_args,
+                    data_fn=None,
+                    data={}
+                            )
 
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting scripts"), str(rsponse.text))
-            return
+            except Exception as e:
+                self.app.show_message(_("Error getting scripts"), str(e))
+                return
 
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting scripts"), str(rsponse.text))
-            return
-        
-        data =[]
-        
-        for d in result.get('entries', []): 
-            data.append(
-                [
-                d['inum'],
-                d.get('name', ''),
-                d.get('description',''),   ## some scopes have no scopetypr
-                ]
-            )
+            if rsponse.status_code not in (200, 201):
+                self.app.show_message(_("Error getting scripts"), str(rsponse.text))
+                return
 
-        if data:
-
-            scripts = JansVerticalNav(
-                    myparent=self.app,
-                    headers=['inum', 'Name', 'Description'],
-                    preferred_size= [12, 25, 0],
-                    data=data,
-                    on_enter=self.add_script_dialog,
-                    on_display=self.app.data_display_dialog,
-                    get_help=(self.get_help,'Scripts'),
-                    #on_delete=self.delete_scope,
-                    # selection_changed=self.data_selection_changed,
-                    selectes=0,
-                    headerColor='class:outh-verticalnav-headcolor',
-                    entriesColor='class:outh-verticalnav-entriescolor',
-                    all_data=result['entries']
+            try:
+                result = rsponse.json()
+            except Exception:
+                self.app.show_message(_("Error getting scripts"), str(rsponse.text))
+                return
+            
+            data =[]
+            
+            for d in result.get('entries', []): 
+                data.append(
+                    [
+                    d['inum'],
+                    d.get('name', ''),
+                    d.get('description',''),   ## some scopes have no scopetypr
+                    ]
                 )
 
-            buttons = []
-            if start_index > 1:
-                handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
-                prev_button = Button(_("Prev"), handler=handler_partial)
-                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                buttons.append(prev_button)
-            if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
-                next_button = Button(_("Next"), handler=handler_partial)
-                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                buttons.append(next_button)
+            if data:
 
-            self.scripts_list_container = HSplit([
-                Window(height=1),
-                scripts,
-                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER),
-            ], height=D())
-            self.app.layout.focus(scripts)
-            get_app().invalidate()
+                scripts = JansVerticalNav(
+                        myparent=self.app,
+                        headers=['inum', 'Name', 'Description'],
+                        preferred_size= [12, 25, 0],
+                        data=data,
+                        on_enter=self.add_script_dialog,
+                        on_display=self.app.data_display_dialog,
+                        get_help=(self.get_help,'Scripts'),
+                        #on_delete=self.delete_scope,
+                        # selection_changed=self.data_selection_changed,
+                        selectes=0,
+                        headerColor='class:outh-verticalnav-headcolor',
+                        entriesColor='class:outh-verticalnav-entriescolor',
+                        all_data=result['entries']
+                    )
 
-        else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.scripts_main_area)
+                buttons = []
+                if start_index > 1:
+                    handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
+                    prev_button = Button(_("Prev"), handler=handler_partial)
+                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                    buttons.append(prev_button)
+                if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
+                    handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
+                    next_button = Button(_("Next"), handler=handler_partial)
+                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                    buttons.append(next_button)
+
+                self.scripts_list_container = HSplit([
+                    Window(height=1),
+                    scripts,
+                    VSplit(buttons, padding=5, align=HorizontalAlign.CENTER),
+                ], height=D())
+                self.app.layout.focus(scripts)
+                get_app().invalidate()
+
+            else:
+                self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.scripts_main_area)
+        
+        asyncio.ensure_future(coroutine())
+
 
     def get_help(self, **kwargs: Any):
 
