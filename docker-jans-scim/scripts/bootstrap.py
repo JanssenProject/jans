@@ -276,7 +276,9 @@ class PersistenceSetup:
         return files
 
     def import_ldif_files(self) -> None:
-        self.generate_scopes_ldif()
+        # temporarily disable dynamic scopes creation
+        # see https://github.com/JanssenProject/jans/issues/2869
+        # self.generate_scopes_ldif()
 
         for file_ in self.ldif_files:
             logger.info(f"Importing {file_}")

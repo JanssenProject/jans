@@ -207,7 +207,9 @@ class Upgrade:
 
     def invoke(self):
         logger.info("Running upgrade process (if required)")
-        self.update_client_scopes()
+        # temporarily disable dynamic scopes creation
+        # see https://github.com/JanssenProject/jans/issues/2869
+        # self.update_client_scopes()
 
     def get_all_scopes(self):
         if self.backend.type in ("sql", "spanner"):
