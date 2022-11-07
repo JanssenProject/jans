@@ -6,36 +6,10 @@
 
 package io.jans.orm.ldap.impl;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.unboundid.ldap.sdk.Attribute;
-import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.Modification;
-import com.unboundid.ldap.sdk.ModificationType;
-import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.ldap.sdk.*;
 import com.unboundid.util.StaticUtils;
-
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryDeleteException;
@@ -47,19 +21,23 @@ import io.jans.orm.exception.operation.SearchScopeException;
 import io.jans.orm.impl.BaseEntryManager;
 import io.jans.orm.ldap.operation.LdapOperationService;
 import io.jans.orm.ldap.operation.impl.LdapOperationServiceImpl;
-import io.jans.orm.model.AttributeData;
-import io.jans.orm.model.AttributeDataModification;
-import io.jans.orm.model.BatchOperation;
-import io.jans.orm.model.DefaultBatchOperation;
-import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.*;
 import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.model.base.LocalizedString;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.base.LocalizedString;
+import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.text.ParseException;
+import java.util.*;
 
 import static io.jans.orm.model.base.LocalizedString.*;
 
@@ -657,13 +635,13 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         return result;
     }
 
-    @Override
-    protected List<AttributeData> getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
+    protected List<AttributeData> getAttributeDataListFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
         List<AttributeData> listAttributes = new ArrayList<>();
 
         localizedString.getLanguageTags().forEach(languageTag -> {
             String value = localizedString.getValue(languageTag);
-            String key = localizedString.addLdapLanguageTag(ldapAttributeName, languageTag);
+            String ldapAttributeNameLocalized = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG);
+            String key = localizedString.addLdapLanguageTag(ldapAttributeNameLocalized, languageTag);
             AttributeData attributeData = new AttributeData(key, value);
 
             listAttributes.add(attributeData);
@@ -991,6 +969,33 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     @Override
     protected Object getNativeDateAttributeValue(Date dateValue) {
         return encodeTime(dateValue);
+    }
+
+    @Override
+    protected void addAttributeDataFromLocalizedString(Object entry, Annotation ldapAttribute, String propertyName, List<AttributeData> attributes) {
+        Class<?> entryClass = entry.getClass();
+
+        Getter getter = getGetter(entryClass, propertyName);
+        if (getter == null) {
+            throw new MappingException("Entry should has getter for property " + propertyName);
+        }
+
+        Object propertyValue = getter.get(entry);
+        if (propertyValue == null) {
+            return;
+        }
+
+        if (!(propertyValue instanceof LocalizedString)) {
+            throw new MappingException("Entry property should be LocalizedString");
+        }
+
+        LocalizedString localizedString = (LocalizedString) propertyValue;
+        String ldapAttributeName = ((AttributeName) ldapAttribute).name();
+
+        List<AttributeData> listAttributes = getAttributeDataListFromLocalizedString(ldapAttributeName, localizedString);
+        if (listAttributes != null) {
+            attributes.addAll(listAttributes);
+        }
     }
 
     private static class CountBatchOperation<T> extends DefaultBatchOperation<T> {
