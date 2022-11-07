@@ -167,7 +167,7 @@ public class AuthenticationFilter implements Filter {
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             boolean isParEndpoint = requestUrl.endsWith("/par");
             boolean ssaEndpoint = requestUrl.endsWith("/ssa") &&
-                    (Arrays.asList(HttpMethod.POST, HttpMethod.GET).contains(httpRequest.getMethod()));
+                    (Arrays.asList(HttpMethod.POST, HttpMethod.GET, HttpMethod.DELETE).contains(httpRequest.getMethod()));
             String authorizationHeader = httpRequest.getHeader(Constants.AUTHORIZATION);
             String dpopHeader = httpRequest.getHeader("DPoP");
 
