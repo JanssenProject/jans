@@ -543,7 +543,7 @@ class JCA_CLI:
 
             if 'verification_uri' in result and 'user_code' in result:
 
-                msg = "Please visit verification url {} and enter user code {} in {} secods".format(
+                msg = "Please visit verification url {} and enter user code {} within {} secods".format(
                         self.colored_text(result['verification_uri'], success_color),
                         self.colored_text(result['user_code'], bold_color),
                         result['expires_in']
@@ -559,7 +559,7 @@ class JCA_CLI:
             result = device_verified
 
         """
-        STEP 2: Get access token for retreiving user info
+        STEP 2: Get access token for retrieving user info
         After device code was verified, we use it to retreive refresh token
         """
         response = requests.post(
@@ -585,7 +585,7 @@ class JCA_CLI:
 
         """
         STEP 3: Get user info
-        refresh token is used for retreiving user information to identify user roles
+        refresh token is used for retrieving user information to identify user roles
         """
         response = requests.post(
             url='https://{}/jans-auth/restv1/userinfo'.format(self.idp_host),
@@ -652,7 +652,7 @@ class JCA_CLI:
             except:
                 pass
         if not error_printed:
-            msg = "Error retreiving data: "
+            msg = "Error retrieving data: "
             err = 'None'
             if isinstance(e, str):
                 err = e
@@ -977,7 +977,7 @@ class JCA_CLI:
 
     def get_requests(self, endpoint, params={}):
         if not self.wrapped:
-            sys.stderr.write("Please wait while retreiving data ...\n")
+            sys.stderr.write("Please wait while retrieving data ...\n")
 
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
@@ -1015,7 +1015,7 @@ class JCA_CLI:
             return response.json()
             print(response.status_code)
         except Exception as e:
-            print("An error ocurred while retreiving data")
+            print("An error ocurred while retrieving data")
             self.print_exception(e)
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):

@@ -77,8 +77,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
         self.admin_ui_roles = {}
         self.claims = []
 
-    def save(self) -> None:
-        pass
 
     def cancel(self) -> None:
         self.future.set_result(DialogResult.CANCEL)
@@ -250,6 +248,52 @@ class EditUserDialog(JansGDialog, DialogUtils):
         dialog = JansGDialog(self.app, title=_("Claims"), body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
+    def save(self) -> None:
+        raw_data = self.make_data_from_dialog(tabs={'user': self.edit_user_container})
+
+        user_info = {'customObjectClasses':['top', 'jansCustomPerson'], 'customAttributes':[]}
+        for key_ in ('mail', 'userId', 'displayName', 'givenName', 'userPassword'):
+            user_info[key_] = raw_data.pop(key_)
+
+        for key_ in ('inum', 'baseDn', 'dn'):
+            if key_ in raw_data:
+                del raw_data[key_]
+            if key_ in self.data:
+                user_info[key_] = self.data[key_]
+
+        status = raw_data.pop('active')
+        user_info['jansStatus'] = 'active' if status else 'inactive'
+
+        for key_ in raw_data:
+            user_info['customAttributes'].append({
+                    'name': key_, 
+                    'multiValued': len(raw_data[key_]) > 1, 
+                    'values': [raw_data[key_]],
+                    })
+
+        for ca in self.data.get('customAttributes', []):
+            if ca['name'] == 'memberOf':
+                user_info['customAttributes'].append(ca)
+                break
+
+        admin_ui_roles = [item[0] for item in self.admin_ui_roles_container.data]
+        if admin_ui_roles:
+           user_info['customAttributes'].append({
+                    'name': 'jansAdminUIRole', 
+                    'multiValued': len(admin_ui_roles) > 1, 
+                    'values': admin_ui_roles,
+                    })
+
+        async def coroutine():
+            operation_id = 'put-user' if self.data.get('baseDn') else 'post-user'
+            cli_args = {'operation_id': operation_id, 'data': user_info}
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+            self.app.show_message('Save Result', response.text)
+
+        asyncio.ensure_future(coroutine())
 
     def __pt_container__(self)-> Dialog:
         return self.dialog
