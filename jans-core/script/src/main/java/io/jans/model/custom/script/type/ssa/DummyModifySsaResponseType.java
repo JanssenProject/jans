@@ -42,4 +42,9 @@ public class DummyModifySsaResponseType implements ModifySsaResponseType {
     public boolean get(Object jsonArray, Object ssaContext) {
         return true;
     }
+
+    @Override
+    public boolean revoke(Object ssaList, Object ssaContext) {
+        return false;
+    }
 }

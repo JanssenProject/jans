@@ -13,4 +13,6 @@ public interface ModifySsaResponseType extends BaseExternalType {
     boolean create(Object jsonWebResponse, Object ssaContext);
 
     boolean get(Object jsonArray, Object ssaContext);
+
+    boolean revoke(Object ssaList, Object ssaContext);
 }

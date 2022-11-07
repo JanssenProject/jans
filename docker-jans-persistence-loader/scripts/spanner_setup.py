@@ -363,6 +363,7 @@ class SpannerBackend:
             ("jansScope", "creationDate"),
             ("jansStatEntry", "jansData"),
             ("jansSessId", "deviceSecret"),
+            ("jansSsa", "jansState"),
         ]:
             add_column(mod[0], mod[1])
 

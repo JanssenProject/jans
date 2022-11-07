@@ -22,7 +22,7 @@ public class SsaValidateClient extends BaseClient<SsaValidateRequest, SsaValidat
 
     @Override
     public String getHttpMethod() {
-        return HttpMethod.GET;
+        return HttpMethod.HEAD;
     }
 
     public SsaValidateResponse execSsaValidate(@NotNull String jti) {
