@@ -12,6 +12,7 @@ from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, W
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame, Box, Dialog
 from prompt_toolkit.application import Application
+from prompt_toolkit.eventloop import get_event_loop
 
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
@@ -20,9 +21,11 @@ from wui_components.jans_cli_dialog import JansGDialog
 
 
 from utils.multi_lang import _
+from utils.utils import DialogUtils
+
 import cli_style
 
-class Plugin():
+class Plugin(DialogUtils):
     """This is a general class for plugins 
     """
     def __init__(
@@ -52,10 +55,10 @@ class Plugin():
 
     def edit_requested_party(self, **kwargs: Any) -> None:
         title = _("Enter Request Party Properties")
-        schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedParties')
+        schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedParty')
         cur_data = kwargs.get('passed', ['', ''])
-        name_widget = self.app.getTitledText(_("Name"), name='name', value=cur_data[0], jans_help=self.app.get_help_from_schema(schema, 'name'), style='class:outh-scope-text')
-        domains_widget = self.app.getTitledText(_("Domains"), name='domains', value='\n'.join(cur_data[1].split(', ')),  height=3, jans_help=self.app.get_help_from_schema(schema, 'domains'), style='class:dialog-titled-widget')
+        name_widget = self.app.getTitledText(_("Name"), name='name', value=cur_data[0], jans_help=self.app.get_help_from_schema(self.schema, 'name'), style='class:outh-scope-text')
+        domains_widget = self.app.getTitledText(_("Domains"), name='domains', value='\n'.join(cur_data[1].split(', ')),  height=3, jans_help=self.app.get_help_from_schema(self.schema, 'domains'), style='class:dialog-titled-widget')
 
         def add_request_party(dialog: Dialog) -> None:
             name_ = name_widget.me.text
@@ -79,15 +82,13 @@ class Plugin():
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/AppConfiguration')
 
-        schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/JansFido2DynConfiguration')
-
-        self.containers['configuration'] = HSplit([
-                                self.app.getTitledText(_("Issuer"), name='issuer', value=self.data.get('issuer',''), jans_help=self.app.get_help_from_schema(schema, 'issuer'), style='class:outh-scope-text'),
-                                self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.data.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(schema, 'baseEndpoint'), style='class:outh-scope-text'),
-                                self.app.getTitledText(_("Clean Service Interval"), name='cleanServiceInterval', value=self.data.get('cleanServiceInterval',''), jans_help=self.app.get_help_from_schema(schema, 'cleanServiceInterval'), style='class:outh-scope-text', text_type='integer'),
-                                self.app.getTitledText(_("Clean Service Batch ChunkSize"), name='cleanServiceBatchChunkSize', value=self.data.get('cleanServiceBatchChunkSize',''), jans_help=self.app.get_help_from_schema(schema, 'cleanServiceBatchChunkSize'), style='class:outh-scope-text', text_type='integer'),
-                                self.app.getTitledCheckBox(_("Use Local Cache"), name='useLocalCache', checked=self.data.get('useLocalCache'), jans_help=self.app.get_help_from_schema(schema, 'useLocalCache'), style='class:outh-client-checkbox'),
-                                self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked=self.data.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(schema, 'disableJdkLogger'), style='class:outh-client-checkbox'),
+        self.tabs['configuration'] = HSplit([
+                                self.app.getTitledText(_("Issuer"), name='issuer', value=self.data.get('issuer',''), jans_help=self.app.get_help_from_schema(self.schema, 'issuer'), style='class:outh-scope-text'),
+                                self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.data.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(self.schema, 'baseEndpoint'), style='class:outh-scope-text'),
+                                self.app.getTitledText(_("Clean Service Interval"), name='cleanServiceInterval', value=self.data.get('cleanServiceInterval',''), jans_help=self.app.get_help_from_schema(self.schema, 'cleanServiceInterval'), style='class:outh-scope-text', text_type='integer'),
+                                self.app.getTitledText(_("Clean Service Batch ChunkSize"), name='cleanServiceBatchChunkSize', value=self.data.get('cleanServiceBatchChunkSize',''), jans_help=self.app.get_help_from_schema(self.schema, 'cleanServiceBatchChunkSize'), style='class:outh-scope-text', text_type='integer'),
+                                self.app.getTitledCheckBox(_("Use Local Cache"), name='useLocalCache', checked=self.data.get('useLocalCache'), jans_help=self.app.get_help_from_schema(self.schema, 'useLocalCache'), style='class:outh-client-checkbox'),
+                                self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked=self.data.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(self.schema, 'disableJdkLogger'), style='class:outh-client-checkbox'),
                                 self.app.getTitledWidget(
                                     _("Logging Level"),
                                     name='loggingLevel',
@@ -95,28 +96,32 @@ class Plugin():
                                         values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'),('ERROR', 'ERROR'),('FATAL', 'FATAL'),('OFF', 'OFF')],
                                         value=self.data.get('loggingLevel')
                                         ),
-                                    jans_help=self.app.get_help_from_schema(schema, 'loggingLevel'),
+                                    jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
                                     style='class:outh-client-dropdown'
                                     ),
-                                self.app.getTitledText(_("Logging Layout"), name='loggingLayout', value=self.data.get('loggingLayout',''), jans_help=self.app.get_help_from_schema(schema, 'loggingLayout'), style='class:outh-scope-text'),
-                                self.app.getTitledText(_("External Logger Configuration"), name='externalLoggerConfiguration', value=self.data.get('externalLoggerConfiguration',''), jans_help=self.app.get_help_from_schema(schema, 'externalLoggerConfiguration'), style='class:outh-scope-text'),
-                                self.app.getTitledText(_("Metric Reporter Interval"), name='metricReporterInterval', value=self.data.get('metricReporterInterval',''), jans_help=self.app.get_help_from_schema(schema, 'metricReporterInterval'), style='class:outh-scope-text', text_type='integer'),
-                                self.app.getTitledText(_("Metric Reporter Keep Data Days"), name='metricReporterKeepDataDays', value=self.data.get('metricReporterKeepDataDays',''), jans_help=self.app.get_help_from_schema(schema, 'metricReporterKeepDataDays'), style='class:outh-scope-text', text_type='integer'),
-                                self.app.getTitledCheckBox(_("Metric Reporter Enabled"), name='metricReporterEnabled', checked=self.data.get('metricReporterEnabled'), jans_help=self.app.get_help_from_schema(schema, 'metricReporterEnabled'), style='class:outh-client-checkbox'),
+                                self.app.getTitledText(_("Logging Layout"), name='loggingLayout', value=self.data.get('loggingLayout',''), jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'), style='class:outh-scope-text'),
+                                self.app.getTitledText(_("External Logger Configuration"), name='externalLoggerConfiguration', value=self.data.get('externalLoggerConfiguration',''), jans_help=self.app.get_help_from_schema(self.schema, 'externalLoggerConfiguration'), style='class:outh-scope-text'),
+                                self.app.getTitledText(_("Metric Reporter Interval"), name='metricReporterInterval', value=self.data.get('metricReporterInterval',''), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterInterval'), style='class:outh-scope-text', text_type='integer'),
+                                self.app.getTitledText(_("Metric Reporter Keep Data Days"), name='metricReporterKeepDataDays', value=self.data.get('metricReporterKeepDataDays',''), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterKeepDataDays'), style='class:outh-scope-text', text_type='integer'),
+                                self.app.getTitledCheckBox(_("Metric Reporter Enabled"), name='metricReporterEnabled', checked=self.data.get('metricReporterEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterEnabled'), style='class:outh-client-checkbox'),
                                 self.app.getTitledText(
                                             _("Person Custom Object Classes"),
                                             name='personCustomObjectClassList',
                                             value='\n'.join(self.data.get('personCustomObjectClassList', [])),
                                             height=3,
-                                            jans_help=self.app.get_help_from_schema(schema, 'personCustomObjectClassList'),
+                                            jans_help=self.app.get_help_from_schema(self.schema, 'personCustomObjectClassList'),
                                             style='class:outh-scope-text'
                                             ),
+                                Window(height=1),
+                                VSplit([Window(), Button(_("Save"), handler=self.save_config), Window()]),
                                 ],
                                 width=D()
                                 )
 
 
         static_schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/Fido2Configuration')
+        static_schema = {}
+
         fido2_static_config = self.data.get('fido2Configuration', {})
 
         requested_parties_title = _("Requested Parties")
@@ -125,7 +130,7 @@ class Plugin():
         requested_parties_data = []
         for rp in fido2_static_config.get('requestedParties', {}):
             requested_parties_data.append([rp['name'], ', '.join(rp.get('domains', []))])
-        
+
         self.requested_parties_container = JansVerticalNav(
                 myparent=self.app,
                 headers=['Name', 'Domains'],
@@ -144,7 +149,7 @@ class Plugin():
                 max_height=False
                 )
 
-        self.containers['static'] = HSplit([
+        self.tabs['static'] = HSplit([
                                 self.app.getTitledText(_("Authenticator Certificates Folder"), name='authenticatorCertsFolder', value=fido2_static_config.get('authenticatorCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticatorCertsFolder'), style='class:outh-scope-text'),
                                 self.app.getTitledText(_("MDS Access Token"), name='mdsAccessToken', value=fido2_static_config.get('mdsAccessToken',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsAccessToken'), style='class:outh-scope-text'),
                                 self.app.getTitledText(_("MDS TOC Certificates Folder"), name='mdsCertsFolder', value=fido2_static_config.get('mdsCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsCertsFolder'), style='class:outh-scope-text'),
@@ -154,8 +159,7 @@ class Plugin():
                                 self.app.getTitledText(_("Unfinished Request Expiration"), name='unfinishedRequestExpiration', value=fido2_static_config.get('unfinishedRequestExpiration',''), jans_help=self.app.get_help_from_schema(static_schema, 'unfinishedRequestExpiration'), style='class:outh-scope-text', text_type='integer'),
                                 self.app.getTitledText(_("Authentication History Expiration"), name='authenticationHistoryExpiration', value=fido2_static_config.get('authenticationHistoryExpiration',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticationHistoryExpiration'), style='class:outh-scope-text', text_type='integer'),
                                 self.app.getTitledText(_("Server Metadata Folder"), name='serverMetadataFolder', value=fido2_static_config.get('serverMetadataFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'serverMetadataFolder'), style='class:outh-scope-text'),
-                                
-                                
+
                                 self.app.getTitledCheckBox(_("User Auto Enrollment"), name='userAutoEnrollment', checked=fido2_static_config.get('userAutoEnrollment'), jans_help=self.app.get_help_from_schema(static_schema, 'userAutoEnrollment'), style='class:outh-client-checkbox'),
                                 self.app.getTitledText(
                                             _("Requested Credential Types"),
@@ -178,12 +182,12 @@ class Plugin():
                             height=5, width=D(),
                             ),
 
-
+                    VSplit([Window(), Button(_("Save"), handler=self.save_config), Window()]),
                                 ],
                                 width=D()
                                 )
 
-        self.nav_selection_changed(list(self.containers)[0])
+        self.nav_selection_changed(list(self.tabs)[0])
 
 
     async def get_fido_configuration(self) -> None:
@@ -223,7 +227,7 @@ class Plugin():
         """prepare the main container (tabs) for the current Plugin 
         """
 
-        self.containers = OrderedDict()
+        self.tabs = OrderedDict()
         self.main_area = HSplit([Label("configuration")],width=D())
 
         self.main_container = HSplit([
@@ -245,10 +249,40 @@ class Plugin():
             selection (str): the current selected tab
         """
 
-        if selection in self.containers:
-            self.main_area = self.containers[selection]
+        if selection in self.tabs:
+            self.main_area = self.tabs[selection]
         else:
             self.main_area = self.app.not_implemented
+
+
+    def save_config(self) -> None:
+        import json
+
+
+        fido2_config = self.make_data_from_dialog(tabs={'configuration': self.tabs['configuration']})
+        fido2_static = self.make_data_from_dialog(tabs={'static': self.tabs['static']})
+
+        fido2_config['personCustomObjectClassList'] = fido2_config['personCustomObjectClassList'].splitlines()
+        fido2_static['requestedCredentialTypes'] = fido2_static['requestedCredentialTypes'].splitlines()
+
+        fido2_static['requestedParties'] = []
+        for name, domains in self.requested_parties_container.data:
+            fido2_static['requestedParties'].append({'name': name, 'domains': domains.splitlines()})
+
+        fido2_config['fido2Configuration'] = fido2_static
+
+        with open('/tmp/f.json', 'w') as w:
+            w.write(json.dumps(fido2_config, indent=2))
+
+        async def coroutine():
+            cli_args = {'operation_id': 'put-properties-fido2', 'data': fido2_config}
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            #self.admin_ui_roles = response.json()
+            #self.add_admin_ui_role()
+        asyncio.ensure_future(coroutine())
+
 
     def set_center_frame(self) -> None:
         """center frame content

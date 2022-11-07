@@ -10,6 +10,7 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame
 from prompt_toolkit.formatted_text import HTML
 from wui_components.jans_drop_down import DropDownWidget
+
 from utils.utils import DialogUtils
 from utils.multi_lang import _
 
