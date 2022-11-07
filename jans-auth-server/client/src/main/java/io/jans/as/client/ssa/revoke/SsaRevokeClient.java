@@ -4,40 +4,38 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.client.ssa.get;
+package io.jans.as.client.ssa.revoke;
 
 import io.jans.as.client.BaseClient;
 import io.jans.as.model.config.Constants;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.client.Invocation.Builder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
 
-public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
+public class SsaRevokeClient extends BaseClient<SsaRevokeRequest, SsaRevokeResponse> {
 
-    private static final Logger LOG = Logger.getLogger(SsaGetClient.class);
+    private static final Logger LOG = Logger.getLogger(SsaRevokeClient.class);
 
-    public SsaGetClient(String url) {
+    public SsaRevokeClient(String url) {
         super(url);
     }
 
     @Override
     public String getHttpMethod() {
-        return HttpMethod.GET;
+        return HttpMethod.DELETE;
     }
 
-    public SsaGetResponse execSsaGet(String accessToken, String jti, Long orgId, Boolean softwareRoles) {
-        SsaGetRequest ssaGetRequest = new SsaGetRequest();
-        ssaGetRequest.setAccessToken(accessToken);
-        ssaGetRequest.setJti(jti);
-        ssaGetRequest.setOrgId(orgId);
-        ssaGetRequest.setSoftwareRoles(softwareRoles);
-        setRequest(ssaGetRequest);
+    public SsaRevokeResponse execSsaRevoke(String accessToken, String jti, Long orgId) {
+        SsaRevokeRequest req = new SsaRevokeRequest();
+        req.setAccessToken(accessToken);
+        req.setJti(jti);
+        req.setOrgId(orgId);
+        setRequest(req);
         return exec();
     }
 
-    public SsaGetResponse exec() {
+    public SsaRevokeResponse exec() {
         try {
             initClient();
 
@@ -50,10 +48,9 @@ public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
                 clientRequest.header(Constants.AUTHORIZATION, "Bearer ".concat(request.getAccessToken()));
             }
 
-            clientResponse = clientRequest.buildGet().invoke();
-            final SsaGetResponse ssaGetResponse = new SsaGetResponse(clientResponse);
-            ssaGetResponse.injectDataFromJson();
-            setResponse(ssaGetResponse);
+            clientResponse = clientRequest.buildDelete().invoke();
+            final SsaRevokeResponse res = new SsaRevokeResponse(clientResponse);
+            setResponse(res);
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

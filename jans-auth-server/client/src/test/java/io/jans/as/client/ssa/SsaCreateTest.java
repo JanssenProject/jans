@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
-public class SsaCreateRestTest extends BaseTest {
+public class SsaCreateTest extends BaseTest {
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test

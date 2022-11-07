@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service.external;
 
+import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.service.external.context.ModifySsaResponseContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -35,7 +36,7 @@ public class ModifySsaResponseService extends ExternalScriptService {
 
             ModifySsaResponseType modifySsaResponseType = (ModifySsaResponseType) script.getExternalType();
             final boolean result = modifySsaResponseType.create(jsonWebResponse, context);
-            log.trace("Finished modify-ssa-response method, script name: {}, jwt: {}, context: {}, result: {}", script.getName(), jsonWebResponse, context, result);
+            log.trace("Finished modify-ssa-response method create, script name: {}, jwt: {}, context: {}, result: {}", script.getName(), jsonWebResponse, context, result);
 
             return result;
         } catch (Exception ex) {
@@ -64,7 +65,7 @@ public class ModifySsaResponseService extends ExternalScriptService {
 
     public boolean get(JSONArray jsonArray, ModifySsaResponseContext context) {
         List<CustomScriptConfiguration> scriptList = getCustomScript();
-        if (scriptList == null || scriptList.isEmpty()) {
+        if (scriptList.isEmpty()) {
             return false;
         }
         for (CustomScriptConfiguration script : scriptList) {
@@ -79,7 +80,32 @@ public class ModifySsaResponseService extends ExternalScriptService {
                 log.error(e.getMessage(), e);
                 saveScriptError(script.getCustomScript(), e);
             }
-            log.trace("Finished modify-ssa-response method, script name: {}, jsonArray: {}, context: {}, result: {}", script.getName(), jsonArray, context, result);
+            log.trace("Finished modify-ssa-response method get, script name: {}, jsonArray: {}, context: {}, result: {}", script.getName(), jsonArray, context, result);
+            if (!result) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean revoke(List<Ssa> ssaList, ModifySsaResponseContext context) {
+        List<CustomScriptConfiguration> scriptList = getCustomScript();
+        if (scriptList.isEmpty()) {
+            return false;
+        }
+        for (CustomScriptConfiguration script : scriptList) {
+            log.trace("Executing python modify-ssa-response method revoke, script name: {}, ssaList: {}, context: {}", script.getName(), ssaList, context);
+            context.setScript(script);
+
+            ModifySsaResponseType modifySsaResponseType = (ModifySsaResponseType) script.getExternalType();
+            boolean result = false;
+            try {
+                result = modifySsaResponseType.revoke(ssaList, context);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                saveScriptError(script.getCustomScript(), e);
+            }
+            log.trace("Finished modify-ssa-response method revoke, script name: {}, ssaList: {}, context: {}, result: {}", script.getName(), ssaList, context, result);
             if (!result) {
                 return false;
             }
