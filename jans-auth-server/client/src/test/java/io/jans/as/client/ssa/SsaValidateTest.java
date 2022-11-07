@@ -28,7 +28,7 @@ import java.util.TimeZone;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-public class SsaValidateRestTest extends BaseTest {
+public class SsaValidateTest extends BaseTest {
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test

@@ -348,6 +348,13 @@ public class SsaServiceTest {
     }
 
     @Test
+    public void createNotAcceptableResponse_valid_response() {
+        Response response = ssaService.createNotAcceptableResponse().build();
+        assertNotNull(response, "Response is null");
+        assertEquals(response.getStatus(), HttpStatus.SC_NOT_ACCEPTABLE);
+    }
+
+    @Test
     public void createUnprocessableEntityResponse_valid_response() {
         Response response = ssaService.createUnprocessableEntityResponse().build();
         assertNotNull(response, "Response is null");

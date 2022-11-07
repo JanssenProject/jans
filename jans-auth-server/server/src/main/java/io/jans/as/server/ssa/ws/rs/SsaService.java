@@ -118,6 +118,10 @@ public class SsaService {
         return Response.status(HttpStatus.SC_UNPROCESSABLE_ENTITY).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
+    public Response.ResponseBuilder createNotAcceptableResponse() {
+        return Response.status(HttpStatus.SC_NOT_ACCEPTABLE).type(MediaType.APPLICATION_JSON_TYPE);
+    }
+
     private boolean hasPortalScope(List<String> scopes) {
         Iterator<String> scopesIterator = scopes.iterator();
         boolean result = false;

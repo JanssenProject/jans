@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.client.ssa.get;
+package io.jans.as.client.ssa.revoke;
 
 import io.jans.as.client.BaseRequest;
 import io.jans.as.model.common.AuthorizationMethod;
@@ -12,7 +12,7 @@ import io.jans.as.model.ssa.SsaRequestParam;
 import io.jans.as.model.util.QueryBuilder;
 import jakarta.ws.rs.core.MediaType;
 
-public class SsaGetRequest extends BaseRequest {
+public class SsaRevokeRequest extends BaseRequest {
 
     private String accessToken;
 
@@ -20,9 +20,7 @@ public class SsaGetRequest extends BaseRequest {
 
     private Long orgId;
 
-    private Boolean softwareRoles;
-
-    public SsaGetRequest() {
+    public SsaRevokeRequest() {
         setContentType(MediaType.APPLICATION_JSON);
         setMediaType(MediaType.APPLICATION_JSON);
         setAuthorizationMethod(AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD);
@@ -52,20 +50,11 @@ public class SsaGetRequest extends BaseRequest {
         this.orgId = orgId;
     }
 
-    public Boolean getSoftwareRoles() {
-        return softwareRoles;
-    }
-
-    public void setSoftwareRoles(Boolean softwareRoles) {
-        this.softwareRoles = softwareRoles;
-    }
-
     @Override
     public String getQueryString() {
         QueryBuilder builder = QueryBuilder.instance();
         builder.append(SsaRequestParam.JTI.getName(), jti);
         builder.append(SsaRequestParam.ORG_ID.getName(), orgId != null ? orgId.toString() : "");
-        builder.append(SsaRequestParam.SOFTWARE_ROLES.getName(), softwareRoles != null ? softwareRoles.toString() : "");
         return builder.toString();
     }
 }
