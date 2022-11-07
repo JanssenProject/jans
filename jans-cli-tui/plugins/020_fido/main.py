@@ -256,8 +256,6 @@ class Plugin(DialogUtils):
 
 
     def save_config(self) -> None:
-        import json
-
 
         fido2_config = self.make_data_from_dialog(tabs={'configuration': self.tabs['configuration']})
         fido2_static = self.make_data_from_dialog(tabs={'static': self.tabs['static']})
@@ -271,16 +269,12 @@ class Plugin(DialogUtils):
 
         fido2_config['fido2Configuration'] = fido2_static
 
-        with open('/tmp/f.json', 'w') as w:
-            w.write(json.dumps(fido2_config, indent=2))
-
         async def coroutine():
             cli_args = {'operation_id': 'put-properties-fido2', 'data': fido2_config}
             self.app.start_progressing()
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            #self.admin_ui_roles = response.json()
-            #self.add_admin_ui_role()
+
         asyncio.ensure_future(coroutine())
 
 
