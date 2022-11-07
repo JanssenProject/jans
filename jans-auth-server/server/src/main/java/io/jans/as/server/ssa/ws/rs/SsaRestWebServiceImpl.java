@@ -8,6 +8,7 @@ package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.server.ssa.ws.rs.action.SsaCreateAction;
 import io.jans.as.server.ssa.ws.rs.action.SsaGetAction;
+import io.jans.as.server.ssa.ws.rs.action.SsaRevokeAction;
 import io.jans.as.server.ssa.ws.rs.action.SsaValidateAction;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,9 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
     @Inject
     private SsaValidateAction ssaValidateAction;
 
+    @Inject
+    private SsaRevokeAction ssaRevokeAction;
+
     @Override
     public Response create(String requestParams, HttpServletRequest httpRequest) {
         return ssaCreateAction.create(requestParams, httpRequest);
@@ -39,5 +43,10 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
     @Override
     public Response validate(String jti) {
         return ssaValidateAction.validate(jti);
+    }
+
+    @Override
+    public Response revoke(String jti, Long orgId, HttpServletRequest httpRequest) {
+        return ssaRevokeAction.revoke(jti, orgId, httpRequest);
     }
 }
