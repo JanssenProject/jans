@@ -51,7 +51,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
     def __init__(
             self,
             parent,
-            data:list,
+            data:dict,
             title: AnyFormattedText= "",
             buttons: Optional[Sequence[Button]]= [],
             save_handler: Callable= None,
@@ -121,10 +121,10 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         self.edit_user_content = [
                     self.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'inum'), read_only=True),
+                    self.app.getTitledText(_("Username"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userId')),
                     self.app.getTitledText(_("First Name"), name='givenName', value=self.data.get('givenName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'givenName')),
                     self.app.getTitledText(_("Middle Name"), name='middleName', value=get_custom_attribute('middleName'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'middleName')),
                     self.app.getTitledText(_("Last Name"), name='sn', value=get_custom_attribute('sn'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'sn')),
-                    self.app.getTitledText(_("Username"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userId')),
                     self.app.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'displayName')),
                     self.app.getTitledText(_("Email"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'mail')),
                     self.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, 'enabled')),
@@ -143,6 +143,10 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     Button(_("Add Cliam"), handler=self.add_claim),
 
                 ]
+        if not self.data:
+            self.edit_user_content.insert(2,
+                    self.app.getTitledText(_("Password"), name='userPassword', value='', style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userPassword'))
+                )
 
         self.edit_user_container = HSplit(self.edit_user_content, height=D(), width=D())
 
