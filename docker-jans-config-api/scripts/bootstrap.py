@@ -467,7 +467,9 @@ class PersistenceSetup:
                 writer.unparse(f"inum={scope['inum'][0]},ou=scopes,o=jans", scope)
 
     def import_ldif_files(self) -> None:
-        self.generate_scopes_ldif()
+        # temporarily disable dynamic scopes creation
+        # see https://github.com/JanssenProject/jans/issues/2869
+        # self.generate_scopes_ldif()
 
         files = ["config.ldif", "scopes.ldif", "clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
