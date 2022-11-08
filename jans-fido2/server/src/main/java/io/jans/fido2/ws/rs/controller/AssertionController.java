@@ -26,6 +26,7 @@ import io.jans.fido2.service.operation.AssertionService;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
+ * serves request for /assertion endpoint exposed by FIDO2 sever 
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

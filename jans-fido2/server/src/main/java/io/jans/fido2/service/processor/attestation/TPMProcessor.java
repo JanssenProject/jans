@@ -59,6 +59,10 @@ import tss.tpm.TPMS_CERTIFY_INFO;
 import tss.tpm.TPMT_PUBLIC;
 import tss.tpm.TPM_GENERATED;
 
+/**
+ * Attestation processor for attestations of fmt = tpm
+ *
+ */
 @ApplicationScoped
 public class TPMProcessor implements AttestationFormatProcessor {
 

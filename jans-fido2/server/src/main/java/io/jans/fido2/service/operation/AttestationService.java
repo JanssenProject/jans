@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
+ * Core offering by the FIDO2 server, attestation is invoked upon enrollment
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

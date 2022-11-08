@@ -40,6 +40,11 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
  * @author Yuriy Movchan
  * @version March 9, 2020
  */
+/**
+ * authData — a raw buffer struct containing user info.
+ * Parser for authData or authenticatorData
+ *
+ */
 @ApplicationScoped
 public class AuthenticatorDataParser {
 
