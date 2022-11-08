@@ -145,7 +145,7 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first 10 OpenID Connect clients"), handler=self.oauth_get_clients),
+                        self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first 10 OpenID Connect clients"), handler=self.oauth_update_clients),
                         self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
                         self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
                         
@@ -239,28 +239,17 @@ class Plugin(DialogUtils):
             endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
             if pattern:
                 endpoint_args +=',pattern:'+pattern
-            try :
-                rsponse = self.app.cli_object.process_command_by_id(
-                            operation_id='get-oauth-openid-clients',
-                            url_suffix='',
-                            endpoint_args=endpoint_args,
-                            data_fn=None,
-                            data={}
-                            )
-
-            except Exception as e:
-                self.app.stop_progressing()
-                self.app.show_message(_("Error getting clients"), str(e))
-                return
-
+            cli_args = {'operation_id': 'get-oauth-openid-clients', 'endpoint_args': endpoint_args}
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
 
-            if rsponse.status_code not in (200, 201):
+            if response.status_code not in (200, 201):
                 self.app.show_message(_("Error getting clients"), str(rsponse.text))
                 return
 
             try:
-                result = rsponse.json()
+                result = response.json()
             except Exception:
                 self.app.show_message(_("Error getting clients"), str(rsponse.text))
                 return
@@ -315,17 +304,10 @@ class Plugin(DialogUtils):
 
             else:
                 self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
-        
+
+        self.app.start_progressing()
         asyncio.ensure_future(coroutine())
 
-
-    def oauth_get_clients(self) -> None:
-        """Method to get the clients data from server
-        """ 
-        self.oauth_data_container['clients'] = HSplit([Label(_("Please wait while getting clients"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
-        t = threading.Thread(target=self.oauth_update_clients, daemon=True)
-        self.app.start_progressing()
-        t.start()
 
     def delete_client(self, **kwargs: Any) -> None:
         """This method for the deletion of the clients data
@@ -359,7 +341,7 @@ class Plugin(DialogUtils):
                 )
                 # TODO Need to do `self.oauth_get_clients()` only if clients list is not empty
                 self.app.stop_progressing()
-                self.oauth_get_clients()
+                self.oauth_update_clients()
                 
             return result
 
@@ -729,7 +711,7 @@ class Plugin(DialogUtils):
         )
         self.app.stop_progressing()
         if response.status_code in (200, 201):
-            self.oauth_get_clients()
+            self.oauth_update_clients()
             return True
 
         self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
@@ -773,9 +755,7 @@ class Plugin(DialogUtils):
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['clients'])
             return
 
-        t = threading.Thread(target=self.oauth_update_clients, args=(0,tbuffer.text), daemon=True)
-        self.app.start_progressing()
-        t.start()
+        self.oauth_update_clients(pattern=tbuffer.text)
 
     def add_scope(self) -> None:
         """Method to display the dialog of clients
