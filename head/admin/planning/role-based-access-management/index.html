@@ -9911,14 +9911,40 @@
 
   <h1>Role Based Access Management</h1>
 
-<p>This is a placeholder</p>
+<p>Using roles to control access to resources makes sense for lots of security use
+cases. One benefit of RBAC is that it's deterministic-- from an audit
+perspective, you can tell who had access to what at any point in time. This is
+harder to achieve when contextual variables play a role in determining access.</p>
+<p>An OpenID Provider / OAuth Authorization Server like Jans Auth Server certainly
+has a role to play in the implementation of an RBAC infrastructure, but is not
+capable of delivering all the functionality your organization will need for a
+complete solution. For example, you may need a platform to define enterprise
+roles or to perform role consolidation. This is normally handled by an
+<a href="../identity-access-governance/">identity governance</a> tool.
+Also, Jans Auth Server is not a policy management platform, like
+* <a href="https://styra.com">Styra OPA</a>, <a href="https://www.osohq.com">OSO</a>
+* <a href="https://zanzibar.academy/">Zanzibar</a>, or
+* <a href="https://www.boundaryproject.io/">Hashicorp Boundary</a> or
+* <a href="https://www.symas.com/syms-rbac-abac-apache-fortress">Apache Fortress</a></p>
+<p>The tools above are just a few open source policy management frameworks. There
+are more commercial products in this space.</p>
+<p>Although Jans Auth Server may not be a complete RBAC solution, there are still
+some RBAC capabilities to consider. When a person authenticates using a web
+browser, the client can obtain user claims via OpenID Connect. It may make sense<br />
+to send the <code>role</code> role claim to the client. You may also send the <code>memberOf</code>
+claim, if your organization uses group membership to manage roles.</p>
+<p>But what if you need to dynamically compute roles? Or if you don't want to
+over-share by sending all the roles and groups associated for a person? One
+strategy is to use the Jans Auth Server Update Token Interception script to
+render the role claim, either in the OAuth access token, the <code>id_token</code> or
+the Userinfo JWT.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T16:08:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-08T04:26:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-08</span>
       
         <br>
         Created:
