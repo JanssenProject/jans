@@ -52,6 +52,10 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+/**
+ * Utility classes for COSE key structure.
+ *
+ */
 @ApplicationScoped
 public class CoseService {
 
