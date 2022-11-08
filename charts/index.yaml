@@ -3,6 +3,87 @@ entries:
   janssen:
   - annotations:
       artifacthub.io/changes: |
+        - 1.0.5 dev chart release
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.5_dev
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.5_dev
+        - name: configuration-manager
+          image: janssenproject/configurator:1.0.5_dev
+        - name:  config-api
+          image: janssenproject/config-api:1.0.5_dev
+        - name: fido2
+          image: janssenproject/fido2:1.0.5_dev
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.5_dev
+        - name: scim
+          image: janssenproject/scim:1.0.5_dev
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    appVersion: 1.0.5-dev
+    created: "2022-11-08T11:42:54.494893602Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.5-dev
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.5-dev
+    description: Janssen Access and Identity Management
+    digest: a5d098c3f874392301799ce48e6fdb393c1ad916df4934df72cd07460b5ddefa
+    home: https://jans.io
+    icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.21.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/charts/janssen
+    urls:
+    - janssen-1.0.5-dev.tgz
+    version: 1.0.5-dev
+  - annotations:
+      artifacthub.io/changes: |
         - 1.0.4 dev chart release
       artifacthub.io/containsSecurityUpdates: "true"
       artifacthub.io/images: |
@@ -29,7 +110,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.4
-    created: "2022-11-08T11:28:37.547723019Z"
+    created: "2022-11-08T11:42:54.486300152Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -110,7 +191,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.4-dev
-    created: "2022-11-08T11:28:37.53854401Z"
+    created: "2022-11-08T11:42:54.479044911Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -191,7 +272,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.3
-    created: "2022-11-08T11:28:37.529934302Z"
+    created: "2022-11-08T11:42:54.470564563Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -272,7 +353,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.3-dev
-    created: "2022-11-08T11:28:37.522112695Z"
+    created: "2022-11-08T11:42:54.461683412Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -352,7 +433,7 @@ entries:
       catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
-    created: "2022-11-08T11:28:37.512606686Z"
+    created: "2022-11-08T11:42:54.454425271Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -437,7 +518,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.1-dev
-    created: "2022-11-08T11:28:37.502472676Z"
+    created: "2022-11-08T11:42:54.444628815Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -524,7 +605,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-11-08T11:28:37.493655268Z"
+    created: "2022-11-08T11:42:54.434916659Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -611,7 +692,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-11-08T11:28:37.47523465Z"
+    created: "2022-11-08T11:42:54.424688201Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -698,7 +779,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-11-08T11:28:37.465466641Z"
+    created: "2022-11-08T11:42:54.416034351Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -785,7 +866,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-11-08T11:28:37.454953731Z"
+    created: "2022-11-08T11:42:54.404668387Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -842,4 +923,4 @@ entries:
     urls:
     - janssen-1.0.0-beta.14.tgz
     version: 1.0.0-beta.14
-generated: "2022-11-08T11:28:37.441011717Z"
+generated: "2022-11-08T11:42:54.392845219Z"
