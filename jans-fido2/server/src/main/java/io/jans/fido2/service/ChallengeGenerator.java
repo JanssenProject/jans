@@ -23,6 +23,10 @@ import java.security.SecureRandom;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+/**
+ * Challenge generator class
+ *
+ */
 @ApplicationScoped
 public class ChallengeGenerator {
 

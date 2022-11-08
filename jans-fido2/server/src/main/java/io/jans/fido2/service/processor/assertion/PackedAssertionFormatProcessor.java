@@ -44,6 +44,10 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Class which processes assertions of "packed" fmt (attestation type)
+ *
+ */
 @ApplicationScoped
 public class PackedAssertionFormatProcessor implements AssertionFormatProcessor {
 

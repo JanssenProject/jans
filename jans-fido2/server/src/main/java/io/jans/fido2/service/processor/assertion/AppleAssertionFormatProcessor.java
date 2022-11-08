@@ -40,6 +40,14 @@ import io.jans.fido2.service.verifier.AuthenticatorDataVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.UserVerificationVerifier;
 
+/**
+ * Processor class for Assertions from Apple Platform authenticator - reference
+ * -
+ * https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849
+ * 
+ * @author madhumitas
+ *
+ */
 @ApplicationScoped
 public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 
@@ -73,13 +81,14 @@ public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 	}
 
 	@Override
-	public void process(String base64AuthenticatorData, String signature, String clientDataJson, Fido2RegistrationData registration,
-			Fido2AuthenticationData authenticationEntity) {
+	public void process(String base64AuthenticatorData, String signature, String clientDataJson,
+			Fido2RegistrationData registration, Fido2AuthenticationData authenticationEntity) {
 		AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
 		commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
 		log.info("User verification option {}", authenticationEntity.getUserVerificationOption());
-		userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
+		userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(),
+				authData);
 
 		byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
 
