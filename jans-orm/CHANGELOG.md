@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.3...jans-orm-v1.0.4) (2022-11-08)
+
+
+### Bug Fixes
+
+* fix OR filters join when sub-filters uses lower ([#2850](https://github.com/JanssenProject/jans/issues/2850)) ([3dc6b32](https://github.com/JanssenProject/jans/commit/3dc6b329aacbb6958efd834c85143231595b0d99))
+* **jans-auth-server:** fix language metadata format ([#2883](https://github.com/JanssenProject/jans/issues/2883)) ([e21e206](https://github.com/JanssenProject/jans/commit/e21e206df16b048b1743c3ee441d9fbdb1f8c67e))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
 ## 1.0.3 (2022-11-01)
 
 
