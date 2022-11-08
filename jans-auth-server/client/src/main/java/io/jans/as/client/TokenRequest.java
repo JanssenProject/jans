@@ -38,7 +38,6 @@ public class TokenRequest extends ClientAuthnRequest {
     private String codeVerifier;
     private String authReqId;
     private String deviceCode;
-    private String audience;
     private String subjectToken;
     private String subjectTokenType;
     private String actorToken;
@@ -107,16 +106,6 @@ public class TokenRequest extends ClientAuthnRequest {
 
     public void setRequestedTokenType(String requestedTokenType) {
         this.requestedTokenType = requestedTokenType;
-    }
-
-    @Override
-    public String getAudience() {
-        return audience;
-    }
-
-    @Override
-    public void setAudience(String audience) {
-        this.audience = audience;
     }
 
     /**
@@ -325,7 +314,7 @@ public class TokenRequest extends ClientAuthnRequest {
         builder.append("refresh_token", refreshToken);
         builder.append("auth_req_id", authReqId);
         builder.append("device_code", deviceCode);
-        builder.append("audience", audience);
+        builder.append("audience", getAudience());
         builder.append("subject_token", subjectToken);
         builder.append("subject_token_type", subjectTokenType);
         builder.append("actor_token", actorToken);
@@ -360,8 +349,8 @@ public class TokenRequest extends ClientAuthnRequest {
         if (username != null && !username.isEmpty()) {
             parameters.put("username", username);
         }
-        if (StringUtils.isNotBlank(audience)) {
-            parameters.put("audience", audience);
+        if (StringUtils.isNotBlank(getAudience())) {
+            parameters.put("audience", getAudience());
         }
         if (StringUtils.isNotBlank(subjectToken)) {
             parameters.put("subject_token", subjectToken);
