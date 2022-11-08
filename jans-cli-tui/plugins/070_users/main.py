@@ -100,13 +100,13 @@ class Plugin(DialogUtils):
         self.user_list_container = self.users_list_box
 
         buttons = []
-        if self.users['start'] > 0:
-            handler_partial = partial(self.get_users, self.users['start']-self.app.entries_per_page, pattern)
+        if self.users['start'] > 1:
+            handler_partial = partial(self.get_users, self.users['start']-self.app.entries_per_page+1, pattern)
             prev_button = Button(_("Prev"), handler=handler_partial)
             prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
             buttons.append(prev_button)
         if self.users['totalEntriesCount'] > self.users['start'] + self.users['entriesCount']:
-            handler_partial = partial(self.get_users, self.users['start']+self.app.entries_per_page, pattern)
+            handler_partial = partial(self.get_users, self.users['start']+self.app.entries_per_page+1, pattern)
             next_button = Button(_("Next"), handler=handler_partial)
             next_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
             buttons.append(next_button)
@@ -116,7 +116,7 @@ class Plugin(DialogUtils):
         self.app.invalidate()
 
 
-    def get_users(self, start_index: int=0, pattern: Optional[str]='') -> None:
+    def get_users(self, start_index: int=1, pattern: Optional[str]='') -> None:
         """Gets Users from server.
         """
 
