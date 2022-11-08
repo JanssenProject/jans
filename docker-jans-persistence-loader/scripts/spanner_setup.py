@@ -364,6 +364,11 @@ class SpannerBackend:
             ("jansStatEntry", "jansData"),
             ("jansSessId", "deviceSecret"),
             ("jansSsa", "jansState"),
+            ("jansClnt", "jansClntURILocalized"),
+            ("jansClnt", "jansLogoURILocalized"),
+            ("jansClnt", "jansPolicyURILocalized"),
+            ("jansClnt", "jansTosURILocalized"),
+            ("jansClnt", "displayNameLocalized"),
         ]:
             add_column(mod[0], mod[1])
 
