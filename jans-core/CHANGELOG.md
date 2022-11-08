@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.3...jans-core-v1.0.4) (2022-11-08)
+
+
+### Features
+
+* for file based scripts check both script revision and file ([#2878](https://github.com/JanssenProject/jans/issues/2878)) ([97ab071](https://github.com/JanssenProject/jans/commit/97ab0712e39605520b3ac8fb8df1c00bf0437797))
+* ssa revoke endpoint ([#2865](https://github.com/JanssenProject/jans/issues/2865)) ([9c68f91](https://github.com/JanssenProject/jans/commit/9c68f914e155de492e54121033c8f0ed45d66817))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
 ## 1.0.3 (2022-11-01)
 
 
