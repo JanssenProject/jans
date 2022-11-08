@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.3...jans-pycloudlib-v1.0.4) (2022-11-08)
+
+
+### Bug Fixes
+
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
 ## 1.0.3 (2022-11-01)
 
 
