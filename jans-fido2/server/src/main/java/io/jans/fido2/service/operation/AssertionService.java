@@ -46,9 +46,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
+ * Core offering by the FIDO2 server, assertion is invoked upon authentication
+ * 
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
+
 @ApplicationScoped
 public class AssertionService {
 

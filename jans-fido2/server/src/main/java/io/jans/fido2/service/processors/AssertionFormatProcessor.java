@@ -22,6 +22,10 @@ import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.model.entry.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 
+/**
+ * Interface class for AssertionFormatProcessor
+ *
+ */
 public interface AssertionFormatProcessor {
 
     AttestationFormat getAttestationFormat();

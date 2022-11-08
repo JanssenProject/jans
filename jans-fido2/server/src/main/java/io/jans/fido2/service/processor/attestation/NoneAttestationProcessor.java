@@ -31,6 +31,21 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Attestation processor for attestations of fmt = none One of the attestation
+ * formats called 'none'. When you getting it, that means two things:
+ * 
+ * 1. You really don't need attestation, and so you are deliberately ignoring
+ * it.
+ * 
+ * 2. You forgot to set attestation flag to 'direct' when making credential.
+ * 
+ * If you are getting attestation with fmt set to none, then no attestation
+ * is provided, and you don't have anything to verify. Simply extract user
+ * relevant information as specified below and save it to the database.
+ *
+ * 
+ */
 @ApplicationScoped
 public class NoneAttestationProcessor implements AttestationFormatProcessor {
 
