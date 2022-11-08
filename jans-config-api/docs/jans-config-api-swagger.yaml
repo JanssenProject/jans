@@ -4441,9 +4441,6 @@ components:
           description: LDAP custom object class list for dynamic person enrolment.
           items:
             type: string
-          enum:
-            - gluuCustomPerson
-            - gluuPerson
         persistIdTokenInLdap:
           type: boolean
           description: Specifies whether to persist id_token into LDAP (otherwise saves into cache).
@@ -5020,42 +5017,42 @@ components:
           type: string
           description: Data Type of attribute.
           enum:
-            - STRING
-            - NUMERIC
-            - BOOLEAN
-            - BINARY
-            - CERTIFICATE
-            - DATE
-            - JSON
+            - string
+            - numeric
+            - boolean
+            - binary
+            - certificate
+            - date
+            - json
         editType:
           type: array
           description: GluuUserRole
           items:
             type: string
             enum:
-              - ADMIN
-              - OWNER
-              - MANAGER
-              - USER
-              - WHITEPAGES
+              - admin
+              - owner
+              - manager
+              - user
+              - whitepages
         viewType:
           type: array
           description: GluuUserRole
           items:
             type: string
             enum:
-              - ADMIN
-              - OWNER
-              - MANAGER
-              - USER
-              - WHITEPAGES
+              - admin
+              - owner
+              - manager
+              - user
+              - whitepages
         usageType:
           type: array
           description: GluuAttributeUsageType
           items:
             type: string
             enum:
-              - OPENID
+              - openid
         claimName:
           type: string
         seeAlso:
@@ -5064,10 +5061,10 @@ components:
           type: string
           description: Attrubute status
           enum:
-            - ACTIVE
-            - INACTIVE
-            - EXPIRED
-            - REGISTER
+            - active
+            - inactive
+            - expired
+            - register
         saml1Uri:
           type: string
         saml2Uri:
@@ -5224,10 +5221,10 @@ components:
           description: Scope creator type
           type: string
           enum:
-            - NONE
-            - CLIENT
-            - USER
-            - AUTO
+            - none
+            - client
+            - user
+            - auto
         creationDate:
           description: Scope creation date time.
           type: string
@@ -7434,8 +7431,8 @@ components:
           description: Session status
           type: string
           enum:
-            - AUTHENTICATED
-            - UNAUTHENTICATED
+            - authenticated
+            - unauthenticated
         sessionState:
           description: state of session.
           type: string
