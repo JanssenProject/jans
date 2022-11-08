@@ -92,7 +92,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			CredAndCounterData credIdAndCounters) {
 
 		log.info("AttStmt: " + attStmt.asText());
-		// Check attStmt and it contains â€œx5câ€� then its a FULL attestation.
+		// Check attStmt and it contains "x5c" then its a FULL attestation.
 		if (attStmt.hasNonNull("x5c")) {
 
 			// 1. Verify |x5c| is a valid certificate chain starting from the |credCert|
