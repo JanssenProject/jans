@@ -245,7 +245,7 @@ nav:
             - 'Client Registration': 'admin/auth-server/endpoints/client-registration.md'
             - 'Authorization': 'admin/auth-server/endpoints/authorization.md'
             - 'Token': 'admin/auth-server/endpoints/token.md'
-            - 'SSA': 'admin/auth-server/ssa.md'
+            - 'SSA': 'admin/auth-server/endpoints/ssa.md'
             - 'Userinfo': 'admin/auth-server/endpoints/userinfo.md'
             - 'Token Revocation': 'admin/auth-server/endpoints/token-revocation.md'
             - 'Session Revocation': 'admin/auth-server/endpoints/session-revocation.md'
@@ -273,7 +273,7 @@ nav:
             - 'CIBA': 'admin/auth-server/openid-features/ciba.md'
             - 'JARM': 'admin/auth-server/openid-features/jarm.md'
             - 'SIOP': 'admin/auth-server/openid-features/siop.md'
-            - 'Native SSO': 'admin/auther-server/openid-features/native-sso.md'
+            - 'Native SSO': 'admin/auth-server/openid-features/native-sso.md'
             - 'User Claims':
                 - 'admin/auth-server/openid-features/user-claims/README.md'
                 - 'Built-in Claims': 'admin/auth-server/openid-features/user-claims/built-in-claims.md'
