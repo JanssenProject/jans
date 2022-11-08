@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/JanssenProject/jans/compare/docs-v1.0.3...docs-v1.0.4) (2022-11-08)
+
+
+### Bug Fixes
+
+* [#2825](https://github.com/JanssenProject/jans/issues/2825) ([#2828](https://github.com/JanssenProject/jans/issues/2828)) ([5ce21aa](https://github.com/JanssenProject/jans/commit/5ce21aac5df54d2fe9402479fd221fffe9dc77ef))
+
 ## 1.0.3 (2022-11-01)
 
 
