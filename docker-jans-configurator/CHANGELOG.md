@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.3-1...docker-jans-configurator-v1.0.4-1) (2022-11-08)
+
+
+### Bug Fixes
+
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
 ## 1.0.3-1 (2022-11-01)
 
 
