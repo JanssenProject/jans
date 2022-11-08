@@ -23,7 +23,8 @@ public enum SsaErrorResponseType implements IErrorType {
     /**
      * When creating an ssa, if you get an internal error.
      */
-    UNKNOWN_ERROR("unknown_error");
+    UNKNOWN_ERROR("unknown_error"),
+    ;
 
     private final String paramName;
 

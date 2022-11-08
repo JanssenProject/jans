@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.3 (2022-11-01)
+
+
+### Bug Fixes
+
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#1463](https://github.com/JanssenProject/jans/issues/1463)) ([b6def37](https://github.com/JanssenProject/jans/commit/b6def37e3ca754a4294584b7c464455e3ed4b7eb))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2471](https://github.com/JanssenProject/jans/issues/2471)) ([903bda2](https://github.com/JanssenProject/jans/commit/903bda2c07cf299a72ccedae1d9fb427d4f993bb))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2519](https://github.com/JanssenProject/jans/issues/2519)) ([c0a2bbe](https://github.com/JanssenProject/jans/commit/c0a2bbe30bedb7153757d5ba6caa86b199e42a0a))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 

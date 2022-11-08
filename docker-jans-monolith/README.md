@@ -7,7 +7,7 @@ Docker monolith image packaging for Janssen.This image packs janssen services in
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-monolith/releases) for stable versions. This image should never be used in production.
-For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.3_dev`.
+For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.4_dev`.
 
 ## Environment Variables
 

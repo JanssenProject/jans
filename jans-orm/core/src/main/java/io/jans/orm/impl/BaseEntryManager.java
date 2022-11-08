@@ -6,44 +6,9 @@
 
 package io.jans.orm.impl;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.annotation.AttributeEnum;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.AttributesList;
-import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.JsonObject;
-import io.jans.orm.annotation.LanguageTag;
-import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.annotation.SchemaEntry;
+import io.jans.orm.annotation.*;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
@@ -63,6 +28,19 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static io.jans.orm.model.base.LocalizedString.*;
 
 /**
  * Abstract Entry Manager
@@ -1018,7 +996,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                         }
 
                         LocalizedString localizedString = (LocalizedString) propertyValue;
-                        final String finalLdapAttributeName = ldapAttributeName;
+                        final String finalLdapAttributeName = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG);
                         Map<String, AttributeData> filteredAttrs = attributesMap.entrySet().stream()
                                 .filter(x -> x.getKey().toLowerCase().startsWith(finalLdapAttributeName.toLowerCase()))
                                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
@@ -1201,13 +1179,20 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
     protected void loadLocalizedString(Map<String, AttributeData> attributesMap, LocalizedString localizedString, Map<String, AttributeData> filteredAttrs) {
         filteredAttrs.forEach((key, value) -> {
             AttributeData data = attributesMap.get(key);
-            if (data.getValues() != null && data.getValues().length == 1 && data.getValues()[0] instanceof Map<?, ?>) {
-                Map<?, ?> values = (Map<?, ?>) data.getValues()[0];
-                values.forEach((languageTag, val) -> {
-					if (languageTag instanceof String && val instanceof String) {
-						localizedString.setValue((String) val, Locale.forLanguageTag((String) languageTag));
-					}
-				});
+			if (data.getValues() != null && data.getValues().length == 1) {
+				if (data.getValues()[0] instanceof Map<?, ?>) {
+					Map<?, ?> values = (Map<?, ?>) data.getValues()[0];
+					values.forEach((languageTag, val) -> {
+						if (languageTag instanceof String && val instanceof String) {
+							localizedString.setValue((String) val, Locale.forLanguageTag((String) languageTag));
+						}
+					});
+				} else if (data.getValues()[0] instanceof String) {
+					String jsonStr = (String) data.getValues()[0];
+					JSONObject jsonObject = new JSONObject(jsonStr);
+
+					localizedString.loadFromJson(jsonObject, key);
+				}
             }
         });
     }
@@ -1586,11 +1571,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                     LanguageTag.class);
 			if (ldapAttribute != null) {
                 if (languageTag != null) {
-                    List<AttributeData> listAttributes = getAttributeDataFromLocalizedString(
-                            entry, ldapAttribute, propertyName);
-                    if (listAttributes != null) {
-                        attributes.addAll(listAttributes);
-                    }
+					addAttributeDataFromLocalizedString(entry, ldapAttribute, propertyName, attributes);
                 } else {
                     AttributeData attribute = getAttributeDataFromAttribute(entry, ldapAttribute, propertiesAnnotation,
                             propertyName);
@@ -1644,40 +1625,48 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return attribute;
 	}
 
-    private List<AttributeData> getAttributeDataFromLocalizedString(
-            Object entry, Annotation ldapAttribute, String propertyName) {
+	protected void addAttributeDataFromLocalizedString(Object entry, Annotation ldapAttribute, String propertyName, List<AttributeData> attributes) {
+		Class<?> entryClass = entry.getClass();
 
-        Class<?> entryClass = entry.getClass();
+		Getter getter = getGetter(entryClass, propertyName);
+		if (getter == null) {
+			throw new MappingException("Entry should has getter for property " + propertyName);
+		}
 
-        Getter getter = getGetter(entryClass, propertyName);
-        if (getter == null) {
-            throw new MappingException("Entry should has getter for property " + propertyName);
-        }
+		Object propertyValue = getter.get(entry);
+		if (propertyValue == null) {
+			return;
+		}
 
-        Object propertyValue = getter.get(entry);
-        if (propertyValue == null) {
-            return null;
-        }
+		if (!(propertyValue instanceof LocalizedString)) {
+			throw new MappingException("Entry property should be LocalizedString");
+		}
 
-        if (!(propertyValue instanceof LocalizedString)) {
-            throw new MappingException("Entry property should be LocalizedString");
-        }
+		LocalizedString localizedString = (LocalizedString) propertyValue;
+		String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 
-        LocalizedString localizedString = (LocalizedString) propertyValue;
-        String ldapAttributeName = ((AttributeName) ldapAttribute).name();
+		AttributeData attributeDataLocalized = getAttributeDataFromLocalizedString(ldapAttributeName, localizedString);
+		if (attributeDataLocalized != null) {
+			attributes.add(attributeDataLocalized);
+		}
+	}
 
-        return getAttributeDataFromLocalizedString(ldapAttributeName, localizedString);
-    }
+	protected AttributeData getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
+		AttributeData attributeData = new AttributeData(ldapAttributeName, new String[1]);
 
-    protected List<AttributeData> getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
-        List<AttributeData> listAttributes = new ArrayList<>();
+		JSONObject jsonObject = new JSONObject();
 
-        AttributeData attributeData = new AttributeData(ldapAttributeName, localizedString.getValues());
-        attributeData.setMultiValued(true);
-        listAttributes.add(attributeData);
+		localizedString.getLanguageTags().forEach(languageTag -> {
+			String key = localizedString.addLdapLanguageTag(ldapAttributeName, languageTag);
+			String value = localizedString.getValue(languageTag);
 
-        return listAttributes;
-    }
+			jsonObject.put(key, value);
+		});
+
+		attributeData.getValues()[0] = jsonObject.toString();
+
+		return attributeData;
+	}
 
 	public List<AttributeData> getAttributeDataListFromCustomAttributesList(Object entry, AttributesList attributesList,
 			String propertyName) {

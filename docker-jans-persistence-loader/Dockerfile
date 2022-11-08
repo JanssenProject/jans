@@ -24,9 +24,10 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=e74ea8e27e59d35ff6e3c6f997e6c1df6a04ec83
+ENV JANS_SOURCE_VERSION=be03a3841541b852d7409e4a8bf190ea46256368
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
+ARG JANS_CONFIG_API_DOCS=jans-config-api/docs
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -35,9 +36,10 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR}
+    && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR} \
+    && git sparse-checkout add ${JANS_CONFIG_API_DOCS}
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj /app/templates
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -50,12 +52,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
-    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/
-
-RUN mkdir -p /app/templates/jans-config-api
-
-# partially sync templates from linux-setup
-RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/ \
+    && cp ${JANS_CONFIG_API_DOCS}/jans-config-api-swagger.yaml -P /app/static/ \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
@@ -64,11 +62,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
-    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
-
-# Download jans-config-api-swagger for role_scope_mapping
-RUN wget -q https://github.com/JanssenProject/jans/raw/${JANS_SOURCE_VERSION}/jans-config-api/docs/jans-config-api-swagger.yaml -P /app/static
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -166,9 +160,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
-    CN_AUTH_SERVER_URL="" \
-    CN_TOKEN_SERVER_BASE_HOSTNAME=""
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
 
 # ====
 # misc
@@ -177,7 +169,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL name="janssenproject/persistence-loader" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.3" \
+    version="1.0.4" \
     release="dev" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"

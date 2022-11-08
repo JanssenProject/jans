@@ -249,8 +249,6 @@ class SpannerClient(SqlSchemaMixin):
         if not column_names:
             # TODO: faster lookup on column names
             col_names = list(self.get_table_mapping().get(table_name, {}).keys())
-        else:
-            col_names = []
 
         with self.database.snapshot() as snapshot:  # type: ignore
             result = snapshot.read(

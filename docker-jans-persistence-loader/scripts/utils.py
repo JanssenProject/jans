@@ -1,11 +1,9 @@
-import base64
 import contextlib
 import json
 import os
 import typing as _t
 from itertools import chain
 from pathlib import Path
-from urllib.parse import urlparse
 from uuid import uuid4
 
 import ruamel.yaml
@@ -200,63 +198,6 @@ def merge_auth_ctx(ctx):
     return ctx
 
 
-def merge_config_api_ctx(ctx):
-    def transform_url(url):
-        auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
-
-        if not auth_server_url:
-            return url
-
-        parse_result = urlparse(url)
-        if parse_result.path.startswith("/.well-known"):
-            path = f"/jans-auth{parse_result.path}"
-        else:
-            path = parse_result.path
-        url = f"http://{auth_server_url}{path}"
-        return url
-
-    def get_injected_urls():
-        auth_config = json.loads(
-            base64.b64decode(ctx["auth_config_base64"]).decode()
-        )
-        urls = (
-            "issuer",
-            "openIdConfigurationEndpoint",
-            "introspectionEndpoint",
-            "tokenEndpoint",
-            "tokenRevocationEndpoint",
-        )
-        return {
-            url: transform_url(auth_config[url])
-            for url in urls
-        }
-
-    approved_issuer = [ctx["hostname"]]
-    token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAME")
-    if token_server_hostname and token_server_hostname not in approved_issuer:
-        approved_issuer.append(token_server_hostname)
-
-    local_ctx = {
-        "apiApprovedIssuer": ",".join([f'"https://{issuer}"' for issuer in approved_issuer]),
-        "apiProtectionType": "oauth2",
-        "jca_client_id": ctx["jca_client_id"],
-        "jca_client_encoded_pw": ctx["jca_client_encoded_pw"],
-        "endpointInjectionEnabled": "true",
-        "configOauthEnabled": str(os.environ.get("CN_CONFIG_API_OAUTH_ENABLED") or True).lower(),
-    }
-    local_ctx.update(get_injected_urls())
-
-    basedir = '/app/templates/jans-config-api'
-    file_mappings = {
-        "config_api_dynamic_conf_base64": "dynamic-conf.json",
-    }
-    for key, file_ in file_mappings.items():
-        file_path = os.path.join(basedir, file_)
-        with open(file_path) as fp:
-            ctx[key] = generate_base64_contents(fp.read() % local_ctx)
-    return ctx
-
-
 def merge_jans_cli_ctx(manager, ctx):
     # WARNING:
     # - deprecated configs and secrets for role_based
@@ -287,7 +228,6 @@ def prepare_template_ctx(manager):
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
-    ctx = merge_config_api_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
     return ctx
 
@@ -301,7 +241,6 @@ def get_ldif_mappings(group, optional_scopes=None):
     def default_files():
         files = [
             "base.ldif",
-            "jans-config-api/scopes.ldif",
         ]
 
         if dist == "openbanking":
@@ -310,7 +249,6 @@ def get_ldif_mappings(group, optional_scopes=None):
                 "scopes.ob.ldif",
                 "scripts.ob.ldif",
                 "configuration.ob.ldif",
-                "jans-config-api/clients.ob.ldif",
             ]
         else:
             files += [
@@ -319,12 +257,10 @@ def get_ldif_mappings(group, optional_scopes=None):
                 "scripts.ldif",
                 "configuration.ldif",
                 "o_metric.ldif",
-                "jans-config-api/clients.ldif",
                 "agama.ldif",
             ]
 
         files += [
-            "jans-config-api/config.ldif",
             "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",

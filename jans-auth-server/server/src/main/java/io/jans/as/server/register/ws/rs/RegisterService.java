@@ -149,19 +149,19 @@ public class RegisterService {
         }
 
         for (String key : requestObject.getClientNameLanguageTags()) {
-            client.setClientName(requestObject.getClientName(key), Locale.forLanguageTag(key));
+            client.setClientNameLocalized(requestObject.getClientName(key), Locale.forLanguageTag(key));
         }
         for (String key : requestObject.getLogoUriLanguageTags()) {
-            client.setLogoUri(requestObject.getLogoUri(key), Locale.forLanguageTag(key));
+            client.setLogoUriLocalized(requestObject.getLogoUri(key), Locale.forLanguageTag(key));
         }
         for (String key : requestObject.getClientUriLanguageTags()) {
-            client.setClientUri(requestObject.getClientUri(key), Locale.forLanguageTag(key));
+            client.setClientUriLocalized(requestObject.getClientUri(key), Locale.forLanguageTag(key));
         }
         for (String key : requestObject.getPolicyUriLanguageTags()) {
-            client.setPolicyUri(requestObject.getPolicyUri(key), Locale.forLanguageTag(key));
+            client.setPolicyUriLocalized(requestObject.getPolicyUri(key), Locale.forLanguageTag(key));
         }
         for (String key : requestObject.getTosUriLanguageTags()) {
-            client.setTosUri(requestObject.getTosUri(key), Locale.forLanguageTag(key));
+            client.setTosUriLocalized(requestObject.getTosUri(key), Locale.forLanguageTag(key));
         }
 
         if (StringUtils.isNotBlank(requestObject.getJwksUri())) {

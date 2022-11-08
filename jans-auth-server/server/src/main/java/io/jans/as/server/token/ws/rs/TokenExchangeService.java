@@ -1,6 +1,5 @@
 package io.jans.as.server.token.ws.rs;
 
-import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
@@ -128,7 +127,7 @@ public class TokenExchangeService {
 
         tokenRestWebServiceValidator.validateSubjectToken(deviceSecret, subjectToken, sessionId, auditLog);
 
-        TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(new User(), client);
+        TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(sessionIdService.getUser(sessionId), client);
         tokenExchangeGrant.setSessionDn(sessionId.getDn());
 
         executionContext.setGrant(tokenExchangeGrant);
@@ -172,20 +171,21 @@ public class TokenExchangeService {
         return jsonObj;
     }
 
-    public void putNewDeviceSecret(JSONObject jsonObj, String sessionDn, Client client, String scope) {
+    public String createNewDeviceSecret(String sessionDn, Client client, String scope) {
         if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
-            return;
+            log.debug("Skip device secret. No device_sso scope.");
+            return null;
         }
         if (client == null || !ArrayUtils.contains(client.getGrantTypes(), GrantType.TOKEN_EXCHANGE)) {
             log.debug("Skip device secret. Scope has {} value but client does not have Token Exchange Grant Type enabled ('urn:ietf:params:oauth:grant-type:token-exchange')", ScopeConstants.DEVICE_SSO);
-            return;
+            return null;
         }
 
         try {
             final SessionId sessionId = sessionIdService.getSessionByDn(sessionDn);
             if (sessionId == null) {
                 log.debug("Unable to find session by dn: {}", sessionDn);
-                return;
+                return null;
             }
 
             String newDeviceSecret = HandleTokenFactory.generateDeviceSecret();
@@ -193,9 +193,10 @@ public class TokenExchangeService {
 
             sessionIdService.updateSessionId(sessionId, false);
 
-            jsonObj.put("device_token", newDeviceSecret);
+            return newDeviceSecret;
         } catch (Exception e) {
             log.error("Failed to generate device_secret", e);
         }
+        return null;
     }
 }

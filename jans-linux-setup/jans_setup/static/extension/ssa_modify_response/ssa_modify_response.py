@@ -30,3 +30,7 @@ class ModifySsaResponse(ModifySsaResponseType):
     def get(self, jsonArray, context):
         print "Modify ssa response script. Modify get ssa list: %s" % jsonArray
         return True
+
+    def revoke(self, ssaList, context):
+        print "Modify ssa response script. Modify revoke ssaList: %s" % ssaList
+        return True

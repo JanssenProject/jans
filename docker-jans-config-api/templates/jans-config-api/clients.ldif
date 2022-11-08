@@ -57,10 +57,13 @@ jansScope: inum=1800.FB7583,ou=scopes,o=jans
 jansScope: inum=1800.A524C2,ou=scopes,o=jans
 jansScope: inum=1800.23C17E,ou=scopes,o=jans
 jansScope: inum=1800.BC5317,ou=scopes,o=jans
+jansScope: inum=C4F7,ou=scopes,o=jans
+jansScope: inum=1200.2B7428,ou=scopes,o=jans
+jansScope: inum=1200.0A0198,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: false
 objectClass: top
 objectClass: jansClnt
-jansRedirectURI: https://%(hostname)s/admin-ui
+jansRedirectURI: https://%(hostname)s/admin
 jansRedirectURI: http://localhost:4100
