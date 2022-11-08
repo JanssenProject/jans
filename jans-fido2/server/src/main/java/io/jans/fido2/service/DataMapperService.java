@@ -23,6 +23,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
 /**
+ * Conversions to/from JSON format and to/from CBOR format
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
