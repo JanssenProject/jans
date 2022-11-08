@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/JanssenProject/jans/compare/agama-v1.0.3...agama-v1.0.4) (2022-11-08)
+
+
+### Bug Fixes
+
+* avoid NPE when configuration is missing [#2857](https://github.com/JanssenProject/jans/issues/2857) ([#2863](https://github.com/JanssenProject/jans/issues/2863)) ([4a27091](https://github.com/JanssenProject/jans/commit/4a2709185bd7ba84c3230cb94d4efea940681742))
+
 ## 1.0.3 (2022-11-01)
 
 
