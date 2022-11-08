@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.4
+CN_VERSION?=1.0.5-SNAPSHOT
 IMAGE_NAME=janssenproject/persistence-loader
 UNSTABLE_VERSION?=dev
 
