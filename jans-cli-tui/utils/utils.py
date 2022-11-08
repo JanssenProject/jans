@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from typing import Optional
 
 import prompt_toolkit
@@ -8,6 +9,7 @@ from wui_components.jans_data_picker import DateSelectWidget
 from wui_components.jans_spinner import Spinner
 
 
+common_data = SimpleNamespace()
 
 class DialogUtils:
 

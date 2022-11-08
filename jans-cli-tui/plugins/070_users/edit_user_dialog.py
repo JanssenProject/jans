@@ -33,7 +33,7 @@ from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_data_picker import DateSelectWidget
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, common_data
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from prompt_toolkit.formatted_text import AnyFormattedText
 
@@ -72,14 +72,22 @@ class EditUserDialog(JansGDialog, DialogUtils):
         self.save_handler = save_handler
         self.data = data
         self.title=title
+        self.admin_ui_roles = {}
         self.schema = self.app.cli_object.get_schema_from_reference('User-Mgt', '#/components/schemas/CustomUser')
         self.create_window()
-        self.admin_ui_roles = {}
-        self.claims = []
-
 
     def cancel(self) -> None:
         self.future.set_result(DialogResult.CANCEL)
+
+
+    def get_claim_properties(self, claim):
+        ret_val = {}
+        for tmp in common_data.users.claims:
+            if tmp['name'] == claim:
+                ret_val = tmp
+                break
+
+        return ret_val
 
     def create_window(self) -> None:
 
@@ -116,15 +124,14 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 max_height=False
                 )
 
-
         self.edit_user_content = [
                     self.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'inum'), read_only=True),
-                    self.app.getTitledText(_("Username"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userId')),
+                    self.app.getTitledText(_("Username *"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userId')),
                     self.app.getTitledText(_("First Name"), name='givenName', value=self.data.get('givenName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'givenName')),
                     self.app.getTitledText(_("Middle Name"), name='middleName', value=get_custom_attribute('middleName'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'middleName')),
                     self.app.getTitledText(_("Last Name"), name='sn', value=get_custom_attribute('sn'), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'sn')),
                     self.app.getTitledText(_("Display Name"), name='displayName', value=self.data.get('displayName',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'displayName')),
-                    self.app.getTitledText(_("Email"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'mail')),
+                    self.app.getTitledText(_("Email *"), name='mail', value=self.data.get('mail',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'mail')),
                     self.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, 'enabled')),
                     self.app.getTitledText(_("Nickname"), name='nickname', value='\n'.join(get_custom_attribute('nickname', multi=True)), style='class:script-titledtext', height=3, jans_help=self.app.get_help_from_schema(self.schema, 'nickname')),
 
@@ -138,12 +145,27 @@ class EditUserDialog(JansGDialog, DialogUtils):
                                 ]),
                         ], height=4, width=D()),
 
-                    Button(_("Add Cliam"), handler=self.add_claim),
+                    Button(_("Add Claim"), handler=self.add_claim),
 
                 ]
+
         if not self.data:
             self.edit_user_content.insert(2,
-                    self.app.getTitledText(_("Password"), name='userPassword', value='', style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userPassword'))
+                    self.app.getTitledText(_("Password *"), name='userPassword', value='', style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userPassword'))
+                )
+
+        for ca in self.data.get('customAttributes', []):
+            if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname'):
+                continue
+            claim_prop = self.get_claim_properties(ca['name'])
+            if claim_prop.get('dataType', 'string') in ('string', 'json'):
+                self.edit_user_content.insert(-1, 
+                    self.app.getTitledText(_(claim_prop.get('displayName', ca['name'])), name=ca['name'], value=get_custom_attribute(ca['name']), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
+                )
+            elif claim_prop.get('dataType') == 'boolean':
+                checked = get_custom_attribute(ca['name']).lower() == 'true'
+                self.edit_user_content.insert(-1, 
+                    self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
                 )
 
         self.edit_user_container = HSplit(self.edit_user_content, height=D(), width=D())
@@ -151,7 +173,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         self.dialog = JansDialogWithNav(
             title=self.title,
             content=DynamicContainer(lambda: self.edit_user_container),
-            button_functions=[(self.cancel, _("Cancel")), (self.save, _("Save"))],
+            button_functions=[(self.cancel, _("Cancel")), (partial(self.save_handler, self), _("Save"))],
             height=self.app.dialog_height,
             width=self.app.dialog_width,
             )
@@ -197,34 +219,17 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
 
 
-    def get_claims(self) -> None:
-        async def coroutine():
-            cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
-            self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            result = response.json()
-            self.claims = result['entries']
-            self.add_claim()
-
-        asyncio.ensure_future(coroutine())
-
-
     def add_claim(self) -> None:
-        if not self.claims:
-            self.get_claims()
-            return
-
         cur_claims = []
         for w in self.edit_user_content:
             if hasattr(w, 'me'):
                 cur_claims.append(w.me.window.jans_name)
 
         claims_list = []
-        for claim in self.claims:
+        for claim in common_data.users.claims:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
-            if claim['name'] in ('memberOf', 'userPassword'):
+            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus'):
                 continue
             claims_list.append((claim['name'], claim['displayName']))
 
@@ -232,7 +237,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         def add_claim(dialog) -> None:
             for claim_ in claims_checkbox.current_values:
-                for claim_prop in self.claims:
+                for claim_prop in common_data.users.claims:
                     if claim_prop['name'] == claim_:
                         break
                 display_name = claim_prop['displayName']
@@ -247,53 +252,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
         dialog = JansGDialog(self.app, title=_("Claims"), body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
-
-    def save(self) -> None:
-        raw_data = self.make_data_from_dialog(tabs={'user': self.edit_user_container})
-
-        user_info = {'customObjectClasses':['top', 'jansCustomPerson'], 'customAttributes':[]}
-        for key_ in ('mail', 'userId', 'displayName', 'givenName', 'userPassword'):
-            user_info[key_] = raw_data.pop(key_)
-
-        for key_ in ('inum', 'baseDn', 'dn'):
-            if key_ in raw_data:
-                del raw_data[key_]
-            if key_ in self.data:
-                user_info[key_] = self.data[key_]
-
-        status = raw_data.pop('active')
-        user_info['jansStatus'] = 'active' if status else 'inactive'
-
-        for key_ in raw_data:
-            user_info['customAttributes'].append({
-                    'name': key_, 
-                    'multiValued': len(raw_data[key_]) > 1, 
-                    'values': [raw_data[key_]],
-                    })
-
-        for ca in self.data.get('customAttributes', []):
-            if ca['name'] == 'memberOf':
-                user_info['customAttributes'].append(ca)
-                break
-
-        admin_ui_roles = [item[0] for item in self.admin_ui_roles_container.data]
-        if admin_ui_roles:
-           user_info['customAttributes'].append({
-                    'name': 'jansAdminUIRole', 
-                    'multiValued': len(admin_ui_roles) > 1, 
-                    'values': admin_ui_roles,
-                    })
-
-        async def coroutine():
-            operation_id = 'put-user' if self.data.get('baseDn') else 'post-user'
-            cli_args = {'operation_id': operation_id, 'data': user_info}
-            self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-
-            self.app.show_message('Save Result', response.text)
-
-        asyncio.ensure_future(coroutine())
 
     def __pt_container__(self)-> Dialog:
         return self.dialog
