@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.4-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.3-1...docker-jans-persistence-loader-v1.0.4-1) (2022-11-08)
+
+
+### Bug Fixes
+
+* **image:** multiple dynamic scopes created when using 2 replicas ([#2871](https://github.com/JanssenProject/jans/issues/2871)) ([5e0f1e6](https://github.com/JanssenProject/jans/commit/5e0f1e69023da264333e3786fcf994539054be71))
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
 ## 1.0.3-1 (2022-11-01)
 
 
