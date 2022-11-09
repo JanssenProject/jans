@@ -276,7 +276,6 @@ class JansVerticalNav():
                 return
             self.selectes = (self.selectes - 1) % len(self.data)
             
-            self.myparent.logger.debug("Selected:"+str(self.data[self.selectes]))
             if self.get_help :
                 self.get_help(data=self.data[self.selectes],scheme=self.scheme)
 
@@ -285,7 +284,6 @@ class JansVerticalNav():
             if not self.data:
                 return
             self.selectes = (self.selectes + 1) % len(self.data)
-            self.myparent.logger.debug("Selected:"+str(self.data[self.selectes]))
             if self.get_help :
                 self.get_help(data=self.data[self.selectes],scheme=self.scheme)
 
