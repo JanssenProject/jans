@@ -9,6 +9,10 @@ tags:
 
 ```bash
 $ sudo systemctl list-units --all "jans*"
+```
+
+Output should be like below: 
+```
 UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
 jans-auth.service       loaded active running Janssen OAauth service    
 jans-config-api.service loaded active running Janssen Config API service
