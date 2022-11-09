@@ -80,7 +80,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.save_handler = save_handler
         self.data = data
         self.title=title
-        self.cur_lang = self.data.get('programmingLanguage', 'PYTHON')
+        self.cur_lang = self.data.get('programmingLanguage', 'python')
         self.create_window()
         self.script = self.data.get('script','')
 
@@ -110,7 +110,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                         data[prop_container.jans_name].append(prop)
 
         
-        data['locationType'] = 'LDAP' if data['location'] == 'db' else 'FILE'
+        data['locationType'] = 'ldap' if data['location'] == 'db' else 'file'
         data['internal'] = self.data.get('internal', False)
         data['modified'] = self.data.get('modified', False)
         data['revision'] = self.data.get('revision', 0) + 1
@@ -140,32 +140,32 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/CustomScript')
 
         script_types = [
-                        ['PERSON_AUTHENTICATION', 'Person Authentication'],
-                        ['CONSENT_GATHERING', 'Consent Gathering'],
-                        ['POST_AUTHN', 'Post Authentication'],
-                        ['ID_TOKEN', 'id_token'],
-                        ['PASSWORD_GRANT', 'Password Grant'],
-                        ['CIBA_END_USER_NOTIFICATION', 'CIBA End User Notification'],
-                        ['OpenID Configuration', 'OpenID Configuration'],
-                        ['DYNAMIC_SCOPE', 'Dynamic Scope', ],
-                        ['SPONTANEOUS_SCOPE', 'Spontaneous Scope',],
-                        ['APPLICATION_SESSION', 'Application Session'],
-                        ['END_SESSION', 'End Session'],
-                        ['CLIENT_REGISTRATION', 'Client Registration'],
-                        ['INTROSPECTION', 'Introspection'],
-                        ['UPDATE_TOKEN', 'Update Token'],
-                        ['CONFIG_API', 'Config API'],
-                        ['IDP', 'IDP'],
-                        ['RESOURCE_OWNER_PASSWORD_CREDENTIALS', 'Resource Owner Password Credentials'],
-                        ['CACHE_REFRESH', 'Cache Refresh'],
-                        ['ID_GENERATOR', 'Id Generator'],
-                        ['UMA_RPT_POLICY', 'Uma Rpt Policy'],
-                        ['UMA_RPT_CLAIMS', 'Uma Rpt Claims'],
-                        ['UMA_CLAIMS_GATHERING', 'Uma Claims Gathering'],
-                        ['SCIM', 'SCIM'],
-                        ['REVOKE_TOKEN', 'Revoke Token'],
-                        ['PERSISTENCE_EXTENSION', 'Persistence Extension'],
-                        ['DISCOVERY', 'Discovery'],
+                        ['person_authentication', 'Person Authentication'],
+                        ['consent_gathering', 'Consent Gathering'],
+                        ['post_authn', 'Post Authentication'],
+                        ['id_token', 'id_token'],
+                        ['password_grant', 'Password Grant'],
+                        ['ciba_end_user_notification', 'CIBA End User Notification'],
+                        #['OpenID Configuration', 'OpenID Configuration'],
+                        ['dynamic_scope', 'Dynamic Scope', ],
+                        ['spontaneous_scope', 'Spontaneous Scope',],
+                        ['application_session', 'Application Session'],
+                        ['end_session', 'End Session'],
+                        ['client_registration', 'Client Registration'],
+                        ['introspection', 'Introspection'],
+                        ['update_token', 'Update Token'],
+                        ['config_api', 'Config API'],
+                        ['idp', 'IDP'],
+                        ['resource_owner_password_credentials', 'Resource Owner Password Credentials'],
+                        ['cache_refresh', 'Cache Refresh'],
+                        ['id_generator', 'Id Generator'],
+                        ['uma_rpt_policy', 'Uma Rpt Policy'],
+                        ['uma_rpt_claims', 'Uma Rpt Claims'],
+                        ['uma_claims_gathering', 'Uma Claims Gathering'],
+                        ['scim', 'SCIM'],
+                        ['revoke_token', 'Revoke Token'],
+                        ['persistence_extension', 'Persistence Extension'],
+                        ['discovery', 'Discovery'],
                         ]
 
         self.location_widget = self.myparent.getTitledText(
@@ -244,7 +244,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                 jans_help=self.myparent.get_help_from_schema(schema, 'scriptType'),
                                 style='class:outh-client-dropdown'),
 
-                    self.myparent.getTitledCheckBox(_("Enabled"), name='enabled', checked= not self.data.get('enabled'), style='class:script-checkbox', jans_help=self.myparent.get_help_from_schema(schema, 'enabled')),
+                    self.myparent.getTitledCheckBox(_("Enabled"), name='enabled', checked=self.data.get('enabled'), style='class:script-checkbox', jans_help=self.myparent.get_help_from_schema(schema, 'enabled')),
                     self.myparent.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'name')),
                     self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'description')),
 
@@ -264,7 +264,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                 _("Programming Language"),
                                 name='programmingLanguage',
                                 widget=DropDownWidget(
-                                    values=[['PYTHON', 'Python'], ['JAVA', 'Java']],
+                                    values=[['python', 'Python'], ['java', 'Java']],
                                     value=self.cur_lang,
                                     on_value_changed=self.script_lang_changed,
                                     ),
