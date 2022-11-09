@@ -16,6 +16,8 @@ import io.jans.orm.model.base.Entry;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.apache.tika.utils.StringUtils;
+
 import java.io.Serializable;
 
 /**
@@ -87,13 +89,6 @@ public class GluuOrganization extends Entry implements Serializable {
 
     public void setJsFaviconPath(String jsFaviconPath) {
         this.jsFaviconPath = jsFaviconPath;
-    }
-
-    public String getOrganizationTitle() {
-        if (title == null || title.trim().equals("")) {
-            return "Gluu";
-        }
-        return title;
     }
 
     public String getCountryName() {
@@ -177,6 +172,9 @@ public class GluuOrganization extends Entry implements Serializable {
     }
 
     public String getTitle() {
+        if (StringUtils.isBlank(title)) {
+            title = "Gluu";
+        }
         return title;
     }
 
