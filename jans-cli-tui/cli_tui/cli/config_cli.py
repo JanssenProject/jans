@@ -64,7 +64,10 @@ client_id = os.environ.get(my_op_mode + '_client_id')
 client_secret = os.environ.get(my_op_mode + '_client_secret')
 access_token = None
 debug = os.environ.get('jans_client_debug')
-log_dir = os.environ.get('cli_log_dir', cur_dir)
+log_dir = os.environ.get('cli_log_dir', os.path.join('jans_cli_logs', home_dir))
+
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir, exist_ok=True)
 
 salt_fn = '/etc/jans/conf/salt'
 if not os.path.exists(salt_fn):

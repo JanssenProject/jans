@@ -14,6 +14,9 @@ from pathlib import Path
 from itertools import cycle
 from requests.models import Response
 
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(cur_dir)
+
 import prompt_toolkit
 from prompt_toolkit.application import Application
 from prompt_toolkit.application.current import get_app
@@ -73,7 +76,6 @@ home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
-cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 def accept_yes() -> None:
     get_app().exit(result=True)
@@ -209,8 +211,12 @@ class JansCliApp(Application):
     def init_logger(self) -> None:
         self.logger = logging.getLogger('JansCli')
         self.logger.setLevel(logging.DEBUG)
+        logs_dir = os.path.join('jans_cli_logs', home_dir)
+        if not os.path.exists(logs_dir):
+            os.makedirs(logs_dir, exist_ok=True)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        file_handler = logging.FileHandler(os.path.join(cur_dir, 'dev.log'))
+        file_handler = logging.FileHandler(os.path.join(logs_dir, 'dev-tui.log'))
+
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
