@@ -1,4 +1,4 @@
-package io.jans.util.properties;
+package io.jans.doc.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package io.jans.util.properties;
+package io.jans.doc.annotation;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -9,9 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@SupportedAnnotationTypes("io.jans.util.properties.JansConfigProperty")
-
-public class JansConfigPropertyProcessor extends AbstractProcessor {
+@SupportedAnnotationTypes("io.jans.doc.annotation.DocumentedJansProperty")
+public class DocumentedJansPropertyProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
