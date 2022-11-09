@@ -8,7 +8,7 @@ tags:
 ## Getting list of Jans services
 
 ```bash
-$ sudo systemctl list-units --all "jans*"
+sudo systemctl list-units --all "jans*"
 ```
 
 Output should be like below: 
