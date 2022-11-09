@@ -407,7 +407,7 @@ class JansCliApp(Application):
         cbl.window.jans_help = jans_help
         #li, cd, width = self.handle_long_string(title, values, cbl)
 
-        v = VSplit([Label(text=title, width=len(title), style=style, wrap_lines=False), cbl])
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cbl], padding=1)
         v.me = cbl
 
         return v
@@ -439,7 +439,8 @@ class JansCliApp(Application):
 
         #li, cd, width = self.handle_long_string(title, text, cb)
 
-        v = VSplit([Label(text=title, width=len(title), style=style, wrap_lines=False), cb])
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cb], padding=1)
+
         v.me = cb
 
         return v
