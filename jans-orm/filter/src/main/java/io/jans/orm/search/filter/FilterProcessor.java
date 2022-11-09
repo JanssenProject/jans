@@ -43,9 +43,9 @@ public class FilterProcessor {
 				return null;
 			}
 
-			Filter resultFilter = new Filter(type, resultFilters.toArray(new Filter[0]));
-			resultFilter.setAssertionValue(genericFilter.getAssertionValue());
-
+			Filter resultFilter = genericFilter.clone();
+			resultFilter.setFilters(resultFilters.toArray(new Filter[0]));
+			
 			return resultFilter;
 		}
 

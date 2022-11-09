@@ -49,6 +49,22 @@ public final class CouchbaseSample {
         newUser.getCustomAttributes().add(new CustomObjectAttribute("test", "test_value"));
         couchbaseEntryManager.persist(newUser);
 
+        // Find all with lower and or filters
+        Filter orFilterWithLower = Filter.createORFilter(Filter.createEqualityFilter(Filter.createLowercaseFilter("description"), "test1"),
+        		Filter.createEqualityFilter(Filter.createLowercaseFilter("description"), "test2"));
+        List<SimpleUser> usersWithOrFilter = couchbaseEntryManager.findEntries("ou=sessions,o=gluu", SimpleUser.class, orFilterWithLower);
+        for (SimpleUser user : usersWithOrFilter) {
+            LOG.info("User with uid: '{}' with DN: '{}'", user.getUserId(), user.getDn());
+        }
+
+        // Find all with lower and or filters
+        Filter orFilterWithLower2 = Filter.createORFilter(Filter.createSubstringFilter(Filter.createLowercaseFilter("description"), null, new String[] { "test1" }, null),
+        		Filter.createSubstringFilter(Filter.createLowercaseFilter("displayName"), null, new String[] { "test1" }, null));
+        List<SimpleUser> usersWithOrFilter2 = couchbaseEntryManager.findEntries("ou=sessions,o=gluu", SimpleUser.class, orFilterWithLower2);
+        for (SimpleUser user : usersWithOrFilter2) {
+            LOG.info("User with uid: '{}' with DN: '{}'", user.getUserId(), user.getDn());
+        }
+
         // Find all users which have specified object classes defined in SimpleUser
         List<SimpleUser> users = couchbaseEntryManager.findEntries("ou=people,o=jans", SimpleUser.class, null);
         for (SimpleUser user : users) {
