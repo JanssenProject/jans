@@ -102,7 +102,7 @@ public class CouchbaseFilterConverter {
                     	canJoinOrFilters = false;
                     	continue;
                     }
-                	
+
                 	if (tmpFilter.getMultiValued() != null) {
                 		canJoinOrFilters = false;
                     	continue;
