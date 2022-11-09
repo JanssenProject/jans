@@ -26,7 +26,7 @@ class PostInstallCommand(install):
             os.path.join(yaml_dir, 'jans-config-api-swagger-auto.yaml')
             )
 
-        for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
+        for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
             print("downloding", plugin_yaml_file)
             urlretrieve(
                 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/plugins/docs/' + plugin_yaml_file,
