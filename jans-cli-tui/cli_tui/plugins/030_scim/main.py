@@ -1,10 +1,12 @@
 import os
 import sys
-import threading
+import asyncio
 
 from typing import Sequence
 
+
 from prompt_toolkit.application import Application
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, VSplit, Window
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame
@@ -33,7 +35,7 @@ class Plugin(DialogUtils):
         self.app_config = {}
         self.widgets_ready = False
         self.container = Frame(
-                            body=HSplit([Label(text=_("Please wait while loading SCIM configuration"))], width=D()),
+                            body=HSplit([Button(text=_("Get Scim Configuration"), handler=self.get_app_config)], width=D()),
                             height=D())
 
 
@@ -90,65 +92,23 @@ class Plugin(DialogUtils):
     def get_app_config(self) -> None:
         """Gets SCIM application configurations from server.
         """
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                        operation_id='get-scim-config',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-        except Exception as e:
+
+        async def coroutine():
+            cli_args = {'operation_id': 'get-scim-config'}
+            self.app.start_progressing()
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            self.app.show_message(_("Error getting SCIM configuration"), str(e))
-            return
-        self.app.stop_progressing()
-
-        try:
-            self.app_config = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting SCIM configuration"), str(rsponse.text))
-            return
-
-        self.app.logger.debug("SCIM Configuration: {}".format(self.app_config))
-
-        if not self.widgets_ready:
+            self.app_config = response.json()
             self.create_widgets()
             self.app.invalidate()
+            self.app.layout.focus(self.app.center_container)
 
-    def on_page_enter(self) -> None:
-        """Function to perform preliminary tasks before this page entered.
-        """
-        if not self.app_config:
-            t = threading.Thread(target=self.get_app_config, daemon=True)
-            self.app.start_progressing()
-            t.start()
+        asyncio.ensure_future(coroutine())
 
-        if self.app_config and not self.widgets_ready:
-            self.create_widgets()
-
-    def do_save_app_config(self, patche_list: Sequence[dict]) -> None:
-        """Saves appication configuration to server
-        """
-        self.app.cli_object.process_command_by_id(
-                    operation_id='patch-scim-config',
-                    url_suffix='',
-                    endpoint_args='',
-                    data_fn=None,
-                    data=patche_list
-                    )
-        self.app.stop_progressing()
-        self.status_bar_text = _("Scim appilication configuration was saved.")
-        self.app.status_bar_text = HTML('<style bg="ansired">' + _("Scim appilication configuration was saved.") + '</style>')
-
-        for patch in patche_list:
-            key = patch['path'].lstrip('/')
-            val = patch['value']
-            self.app_config[key] = val
 
     def save_app_config(self) -> None:
         """Save button handler for saving SCIM application configurations.
-        Once configuration data was obtained from form, patch operations are prepared and send to `do_save_app_config()` in thread.
+        Once configuration data was obtained from form, patch operations are prepared and saved to server.
         """
         data = self.make_data_from_dialog({'scim': self.container})
         self.app.logger.debug("SCIM APP CONFIG {}".format(data))
@@ -160,11 +120,16 @@ class Plugin(DialogUtils):
             if data[key] and key not in self.app_config:
                 patche_list.append({'op':'add', 'path': key, 'value': data[key]})
 
-        self.app.logger.debug("SCIM PATCH {}".format(patche_list))
-        if patche_list:
-            t = threading.Thread(target=self.do_save_app_config, args=(patche_list,), daemon=True)
+
+        if not patche_list:
+            self.app.show_message(_("Warning"), _("No changes was done on Scim appilication configuration. Nothing to save."))
+            return
+
+        async def coroutine():
+            cli_args = {'operation_id': 'patch-scim-config', 'data': patche_list}
             self.app.start_progressing()
-            t.start()
-        else:
-            self.app.status_bar_text = HTML('<style bg="ansired">' + _("No changes was done on Scim appilication configuration. Nothing to save.") + '</style>')
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+        asyncio.ensure_future(coroutine())
 
