@@ -206,10 +206,6 @@ public class Filter {
         this.subFinal = subFinal;
     }
 
-	protected void setMultiValued(Boolean multiValued) {
-		this.multiValued = multiValued;
-	}
-
     public final Boolean getMultiValued() {
         return multiValued;
     }
