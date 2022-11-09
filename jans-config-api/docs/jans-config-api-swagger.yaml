@@ -194,7 +194,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [ https://jans.io/oauth/config/fido2.readonly ]
-		
+
   /jans-config-api/api/v1/attributes:
     get:
       summary: Gets a list of Gluu attributes.
@@ -3585,7 +3585,7 @@ components:
           type: string
         details:
           type: string
-		  
+  
     CustomScript:
       type: object
       description: Script
@@ -5001,7 +5001,7 @@ components:
         sourceAttribute:
           type: string
         nameIdType:
-          type: string		  
+          type: string  
         name:
           type: string
           description: Name of the attribute.
@@ -5012,7 +5012,7 @@ components:
           type: string
           description: User friendly descriptive detail of attribute.
         origin:
-          type: string		  
+          type: string  
         dataType:
           type: string
           description: Data Type of attribute.
@@ -5081,10 +5081,10 @@ components:
           type: boolean
           description: Boolean value indicating if the attribute should be shown on that discovery page.
         custom:
-          type: boolean	
+          type: boolean
           description: Boolean value indicating if it is a custom attribute.
         requred:
-          type: boolean	
+          type: boolean
           description: Boolean value indicating if it is a attribute required.
         attributeValidation:
           type: object
@@ -5098,7 +5098,7 @@ components:
             maxLength:
               type: integer
         tooltip:
-          type: string	
+          type: string
         lifetime:
           type: string
         adminCanAccess:
@@ -5254,157 +5254,115 @@ components:
               items:
                 $ref: '#/components/schemas/Client'
 
-    CustomAttribute:
-      title: CustomAttribute
-      description: Attribute.
+    CustomObjectAttribute:
       type: object
-      required:
-        - name
-        - multiValued
-        - values
       properties:
         name:
           type: string
-          description: Name of the attribute.
-          example: 'name, displayName, birthdate, email'
         multiValued:
           type: boolean
-          description: Indicates if the attribute can hold multiple values.
         values:
           type: array
           items:
-            type: string
+            type: object
         value:
-          type: string
+          type: object
         displayValue:
           type: string
+  
     ClientAttributes:
-      title: ClientAttributes
-      description: Attribute.
       type: object
       properties:
         tlsClientAuthSubjectDn:
-          description: String representation of the expected subject distinguished name of the certificate, which the OAuth client will use in mutual TLS authentication.
           type: string
         runIntrospectionScriptBeforeJwtCreation:
-          description: boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT.
           type: boolean
         keepClientAuthorizationAfterExpiration:
-          description: boolean property which indicates whether to keep client authorization after expiration.
           type: boolean
         allowSpontaneousScopes:
-          description: boolean, whether to allow spontaneous scopes for client.
           type: boolean
         spontaneousScopes:
-          description: List of spontaneous scope regular expression.
           type: array
           items:
             type: string
         spontaneousScopeScriptDns:
-          description: List of spontaneous scope scripts.
           type: array
           items:
             type: string
         updateTokenScriptDns:
-          description: List of update token scripts.
           type: array
           items:
             type: string
         backchannelLogoutUri:
-          description: List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
           type: array
           items:
             type: string
         backchannelLogoutSessionRequired:
-          description: Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in the Logout Token to identify the RP session with the OP when true. Default value is false.
           type: boolean
         additionalAudience:
-          description: List of additional client audience.
           type: array
           items:
             type: string
         postAuthnScripts:
-          description: List of post authentication scripts.
           type: array
           items:
             type: string
         consentGatheringScripts:
-          description: List of consent gathering scripts.
           type: array
           items:
             type: string
         introspectionScripts:
-          description: List of introspection scripts.
           type: array
           items:
             type: string
         rptClaimsScripts:
-          description: List of Requesting Party Token (RPT) claims scripts.
           type: array
           items:
             type: string
         ropcScripts:
-          description: List of Resource Owner Password Credentials (ROPC) scripts.
           type: array
           items:
             type: string
         parLifetime:
-          description: represents the lifetime of Pushed Authorisation Request (PAR).
           type: integer
-          format: int64
+          format: int32
         requirePar:
-          description: boolean value to indicate of Pushed Authorisation Request(PAR)is required.
           type: boolean
         jansAuthSignedRespAlg:
-          description: JWS alg algorithm JWA required for signing authorization responses.
           type: string
         jansAuthEncRespAlg:
-          description: JWE alg algorithm JWA required for encrypting authorization responses.
           type: string
         jansAuthEncRespEnc:
-          description: JWE enc algorithm JWA required for encrypting auhtorization responses.
           type: string
         jansSubAttr:
-          description: custom subject identifier attribute.
           type: string
         redirectUrisRegex:
-          description:  If set, redirectUri must match to this regexp
           type: string
         jansAuthorizedAcr:
-          description:  List of thentication Context Class Reference (ACR) that must exist.
           type: array
           items:
             type: string
         jansDefaultPromptLogin:
-          description: sets prompt=login to the authorization request, which causes the authorization server to force the user to sign in again before it will show the authorization prompt.
           type: boolean
+        idTokenLifetime:
+          type: integer
+          format: int32
 
 
     Client:
-      title: Client object
-      description: Client.
       type: object
       required:
         - redirectUris
       properties:
         dn:
           type: string
-        baseDn:
-          type: string
         expirationDate:
-          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
           type: string
           format: date-time
         deletable:
-          description: Specifies whether client is deletable.
           type: boolean
-          default: false
-        inum:
-          description: XRI i-number. Client Identifier to uniquely identify the client.
-          type: string
         clientSecret:
           type: string
-          description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
         frontChannelLogoutUri:
           type: string
         frontChannelLogoutSessionRequired:
@@ -5418,358 +5376,194 @@ components:
           type: string
           format: date-time
         redirectUris:
-          description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
           type: array
           items:
             type: string
-          example:
-            - 'https://client.example.org/cb'
         claimRedirectUris:
-          description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
           type: array
           items:
             type: string
         responseTypes:
-          description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
           type: array
           items:
             type: string
             enum:
-              - code
-              - token
-              - id_token
+            - code
+            - token
+            - id_token
         grantTypes:
-          description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
           type: array
           items:
             type: string
             enum:
-              - authorization_code
-              - implicit
-              - password
-              - client_credentials
-              - refresh_token
-              - urn:ietf:params:oauth:grant-type:uma-ticket
-              - urn:openid:params:grant-type:ciba
-              - urn:ietf:params:oauth:grant-type:device_code
+            - none
+            - authorization_code
+            - implicit
+            - password
+            - client_credentials
+            - refresh_token
+            - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
+            - urn:openid:params:grant-type:ciba
+            - urn:ietf:params:oauth:grant-type:device_code
         applicationType:
-          description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
           type: string
-          default: web	
           enum:
-            - web
-            - native
+          - native
+          - web
         contacts:
-          description: e-mail addresses of people responsible for this Client.
           type: array
           items:
             type: string
         idTokenTokenBindingCnf:
-          description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
           type: string
         clientName:
-          $ref: '#/components/schemas/LocalizedString'
-          description: Name of the user suitable for display to end-users
+          type: string
         logoUri:
-          description: URL that references a logo for the Client application.
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         clientUri:
-          description: URL of the home page of the Client. The value of this field must point to a valid Web page.
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         policyUri:
-          description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         tosUri:
-          description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
+          type: string
+        clientNameLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        logoUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        clientUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        policyUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        tosUriLocalized:
           $ref: '#/components/schemas/LocalizedString'
         jwksUri:
-          description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
           type: string
         jwks:
-          description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
           type: string
-          example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
         sectorIdentifierUri:
-          description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
           type: string
         subjectType:
-          description: Subject type requested for the Client ID. Valid types include pairwise and public.
           type: string
           enum:
-            - pairwise
-            - public
+          - pairwise
+          - public
         idTokenSignedResponseAlg:
-          description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
           type: string
-          enum:
-            - HS256
-            - HS384
-            - HS512
-            - RS256
-            - RS384
-            - RS512
-            - ES256
-            - ES384
-            - ES512
-            - PS256
-            - PS384
-            - PS512
         idTokenEncryptedResponseAlg:
-          description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
           type: string
-          enum:
-            - RSA1_5
-            - RSA-OAEP
-            - A128KW
-            - A256KW
         idTokenEncryptedResponseEnc:
-          description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
           type: string
-          enum:
-            - A128CBC+HS256
-            - A256CBC+HS512
-            - A128GCM
-            - A256GCM
         userInfoSignedResponseAlg:
-          description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
           type: string
-          enum:
-            - HS256
-            - HS384
-            - HS512
-            - RS256
-            - RS384
-            - RS512
-            - ES256
-            - ES384
-            - ES512
-            - PS256
-            - PS384
-            - PS512
         userInfoEncryptedResponseAlg:
-          description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
           type: string
-          enum:
-            - RSA1_5
-            - RSA-OAEP
-            - A128KW
-            - A256KW
         userInfoEncryptedResponseEnc:
-          description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
           type: string
-          enum:
-            - A128CBC+HS256
-            - A256CBC+HS512
-            - A128GCM
-            - A256GCM
         requestObjectSigningAlg:
-          description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
           type: string
-          enum:
-            - HS256
-            - HS384
-            - HS512
-            - RS256
-            - RS384
-            - RS512
-            - ES256
-            - ES384
-            - ES512
-            - PS256
-            - PS384
-            - PS512
         requestObjectEncryptionAlg:
-          description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
           type: string
-          enum:
-            - RSA1_5
-            - RSA-OAEP
-            - A128KW
-            - A256KW
         requestObjectEncryptionEnc:
-          description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
           type: string
-          enum:
-            - A128CBC+HS256
-            - A256CBC+HS512
-            - A128GCM
-            - A256GCM
         tokenEndpointAuthMethod:
-          description: Requested Client Authentication method for the Token Endpoint.
           type: string
-          enum:
-            - client_secret_basic
-            - client_secret_post
-            - client_secret_jwt
-            - private_key_jwt
-            - tls_client_auth
-            - none
         tokenEndpointAuthSigningAlg:
-          description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
           type: string
-          enum:
-            - HS256
-            - HS384
-            - HS512
-            - RS256
-            - RS384
-            - RS512
-            - ES256
-            - ES384
-            - ES512
-            - PS256
-            - PS384
-            - PS512
         defaultMaxAge:
-          description: Specifies the Default Maximum Authentication Age.
           type: integer
           format: int32
-          example: 1000000
         defaultAcrValues:
-          description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
           type: array
           items:
             type: string
         initiateLoginUri:
-          description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
           type: string
         postLogoutRedirectUris:
-          description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
           type: array
           items:
             type: string
-          example:
-            - 'https://client.example.org/logout/page1'
-            - 'https://client.example.org/logout/page2'
-            - 'https://client.example.org/logout/page3'
         requestUris:
-          description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
           type: array
           items:
             type: string
         scopes:
-          description: Provide list of scopes granted to the client (scope dn or scope id).
           type: array
           items:
             type: string
-          example:
-            - read write dolphin
         claims:
-          description: Provide list of claims granted to the client.
           type: array
           items:
             type: string
-            description: String containing a space-separated list of claims that can be requested individually.
         trustedClient:
-          description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
           type: boolean
-          default: false
         lastAccessTime:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.'
           type: string
           format: date-time
         lastLogonTime:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.'
           type: string
           format: date-time
         persistClientAuthorizations:
-          description: Specifies if the client authorization details are to be persisted. Default value is true.
           type: boolean
         includeClaimsInIdToken:
-          description: 'If true then claims are included in token id, default value is false.'
           type: boolean
-          default: false
         refreshTokenLifetime:
-          description: Specifies the Client-specific refresh token expiration.
           type: integer
           format: int32
-          example: 100000000
         accessTokenLifetime:
-          description: Specifies the Client-specific access token expiration.
           type: integer
           format: int32
-          example: 100000000
         customAttributes:
           type: array
           items:
-            $ref: '#/components/schemas/CustomAttribute'
+            $ref: '#/components/schemas/CustomObjectAttribute'
         customObjectClasses:
           type: array
           items:
             type: string
         rptAsJwt:
-          description: Specifies whether RPT should be return as signed JWT.
           type: boolean
         accessTokenAsJwt:
-          description: Specifies whether access token as signed JWT.
           type: boolean
         accessTokenSigningAlg:
-          description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
           type: string
-          enum:
-            - HS256
-            - HS384
-            - HS512
-            - RS256
-            - RS384
-            - RS512
-            - ES256
-            - ES384
-            - ES512
-            - PS256
-            - PS384
-            - PS512
         disabled:
-          description: Specifies whether client is disabled.
           type: boolean
-          default: false
         authorizedOrigins:
-          description: Specifies authorized JavaScript origins.
           type: array
           items:
             type: string
         softwareId:
-          description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
           type: string
-          example: 4NRB1-0XZABZI9E6-5SM3R
         softwareVersion:
-          description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
           type: string
-          example: '2.1'
         softwareStatement:
-          description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
           type: string
         attributes:
-          type: object
           $ref: '#/components/schemas/ClientAttributes'
         backchannelTokenDeliveryMode:
-          description: specifies how backchannel token will be delivered.
           type: string
           enum:
-            - poll
-            - ping
-            - push
+          - poll
+          - ping
+          - push
         backchannelClientNotificationEndpoint:
-          description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
           type: string
         backchannelAuthenticationRequestSigningAlg:
-          description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
           type: string
           enum:
-            - RS256
-            - RS384
-            - RS512
-            - ES256
-            - ES384
-            - ES512
-            - PS256
-            - PS384
-            - PS512
+          - RS256
+          - RS384
+          - RS512
+          - ES256
+          - ES384
+          - ES512
+          - PS256
+          - PS384
+          - PS512
         backchannelUserCodeParameter:
-          description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
           type: boolean
         description:
-          description: Description of the client.
           type: string
         organization:
           type: string
@@ -5795,6 +5589,10 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        baseDn:
+          type: string
+        inum:
+          type: string
 
 
     UmaResource:
@@ -7479,7 +7277,7 @@ components:
           type: boolean
           description: indicates if the parameter by default will be returned in response.
           default: false
-		  
+  
     PagedResult:
       type: object
       properties:
@@ -7495,8 +7293,8 @@ components:
         entries:
           type: array
           items:
-            type: object		  
-			
+            type: object  
+
     LocalizedString:
       type: object
       properties:
