@@ -6,6 +6,7 @@ from test import test_drop_down
 from test import test_getTitledCheckBoxList, test_drop_down, test_date_picker, test_getTitledText, test_getTitledCheckBox, test_getTitledRadioButton
 from mock import patch
 
+
 class Test_DropDownWidget(unittest.TestCase):                                                               
     def test_drop_down1(self):   ### existing value
         with patch('test.prompt', return_value = ('HS1',[('HS1','HS1'),('HS2','HS2'),])) as prompt : ## return_value >> value, values

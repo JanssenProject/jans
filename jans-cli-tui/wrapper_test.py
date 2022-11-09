@@ -1,6 +1,6 @@
 import os
 import json
-from cli import config_cli
+from cli_tui.cli import config_cli
 test_client = config_cli.client_id if config_cli.test_client else None
 config_cli.debug = True
 cli_object = config_cli.JCA_CLI(
