@@ -1,17 +1,10 @@
 package io.jans.util.properties;
 
-import sun.tools.java.Environment;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
-import java.io.*;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +41,7 @@ public class JansConfigPropertyProcessor extends AbstractProcessor {
 
             for (Element jansProperty : properties)
             {
-                JansConfigProperty propertyAnnotation = jansProperty.getAnnotation(JansConfigProperty.class);
+                DocumentedJansProperty propertyAnnotation = jansProperty.getAnnotation(DocumentedJansProperty.class);
                 markdownContent.append("| "+jansProperty.getSimpleName()+" ");
                 markdownContent.append("| "+propertyAnnotation.description()+" ");
                 markdownContent.append("| "+propertyAnnotation.isMandatory()+" ");
