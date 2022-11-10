@@ -8,6 +8,7 @@ import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("io.jans.doc.annotation.DocumentedJansProperty")
 public class DocumentedJansPropertyProcessor extends AbstractProcessor {
@@ -19,14 +20,12 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
         for (TypeElement annotation : annotations) {
             Set<? extends Element> annotatedProperties = env.getElementsAnnotatedWith(annotation);
 
-
-            List<Element> properties = new ArrayList<>();
-            properties.addAll(annotatedProperties);
-
-            // Prepare contents for markdown document
+            // sort alphabetically
+            List<? extends Element> sortedProperties = annotatedProperties.stream()
+                    .sorted((prop1, prop2)->prop1.getSimpleName().toString().toLowerCase().compareTo(prop2.getSimpleName().toString().toLowerCase()))
+                    .collect(Collectors.toList());
 
             StringBuilder propTable = new StringBuilder();
-
             StringBuilder propDetails = new StringBuilder();
 
             // prepare document header
@@ -34,7 +33,7 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
             propTable.append("\n");
             propTable.append("\n");
 
-            // prepare table
+            // prepare table header
             propTable.append("| Property Name ");
             propTable.append("| Description ");
             propTable.append("|  | ");
@@ -42,14 +41,18 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
             propTable.append("|-----|-----|-----|");
             propTable.append("\n");
 
-            // for each property add a row in table and add details section
-            for (Element jansProperty : properties)
+            // for each property add a row in table and add content for the details section
+            for (Element jansProperty : sortedProperties)
             {
                 DocumentedJansProperty propertyAnnotation = jansProperty.getAnnotation(DocumentedJansProperty.class);
 
                 addToTable(propTable, jansProperty, propertyAnnotation);
                 addToDetails(propDetails, jansProperty, propertyAnnotation);
+
             }
+            propTable.append("\n\n");
+
+
 
             // This would be replaced by code to write into a markdown file
             System.out.println(propTable.toString()+"\n\n");
