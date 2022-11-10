@@ -150,11 +150,10 @@ class JansCliApp(Application):
             )
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
         self.create_background_task(self.progress_coroutine())
-
         self.plugins_initialised = False
-        self.check_jans_cli_ini()
-        if self.cli_object_ok:
-            self.init_plugins()
+
+        self.create_background_task(self.check_jans_cli_ini())
+
 
     async def progress_coroutine(self) -> None:
         """asyncio corotune for progress bar
@@ -235,8 +234,6 @@ class JansCliApp(Application):
 
         status = self.cli_object.check_connection()
 
-        self.logger.info("OpenID Configuration: %s", self.cli_object.openid_configuration)
-
         self.invalidate()
 
         if status not in (True, 'ID Token is expired'):
@@ -246,44 +243,54 @@ class JansCliApp(Application):
         else:
             if not test_client and not self.cli_object.access_token:
 
-                    response = self.cli_object.get_device_verification_code()
-                    result = response.json()
+                response = self.cli_object.get_device_verification_code()
+                result = response.json()
 
-                    msg = _("Please visit verification url %s and enter user code %s within %d seconds.")
-                    body = HSplit([Label(msg % (result['verification_uri'], result['user_code'], result['expires_in']),style='class:jans-main-verificationuri.text')],style='class:jans-main-verificationuri')
-                    dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
+                msg = _("Please visit verification url %s and enter user code %s within %d seconds.")
+                body = HSplit([Label(msg % (result['verification_uri'], result['user_code'], result['expires_in']),style='class:jans-main-verificationuri.text')],style='class:jans-main-verificationuri')
+                dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
 
-                    async def coroutine():
-                        app = get_app()
-                        focused_before = app.layout.current_window
-                        await self.show_dialog_as_float(dialog)
-                        try:
-                            app.layout.focus(focused_before)
-                        except:
-                            app.layout.focus(self.center_frame)
-                        try:
-                            self.cli_object.get_jwt_access_token(result)
-                        except Exception as e:
-                            err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
-                            await self.show_dialog_as_float(err_dialog)
-                            self.cli_object_ok = False
-                            self.create_cli()
-                            return
-                        self.cli_object_ok = True
-                        if not self.plugins_initialised:
-                            self.init_plugins()
-                    asyncio.ensure_future(coroutine())
+                async def coroutine():
+                    app = get_app()
+                    focused_before = app.layout.current_window
+                    await self.show_dialog_as_float(dialog)
+                    try:
+                        app.layout.focus(focused_before)
+                    except:
+                        app.layout.focus(self.center_frame)
+
+                    self.start_progressing()
+                    try:
+                        response = await self.loop.run_in_executor(self.executor, self.cli_object.get_jwt_access_token, result)
+                    except Exception as e:
+                        self.stop_progressing()
+                        err_dialog = JansGDialog(self, title=_("Error!"), body=HSplit([Label(str(e))]))
+                        await self.show_dialog_as_float(err_dialog)
+                        self.cli_object_ok = False
+                        self.create_cli()
+                        return
+
+                    self.stop_progressing()
+
+
+                    self.cli_object_ok = True
+                    if not self.plugins_initialised:
+                        self.init_plugins()
+                asyncio.ensure_future(coroutine())
 
             else:
                 self.cli_object_ok = True
                 if not self.plugins_initialised:
                     self.init_plugins()
 
-    def check_jans_cli_ini(self) -> None:
+    async def check_jans_cli_ini(self) -> None:
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
             self.jans_creds_dialog()
         else :
             self.create_cli()
+
+        if self.cli_object_ok and not self.plugins_initialised:
+            self.init_plugins()
 
     def jans_creds_dialog(self, *params: Any) -> None:
         body=HSplit([
