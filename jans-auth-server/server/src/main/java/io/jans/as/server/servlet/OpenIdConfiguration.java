@@ -7,11 +7,7 @@
 package io.jans.as.server.servlet;
 
 import io.jans.as.common.service.AttributeService;
-import io.jans.as.model.common.FeatureFlagType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.ScopeType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
@@ -25,16 +21,15 @@ import io.jans.as.server.service.external.ExternalDiscoveryService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -162,75 +157,32 @@ public class OpenIdConfiguration extends HttpServlet {
                 Util.putArray(jsonObj, listGrantTypesSupported, GRANT_TYPES_SUPPORTED);
             }
 
-            JSONArray acrValuesSupported = new JSONArray();
-            for (String acr : externalAuthenticationService.getAcrValuesList()) {
-                acrValuesSupported.put(acr);
-            }
-            jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
+
+            Util.putArray(jsonObj, externalAuthenticationService.getAcrValuesList(), ACR_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getSubjectTypesSupported(), SUBJECT_TYPES_SUPPORTED);
 
-            JSONArray authorizationSigningAlgValuesSupported = new JSONArray();
-            for (String authorizationSigningAlg : appConfiguration.getAuthorizationSigningAlgValuesSupported()) {
-                authorizationSigningAlgValuesSupported.put(authorizationSigningAlg);
-            }
-            if (!authorizationSigningAlgValuesSupported.isEmpty()) {
-                jsonObj.put(AUTHORIZATION_SIGNING_ALG_VALUES_SUPPORTED, authorizationSigningAlgValuesSupported);
-            }
-
-            JSONArray authorizationEncryptionAlgValuesSupported = new JSONArray();
-            for (String authorizationEncryptionAlg : appConfiguration.getAuthorizationEncryptionAlgValuesSupported()) {
-                authorizationEncryptionAlgValuesSupported.put(authorizationEncryptionAlg);
-            }
-            if (!authorizationEncryptionAlgValuesSupported.isEmpty()) {
-                jsonObj.put(AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED, authorizationEncryptionAlgValuesSupported);
-            }
-
-            JSONArray authorizationEncryptionEncValuesSupported = new JSONArray();
-            for (String authorizationEncyptionEnc : appConfiguration.getAuthorizationEncryptionEncValuesSupported()) {
-                authorizationEncryptionEncValuesSupported.put(authorizationEncyptionEnc);
-            }
-            if (!authorizationEncryptionEncValuesSupported.isEmpty()) {
-                jsonObj.put(AUTHORIZATION_ENCRYPTION_ENC_VALUES_SUPPORTED, authorizationEncryptionEncValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getAuthorizationSigningAlgValuesSupported(), AUTHORIZATION_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getAuthorizationEncryptionAlgValuesSupported(), AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getAuthorizationEncryptionEncValuesSupported(), AUTHORIZATION_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getUserInfoSigningAlgValuesSupported(), USER_INFO_SIGNING_ALG_VALUES_SUPPORTED);
-
-            JSONArray userInfoEncryptionAlgValuesSupported = new JSONArray();
-            for (String userInfoEncryptionAlg : appConfiguration.getUserInfoEncryptionAlgValuesSupported()) {
-                userInfoEncryptionAlgValuesSupported.put(userInfoEncryptionAlg);
-            }
-            if (userInfoEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED, userInfoEncryptionAlgValuesSupported);
-            }
-
-            JSONArray userInfoEncryptionEncValuesSupported = new JSONArray();
-            for (String userInfoEncryptionEnc : appConfiguration.getUserInfoEncryptionEncValuesSupported()) {
-                userInfoEncryptionEncValuesSupported.put(userInfoEncryptionEnc);
-            }
-            if (userInfoEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED, userInfoEncryptionAlgValuesSupported);
-            }
+            Util.putArray(jsonObj, appConfiguration.getUserInfoEncryptionAlgValuesSupported(), USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getUserInfoEncryptionEncValuesSupported(), USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getIdTokenSigningAlgValuesSupported(), ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
-
             Util.putArray(jsonObj, appConfiguration.getIdTokenEncryptionAlgValuesSupported(), ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
-
             Util.putArray(jsonObj, appConfiguration.getIdTokenEncryptionEncValuesSupported(), ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getAccessTokenSigningAlgValuesSupported(), ACCESS_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getRequestObjectSigningAlgValuesSupported(), REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED);
-
             Util.putArray(jsonObj, appConfiguration.getRequestObjectEncryptionAlgValuesSupported(), REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED);
-
             Util.putArray(jsonObj, appConfiguration.getRequestObjectEncryptionEncValuesSupported(), REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getTokenEndpointAuthMethodsSupported(), TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED);
-
-            Util.putArray(jsonObj, appConfiguration
-                    .getTokenEndpointAuthSigningAlgValuesSupported(), TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported(), TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getDpopSigningAlgValuesSupported(), DPOP_SIGNING_ALG_VALUES_SUPPORTED);
 
@@ -240,11 +192,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(SERVICE_DOCUMENTATION, appConfiguration.getServiceDocumentation());
 
-            JSONArray idTokenTokenBindingCnfValuesSupported = new JSONArray();
-            for (String value : appConfiguration.getIdTokenTokenBindingCnfValuesSupported()) {
-                idTokenTokenBindingCnfValuesSupported.put(value);
-            }
-            jsonObj.put(ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED, idTokenTokenBindingCnfValuesSupported);
+            Util.putArray(jsonObj, appConfiguration.getIdTokenTokenBindingCnfValuesSupported(), ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getClaimsLocalesSupported(), CLAIMS_LOCALES_SUPPORTED);
 
