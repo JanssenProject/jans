@@ -657,7 +657,7 @@ application = JansCliApp()
 
 def run():
     result = application.run()
-    print("You said: %r" % result)
+    print("See you next time.")
 
 
 if __name__ == "__main__":
