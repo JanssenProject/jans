@@ -147,7 +147,7 @@ class Plugin():
                 on_enter=self.add_script_dialog,
                 on_display=self.app.data_display_dialog,
                 get_help=(self.get_help,'Scripts'),
-                #on_delete=self.delete_script,
+                on_delete=self.delete_script,
                 selectes=0,
                 headerColor='class:outh-verticalnav-headcolor',
                 entriesColor='class:outh-verticalnav-entriescolor',
@@ -230,3 +230,27 @@ class Plugin():
                 self.get_scripts()
 
         asyncio.ensure_future(coroutine())
+
+    def delete_script(self, **kwargs: Any) -> None:
+
+        def do_delete_script():
+
+            async def coroutine():
+                cli_args = {'operation_id': 'delete-config-scripts-by-inum', 'url_suffix':'inum:{}'.format(kwargs['selected'][0])}
+                self.app.start_progressing()
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+                if response:
+                    self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.scripts_listbox)
+                else:
+                    self.scripts_listbox.remove_item(kwargs['selected'])
+            asyncio.ensure_future(coroutine())
+
+        buttons = [Button(_("No")), Button(_("Yes"), handler=do_delete_script)]
+
+        self.app.show_message(
+                title=_("Confirm"),
+                message=_("Are you sure you want to delete script {}?").format(kwargs['selected'][1]),
+                buttons=buttons,
+                tobefocused=self.scripts_listbox
+                )
