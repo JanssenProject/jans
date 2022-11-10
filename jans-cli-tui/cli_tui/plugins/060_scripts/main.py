@@ -6,7 +6,6 @@ import asyncio
 
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
-from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import (
@@ -103,7 +102,7 @@ class Plugin():
 
         async def coroutine():
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             self.users = response.json()
 
@@ -221,7 +220,7 @@ class Plugin():
             operation_id = 'put-config-scripts' if dialog.new_data.get('baseDn') else 'post-config-scripts'
             cli_args = {'operation_id': operation_id, 'data': dialog.new_data}
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             if response.status_code == 500:
                 self.app.show_message(_('Error'), response.text + '\n' + response.reason)
@@ -238,7 +237,7 @@ class Plugin():
             async def coroutine():
                 cli_args = {'operation_id': 'delete-config-scripts-by-inum', 'url_suffix':'inum:{}'.format(kwargs['selected'][0])}
                 self.app.start_progressing()
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 if response:
                     self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.scripts_listbox)

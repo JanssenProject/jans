@@ -8,7 +8,6 @@ from typing import Sequence, Any, Optional
 
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
-from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, VSplit, Window, DynamicContainer, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame, Dialog
@@ -127,7 +126,7 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             self.users = response.json()
             self.app.logger.debug("Users: {}".format(self.users))
@@ -165,7 +164,7 @@ class Plugin(DialogUtils):
                     async def coroutine():
                         cli_args = {'operation_id': 'delete-user', 'url_suffix':'inum:{}'.format(user['inum'])}
                         self.app.start_progressing()
-                        response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                         self.app.stop_progressing()
                         if response:
                             self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.user_list_container)
@@ -245,7 +244,7 @@ class Plugin(DialogUtils):
             operation_id = 'put-user' if dialog.data.get('baseDn') else 'post-user'
             cli_args = {'operation_id': operation_id, 'data': user_info}
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             if response.status_code == 500:
                 self.app.show_message(_('Error'), response.text + '\n' + response.reason)
@@ -262,7 +261,7 @@ class Plugin(DialogUtils):
         async def coroutine():
             cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             result = response.json()
             common_data.users.claims = result['entries']

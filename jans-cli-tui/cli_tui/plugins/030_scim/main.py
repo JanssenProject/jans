@@ -6,7 +6,6 @@ from typing import Sequence
 
 
 from prompt_toolkit.application import Application
-from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, VSplit, Window
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame
@@ -96,7 +95,7 @@ class Plugin(DialogUtils):
         async def coroutine():
             cli_args = {'operation_id': 'get-scim-config'}
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             self.app_config = response.json()
             self.create_widgets()
@@ -128,7 +127,7 @@ class Plugin(DialogUtils):
         async def coroutine():
             cli_args = {'operation_id': 'patch-scim-config', 'data': patche_list}
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
 
         asyncio.ensure_future(coroutine())

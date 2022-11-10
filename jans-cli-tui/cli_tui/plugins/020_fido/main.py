@@ -12,7 +12,6 @@ from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, W
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Frame, Box, Dialog
 from prompt_toolkit.application import Application
-from prompt_toolkit.eventloop import get_event_loop
 
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
@@ -272,7 +271,7 @@ class Plugin(DialogUtils):
         async def coroutine():
             cli_args = {'operation_id': 'put-properties-fido2', 'data': fido2_config}
             self.app.start_progressing()
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
 
         asyncio.ensure_future(coroutine())
