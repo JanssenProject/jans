@@ -25,32 +25,51 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
 
             // Prepare contents for markdown document
 
-            StringBuilder markdownContent = new StringBuilder();
+            StringBuilder propTable = new StringBuilder();
 
-            markdownContent.append("# Janssen Server Configuration Properties");
-            markdownContent.append("</br>");
-            markdownContent.append("</br>");
-            markdownContent.append("| Property Name ");
-            markdownContent.append("| Description ");
-            markdownContent.append("| Mandatory ");
-            markdownContent.append("| Default Value | ");
-            markdownContent.append("</br>");
-            markdownContent.append("|-----|-----|-----|-----|");
-            markdownContent.append("</br>");
+            StringBuilder propDetails = new StringBuilder();
 
+            // prepare document header
+            propTable.append("# Janssen Server Configuration Properties");
+            propTable.append("\n");
+            propTable.append("\n");
+
+            // prepare table
+            propTable.append("| Property Name ");
+            propTable.append("| Description ");
+            propTable.append("|  | ");
+            propTable.append("\n");
+            propTable.append("|-----|-----|-----|");
+            propTable.append("\n");
+
+            // for each property add a row in table and add details section
             for (Element jansProperty : properties)
             {
                 DocumentedJansProperty propertyAnnotation = jansProperty.getAnnotation(DocumentedJansProperty.class);
-                markdownContent.append("| "+jansProperty.getSimpleName()+" ");
-                markdownContent.append("| "+propertyAnnotation.description()+" ");
-                markdownContent.append("| "+propertyAnnotation.isMandatory()+" ");
-                markdownContent.append("| "+propertyAnnotation.defaultValue()+" |");
-                markdownContent.append("</br>");
+
+                addToTable(propTable, jansProperty, propertyAnnotation);
+                addToDetails(propDetails, jansProperty, propertyAnnotation);
             }
 
             // This would be replaced by code to write into a markdown file
-            System.out.println(markdownContent.toString());
+            System.out.println(propTable.toString()+"\n\n");
+            System.out.println(propDetails.toString()+"\n\n");
         }
         return false;
+    }
+
+    private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocumentedJansProperty propertyAnnotation) {
+        propDetails.append("### "+ jansProperty.getSimpleName()+"\n\n");
+        propDetails.append("- Description: "+ propertyAnnotation.description()+"\n\n");
+        propDetails.append("- Required: "+ propertyAnnotation.isMandatory()+"\n\n"); //TODO: change to required and yes/no
+        propDetails.append("- Default value: "+ propertyAnnotation.defaultValue()+"\n\n");
+        propDetails.append("\n");
+    }
+
+    private static void addToTable(StringBuilder propTable, Element jansProperty, DocumentedJansProperty propertyAnnotation) {
+        propTable.append("| "+ jansProperty.getSimpleName()+" ");
+        propTable.append("| "+ propertyAnnotation.description()+" ");
+        propTable.append("| [Details](#"+jansProperty.getSimpleName().toString().toLowerCase()+") |");
+        propTable.append("\n");
     }
 }
