@@ -14,7 +14,7 @@ import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
-import io.jans.util.properties.DocumentedJansProperty;
+import io.jans.doc.annotation.DocumentedJansProperty;
 
 import java.util.ArrayList;
 import java.util.HashSet;

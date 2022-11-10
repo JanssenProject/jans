@@ -1,6 +1,6 @@
 package io.jans.as.model.common;
 
-import io.jans.util.properties.DocumentedJansProperty;
+import io.jans.doc.annotation.DocumentedJansProperty;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashSet;

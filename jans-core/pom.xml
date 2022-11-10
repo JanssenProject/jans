@@ -56,7 +56,7 @@
 		<module>radius</module>
 		<module>demo-cdi</module>
 		<module>uma-rs-core</module>
-		<module>jans-doc</module>
+		<module>doc</module>
 	</modules>
 
 	<dependencyManagement>

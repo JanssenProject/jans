@@ -5,12 +5,11 @@
         <groupId>io.jans</groupId>
         <version>1.0.4-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>jans-doc</artifactId>
     <packaging>jar</packaging>
-
     <name>jans-doc</name>
-    <url>http://maven.apache.org</url>
+
 
 </project>
