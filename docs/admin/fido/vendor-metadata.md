@@ -229,10 +229,8 @@ Janssen's FIDO2 server -
 1.  Provides trust root certificates for verifying attestation statements during credential registrations.
 
 
-
 ### 3. Skip metadata validation
 Metadata validation is recommended but not mandatory as per FIDO2 specifications. As per the current implementation, there is no provision in the jans-fido2 server to turn this feature off. However, the intention is to implement it in the future.
-
 
 ### References:
 
