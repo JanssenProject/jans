@@ -7,6 +7,7 @@ tags:
 ### Log level and Logging Layout Parameters of Janssen's FIDO2 server:
 
 | Field named | Example | Description|
+|--|--|--|
 |loggingLevel | "INFO" or "TRACE" or "DEBUG" | Logging level for FIDO2 server|
 |loggingLayout |"text" or "json" |Contents of logs as plain text or json format|
 
