@@ -245,13 +245,13 @@ class Plugin(DialogUtils):
             self.app.stop_progressing()
 
             if response.status_code not in (200, 201):
-                self.app.show_message(_("Error getting clients"), str(rsponse.text))
+                self.app.show_message(_("Error getting clients"), str(response.text))
                 return
 
             try:
                 result = response.json()
             except Exception:
-                self.app.show_message(_("Error getting clients"), str(rsponse.text))
+                self.app.show_message(_("Error getting clients"), str(response.text))
                 return
 
             data =[]
@@ -376,7 +376,11 @@ class Plugin(DialogUtils):
             self.app.start_progressing()
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            result = response.json()
+            try:
+                result = response.json()
+            except Exception as e:
+                self.app.show_message(_("Error getting response"), str(response))
+                return
 
 
             data =[]
