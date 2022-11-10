@@ -14,6 +14,7 @@ import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.core.util.ProtectionScope;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
@@ -24,16 +25,16 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class AuthUtil {
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
     }
-    
+
     public String getIntrospectionEndpoint() {
         return configurationService.find().getIntrospectionEndpoint();
     }
@@ -78,7 +79,7 @@ public class AuthUtil {
     public String getTokenEndpoint() {
         return configurationService.find().getTokenEndpoint();
     }
-    
+
     public String getEndSessionEndpoint() {
         return this.configurationService.find().getEndSessionEndpoint();
     }
@@ -90,24 +91,23 @@ public class AuthUtil {
     public String getClientId() {
         return this.configurationFactory.getApiClientId();
     }
-    
+
     public List<String> getUserExclusionAttributes() {
         return this.configurationFactory.getApiAppConfiguration().getUserExclusionAttributes();
     }
-    
+
     public String getUserExclusionAttributesAsString() {
         List<String> excludedAttributes = getUserExclusionAttributes();
         return excludedAttributes == null ? null : excludedAttributes.stream().collect(Collectors.joining(","));
     }
-    
+
     public List<String> getUserMandatoryAttributes() {
         return this.configurationFactory.getApiAppConfiguration().getUserMandatoryAttributes();
     }
-    
+
     public AgamaConfiguration getAgamaConfiguration() {
         return this.configurationFactory.getApiAppConfiguration().getAgamaConfiguration();
     }
-
 
     public String getTokenUrl() {
         return this.configurationService.find().getTokenEndpoint();
@@ -153,58 +153,6 @@ public class AuthUtil {
         return encryptedPassword;
     }
 
-    public List<Scope> getResourceScopeList(String method, String path) {
-        log.trace(" ResourceScopeList requested for method:{}, path:{}", method, path);
-
-        // Verify in cache
-        Map<String, List<Scope>> resources = ApiProtectionCache.getAllResources();
-
-        // Filter paths based on resource name
-        Set<String> keys = resources.keySet();
-        List<String> filteredPaths = keys.stream().filter(k -> k.contains(path)).collect(Collectors.toList());
-
-        if (filteredPaths == null || filteredPaths.isEmpty()) {
-            throw new WebApplicationException("No matching resource found .",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
-
-        List<Scope> scopeList = null;
-        for (String key : filteredPaths) {
-            String[] result = key.split(":::");
-            if (result != null && result.length > 1) {
-                String httpmethod = result[0];
-                String pathUrl = result[1];
-                log.trace(" Resource Scopes - httpmethod:{} , pathUrl:{} ", httpmethod, pathUrl);
-
-                if (pathUrl != null && pathUrl.contains(path)) {
-                    // Matching url
-                    log.trace(" Matching url with path:{} , pathUrl:{} ", path, pathUrl);
-
-                    // Verify Method
-                    if (httpmethod.contains(method)) {
-                        scopeList = ApiProtectionCache.getResourceScopes(key);
-                        log.trace(" scopeList:{} for the method:{} ", scopeList, method);
-                        break;
-                    }
-                }
-            }
-        }
-        return scopeList;
-    }
-
-    public List<String> getAllResourceScopes() {
-        Map<String, Scope> scopeMap = ApiProtectionCache.getAllScopes();
-        log.trace("All Resource Scopes - scopeMap:{}", scopeMap);
-
-        List<String> scopeStrList = null;
-        if (scopeMap != null && !scopeMap.isEmpty()) {
-            Set<String> scopeSet = scopeMap.keySet();
-            scopeStrList = new ArrayList<>(scopeSet);
-        }
-        log.trace("All Resource Scopes - scopeStrList:{} ", scopeStrList);
-        return scopeStrList;
-    }
-
     public List<String> getRequestedScopes(String path) {
         List<Scope> scopeList = ApiProtectionCache.getResourceScopes(path);
         log.trace("Requested scopes:{} for path:{} ", scopeList, path);
@@ -219,33 +167,34 @@ public class AuthUtil {
         return scopeStrList;
     }
 
-    public List<String> getRequestedScopes(String method, String path) {
-        log.trace("Requested scopes for path:{} and method:{} ", path, method);
-        List<Scope> scopeList = this.getResourceScopeList(method, path);
-        log.trace("Requested scopeList:{} for path:{} and method:{} ", scopeList, path, method);
-        List<String> scopeStrList = new ArrayList<>();
-        if (scopeList != null && !scopeList.isEmpty()) {
-            for (Scope s : scopeList) {
-                scopeStrList.add(s.getId());
-            }
-        }
-        log.trace("Final scopeStrList:{} for path:{} and method:{} ", scopeStrList, path, method);
-        return scopeStrList;
-    }
-
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
         log.trace("Requested scopes for resourceInfo:{} ", resourceInfo);
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         List<String> scopes = new ArrayList<>();
-        if (typeAnnotation == null) {
-            addMethodScopes(resourceInfo, scopes);
-        } else {
-            scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
-            addMethodScopes(resourceInfo, scopes);
+        if (typeAnnotation != null) {
+            HashMap<String, List<String>> scopeMap = new HashMap<>();
+            addMethodScopes(resourceInfo, scopeMap, null);
+            for (Map.Entry<String, List<String>> entry : scopeMap.entrySet()) {
+                scopes.addAll(entry.getValue());
+
+            }
         }
-        log.trace("Requested scopes:{} for resourceInfo:{} ", scopes, resourceInfo);
+        log.trace("Requested resourceInfo:{} for scope:{} ", resourceInfo, scopes);
         return scopes;
+    }
+
+    public Map<String, List<String>> getResourceScopes(ResourceInfo resourceInfo, ProtectionScope protectionScope) {
+        log.trace("Requested scopes for resourceInfo:{} ", resourceInfo);
+        Class<?> resourceClass = resourceInfo.getResourceClass();
+        ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
+        HashMap<String, List<String>> scopeMap = new HashMap<>();
+        if (typeAnnotation == null) {
+            addMethodScopes(resourceInfo, scopeMap, protectionScope);
+        }
+        log.trace("Requested scopes:{} for resourceInfo:{} of type protectionScope:{} ", scopeMap, resourceInfo,
+                protectionScope);
+        return scopeMap;
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
@@ -254,14 +203,39 @@ public class AuthUtil {
         return authScopeSet.containsAll(resourceScopeSet);
     }
 
-    private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
+    private void addMethodScopes(ResourceInfo resourceInfo, HashMap<String, List<String>> scopeMap,
+            ProtectionScope protectionScope) {
+        log.debug("Adding scopes for resourceInfo:{} for protectionScope:{} in scopeMap:{} ", resourceInfo,
+                protectionScope, scopeMap);
         Method resourceMethod = resourceInfo.getResourceMethod();
         ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
         if (methodAnnotation != null) {
-            scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
+            if (scopeMap == null) {
+                scopeMap = new HashMap<>();
+            }
+            if (protectionScope != null) {
+                if (ProtectionScope.SCOPE.equals(protectionScope)) {
+                    scopeMap.put(ProtectionScope.SCOPE.name(),
+                            Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
+                } else if (ProtectionScope.GROUP.equals(protectionScope)) {
+                    scopeMap.put(ProtectionScope.GROUP.name(),
+                            Stream.of(methodAnnotation.groupScopes()).collect(Collectors.toList()));
+                } else {
+                    scopeMap.put(ProtectionScope.SUPER.name(),
+                            Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
+                }
+            } else {
+                List<String> scopes = new ArrayList<>();
+                scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
+                scopes.addAll(Stream.of(methodAnnotation.groupScopes()).collect(Collectors.toList()));
+                scopes.addAll(Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
+                scopeMap.put("ALL", scopes);
+            }
         }
+        log.debug("Added scopes for resourceInfo:{} for protectionScope:{} in scopeMap:{} ", resourceInfo,
+                protectionScope, scopeMap);
     }
-    
+
     public String requestAccessToken(final String clientId, final List<String> scope) {
         log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
         String tokenUrl = getTokenEndpoint();
@@ -397,56 +371,53 @@ public class AuthUtil {
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
         return CollectionUtils.isEqualCollection(list1, list2);
     }
-    
+
     public boolean containsField(List<Field> allFields, String attribute) {
-        log.debug("allFields:{},  attribute:{}, allFields.contains(attribute):{} ", allFields ,  attribute, allFields.stream().anyMatch(f -> f.getName().equals(attribute)));
-         
+        log.debug("allFields:{},  attribute:{}, allFields.contains(attribute):{} ", allFields, attribute,
+                allFields.stream().anyMatch(f -> f.getName().equals(attribute)));
+
         return allFields.stream().anyMatch(f -> f.getName().equals(attribute));
-     }
-     
-     public List<Field> getAllFields(Class<?> type) {
-         List<Field> allFields =  new ArrayList<>();
-         allFields = getAllFields(allFields, type);
-         log.debug("Fields:{} of type:{}  ", allFields, type);
-                 
-         return allFields;
-     }
-     
-     public List<Field> getAllFields(List<Field> fields, Class<?> type) {
-         log.debug("fields:{} of type:{} ", fields, type);
-         fields.addAll(Arrays.asList(type.getDeclaredFields()));
+    }
 
-         if (type.getSuperclass() != null) {
-             getAllFields(fields, type.getSuperclass());
-         }
-         log.debug("Final fields:{} of type:{} ", fields, type);
-         return fields;
-     }
-     
-     public boolean isValidDn(String dn) {
-         return isValidDn(dn, false);
-     }
+    public List<Field> getAllFields(Class<?> type) {
+        List<Field> allFields = new ArrayList<>();
+        allFields = getAllFields(allFields, type);
+        log.debug("Fields:{} of type:{}  ", allFields, type);
 
-     
-     public boolean isValidDn(String dn, boolean strictNameChecking) {
-         return DN.isValidDN(dn, strictNameChecking);
-     }
+        return allFields;
+    }
 
-   
-     public RevokeSessionResponse revokeSession(final String url,final String token, final String userId) {
-         log.debug("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
+    public List<Field> getAllFields(List<Field> fields, Class<?> type) {
+        log.debug("fields:{} of type:{} ", fields, type);
+        fields.addAll(Arrays.asList(type.getDeclaredFields()));
 
-        
+        if (type.getSuperclass() != null) {
+            getAllFields(fields, type.getSuperclass());
+        }
+        log.debug("Final fields:{} of type:{} ", fields, type);
+        return fields;
+    }
 
-         RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, token,userId);
-         log.debug("revokeSessionResponse:{}",revokeSessionResponse);
-         if (revokeSessionResponse != null) {
+    public boolean isValidDn(String dn) {
+        return isValidDn(dn, false);
+    }
 
-             log.debug("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ", revokeSessionResponse.getEntity(), revokeSessionResponse.getStatus());
-           
-            
-         }
-         return revokeSessionResponse;
-     }
+    public boolean isValidDn(String dn, boolean strictNameChecking) {
+        return DN.isValidDN(dn, strictNameChecking);
+    }
+
+    public RevokeSessionResponse revokeSession(final String url, final String token, final String userId) {
+        log.debug("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
+
+        RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, token, userId);
+        log.debug("revokeSessionResponse:{}", revokeSessionResponse);
+        if (revokeSessionResponse != null) {
+
+            log.debug("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ",
+                    revokeSessionResponse.getEntity(), revokeSessionResponse.getStatus());
+
+        }
+        return revokeSessionResponse;
+    }
 
 }
