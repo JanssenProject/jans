@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface DocumentedJansProperty {
     String description() default "None";
 
-    boolean isMandatory() default false;
+    boolean isRequired() default false;
 
     String defaultValue() default "None";
 }

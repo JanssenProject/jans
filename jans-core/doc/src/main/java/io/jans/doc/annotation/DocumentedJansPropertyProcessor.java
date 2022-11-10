@@ -5,7 +5,6 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,7 +63,7 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
     private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocumentedJansProperty propertyAnnotation) {
         propDetails.append("### "+ jansProperty.getSimpleName()+"\n\n");
         propDetails.append("- Description: "+ propertyAnnotation.description()+"\n\n");
-        propDetails.append("- Required: "+ propertyAnnotation.isMandatory()+"\n\n"); //TODO: change to required and yes/no
+        propDetails.append("- Required: "+ (propertyAnnotation.isRequired()==Boolean.TRUE?"Yes":"No")+"\n\n"); //TODO: change to required and yes/no
         propDetails.append("- Default value: "+ propertyAnnotation.defaultValue()+"\n\n");
         propDetails.append("\n");
     }

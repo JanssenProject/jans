@@ -38,10 +38,10 @@ public class AppConfiguration implements Configuration {
 
     private String issuer;
 
-    @DocumentedJansProperty(description = "This is base end point", isMandatory = true, defaultValue = "https://sampleBase/")
+    @DocumentedJansProperty(description = "This is base end point", isRequired = true, defaultValue = "https://sampleBase/")
     private String baseEndpoint;
 
-    @DocumentedJansProperty(description = "This is authorization end point", isMandatory = false, defaultValue = "https://sampleAuth/")
+    @DocumentedJansProperty(description = "This is authorization end point", isRequired = false, defaultValue = "https://sampleAuth/")
     private String authorizationEndpoint;
     private String tokenEndpoint;
     private String tokenRevocationEndpoint;
