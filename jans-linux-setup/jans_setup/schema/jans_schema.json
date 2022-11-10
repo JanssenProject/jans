@@ -498,6 +498,18 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "jans Clnt URI localized",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansClntURILocalized"
+      ],
+      "multivalued": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "jans Dyn Conf",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -724,6 +736,18 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "jans Logo URI localized",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansLogoURILocalized"
+      ],
+      "multivalued": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "jans nonce",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -774,6 +798,18 @@
       "names": [
         "jansPolicyURI"
       ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jans Policy URI localized",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPolicyURILocalized"
+      ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1065,6 +1101,18 @@
       "names": [
         "jansTosURI"
       ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jans Tos URI localized",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTosURILocalized"
+      ],
+      "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -3159,6 +3207,18 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jans Display Name Localized",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "displayNameLocalized"
+      ],
+      "multivalued": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -3359,6 +3419,7 @@
         "description",
         "exp",
         "del",
+        "jansState",
         "creatorId",
         "creatorTyp",
         "creationDate"
@@ -3506,6 +3567,7 @@
         "o",
         "jansGrp",
         "displayName",
+        "displayNameLocalized",
         "description",
         "inum",
         "jansAppTyp",
@@ -3515,6 +3577,7 @@
         "exp",
         "del",
         "jansClntURI",
+        "jansClntURILocalized",
         "jansContact",
         "jansDefAcrValues",
         "jansDefMaxAge",
@@ -3526,7 +3589,9 @@
         "jansJwksURI",
         "jansJwks",
         "jansLogoURI",
+        "jansLogoURILocalized",
         "jansPolicyURI",
+        "jansPolicyURILocalized",
         "jansPostLogoutRedirectURI",
         "jansRedirectURI",
         "jansRegistrationAccessTkn",
@@ -3543,6 +3608,7 @@
         "jansTknEndpointAuthMethod",
         "jansTknEndpointAuthSigAlg",
         "jansTosURI",
+        "jansTosURILocalized",
         "jansTrustedClnt",
         "jansUsrInfEncRespAlg",
         "jansUsrInfEncRespEnc",

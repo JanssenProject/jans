@@ -45,8 +45,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.4-SNAPSHOT
-ENV CN_BUILD_DATE='2022-11-01 11:06'
+ENV CN_VERSION=1.0.5-SNAPSHOT
+ENV CN_BUILD_DATE='2022-11-08 08:33'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -84,7 +84,7 @@ RUN mkdir -p /opt/prometheus \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c3e3f537e4e85c1ee718f7a7b79a203e7ed57e42
+ENV JANS_SOURCE_VERSION=d1890e76c13c8c2c3dcdcc0625edd04cf552bbf9
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -213,7 +213,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/scim" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.4" \
+    version="1.0.5" \
     release="dev" \
     summary="Janssen SCIM" \
     description="SCIM server"
@@ -226,7 +226,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     /usr/share/java
 
-COPY jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
+COPY --chown=1000:0 jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
 COPY conf/*.tmpl /app/templates/
 COPY templates /app/templates
@@ -246,7 +246,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
-    && chown -R 1000:0 /usr/share/java
+    && chown -R 1000:0 /usr/share/java \
+    && chmod -R g=u /app/templates/jans-scim
 
 USER 1000
 

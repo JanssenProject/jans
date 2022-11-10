@@ -81,3 +81,4 @@ Grab a fresh ubuntu 22.04 lts VM and run:
 ```bash
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
+

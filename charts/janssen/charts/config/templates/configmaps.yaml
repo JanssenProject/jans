@@ -38,7 +38,7 @@ data:
   CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnConfigGoogleSecretNamePrefix | quote }}
   # [google_secret_manager_envs] END
   {{- end }}
-  CN_SQL_DB_SCHEMA: {{ .Values.configmap.cnSqlDbSchema }}
+  CN_SQL_DB_SCHEMA: {{ .Values.configmap.cnSqlDbSchema | quote }}
   CN_SQL_DB_DIALECT: {{ .Values.configmap.cnSqlDbDialect }}
   CN_SQL_DB_HOST: {{ .Values.configmap.cnSqlDbHost }}
   CN_SQL_DB_PORT: {{ .Values.configmap.cnSqlDbPort | quote }}

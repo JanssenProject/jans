@@ -28,7 +28,21 @@ public interface SsaRestWebService {
     Response get(
             @QueryParam("software_roles") Boolean softwareRoles,
             @QueryParam("jti") String jti,
-            @QueryParam("org_id") String orgId,
+            @QueryParam("org_id") Long orgId,
+            @Context HttpServletRequest httpRequest
+    );
+
+    @HEAD
+    @Path("/ssa")
+    @Produces({MediaType.APPLICATION_JSON})
+    Response validate(@HeaderParam("jti") String jti);
+
+    @DELETE
+    @Path("/ssa")
+    @Produces({MediaType.APPLICATION_JSON})
+    Response revoke(
+            @QueryParam("jti") String jti,
+            @QueryParam("org_id") Long orgId,
             @Context HttpServletRequest httpRequest
     );
 }

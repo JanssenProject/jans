@@ -25,6 +25,7 @@ import io.jans.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
 /**
+ * Class that periodically updates the mds3 blob in the FIDO2 server
  * @author madhumitas
  *
  */

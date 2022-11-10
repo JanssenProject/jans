@@ -7178,19 +7178,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
+        adminCanView:
+          type: boolean
         adminCanAccess:
           type: boolean
+        userCanView:
+          type: boolean
         userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7355,6 +7355,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         applicationType:
@@ -7369,14 +7370,24 @@ components:
         idTokenTokenBindingCnf:
           type: string
         clientName:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         logoUri:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         clientUri:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         policyUri:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         tosUri:
+          type: string
+        clientNameLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        logoUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        clientUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        policyUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        tosUriLocalized:
           $ref: '#/components/schemas/LocalizedString'
         jwksUri:
           type: string
@@ -7517,8 +7528,6 @@ components:
           format: int32
         displayName:
           type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -7530,6 +7539,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        tokenBindingSupported:
+          type: boolean
         baseDn:
           type: string
         inum:
@@ -7796,6 +7807,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         subjectTypesSupported:
@@ -8056,6 +8068,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         cssLocation:
@@ -8170,6 +8183,10 @@ components:
         openidScopeBackwardCompatibility:
           type: boolean
         disableU2fEndpoint:
+          type: boolean
+        rotateDeviceSecret:
+          type: boolean
+        returnDeviceSecretFromAuthzEndpoint:
           type: boolean
         dcrSignatureValidationEnabled:
           type: boolean
@@ -8326,8 +8343,6 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8337,6 +8352,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8620,13 +8637,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -9027,6 +9044,10 @@ components:
         sessionAttributes:
           type: object
           additionalProperties:
+            type: string
+        deviceSecrets:
+          type: array
+          items:
             type: string
         expirationDate:
           type: string

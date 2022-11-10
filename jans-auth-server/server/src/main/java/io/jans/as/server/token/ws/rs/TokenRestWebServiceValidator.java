@@ -219,17 +219,17 @@ public class TokenRestWebServiceValidator {
         }
     }
 
-    public void validateSubjectToken(String subjectToken, String deviceSecret, SessionId sidSession, OAuth2AuditLog auditLog) {
+    public void validateSubjectToken(String deviceSecret, String subjectToken, SessionId sidSession, OAuth2AuditLog auditLog) {
         try {
             final Jwt jwt = Jwt.parse(subjectToken);
             validateSubjectTokenSignature(deviceSecret, sidSession, jwt, auditLog);
         } catch (InvalidJwtException e) {
-            log.error("Unable to parse subject_token as JWT.", e);
+            log.error("Unable to parse subject_token as JWT, subjectToken: " + subjectToken, e);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Unable to parse subject_token as JWT."), auditLog));
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Unable to validate subject_token.", e);
+            log.error("Unable to validate subject_token, subjectToken: " + subjectToken, e);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Unable to validate subject_token as JWT."), auditLog));
         }
     }

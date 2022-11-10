@@ -6,6 +6,7 @@
 package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -16,10 +17,15 @@ import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.token.JwtSigner;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
+import io.jans.util.StringHelper;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -53,9 +59,15 @@ public class SsaService {
         persistenceEntryManager.merge(ssa);
     }
 
-    public List<Ssa> getSsaList(String jti, String orgId, String clientId, String[] scopes) {
-        String dn = staticConfiguration.getBaseDn().getSsa();
+    public Ssa findSsaByJti(String jti) {
+        try {
+            return persistenceEntryManager.find(Ssa.class, getDnForSsa(jti));
+        } catch (EntryPersistenceException e) {
+            return null;
+        }
+    }
 
+    public List<Ssa> getSsaList(String jti, Long orgId, SsaState status, String clientId, String[] scopes) {
         List<Filter> filters = new ArrayList<>();
         if (hasPortalScope(Arrays.asList(scopes))) {
             filters.add(Filter.createEqualityFilter("creatorId", clientId));
@@ -66,12 +78,15 @@ public class SsaService {
         if (orgId != null) {
             filters.add(Filter.createEqualityFilter("o", orgId));
         }
+        if (status != null) {
+            filters.add(Filter.createEqualityFilter("jansState", status));
+        }
         Filter filter = null;
         if (!filters.isEmpty()) {
             filter = Filter.createANDFilter(filters);
             log.trace("Filter with AND created: " + filters);
         }
-        return persistenceEntryManager.findEntries(dn, Ssa.class, filter);
+        return persistenceEntryManager.findEntries(getDnForSsa(null), Ssa.class, filter);
     }
 
     public Jwt generateJwt(Ssa ssa, ExecutionContext executionContext, WebKeysConfiguration webKeysConfiguration, AbstractCryptoProvider cryptoProvider) {
@@ -99,6 +114,14 @@ public class SsaService {
         }
     }
 
+    public Response.ResponseBuilder createUnprocessableEntityResponse() {
+        return Response.status(HttpStatus.SC_UNPROCESSABLE_ENTITY).type(MediaType.APPLICATION_JSON_TYPE);
+    }
+
+    public Response.ResponseBuilder createNotAcceptableResponse() {
+        return Response.status(HttpStatus.SC_NOT_ACCEPTABLE).type(MediaType.APPLICATION_JSON_TYPE);
+    }
+
     private boolean hasPortalScope(List<String> scopes) {
         Iterator<String> scopesIterator = scopes.iterator();
         boolean result = false;
@@ -111,5 +134,13 @@ public class SsaService {
             }
         }
         return result;
+    }
+
+    private String getDnForSsa(String ssaId) {
+        String baseDn = staticConfiguration.getBaseDn().getSsa();
+        if (StringHelper.isEmpty(ssaId)) {
+            return baseDn;
+        }
+        return String.format("inum=%s,%s", ssaId, baseDn);
     }
 }

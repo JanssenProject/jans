@@ -30,19 +30,10 @@ public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
     public SsaGetResponse execSsaGet(String accessToken, String jti, Long orgId, Boolean softwareRoles) {
         SsaGetRequest ssaGetRequest = new SsaGetRequest();
         ssaGetRequest.setAccessToken(accessToken);
+        ssaGetRequest.setJti(jti);
+        ssaGetRequest.setOrgId(orgId);
+        ssaGetRequest.setSoftwareRoles(softwareRoles);
         setRequest(ssaGetRequest);
-
-        URIBuilder uriBuilder = new URIBuilder();
-        if (StringUtils.isNotBlank(jti)) {
-            uriBuilder.addParameter("jti", jti);
-        }
-        if (orgId != null && orgId > 0) {
-            uriBuilder.addParameter("org_id", orgId.toString());
-        }
-        if (softwareRoles != null) {
-            uriBuilder.addParameter("software_roles", softwareRoles.toString());
-        }
-        setUrl(getUrl() + uriBuilder);
         return exec();
     }
 
@@ -50,7 +41,8 @@ public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
         try {
             initClient();
 
-            Builder clientRequest = webTarget.request();
+            String uriWithParams = getUrl() + "?" + getRequest().getQueryString();
+            Builder clientRequest = resteasyClient.target(uriWithParams).request();
             applyCookies(clientRequest);
 
             clientRequest.header("Content-Type", request.getContentType());

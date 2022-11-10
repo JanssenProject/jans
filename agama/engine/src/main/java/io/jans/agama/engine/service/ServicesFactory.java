@@ -43,9 +43,16 @@ public class ServicesFactory {
     public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
         
         try {
-            logger.info("Refreshing Agama configuration...");
-            BeanUtils.copyProperties(econfig, appConfiguration.getAgamaConfiguration());
-            serializerFactory.refresh();
+            EngineConfig newConfig = appConfiguration.getAgamaConfiguration();
+
+            if (newConfig == null) {
+                logger.info("Agama will not be available in this deployment");
+
+            } else {
+                logger.info("Refreshing Agama configuration...");
+                BeanUtils.copyProperties(econfig, newConfig);
+                serializerFactory.refresh();
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
