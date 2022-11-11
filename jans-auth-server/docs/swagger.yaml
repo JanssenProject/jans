@@ -4275,6 +4275,217 @@ paths:
                     type: string
                   details:
                     type: string
+
+  /ssa:
+    post:
+      tags:
+        - SSA
+      summary: Create SSA.
+      description: Create `SSA` for the organization with `expiration` (optional).
+      operationId: post-register
+      security:
+        - bearer: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - org_id
+              type: object
+              properties:
+                org_id:
+                  type: number
+                  description: The `org_id` is used for organization identification.
+                  example: 1
+                description:
+                  type: string
+                  description: Description SSA.
+                  example: Your description of SSA
+                expiration:
+                  type: number
+                  description: Expiration date. If this field is not sent, it will take days to expire, according to how it has been configured.
+                  example: 1660832042
+                software_id:
+                  type: string
+                  description: The `software_id` is used for software identification.
+                  example:
+                    gluu-scan-api
+                software_roles:
+                  type: array
+                  description: List of string values, fixed value ["password", "notify"].
+                  items:
+                    type: string
+                  example:
+                    - password
+                grant_types:
+                  type: array
+                  description: Fixed value ["client_credentials"].
+                  items:
+                    type: string
+                  example:
+                    - client_credentials
+                one_time_use:
+                  type: boolean
+                  description: Defined whether the SSA will be used only once or can be used multiple times.
+                  default: true
+                rotate_ssa:
+                  type: boolean
+                  description: TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
+                  default: true
+      responses:
+        201:
+          description: 'Created'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ssa:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BvcnRhbC5nbHV1Lm9yZyIsImlhdCI6IjE2NTUzMTkyNjgiLCJqdGkiOiJmN2I1OTkxYy00YzE4LTRjODEtYTY2NC1lNmY4NjcwZjVkNTEiLCJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJvcmdfaWQiOjEsInNvZnR3YXJlX3JvbGVzIjpbInBhc3N3dXJkIl0sImp3a3NfdXJpIjoiaHR0cHM6Ly9jbG91ZC1kZXYuZ2x1dS5jbG91ZC9wb3J0YWwvandrcyIsImdyYW50X3R5cGVzIjpbImNsaWVudF9jcmVkZW50aWFscyJdLCJleHAiOjE2NTkzMTkyNjh9.MkE-47SvBshmazBfyhAcHsqPpFIbg5CpA8k2TxDWhxc
+        401:
+          $ref: '#/components/responses/UnauthorizedSSA'
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+    get:
+      tags:
+        - SSA
+      summary: Get list of SSAs
+      description: Get all `SSA` list with filters.
+      operationId: get-ssa
+      security:
+        - bearer: [ ]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: jti
+          description: JTI
+        - schema:
+            type: integer
+          in: query
+          name: org_id
+          description: Organization ID
+      responses:
+        200:
+          description: The response will return the list of SSAs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    created_at:
+                      type: integer
+                    expiration:
+                      type: integer
+                    issuer:
+                      type: string
+                    jti:
+                      type: string
+                    ssa:
+                      type: object
+                      properties:
+                        iss:
+                          type: string
+                        iat:
+                          type: integer
+                        jti:
+                          type: string
+                        software_id:
+                          type: string
+                        org_id:
+                          type: integer
+                        software_roles:
+                          type: array
+                          items:
+                            type: string
+                        grant_types:
+                          type: array
+                          items:
+                            type: string
+                        exp:
+                          type: integer
+              examples:
+                example-1:
+                  value:
+                    - created_at: 1655319268
+                      expiration: 1656319268
+                      issuer: 04d7af18-f69c-4cf9-8b17-9872315a8f17
+                      jti: 1527324c-b5a3-4d7d-8953-8c1874600ec1
+                      ssa:
+                        iss: 'https://jans.io'
+                        iat: 1655319268
+                        jti: f7b5991c-4c18-4c81-a664-e6f8670f5d51
+                        software_id: gluu-scan-api
+                        org_id: 1
+                        software_roles:
+                          - password
+                        grant_types:
+                          - client_credentials
+                        exp: 1655419268
+        401:
+          $ref: '#/components/responses/UnauthorizedSSA'
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+    head:
+      tags:
+        - SSA
+      summary: Validate SSA
+      description: Validates that a given SSA JTI exists and is valid.
+      operationId: head-ssa
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: jti
+          description: JTI
+          required: true
+      responses:
+        200:
+          description: The API returns `200` status code, when token is valid.
+        422:
+          description: Not found.
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+    delete:
+      tags:
+        - SSA
+      summary: Revoke SSA
+      description: |-
+        Revokes existing active SSA based on `jti` or `org_id`.
+        - `jti` - for delete only one SSA, the specified by `jti` 
+        - `org_id` - for delete all SSA of the specified organization.
+      operationId: delete-ssa
+      security:
+        - bearer: [ ]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: jti
+          description: A unique identifier for the token, which can be used to prevent reuse of the token.
+        - schema:
+            type: integer
+          in: query
+          name: org_id
+          description: Delete all SSAs of the specified organization.
+      responses:
+        200:
+          description: Success.
+        401:
+          $ref: '#/components/responses/UnauthorizedSSA'
+        406:
+          description: Not Acceptable. Check the query params. (When `jti` or `org_id` is not sent in the query param)
+        422:
+          description: Not found.
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
 components:
   responses:
     Found: #302 - FOUND
@@ -4316,6 +4527,32 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    UnauthorizedSSA: #401 - UNAUTHORIZED SSA
+      description: Unauthorized access request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            unauthorized_client:
+              value:
+                error: unauthorized_client
+                error_description: The Client is not authorized to use this authentication flow.
+            invalid_client:
+              value:
+                error: invalid_client
+                error_description: Client authentication failed (e.g. unknown client, no client authentication included, or unsupported authentication method).
+    InternalServerErrorSSA: #500 - INTERNAL_SERVER_ERROR SSA
+      description: Internal error occured. Please check log file for details.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            unknown_error:
+              value:
+                error: unknown_error
+                error_description: Unknown or not found error.
 
   schemas:
     ErrorResponse:
@@ -4366,3 +4603,7 @@ components:
           type: string
         y:
           type: string
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer

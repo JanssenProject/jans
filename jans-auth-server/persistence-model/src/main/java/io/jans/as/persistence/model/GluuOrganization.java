@@ -13,10 +13,9 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.apache.tika.utils.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 
