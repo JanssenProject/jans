@@ -6,10 +6,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
-import javax.tools.JavaFileManager;
 import javax.tools.StandardLocation;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -50,39 +47,23 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
             // for each property add a row in table and add content for the details section
             for (Element jansProperty : sortedProperties)
             {
-//                System.out.println(jansProperty.getEnclosingElement().toString());
                 DocumentedJansProperty propertyAnnotation = jansProperty.getAnnotation(DocumentedJansProperty.class);
                 addToTable(propTable, jansProperty, propertyAnnotation);
                 addToDetails(propDetails, jansProperty, propertyAnnotation);
-
             }
             propTable.append("\n\n");
-//            String annotatedClassName = ((TypeElement)annotation.getEnclosingElement()).getQualifiedName().toString();
-
             createAndWriteDoc(propTable.append(propDetails.toString()), "");
 
-            // This would be replaced by code to write into a markdown file
-            System.out.println(propTable.toString()+"\n\n");
-            System.out.println(propDetails.toString()+"\n\n");
         }
         return false;
     }
 
     private void createAndWriteDoc(StringBuilder docContent, String className) {
-//        String userDirectory = System.getProperty("user.dir");
-//        System.out.println("dir ->"+userDirectory);
 
-
-        try{
-            System.out.println("Paths -->");
-            System.out.println(StandardLocation.CLASS_OUTPUT.getName());
-            System.out.println(StandardLocation.SOURCE_OUTPUT);
-            System.out.println(StandardLocation.CLASS_PATH);
-            System.out.println(StandardLocation.ANNOTATION_PROCESSOR_PATH);
-            System.out.println("Paths --<");
-//            FileObject docFile = processingEnv.getFiler().createSourceFile("out.put");
-            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT,"", "out.put");
-            PrintWriter docWriter = new PrintWriter(docFile.openWriter());
+        PrintWriter docWriter = null;
+        try {
+            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "out.put");
+            docWriter = new PrintWriter(docFile.openWriter());
             docWriter.write(docContent.toString());
             docWriter.flush();
         } catch (IOException e) {
@@ -90,6 +71,8 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
             System.out.println("Failed to create file for property documentation. Exiting the process");
             e.printStackTrace();
             System.exit(1);
+        } finally {
+            docWriter.close();
         }
 
     }
