@@ -5,6 +5,9 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,13 +54,26 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
             }
             propTable.append("\n\n");
 
-
+            createAndWriteDoc(propTable.append(propDetails.toString()));
 
             // This would be replaced by code to write into a markdown file
             System.out.println(propTable.toString()+"\n\n");
             System.out.println(propDetails.toString()+"\n\n");
         }
         return false;
+    }
+
+    private void createAndWriteDoc(StringBuilder docContent) {
+        try(PrintWriter docWriter = new PrintWriter(new File("out.put"))) {
+            docWriter.write(docContent.toString());
+            docWriter.flush();
+        } catch (FileNotFoundException e) {
+            // log to system output at compile time and exit
+            System.out.println("Failed to create file for property documentation. Exiting the process");
+            e.printStackTrace();
+            System.exit(1);
+        }
+
     }
 
     private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocumentedJansProperty propertyAnnotation) {
