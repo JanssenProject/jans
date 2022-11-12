@@ -6,8 +6,10 @@ tags:
 ---
 
 ## Overview
+OAuth 2.0 allows providers to prompt users for consent before releasing their personal information to a client (application). The standard consent process is binary: approve or deny. Using the consent gathering interception script, the consent flow can be customized to meet unique business requirements, for instance to support payment authorization, where you need to present transactional information, or where you need to step-up authentication to add security. 
 
 ## Interface
+The consent gathering script implements the [ConsentGathering](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/ConsentGatheringType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
 | Method header | Method description |
@@ -17,11 +19,23 @@ tags:
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
 
 ### New Methods
+| Method header | Method description |
+|:-----|:------|
+| `def authorize(self, step, consentContext)` | Main consent-gather method. Must return True (if consent gathered successfully) or False (if failed). |
+| `def getNextStep(self, step, context)` |  |
+| `def getStepsCount(self, context)` | Return total number of consent gathering steps |
+| `def getPageForStep(self, step, context)` | Returns the consent page corresponding to the current step of consent gathering |
 
 ### Objects
+| Object name | Object description |
+|:-----|:------|
+|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+|`configurationAttributes`| `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes` |
+|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
+|`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ConsentGatheringContext.java) |
 
 ## Use case: Dummy Consent Gathering Form
-
+This script has been adapted from the Gluu Server [sample consent gathering script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/authz/ConsentGatheringSample.py).
 ### Script Type: Python
 ```python
 from io.jans.model.custom.script.type.authz import ConsentGatheringType
@@ -50,9 +64,8 @@ class ConsentGathering(ConsentGatheringType):
     def getApiVersion(self):
         return 11
 
-    # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
-    def authorize(self, step, context): # context is reference of io.jans.as.server.service.external.context.ConsentGatheringContext
+    def authorize(self, step, context): 
         print "Consent-Gathering. Authorizing..."
 
         if step == 1:
