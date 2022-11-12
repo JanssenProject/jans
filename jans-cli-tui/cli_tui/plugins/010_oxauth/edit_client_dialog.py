@@ -541,7 +541,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledCheckBox(
                             _("Require user code param"), 
                             name='backchannelUserCodeParameterSupported',   ## TODO AppConfiguration
-                            checked=self.data.get('attributes', {}).get('backchannelUserCodeParameterSupported'),## TODO Not in attributes >> in get-properties
+                            checked=self.data.get('backchannelUserCodeParameterSupported', ''),## TODO Not in attributes >> in get-properties
                             style='class:outh-client-checkbox',
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
@@ -568,7 +568,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledCheckBox(
                             _("Request PAR"), 
                             name='sessionIdRequestParameterEnabled', ## TODO AppConfiguration
-                            checked=self.data.get('attributes', {}).get('sessionIdRequestParameterEnabled'),## TODO Not in attributes >> in get-properties
+                            checked=self.data.get('sessionIdRequestParameterEnabled', ''),## TODO Not in attributes >> in get-properties
                             style='class:outh-client-checkbox',
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 

@@ -265,6 +265,44 @@ class Plugin(DialogUtils):
                     d.get('subjectType', '') 
                     ]
                 )
+            #---------------------------------------------------------------------#
+            #---------------------------------------------------------------------#
+            #---------------------------------------------------------------------#
+            
+            cli_args = {'operation_id': 'get-properties', 'endpoint_args': ''}
+            self.app.start_progressing()
+            response2 = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+            if response2.status_code not in (200, 201):
+                self.app.show_message(_("Error getting clients"), str(response2.text))
+                return
+
+            try:
+                result2 = response2.json()
+            except Exception:
+                self.app.show_message(_("Error getting clients"), str(response2.text))
+                return
+            
+            sec_dict={}
+            property_in_appconfig = ['tokenEndpointAuthMethodsSupported','backchannelUserCodeParameterSupported','sessionIdRequestParameterEnabled']
+
+            for i in property_in_appconfig:
+                sec_dict[i] = result2.get(i)
+
+
+            ## TODO >>> Something is not correct here
+            for i in range(len(result['entries'])):
+                result['entries'][i].update(sec_dict)
+
+            file1= open("hopa.log",'a')
+            file1.write('\n \n')
+            file1.write("result['entries'] : "+str(result['entries'])+'\n \n')
+            file1.close()
+            
+            #---------------------------------------------------------------------#
+            #---------------------------------------------------------------------#
+            #---------------------------------------------------------------------#
 
             if data:
                 clients = JansVerticalNav(
@@ -691,6 +729,10 @@ class Plugin(DialogUtils):
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
 
+        file1= open("hopa.log",'a')
+        file1.write("selected_line_data : "+str(selected_line_data)+'\n \n')
+        file1.close()
+
         self.EditClientDialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client,delete_UMAresource=self.delete_UMAresource)
         self.app.show_jans_dialog(self.EditClientDialog)
 
@@ -713,6 +755,27 @@ class Plugin(DialogUtils):
             data_fn='',
             data=dialog.data
         )
+        property_in_appconfig = ['tokenEndpointAuthMethodsSupported','backchannelUserCodeParameterSupported','sessionIdRequestParameterEnabled']
+        data_to_patch=[]
+        for i in property_in_appconfig:
+            data_to_patch.append({'op':'replace', 'path': i, 'value': dialog.data.get(i) })
+            # file1= open("hopa.log",'a')
+            # file1.write(str(i)+" : "+str(dialog.data.get(i))+'\n \n')
+            # file1.close()
+
+        response2 = self.app.cli_object.process_command_by_id(
+                operation_id='patch-properties' ,
+                url_suffix='',
+                endpoint_args='',
+                data_fn='',
+                data=data_to_patch
+                )    
+
+        # file1= open("hopa.log",'a')
+        # file1.write("response2 : "+str(response2['tokenEndpointAuthMethodsSupported'])+'\n \n')
+        # file1.close()
+
+
         self.app.stop_progressing()
         if response.status_code in (200, 201):
             self.oauth_update_clients()
