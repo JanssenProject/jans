@@ -372,8 +372,16 @@ class Plugin():
             height=3, 
             style='class:dialog-titled-widget')
 
+        self.adminui_role_deletable = self.app.getTitledCheckBox(
+            "Deletable", 
+            name='deletable', 
+            checked= False, 
+            jans_help= "Default to False",
+            style='class:outh-client-checkbox')          
+
         def save(dialog: Dialog) -> None:
             desc = self.adminui_role_description.me.text
+            deletable = self.adminui_role_deletable.me.checked
 
             # ------------------------------------------------------------#
             # --------------------- Patch to server ----------------------#
@@ -384,7 +392,7 @@ class Plugin():
                         url_suffix='',
                         endpoint_args='',
                         data_fn='',
-                        data={'role': '{}'.format(title), 'description': '{}'.format(desc)},
+                        data={'role': '{}'.format(title), 'description': '{}'.format(desc), 'deletable':'{}'.format(deletable)},
                         )
             else:
                 return
@@ -401,7 +409,7 @@ class Plugin():
 
 
 
-        body = HSplit([self.adminui_role_description])
+        body = HSplit([self.adminui_role_description,self.adminui_role_deletable])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=save)]
         dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
@@ -411,7 +419,7 @@ class Plugin():
 
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete adminui_roles :")+"\n {} ?".format(kwargs['selected'][0]))
 
-        async def coroutine():
+        async def coroutine(): ## Need to add editable
             focused_before = self.app.layout.current_window
             result = await self.app.show_dialog_as_float(dialog)
             try:
@@ -420,7 +428,7 @@ class Plugin():
                 self.app.stop_progressing()
                 self.app.layout.focus(self.app.center_frame)
 
-            if result.lower() == 'yes':
+            if result.lower() == 'yes': ## should we delete the main roles?!
                 result = self.app.cli_object.process_command_by_id(
                     operation_id='delete-adminui-role',
                     url_suffix='adminUIRole:{}'.format(kwargs ['selected'][0]),
@@ -429,7 +437,7 @@ class Plugin():
                     data={}
                 )
                 self.app.stop_progressing()
-                self.get_adminui_roles()
+                self.get_adminui_roles()  
                 
             return result  ### TODO >> Role cannot be deleted. Please set ‘deletable’ property of role to true.
 
