@@ -25,7 +25,8 @@ class JansNavBar():
         entries: list,
         selection_changed: Callable,
         select: int= 0,
-        jans_name: Optional[str] = ''
+        jans_name: Optional[str] = '',
+        last_to_right: Optional[bool] = False,
         ) -> Window:
 
         """init for JansNavBar
@@ -36,7 +37,7 @@ class JansNavBar():
             selection_changed (_type_): _description_
             select (int, optional): _description_. Defaults to 0.
             bgcolor (str, optional): _description_. Defaults to '#00ff44'.
-        
+            last_to_right (bool, optional): move last item to rightmost.
         Examples:
             self.oauth_navbar = JansNavBar(
                                 self,
@@ -51,6 +52,7 @@ class JansNavBar():
         self.cur_navbar_selection = select
         self.selection_changed = selection_changed
         self.jans_name = jans_name
+        self.last_to_right = last_to_right
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.create_window()
 
@@ -110,11 +112,14 @@ class JansNavBar():
     def get_navbar_entries(self)-> AnyFormattedText:
         """Get all selective entries
 
-        Returns:    
+        Returns:
             merge_formatted_text: Merge (Concatenate) several pieces of formatted text together. 
         """
-        
+
         result = []
+        nitems = len(self.navbar_entries)
+        total_text_lenght = 0
+        
         for i, entry in enumerate(self.navbar_entries):
             display_text = entry[1]
             re_search = shortcut_re.search(display_text)
@@ -124,11 +129,19 @@ class JansNavBar():
                 display_text = display_text[:sc]+ '<style fg="{}">'.format(cli_style.shorcut_color) + shorcut_key + '</style>' +display_text[ec:]
                 self.add_key_binding(shorcut_key.lower())
 
+            total_text_lenght += len(entry[1].replace('[','').replace(']',''))
             if i == self.cur_navbar_selection:
                 result.append(HTML('<style fg="{}" bg="{}">{}</style>'.format(cli_style.sub_navbar_selected_bgcolor, cli_style.sub_navbar_selected_fgcolor, display_text)))
             else:
                 result.append(HTML('<b>{}</b>'.format(display_text)))
-            result.append("   ")
+            if self.last_to_right and i+2 == nitems:
+                screen_width = self.myparent.output.get_size().columns
+                remaining_space = (screen_width - total_text_lenght - len(self.navbar_entries[-1][1].replace('[','').replace(']','')) - 2)
+                sep_space = ' ' * remaining_space
+            else:
+                sep_space = '   '
+            total_text_lenght += len(sep_space)
+            result.append(sep_space)
 
         return merge_formatted_text(result)
 

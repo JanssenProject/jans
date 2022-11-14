@@ -120,10 +120,11 @@ class JansCliApp(Application):
 
         self.nav_bar = JansNavBar(
                     self,
-                    entries=[(plugin.pid, plugin.name) for plugin in self._plugins], 
+                    entries=[(plugin.pid, plugin.name) for plugin in self._plugins],
                     selection_changed=self.main_nav_selection_changed,
                     select=0,
-                    jans_name='main:nav_bar'
+                    jans_name='main:nav_bar',
+                    last_to_right=True,
                     )
         self.center_frame = FloatContainer(content=
                     Frame(

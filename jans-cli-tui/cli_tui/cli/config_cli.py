@@ -158,6 +158,7 @@ parser.add_argument("--patch-replace", help="Colon delimited key:value pair for 
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
 parser.add_argument("-no-color", help="Do not colorize json dumps", action='store_true')
 parser.add_argument("--log-dir", help="Log directory", default=log_dir)
+parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
 
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
@@ -423,6 +424,38 @@ class JCA_CLI:
         self.openid_configuration = response.json()
 
         return True
+
+    def revoke_session(self):
+        self.cli_logger.debug("Revoking session info")
+        url = 'https://{}/jans-auth/restv1/revoke'.format(self.idp_host)
+        print(url,self.client_id, self.client_secret)
+        print(self.access_token)
+        try:
+
+            response = requests.post(
+                    url=url,
+                    auth=(self.client_id, self.client_secret),
+                    data={"token": self.access_token, 'token_type_hint': 'access_token'},
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+        except Exception as e:
+            self.cli_logger.error(str(e))
+            if self.wrapped:
+                return str(e)
+
+            raise ValueError(
+                self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
+
+
+        self.log_response(response)
+
+        if self.wrapped:
+            return response
+        else:
+            print(response.status_code)
+            print(response.text)
+
 
 
     def check_access_token(self):
@@ -1489,9 +1522,13 @@ class JCA_CLI:
 
 def main():
 
-    
+
     error_log_file = os.path.join(log_dir, 'cli_eorror.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
+
+    if args.revoke_session:
+        cli_object.revoke_session()
+        sys.exit()
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
