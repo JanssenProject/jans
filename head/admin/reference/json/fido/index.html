@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#references" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -5654,9 +5659,38 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          FIDO
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         FIDO
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References:
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9876,6 +9910,21 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References:
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -9918,14 +9967,60 @@
 
   <h1>FIDO</h1>
 
-<p>This is a placeholder</p>
+<p>Use the following command to obtain configuration parameters:</p>
+<p><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2</code></p>
+<p>Response:
+<div class="highlight"><pre><span></span><code>{
+   &quot;issuer&quot;:&quot;https://.jans.io&quot;,
+   &quot;baseEndpoint&quot;:&quot;https://my-jans-server.jans.io/jans-fido2/restv1&quot;,
+   &quot;cleanServiceInterval&quot;:60,
+   &quot;cleanServiceBatchChunkSize&quot;:10000,
+   &quot;useLocalCache&quot;:true,
+   &quot;disableJdkLogger&quot;:true,
+   &quot;loggingLevel&quot;:&quot;INFO&quot;,
+   &quot;loggingLayout&quot;:&quot;text&quot;,
+   &quot;externalLoggerConfiguration&quot;:&quot;&quot;,
+   &quot;metricReporterInterval&quot;:300,
+   &quot;metricReporterKeepDataDays&quot;:15,
+   &quot;metricReporterEnabled&quot;:true,
+   &quot;personCustomObjectClassList&quot;:[
+      &quot;jansCustomPerson&quot;,
+      &quot;jansPerson&quot;
+   ],
+   &quot;fido2Configuration&quot;:{
+      &quot;authenticatorCertsFolder&quot;:&quot;/etc/jans/conf/fido2/authenticator_cert&quot;,
+      &quot;mdsCertsFolder&quot;:&quot;/etc/jans/conf/fido2/mds/cert&quot;,
+      &quot;mdsTocsFolder&quot;:&quot;/etc/jans/conf/fido2/mds/toc&quot;,
+      &quot;serverMetadataFolder&quot;:&quot;/etc/jans/conf/fido2/server_metadata&quot;,
+      &quot;requestedCredentialTypes&quot;:[
+         &quot;RS256&quot;,
+         &quot;ES256&quot;
+      ],
+      &quot;requestedParties&quot;:[
+         {
+            &quot;name&quot;:&quot;https://my-jans-server.jans.io&quot;,
+            &quot;domains&quot;:[
+               &quot;my-jans-server.jans.io&quot;
+            ]
+         }
+      ],
+      &quot;userAutoEnrollment&quot;:false,
+      &quot;unfinishedRequestExpiration&quot;:180,
+      &quot;authenticationHistoryExpiration&quot;:1296000
+   }
+}
+</code></pre></div></p>
+<h3 id="references">References:<a class="headerlink" href="#references" title="Permanent link">#</a></h3>
+<ol>
+<li><a href="../../fido/config">Configuring the FIDO2 server</a></li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-14T11:14:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-14</span>
       
         <br>
         Created:

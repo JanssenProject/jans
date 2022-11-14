@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#overview" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -9582,10 +9587,84 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          jans-fido2
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         jans-fido2
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#janssens-fido2-server" class="md-nav__link">
+    Janssen's FIDO2 server
+  </a>
+  
+    <nav class="md-nav" aria-label="Janssen's FIDO2 server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-of-the-fido2-ecosystem-in-janssen" class="md-nav__link">
+    Components of the FIDO2 ecosystem in Janssen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attestation-formats-supported-by-janssens-fido-server" class="md-nav__link">
+    Attestation formats supported by Janssen's FIDO server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backward-compatibility-with-u2f-authenticators" class="md-nav__link">
+    Backward compatibility with U2F authenticators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools" class="md-nav__link">
+    Tools
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9873,6 +9952,64 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#janssens-fido2-server" class="md-nav__link">
+    Janssen's FIDO2 server
+  </a>
+  
+    <nav class="md-nav" aria-label="Janssen's FIDO2 server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-of-the-fido2-ecosystem-in-janssen" class="md-nav__link">
+    Components of the FIDO2 ecosystem in Janssen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attestation-formats-supported-by-janssens-fido-server" class="md-nav__link">
+    Attestation formats supported by Janssen's FIDO server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backward-compatibility-with-u2f-authenticators" class="md-nav__link">
+    Backward compatibility with U2F authenticators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools" class="md-nav__link">
+    Tools
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -9887,6 +10024,20 @@
                   
   
 
+  <nav class="md-tags" >
+    
+      
+      
+        <span class="md-tag">developer</span>
+      
+    
+      
+      
+        <span class="md-tag">fido</span>
+      
+    
+  </nav>
+
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/developer/implementation-design/jans-fido2.md" title="Edit this page" class="md-content__button md-icon">
@@ -9895,16 +10046,101 @@
   </a>
 
 
-  <h1>jans-fido2</h1>
-
-<p>This file is a placeholder.</p>
+<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
+<h2 id="janssens-fido2-server">Janssen's FIDO2 server<a class="headerlink" href="#janssens-fido2-server" title="Permanent link">#</a></h2>
+<p>FIDO2 as an open standard for authentication is based on public key cryptography.</p>
+<p>Janssen's FIDO2 server - a component inside the Janssen project enables users of RPs to enroll and authenticate themselves using U2F keys, FIDO2 keys or inbuilt platform authenticator.
+1. The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.
+2. The FIDO2 server implements the <a href="https://fidoalliance.org/metadata/metadata-service-overview/">FIDO Metadata Service (MDS3)</a> defined by FIDO Alliance.
+3. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (LDAP, MYSQL, Couchbase etc.)</p>
+<h3 id="components-of-the-fido2-ecosystem-in-janssen">Components of the FIDO2 ecosystem in Janssen<a class="headerlink" href="#components-of-the-fido2-ecosystem-in-janssen" title="Permanent link">#</a></h3>
+<p><img alt="FIDO2 ecosystem" src="../../../assets/fido2-components.png" /></p>
+<p><a href="../../../assets/fido2-components.xml">Diagram reference</a></p>
+<ol>
+<li>
+<p><strong>User</strong>: User of an application, the one who possesses the Authenticator and who's role is to pass the Test of User Presence (TUP) (touch device, look, speak etc.).</p>
+</li>
+<li>
+<p><strong>WebAuthn API</strong>:</p>
+<ul>
+<li>A global web standard for password-less FIDO2 authentication, implemented by most browsers (Google Chrome, Mozilla Firefox, Microsoft Edge, Apple Safari, Opera, Microsoft edge).</li>
+<li>It provides clients access to the underlying capabilities of the Authenticator.</li>
+<li>WebAuthn offers a very good user experience, there is no need for any additional browser plugin to be installed.</li>
+<li>WebAuthn API: enables clients to make requests to authenticators with regards to :</li>
+<li>creation of a new key-pair</li>
+<li>provide an assertion about a key</li>
+<li>report capabilities (capability exists but not offered in Janssen's FIDO2 offering)</li>
+<li>manage a PIN. (capability exists but not offered in Janssen's FIDO2 offering)</li>
+</ul>
+</li>
+<li>
+<p><strong>Authenticator</strong>: A device which holds the private key. It prompts the user to perform a certain gesture. It can be a platform authenticator that is built into the client device or a roaming authenticator that is connected to the client device through USB, BLE, or NFC.</p>
+</li>
+<li>
+<p><strong>Relying Party</strong>: The RP (<code>jans-auth</code> or <code>casa</code>) implements a Javascript Client which makes a registration and authentication request to the WebAuthn API. The Relying Party ID is the DNS domain where the FIDO2 device will be registered and used.</p>
+</li>
+<li>
+<p><strong>CTAP2</strong>: Simple and lightweight hardware protocol that enables Authenticators to talk with Supported browsers.</p>
+</li>
+<li>
+<p><strong>FIDO2 Server</strong>
+Janssen's FIDO server is a standalone server communicates with the RP using an API which can be obtained by querying the following URL :
+<code>https://&lt;myjans-server&gt;/.well-known/fido2-configuration</code>
+Response:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;version&quot;: &quot;1.1&quot;,
+  &quot;issuer&quot;: &quot;https://&lt;myjans-server&gt;&quot;,
+  &quot;attestation&quot;: {
+    &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation&quot;,
+    &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/options&quot;,
+    &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/result&quot;
+  },
+  &quot;assertion&quot;: {
+    &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion&quot;,
+    &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/options&quot;,
+    &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/result&quot;
+  }
+}
+</code></pre></div>
+<p>The two main functionalities are:
+1. Attestation
+2. Assertion
+The authenticator credentials obtained after querying the WebAuthn API is forwarded to the FIDO2 server for attestation or assertion.</p>
+</li>
+<li>
+<p><strong>Interception script</strong> : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found <a href="../../script-catalog/person_authentication/fido2-external-authenticator/README">here</a>.</p>
+</li>
+</ol>
+<h3 id="attestation-formats-supported-by-janssens-fido-server">Attestation formats supported by Janssen's FIDO server<a class="headerlink" href="#attestation-formats-supported-by-janssens-fido-server" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/processor/attestation/PackedAttestationProcessor.java">Packed (FIDO2)</a>: The most used attestation format</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/processor/attestation/TPMProcessor.java">TPM</a> : Attestation for Windows10 devices</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/processor/attestation/AndroidKeyAttestationProcessor.java">Android key attestation</a> : Attestation for android devices.</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/processor/attestation/AndroidSafetyNetAttestationProcessor.java">Android SafetyNet </a>: Any Android devices running 7+</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/processor/attestation/U2FAttestationProcessor.java">FIDO U2F</a>: Legacy U2F authenticators</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/processor/attestation/AppleAttestationProcessor.java">Apple Anonymous</a>: Apple devices do attestations differently.</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/processor/attestation/NoneAttestationProcessor.java">None</a></li>
+</ul>
+<h3 id="backward-compatibility-with-u2f-authenticators">Backward compatibility with U2F authenticators<a class="headerlink" href="#backward-compatibility-with-u2f-authenticators" title="Permanent link">#</a></h3>
+<p>The FIDO server offers registration and authentication using legacy U2F authenticators.</p>
+<h3 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h3>
+<ol>
+<li>https://www.w3.org/TR/webauthn-2/</li>
+<li>http://fidoalliance.org/specs/mds/fido-metadata-statement-v3.0-ps-20210518.html</li>
+</ol>
+<h3 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">#</a></h3>
+<ol>
+<li>https://jwt.io/ – For JWT decoding and debugging</li>
+<li>https://www.base64decode.org/ – For Decoding Base64 to UTF8</li>
+<li>https://fidoalliance.org/certification/fido-certified-products/ - To browse authenticators listed with FIDO Alliance</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-07-25T20:25:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-07-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-14T11:14:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-14</span>
       
         <br>
         Created:
