@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#setup-script" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -1189,10 +1194,63 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Setup Instructions
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Setup Instructions
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-setup" class="md-nav__link">
+    Running Setup
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#avoiding-common-issues" class="md-nav__link">
+    Avoiding common issues
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#script-command-line-options" class="md-nav__link">
+    Script Command Line Options
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9873,6 +9931,43 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-setup" class="md-nav__link">
+    Running Setup
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#avoiding-common-issues" class="md-nav__link">
+    Avoiding common issues
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#script-command-line-options" class="md-nav__link">
+    Script Command Line Options
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -9914,16 +10009,384 @@
   </a>
 
 
-  <h1>Setup Instructions</h1>
+<h1 id="setup-script">Setup Script<a class="headerlink" href="#setup-script" title="Permanent link">#</a></h1>
+<h2 id="running-setup">Running Setup<a class="headerlink" href="#running-setup" title="Permanent link">#</a></h2>
+<p>After installation, executing setup.py will launch the SETUP Command Line by default. </p>
+<p>To run the script, run the following command:</p>
+<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py
+</code></pre></div>
+<p>A warning will pop up if the free disk space is less than the recommended 40 GB. The installer will check that all dependant packages are installed or not, and if missing it will ask to install. When prompted Y/y at the command prompt will install all required packages.</p>
+<ol>
+<li>
+<p>The installer will detect which operating system, init type, and Apache version are currently on the server.</p>
+</li>
+<li>
+<p>The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Gluu Server. Hit Enter to accept the default values.</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>Enter IP Address:
+Enter hostname:
+Enter your city or locality:
+Enter your state or province two letter code:
+Enter two letter Country Code
+Enter Organization name:
+Enter email address <span class="k">for</span> support at your organization:
+Enter maximum RAM <span class="k">for</span> applications <span class="k">in</span> MB:
+Enter Password <span class="k">for</span> Admin User:
+</code></pre></div>
+<ol>
+<li>
+<p>Next, pick a persistence mechanism. Choose from openDJ, MySQL ,PGSql, an LDAP that can be installed locally or remotely, or Couchbase, an enterprise NoSQL cloud database.</p>
+</li>
+<li>
+<p>Next, pick which services should be installed for this deployment:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>Install Jans Config API? <span class="o">[</span>Yes<span class="o">]</span>:
+Install SCIM Server? <span class="o">[</span>Yes<span class="o">]</span>:
+Install Fido2 Server? <span class="o">[</span>Yes<span class="o">]</span>:
+</code></pre></div>
+<ol>
+<li>Finally, review the summary screen that gives an overview of the selections made during the setup process.</li>
+</ol>
+<h3 id="avoiding-common-issues">Avoiding common issues<a class="headerlink" href="#avoiding-common-issues" title="Permanent link">#</a></h3>
+<p>Avoid setup issues by acknowledging the following:</p>
+<ul>
+<li>
+<p>IP Address: Do not use localhost for either the IP address or hostname.</p>
+</li>
+<li>
+<p>Hostname:</p>
+</li>
+<li>
+<p>Make sure to choose the hostname carefully. Changing the hostname after installation is not a simple task.</p>
+</li>
+<li>
+<p>Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.</p>
+</li>
+<li>
+<p>For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Gluu.</p>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.</p>
+</div>
+<h2 id="script-command-line-options">Script Command Line Options<a class="headerlink" href="#script-command-line-options" title="Permanent link">#</a></h2>
+<p>To check usage of this script run help command</p>
+<div class="highlight"><pre><span></span><code>    python3 /opt/jans/jans-setup/setup.py --help
 
-
+      usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-remote-rdbm {mysql,pgsql,spanner} | -local-rdbm 
+      {mysql,pgsql}]
+      [-ip-address IP_ADDRESS] [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE] [-country COUNTRY] 
+      [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT] [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] 
+      [--reset-rdbm-db] [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD]  [-jans-max-mem JANS_MAX_MEM] 
+      [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download] [--download-exit] 
+      [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD] [-setup-branch SETUP_BRANCH]  [--disable-config-api-security]
+      [--cli-test-client] [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT]  [-disable-script DISABLE_SCRIPT] [-stm] [-w]
+      [-t] [-x] [--allow-pre-released-features] [--listen_all_interfaces] [--remote-ldap | --disable-local-ldap] [--remote-couchbase]
+      [--local-couchbase] [-couchbase-admin-user COUCHBASE_ADMIN_USER]  [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD] 
+      [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX][-couchbase-hostname COUCHBASE_HOSTNAME] [--no-data] [--no-jsauth] 
+      [-ldap-admin-password LDAP_ADMIN_PASSWORD] [--no-config-api] [--no-scim] [--no-fido2] [--install-eleven] [--load-config-api-test] 
+      [-config-patch-creds CONFIG_PATCH_CREDS] [-spanner-project SPANNER_PROJECT] [-spanner-instance SPANNER_INSTANCE] [
+      -spanner-database SPANNER_DATABASE]  [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials       
+      GOOGLE_APPLICATION_CREDENTIALS]
+</code></pre></div>
+<p>Use this script to configure your Jans Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.</p>
+<p>Below are the optional arguments:</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-h, --help</td>
+<td>show this help message and exit</td>
+</tr>
+<tr>
+<td>--version</td>
+<td>show program's version number and exit</td>
+</tr>
+<tr>
+<td>-c</td>
+<td>Use command line instead of TUI</td>
+</tr>
+<tr>
+<td>-d D</td>
+<td>Installation directory</td>
+</tr>
+<tr>
+<td>-f F</td>
+<td>Specify setup.properties file</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>No interactive prompt before install starts. Run with -f</td>
+</tr>
+<tr>
+<td>-N, --no-httpd</td>
+<td>No apache httpd server</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>Update hosts file with IP address / hostname</td>
+</tr>
+<tr>
+<td>-csx</td>
+<td>Collect setup properties, save and exit</td>
+</tr>
+<tr>
+<td mysql_pgsql_spanner="mysql,pgsql,spanner">-remote-rdbm</td>
+<td>Enables using remote RDBM server</td>
+</tr>
+<tr>
+<td mysql_pgsql="mysql,pgsql">-local-rdbm</td>
+<td>Enables installing/configuring local RDBM server</td>
+</tr>
+<tr>
+<td>-ip-address IP_ADDRESS</td>
+<td>Used primarily by Apache httpd for the Listen directive</td>
+</tr>
+<tr>
+<td>-host-name HOST_NAME</td>
+<td>Internet-facing FQDN that is used to generate certificates and metadata.</td>
+</tr>
+<tr>
+<td>-org-name ORG_NAME</td>
+<td>Organization name field used for generating X.509 certificates</td>
+</tr>
+<tr>
+<td>-email EMAIL</td>
+<td>Email address for support at your organization used for generating X.509 certificates</td>
+</tr>
+<tr>
+<td>-city CITY</td>
+<td>City field used for generating X.509 certificates</td>
+</tr>
+<tr>
+<td>-state STATE</td>
+<td>State field used for generating X.509 certificates</td>
+</tr>
+<tr>
+<td>-country COUNTRY</td>
+<td>Two letters country coude used for generating X.509 certificates</td>
+</tr>
+<tr>
+<td>-rdbm-user RDBM_USER</td>
+<td>RDBM username</td>
+</tr>
+<tr>
+<td>-rdbm-password RDBM_PASSWORD</td>
+<td>RDBM password</td>
+</tr>
+<tr>
+<td>-rdbm-port RDBM_PORT</td>
+<td>RDBM port</td>
+</tr>
+<tr>
+<td>-rdbm-db RDBM_DB</td>
+<td>RDBM database</td>
+</tr>
+<tr>
+<td>-rdbm-host RDBM_HOST</td>
+<td>RDBM host</td>
+</tr>
+<tr>
+<td>--reset-rdbm-db</td>
+<td>Deletes all tables on target database. Warning! You will lose all data on target database.</td>
+</tr>
+<tr>
+<td>--shell</td>
+<td>Drop into interactive shell before starting installation</td>
+</tr>
+<tr>
+<td>--dump-config-on-error</td>
+<td>Dump configuration on error</td>
+</tr>
+<tr>
+<td>--no-progress</td>
+<td>Use simple progress</td>
+</tr>
+<tr>
+<td>-admin-password ADMIN_PASSWORD</td>
+<td>Used as the Administrator password</td>
+</tr>
+<tr>
+<td>-jans-max-mem JANS_MAX_MEM</td>
+<td>Total memory (in KB) to be used by Jannsen Server</td>
+</tr>
+<tr>
+<td>-properties-password PROPERTIES_PASSWORD</td>
+<td>Encoded setup.properties file password</td>
+</tr>
+<tr>
+<td>-approved-issuer APPROVED_ISSUER</td>
+<td>Api Approved Issuer</td>
+</tr>
+<tr>
+<td>--force-download</td>
+<td>Force downloading files</td>
+</tr>
+<tr>
+<td>--download-exit</td>
+<td>Download files and exits</td>
+</tr>
+<tr>
+<td>-jans-app-version JANS_APP_VERSION</td>
+<td>Version for Jannsen applications</td>
+</tr>
+<tr>
+<td>-jans-build JANS_BUILD</td>
+<td>Build version for Janssen applications</td>
+</tr>
+<tr>
+<td>-setup-branch SETUP_BRANCH</td>
+<td>Jannsen setup github branch</td>
+</tr>
+<tr>
+<td>--disable-config-api-security</td>
+<td>Turn off oauth2 security validation for jans-config-api</td>
+</tr>
+<tr>
+<td>--cli-test-client</td>
+<td>Use config api test client for CLI</td>
+</tr>
+<tr>
+<td>--import-ldif IMPORT_LDIF</td>
+<td>Render ldif templates from directory and import them in Database</td>
+</tr>
+<tr>
+<td>-enable-script ENABLE_SCRIPT</td>
+<td>inum of script to enable</td>
+</tr>
+<tr>
+<td>-disable-script DISABLE_SCRIPT</td>
+<td>inum of script to enable</td>
+</tr>
+<tr>
+<td>-stm, --enable-scim-test-mode</td>
+<td>Enable Scim Test Mode</td>
+</tr>
+<tr>
+<td>-w</td>
+<td>Get the development head war files</td>
+</tr>
+<tr>
+<td>-t</td>
+<td>Load test data</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>Load test data and exit</td>
+</tr>
+<tr>
+<td>--allow-pre-released-features</td>
+<td>Enable options to install experimental features, not yet officially supported</td>
+</tr>
+<tr>
+<td>--listen_all_interfaces</td>
+<td>Allow the LDAP server to listen on all server interfaces</td>
+</tr>
+<tr>
+<td>--remote-ldap</td>
+<td>Enables using remote LDAP server</td>
+</tr>
+<tr>
+<td>--disable-local-ldap</td>
+<td>Disables installing local LDAP server</td>
+</tr>
+<tr>
+<td>--remote-couchbase</td>
+<td>Enables using remote couchbase server</td>
+</tr>
+<tr>
+<td>--local-couchbase</td>
+<td>Enables installing couchbase server</td>
+</tr>
+<tr>
+<td>-couchbase-admin-user COUCHBASE_ADMIN_USER</td>
+<td>Couchbase admin user</td>
+</tr>
+<tr>
+<td>-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD</td>
+<td>Couchbase admin user password</td>
+</tr>
+<tr>
+<td>-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX</td>
+<td>Set prefix for couchbase buckets</td>
+</tr>
+<tr>
+<td>-couchbase-hostname COUCHBASE_HOSTNAME</td>
+<td>Remote couchbase server hostname</td>
+</tr>
+<tr>
+<td>--no-data</td>
+<td>Do not import any data to database backend, used for clustering</td>
+</tr>
+<tr>
+<td>--no-jsauth</td>
+<td>Do not install OAuth2 Authorization Server</td>
+</tr>
+<tr>
+<td>-ldap-admin-password LDAP_ADMIN_PASSWORD</td>
+<td>Used as the LDAP directory manager password</td>
+</tr>
+<tr>
+<td>--no-config-api</td>
+<td>Do not install Jans Auth Config Api</td>
+</tr>
+<tr>
+<td>--no-scim</td>
+<td>Do not install Scim Server</td>
+</tr>
+<tr>
+<td>--no-fido2</td>
+<td>Do not install Fido2 Server</td>
+</tr>
+<tr>
+<td>--install-eleven</td>
+<td>Install Eleven Server</td>
+</tr>
+<tr>
+<td>--load-config-api-test</td>
+<td>Load Config Api Test Data</td>
+</tr>
+<tr>
+<td>-config-patch-creds CONFIG_PATCH_CREDS</td>
+<td>password:username for downloading auto test ciba password</td>
+</tr>
+<tr>
+<td>-spanner-project SPANNER_PROJECT</td>
+<td>Spanner project name</td>
+</tr>
+<tr>
+<td>-spanner-instance SPANNER_INSTANCE</td>
+<td>Spanner instance name</td>
+</tr>
+<tr>
+<td>-spanner-database SPANNER_DATABASE</td>
+<td>Spanner database name</td>
+</tr>
+<tr>
+<td>-spanner-emulator-host SPANNER_EMULATOR_HOST</td>
+<td>Use Spanner emulator host</td>
+</tr>
+<tr>
+<td>-google-application-credentials GOOGLE_APPLICATION_CREDENTIALS</td>
+<td>Path to Google application credentials json file</td>
+</tr>
+</tbody>
+</table>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-27T08:37:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-14T18:52:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-14</span>
       
         <br>
         Created:
