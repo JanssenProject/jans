@@ -123,7 +123,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         
                        'backchannelLogoutUri',
                        'additionalAudience',
-                       'rptClaimsScripts',  ## TODO Scopes!!
+                       'rptClaimsScripts',  
                        'spontaneousScopeScriptDns',
                        'jansAuthorizedAcr',
                         'tlsClientAuthSubjectDn',                     
@@ -146,14 +146,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             ):
             if self.data[list_key]:
                 self.data['attributes'][list_key] = self.data[list_key]
-
-
-        # for list_key in (
-        #             'backchannelUserCodeParameterSupported', ## TODO AppConfiguration
-        #             'sessionIdRequestParameterEnabled',  ## TODO AppConfiguration
-        #                     ):
-        #     if self.data[list_key]:
-        #         self.data['attributes'][list_key] = self.data[list_key]
 
 
         cfr = self.check_required_fields()
@@ -239,16 +231,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(schema, 'description'),
                             style='class:outh-client-text'),
                         
-                        # self.myparent.getTitledText(_("Authn Method token endpoint"),## TODO not titledtext
-                        #     name='tokenEndpointAuthMethodsSupported',  ## TODO AppConfiguration
-                        #     value='\n'.join(self.data.get('tokenEndpointAuthMethodsSupported', [])),## TODO Not in attributes >> in get-properties
-                        #     height=3, 
-                        #     style='class:outh-client-text'),
-
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
-
                         self.myparent.getTitledRadioButton(
                                 _("Authn Method token endpoint"), 
                                 name='tokenEndpointAuthMethod', 
@@ -256,11 +238,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 current_value=self.data.get('tokenEndpointAuthMethod'),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethod'),
                                 style='class:outh-client-radiobutton'),
-
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
-
 
                         self.myparent.getTitledRadioButton(
                                 _("Subject Type"), 
@@ -292,19 +269,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 current_values=self.data.get('responseTypes', []), 
                                 jans_help=self.myparent.get_help_from_schema(schema, 'responseTypes'),
                                 style='class:outh-client-checkboxlist'),
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
-                        self.myparent.getTitledCheckBox(_("Supress Authorization"),## TODO AppConfiguration
+
+                        self.myparent.getTitledCheckBox(_("Supress Authorization"),
                                 name='dynamicRegistrationPersistClientAuthorizations',
                                 checked=self.data.get('dynamicRegistrationPersistClientAuthorizations'),
                                 jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
                                     'tokenEndpointAuthMethodsSupported'),
                                 style='class:outh-client-checkbox'),
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------------#
 
                         self.myparent.getTitledRadioButton(
                             _("Application Type"), 
@@ -322,7 +294,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(schema, 'redirectUris'),
                             style='class:outh-client-textrequired'),
 
-                        self.myparent.getTitledText( ## ClientAttributes
+                        self.myparent.getTitledText( 
                             _("Redirect Regex"), 
                             name='redirectUrisRegex', 
                             value=self.data.get('attributes', {}).get('redirectUrisRegex',''), 
@@ -457,16 +429,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     )
 
         self.tabs['SoftwareInfo'] =  HSplit([
-            # self.myparent.getTitledText(title =_("Client URI"), name='clientUri', value=str(self.data.get('clientUri',{}).get('value','')),style='green'),
-            # self.myparent.getTitledText(title =_("Policy URI"), name='policyUri', value=str(self.data.get('policyUri',{}).get('value','')),style='green'),
-            # self.myparent.getTitledText(title =_("Logo URI"), name='logoUri', value=str(self.data.get('logoUri',{}).get('value','')),style='green'),
-            # self.myparent.getTitledText(title =_("Term of service URI"), name='tosUri', value=str(self.data.get('tosUri',{}).get('value','')),style='green'),
-
-            # self.myparent.getTitledText(title =_("Client URI"), name='clientUri', value=str(self.data.get('clientUri','')).replace('{','').replace('}',''),style='green'),
-            # self.myparent.getTitledText(title =_("Policy URI"), name='policyUri', value=str(self.data.get('policyUri','')).replace('{','').replace('}',''),style='green'),
-            # self.myparent.getTitledText(title =_("Logo URI"), name='logoUri', value=str(self.data.get('logoUri','')).replace('{','').replace('}',''),style='green'),
-            # self.myparent.getTitledText(title =_("Term of service URI"), name='tosUri', value=str(self.data.get('tosUri','')).replace('{','').replace('}',''),style='green'),
-
 
             self.myparent.getTitledText(_("Contacts"),              ### height =3 insted of the <+> button
                             name='contacts',
@@ -536,20 +498,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(schema, 'backchannelClientNotificationEndpoint'),
                             style='class:outh-client-text'),
                         
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
                         self.myparent.getTitledCheckBox(
                             _("Require user code param"), 
-                            name='backchannelUserCodeParameter',   ## TODO AppConfiguration
-                            checked=self.data.get('backchannelUserCodeParameter', ''),## TODO Not in attributes >> in get-properties
+                            name='backchannelUserCodeParameter',   
+                            checked=self.data.get('backchannelUserCodeParameter', ''),
                             style='class:outh-client-checkbox',
                             jans_help=self.myparent.get_help_from_schema(schema, 'backchannelUserCodeParameter'),
 
                             ),
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
 
                         Label(text=_("PAR"),style='class:outh-client-label'),
 
@@ -562,9 +518,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     'parLifetime'),  
                             text_type='integer',                          
                             style='class:outh-client-text'),
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
+
                         self.myparent.getTitledCheckBox(
                             _("Request PAR"), 
                             name='requirePar', 
@@ -572,9 +526,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             style='class:outh-client-checkbox',
                             jans_help=self.myparent.get_help_from_schema(schema, 'requirePar'),
                                 ),
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
+
                         Label(_("UMA"), style='class:outh-client-label'),
 
                         self.myparent.getTitledRadioButton(
@@ -592,11 +544,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                               jans_help=self.myparent.get_help_from_schema(schema, 'claimRedirectUris'),
                               height=3,
                               style='class:outh-client-text'),
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
+
                         self.myparent.getTitledText(_("RPT Modification Script"),
-                            name='rptClaimsScripts',  ## TODO Scopes!!
+                            name='rptClaimsScripts',  
                             value='\n'.join(self.data.get('attributes', {}).get('rptClaimsScripts',[]) ),
                             height=3,
                             style='class:outh-client-text',
@@ -604,9 +554,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Scope'), 
                                     'rptClaimsScripts'),
                                 ),
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
-                        #-------------------------------------------------------------------#
 
                     self.resources if self.data.get('inum','') else  HSplit([],width=D())
 
@@ -722,7 +669,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.spontaneous_scopes,
 
 
-                        VSplit([   ## TODO what the functionality would be?
+                        VSplit([  
                                 Label(text=_("Spontaneous scopes"),style='class:outh-client-label',width=len(_("Spontaneous scopes")*2)), ## TODO
                                 Button(
                                     _("View current"), 
@@ -763,10 +710,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             'jansAuthorizedAcr'),
                             style='class:outh-client-text'),
 
-
-                        #-----------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------#
                         self.myparent.getTitledText(
                             _("TLS Subject DN"), 
                             name='tlsClientAuthSubjectDn',  
@@ -776,9 +719,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                             'tlsClientAuthSubjectDn'),
                                 ),
-                        #-----------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------#
-                        #-----------------------------------------------------------------------#
 
                         self.myparent.getTitledWidget(
                                 _("Client Expiration Date"),
@@ -832,10 +772,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     'introspectionScripts'),
                 style='class:outh-client-text'),
 
-            # --------------------------------------------------------------------------------------# 
-            # --------------------------------------------------------------------------------------# 
-            # --------------------------------------------------------------------------------------# 
-            self.myparent.getTitledText(_("Password Grant"),  ## TODO >> AppConfiguration
+            self.myparent.getTitledText(_("Password Grant"),  
                 name='ropcScripts',
                 value='\n'.join(self.data.get('attributes', {}).get('ropcScripts',[])), 
                 height=3,
@@ -845,9 +782,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     'ropcScripts'),
                     ),
                 
-            # --------------------------------------------------------------------------------------# 
-            # --------------------------------------------------------------------------------------# 
-            # --------------------------------------------------------------------------------------# 
             self.myparent.getTitledText(_("OAuth Consent"),
                 name='consentGatheringScripts',
                 value='\n'.join(self.data.get('attributes', {}).get('consentGatheringScripts',[]) ),
