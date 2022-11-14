@@ -65,6 +65,7 @@ class Plugin:
     def logout_exit_cli(self) -> None:
         """Removes auth token and exits
         """
+        self.app.cli_object.revoke_session()
         del config_cli.config['DEFAULT']['access_token_enc']
         del config_cli.config['DEFAULT']['user_data']
         config_cli.write_config()

@@ -428,8 +428,7 @@ class JCA_CLI:
     def revoke_session(self):
         self.cli_logger.debug("Revoking session info")
         url = 'https://{}/jans-auth/restv1/revoke'.format(self.idp_host)
-        print(url,self.client_id, self.client_secret)
-        print(self.access_token)
+
         try:
 
             response = requests.post(
