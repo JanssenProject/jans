@@ -118,6 +118,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data['attributes'] = {}
         self.data['attributes']={'redirectUrisRegex':self.data['redirectUrisRegex']}
         self.data['attributes']={'parLifetime':self.data['parLifetime']}
+        self.data['attributes']={'requirePar':self.data['requirePar']}
         for list_key in (
                         
                        'backchannelLogoutUri',
@@ -247,15 +248,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         #-----------------------------------------------------------------------------#
                         #-----------------------------------------------------------------------------#
                         #-----------------------------------------------------------------------------#
-                        self.myparent.getTitledCheckBoxList(
-                                _("Authn Method token endpoint"),
-                                name='tokenEndpointAuthMethodsSupported', 
+
+                        self.myparent.getTitledRadioButton(
+                                _("Authn Method token endpoint"), 
+                                name='tokenEndpointAuthMethod', 
                                 values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
-                                current_values=self.data.get('tokenEndpointAuthMethodsSupported', []), 
-                                jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
-                                    'tokenEndpointAuthMethodsSupported'),
-                                style='class:outh-client-checkboxlist'),
+                                current_value=self.data.get('tokenEndpointAuthMethod'),
+                                jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethod'),
+                                style='class:outh-client-radiobutton'),
+
                         #-----------------------------------------------------------------------------#
                         #-----------------------------------------------------------------------------#
                         #-----------------------------------------------------------------------------#
@@ -540,12 +541,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         #-------------------------------------------------------------------#
                         self.myparent.getTitledCheckBox(
                             _("Require user code param"), 
-                            name='backchannelUserCodeParameterSupported',   ## TODO AppConfiguration
-                            checked=self.data.get('backchannelUserCodeParameterSupported', ''),## TODO Not in attributes >> in get-properties
+                            name='backchannelUserCodeParameter',   ## TODO AppConfiguration
+                            checked=self.data.get('backchannelUserCodeParameter', ''),## TODO Not in attributes >> in get-properties
                             style='class:outh-client-checkbox',
-                            jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
-                                    'backchannelUserCodeParameterSupported'),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'backchannelUserCodeParameter'),
+
                             ),
                         #-------------------------------------------------------------------#
                         #-------------------------------------------------------------------#
@@ -567,12 +567,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         #-------------------------------------------------------------------#
                         self.myparent.getTitledCheckBox(
                             _("Request PAR"), 
-                            name='sessionIdRequestParameterEnabled', ## TODO AppConfiguration
-                            checked=self.data.get('sessionIdRequestParameterEnabled', ''),## TODO Not in attributes >> in get-properties
+                            name='requirePar', 
+                            checked=self.data.get('attributes', {}).get('requirePar',''),
                             style='class:outh-client-checkbox',
-                            jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
-                                    'sessionIdRequestParameterEnabled'),
+                            jans_help=self.myparent.get_help_from_schema(schema, 'requirePar'),
                                 ),
                         #-------------------------------------------------------------------#
                         #-------------------------------------------------------------------#
