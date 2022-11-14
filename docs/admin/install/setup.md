@@ -49,14 +49,13 @@ Installer will check for all dependant packages are installed or not if missing 
      - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
      
      - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Gluu.
-     
   
-    ** Warning**    
-        Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not           supported and not recommended.
+!!! Warning    
+    Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not           supported and not recommended.
 
 ## Script Command Line Options
 
-to check usage of this script run help command
+To check usage of this script run help command
 
 
 ```
@@ -79,180 +78,78 @@ to check usage of this script run help command
       GOOGLE_APPLICATION_CREDENTIALS]
 ```
 
-  Use this script to configure your Jans Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found
-  in this folder, these properties will automatically be used instead of the interactive setup.
-
-Below are the option arugments:
-
-
-   **optional arguments:**
-                  
-
-                  -h, --help            show this help message and exit
-
-                  --version             show program's version number and exit
-
-                  -c                    Use command line instead of tui
-
-                  -d D                  Installation directory
-
-                  -f F                  Specify setup.properties file
-
-                  -n                    No interactive prompt before install starts. Run with -f
-
-                  -N, --no-httpd        No apache httpd server
-
-                  -u                    Update hosts file with IP address / hostname
-
-                  -csx                  Collect setup properties, save and exit
-
-                  -remote-rdbm {mysql,pgsql,spanner}
-                                          Enables using remote RDBM server
-
-                  -local-rdbm {mysql,pgsql}
-                                        Enables installing/configuring local RDBM server
-
-                  -ip-address IP_ADDRESS
-                                        Used primarily by Apache httpd for the Listen directive
-
-                  -host-name HOST_NAME  Internet-facing FQDN that is used to generate certificates and metadata.
-
-                  -org-name ORG_NAME    Organization name field used for generating X.509 certificates
-
-                  -email EMAIL          Email address for support at your organization used for generating X.509 certificates
-
-                  -city CITY            City field used for generating X.509 certificates
-
-                  -state STATE          State field used for generating X.509 certificates
-
-                  -country COUNTRY      Two letters country coude used for generating X.509 certificates
-
-                  -rdbm-user RDBM_USER  RDBM username
-
-                  -rdbm-password RDBM_PASSWORD
-                                          RDBM password
-
-                  -rdbm-port RDBM_PORT  RDBM port
-
-                  -rdbm-db RDBM_DB      RDBM database
-
-                  -rdbm-host RDBM_HOST  RDBM host
-
-                  --reset-rdbm-db       Deletes all tables on target database. Warning! You will lose all data on target database.
-
-                  --shell               Drop into interactive shell before starting installation
-
-                  --dump-config-on-error
-                                        Dump configuration on error
-
-                  --no-progress         Use simple progress
-
-                  -admin-password ADMIN_PASSWORD
-                                        Used as the Administrator password
-
-                  -jans-max-mem JANS_MAX_MEM
-                                        Total memory (in KB) to be used by Jannses Server
-
-                  -properties-password PROPERTIES_PASSWORD
-                                        Encoded setup.properties file password
-
-                  -approved-issuer APPROVED_ISSUER
-                                        Api Approved Issuer
-
-                  --force-download      Force downloading files
-
-                  --download-exit       Download files and exits
-
-                  -jans-app-version JANS_APP_VERSION
-                                        Version for Jannses applications
-
-                  -jans-build JANS_BUILD
-                                        Buid version for Janssen applications
-
-                  -setup-branch SETUP_BRANCH
-                                        Jannsen setup github branch
-
-                  --disable-config-api-security
-                                        Turn off oauth2 security validation for jans-config-api
-
-                  --cli-test-client     Use config api test client for CLI
-
-                  --import-ldif IMPORT_LDIF
-                                        Render ldif templates from directory and import them in Database
-
-                  -enable-script ENABLE_SCRIPT
-                                        inum of script to enable
-
-                  -disable-script DISABLE_SCRIPT
-                                        inum of script to enable
-
-                  -stm, --enable-scim-test-mode
-                                        Enable Scim Test Mode
-
-                  -w                    Get the development head war files
-
-                  -t                    Load test data
-
-                  -x                    Load test data and exit
-
-                  --allow-pre-released-features
-                                        Enable options to install experimental features, not yet officially supported
-
-                  --listen_all_interfaces
-                                        Allow the LDAP server to listen on all server interfaces
-
-                  --remote-ldap         Enables using remote LDAP server
-
-                  --disable-local-ldap  Disables installing local LDAP server
-
-                  --remote-couchbase    Enables using remote couchbase server
-
-                  --local-couchbase     Enables installing couchbase server
-
-                  -couchbase-admin-user COUCHBASE_ADMIN_USER
-                                        Couchbase admin user
-
-                  -couchbase-admin-password COUCHBASE_ADMIN_PASSWORD
-                                        Couchbase admin user password
-
-                  -couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX
-                                        Set prefix for couchbase buckets
-
-                  -couchbase-hostname COUCHBASE_HOSTNAME
-                                        Remote couchbase server hostname
-
-                  --no-data             Do not import any data to database backend, used for clustering
-
-                  --no-jsauth           Do not install OAuth2 Authorization Server
-
-                  -ldap-admin-password LDAP_ADMIN_PASSWORD
-                                        Used as the LDAP directory manager password
-
-                  --no-config-api       Do not install Jans Auth Config Api
-
-                  --no-scim             Do not install Scim Server
-
-                  --no-fido2            Do not install Fido2 Server
-
-                  --install-eleven      Install Eleven Server
-
-                  --load-config-api-test
-                                        Load Config Api Test Data
-
-                  -config-patch-creds CONFIG_PATCH_CREDS
-                                        password:username for downloading auto test ciba password
-
-                  -spanner-project SPANNER_PROJECT
-                                        Spanner project name
-
-                  -spanner-instance SPANNER_INSTANCE
-                                        Spanner instance name
-
-                  -spanner-database SPANNER_DATABASE
-                                        Spanner database name
-
-                  -spanner-emulator-host SPANNER_EMULATOR_HOST
-                                        Use Spanner emulator host
-
-                  -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS
-                                        Path to Google application credentials json file
+Use this script to configure your Jans Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
+
+Below are the optional arguments:
+
+| Argument | Description |
+| --- | --- |
+| -h, --help | show this help message and exit |
+| --version | show program's version number and exit |
+| -c | Use command line instead of TUI |
+| -d D | Installation directory |
+| -f F | Specify setup.properties file |
+| -n  | No interactive prompt before install starts. Run with -f |
+| -N, --no-httpd | No apache httpd server |
+| -u | Update hosts file with IP address / hostname |
+| -csx | Collect setup properties, save and exit |
+| -remote-rdbm {mysql,pgsql,spanner} | Enables using remote RDBM server |
+| -local-rdbm {mysql,pgsql} | Enables installing/configuring local RDBM server |
+| -ip-address IP_ADDRESS | Used primarily by Apache httpd for the Listen directive |
+| -host-name HOST_NAME | Internet-facing FQDN that is used to generate certificates and metadata. |
+| -org-name ORG_NAME | Organization name field used for generating X.509 certificates |
+| -email EMAIL | Email address for support at your organization used for generating X.509 certificates |
+| -city CITY | City field used for generating X.509 certificates |
+| -state STATE | State field used for generating X.509 certificates |
+| -country COUNTRY | Two letters country coude used for generating X.509 certificates |
+| -rdbm-user RDBM_USER | RDBM username |
+| -rdbm-password RDBM_PASSWORD | RDBM password | 
+| -rdbm-port RDBM_PORT | RDBM port |
+| -rdbm-db RDBM_DB | RDBM database |
+| -rdbm-host RDBM_HOST | RDBM host |
+| --reset-rdbm-db | Deletes all tables on target database. Warning! You will lose all data on target database. |
+| --shell | Drop into interactive shell before starting installation |
+| --dump-config-on-error | Dump configuration on error |
+| --no-progress | Use simple progress |
+| -admin-password ADMIN_PASSWORD | Used as the Administrator password |
+| -jans-max-mem JANS_MAX_MEM | Total memory (in KB) to be used by Jannsen Server |
+| -properties-password PROPERTIES_PASSWORD | Encoded setup.properties file password |
+| -approved-issuer APPROVED_ISSUER | Api Approved Issuer |
+| --force-download | Force downloading files |
+| --download-exit | Download files and exits |
+| -jans-app-version JANS_APP_VERSION | Version for Jannsen applications |
+| -jans-build JANS_BUILD | Build version for Janssen applications |
+| -setup-branch SETUP_BRANCH | Jannsen setup github branch |
+| --disable-config-api-security | Turn off oauth2 security validation for jans-config-api |
+| --cli-test-client | Use config api test client for CLI |
+| --import-ldif IMPORT_LDIF | Render ldif templates from directory and import them in Database
+| -enable-script ENABLE_SCRIPT | inum of script to enable |
+| -disable-script DISABLE_SCRIPT | inum of script to enable |
+| -stm, --enable-scim-test-mode | Enable Scim Test Mode |
+| -w | Get the development head war files |
+| -t | Load test data |
+| -x | Load test data and exit |
+| --allow-pre-released-features | Enable options to install experimental features, not yet officially supported |
+| --listen_all_interfaces | Allow the LDAP server to listen on all server interfaces |
+| --remote-ldap | Enables using remote LDAP server |
+| --disable-local-ldap  | Disables installing local LDAP server |
+| --remote-couchbase | Enables using remote couchbase server |
+| --local-couchbase | Enables installing couchbase server |
+| -couchbase-admin-user COUCHBASE_ADMIN_USER | Couchbase admin user |
+| -couchbase-admin-password COUCHBASE_ADMIN_PASSWORD | Couchbase admin user password |
+| -couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX | Set prefix for couchbase buckets |
+| -couchbase-hostname COUCHBASE_HOSTNAME | Remote couchbase server hostname |
+| --no-data | Do not import any data to database backend, used for clustering |
+| --no-jsauth | Do not install OAuth2 Authorization Server |
+| -ldap-admin-password LDAP_ADMIN_PASSWORD | Used as the LDAP directory manager password |
+| --no-config-api | Do not install Jans Auth Config Api |
+| --no-scim | Do not install Scim Server |
+| --no-fido2 | Do not install Fido2 Server |
+| --install-eleven | Install Eleven Server |
+| --load-config-api-test | Load Config Api Test Data |
+| -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
+| -spanner-project SPANNER_PROJECT | Spanner project name |
+| -spanner-instance SPANNER_INSTANCE | Spanner instance name |
+| -spanner-database SPANNER_DATABASE | Spanner database name |
+| -spanner-emulator-host SPANNER_EMULATOR_HOST | Use Spanner emulator host |
+| -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS | Path to Google application credentials json file |
