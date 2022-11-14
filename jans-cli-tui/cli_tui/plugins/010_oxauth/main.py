@@ -256,11 +256,16 @@ class Plugin(DialogUtils):
 
             data =[]
 
+            file1 = open("hopa.log", "w")
+            file1.write(str(response.status_code)+'\n')
+            file1.write(str(response.json()))
+            file1.close()
+
             for d in result.get('entries', []):
                 data.append(
                     [
                     d['inum'],
-                    d.get('clientName', {}).get('values', {}).get('', ''),
+                    d.get('clientName', ''),
                     ','.join(d.get('grantTypes', [])),
                     d.get('subjectType', '') 
                     ]
