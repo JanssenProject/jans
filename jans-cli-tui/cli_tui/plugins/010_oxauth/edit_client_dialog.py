@@ -123,15 +123,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         
                        'backchannelLogoutUri',
                        'additionalAudience',
-                       'umaAuthorizationPolicies',  ## TODO Scopes!!
+                       'rptClaimsScripts',  ## TODO Scopes!!
                        'spontaneousScopeScriptDns',
                        'jansAuthorizedAcr',
-                        'x5c',                      ## TODO >> JsonWebKey
+                        'tlsClientAuthSubjectDn',                     
                         'spontaneousScopes',
                         'updateTokenScriptDns',
                         'postAuthnScripts',
                         'introspectionScripts',
-                        'dynamicRegistrationAllowedPasswordGrantScopes',  ## TODO >> AppConfiguration
+                        'ropcScripts', 
                         'consentGatheringScripts',
     
                             ):
@@ -595,14 +595,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         #-------------------------------------------------------------------#
                         #-------------------------------------------------------------------#
                         #-------------------------------------------------------------------#
-                        self.myparent.getTitledText(_("UMA Authorization Policies"),
-                            name='umaAuthorizationPolicies',  ## TODO Scopes!!
-                            value='\n'.join(self.data.get('attributes', {}).get('umaAuthorizationPolicies',[]) ),
+                        self.myparent.getTitledText(_("RPT Modification Script"),
+                            name='rptClaimsScripts',  ## TODO Scopes!!
+                            value='\n'.join(self.data.get('attributes', {}).get('rptClaimsScripts',[]) ),
                             height=3,
                             style='class:outh-client-text',
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Scope'), 
-                                    'umaAuthorizationPolicies'),
+                                    'rptClaimsScripts'),
                                 ),
                         #-------------------------------------------------------------------#
                         #-------------------------------------------------------------------#
@@ -769,12 +769,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         #-----------------------------------------------------------------------#
                         self.myparent.getTitledText(
                             _("TLS Subject DN"), 
-                            name='x5c',   ## TODO >> JsonWebKey
-                            value='\n'.join(self.data.get('attributes', {}).get('x5c',[])),
+                            name='tlsClientAuthSubjectDn',  
+                            value='\n'.join(self.data.get('attributes', {}).get('tlsClientAuthSubjectDn',[])),
                             height=3, style='class:outh-client-text',
                             jans_help=self.myparent.get_help_from_schema(
-                                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/JSONWebKey'), 
-                                    'x5c'),
+                            self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
+                            'tlsClientAuthSubjectDn'),
                                 ),
                         #-----------------------------------------------------------------------#
                         #-----------------------------------------------------------------------#
@@ -836,13 +836,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
             # --------------------------------------------------------------------------------------# 
             # --------------------------------------------------------------------------------------# 
             self.myparent.getTitledText(_("Password Grant"),  ## TODO >> AppConfiguration
-                name='dynamicRegistrationAllowedPasswordGrantScopes',
-                value='\n'.join(self.data.get('attributes', {}).get('dynamicRegistrationAllowedPasswordGrantScopes',[])), 
+                name='ropcScripts',
+                value='\n'.join(self.data.get('attributes', {}).get('ropcScripts',[])), 
                 height=3,
                 style='class:outh-client-text',
                 jans_help=self.myparent.get_help_from_schema(
-                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
-                    'dynamicRegistrationAllowedPasswordGrantScopes'),
+                    self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
+                    'ropcScripts'),
                     ),
                 
             # --------------------------------------------------------------------------------------# 
