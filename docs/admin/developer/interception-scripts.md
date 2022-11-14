@@ -20,14 +20,14 @@ represents a feature of the Jans server that can be extended as per the business
 need. Each script type is described by a java interface whose methods should be
 overridden to implement your business case.
 
-1. [Person Authentication](./scripts/person-authentication.md) : Allows the
+1. [Person Authentication](./scripts/person-authentication.md): Allows the
 definition of multi-step authentication workflows, including adaptive
 authentication - where the number of steps varies depending on the context.
-1. [Consent Gathering](./scripts/consent-gathering.md) : Allows exact
+1. [Consent Gathering](./scripts/consent-gathering.md): Allows exact
 customization of the authorization (or consent) process. By default, the OP will
 request authorization for each scope, and display the respective scope description.
 1. Update User
-1. [Client Registration](./scripts/client-registration.md)
+1. [Client Registration](./scripts/client-registration.md): Allows implementing custom business logic during dynamic client registration, including validating SSA's and granting scopes.
 1. Dynamic scopes : Enables admin to generate scopes on the fly, for example by
 calling external APIs
 1. ID Generator
