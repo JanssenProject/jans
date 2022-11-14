@@ -6,57 +6,67 @@ tags:
 ---
 
 # Setup Script
+
+## Running Setup
+
  After installation, executing setup.py will launch the SETUP Command Line by default. 
-A warning will pop up if the free disk space is less than the recommended 40 GB.
-Installer will check for all dependant packages are installed or not if missing it will ask to install. Adding Y/y at command prompt       will install all required packages.
- ![image](https://user-images.githubusercontent.com/5729240/200240053-f7c30006-1aec-41d4-acdd-b244c78854f0.png)
-
-## Setup Wizard
-
-## Setup Command Line
+ 
+ To run the script, run the following command:
+ 
+ ```bash
+ python3 /opt/jans/jans-setup/setup.py
+ ```
+ 
+ A warning will pop up if the free disk space is less than the recommended 40 GB. The installer will check that all dependant packages are installed or not, and if missing it will ask to install. When prompted Y/y at the command prompt will install all required packages.
    
-  1.The installer will detect which operating system, init type, and Apache version are currently on the server.
+  1. The installer will detect which operating system, init type, and Apache version are currently on the server.
   
-  The setup script will bring up a prompt to provide information for certificate as well as the IP Address and the hostname for the Gluu Server. Hit Enter to accept the default values.
+  2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Gluu Server. Hit Enter to accept the default values.
   
-  2.The  Next screen will gather some basic information to generate certificates.
+  ```bash
+  Enter IP Address:
+  Enter hostname:
+  Enter your city or locality:
+  Enter your state or province two letter code:
+  Enter two letter Country Code
+  Enter Organization name:
+  Enter email address for support at your organization:
+  Enter maximum RAM for applications in MB:
+  Enter Password for Admin User:
+  ```
   
-  3.Next, pick a persistence mechanism. Choose from openDJ, MySQL ,PGSql, an LDAP that can be installed locally or remotely,
-       or Couchbase, an enterprise NoSQL cloud database.
-       
-       
-  ![image](https://user-images.githubusercontent.com/5729240/200240133-426c05ee-98bb-44f9-a2c9-c63eb4065713.png)
+  3. Next, pick a persistence mechanism. Choose from openDJ, MySQL ,PGSql, an LDAP that can be installed locally or remotely, or Couchbase, an enterprise NoSQL cloud database.
     
-    
-  4.Next, pick which services should be installed for this deployment.
-   
-  5.Finally, review the summary screen that gives an overview of the selections made during the setup process.
-    
-    
-  ![image](https://user-images.githubusercontent.com/5729240/200240228-494c28f9-9c72-4566-9ae7-6109bfca30cc.png)
+  4. Next, pick which services should be installed for this deployment:
 
+  ```bash
+  Install Jans Config API? [Yes]:
+  Install SCIM Server? [Yes]:
+  Install Fido2 Server? [Yes]:
+  ```
+   
+  5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
 
 ### Avoiding common issues
 
-- Avoid setup issues by acknowledging the following:
+Avoid setup issues by acknowledging the following:
 
 - IP Address: Do not use localhost for either the IP address or hostname.
 
-  - Hostname:
+- Hostname:
   
-     - Make sure to choose the hostname carefully. Changing the hostname after installation is not a simple task.
+   - Make sure to choose the hostname carefully. Changing the hostname after installation is not a simple task.
      
-     - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
+   - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
      
-     - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Gluu.
+   - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Gluu.
   
 !!! Warning    
-    Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not           supported and not recommended.
+    Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.
 
 ## Script Command Line Options
 
 To check usage of this script run help command
-
 
 ```
     python3 /opt/jans/jans-setup/setup.py --help
