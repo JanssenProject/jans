@@ -65,7 +65,14 @@ class Plugin:
     def logout_exit_cli(self) -> None:
         """Removes auth token and exits
         """
-        self.app.cli_object.revoke_session()
+
+        async def coroutine():
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_object.revoke_session)
+            self.app.stop_progressing()
+
+        asyncio.ensure_future(coroutine())
+
         del config_cli.config['DEFAULT']['access_token_enc']
         del config_cli.config['DEFAULT']['user_data']
         config_cli.write_config()
