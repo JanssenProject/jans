@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
-public @interface DocumentedJansProperty {
+public @interface DocProperty {
     String description() default "None";
 
     boolean isRequired() default false;

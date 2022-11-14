@@ -1,6 +1,6 @@
 package io.jans.as.model.common;
 
-import io.jans.doc.annotation.DocumentedJansProperty;
+import io.jans.doc.annotation.DocProperty;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashSet;
@@ -13,7 +13,7 @@ import java.util.Set;
 public enum FeatureFlagType {
 
     UNKNOWN("unknown"),
-    @DocumentedJansProperty(description = "Enable/Disable health-check endpoint")
+    @DocProperty(description = "Enable/Disable health-check endpoint")
     HEALTH_CHECK("health_check"),
     USERINFO("userinfo"),
     CLIENTINFO("clientinfo"),

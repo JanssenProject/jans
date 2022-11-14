@@ -408,7 +408,7 @@
 						<encoding>UTF-8</encoding>
 						<annotationProcessors>
 							<annotationProcessor>
-								io.jans.doc.annotation.DocumentedJansPropertyProcessor
+								io.jans.doc.annotation.DocPropertyProcessor
 							</annotationProcessor>
 						</annotationProcessors>
 					</configuration>

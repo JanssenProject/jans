@@ -14,7 +14,7 @@ import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
-import io.jans.doc.annotation.DocumentedJansProperty;
+import io.jans.doc.annotation.DocProperty;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,11 +38,13 @@ public class AppConfiguration implements Configuration {
 
     private String issuer;
 
-    @DocumentedJansProperty(description = "This is base end point", isRequired = true, defaultValue = "https://sampleBase/")
+    @DocProperty(description = "This is base end point", isRequired = true, defaultValue = "https://sampleBase/")
     private String baseEndpoint;
 
-    @DocumentedJansProperty(description = "This is authorization end point", isRequired = false, defaultValue = "https://sampleAuth/")
+    @DocProperty(description = "This is authorization end point", isRequired = false, defaultValue = "https://sampleAuth/")
     private String authorizationEndpoint;
+
+    @DocProperty(description = "This is token end point", isRequired = false, defaultValue = "https://sampleAuth/")
     private String tokenEndpoint;
     private String tokenRevocationEndpoint;
     private String userInfoEndpoint;

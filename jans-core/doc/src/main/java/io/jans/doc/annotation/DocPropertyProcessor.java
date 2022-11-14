@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SupportedAnnotationTypes("io.jans.doc.annotation.DocumentedJansProperty")
-public class DocumentedJansPropertyProcessor extends AbstractProcessor {
+@SupportedAnnotationTypes("io.jans.doc.annotation.DocProperty")
+public class DocPropertyProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
@@ -47,7 +47,7 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
             // for each property add a row in table and add content for the details section
             for (Element jansProperty : sortedProperties)
             {
-                DocumentedJansProperty propertyAnnotation = jansProperty.getAnnotation(DocumentedJansProperty.class);
+                DocProperty propertyAnnotation = jansProperty.getAnnotation(DocProperty.class);
                 addToTable(propTable, jansProperty, propertyAnnotation);
                 addToDetails(propDetails, jansProperty, propertyAnnotation);
             }
@@ -62,7 +62,7 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
 
         PrintWriter docWriter = null;
         try {
-            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "out.put");
+            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "doc-properties.md");
             docWriter = new PrintWriter(docFile.openWriter());
             docWriter.write(docContent.toString());
             docWriter.flush();
@@ -77,7 +77,7 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
 
     }
 
-    private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocumentedJansProperty propertyAnnotation) {
+    private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocProperty propertyAnnotation) {
         propDetails.append("### "+ jansProperty.getSimpleName()+"\n\n");
         propDetails.append("- Description: "+ propertyAnnotation.description()+"\n\n");
         propDetails.append("- Required: "+ (propertyAnnotation.isRequired()==Boolean.TRUE?"Yes":"No")+"\n\n"); //TODO: change to required and yes/no
@@ -85,7 +85,7 @@ public class DocumentedJansPropertyProcessor extends AbstractProcessor {
         propDetails.append("\n");
     }
 
-    private static void addToTable(StringBuilder propTable, Element jansProperty, DocumentedJansProperty propertyAnnotation) {
+    private static void addToTable(StringBuilder propTable, Element jansProperty, DocProperty propertyAnnotation) {
         propTable.append("| "+ jansProperty.getSimpleName()+" ");
         propTable.append("| "+ propertyAnnotation.description()+" ");
         propTable.append("| [Details](#"+jansProperty.getSimpleName().toString().toLowerCase()+") |");
