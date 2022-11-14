@@ -71,6 +71,8 @@ Response:
   B. Use the following command to update the logging level
   `/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/config_values.json`
 
+  C. restart `jans-fido2`
+     `service fido2 restart` or `systemctl restart fido2`
 
   ### Location of logs in FIDO2 server:
 
