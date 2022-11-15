@@ -22,6 +22,9 @@ import java.util.List;
 
 import static io.jans.as.model.ssa.SsaRequestParam.*;
 
+/**
+ * Provides json utilities for SSA
+ */
 @Stateless
 @Named
 public class SsaJsonService {
@@ -29,14 +32,39 @@ public class SsaJsonService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    /**
+     * Convert to json string from jsonObject.
+     *
+     * @param jsonObject Json object to convert
+     * @return Json string
+     * @throws JSONException If an error is found when converting.
+     */
     public String jsonObjectToString(JSONObject jsonObject) throws JSONException {
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
+    /**
+     * Convert to json string from jsonArray.
+     *
+     * @param jsonArray Json array to convert
+     * @return Json string
+     * @throws JSONException If an error is found when converting.
+     */
     public String jsonArrayToString(JSONArray jsonArray) throws JSONException {
         return jsonArray.toString(4).replace("\\/", "/");
     }
 
+    /**
+     * Convert to JSONArray from ssaList with structure SSA.
+     *
+     * <p>
+     * Method generates the SSA structure to add them to a json array.
+     * </p>
+     *
+     * @param ssaList List of SSA
+     * @return Json array
+     * @throws JSONException If an error is found when converting.
+     */
     public JSONArray getJSONArray(List<Ssa> ssaList) throws JSONException {
         JSONArray jsonArray = new JSONArray();
         if (ssaList == null) {
@@ -67,6 +95,13 @@ public class SsaJsonService {
         return jsonArray;
     }
 
+    /**
+     * Convert to JSON using jwt.
+     *
+     * @param jwt json web token of SSA
+     * @return Json object.
+     * @throws JSONException If an error is found when converting.
+     */
     public JSONObject getJSONObject(String jwt) throws JSONException {
         JSONObject responseJsonObject = new JSONObject();
         Util.addToJSONObjectIfNotNull(responseJsonObject, SSA.getName(), jwt);

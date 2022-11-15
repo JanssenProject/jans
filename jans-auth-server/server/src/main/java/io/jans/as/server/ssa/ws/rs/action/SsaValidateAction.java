@@ -17,6 +17,7 @@ import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -24,6 +25,9 @@ import org.slf4j.Logger;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+/**
+ * Provides the method to validate an existing SSA considering certain conditions.
+ */
 @Stateless
 @Named
 public class SsaValidateAction {
@@ -37,6 +41,19 @@ public class SsaValidateAction {
     @Inject
     private SsaService ssaService;
 
+    /**
+     * Validates an existing SSA for a given "jti".
+     *
+     * <p>
+     * Method will return a {@link WebApplicationException} with status {@code 422} if the SSA does not exist,
+     * has been expired or is no longer active,
+     * it will also return a {@link WebApplicationException} with status {@code 500} in case an uncontrolled
+     * error occurs when processing the method.
+     * </p>
+     *
+     * @param jti Unique identifier
+     * @return {@link Response} with status {@code 200} (Ok) if SSA has been validated.
+     */
     public Response validate(String jti) {
         log.debug("Attempting to validate ssa jti: '{}'", jti);
 
