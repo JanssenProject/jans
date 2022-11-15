@@ -47,7 +47,7 @@
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.5</jacoco.version>
-		<swagger.version>2.2.4</swagger.version>
+		<swagger.version>2.2.7</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
