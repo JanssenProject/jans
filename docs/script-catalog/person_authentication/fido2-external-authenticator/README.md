@@ -6,13 +6,13 @@
 FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
 
 This document explains how to use the Janssen Auth Server's built-in 
-[FIDO2 interception script](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/Fido2ExternalAuthenticator.py) 
-to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step. 
+[FIDO2 interception script](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/Fido2ExternalAuthenticator.py)
+to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
 
 ## Prerequisites
 - A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))      
 - [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) (included in the default Janssen Server distribution);     
-- At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices). 
+- At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
 
 ### FIDO2 devices
 Some well known FIDO2 devices and manufacturers include:           
@@ -24,7 +24,7 @@ Some well known FIDO2 devices and manufacturers include:
 - [AuthenTrend](https://authentrend.com/)
 - [Apple's built-in Touch ID](https://support.apple.com/en-in/guide/mac-help/mchl16fbf90a/mac)
 
-[Purchase FIDO2 devices on Amazon](https://www.amazon.com/s/ref=nb_sb_noss/146-0120855-4781335?url=search-alias%3Daps&field-keywords=fido2). Or, check [FIDO's certified products](https://fidoalliance.org/certification/fido-certified-products/) for a comprehensive list of FIDO2 devices (sort by `Specification` == `FIDO2`). 
+[Purchase FIDO2 devices on Amazon](https://www.amazon.com/s/ref=nb_sb_noss/146-0120855-4781335?url=search-alias%3Daps&field-keywords=fido2). Or, check [FIDO's certified products](https://fidoalliance.org/certification/fido-certified-products/) for a comprehensive list of FIDO2 devices (sort by `Specification` == `FIDO2`).
 
 ## Properties
 The script has the following properties
@@ -37,18 +37,18 @@ The script has the following properties
 
 By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
 
-1. Obtain the json contents of `fido2` custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc. 
+1. Obtain the json contents of `fido2` custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc.
 
 e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
 2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
-Now FIDO2 is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request FIDO2 authentication for users. 
+Now FIDO2 is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request FIDO2 authentication for users.
 
-!!! Note 
-    To make sure FIDO2 has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect 
-    configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. 
-    Find `"acr_values_supported":` and you should see `"fido2"`. 
+!!! Note
+    To make sure FIDO2 has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect
+    configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`.
+    Find `"acr_values_supported":` and you should see `"fido2"`.
 
 ## Enable FIDO2 Script as default authentication script:
 Use this [link](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-default-authentication-method.md) as a reference.
@@ -73,24 +73,24 @@ Below is an illustration of the Janssen Server's default FIDO2 login page:
 
 ![fido2](https://github.com/JanssenProject/jans/raw/main/docs/assets/image_fido2.png)
 
-The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://jans.io/docs/admin/developer/customization/customize-web-pages/). 
+The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://jans.io/docs/admin/developer/customization/customize-web-pages/).
 
-## Using FIDO2 tokens 
+## Using FIDO2 tokens
 
 ### Credential enrollment
-FIDO2 device enrollment happens during the first authentication attempt. 
+FIDO2 device enrollment happens during the first authentication attempt.
 
 ### Subsequent authentications
-All subsequent FIDO2 authentications for that user account will require the enrolled FIDO2 key. 
+All subsequent FIDO2 authentications for that user account will require the enrolled FIDO2 key.
 
 ### FIDO2 credential management
-A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot. 
+A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.
 
 ![fido2](https://github.com/JanssenProject/jans/raw/main/docs/assets/image-fido2-ldap-structure.png)
 Diagram source in mermaid.live
 ```
 graph TD
-     
+
     A[ou=jans] --> K(ou=people)
     K --> K1[inum=....]
     K1 --> K11[ou=fido2_register]
@@ -124,7 +124,7 @@ graph TD
     K32 --> K321[jansId=....]
     K32 --> K322[jansId=....]
     K32 --> K323[jansId=....]
-    
+
 ```
 
 ### FIDO2 discovery endpoint
