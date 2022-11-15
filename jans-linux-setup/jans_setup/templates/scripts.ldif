@@ -288,7 +288,7 @@ jansLevel: 70
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_fido2externalauthenticator)s
+jansScr::%(person_authentication_fido2_external_authenticator_fido2externalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
