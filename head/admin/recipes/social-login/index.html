@@ -9989,11 +9989,11 @@
 <h2 id="implementing-social-logins">Implementing Social logins<a class="headerlink" href="#implementing-social-logins" title="Permanent link">#</a></h2>
 <p>You can use a <code>PersonAuthenticationType</code> script to allow users to sign using credentials from popular <strong>Social Identity providers</strong> or <strong>Inbound Identity Providers</strong> like Facebook, Google and Apple. After users authenticate, we provision their Social Identity Provider credentials into the Jans-auth server. No additional username, password, credentials are needed for this user.
 1. Facebook
-2. <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/recipes/social-login-google.md">Google</a>
-3. <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/recipes/social-login-apple.md">Apple</a></p>
-<p>Following is a high-level diagram depicting a typical flow - user authentication on a Social Identity Platform and subsequent user provisioning on Jans-Auth server. </p>
+2. <a href="../../script-catalog/person-authentication/google-external-authenticator/README.md">Google</a>
+3. <a href="../../script-catalog/person-authentication/apple-external-authenticator/README.md">Apple</a></p>
+<p>Following is a high-level diagram depicting a typical flow - user authentication on a Social Identity Platform and subsequent user provisioning on Jans-Auth server.</p>
 <p>You can copy paste this sequence in <a href="https://sequencediagram.org/">https://sequencediagram.org/</a>
-<div class="highlight"><pre><span></span><code>title Social login 
+<div class="highlight"><pre><span></span><code>title Social login
 Jans AS&lt;-User agent: 1. Invoke /authorize endpoint
 Jans AS-&gt;User agent: 2. Discovery: Present list of remote IDPs (Google, Apple, FB...)
 User agent-&gt;Jans AS: 3. Select IDP (e.g. click on button)
@@ -10024,7 +10024,7 @@ Jans AS-&gt;User agent: 10. write Jans session cookie
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-15T08:06:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-15</span>
       
         <br>
         Created:
