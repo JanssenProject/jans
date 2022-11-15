@@ -4,17 +4,17 @@ tags:
   - recipes
 ---
 
-## Implementing Social logins 
+## Implementing Social logins
 You can use a `PersonAuthenticationType` script to allow users to sign using credentials from popular **Social Identity providers** or **Inbound Identity Providers** like Facebook, Google and Apple. After users authenticate, we provision their Social Identity Provider credentials into the Jans-auth server. No additional username, password, credentials are needed for this user.
 1. Facebook
-2. [Google](https://github.com/JanssenProject/jans/blob/main/docs/admin/recipes/social-login-google.md)
-3. [Apple](https://github.com/JanssenProject/jans/blob/main/docs/admin/recipes/social-login-apple.md)
+2. [Google](../../script-catalog/person-authentication/google-external-authenticator/README.md)
+3. [Apple](../../script-catalog/person-authentication/apple-external-authenticator/README.md)
 
-Following is a high-level diagram depicting a typical flow - user authentication on a Social Identity Platform and subsequent user provisioning on Jans-Auth server. 
+Following is a high-level diagram depicting a typical flow - user authentication on a Social Identity Platform and subsequent user provisioning on Jans-Auth server.
 
 You can copy paste this sequence in [https://sequencediagram.org/](https://sequencediagram.org/)
 ```
-title Social login 
+title Social login
 Jans AS<-User agent: 1. Invoke /authorize endpoint
 Jans AS->User agent: 2. Discovery: Present list of remote IDPs (Google, Apple, FB...)
 User agent->Jans AS: 3. Select IDP (e.g. click on button)
