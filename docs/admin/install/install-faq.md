@@ -143,3 +143,9 @@ Individual modules of the Janssen Server will continue to write their operationa
 ```commandline
 /opt/jans/jetty/<module-name>/logs/
 ```
+
+-----------------------------
+
+## After installation, what's next?
+
+After successful installation of the Janssen Server, move on to the [configuration steps](../config-guide/jans-cli/cli-index/) in the Command Line Interface documentation to align Janssen with your organizational requirements.
