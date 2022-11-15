@@ -19,9 +19,9 @@ tags:
  
  A warning will pop up if the free disk space is less than the recommended 40 GB. The installer will check that all dependant packages are installed or not, and if missing it will ask to install. When prompted Y/y at the command prompt will install all required packages.
    
-  1. The installer will detect which operating system, init type, and Apache version are currently on the server.
+1. The installer will detect which operating system, init type, and Apache version are currently on the server.
   
-  2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Gluu Server. Hit Enter to accept the default values.
+2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Gluu Server. Hit Enter to accept the default values.
   
   ```bash
   Enter IP Address:
@@ -35,9 +35,9 @@ tags:
   Enter Password for Admin User:
   ```
   
-  3. Next, pick a persistence mechanism. Choose from openDJ, MySQL ,PGSql, an LDAP that can be installed locally or remotely, or Couchbase, an enterprise NoSQL cloud database.
+3. Next, pick a persistence mechanism. Choose from openDJ, MySQL ,PGSql, an LDAP that can be installed locally or remotely, or Couchbase, an enterprise NoSQL cloud database.
     
-  4. Next, pick which services should be installed for this deployment:
+4. Next, pick which services should be installed for this deployment:
 
   ```bash
   Install Jans Config API? [Yes]:
@@ -45,7 +45,7 @@ tags:
   Install Fido2 Server? [Yes]:
   ```
    
-  5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
+5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
 
 ### Avoiding common issues
 
