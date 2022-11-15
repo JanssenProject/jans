@@ -1,5 +1,5 @@
 [Unit]
-Description=Janssen OAauth service
+Description=Janssen Auth Server
 After=opendj.service
 
 [Service]
