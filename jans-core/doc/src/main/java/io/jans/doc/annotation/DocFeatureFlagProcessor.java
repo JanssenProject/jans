@@ -13,21 +13,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SupportedAnnotationTypes("io.jans.doc.annotation.DocProperty")
-public class DocPropertyProcessor extends AbstractProcessor {
+@SupportedAnnotationTypes("io.jans.doc.annotation.DocFeatureFlag")
+public class DocFeatureFlagProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
 
 
         for (TypeElement annotation : annotations) {
-            Set<? extends Element> annotatedProperties = env.getElementsAnnotatedWith(annotation);
+            Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(annotation);
 
-            for( Element e : annotatedProperties)
+            for( Element e : annotatedElements)
                 System.out.println(e.getEnclosingElement());
 
             // sort alphabetically
-            List<? extends Element> sortedProperties = annotatedProperties.stream()
+            List<? extends Element> sortedElements = annotatedElements.stream()
                     .sorted((prop1, prop2)->prop1.getSimpleName().toString().toLowerCase().compareTo(prop2.getSimpleName().toString().toLowerCase()))
                     .collect(Collectors.toList());
 
@@ -36,24 +36,24 @@ public class DocPropertyProcessor extends AbstractProcessor {
             StringBuilder detailsContent = new StringBuilder();
 
             // prepare document header
-            docContents.append("# Janssen Server Configuration Properties");
+            docContents.append("# Janssen Server Feature Flags");
             docContents.append("\n");
             docContents.append("\n");
 
             // prepare table header
-            tableContents.append("| Property Name ");
+            tableContents.append("| Feature Flag Name ");
             tableContents.append("| Description ");
             tableContents.append("|  | ");
             tableContents.append("\n");
             tableContents.append("|-----|-----|-----|");
             tableContents.append("\n");
 
-            // for each property add a row in table and add content for the details section
-            for (Element jansProperty : sortedProperties)
+            // for each feature flag add a row in table and add content for the details section
+            for (Element element : sortedElements)
             {
-                DocProperty propertyAnnotation = jansProperty.getAnnotation(DocProperty.class);
-                addToTable(tableContents, jansProperty, propertyAnnotation);
-                addToDetails(detailsContent, jansProperty, propertyAnnotation);
+                DocFeatureFlag elementAnnotation = element.getAnnotation(DocFeatureFlag.class);
+                addToTable(tableContents, element, elementAnnotation);
+                addToDetails(detailsContent, element, elementAnnotation);
             }
             tableContents.append("\n\n");
             createAndWriteDoc(docContents.append((tableContents.append(detailsContent.toString()))), "");
@@ -66,13 +66,13 @@ public class DocPropertyProcessor extends AbstractProcessor {
 
         PrintWriter docWriter = null;
         try {
-            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "module-properties.md");
+            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "module-feature-flags.md");
             docWriter = new PrintWriter(docFile.openWriter());
             docWriter.write(docContent.toString());
             docWriter.flush();
         } catch (IOException e) {
             // log to system output at compile time and exit
-            System.out.println("Failed to create file for property documentation. Exiting the process");
+            System.out.println("Failed to create file for feature flag documentation. Exiting the process");
             e.printStackTrace();
             System.exit(1);
         } finally {
@@ -81,18 +81,18 @@ public class DocPropertyProcessor extends AbstractProcessor {
 
     }
 
-    private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocProperty propertyAnnotation) {
-        propDetails.append("### "+ jansProperty.getSimpleName()+"\n\n");
-        propDetails.append("- Description: "+ propertyAnnotation.description()+"\n\n");
-        propDetails.append("- Required: "+ (propertyAnnotation.isRequired()==Boolean.TRUE?"Yes":"No")+"\n\n"); //TODO: change to required and yes/no
-        propDetails.append("- Default value: "+ propertyAnnotation.defaultValue()+"\n\n");
+    private static void addToDetails(StringBuilder propDetails, Element jansElement, DocFeatureFlag featureFlagAnnotation) {
+        propDetails.append("### "+ jansElement.getSimpleName()+"\n\n");
+        propDetails.append("- Description: "+ featureFlagAnnotation.description()+"\n\n");
+        propDetails.append("- Required: "+ (featureFlagAnnotation.isRequired()==Boolean.TRUE?"Yes":"No")+"\n\n");
+        propDetails.append("- Default value: "+ featureFlagAnnotation.defaultValue()+"\n\n");
         propDetails.append("\n");
     }
 
-    private static void addToTable(StringBuilder propTable, Element jansProperty, DocProperty propertyAnnotation) {
-        propTable.append("| "+ jansProperty.getSimpleName()+" ");
-        propTable.append("| "+ propertyAnnotation.description()+" ");
-        propTable.append("| [Details](#"+jansProperty.getSimpleName().toString().toLowerCase()+") |");
+    private static void addToTable(StringBuilder propTable, Element jansElement, DocFeatureFlag featureFlagAnnotation) {
+        propTable.append("| "+ jansElement.getSimpleName()+" ");
+        propTable.append("| "+ featureFlagAnnotation.description()+" ");
+        propTable.append("| [Details](#"+jansElement.getSimpleName().toString().toLowerCase()+") |");
         propTable.append("\n");
     }
 }

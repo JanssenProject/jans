@@ -410,6 +410,9 @@
 							<annotationProcessor>
 								io.jans.doc.annotation.DocPropertyProcessor
 							</annotationProcessor>
+							<annotationProcessor>
+								io.jans.doc.annotation.DocFeatureFlagProcessor
+							</annotationProcessor>
 						</annotationProcessors>
 					</configuration>
 				</plugin>
