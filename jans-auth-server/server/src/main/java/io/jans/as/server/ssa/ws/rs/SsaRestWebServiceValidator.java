@@ -15,6 +15,7 @@ import io.jans.as.server.service.ScopeService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
@@ -22,6 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Provides methods to validate different params about SSA.
+ */
 @Named
 @Stateless
 public class SsaRestWebServiceValidator {
@@ -38,7 +42,14 @@ public class SsaRestWebServiceValidator {
     @Inject
     private ScopeService scopeService;
 
-    public Client getClientFromSession() {
+    /**
+     * Get client from session
+     *
+     * @return {@link Client} if obtained.
+     * @throws WebApplicationException with status {@code 401} and key <b>INVALID_CLIENT</b> if the client cannot
+     *                                 be obtained.
+     */
+    public Client getClientFromSession() throws WebApplicationException {
         SessionClient sessionClient = identity.getSessionClient();
         if (sessionClient != null) {
             log.debug("Client: {}, obtained from session", sessionClient.getClient().getClientId());
@@ -47,13 +58,27 @@ public class SsaRestWebServiceValidator {
         throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_CLIENT, "Invalid client");
     }
 
-    public void checkScopesPolicy(Client client, String scope) {
+    /**
+     * Check if the client has the given scope.
+     *
+     * @param client Client to check scope
+     * @param scope  Scope to validate
+     * @throws WebApplicationException with status {@code 401} and key <b>UNAUTHORIZED_CLIENT</b> if you don't have the scope.
+     */
+    public void checkScopesPolicy(Client client, String scope) throws WebApplicationException {
         List<String> scopes = scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
         if (!scopes.contains(scope))
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
     }
 
-    public void checkScopesPolicy(Client client, List<String> scopeList) {
+    /**
+     * Check if the client has at least one scope from the list of scopes.
+     *
+     * @param client    Client to check scope
+     * @param scopeList List of scope to validated
+     * @throws WebApplicationException with status {@code 401} and key <b>UNAUTHORIZED_CLIENT</b> if you don't have the scope.
+     */
+    public void checkScopesPolicy(Client client, List<String> scopeList) throws WebApplicationException {
         if (client == null || scopeList == null || scopeList.isEmpty()) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
         }

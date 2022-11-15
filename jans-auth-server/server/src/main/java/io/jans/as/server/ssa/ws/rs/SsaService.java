@@ -35,6 +35,9 @@ import java.util.List;
 
 import static io.jans.as.model.ssa.SsaRequestParam.*;
 
+/**
+ * Provides SSA methods to save, update, search, etc.
+ */
 @Stateless
 @Named
 public class SsaService {
@@ -51,14 +54,33 @@ public class SsaService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    /**
+     * Persist SSA in to the database
+     *
+     * @param ssa New SSA that should be created.
+     */
     public void persist(Ssa ssa) {
         persistenceEntryManager.persist(ssa);
     }
 
+    /**
+     * Updates an existing SSA in the database
+     *
+     * @param ssa SSA to be updated.
+     */
     public void merge(Ssa ssa) {
         persistenceEntryManager.merge(ssa);
     }
 
+    /**
+     * Find SSA based on "jti"
+     * <p>
+     * Method returns null if the SSA is not found.
+     * </p>
+     *
+     * @param jti Unique identifier
+     * @return {@link Ssa} found
+     */
     public Ssa findSsaByJti(String jti) {
         try {
             return persistenceEntryManager.find(Ssa.class, getDnForSsa(jti));
@@ -67,6 +89,19 @@ public class SsaService {
         }
     }
 
+    /**
+     * Get list of SSAs based on "jti", "org_id" or "status" filters
+     * <p>
+     * If the client only has ssa.portal scope, then it is filtered by the client that created the SSA
+     * </p>
+     *
+     * @param jti      Unique identifier
+     * @param orgId    Organization ID
+     * @param status   Status
+     * @param clientId Client ID
+     * @param scopes   List of scope
+     * @return List of SSA
+     */
     public List<Ssa> getSsaList(String jti, Long orgId, SsaState status, String clientId, String[] scopes) {
         List<Filter> filters = new ArrayList<>();
         if (hasPortalScope(Arrays.asList(scopes))) {
@@ -89,6 +124,21 @@ public class SsaService {
         return persistenceEntryManager.findEntries(getDnForSsa(null), Ssa.class, filter);
     }
 
+    /**
+     * Generates a new JWT using a given SSA.
+     * <p>
+     * Method throws an {@link RuntimeException} if it fails to create the jwt
+     * </p>
+     * <p>
+     * Method executes a postProcessor in case it has been sent in the execution context parameter.
+     * </p>
+     *
+     * @param ssa                  Ssa
+     * @param executionContext     Execution context
+     * @param webKeysConfiguration Web keys configuration
+     * @param cryptoProvider       Crypto provider
+     * @return Jwt with SSA structure
+     */
     public Jwt generateJwt(Ssa ssa, ExecutionContext executionContext, WebKeysConfiguration webKeysConfiguration, AbstractCryptoProvider cryptoProvider) {
         try {
             SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getSsaConfiguration().getSsaSigningAlg());
@@ -114,14 +164,30 @@ public class SsaService {
         }
     }
 
+    /**
+     * Create a {@link Response.ResponseBuilder} with status 422
+     *
+     * @return Response builder
+     */
     public Response.ResponseBuilder createUnprocessableEntityResponse() {
         return Response.status(HttpStatus.SC_UNPROCESSABLE_ENTITY).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
+    /**
+     * Create a {@link Response.ResponseBuilder} with status 406
+     *
+     * @return Response builder
+     */
     public Response.ResponseBuilder createNotAcceptableResponse() {
         return Response.status(HttpStatus.SC_NOT_ACCEPTABLE).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
+    /**
+     * Check if there is only one "ssa.portal" scope
+     *
+     * @param scopes List of scope
+     * @return true if is only one "ssa.portal", or false otherwise
+     */
     private boolean hasPortalScope(List<String> scopes) {
         Iterator<String> scopesIterator = scopes.iterator();
         boolean result = false;
@@ -136,6 +202,12 @@ public class SsaService {
         return result;
     }
 
+    /**
+     * Build a DN for SSA
+     *
+     * @param ssaId SSA ID
+     * @return DN of SSA
+     */
     private String getDnForSsa(String ssaId) {
         String baseDn = staticConfiguration.getBaseDn().getSsa();
         if (StringHelper.isEmpty(ssaId)) {
