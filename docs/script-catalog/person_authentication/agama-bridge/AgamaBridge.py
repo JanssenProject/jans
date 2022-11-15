@@ -177,4 +177,4 @@ class PersonAuthentication(PersonAuthenticationType):
         elif i == -1:
             return (param, None)
         else:
-            return (param[:i], param[i:])
+            return (param[:i], param[i+1:])
