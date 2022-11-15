@@ -23,9 +23,6 @@ public class DocPropertyProcessor extends AbstractProcessor {
         for (TypeElement annotation : annotations) {
             Set<? extends Element> annotatedProperties = env.getElementsAnnotatedWith(annotation);
 
-            for( Element e : annotatedProperties)
-                System.out.println(e.getEnclosingElement());
-
             // sort alphabetically
             List<? extends Element> sortedProperties = annotatedProperties.stream()
                     .sorted((prop1, prop2)->prop1.getSimpleName().toString().toLowerCase().compareTo(prop2.getSimpleName().toString().toLowerCase()))

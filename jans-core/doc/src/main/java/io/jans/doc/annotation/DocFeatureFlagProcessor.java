@@ -23,9 +23,6 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
         for (TypeElement annotation : annotations) {
             Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(annotation);
 
-            for( Element e : annotatedElements)
-                System.out.println(e.getEnclosingElement());
-
             // sort alphabetically
             List<? extends Element> sortedElements = annotatedElements.stream()
                     .sorted((prop1, prop2)->prop1.getSimpleName().toString().toLowerCase().compareTo(prop2.getSimpleName().toString().toLowerCase()))
