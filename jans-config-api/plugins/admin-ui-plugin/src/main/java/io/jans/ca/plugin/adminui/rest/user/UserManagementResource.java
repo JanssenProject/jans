@@ -37,10 +37,13 @@ public class UserManagementResource {
     static final String ROLE_PERMISSIONS_MAPPING = "/adminUIRolePermissionsMapping";
     static final String SCOPE_ROLE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly";
     static final String SCOPE_ROLE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write";
+    static final String SCOPE_ROLE_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete";
     static final String SCOPE_PERMISSION_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly";
     static final String SCOPE_PERMISSION_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write";
+    static final String SCOPE_PERMISSION_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete";
     static final String SCOPE_ROLE_PERMISSION_MAPPING_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly";
     static final String SCOPE_ROLE_PERMISSION_MAPPING_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write";
+    static final String SCOPE_ROLE_PERMISSION_MAPPING_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete";
 
     @Inject
     Logger log;
@@ -160,7 +163,7 @@ public class UserManagementResource {
 
     @Operation(summary = "Delete admin ui role by role-name", description = "Delete admin ui role by role-name", operationId = "delete-adminui-role", tags = {
             "Admin UI - Role"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_ROLE_WRITE}))
+            SCOPE_ROLE_DELETE}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
@@ -169,7 +172,7 @@ public class UserManagementResource {
     @DELETE
     @Path(ROLES + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_ROLE_WRITE)
+    @ProtectedApi(scopes = SCOPE_ROLE_DELETE)
     public Response deleteRole(@PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Deleting Admin-UI role.");
@@ -297,7 +300,7 @@ public class UserManagementResource {
 
     @Operation(summary = "Delete admin ui permission by permission-name", description = "Delete admin ui permission by permission-name", operationId = "delete-adminui-permission", tags = {
             "Admin UI - Permission"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_PERMISSION_WRITE}))
+            SCOPE_PERMISSION_DELETE}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
@@ -306,7 +309,7 @@ public class UserManagementResource {
     @DELETE
     @Path(PERMISSIONS + PERMISSION_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_PERMISSION_WRITE)
+    @ProtectedApi(scopes = SCOPE_PERMISSION_DELETE)
     public Response deletePermission(@PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
         try {
             log.info("Deleting Admin-UI permission.");
@@ -434,7 +437,7 @@ public class UserManagementResource {
 
     @Operation(summary = "Remove role-permissions mapping by role-name", description = "Remove role-permissions mapping by role-name", operationId = "remove-role-permissions-permission", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_ROLE_PERMISSION_MAPPING_WRITE}))
+            SCOPE_ROLE_PERMISSION_MAPPING_DELETE}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
@@ -443,7 +446,7 @@ public class UserManagementResource {
     @DELETE
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_ROLE_PERMISSION_MAPPING_WRITE)
+    @ProtectedApi(scopes = SCOPE_ROLE_PERMISSION_MAPPING_DELETE)
     public Response removePermissionsFromRole(@PathParam(ROLE_CONST) @NotNull String role) {
         try {
             log.info("Removing permissions to Admin-UI role.");
