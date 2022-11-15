@@ -2301,11 +2301,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/script-catalog/person_authentication/agama-external-authenticator/</loc>
-         <lastmod>2022-11-15</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/apple-external-authenticator/</loc>
          <lastmod>2022-11-15</lastmod>
          <changefreq>daily</changefreq>
