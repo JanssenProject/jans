@@ -34,6 +34,9 @@ import org.slf4j.Logger;
 
 import java.util.List;
 
+/**
+ * Provides the method to revoke an existing SSA considering certain conditions.
+ */
 @Stateless
 @Named
 public class SsaRevokeAction {
@@ -62,6 +65,31 @@ public class SsaRevokeAction {
     @Inject
     private AttributeService attributeService;
 
+    /**
+     * Revoked existing active SSA based on "jti" or "org_id".
+     *
+     * <p>
+     * Method will return a {@link WebApplicationException} with status {@code 401} if this functionality is not enabled,
+     * request has to have at least scope "ssa.admin",
+     * {@link WebApplicationException} with status {@code 406} if "jti" or "org_id" filters are not valid,
+     * {@link WebApplicationException} with status {@code 422} if the SSA does not exist, has expired or is no longer active,
+     * it will also return a {@link WebApplicationException} with status code {@code 500} in case an uncontrolled
+     * error occurs when processing the method.
+     * </p>
+     * <p>
+     * After revoking the SSA, it calls custom script to perform an additional process.
+     * <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py">SSA Custom Script</a>,
+     * method revoke.
+     * </p>
+     * <p>
+     * Method updates the list of SSA and marks them as REVOKED in the database.
+     * </p>
+     *
+     * @param jti         Unique identifier
+     * @param orgId       Organization ID
+     * @param httpRequest Http request
+     * @return {@link Response} with status {@code 200 (Ok)} if SSA has been revoked.
+     */
     public Response revoke(String jti, Long orgId, HttpServletRequest httpRequest) {
         log.debug("Attempting to revoke ssa, jti: '{}', orgId: {}", jti, orgId);
 
@@ -105,6 +133,13 @@ public class SsaRevokeAction {
         return builder.build();
     }
 
+    /**
+     * Validate "jti" or "org_id" parameters
+     *
+     * @param jti Unique identifier
+     * @param orgId Organization ID
+     * @return true if the parameters are valid or false otherwise.
+     */
     private boolean isNotValidParam(String jti, Long orgId) {
         return StringUtils.isBlank(jti) && orgId == null;
     }

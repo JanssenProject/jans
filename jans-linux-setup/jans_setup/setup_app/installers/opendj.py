@@ -344,14 +344,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.start()
 
     def setup_opendj_service(self):
-        if not base.snap:
-            self.copyFile(self.unit_file, Config.unit_files_path)
-            init_script_fn = '/etc/init.d/opendj'
-            if os.path.exists(init_script_fn):
-                self.removeFile(init_script_fn)
-            self.run([self.ldapDsCreateRcCommand, '--outputFile', init_script_fn, '--userName', Config.ldap_user])
-            self.reload_daemon()
-
+        self.copyFile(self.unit_file, Config.unit_files_path)
+        self.reload_daemon()
 
     def installed(self):
         if os.path.exists(self.openDjSchemaFolder):
