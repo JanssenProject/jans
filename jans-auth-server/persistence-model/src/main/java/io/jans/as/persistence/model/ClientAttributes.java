@@ -104,6 +104,17 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("idTokenLifetime")
     private Integer idTokenLifetime;
 
+    @JsonProperty("allowOfflineAccessWithoutConsent")
+    private Boolean allowOfflineAccessWithoutConsent;
+
+    public Boolean getAllowOfflineAccessWithoutConsent() {
+        return allowOfflineAccessWithoutConsent;
+    }
+
+    public void setAllowOfflineAccessWithoutConsent(Boolean allowOfflineAccessWithoutConsent) {
+        this.allowOfflineAccessWithoutConsent = allowOfflineAccessWithoutConsent;
+    }
+
     public Integer getIdTokenLifetime() {
         return idTokenLifetime;
     }
@@ -366,6 +377,7 @@ public class ClientAttributes implements Serializable {
                 ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
                 ", publicSubjectIdentifierAttribute=" + publicSubjectIdentifierAttribute +
                 ", redirectUrisRegex=" + redirectUrisRegex +
+                ", allowOfflineAccessWithoutConsent=" + allowOfflineAccessWithoutConsent +
                 ", defaultPromptLogin=" + defaultPromptLogin +
                 '}';
     }
