@@ -323,6 +323,10 @@ class JansCliApp(Application):
         self.bindings.add('c-c')(do_exit)
         self.bindings.add('f1')(self.help)
         self.bindings.add('escape')(self.escape)
+        self.bindings.add('s-up')(self.up)
+
+    def up(self, ev: KeyPressEvent) -> None:
+        get_app().layout.focus(Frame(self.nav_bar.nav_window))
 
     def focus_next(self, ev: KeyPressEvent) -> None:
         focus_next(ev)
