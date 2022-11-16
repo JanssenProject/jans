@@ -14,6 +14,10 @@ public class UserInfoResponse {
         this.claims = claims;
     }
 
+    public void addClaims(String key, Object value) {
+        this.claims.put(key, value);
+    }
+
     public String getJwtUserInfo() {
         return jwtUserInfo;
     }
