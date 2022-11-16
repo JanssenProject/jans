@@ -1483,7 +1483,7 @@
           "superScopes": [
             {
               "inum": "1800.03.1",
-              "scope": "https://jans.io/oauth/config/read-all"
+              "name": "https://jans.io/oauth/config/read-all"
             }
           ]
         },
@@ -1494,14 +1494,14 @@
           "scopes": [
             {
               "inum": "1800.01.47",
-              "scope": "https://jans.io/oauth/jans-auth-server/session.delete"
+              "name": "https://jans.io/oauth/jans-auth-server/session.delete"
             }
           ],
           "groupScopes": [],
           "superScopes": [
             {
               "inum": "1800.03.3",
-              "scope": "https://jans.io/oauth/config/delete-all"
+              "name": "https://jans.io/oauth/config/delete-all"
             }
           ]
         }

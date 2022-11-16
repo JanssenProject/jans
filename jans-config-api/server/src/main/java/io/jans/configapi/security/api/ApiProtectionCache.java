@@ -9,6 +9,7 @@ import io.jans.as.persistence.model.Scope;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,9 @@ public class ApiProtectionCache {
             .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
 
     private static final Cache<String, List<Scope>> resourceCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
+    
+    private static final Cache<String, Map<String,List<Scope>>> resourceScopeCache = CacheBuilder.newBuilder()
             .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
 
     // Scope
@@ -63,11 +67,34 @@ public class ApiProtectionCache {
     public static void putResource(String resourceName, List<Scope> scopeList) {
         Preconditions.checkNotNull(resourceName);
         resourceCache.put(resourceName, scopeList);
-
     }
 
     public static Map<String, List<Scope>> getAllResources() {
         return Maps.newHashMap(resourceCache.asMap());
     }
+    
+    public static void putResource(String resourceName, Map<String,List<Scope>> scopeMap) {
+        Preconditions.checkNotNull(resourceName);
+        resourceScopeCache.put(resourceName, scopeMap);
+    }
+    
+    public static void putResourceScopeByType(String resourceName, String scopeType, List<Scope> scopes) {
+        Preconditions.checkNotNull(resourceName);
+        Preconditions.checkNotNull(scopeType);
+        Map<String, List<Scope>> scopeMap = resourceScopeCache.getIfPresent(resourceName);
+        if(scopeMap==null) {
+            scopeMap = new HashMap<>();            
+        }           
+       scopeMap.put(scopeType, scopes);
+    }
 
+    public static List<Scope> getResourceScopeByType(String resourceName, String scopeType) {
+        Preconditions.checkNotNull(resourceName);
+        Preconditions.checkNotNull(scopeType);
+        Map<String, List<Scope>> scopeMap = resourceScopeCache.getIfPresent(resourceName);
+        if(scopeMap==null) {
+            return null;
+        }           
+        return scopeMap.get(scopeType);
+    }
 }
