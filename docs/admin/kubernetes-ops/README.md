@@ -7,7 +7,21 @@ tags:
 
 # Overview
 
-Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
+This Operation guide helps you learn about the common operations for Janssen on Kubernetes.
 
-!!! Contribute
-If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
+
+## Prerequisite
+- Review the [janssen](../reference/README.md) components and architecture
+
+- Complete the [installation](../install/helm-install/local.md) of janssen on your desired Kubernetes provider.
+
+## Common Operations
+
+- [Scaling](scaling.md)
+- [Backup and Restore](backup-restore.md)  
+- [Certificate Management](cert-management.md)  
+- [Customization](customization.md)  
+- [Start Order](start-order.md)  
+- [Logs](logs.md)
+- [Health Check](health-check.md)
+- [FAQ](faq.md)
