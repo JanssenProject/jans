@@ -7,7 +7,7 @@ tags:
 
 # Overview
 
-This Operation Guide helps you learn about the common operations for Janssen on Kubernetes.
+This Operation guide helps you learn about the common operations for Janssen on Kubernetes.
 
 
 ## Prerequisite

@@ -9,7 +9,7 @@ tags:
 
 # Overview
 
-This Reference Guide helps you learn about the components and architecture of Janssen.
+This Reference guide helps you learn about the components and architecture of Janssen.
 
 ## Janssen components
 
