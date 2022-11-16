@@ -37,7 +37,7 @@ metadata:
 {{- end }}
 data:
   {{- range $key, $val := .Values.global.usrEnvs.normal }}
-  {{ $key }}: {{ $val }}
+  {{ $key }}: {{ $val | quote }}
   {{- end}}
 {{- end}}
 {{ if .Values.usrEnvs.secret }}

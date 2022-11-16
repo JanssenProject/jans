@@ -37,9 +37,16 @@ spec:
       dnsConfig:
 {{ toYaml . | indent 8 }}
     {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "config-api.topology-spread-constraints" . | indent 8 }}
+      {{- end }}
       containers:
         - name: {{ include "config-api.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            {{- include "config-api.usr-envs" . | indent 12 }}
+            {{- include "config-api.usr-secret-envs" . | indent 12 }}
           securityContext:
             runAsUser: 1000
             runAsNonRoot: true
