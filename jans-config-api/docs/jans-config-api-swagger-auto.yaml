@@ -7178,19 +7178,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7528,6 +7528,8 @@ components:
           format: int32
         displayName:
           type: string
+        tokenBindingSupported:
+          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -7539,8 +7541,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        tokenBindingSupported:
-          type: boolean
         baseDn:
           type: string
         inum:
@@ -7633,10 +7633,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -7644,13 +7644,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        value:
+          type: string
         languageTags:
           uniqueItems: true
           type: array
           items:
             type: string
-        value:
-          type: string
     AppConfiguration:
       type: object
       properties:
@@ -8343,6 +8343,17 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8370,17 +8381,6 @@ components:
             - STAT
             - PAR
             - SSA
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
