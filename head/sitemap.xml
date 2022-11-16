@@ -1766,6 +1766,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/reference/database/mysql-schema-ERdiagram/</loc>
+         <lastmod>2022-11-16</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/database/mysql-schema-indexes/</loc>
+         <lastmod>2022-11-16</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mysql-schema/</loc>
          <lastmod>2022-11-16</lastmod>
          <changefreq>daily</changefreq>
