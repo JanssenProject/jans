@@ -46,6 +46,10 @@ spec:
           configMap:
             name: {{ $.Release.Name }}-oxjans
       {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "opendj.topology-spread-constraints" . | indent 8 }}
+      {{- end }}
       containers:
       - name: {{ include "opendj.name" $ }}
         imagePullPolicy: {{ $.Values.image.pullPolicy }}
