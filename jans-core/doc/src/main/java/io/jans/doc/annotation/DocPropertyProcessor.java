@@ -53,13 +53,14 @@ public class DocPropertyProcessor extends AbstractProcessor {
                 addToDetails(detailsContent, jansProperty, propertyAnnotation);
             }
             tableContents.append("\n\n");
-            createAndWriteDoc(docContents.append((tableContents.append(detailsContent.toString()))), "");
+            docContents.append((tableContents.append(detailsContent.toString())));
+            createAndWriteDoc(docContents);
 
         }
         return false;
     }
 
-    private void createAndWriteDoc(StringBuilder docContent, String className) {
+    private void createAndWriteDoc(StringBuilder docContent) {
 
         PrintWriter docWriter = null;
         try {

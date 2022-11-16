@@ -322,41 +322,40 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Time interval for the Clean Service in seconds")
     private int cleanServiceInterval;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Clean service chunk size which is used during clean up")
     private int cleanServiceBatchChunkSize = 100;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "Boolean value specifying whether to regenerate keys")
     private Boolean keyRegenerationEnabled;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The interval for key regeneration in hours")
     private int keyRegenerationInterval;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The default signature algorithm to sign ID Tokens")
     private String defaultSignatureAlgorithm;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "OpenID Connect Version")
     private String oxOpenIdConnectVersion;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "URL for the Inum generator Service")
     private String oxId;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire")
     private int dynamicRegistrationExpirationTime = -1;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to persist client authorizations")
     private Boolean dynamicRegistrationPersistClientAuthorizations;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether a client is trusted and no authorization is required")
     private Boolean trustedClientEnabled;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose whether to skip authorization if a client has an OpenId scope and a pairwise ID")
     private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to enable scopes parameter in dynamic registration")
     private Boolean dynamicRegistrationScopesParamEnabled;
 
     @DocProperty(description = "")
@@ -365,29 +364,28 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private List<String> dynamicRegistrationAllowedPasswordGrantScopes;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "LDAP custom object class for dynamic registration")
     private String dynamicRegistrationCustomObjectClass;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list details LDAP custom object classes for dynamic person enrollment")
     private List<String> personCustomObjectClassList;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "Specifies whether to persist id_token into LDAP (otherwise saves into cache)")
     private Boolean persistIdTokenInLdap = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Specifies whether to persist refresh_token into LDAP (otherwise saves into cache)")
     private Boolean persistRefreshTokenInLdap = true;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property)")
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization")
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret")
     private Boolean returnClientSecretOnRead = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true")
     private Boolean rejectJwtWithNoneAlg = true;
 
     @DocProperty(description = "")
@@ -402,48 +400,49 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private int expirationNotificatorIntervalInSeconds = 600;
 
-    @DocProperty(description = "")
+
 
     //feature flags
+    @DocProperty(description = "")
     private Boolean redirectUrisRegexEnabled = false;
 
     @DocProperty(description = "")
     private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to enable client authentication filters")
     private Boolean clientAuthenticationFiltersEnabled;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio")
     private Boolean clientRegDefaultToCodeFlowWithRefresh;
 
     @DocProperty(description = "")
     private Boolean grantTypesAndResponseTypesAutofixEnabled;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list details filters for user authentication")
     private List<AuthenticationFilter> authenticationFilters;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list details filters for client authentication")
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list specifies the CORS configuration filters")
     private List<CorsConfigurationFilter> corsConfigurationFilters;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "The lifetime for unused session states")
     private int sessionIdUnusedLifetime;
 
-    @DocProperty(description = "")
-    private int sessionIdUnauthenticatedUnusedLifetime = 120;
+    @DocProperty(description = "The lifetime for unused unauthenticated session states")
+    private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
 
-    @DocProperty(description = "") // 120 seconds
+    @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none")
     private Boolean sessionIdPersistOnPromptNone;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to enable session_id HTTP request parameter")
     private Boolean sessionIdRequestParameterEnabled = false; // #1195
+
+    @DocProperty(description = "Boolean value specifying whether change session_id on authentication. Default value is true")
     private Boolean changeSessionIdOnAuthentication = true;
 
     @DocProperty(description = "")
@@ -452,111 +451,108 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private Boolean includeSidInResponse = false;
 
-    @DocProperty(description = "")
+
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
+    @DocProperty(description = "The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
     private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
 
-    @DocProperty(description = "")
-    private Integer serverSessionIdLifetime = sessionIdLifetime;
+    @DocProperty(description = "Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object")
+    private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
 
-    @DocProperty(description = "") // by default same as sessionIdLifetime
+    @DocProperty(description = "")
     private String activeSessionAuthorizationScope;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The interval for configuration update in seconds")
     private int configurationUpdateInterval;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the client registration API")
     private Set<GrantType> dynamicGrantTypeDefault;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "The location for CSS files")
     private String cssLocation;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The location for JavaScript files")
     private String jsLocation;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The location for image files")
     private String imgLocation;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The interval for metric reporter in seconds")
     private int metricReporterInterval;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The days to keep metric reported data")
     private int metricReporterKeepDataDays;
 
-    @DocProperty(description = "")
-    private String pairwiseIdType;
+    @DocProperty(description = "the pairwise ID type")
+    private String pairwiseIdType; // persistent, algorithmic
 
-    @DocProperty(description = "") // persistent, algorithmic
+    @DocProperty(description = "Key to calculate algorithmic pairwise IDs")
     private String pairwiseCalculationKey;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Salt to calculate algorithmic pairwise IDs")
     private String pairwiseCalculationSalt;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "When true, clients with the same Sector ID also share the same Subject ID")
     private Boolean shareSubjectIdBetweenClientsWithSameSectorId = false;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "Web Key Storage Type")
     private WebKeyStorage webKeysStorage;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "DN of certificate issuer")
     private String dnName;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The Key Store File (JKS)")
     // Jans Auth KeyStore
     private String keyStoreFile;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "The Key Store password")
     private String keyStoreSecret;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Key Selection Strategy : OLDER, NEWER, FIRST", defaultValue = "OLDER")
     private KeySelectionStrategy keySelectionStrategy = DEFAULT_KEY_SELECTION_STRATEGY;
 
     @DocProperty(description = "")
     private List<String> keyAlgsAllowedForGeneration = new ArrayList<>();
 
     @DocProperty(description = "")
-    private Boolean keySignWithSameKeyButDiffAlg;
+    private Boolean keySignWithSameKeyButDiffAlg; // https://github.com/JanssenProject/jans-auth-server/issues/95
 
-    @DocProperty(description = "") // https://github.com/JanssenProject/jans-auth-server/issues/95
+    @DocProperty(description = "")
     private String staticKid;
 
     @DocProperty(description = "")
     private String staticDecryptionKid;
 
-    @DocProperty(description = "")
+
 
     //oxEleven
+    @DocProperty(description = "")
     private String oxElevenTestModeToken;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "oxEleven Generate Key endpoint URL")
     private String oxElevenGenerateKeyEndpoint;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "oxEleven Sign endpoint UR")
     private String oxElevenSignEndpoint;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "oxEleven Verify Signature endpoint URL")
     private String oxElevenVerifySignatureEndpoint;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "oxEleven Delete Key endpoint URL")
     private String oxElevenDeleteKeyEndpoint;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
 
     @DocProperty(description = "")
     private Boolean introspectionSkipAuthorization;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "Choose whether to accept access tokens to call end_session endpoint")
     private Boolean endSessionWithAccessToken;
 
     @DocProperty(description = "")
@@ -574,62 +570,60 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private String jmsPassword;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list specifies which client redirection URIs are white-listed")
     private List<String> clientWhiteList;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list specified which client redirection URIs are black-listed")
     private List<String> clientBlackList;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose whether to include claims in ID tokens")
     private Boolean legacyIdTokenClaims;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose whether to enable the custom response header parameter to return custom headers with the authorization response")
     private Boolean customHeadersWithAuthorizationResponse;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose whether to support front channel session logout")
     private Boolean frontChannelLogoutSessionSupported;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Specify the logging level for oxAuth loggers")
     private String loggingLevel;
 
     @DocProperty(description = "")
     private String loggingLayout;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose if application should update oxLastLogonTime attribute upon user authentication")
     private Boolean updateUserLastLogonTime;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose if application should update oxLastAccessTime/oxLastLogonTime attributes upon client authentication")
     private Boolean updateClientAccessTime;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose if application should log the Client ID on client authentication")
     private Boolean logClientIdOnClientAuthentication;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose if application should log the Client Name on client authentication")
     private Boolean logClientNameOnClientAuthentication;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose whether to disable JDK loggers")
     private Boolean disableJdkLogger = true;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "This list details the allowed custom parameters for authorization requests")
     private Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters;
 
     @DocProperty(description = "")
     private Boolean openidScopeBackwardCompatibility = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Choose whether to disable U2F endpoints")
     private Boolean disableU2fEndpoint = false;
 
-    @DocProperty(description = "")
-
     // Token Exchange
+    @DocProperty(description = "")
     private Boolean rotateDeviceSecret = false;
 
     @DocProperty(description = "")
     private Boolean returnDeviceSecretFromAuthzEndpoint = false;
 
-    @DocProperty(description = "")
-
     // DCR
+    @DocProperty(description = "")
     private Boolean dcrSignatureValidationEnabled = false;
 
     @DocProperty(description = "")
@@ -656,11 +650,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private List<String> dcrIssuers = new ArrayList<>();
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds")
     private Boolean useLocalCache = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode")
     private Boolean fapiCompatibility = false;
 
     @DocProperty(description = "")
@@ -672,13 +665,13 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private Boolean allowEndSessionWithUnmatchedSid = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true")
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false")
     private Boolean errorReasonEnabled = false;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false")
     private Boolean removeRefreshTokensForClientOnLogout = true;
 
     @DocProperty(description = "")
@@ -690,13 +683,13 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private Boolean checkUserPresenceOnRefreshToken = false;
 
+    @DocProperty(description = "Boolean value specifying whether to turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration")
+    private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+
+    @DocProperty(description = "Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false")
+    private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+
     @DocProperty(description = "")
-    private Boolean consentGatheringScriptBackwardCompatibility = false;
-
-    @DocProperty(description = "") // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
-    private Boolean introspectionScriptBackwardCompatibility = false;
-
-    @DocProperty(description = "") // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionResponseScopesBackwardCompatibility = false;
 
     @DocProperty(description = "")
@@ -707,15 +700,12 @@ public class AppConfiguration implements Configuration {
     private String softwareStatementValidationClaimName;
 
     @DocProperty(description = "")
-
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
-    @DocProperty(description = "")
-
+    @DocProperty(description = "A list of possible error handling methods")
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
     @DocProperty(description = "")
-
     private Boolean disableAuthnForMaxAgeZero;
 
     @DocProperty(description = "")
@@ -729,10 +719,8 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "")
     private String deviceAuthzResponseTypeToProcessAuthz;
-
-    @DocProperty(description = "")
-
     // CIBA
+    @DocProperty(description = "")
     private String backchannelClientId;
 
     @DocProperty(description = "")
@@ -780,9 +768,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "")
     private int cibaMaxExpirationTimeAllowedSec;
 
-    @DocProperty(description = "")
-
     // DPoP
+    @DocProperty(description = "")
     private List<String> dpopSigningAlgValuesSupported;
 
     @DocProperty(description = "")
@@ -792,11 +779,9 @@ public class AppConfiguration implements Configuration {
     private int dpopJtiCacheTime = 3600;
 
     @DocProperty(description = "")
-
     private Boolean allowIdTokenWithoutImplicitGrantType;
 
     @DocProperty(description = "")
-
     private int discoveryCacheLifetimeInMinutes = 60;
 
     @DocProperty(description = "")
@@ -806,25 +791,21 @@ public class AppConfiguration implements Configuration {
     private List<String> discoveryDenyKeys;
 
     @DocProperty(description = "")
-
     private List<String> featureFlags;
 
+    @DocProperty(description = "Enable/disable request/response logging filter")
+    private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
+
+    @DocProperty(description = "This list details the base URIs for which the request/response logging filter will not record activity")
+    private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
+
+    @DocProperty(description = "The path to the external log4j2 logging configuration")
+    private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+
     @DocProperty(description = "")
-
-    private Boolean httpLoggingEnabled;
-
-    @DocProperty(description = "") // Used in ServletLoggingFilter to enable http request/response logging.
-    private Set<String> httpLoggingExcludePaths;
-
-    @DocProperty(description = "") // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
-    private String externalLoggerConfiguration;
-
-    @DocProperty(description = "") // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
-    
     private EngineConfig agamaConfiguration;
 
     @DocProperty(description = "")
-
     private SsaConfiguration ssaConfiguration;
 
     public Boolean getRequireRequestObjectEncryption() {
