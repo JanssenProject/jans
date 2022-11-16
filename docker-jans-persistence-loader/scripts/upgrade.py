@@ -177,16 +177,16 @@ def _transform_auth_dynamic_config(conf):
         lambda x: isinstance(x, dict), conf["authorizationRequestCustomAllowedParameters"]
     ))
     if not params_with_dict:
-        conf["authorizationRequestCustomAllowedParameters"] = list(map(
-            lambda p: {"paramName": p[0], "returnInResponse": p[1]},
-            [
+        conf["authorizationRequestCustomAllowedParameters"] = [
+            {"paramName": p[0], "returnInResponse": p[1]}
+            for p in [
                 ("customParam1", False),
                 ("customParam2", False),
                 ("customParam3", False),
                 ("customParam4", True),
                 ("customParam5", True),
             ]
-        ))
+        ]
         should_update = True
 
     if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
@@ -457,7 +457,9 @@ class Upgrade:
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
 
-        self.update_auth_dynamic_config()
+        if as_boolean(os.environ.get("CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG", "true")):
+            self.update_auth_dynamic_config()
+
         self.update_auth_errors_config()
         self.update_auth_static_config()
         self.update_attributes_entries()
