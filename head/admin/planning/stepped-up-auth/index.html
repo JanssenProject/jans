@@ -9909,14 +9909,38 @@
 
   <h1>Stepped-up Authentication</h1>
 
-<p>This is a placeholder</p>
+<p>The holy grail of security policies since the introduction of RSA OTP tokens,
+stepped-up authentication is when the subject is presented with an additional
+authentication requirement, usually in response to perceived risk. As Jans
+How do you decide when to invoke stepped-up authentication? As Auth Server is not
+a policy enforcement point, or a policy management system, these two aspects are
+out of scope. But once you make a runtime decision that you need more evidence
+of identity, the OpenID Connect <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">Authentication Request</a> has a few features that can help you out.</p>
+<p>The first is <code>prompt=login</code>. This is a hint from the Relying Party to the
+OpenID Provider that re-authentication is needed. Not all OpenID Connect
+providers support this feature (for example, Google does not).  However
+Auth Server does currently support this parameter, although there is a
+<a href="https://github.com/JanssenProject/jans/issues/3006">feature request</a> to make it
+optional.</p>
+<p>The second is <code>acr_values</code>. In Auth Server, this provides a hint to the
+Auth Server to invoke a specific Person Authentication interception script.
+Typically, this would specify your workflow for additional authentication.
+If you are using Agama, you can also provide a hint for which Agama flow to
+invoke by adding __.</p>
+<p>Another more esoteric strategy is to use UMA claims gathering. In this flow,
+the subject's browser is directed to the claims gathering endpoint (i.e.
+front channel), at which point the claims gathering script could invoke an
+OpenID authentication, using the <code>prompt</code> and <code>acr_values</code> parameters mentioned
+above.</p>
+<p>If you want to see an example of how a client implements stepped-up
+authentication, you should checkout this <a href="https://github.com/zmartzone/mod_auth_openidc/wiki/Step-up-Authentication">mod_auth_openidc wiki page</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-12T16:08:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-17T01:05:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-17</span>
       
         <br>
         Created:
