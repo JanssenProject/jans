@@ -40,6 +40,7 @@ import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentia
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
+import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.uma.service.UmaTokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.AuthenticationException;
@@ -139,6 +140,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private TokenCreatorService tokenCreatorService;
+
+    @Inject
+    private StatService statService;
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -368,6 +372,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         tokenExchangeService.rotateDeviceSecretOnRefreshToken(executionContext.getHttpRequest(), authorizationGrant, scope);
 
+        statService.reportActiveUser(authorizationGrant.getUserId());
         auditLog.updateOAuth2AuditLog(authorizationGrant, true);
 
         return response(Response.ok().entity(getJSonResponse(accToken,
