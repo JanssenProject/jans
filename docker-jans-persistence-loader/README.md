@@ -54,6 +54,7 @@ The following environment variables are supported by the container:
 - `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `ldap`, `couchbase`, or `hybrid`; default to `ldap`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_PERSISTENCE_SKIP_INITIALIZED`: skip initialization if backend already initialized (default to `false`).
+- `CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG`: Whether to allow automatic updates of `jans-auth` configuration (default to `true`).
 - `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`).
 - `CN_LDAP_USE_SSL`: Whether to use SSL connection to LDAP server (default to `true`).
 - `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
