@@ -537,7 +537,7 @@ objectClass: top
 description: Agama Script
 displayName: agama
 inum: BADA-BADA
-jansConfProperty: {"value1":"cust_param_name","value2":"customParam1","hide":false,"description":""}
+jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}

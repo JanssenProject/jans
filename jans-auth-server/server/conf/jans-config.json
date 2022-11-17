@@ -385,6 +385,10 @@
         {
             "paramName": "customParam5",
             "returnInResponse": true
+        },
+        {
+            "paramName": "agama_flow",
+            "returnInResponse": false
         }
     ],
     "legacyDynamicRegistrationScopeParam": false,
