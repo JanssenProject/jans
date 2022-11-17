@@ -47,6 +47,11 @@
 				<artifactId>jakarta.servlet-api</artifactId>
 				<scope>provided</scope>
 			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-doc</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 	</dependencies>
 	
 </project>
