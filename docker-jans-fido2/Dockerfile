@@ -35,7 +35,7 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.5-SNAPSHOT
-ENV CN_BUILD_DATE='2022-11-08 08:33'
+ENV CN_BUILD_DATE='2022-11-17 08:50'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -54,7 +54,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=d1890e76c13c8c2c3dcdcc0625edd04cf552bbf9
+ENV JANS_SOURCE_VERSION=13f599830c0d6b48bd1cd6f71f3d200ec6bddfe7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
