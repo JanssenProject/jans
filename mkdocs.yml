@@ -139,11 +139,9 @@ nav:
         - 'Passwordless Authentication': 'admin/planning/passwordless-auth.md'
         - 'Machine-to-Machine Authentication': 'admin/planning/machine-to-machine.md'
     - 'Installation':
-        - 'admin/install/README.md'
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
-            - 'Docker Quick Start': 'admin/install/vm-install/quick-start-install.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
             - 'Suse': 'admin/install/vm-install/suse.md'
@@ -158,6 +156,7 @@ nav:
             - 'Microsoft Azure AKS': 'admin/install/helm-install/microsoft-azure.md'
 #            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
             - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
+        - 'Docker Installation': 'admin/install/docker.md'    
         - 'Setup Instructions': 'admin/install/setup.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
