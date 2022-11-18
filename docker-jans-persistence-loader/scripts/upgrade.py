@@ -67,80 +67,7 @@ def _transform_auth_dynamic_config(conf):
         conf["redirectUrisRegexEnabled"] = bool(distribution != "openbanking")
         should_update = True
 
-    if distribution == "openbanking":
-        if "dcrAuthorizationWithMTLS" not in conf:
-            conf["dcrAuthorizationWithMTLS"] = False
-            should_update = True
-
-        if "scopesSupported" not in conf:
-            conf["scopesSupported"] = [
-                "openid",
-                "consents",
-                "accounts",
-                "resources",
-            ]
-            should_update = True
-
-        if "jwt" not in conf["responseModesSupported"]:
-            conf["responseModesSupported"].append("jwt")
-            should_update = True
-
-        if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
-            conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
-            should_update = True
-
-        if conf["redirectUrisRegexEnabled"]:
-            conf["redirectUrisRegexEnabled"] = False
-            should_update = True
-    else:
-        if all([
-            os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
-            conf["personCustomObjectClassList"]
-        ]):
-            conf["personCustomObjectClassList"] = []
-            should_update = True
-
-        if "subjectIdentifiersPerClientSupported" not in conf:
-            conf["subjectIdentifiersPerClientSupported"] = ["mail", "uid"]
-            should_update = True
-
-        if "agamaConfiguration" not in conf:
-            conf["agamaConfiguration"] = {
-                "enabled": False,
-                "templatesPath": "/ftl",
-                "scriptsPath": "/scripts",
-                "serializerType": "KRYO",
-                "maxItemsLoggedInCollections": 3,
-                "pageMismatchErrorPage": "mismatch.ftl",
-                "interruptionErrorPage": "timeout.ftl",
-                "crashErrorPage": "crash.ftl",
-                "finishedFlowPage": "finished.ftl",
-                "bridgeScriptPage": "agama.xhtml",
-                "defaultResponseHeaders": {
-                    "Cache-Control": "max-age=0, no-store",
-                },
-            }
-            should_update = True
-
-        if "interruptionTime" in conf["agamaConfiguration"]:
-            conf["agamaConfiguration"].pop("interruptionTime", None)
-            should_update = True
-
-        # add Cache-Control and remove Expires, Content-Type
-        if "Cache-Control" not in conf["agamaConfiguration"]["defaultResponseHeaders"]:
-            conf["agamaConfiguration"]["defaultResponseHeaders"]["Cache-Control"] = "max-age=0, no-store"
-            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Expires", None)
-            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
-            should_update = True
-
-        for grant_type in [
-            "urn:ietf:params:oauth:grant-type:device_code",
-            "urn:ietf:params:oauth:grant-type:token-exchange",
-        ]:
-            if grant_type not in conf["dynamicGrantTypeDefault"]:
-                conf["dynamicGrantTypeDefault"].append(grant_type)
-                should_update = True
-
+    # common config in all distributions
     if "accessTokenSigningAlgValuesSupported" not in conf:
         conf["accessTokenSigningAlgValuesSupported"] = [
             "none",
@@ -219,6 +146,90 @@ def _transform_auth_dynamic_config(conf):
     ]:
         if grant_type not in conf["grantTypesSupported"]:
             conf["grantTypesSupported"].append(grant_type)
+            should_update = True
+
+    # specific config per distribution
+    if distribution == "openbanking":
+        if "dcrAuthorizationWithMTLS" not in conf:
+            conf["dcrAuthorizationWithMTLS"] = False
+            should_update = True
+
+        if "scopesSupported" not in conf:
+            conf["scopesSupported"] = [
+                "openid",
+                "consents",
+                "accounts",
+                "resources",
+            ]
+            should_update = True
+
+        if "jwt" not in conf["responseModesSupported"]:
+            conf["responseModesSupported"].append("jwt")
+            should_update = True
+
+        if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
+            conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
+            should_update = True
+
+        # if conf["redirectUrisRegexEnabled"]:
+        #     conf["redirectUrisRegexEnabled"] = False
+        #     should_update = True
+    else:
+        if all([
+            os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
+            conf["personCustomObjectClassList"]
+        ]):
+            conf["personCustomObjectClassList"] = []
+            should_update = True
+
+        if "subjectIdentifiersPerClientSupported" not in conf:
+            conf["subjectIdentifiersPerClientSupported"] = ["mail", "uid"]
+            should_update = True
+
+        if "agamaConfiguration" not in conf:
+            conf["agamaConfiguration"] = {
+                "enabled": False,
+                "templatesPath": "/ftl",
+                "scriptsPath": "/scripts",
+                "serializerType": "KRYO",
+                "maxItemsLoggedInCollections": 3,
+                "pageMismatchErrorPage": "mismatch.ftl",
+                "interruptionErrorPage": "timeout.ftl",
+                "crashErrorPage": "crash.ftl",
+                "finishedFlowPage": "finished.ftl",
+                "bridgeScriptPage": "agama.xhtml",
+                "defaultResponseHeaders": {
+                    "Cache-Control": "max-age=0, no-store",
+                },
+            }
+            should_update = True
+
+        if "interruptionTime" in conf["agamaConfiguration"]:
+            conf["agamaConfiguration"].pop("interruptionTime", None)
+            should_update = True
+
+        # add Cache-Control and remove Expires, Content-Type
+        if "Cache-Control" not in conf["agamaConfiguration"]["defaultResponseHeaders"]:
+            conf["agamaConfiguration"]["defaultResponseHeaders"]["Cache-Control"] = "max-age=0, no-store"
+            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Expires", None)
+            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
+            should_update = True
+
+        for grant_type in [
+            "urn:ietf:params:oauth:grant-type:device_code",
+            "urn:ietf:params:oauth:grant-type:token-exchange",
+        ]:
+            if grant_type not in conf["dynamicGrantTypeDefault"]:
+                conf["dynamicGrantTypeDefault"].append(grant_type)
+                should_update = True
+
+        # ensure agama_flow listed in authorizationRequestCustomAllowedParameters
+        if "agama_flow" not in [
+            p["paramName"] for p in conf["authorizationRequestCustomAllowedParameters"]
+        ]:
+            conf["authorizationRequestCustomAllowedParameters"].append({
+                "paramName": "agama_flow", "returnInResponse": False,
+            })
             should_update = True
 
     # return the conf and flag to determine whether it needs update or not
