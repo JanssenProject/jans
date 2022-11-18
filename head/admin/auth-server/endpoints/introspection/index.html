@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#introspection-endpoint" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -2865,9 +2870,86 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Introspection
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Introspection
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introspection-endpoint" class="md-nav__link">
+    Introspection endpoint
+  </a>
+  
+    <nav class="md-nav" aria-label="Introspection endpoint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-get" class="md-nav__link">
+    A. GET:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-post" class="md-nav__link">
+    B. POST:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-the-behavior-of-as" class="md-nav__link">
+    Customizing the behavior of AS
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introspection-interception-script" class="md-nav__link">
+    Introspection interception script
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    Testing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -9874,6 +9956,69 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introspection-endpoint" class="md-nav__link">
+    Introspection endpoint
+  </a>
+  
+    <nav class="md-nav" aria-label="Introspection endpoint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-get" class="md-nav__link">
+    A. GET:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-post" class="md-nav__link">
+    B. POST:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-the-behavior-of-as" class="md-nav__link">
+    Customizing the behavior of AS
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#introspection-interception-script" class="md-nav__link">
+    Introspection interception script
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    Testing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -9904,6 +10049,21 @@
         <span class="md-tag">endpoint</span>
       
     
+      
+      
+        <span class="md-tag">introspection</span>
+      
+    
+      
+      
+        <span class="md-tag">accessTokenAsJwt</span>
+      
+    
+      
+      
+        <span class="md-tag">introspectionScriptBackwardCompatibility</span>
+      
+    
   </nav>
 
 
@@ -9916,14 +10076,105 @@
 
   <h1>Introspection</h1>
 
-<p>This is a placeholder</p>
+<h3 id="introspection-endpoint">Introspection endpoint<a class="headerlink" href="#introspection-endpoint" title="Permanent link">#</a></h3>
+<p>The URI to invoke the <a href="https://datatracker.ietf.org/doc/html/rfc7662">Introspection Endpoint</a> in Janssen Auth Server can be found by checking the <code>introspection_endpoint</code> claim of the OpenID Connect configuration response, typically deployed at <code>https://&lt;my.jans.server&gt;/.well-known/openid-configuration</code></p>
+<p><code>"introspection_endpoint" : "https://&lt;my.jans.server&gt;/jans-auth/restv1/introspection"</code></p>
+<h4 id="a-get">A. GET:<a class="headerlink" href="#a-get" title="Permanent link">#</a></h4>
+<p><div class="highlight"><pre><span></span><code>curl -X &#39;GET&#39;   &#39;https://&lt;my.jans.server&gt;/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&amp;response_as_jwt=false&#39;   -H &#39;accept: application/json&#39; -H   &quot;Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5&quot;
+</code></pre></div>
+Response:
+<div class="highlight"><pre><span></span><code>{
+    &quot;sub&quot;: &quot;&quot;,
+    &quot;iss&quot;: &quot;https://&lt;my.jans.server&gt;&quot;,
+    &quot;active&quot;: true,
+    &quot;token_type&quot;: &quot;Bearer&quot;,
+    &quot;client_id&quot;: &quot;1800.df1bb233-10b8-40ed-bbb9-07da50892a35&quot;,
+    &quot;aud&quot;: &quot;1800.df1bb233-10b8-40ed-bbb9-07da50892a35&quot;,
+    &quot;nbf&quot;: null,
+    &quot;scope&quot;: &quot;https://jans.io/oauth/config/scripts.write&quot;,
+    &quot;acr_values&quot;: null,
+    &quot;cnf&quot;: null,
+    &quot;exp&quot;: 1668705523,
+    &quot;iat&quot;: 1668705223,
+    &quot;jti&quot;: null,
+    &quot;username&quot;: null
+}
+</code></pre></div></p>
+<h4 id="b-post">B. POST:<a class="headerlink" href="#b-post" title="Permanent link">#</a></h4>
+<p>Example:
+<div class="highlight"><pre><span></span><code>curl -X &#39;POST&#39; \
+  &#39;https://&lt;my.jans.server&gt;/jans-auth/restv1/introspection&#39; \
+  -H &#39;accept: application/json&#39; \
+  -H &#39;Content-Type: application/x-www-form-urlencoded&#39; \
+  -d &#39;token=eyJra....3ZkB-Ajwg&#39;  
+  -H &quot;Authorization: Bearer eyJra...BpKo7g&quot;
+</code></pre></div>
+Response:
+<div class="highlight"><pre><span></span><code>{
+    &quot;sub&quot;: &quot;&quot;,
+    &quot;iss&quot;: &quot;https://&lt;my.jans.server&gt;&quot;,
+    &quot;active&quot;: true,
+    &quot;token_type&quot;: &quot;Bearer&quot;,
+    &quot;client_id&quot;: &quot;3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad&quot;,
+    &quot;aud&quot;: &quot;3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad&quot;,
+    &quot;nbf&quot;: null,
+    &quot;scope&quot;: &quot;&quot;,
+    &quot;acr_values&quot;: null,
+    &quot;cnf&quot;: null,
+    &quot;exp&quot;: 1668941216,
+    &quot;iat&quot;: 1668781885,
+    &quot;jti&quot;: null,
+    &quot;username&quot;: null
+}
+</code></pre></div></p>
+<h3 id="customizing-the-behavior-of-as">Customizing the behavior of AS<a class="headerlink" href="#customizing-the-behavior-of-as" title="Permanent link">#</a></h3>
+<p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
+<ol>
+<li>
+<p>As the access token has sufficient entropy, and a short lifetime, authentication should not be required.
+Configure the Janssen AS to reflect <code>introspectionSkipAuthorization=true</code> (default value false)</p>
+</li>
+<li>
+<p>In order to be run and Introspection script should be associated with an OpenID Client (used for obtaining the token). Another way of doing this is by setting the <code>introspectionScriptBackwardCompatibility</code> global Auth Server JSON Configuration Property to true. In this case the Auth Server will run all scripts and will do so by ignoring client configuration.</p>
+</li>
+</ol>
+<h3 id="introspection-interception-script">Introspection interception script<a class="headerlink" href="#introspection-interception-script" title="Permanent link">#</a></h3>
+<p>By using the power <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java">IntrospectionType</a> custom script, one can modify claims of an Access token as JWT. To do this:</p>
+<ol>
+<li>Configure the Client using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a>
+  Update the following parameters for the client</li>
+<li><code>accessTokenAsJwt = true</code></li>
+<li>
+<p><code>runIntrospectionScriptBeforeJwtCreation = true</code></p>
+</li>
+<li>
+<p>Script
+  <a href="../../../../script-catalog/introspection/">Introspection Script Guide</a></p>
+</li>
+</ol>
+<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h3>
+<ol>
+<li>
+<p><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/IntrospectionWsHttpTest.java">Reference</a></p>
+</li>
+<li>
+<p>Swagger doc - https://github.com/JanssenProject/jans/blob/main/jans-auth-server/docs/swagger.yaml</p>
+</li>
+<li>
+<p>Useful tool - <a href="https://jwt.io/">jwt.io</a> to inspect a JWT</p>
+</li>
+</ol>
+<h3 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h3>
+<ol>
+<li>How is UpdateTokenType script different? - <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/update_token/sample-script/README.md">Article</a></li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T03:54:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-18T17:27:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-18</span>
       
         <br>
         Created:
