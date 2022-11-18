@@ -51,7 +51,7 @@ public class SsaGetTest extends BaseTest {
 
         // Ssa get
         SsaGetClient ssaGetClient = new SsaGetClient(ssaEndpoint);
-        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, null, orgId1, false);
+        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, null, orgId1);
         AssertBuilder.ssaGet(ssaGetResponse)
                 .ssaListSize(2)
                 .jtiList(jtiList)
@@ -82,7 +82,7 @@ public class SsaGetTest extends BaseTest {
 
         // Ssa get
         SsaGetClient ssaGetClient = new SsaGetClient(ssaEndpoint);
-        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, null, false);
+        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, null);
         AssertBuilder.ssaGet(ssaGetResponse)
                 .ssaListSize(1)
                 .jtiList(jtiList)
@@ -114,7 +114,7 @@ public class SsaGetTest extends BaseTest {
 
         // Ssa get
         SsaGetClient ssaGetClient = new SsaGetClient(ssaEndpoint);
-        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, orgId1, false);
+        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, orgId1);
         AssertBuilder.ssaGet(ssaGetResponse)
                 .ssaListSize(1)
                 .jtiList(jtiList)
@@ -145,7 +145,7 @@ public class SsaGetTest extends BaseTest {
 
         // Ssa get
         SsaGetClient ssaGetClient = new SsaGetClient(ssaEndpoint);
-        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, null, false);
+        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, null);
         AssertBuilder.ssaGet(ssaGetResponse)
                 .ssaListSize(0)
                 .jtiList(jtiList)

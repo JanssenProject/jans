@@ -16,7 +16,6 @@ public enum SsaScopeType {
     SSA_DEVELOPER("https://jans.io/auth/ssa.developer"),
     ;
 
-
     private static final Map<String, SsaScopeType> lookup = new HashMap<>();
 
     static {

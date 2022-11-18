@@ -47,11 +47,11 @@ public class SsaRestWebServiceImplTest {
 
     @Test
     public void get_validParams_validResponse() {
-        when(ssaGetAction.get(anyBoolean(), anyString(), any(), any())).thenReturn(mock(Response.class));
+        when(ssaGetAction.get(anyString(), any(), any())).thenReturn(mock(Response.class));
 
-        Response response = ssaRestWebServiceImpl.get(false, "testJti", 1000L, mock(HttpServletRequest.class));
+        Response response = ssaRestWebServiceImpl.get("testJti", 1000L, mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
-        verify(ssaGetAction).get(anyBoolean(), anyString(), any(), any());
+        verify(ssaGetAction).get(anyString(), any(), any());
         verifyNoMoreInteractions(ssaGetAction);
     }
 
