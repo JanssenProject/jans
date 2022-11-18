@@ -93,14 +93,14 @@ public class SsaGetAction {
      * @param httpRequest Http request
      * @return {@link Response} with status {@code 200 (Ok)} and the body containing the list of SSAs.
      */
-    public Response get(Boolean softwareRoles, String jti, Long orgId, HttpServletRequest httpRequest) {
-        log.debug("Attempting to read ssa: softwareRoles = {}, jti = '{}', orgId = {}", softwareRoles, jti, orgId);
+    public Response get(String jti, Long orgId, HttpServletRequest httpRequest) {
+        log.debug("Attempting to read ssa: softwareRoles = {}, orgId = {}", jti, orgId);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
         Response.ResponseBuilder builder = Response.ok();
         try {
             final Client client = ssaRestWebServiceValidator.getClientFromSession();
-            ssaRestWebServiceValidator.checkScopesPolicy(client, Arrays.asList(SsaScopeType.SSA_ADMIN.getValue(), SsaScopeType.SSA_PORTAL.getValue()));
+            ssaRestWebServiceValidator.checkScopesPolicy(client, Arrays.asList(SsaScopeType.SSA_ADMIN.getValue(), SsaScopeType.SSA_PORTAL.getValue(), SsaScopeType.SSA_DEVELOPER.getValue()));
 
             final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(), client.getScopes());
 

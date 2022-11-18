@@ -198,7 +198,7 @@ public class SsaServiceTest {
     }
 
     @Test
-    public void getSsaList_withPortalScope_valid() {
+    public void getSsaList_withDeveloperScope_valid() {
         BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
         baseDnConfiguration.setSsa("ou=ssa,o=jans");
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
@@ -207,7 +207,7 @@ public class SsaServiceTest {
         Long orgId = null;
         SsaState status = null;
         String clientId = "test-client";
-        String[] scopes = new String[]{SsaScopeType.SSA_PORTAL.getValue()};
+        String[] scopes = new String[]{SsaScopeType.SSA_DEVELOPER.getValue()};
         List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         verify(log).trace(eq("Filter with AND created: " + String.format("[(creatorId=%s)]", clientId)));
