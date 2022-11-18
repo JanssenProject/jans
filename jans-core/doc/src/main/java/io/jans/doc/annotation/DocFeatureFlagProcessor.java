@@ -3,6 +3,7 @@ package io.jans.doc.annotation;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
@@ -14,11 +15,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("io.jans.doc.annotation.DocFeatureFlag")
+@SupportedOptions({"module"})
 public class DocFeatureFlagProcessor extends AbstractProcessor {
 
+    String moduleName;
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
 
+        moduleName = processingEnv.getOptions().get("module");
 
         for (TypeElement annotation : annotations) {
             Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(annotation);
@@ -33,7 +37,7 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
             StringBuilder detailsContent = new StringBuilder();
 
             // prepare document header
-            docContents.append("# Janssen Server Feature Flags");
+            docContents.append("# "+moduleName+" Feature Flags");
             docContents.append("\n");
             docContents.append("\n");
 
@@ -63,7 +67,7 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
 
         PrintWriter docWriter = null;
         try {
-            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "module-feature-flags.md");
+            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", moduleName.toLowerCase().replaceAll("\\s", "")+"-feature-flags.md");
             docWriter = new PrintWriter(docFile.openWriter());
             docWriter.write(docContent.toString());
             docWriter.flush();

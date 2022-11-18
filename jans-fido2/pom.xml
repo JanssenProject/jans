@@ -122,6 +122,9 @@
 								io.jans.doc.annotation.DocPropertyProcessor
 							</annotationProcessor>
 						</annotationProcessors>
+						<compilerArgs>
+							<arg>-Amodule=Fido2</arg>
+						</compilerArgs>
 					</configuration>
 				</plugin>
 				<plugin>

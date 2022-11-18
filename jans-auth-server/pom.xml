@@ -414,6 +414,7 @@
 								io.jans.doc.annotation.DocFeatureFlagProcessor
 							</annotationProcessor>
 						</annotationProcessors>
+						<compilerArgument>-Amodule=Janssen Auth Server</compilerArgument>
 					</configuration>
 				</plugin>
 				<plugin>

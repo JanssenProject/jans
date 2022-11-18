@@ -3,6 +3,7 @@ package io.jans.doc.annotation;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
@@ -14,13 +15,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("io.jans.doc.annotation.DocProperty")
+@SupportedOptions({"module"})
 public class DocPropertyProcessor extends AbstractProcessor {
 
+    String moduleName;
+
+    // This method would be called once per class containing annotated elements
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
 
+        moduleName = processingEnv.getOptions().get("module");
 
+        // Loop iterates once per supported annotation type by this processor
         for (TypeElement annotation : annotations) {
+
+            // Get all the elements that are annotated by a particular annotation located across classes in this module
             Set<? extends Element> annotatedProperties = env.getElementsAnnotatedWith(annotation);
 
             // sort alphabetically
@@ -33,7 +42,7 @@ public class DocPropertyProcessor extends AbstractProcessor {
             StringBuilder detailsContent = new StringBuilder();
 
             // prepare document header
-            docContents.append("# Janssen Server Configuration Properties");
+            docContents.append("# "+moduleName+" Configuration Properties");
             docContents.append("\n");
             docContents.append("\n");
 
@@ -64,7 +73,7 @@ public class DocPropertyProcessor extends AbstractProcessor {
 
         PrintWriter docWriter = null;
         try {
-            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "module-properties.md");
+            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", moduleName.toLowerCase().replaceAll("\\s", "")+"-properties.md");
             docWriter = new PrintWriter(docFile.openWriter());
             docWriter.write(docContent.toString());
             docWriter.flush();
