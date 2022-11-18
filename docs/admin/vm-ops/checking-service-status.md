@@ -23,6 +23,13 @@ SUB    = The low-level unit activation state, values depend on unit type.
 
 5 loaded units listed.
 ```
+## Other Services
+
+There are more services other than Jans services like LDAP or Apache. To get the status of those services make sure you use command like
+
+```bash
+sudo systemctl list-units --all "apache2*"
+```
 
 Note: depending on your OS and the components of Jans installed, the output may be different.
 
