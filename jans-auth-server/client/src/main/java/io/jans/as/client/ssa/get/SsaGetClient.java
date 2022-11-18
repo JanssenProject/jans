@@ -11,7 +11,6 @@ import io.jans.as.model.config.Constants;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.client.Invocation.Builder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
 
 public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
@@ -27,12 +26,11 @@ public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
         return HttpMethod.GET;
     }
 
-    public SsaGetResponse execSsaGet(String accessToken, String jti, Long orgId, Boolean softwareRoles) {
+    public SsaGetResponse execSsaGet(String accessToken, String jti, Long orgId) {
         SsaGetRequest ssaGetRequest = new SsaGetRequest();
         ssaGetRequest.setAccessToken(accessToken);
         ssaGetRequest.setJti(jti);
         ssaGetRequest.setOrgId(orgId);
-        ssaGetRequest.setSoftwareRoles(softwareRoles);
         setRequest(ssaGetRequest);
         return exec();
     }
