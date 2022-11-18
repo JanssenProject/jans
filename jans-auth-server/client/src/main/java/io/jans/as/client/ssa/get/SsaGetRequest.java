@@ -20,8 +20,6 @@ public class SsaGetRequest extends BaseRequest {
 
     private Long orgId;
 
-    private Boolean softwareRoles;
-
     public SsaGetRequest() {
         setContentType(MediaType.APPLICATION_JSON);
         setMediaType(MediaType.APPLICATION_JSON);
@@ -52,20 +50,11 @@ public class SsaGetRequest extends BaseRequest {
         this.orgId = orgId;
     }
 
-    public Boolean getSoftwareRoles() {
-        return softwareRoles;
-    }
-
-    public void setSoftwareRoles(Boolean softwareRoles) {
-        this.softwareRoles = softwareRoles;
-    }
-
     @Override
     public String getQueryString() {
         QueryBuilder builder = QueryBuilder.instance();
         builder.append(SsaRequestParam.JTI.getName(), jti);
         builder.append(SsaRequestParam.ORG_ID.getName(), orgId != null ? orgId.toString() : "");
-        builder.append(SsaRequestParam.SOFTWARE_ROLES.getName(), softwareRoles != null ? softwareRoles.toString() : "");
         return builder.toString();
     }
 }
