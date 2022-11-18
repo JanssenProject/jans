@@ -115,9 +115,9 @@ public class AgamaResource extends ConfigBaseResource {
     @Operation(summary = "Create a new agama flow", description = "Create a new agama flow", operationId = "post-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.AGAMA_WRITE_ACCESS }))
-    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Request example" , value = "example/agama/agama.json")))
+    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Request example", value = "example/agama/agama.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class) , examples = @ExampleObject(name = "Response example" , value = "example/agama/agama.json"))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -146,9 +146,9 @@ public class AgamaResource extends ConfigBaseResource {
     @Operation(summary = "Create a new agama flow from source", description = "Create a new agama flow from source.", operationId = "post-agama-flow-from-source", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.AGAMA_WRITE_ACCESS }))
-    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class) , examples = @ExampleObject(name = "Request example" , value = "example/agama/test-agama-source.json")))
+    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Request example", value = "example/agama/test-agama-source.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class) , examples = @ExampleObject(name = "Response example" , value = "example/agama/agama.json"))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -187,9 +187,9 @@ public class AgamaResource extends ConfigBaseResource {
     @Operation(summary = "Update agama flow from source file", description = "Update agama flow from source file.", operationId = "put-agama-flow-from-source", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.AGAMA_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Request example" , value = "example/agama/test-agama-source.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Request example", value = "example/agama/test-agama-source.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example" , value = "example/agama/agama.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -223,9 +223,9 @@ public class AgamaResource extends ConfigBaseResource {
     @Operation(summary = "Partially modify a Agama Flow", description = "Partially modify a Agama Flow", operationId = "patch-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.AGAMA_WRITE_ACCESS }))
-    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)) , examples = @ExampleObject(name = "Request example" , value = "example/agama/agama-patch.json")))
+    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request example", value = "example/agama/agama-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patched Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example" , value = "example/agama/agama.json"))),
+            @ApiResponse(responseCode = "200", description = "Patched Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -397,12 +397,15 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     private Flow minimize(Flow flow, boolean includeSource) {
-
+        if (flow == null) {
+            return flow;
+        }
         flow.setTranspiled(null);
         flow.setTransHash(null);
         if (!includeSource) {
             flow.setSource(null);
         }
+
         return flow;
 
     }

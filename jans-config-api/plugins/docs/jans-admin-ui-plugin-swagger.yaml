@@ -462,7 +462,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
   /admin-ui/adminUIRoles/{adminUIRole}:
     get:
       tags:
@@ -523,7 +523,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
   /admin-ui/adminUIRolePermissionsMapping/{adminUIRole}:
     get:
       tags:
@@ -584,7 +584,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
 components:
   schemas:
     LicenseRequest:

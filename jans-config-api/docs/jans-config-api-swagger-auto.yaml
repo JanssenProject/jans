@@ -7178,17 +7178,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -7528,6 +7528,8 @@ components:
           format: int32
         displayName:
           type: string
+        tokenBindingSupported:
+          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -7539,8 +7541,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        tokenBindingSupported:
-          type: boolean
         baseDn:
           type: string
         inum:
@@ -7622,6 +7622,8 @@ components:
         idTokenLifetime:
           type: integer
           format: int32
+        allowOfflineAccessWithoutConsent:
+          type: boolean
     CustomObjectAttribute:
       type: object
       properties:
@@ -8343,6 +8345,8 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8352,8 +8356,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8859,8 +8861,6 @@ components:
         jsLogoPath:
           type: string
         jsFaviconPath:
-          type: string
-        organizationTitle:
           type: string
         baseDn:
           type: string
