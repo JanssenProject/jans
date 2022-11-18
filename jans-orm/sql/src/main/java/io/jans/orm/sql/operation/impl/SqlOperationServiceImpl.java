@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -659,6 +660,9 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					} else if (attributeObject instanceof Timestamp) {
 						attributeValueObjects = new Object[] {
 								new java.util.Date(((Timestamp) attributeObject).getTime()) };
+					} else if (attributeObject instanceof LocalDateTime) {
+						attributeValueObjects = new Object[] {
+								new java.util.Date(Timestamp.valueOf((LocalDateTime) attributeObject).getTime()) };
 					} else {
 						Object value = attributeObject.toString();
 						attributeValueObjects = new Object[] { value };
