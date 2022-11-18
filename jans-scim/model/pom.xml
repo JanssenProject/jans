@@ -26,6 +26,11 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-core-model</artifactId>
         </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-doc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- Logging -->
 		<dependency>
