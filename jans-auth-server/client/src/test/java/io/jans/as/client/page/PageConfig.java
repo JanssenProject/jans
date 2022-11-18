@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class PageConfig {
 
-    public static int WAIT_OPERATION_TIMEOUT = 60;
+    public static int WAIT_OPERATION_TIMEOUT = 30;
 
     private final WebDriver driver;
     private final Map<String, String> testKeys = new HashMap<>();
