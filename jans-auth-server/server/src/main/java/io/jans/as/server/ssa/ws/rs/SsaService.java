@@ -104,7 +104,7 @@ public class SsaService {
      */
     public List<Ssa> getSsaList(String jti, Long orgId, SsaState status, String clientId, String[] scopes) {
         List<Filter> filters = new ArrayList<>();
-        if (hasPortalScope(Arrays.asList(scopes))) {
+        if (hasDeveloperScope(Arrays.asList(scopes))) {
             filters.add(Filter.createEqualityFilter("creatorId", clientId));
         }
         if (jti != null) {
@@ -183,19 +183,19 @@ public class SsaService {
     }
 
     /**
-     * Check if there is only one "ssa.portal" scope
+     * Check if there is only one "ssa.developer" scope
      *
      * @param scopes List of scope
-     * @return true if is only one "ssa.portal", or false otherwise
+     * @return true if is only one "ssa.developer", or false otherwise
      */
-    private boolean hasPortalScope(List<String> scopes) {
+    private boolean hasDeveloperScope(List<String> scopes) {
         Iterator<String> scopesIterator = scopes.iterator();
         boolean result = false;
         while (scopesIterator.hasNext()) {
             String scope = scopesIterator.next();
-            if (scope.equals(SsaScopeType.SSA_ADMIN.getValue())) {
+            if (scope.equals(SsaScopeType.SSA_ADMIN.getValue()) || scope.equals(SsaScopeType.SSA_PORTAL.getValue())) {
                 return false;
-            } else if (scope.equals(SsaScopeType.SSA_PORTAL.getValue())) {
+            } else if (scope.equals(SsaScopeType.SSA_DEVELOPER.getValue())) {
                 result = true;
             }
         }

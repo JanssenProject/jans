@@ -37,9 +37,9 @@ public interface SsaRestWebService {
     /**
      * Get list of SSA based on "jti" or "org_id" filter.
      *
-     * @param jti           Unique identifier
-     * @param orgId         Organization ID
-     * @param httpRequest   Http request
+     * @param jti         Unique identifier
+     * @param orgId       Organization ID
+     * @param httpRequest Http request
      * @return the {@link Response} with status {@code 200 (Ok)} and with body the ssa list,
      * or with status {@code 401 (Unauthorized)} if unauthorized access request,
      * or with status {@code 500 (Internal Server Error)} if internal error occurred.
@@ -48,7 +48,6 @@ public interface SsaRestWebService {
     @Path("/ssa")
     @Produces({MediaType.APPLICATION_JSON})
     Response get(
-            @QueryParam("software_roles") Boolean softwareRoles,
             @QueryParam("jti") String jti,
             @QueryParam("org_id") Long orgId,
             @Context HttpServletRequest httpRequest

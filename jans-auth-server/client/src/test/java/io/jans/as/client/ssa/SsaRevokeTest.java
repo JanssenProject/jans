@@ -64,7 +64,7 @@ public class SsaRevokeTest extends BaseTest {
 
         // Ssa get
         SsaGetClient ssaGetClient = new SsaGetClient(ssaEndpoint);
-        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, orgId, false);
+        SsaGetResponse ssaGetResponse = ssaGetClient.execSsaGet(accessToken, jti, orgId);
         showClient(ssaGetClient);
         assertNotNull(ssaGetResponse, "Ssa get response is null");
         assertTrue(ssaGetResponse.getSsaList().isEmpty());

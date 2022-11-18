@@ -60,8 +60,8 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      * @return {@link Response} with status {@code 200 (Ok)} and with body List of SSA.
      */
     @Override
-    public Response get(Boolean softwareRoles, String jti, Long orgId, HttpServletRequest httpRequest) {
-        return ssaGetAction.get(softwareRoles, jti, orgId, httpRequest);
+    public Response get(String jti, Long orgId, HttpServletRequest httpRequest) {
+        return ssaGetAction.get(jti, orgId, httpRequest);
     }
 
     /**
