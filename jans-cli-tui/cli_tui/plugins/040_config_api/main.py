@@ -47,9 +47,9 @@ class Plugin():
         self.pid = 'config_api'
         self.name = '[C]onfig-API'
         self.page_entered = False
-        self.data = {}
         self.role_type = 'api-viewer'
-        
+        self.admin_ui_roles_data = {}
+
         self.prepare_navbar()
         self.prepare_containers()
 
@@ -98,13 +98,6 @@ class Plugin():
                             name='oauth:clients:get', 
                             jans_help=_("Get all admin ui roles"), 
                             handler=self.get_adminui_roles),
-                        
-                        self.app.getTitledText(
-                            _("Search: "), 
-                            name='oauth:scopes:search', 
-                            jans_help=_("Press enter to perform search"), 
-                            accept_handler=self.search_adminui_roles,
-                            style='class:outh_containers_scopes.text'),
 
                         self.app.getButton(
                             text=_("Add adminui roles"), 
@@ -179,17 +172,27 @@ class Plugin():
     #--------------------------------------------------------------------------------#
 
     def get_adminui_roles(self) -> None:
-        """Method to get the clients data from server
-        """ 
-        self.config_data_container['accessroles'] = HSplit([Label(_("Please wait while getting clients"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
-        t = threading.Thread(target=self.adminui_update_roles, daemon=True)
-        self.app.start_progressing()
-        t.start()
+        """Method to get the admin ui roles from server
+        """
+        cli_args = {'operation_id': 'get-all-adminui-roles'}
 
-    def adminui_update_roles(
-        self,
-        start_index: Optional[int]= 0, 
-        pattern: Optional[str]= '',
+        async def coroutine():
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            data = response.json()
+            if response.status_code not in (200, 201):
+                self.app.show_message(_("Error Getting Admin UI Roles!"), str(data), tobefocused=self.app.center_container)
+                return
+
+            self.admin_ui_roles_data = data
+            self.adminui_update_roles()
+            self.app.layout.focus(self.app.center_container)
+
+        asyncio.ensure_future(coroutine())
+
+
+    def adminui_update_roles(self,
         ) -> None:
         """update the current clients data to server
 
@@ -197,87 +200,26 @@ class Plugin():
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
-        def get_next(
-            start_index: int,  
-            pattern: Optional[str]= '', 
-            ) -> None:
-            self.adminui_update_roles(start_index, pattern='')
-
-        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
-        if pattern:
-            endpoint_args +=',pattern:'+pattern
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                        operation_id='get-all-adminui-roles',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-
-        except Exception as e:
-            self.app.stop_progressing()
-            self.app.show_message(_("Error getting clients"), str(e))
-            return
-
-        self.app.stop_progressing()
-
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting clients"), str(rsponse.text))
-            return
-
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting clients"), str(rsponse.text))
-            return
-
         data =[]
 
-        if pattern:
-            for k in result:
-                if pattern.lower() in k.get('role').lower():
-                    data.append(
-                        [
-                        k.get('role'),
-                        k.get('description'),
-                        ]
-                    )
-        else:
-            for d in result:
-                data.append(
-                    [
-                    d.get('role'),
-                    d.get('description'),
-                    ]
-                )
+        for d in self.admin_ui_roles_data:
+            data.append(
+                [
+                d.get('role'),
+                d.get('description'),
+                ]
+            )
 
         # ------------------------------------------------------------------------------- #
         # --------------------------------- View Data ----------------------------------- #
         # ------------------------------------------------------------------------------- #               
 
         if data:
-            buttons = []
-            if int(len(data)/ 20) >=1  :
-
-                if start_index< int(len(data)/ 20) :
-                    handler_partial = partial(get_next, start_index+1, pattern)
-                    next_button = Button(_("Next"), handler=handler_partial)
-                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                    buttons.append(next_button)
-
-                if start_index!=0:
-                    handler_partial = partial(get_next, start_index-1, pattern)
-                    prev_button = Button(_("Prev"), handler=handler_partial)
-                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                    buttons.append(prev_button)
-            data_now = data[start_index*20:start_index*20+20]
-            
             clients = JansVerticalNav(
                 myparent=self.app,
                 headers=['Role', 'Description',],
                 preferred_size= [0,0],
-                data=data_now,
+                data=data,
                 on_enter=self.edit_adminui_roles,
                 on_display=self.app.data_display_dialog,
                 on_delete= self.delete_adminui_roles,
@@ -285,18 +227,16 @@ class Plugin():
                 selectes=0,
                 headerColor='class:outh-verticalnav-headcolor',
                 entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=result
+                all_data=self.admin_ui_roles_data
             )
             self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
             self.config_data_container['accessroles'] = HSplit([
                 clients,
-                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
             ])
             get_app().invalidate()
             self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
-        
         else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.config_data_container['accessroles'])
+            self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
     def add_adminui_roles(self) -> None:
         """Method to display the dialog of clients
@@ -349,14 +289,6 @@ class Plugin():
         dialog = JansGDialog(self.app, title=_('Add New Role'), body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
-    def search_adminui_roles(self, tbuffer:Buffer,) -> None:
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.containers['accessroles'])
-            return
-
-        t = threading.Thread(target=self.adminui_update_roles, args=(0,tbuffer.text), daemon=True)
-        self.app.start_progressing()
-        t.start()
 
     def edit_adminui_roles(self, **params: Any) -> None:
         """Method to display the dialog of clients
