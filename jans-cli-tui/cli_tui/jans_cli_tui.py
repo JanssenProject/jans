@@ -94,6 +94,7 @@ class JansCliApp(Application):
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
         self.init_logger()
+        self.disabled_plugins = []
         self.status_bar_text = ''
         self.progress_char = ' '
         self.progress_active = False
@@ -185,6 +186,8 @@ class JansCliApp(Application):
         self.invalidate()
 
     def _load_plugins(self) -> None:
+        # check if admin-ui plugin is available:
+        
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
             if plugin_file.parent.joinpath('.enabled').exists():
@@ -192,13 +195,36 @@ class JansCliApp(Application):
                 spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file.as_posix())
                 plugin = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(plugin)
-                self._plugins.append(plugin.Plugin(self))
+                plugin_object = plugin.Plugin(self)
+                self._plugins.append(plugin_object)
 
     def init_plugins(self) -> None:
         for plugin in self._plugins:
             if hasattr(plugin, 'init_plugin'):
                 plugin.init_plugin()
         self.plugins_initialised = True
+
+    def plugin_enabled(self, pid: str) -> bool:
+        """Checks whether plugin is enabled or not
+        Args:
+            pid (str): PID of plugin
+        """
+        for plugin_object in self._plugins:
+            if plugin_object.pid == pid:
+                return True
+        return False
+
+
+    def remove_plugin(self,  pid: str) -> None:
+        """Removes plugin object
+        Args:
+            pid (str): PID of plugin
+        """
+        for plugin_object in self._plugins:
+            if plugin_object.pid == pid:
+                self._plugins.remove(plugin_object)
+                return
+
 
     @property
     def dialog_width(self) -> None:
@@ -284,6 +310,16 @@ class JansCliApp(Application):
                 if not self.plugins_initialised:
                     self.init_plugins()
 
+        if self.cli_object_ok:
+            response = self.cli_requests({'operation_id': 'is-license-active'})
+            if response.status_code == 404:
+                for entry in self.nav_bar.navbar_entries:
+                    if entry[0] == 'config_api':
+                        self.nav_bar.navbar_entries.remove(entry)
+                        self.remove_plugin(entry[0])
+                        self.invalidate()
+
+
     async def check_jans_cli_ini(self) -> None:
         if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
             self.jans_creds_dialog()
@@ -292,6 +328,7 @@ class JansCliApp(Application):
 
         if self.cli_object_ok and not self.plugins_initialised:
             self.init_plugins()
+
 
     def jans_creds_dialog(self, *params: Any) -> None:
         body=HSplit([

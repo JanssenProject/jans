@@ -104,26 +104,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
         else:
             active_checked = True
 
-
-        admin_ui_roles = [[role] for role in get_custom_attribute('jansAdminUIRole', multi=True) ]
-        admin_ui_roles_label = _("jansAdminUIRole")
-        add_admin_ui_role_label = _("Add Admin UI Role")
-        self.admin_ui_roles_container = JansVerticalNav(
-                myparent=self.app,
-                headers=['Role'],
-                preferred_size=[20],
-                data=admin_ui_roles,
-                on_delete=self.delete_admin_ui_role,
-                selectes=0,
-                headerColor='class:outh-client-navbar-headcolor',
-                entriesColor='class:outh-client-navbar-entriescolor',
-                all_data=admin_ui_roles,
-                underline_headings=False,
-                max_width=25,
-                jans_name='configurationProperties',
-                max_height=False
-                )
-
         self.edit_user_content = [
                     self.app.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'inum'), read_only=True),
                     self.app.getTitledText(_("Username *"), name='userId', value=self.data.get('userId',''), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userId')),
@@ -135,6 +115,31 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     self.app.getTitledCheckBox(_("Active"), name='active', checked=active_checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, 'enabled')),
                     self.app.getTitledText(_("Nickname"), name='nickname', value='\n'.join(get_custom_attribute('nickname', multi=True)), style='class:script-titledtext', height=3, jans_help=self.app.get_help_from_schema(self.schema, 'nickname')),
 
+                    Button(_("Add Claim"), handler=self.add_claim),
+                ]
+
+
+        if self.app.plugin_enabled('config_api'):
+            admin_ui_roles = [[role] for role in get_custom_attribute('jansAdminUIRole', multi=True) ]
+            admin_ui_roles_label = _("jansAdminUIRole")
+            add_admin_ui_role_label = _("Add Admin UI Role")
+            self.admin_ui_roles_container = JansVerticalNav(
+                    myparent=self.app,
+                    headers=['Role'],
+                    preferred_size=[20],
+                    data=admin_ui_roles,
+                    on_delete=self.delete_admin_ui_role,
+                    selectes=0,
+                    headerColor='class:outh-client-navbar-headcolor',
+                    entriesColor='class:outh-client-navbar-entriescolor',
+                    all_data=admin_ui_roles,
+                    underline_headings=False,
+                    max_width=25,
+                    jans_name='configurationProperties',
+                    max_height=False
+                    )
+
+            self.edit_user_content.insert(-1,
                     VSplit([ 
                         Label(text=admin_ui_roles_label, style='class:script-label', width=len(admin_ui_roles_label)+1), 
                         self.admin_ui_roles_container,
@@ -143,11 +148,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
                                 Window(height=1),
                                 Button(text=add_admin_ui_role_label, width=len(add_admin_ui_role_label)+4, handler=self.add_admin_ui_role),
                                 ]),
-                        ], height=4, width=D()),
+                        ], height=4, width=D())
+                    )
 
-                    Button(_("Add Claim"), handler=self.add_claim),
-
-                ]
 
         if not self.data:
             self.edit_user_content.insert(2,

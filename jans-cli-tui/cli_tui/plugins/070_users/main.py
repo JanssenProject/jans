@@ -232,13 +232,14 @@ class Plugin(DialogUtils):
                 user_info['customAttributes'].append(ca)
                 break
 
-        admin_ui_roles = [item[0] for item in dialog.admin_ui_roles_container.data]
-        if admin_ui_roles:
-           user_info['customAttributes'].append({
-                    'name': 'jansAdminUIRole', 
-                    'multiValued': len(admin_ui_roles) > 1, 
-                    'values': admin_ui_roles,
-                    })
+        if hasattr(dialog, 'admin_ui_roles_container'):
+            admin_ui_roles = [item[0] for item in dialog.admin_ui_roles_container.data]
+            if admin_ui_roles:
+               user_info['customAttributes'].append({
+                        'name': 'jansAdminUIRole', 
+                        'multiValued': len(admin_ui_roles) > 1, 
+                        'values': admin_ui_roles,
+                        })
 
         async def coroutine():
             operation_id = 'put-user' if dialog.data.get('baseDn') else 'post-user'
