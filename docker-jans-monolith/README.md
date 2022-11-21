@@ -6,8 +6,8 @@ tags:
 - docker
 ---
 
-!!! Warning 
-    **This image is for testing and development purposes only. Use Janssen [helm charts](../charts) for production setups.**
+> **Warning**
+> This image is for testing and development purposes only. Use Janssen [helm charts](../charts) for production setups.
 
 ## Overview
 
