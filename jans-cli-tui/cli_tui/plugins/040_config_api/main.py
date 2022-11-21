@@ -300,7 +300,7 @@ class Plugin():
         self.adminui_role_description = self.app.getTitledText(
             _("Domains"), 
             name='domains', 
-            value=role_data.get('description',''),  
+            value=role_data.get('description',''),
             height=3, 
             style='class:dialog-titled-widget')
 
@@ -339,15 +339,12 @@ class Plugin():
             self.app.show_message(_("Error!"), _("An error ocurred while saving role adminui:\n") + str(response.text))
 
 
-
-
         body = HSplit([self.adminui_role_description,self.adminui_role_deletable])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=save)]
         dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
     def delete_adminui_roles(self, **kwargs: Any) -> None:
-
 
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete adminui_roles :")+"\n {} ?".format(kwargs['selected'][0]))
 
@@ -363,7 +360,6 @@ class Plugin():
                 cli_args = {'operation_id': 'delete-adminui-role', 'url_suffix':'adminUIRole:{}'.format(kwargs ['selected'][0])}
                 self.app.start_progressing()
                 response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-
                 self.app.stop_progressing()
                 if response:
                     self.app.show_message(_("Error!"), str(response), tobefocused=self.app.center_container)
@@ -514,24 +510,21 @@ class Plugin():
             # --------------------- Patch to server ----------------------#
             # ------------------------------------------------------------#
             if permission :
-                response = self.app.cli_object.process_command_by_id(
-                        operation_id='add-adminui-permission',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn='',
-                        data={'permission': '{}'.format(permission), 'defaultPermissionInToken': '{}'.format(defaultPermissionInToken)},
-                        )
-            else:
-                return
-            # ------------------------------------------------------------#
-            # -- get_properties or serach again to see Momentary change --#
-            # ------------------------------------------------------------#
-            if response:
-                self.get_adminui_permissions()
-                # self.future.set_result(DialogResult.ACCEPT)
-                return True
+                async def coroutine():
+                    cli_args = {
+                        'operation_id': 'add-adminui-permission', 
+                        'data': {'permission': '{}'.format(permission), 'defaultPermissionInToken': '{}'.format(defaultPermissionInToken)}
+                        }
+                    self.app.start_progressing()
+                    response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                    self.app.stop_progressing()
 
-            self.app.show_message(_("Error!"), _("An error ocurred while Addin role adminui permission:\n") + str(response.text))
+                    if response:
+                        self.app.show_message(_("Error!"), _("An error ocurred while Addin role adminui permission:\n") + str(response.text))
+                    else:
+                        self.get_adminui_permissions()
+
+                asyncio.ensure_future(coroutine())
 
 
         body = HSplit([self.adminui_permission,self.adminui_role_permissions])
