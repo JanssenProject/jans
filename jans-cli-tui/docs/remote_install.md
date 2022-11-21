@@ -1,21 +1,13 @@
-Install Requirements
----------------------
+Install Jans-TUI with pip from GitHub
+--------------------------------------
 ```
-pip3 install prompt_toolkit
-pip3 install urllib3
-pip3 install requests
-pip3 install pygments
-sudo pip3 install pyjwt
-pip3 install pyDes
+pip3 install https://github.com/JanssenProject/jans/archive/refs/heads/jans-cli-tui-works.zip#subdirectory=jans-cli-tui
 ```
 
-Get Latest Jans-TUI
--------------------------
+Execute:
+
 ```
-wget https://github.com/JanssenProject/jans/archive/refs/heads/jans-cli-tui-works.zip
-unzip jans-cli-tui-works.zip
-cd jans-jans-cli-tui-works/jans-cli-tui/
-python3 jans-cli-tui.py
+config-cli-tui
 ```
 
 Get Credidentials for CLI
