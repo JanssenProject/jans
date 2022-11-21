@@ -128,7 +128,7 @@ class Plugin(DialogUtils):
 
         requested_parties_data = []
         for rp in fido2_static_config.get('requestedParties', {}):
-            requested_parties_data.append([rp['name'], ', '.join(rp.get('domains', []))])
+            requested_parties_data.append([rp.get('name',''), ', '.join(rp.get('domains', []))])
 
         self.requested_parties_container = JansVerticalNav(
                 myparent=self.app,
