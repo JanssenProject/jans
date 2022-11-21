@@ -1,3 +1,11 @@
+---
+tags:
+- administration
+- installation
+- quick-start
+- docker
+---
+
 !!! Warning 
     **This image is for testing and development purposes only. Use Janssen [helm charts](../charts) for production setups.**
 
@@ -56,7 +64,7 @@ To see the containers running
 docker ps
 ```
 
-## Configure
+## Configure Janssen Server
 
 ```bash
 docker ps #List the containers running. Copy the container name of monolith jans

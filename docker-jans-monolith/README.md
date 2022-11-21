@@ -1,17 +1,27 @@
-# Overview
+---
+tags:
+- administration
+- installation
+- quick-start
+- docker
+---
 
-**This image is for testing and development purposes only! Use Janssen [helm charts](../charts) for production setups**
+!!! Warning 
+    **This image is for testing and development purposes only. Use Janssen [helm charts](../charts) for production setups.**
 
-Docker monolith image packaging for Janssen.This image packs janssen services including, the auth-server, config-api, fido2, and scim.
+## Overview
 
-## Versions
+Docker monolith image packaging for Janssen. This image packs janssen services including the auth-server, config-api, fido2, and scim.
 
-See [Releases](https://github.com/JanssenProject/docker-jans-monolith/releases) for stable versions. This image should never be used in production.
-For bleeding-edge/unstable version, use `janssenproject/monolith:1.0.4_dev`.
+## Pre-requisites
+
+- [Docker](https://docs.docker.com/install)
+- [Docker compose](https://docs.docker.com/compose/install/)
+
 
 ## Environment Variables
 
-The following environment variables are supported by the container:
+Installation depends on a set of environment variables. These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.
 
 | ENV                     | Description                                      | Default                                          |
 |-------------------------|--------------------------------------------------|--------------------------------------------------|
@@ -32,35 +42,38 @@ The following environment variables are supported by the container:
 | `MYSQL_HOST`            | MySQL host.                                      | `mysql` which is the docker compose service name |
 
 
-## Pre-requisites
-
-- [Docker](https://docs.docker.com/install). Docker compose should be installed by default with Docker.
-
 ## How to run
+
+Download the compose file 
+
+```bash
+
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
+```
+
+This docker compose file run two containers, the janssen monolith container and mysql container.
 
 ```bash
 docker compose -f jans-mysql-compose.yml up -d
 ```
 
-## Clean up
-
-Remove setup and volumes
-
-```
-docker compose -f jans-mysql-compose.yml down && rm -rf jans-*
-```
-
-## Test
+To see the containers running
 
 ```bash
-docker exec -ti docker-jans-monolith-jans-1 bash
+
+docker ps
 ```
 
-Run 
+## Configure Janssen Server
+
 ```bash
-/opt/jans/jans-cli/config-cli.py
-#or
-/opt/jans/jans-cli/scim-cli.py
+docker ps #List the containers running. Copy the container name of monolith jans
+
+docker exec -ti <monolith_container_name> bash #This opens a bash terminal in the running container
+
+/opt/jans/jans-cli/config-cli.py #configure config-cli
+
+/opt/jans/jans-cli/scim-cli.py #configure scim
 ```
 
 ## Access endpoints externally
@@ -74,11 +87,10 @@ Add to your `/etc/hosts` file the ip domain record which should be the ip of the
 
 After adding the record you can hit endpoints such as https://demoexample.jans.io/.well-known/openid-configuration
 
-## Quick start 
+## Clean up
 
-Grab a fresh ubuntu 22.04 lts VM and run:
+Remove setup and volumes
 
-```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
-
+docker compose -f jans-mysql-compose.yml down && rm -rf jans-*
+```
