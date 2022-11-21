@@ -31,7 +31,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, customScript,  configurationAttributes):
         print "GitHub. Initialization"
-        print "GitHub. Initialized successfully"
 
         # read config from github_creds_file
         github_creds_file = configurationAttributes.get("github_creds_file").getValue2()
