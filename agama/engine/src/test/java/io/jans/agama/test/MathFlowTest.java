@@ -25,7 +25,7 @@ public class MathFlowTest extends BaseTest {
     @Test
     public void runRandom() {
         
-        int len = (int) (Math.random() * 10);
+        int len = (int) (1 + Math.random() * 10);
         List<Integer> list = new ArrayList<>();
         
         for (int i = 0; i < len; i++) {
