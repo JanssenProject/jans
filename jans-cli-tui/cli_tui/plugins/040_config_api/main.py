@@ -357,21 +357,18 @@ class Plugin():
             try:
                 self.app.layout.focus(focused_before)
             except:
-                self.app.stop_progressing()
                 self.app.layout.focus(self.app.center_frame)
 
             if result.lower() == 'yes': ## should we delete the main roles?!
-                result = self.app.cli_object.process_command_by_id(
-                    operation_id='delete-adminui-role',
-                    url_suffix='adminUIRole:{}'.format(kwargs ['selected'][0]),
-                    endpoint_args='',
-                    data_fn='',
-                    data={}
-                )
+                cli_args = {'operation_id': 'delete-adminui-role', 'url_suffix':'adminUIRole:{}'.format(kwargs ['selected'][0])}
+                self.app.start_progressing()
+                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+
                 self.app.stop_progressing()
-                self.get_adminui_roles()  
-                
-            return result  ### TODO >> Role cannot be deleted. Please set ‘deletable’ property of role to true.
+                if response:
+                    self.app.show_message(_("Error!"), str(response), tobefocused=self.app.center_container)
+                else:
+                    self.get_adminui_roles()
 
         asyncio.ensure_future(coroutine())
     
