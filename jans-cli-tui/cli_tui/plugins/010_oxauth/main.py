@@ -355,27 +355,20 @@ class Plugin(DialogUtils):
 
     def oauth_get_scopes(
             self, 
-            start_index: Optional[int]= 0,  
-            pattern: Optional[str]= '', 
+            start_index: Optional[int]= 0,
+            pattern: Optional[str]= '',
             ) -> None:
         """update the current Scopes data to server
 
         Args:
             start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
         """
-        def get_next(
-            start_index: int,
-            pattern: Optional[str]= '',
-            ) -> None:
-            self.oauth_get_scopes(start_index, pattern='')
-
 
         async def coroutine():
 
             endpoint_args ='withAssociatedClients:true,limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
             if pattern:
                 endpoint_args +=',pattern:'+pattern
-
 
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':endpoint_args}
             self.app.start_progressing()
@@ -419,12 +412,12 @@ class Plugin(DialogUtils):
 
                 buttons = []
                 if start_index > 0:
-                    handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
+                    handler_partial = partial(self.oauth_get_scopes, start_index-self.app.entries_per_page, pattern)
                     prev_button = Button(_("Prev"), handler=handler_partial)
                     prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
                     buttons.append(prev_button)
                 if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                    handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
+                    handler_partial = partial(self.oauth_get_scopes, start_index+self.app.entries_per_page, pattern)
                     next_button = Button(_("Next"), handler=handler_partial)
                     next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
                     buttons.append(next_button)
@@ -759,9 +752,7 @@ class Plugin(DialogUtils):
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['scopes'])
             return
 
-        t = threading.Thread(target=self.oauth_update_scopes, args=(0,tbuffer.text), daemon=True)
-        self.app.start_progressing()
-        t.start()
+        self.oauth_get_scopes(pattern=tbuffer.text)
 
     def search_clients(self, tbuffer:Buffer,) -> None:
         if not len(tbuffer.text) > 2:
