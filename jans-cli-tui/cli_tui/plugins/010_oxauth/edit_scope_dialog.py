@@ -1,6 +1,3 @@
-import threading
-import re
-
 from typing import Any, OrderedDict, Optional, Sequence, Union, TypeVar, Callable
 from asyncio import ensure_future
 
@@ -72,7 +69,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
         self.data = data
-        self.title=title
+        self.title = title
+        self.claims_container = None
         self.showInConfigurationEndpoint = self.data.get('attributes', {}).get('showInConfigurationEndpoint', '')
         self.defaultScope = self.data.get('defaultScope', '')
         self.schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Scope')
@@ -91,7 +89,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             if item_data:
                 data[item_data['key']] = item_data['value']
 
-        if data['scopeType'] in ('openid', 'dynamic') and hasattr(self, 'claims_container'):
+        if data['scopeType'] in ('openid', 'dynamic') and hasattr(self, 'claims_container') and self.claims_container:
             claims = [claim[0] for claim in self.claims_container.data]
             data['claims'] = claims
 
@@ -210,26 +208,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         return calims_names
 
-    def get_claims(self) -> FloatContainer:
-
-        data = self.get_named_claims(self.data.get('claims', []))
-        if data :
-            self.claims_container = JansVerticalNav(
-                    myparent=self.myparent,
-                    headers=['dn', 'Display Name'],
-                    preferred_size= [0,0],
-                    data=data,
-                    on_display=self.myparent.data_display_dialog,
-                    on_delete=self.delete_claim,
-                    selectes=0,
-                    headerColor='class:outh-client-navbar-headcolor',
-                    entriesColor='class:outh-client-navbar-entriescolor',
-                    all_data=data
-                    )
-        else:
-            self.claims_container=HSplit([],width=D())
-
-        return self.claims_container
 
     def delete_claim(self, **kwargs: Any) -> None:
         """This method for the deletion of claim
@@ -282,8 +260,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
                         ],width=D(),)
 
-        self.alt_tabs['openid'] = HSplit([
 
+        open_id_widgets = [
                             self.myparent.getTitledCheckBox(
                                     _("Default Scope"),
                                     name='defaultScope',
@@ -310,13 +288,26 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     jans_help=_("Press enter to perform search"),
                                     accept_handler=self.search_claims,
                                     ),
+                            ]
+        calims_data = self.get_named_claims(self.data.get('claims', []))
+        
+        if calims_data :
+            self.claims_container = JansVerticalNav(
+                    myparent=self.myparent,
+                    headers=['dn', 'Display Name'],
+                    preferred_size= [0,0],
+                    data=calims_data,
+                    on_display=self.myparent.data_display_dialog,
+                    on_delete=self.delete_claim,
+                    selectes=0,
+                    headerColor='class:outh-client-navbar-headcolor',
+                    entriesColor='class:outh-client-navbar-entriescolor',
+                    all_data=calims_data
+                    )
 
+            open_id_widgets.append(self.claims_container)
 
-                            ####################################################
-                            self.get_claims(), 
-                            ###################################################
-
-                            ],width=D(),)
+        self.alt_tabs['openid'] = HSplit(open_id_widgets, width=D())
 
         self.alt_tabs['dynamic'] = HSplit([
                         

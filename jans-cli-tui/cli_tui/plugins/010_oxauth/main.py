@@ -133,7 +133,7 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_scopes),
+                        self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first {} Scopes").format(self.app.entries_per_page), handler=self.oauth_get_scopes),
                         self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button"), handler=self.add_scope),
                         ],
@@ -145,7 +145,7 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first 10 OpenID Connect clients"), handler=self.oauth_update_clients),
+                        self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first {} OpenID Connect clients").format(self.app.entries_per_page), handler=self.oauth_update_clients),
                         self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
                         self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
                         
@@ -169,7 +169,7 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['properties'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get properties"), name='oauth:scopes:get', jans_help=_("Retreive first 10 Scopes"), handler=self.oauth_get_properties),
+                        self.app.getButton(text=_("Get properties"), name='oauth:scopes:get', jans_help=_("Retreive first {} Scopes").format(self.app.entries_per_page), handler=self.oauth_get_properties),
                         self.app.getTitledText(
                             _("Search: "), 
                             name='oauth:properties:search', 
@@ -689,7 +689,7 @@ class Plugin(DialogUtils):
     def edit_scope_dialog(self, **params: Any) -> None:
         selected_line_data = params['data']  
 
-        dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data,save_handler=self.save_scope)
+        dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data, save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
 
     def edit_client_dialog(self, **params: Any) -> None:
@@ -740,19 +740,19 @@ class Plugin(DialogUtils):
             _type_: bool value to check the status code response
         """
 
-        response = self.app.cli_object.process_command_by_id(
-            operation_id='put-oauth-scopes' if dialog.data.get('inum') else 'post-oauth-scopes',
-            url_suffix='',
-            endpoint_args='',
-            data_fn='',
-            data=dialog.data
-        )
-        self.app.stop_progressing()
-        if response.status_code in (200, 201):
-            self.oauth_get_scopes()
-            return True
+        async def coroutine():
+            operation_id='put-oauth-scopes' if dialog.data.get('inum') else 'post-oauth-scopes'
+            cli_args = {'operation_id': operation_id, 'data': dialog.data}
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            dialog.future.set_result(DialogResult.ACCEPT)
+            if response.status_code == 500:
+                self.app.show_message(_('Error'), response.text + '\n' + response.reason)
+            else:
+                self.oauth_get_scopes()
 
-        self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
+        asyncio.ensure_future(coroutine())
 
     def search_scope(self, tbuffer:Buffer,) -> None:
         if not len(tbuffer.text) > 2:
