@@ -169,13 +169,13 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['properties'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get properties"), name='oauth:scopes:get', jans_help=_("Retreive first {} Scopes").format(self.app.entries_per_page), handler=self.oauth_get_properties),
                         self.app.getTitledText(
                             _("Search: "), 
                             name='oauth:properties:search', 
                             jans_help=_("Press enter to perform search"), 
                             accept_handler=self.search_properties,
-                            style='class:outh_containers_scopes.text')                        ],
+                            style='class:outh_containers_scopes.text')
+                        ],
                         padding=3,
                         width=D(),
                     ),
@@ -214,6 +214,8 @@ class Plugin(DialogUtils):
             selection (str): the current selected tab
         """
         if selection in self.oauth_containers:
+            if selection == 'properties':
+                self.oauth_update_properties()
             self.oauth_main_area = self.oauth_containers[selection]
         else:
             self.oauth_main_area = self.app.not_implemented
@@ -439,7 +441,7 @@ class Plugin(DialogUtils):
 
     def oauth_update_properties(
         self,
-        start_index: Optional[int]= 0, 
+        start_index: Optional[int]= 0,
         pattern: Optional[str]= '',
         ) -> None:
         """update the current clients data to server
@@ -447,40 +449,6 @@ class Plugin(DialogUtils):
         Args:
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
-        def get_next(
-            start_index: int,  
-            pattern: Optional[str]= '', 
-            ) -> None:
-            self.app.logger.debug("start_index="+str(start_index))
-            self.oauth_update_properties(start_index, pattern=pattern)
-
-        # ------------------------------------------------------------------------------- #
-        # ------------------------------------------------------------------------------- #
-        # ------------------------------------------------------------------------------- #
-
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                        operation_id='get-properties',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-        except Exception as e:
-            self.app.stop_progressing()
-            self.app.show_message(_("Error getting properties"), str(e))
-            return
-
-        self.app.stop_progressing()
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting properties"), str(rsponse.text))
-            return
-
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting properties"), str(rsponse.text))
-            return
 
         # ------------------------------------------------------------------------------- #
         # ----------------------------------- Search ------------------------------------ #
@@ -488,51 +456,52 @@ class Plugin(DialogUtils):
         porp_schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
         data =[]
+        
         if pattern:
-            for k in result:
+            for k in self.app_configuration:
                 if pattern.lower() in k.lower():
                     if k in porp_schema.get('properties', {}):
                         data.append(
                             [
                             k,
-                            result[k],
+                            self.app_configuration[k],
                             ]
                         )
         else:
-            for d in result:
+            for d in self.app_configuration:
                 if d in porp_schema.get('properties', {}):
                     data.append(
                         [
                         d,
-                        result[d],
+                        self.app_configuration[d],
                         ]
                     )
-
 
         # ------------------------------------------------------------------------------- #
         # --------------------------------- View Data ----------------------------------- #
         # ------------------------------------------------------------------------------- #               
 
+
         if data:
             buttons = []
-            if int(len(data)/ 20) >=1  :
 
-                if start_index< int(len(data)/ 20) :
-                    handler_partial = partial(get_next, start_index+1, pattern)
-                    next_button = Button(_("Next"), handler=handler_partial)
-                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                    buttons.append(next_button)
+            if len(data)/20 >=1:
 
                 if start_index!=0:
-                    handler_partial = partial(get_next, start_index-1, pattern)
+                    handler_partial = partial(self.oauth_update_properties, start_index-1, pattern)
                     prev_button = Button(_("Prev"), handler=handler_partial)
-                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                    prev_button.window.jans_help = _("Displays previous %d entries") % self.app.entries_per_page
                     buttons.append(prev_button)
 
+                if start_index< int(len(data)/ 20) :
+                    handler_partial = partial(self.oauth_update_properties, start_index+1, pattern)
+                    next_button = Button(_("Next"), handler=handler_partial)
+                    next_button.window.jans_help = _("Displays next %d entries") % self.app.entries_per_page
+                    buttons.append(next_button)
 
             data_now = data[start_index*20:start_index*20+20]
 
-            clients = JansVerticalNav(
+            properties = JansVerticalNav(
                 myparent=self.app,
                 headers=['Property Name', 'Property Value'],
                 preferred_size= [0,0],
@@ -541,18 +510,18 @@ class Plugin(DialogUtils):
                 on_display=self.properties_display_dialog,
                 get_help=(self.get_help,'AppConfiguration'),
                 # selection_changed=self.data_selection_changed,
-                selectes=0,      
+                selectes=0,
                 headerColor='class:outh-verticalnav-headcolor',
                 entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=list(result.values())
+                all_data=list(self.app_configuration.values())
             )
-            self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
+
             self.oauth_data_container['properties'] = HSplit([
-                clients,
+                properties,
                 VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
             ])
-            get_app().invalidate()
-            self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+            self.app.invalidate()
+            self.app.layout.focus(properties)
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['properties'])
 
@@ -574,13 +543,6 @@ class Plugin(DialogUtils):
 
         self.app.show_jans_dialog(dialog)
 
-    def oauth_get_properties(self) -> None:
-        """Method to get the clients data from server
-        """ 
-        self.oauth_data_container['properties'] = HSplit([Label(_("Please wait while getting properties"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
-        t = threading.Thread(target=self.oauth_update_properties, daemon=True)
-        self.app.start_progressing()
-        t.start()
 
     def view_property(self, **params: Any) -> None:
         #property, value =params['passed']
