@@ -115,6 +115,11 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         config['DEFAULT']['jca_plugins'] = ','.join(base.current_app.ConfigApiInstaller.get_plugins())
 
+        # clean old token and user data
+        for prop in ('user_data', 'access_token_enc'):
+            if prop in config['DEFAULT']:
+                del config['DEFAULT'][prop]
+
         config.write(self.config_ini_fn.open('w'))
         self.config_ini_fn.chmod(0o600)
 
