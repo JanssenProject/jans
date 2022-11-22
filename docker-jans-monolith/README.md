@@ -61,15 +61,14 @@ To see the containers running
 
 ```bash
 
-docker ps
+docker compose -f jans-mysql-compose.yml ps
 ```
 
 ## Configure Janssen Server
 
 ```bash
-docker ps #List the containers running. Copy the container name of monolith jans
 
-docker exec -ti <monolith_container_name> bash #This opens a bash terminal in the running container
+docker compose -f jans-mysql-compose.yml exec jans sh #This opens a bash terminal in the running container
 
 /opt/jans/jans-cli/config-cli.py #configure config-cli
 
