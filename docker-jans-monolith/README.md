@@ -3,7 +3,7 @@ tags:
 - administration
 - installation
 - quick-start
-- docker
+- docker compose
 ---
 
 > **Warning**
