@@ -37,17 +37,7 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
             StringBuilder detailsContent = new StringBuilder();
 
             // prepare document header
-            docContents.append("# "+moduleName+" Feature Flags");
-            docContents.append("\n");
-            docContents.append("\n");
-
-            // prepare table header
-            tableContents.append("| Feature Flag Name ");
-            tableContents.append("| Description ");
-            tableContents.append("|  | ");
-            tableContents.append("\n");
-            tableContents.append("|-----|-----|-----|");
-            tableContents.append("\n");
+            prepareDocTagsAndTableHeader(docContents, tableContents);
 
             // for each feature flag add a row in table and add content for the details section
             for (Element element : sortedElements)
@@ -61,6 +51,33 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
 
         }
         return false;
+    }
+
+    private void prepareDocTagsAndTableHeader(StringBuilder docContents, StringBuilder tableContents) {
+
+
+        // add tags
+        docContents.append("---\n");
+        docContents.append("tags:\n");
+        docContents.append("- administration\n");
+        docContents.append("- reference\n");
+        docContents.append("- json\n");
+        docContents.append("- feature-flags\n");
+        docContents.append("---\n");
+        docContents.append("\n");
+
+        // add doc headers
+        docContents.append("# "+moduleName+" Feature Flags");
+        docContents.append("\n");
+        docContents.append("\n");
+
+        // prepare table header
+        tableContents.append("| Feature Flag Name ");
+        tableContents.append("| Description ");
+        tableContents.append("|  | ");
+        tableContents.append("\n");
+        tableContents.append("|-----|-----|-----|");
+        tableContents.append("\n");
     }
 
     private void createAndWriteDoc(StringBuilder docContent, String className) {

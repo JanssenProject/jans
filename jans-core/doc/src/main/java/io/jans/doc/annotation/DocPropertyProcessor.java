@@ -42,17 +42,7 @@ public class DocPropertyProcessor extends AbstractProcessor {
             StringBuilder detailsContent = new StringBuilder();
 
             // prepare document header
-            docContents.append("# "+moduleName+" Configuration Properties");
-            docContents.append("\n");
-            docContents.append("\n");
-
-            // prepare table header
-            tableContents.append("| Property Name ");
-            tableContents.append("| Description ");
-            tableContents.append("|  | ");
-            tableContents.append("\n");
-            tableContents.append("|-----|-----|-----|");
-            tableContents.append("\n");
+            prepareDocTagsAndTableHeader(docContents, tableContents);
 
             // for each property add a row in table and add content for the details section
             for (Element jansProperty : sortedProperties)
@@ -67,6 +57,33 @@ public class DocPropertyProcessor extends AbstractProcessor {
 
         }
         return false;
+    }
+
+    private void prepareDocTagsAndTableHeader(StringBuilder docContents, StringBuilder tableContents) {
+
+        // add tags
+        docContents.append("---\n");
+        docContents.append("tags:\n");
+        docContents.append("- administration\n");
+        docContents.append("- reference\n");
+        docContents.append("- json\n");
+        docContents.append("- properties\n");
+        docContents.append("---\n");
+        docContents.append("\n");
+
+        // add doc headers
+        docContents.append("# "+moduleName+" Configuration Properties");
+        docContents.append("\n");
+        docContents.append("\n");
+
+
+        // prepare table header
+        tableContents.append("| Property Name ");
+        tableContents.append("| Description ");
+        tableContents.append("|  | ");
+        tableContents.append("\n");
+        tableContents.append("|-----|-----|-----|");
+        tableContents.append("\n");
     }
 
     private void createAndWriteDoc(StringBuilder docContent) {
