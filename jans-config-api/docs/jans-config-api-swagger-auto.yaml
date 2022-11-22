@@ -7178,19 +7178,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
         adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -7622,6 +7622,8 @@ components:
         idTokenLifetime:
           type: integer
           format: int32
+        allowOfflineAccessWithoutConsent:
+          type: boolean
     CustomObjectAttribute:
       type: object
       properties:
@@ -8343,15 +8345,6 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         fapi:
           type: boolean
         enabledFeatureFlags:
@@ -8381,6 +8374,15 @@ components:
             - STAT
             - PAR
             - SSA
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -8637,13 +8639,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
