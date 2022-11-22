@@ -7178,19 +7178,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -7526,8 +7526,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         tokenBindingSupported:
           type: boolean
         authenticationMethod:
@@ -7541,6 +7539,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -8639,13 +8639,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

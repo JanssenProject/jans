@@ -6,9 +6,11 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.core.util.ProtectionScopeType;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +27,17 @@ public class ApiProtectionCache {
 
     private static final Cache<String, List<Scope>> resourceCache = CacheBuilder.newBuilder()
             .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
-    
-    private static final Cache<String, Map<String,List<Scope>>> resourceScopeCache = CacheBuilder.newBuilder()
+
+    private static final Cache<String, Scope> groupScopeCache = CacheBuilder.newBuilder()
             .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
+
+    private static final Cache<String, Scope> superScopeCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
+
+    private static final Cache<String, Map<ProtectionScopeType, List<Scope>>> resourceScopeCache = CacheBuilder
+            .newBuilder().expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
+    
+    ApiProtectionCache(){}
 
     // Scope
     public static void removeAllScopes() {
@@ -48,10 +58,72 @@ public class ApiProtectionCache {
         }
     }
 
-    public static Map<String, Scope> getAllScopes() {
+    public static Map<String, Scope> getScopes() {
         return Maps.newHashMap(scopeCache.asMap());
     }
 
+    // Group Scope
+    public static Scope getGroupScope(String scopeName) {
+        Preconditions.checkNotNull(scopeName);
+        Preconditions.checkState(!Strings.isNullOrEmpty(scopeName));
+        return groupScopeCache.getIfPresent(scopeName);
+
+    }
+
+    public static void putGroupScope(Scope scope) {
+        Preconditions.checkNotNull(scope);
+        if (groupScopeCache.getIfPresent(scope.getId()) == null) {
+            groupScopeCache.put(scope.getId(), scope);
+        }
+    }
+
+    public static void removeAllGroupScopes() {
+        groupScopeCache.invalidateAll();
+    }
+
+    public static Map<String, Scope> getAllGroupScopes() {
+        return Maps.newHashMap(groupScopeCache.asMap());
+    }
+
+    // Super Scope
+    public static Scope getSuperScope(String scopeName) {
+        Preconditions.checkNotNull(scopeName);
+        Preconditions.checkState(!Strings.isNullOrEmpty(scopeName));
+        return superScopeCache.getIfPresent(scopeName);
+
+    }
+
+    public static void putSuperScope(Scope scope) {
+        Preconditions.checkNotNull(scope);
+        if (superScopeCache.getIfPresent(scope.getId()) == null) {
+            superScopeCache.put(scope.getId(), scope);
+        }
+    }
+
+    public static void removeAllSuperScopes() {
+        superScopeCache.invalidateAll();
+    }
+
+    public static Map<String, Scope> getAllSuperScopes() {
+        return Maps.newHashMap(superScopeCache.asMap());
+    }
+
+    // All Scope
+    public static Map<String, Scope> getAllTypesOfScopes() {
+        Map<String, Scope> scopes = Maps.newHashMap(scopeCache.asMap());
+        scopes.putAll(Maps.newHashMap(groupScopeCache.asMap()));
+        scopes.putAll(Maps.newHashMap(superScopeCache.asMap()));
+        return scopes;
+    }
+    
+
+    public static Map<String, Scope> getAllScopesMap() {
+        Map<String, Scope> scopes = Maps.newHashMap(scopeCache.asMap());
+        scopes.putAll(Maps.newHashMap(groupScopeCache.asMap()));
+        scopes.putAll(Maps.newHashMap(superScopeCache.asMap()));
+        return scopes;
+    }
+    
     // Resource
     public static void removeAllResources() {
         resourceCache.invalidateAll();
@@ -67,34 +139,64 @@ public class ApiProtectionCache {
     public static void putResource(String resourceName, List<Scope> scopeList) {
         Preconditions.checkNotNull(resourceName);
         resourceCache.put(resourceName, scopeList);
+
     }
 
     public static Map<String, List<Scope>> getAllResources() {
         return Maps.newHashMap(resourceCache.asMap());
     }
-    
-    public static void putResource(String resourceName, Map<String,List<Scope>> scopeMap) {
+
+    // ResourceScopeCache
+
+    public static void putResource(String resourceName, Map<ProtectionScopeType, List<Scope>> scopeMap) {
         Preconditions.checkNotNull(resourceName);
         resourceScopeCache.put(resourceName, scopeMap);
     }
-    
-    public static void putResourceScopeByType(String resourceName, String scopeType, List<Scope> scopes) {
+
+    public static void putResourceScopeByType(String resourceName, ProtectionScopeType protectionScopeType,
+            List<Scope> scopes) {
         Preconditions.checkNotNull(resourceName);
-        Preconditions.checkNotNull(scopeType);
-        Map<String, List<Scope>> scopeMap = resourceScopeCache.getIfPresent(resourceName);
-        if(scopeMap==null) {
-            scopeMap = new HashMap<>();            
-        }           
-       scopeMap.put(scopeType, scopes);
+        Preconditions.checkNotNull(protectionScopeType);
+        Map<ProtectionScopeType, List<Scope>> scopeMap = resourceScopeCache.getIfPresent(resourceName);
+        if (scopeMap == null) {
+            scopeMap = new HashMap<>();
+        }
+        scopeMap.put(protectionScopeType, scopes);
+        resourceScopeCache.put(resourceName, scopeMap);
     }
 
-    public static List<Scope> getResourceScopeByType(String resourceName, String scopeType) {
+    public static List<Scope> getResourceScopeByType(String resourceName, ProtectionScopeType protectionScopeType) {
         Preconditions.checkNotNull(resourceName);
-        Preconditions.checkNotNull(scopeType);
-        Map<String, List<Scope>> scopeMap = resourceScopeCache.getIfPresent(resourceName);
-        if(scopeMap==null) {
-            return null;
-        }           
-        return scopeMap.get(scopeType);
+        Preconditions.checkNotNull(protectionScopeType);
+        Map<ProtectionScopeType, List<Scope>> scopeMap = resourceScopeCache.getIfPresent(resourceName);
+        if (scopeMap == null) {
+            return Collections.emptyList();
+        }
+        return scopeMap.get(protectionScopeType);
+    }
+
+    public static Map<String, Map<ProtectionScopeType, List<Scope>>> getAllResourcesMap() {
+        return Maps.newHashMap(resourceScopeCache.asMap());
+    }
+
+    public static void addScope(String resourceName, ProtectionScopeType protectionScopeType, Scope scope) {
+        Preconditions.checkNotNull(resourceName);
+        Preconditions.checkNotNull(protectionScopeType);
+        Preconditions.checkNotNull(scope);
+
+        switch (protectionScopeType) {
+        case GROUP:
+            putGroupScope(scope);
+            break;
+
+        case SUPER:
+            putSuperScope(scope);
+            break;
+
+        default:
+            putScope(scope);
+            break;
+
+        }
     }
 }

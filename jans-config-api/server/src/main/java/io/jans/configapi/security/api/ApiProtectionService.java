@@ -11,7 +11,7 @@ import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.core.util.ProtectionScope;
+import io.jans.configapi.core.util.ProtectionScopeType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,8 +69,8 @@ public class ApiProtectionService {
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
         createScopeIfNeeded(apiProtectionType);
-        log.trace("ApiProtectionService:::verifyResources() - allScopes:{}, allResources:{} ",
-                ApiProtectionCache.getAllScopes(), ApiProtectionCache.getAllResources());
+        log.trace("ApiProtectionService:::verifyResources() - getAllTypesOfScopes:{}, allResources:{}, getAllResourcesMap:{} ",
+                ApiProtectionCache.getAllTypesOfScopes(), ApiProtectionCache.getAllResources(), ApiProtectionCache.getAllResourcesMap());
 
         updateScopeForClientIfNeeded(clientId);
 
@@ -92,19 +92,19 @@ public class ApiProtectionService {
                 // If no scopes for the path then skip validation
                 List<io.jans.configapi.core.protect.Scope> rsScopes = condition.getScopes();
                 if (rsScopes != null && !rsScopes.isEmpty()) {
-                    processScope(resourceName, ProtectionScope.SCOPE, rsScopes);
+                    processScope(resourceName, ProtectionScopeType.SCOPE, rsScopes);
                 }
                 
                 // If no group scopes for the path then skip validation
                 List<io.jans.configapi.core.protect.Scope> groupScopes = condition.getGroupScopes();                
                 if (groupScopes != null && !groupScopes.isEmpty()) {
-                    processScope(resourceName, ProtectionScope.GROUP, groupScopes);
+                    processScope(resourceName, ProtectionScopeType.GROUP, groupScopes);
                 }
                 
                 // If no super scopes for the path then skip validation
                 List<io.jans.configapi.core.protect.Scope> superScopes = condition.getSuperScopes();
                 if (superScopes != null && !superScopes.isEmpty()) {
-                    processScope(resourceName, ProtectionScope.SUPER, superScopes);
+                    processScope(resourceName, ProtectionScopeType.SUPER, superScopes);
                 }
                 
                 log.debug("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, scopeList:{}", resourceName,
@@ -114,8 +114,8 @@ public class ApiProtectionService {
         }
     }
     
-    private void processScope(String resourceName, ProtectionScope scopeType, List<io.jans.configapi.core.protect.Scope> scopeList){
-        log.debug("ApiProtectionService:::processScope() - resourceName:{}, scopeType:{}, scopeList:{}", resourceName, scopeType, scopeList);
+    private void processScope(String resourceName, ProtectionScopeType protectionScopeType, List<io.jans.configapi.core.protect.Scope> scopeList){
+        log.debug("ApiProtectionService:::processScope() - resourceName:{}, protectionScopeType:{}, scopeList:{}", resourceName, protectionScopeType, scopeList);
         
         //return if no scopes 
         if(scopeList==null || scopeList.isEmpty()) {
@@ -131,13 +131,14 @@ public class ApiProtectionService {
                 return;
              }
             
-            List<Scope> scopes = validateScope(rsScope);
-            ApiProtectionCache.putResourceScopeByType(resourceName, scopeType.toString().toUpperCase(), scopes);
+            List<Scope> scopes = validateScope(resourceName, protectionScopeType, rsScope);
+            ApiProtectionCache.putResource(resourceName, scopes);
+            ApiProtectionCache.putResourceScopeByType(resourceName, protectionScopeType, scopes);
         }
     }
 
-    private List<Scope> validateScope(io.jans.configapi.core.protect.Scope rsScope) {
-        log.debug("Verify Scope in DB - {} ", rsScope);
+    private List<Scope> validateScope(String resourceName, ProtectionScopeType protectionScopeType, io.jans.configapi.core.protect.Scope rsScope) {
+        log.debug("Verify Scope in DB - protectionScopeType:{}, rsScope:{} ", protectionScopeType, rsScope);
         List<Scope> scopeList = new ArrayList<>();
         
         // Check in DB
@@ -185,7 +186,7 @@ public class ApiProtectionService {
         // Add to scope if not null
         if (scope != null) {
             scopeList.add(scope);
-            ApiProtectionCache.putScope(scope);
+            ApiProtectionCache.addScope(resourceName, protectionScopeType, scope);
         }
         return scopeList;
     }
@@ -245,7 +246,7 @@ public class ApiProtectionService {
         List<String> scopes = new ArrayList<>();
 
         // Verify in cache
-        Map<String, Scope> scopeMap = ApiProtectionCache.getAllScopes();
+        Map<String, Scope> scopeMap = ApiProtectionCache.getAllTypesOfScopes();
         Set<String> keys = scopeMap.keySet();
 
         for (String id : keys) {

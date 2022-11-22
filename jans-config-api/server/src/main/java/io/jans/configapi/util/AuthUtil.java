@@ -14,7 +14,7 @@ import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.core.util.ProtectionScope;
+import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
@@ -184,7 +184,7 @@ public class AuthUtil {
         return scopes;
     }
 
-    public Map<String, List<String>> getResourceScopes(ResourceInfo resourceInfo, ProtectionScope protectionScope) {
+    public Map<String, List<String>> getResourceScopes(ResourceInfo resourceInfo, ProtectionScopeType protectionScope) {
         log.trace("Requested scopes for resourceInfo:{} ", resourceInfo);
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
@@ -204,7 +204,7 @@ public class AuthUtil {
     }
 
     private void addMethodScopes(ResourceInfo resourceInfo, HashMap<String, List<String>> scopeMap,
-            ProtectionScope protectionScope) {
+            ProtectionScopeType protectionScope) {
         log.debug("Adding scopes for resourceInfo:{} for protectionScope:{} in scopeMap:{} ", resourceInfo,
                 protectionScope, scopeMap);
         Method resourceMethod = resourceInfo.getResourceMethod();
@@ -214,14 +214,14 @@ public class AuthUtil {
                 scopeMap = new HashMap<>();
             }
             if (protectionScope != null) {
-                if (ProtectionScope.SCOPE.equals(protectionScope)) {
-                    scopeMap.put(ProtectionScope.SCOPE.name(),
+                if (ProtectionScopeType.SCOPE.equals(protectionScope)) {
+                    scopeMap.put(ProtectionScopeType.SCOPE.name(),
                             Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
-                } else if (ProtectionScope.GROUP.equals(protectionScope)) {
-                    scopeMap.put(ProtectionScope.GROUP.name(),
+                } else if (ProtectionScopeType.GROUP.equals(protectionScope)) {
+                    scopeMap.put(ProtectionScopeType.GROUP.name(),
                             Stream.of(methodAnnotation.groupScopes()).collect(Collectors.toList()));
                 } else {
-                    scopeMap.put(ProtectionScope.SUPER.name(),
+                    scopeMap.put(ProtectionScopeType.SUPER.name(),
                             Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
                 }
             } else {
@@ -303,7 +303,7 @@ public class AuthUtil {
         List<String> scopes = new ArrayList<>();
 
         // Verify in cache
-        Map<String, Scope> scopeMap = ApiProtectionCache.getAllScopes();
+        Map<String, Scope> scopeMap = ApiProtectionCache.getAllTypesOfScopes();
         Set<String> keys = scopeMap.keySet();
 
         for (String id : keys) {
