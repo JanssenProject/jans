@@ -1,6 +1,5 @@
 import json
 from asyncio import Future
-from typing import OrderedDict
 
 from prompt_toolkit.widgets import Button, TextArea
 from prompt_toolkit.application.current import get_app

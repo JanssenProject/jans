@@ -1,7 +1,7 @@
 import re
 import threading
 
-from typing import OrderedDict, Optional, Sequence, Union, TypeVar, Callable
+from typing import Optional, Sequence, Union, TypeVar, Callable
 import asyncio
 from functools import partial
 

@@ -1,7 +1,6 @@
 import re
 import threading
 
-from typing import OrderedDict
 from asyncio import ensure_future
 from functools import partial
 

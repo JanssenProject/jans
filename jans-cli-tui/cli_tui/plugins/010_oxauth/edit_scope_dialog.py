@@ -1,4 +1,4 @@
-from typing import Any, OrderedDict, Optional, Sequence, Union, TypeVar, Callable
+from typing import Any, Optional, Sequence, Union, TypeVar, Callable
 from asyncio import ensure_future
 
 from prompt_toolkit.layout.dimension import D

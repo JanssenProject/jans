@@ -51,8 +51,8 @@ from prompt_toolkit.widgets import (
     CheckboxList,
     Checkbox,
 )
-
-from typing import Any, Optional, OrderedDict, Sequence, Union
+from collections import OrderedDict
+from typing import Any, Optional, Sequence, Union
 from prompt_toolkit.key_binding.key_processor import KeyPressEvent
 from prompt_toolkit.layout.containers import (
     AnyContainer,
