@@ -219,7 +219,7 @@ class JansCliApp(Application):
         return False
 
 
-    def remove_plugin(self,  pid: str) -> None:
+    def remove_plugin(self, pid: str) -> None:
         """Removes plugin object
         Args:
             pid (str): PID of plugin
@@ -303,16 +303,23 @@ class JansCliApp(Application):
 
                     self.stop_progressing()
 
-
                     self.cli_object_ok = True
                     if not self.plugins_initialised:
                         self.init_plugins()
+                    self.runtime_plugins()
+
                 asyncio.ensure_future(coroutine())
 
             else:
                 self.cli_object_ok = True
                 if not self.plugins_initialised:
                     self.init_plugins()
+
+        self.runtime_plugins()
+
+
+    def runtime_plugins(self) -> None:
+        """Disables plugins when cli object is ready"""
 
         if self.cli_object_ok:
             response = self.cli_requests({'operation_id': 'is-license-active'})
