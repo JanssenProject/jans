@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/admin/config-api/config/">
+        <link rel="canonical" href="https://jans.io/docs/head/admin/config-api/openid-client/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
     
     
       
-        <title>Configuration - Janssen Documentation</title>
+        <title>OpenID Connect Client - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#config-api" class="md-skip">
+        <a href="#openid-connect-client" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Configuration
+              OpenID Connect Client
             
           </span>
         </div>
@@ -213,15 +213,13 @@
         
   
   
-    
-  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link md-tabs__link--active">
+      <a href="../../" class="md-tabs__link">
         Administration
       </a>
     </li>
@@ -315,14 +313,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
       
       
       
@@ -6503,14 +6499,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_13" type="checkbox" id="__nav_1_13" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_13" type="checkbox" id="__nav_1_13" >
       
       
       
@@ -6555,113 +6549,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Configuration
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../config/" class="md-nav__link">
         Configuration
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#packaging-and-running-the-application" class="md-nav__link">
-    Packaging and running the application
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#plugins" class="md-nav__link">
-    Plugins
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#endpoints-protection" class="md-nav__link">
-    Endpoints protection
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    Documentation
-  </a>
-  
-    <nav class="md-nav" aria-label="Documentation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#endpoints" class="md-nav__link">
-    Endpoints
-  </a>
-  
-    <nav class="md-nav" aria-label="Endpoints">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#attribute" class="md-nav__link">
-    Attribute
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#default-authentication-method" class="md-nav__link">
-    Default Authentication Method
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -9980,70 +9872,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
+  <a href="#listing-existing-openid-connect-clients" class="md-nav__link">
+    Listing existing OpenID Connect clients
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#packaging-and-running-the-application" class="md-nav__link">
-    Packaging and running the application
+  <a href="#creating-new-openid-connect-client" class="md-nav__link">
+    Creating new OpenID Connect client
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#plugins" class="md-nav__link">
-    Plugins
+  <a href="#updating-existing-openid-connect-client" class="md-nav__link">
+    Updating existing OpenID Connect client
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#endpoints-protection" class="md-nav__link">
-    Endpoints protection
+  <a href="#patching-existing-openid-connect-client" class="md-nav__link">
+    Patching existing OpenID Connect client
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    Documentation
+  <a href="#deleting-existing-openid-connect-client" class="md-nav__link">
+    Deleting existing OpenID Connect client
   </a>
-  
-    <nav class="md-nav" aria-label="Documentation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#endpoints" class="md-nav__link">
-    Endpoints
-  </a>
-  
-    <nav class="md-nav" aria-label="Endpoints">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#attribute" class="md-nav__link">
-    Attribute
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#default-authentication-method" class="md-nav__link">
-    Default Authentication Method
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -10074,41 +9933,596 @@
         <span class="md-tag">config-api</span>
       
     
+      
+      
+        <span class="md-tag">endpoints</span>
+      
+    
   </nav>
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/config-api/config.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/config-api/openid-client.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="config-api">config-api<a class="headerlink" href="#config-api" title="Permanent link">#</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p><a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> provides a central place to manage and configure jans modules.
-It helps in configuring auth-server, users, fido2 and scim modules.
-Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server] (https://github.com/JanssenProject/jans/tree/main/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
-<img alt="Config-API-Architecture" src="../../../assets/config-api-architecture.png" />
-If you want to learn more about Weld, please visit its website: https://weld.cdi-spec.org/</p>
-<h2 id="packaging-and-running-the-application">Packaging and running the application<a class="headerlink" href="#packaging-and-running-the-application" title="Permanent link">#</a></h2>
-<p>The application can be packaged using <code>./mvnw package</code>.
-It produces the <code>jans-config-api.war</code> file in the <code>server/target</code> directory.
-Be aware that all the dependencies are copied into the <code>server/target/jans-config-api/WEB-INF/lib</code> directory.</p>
-<h2 id="plugins">Plugins<a class="headerlink" href="#plugins" title="Permanent link">#</a></h2>
-<p>Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
-![Refer] (/plugins.md) for more details.</p>
-<h2 id="endpoints-protection">Endpoints protection<a class="headerlink" href="#endpoints-protection" title="Permanent link">#</a></h2>
-<p>Config API endpoints are OAuth 2.0 protected. It supports simple bearer and JWT token.</p>
-<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">#</a></h2>
-<p>Learn more in the <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml">jans-config-api documentation</a>.</p>
-<h3 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">#</a></h3>
-<h4 id="attribute">Attribute<a class="headerlink" href="#attribute" title="Permanent link">#</a></h4>
-<p>Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources.
-![Refer] (./attribute.md) for more details.</p>
-<h4 id="default-authentication-method">Default Authentication Method<a class="headerlink" href="#default-authentication-method" title="Permanent link">#</a></h4>
-<p>Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources.
-![Refer] (/default-authentication-method.md) for more details.</p>
+<h1 id="openid-connect-client">OpenID Connect Client<a class="headerlink" href="#openid-connect-client" title="Permanent link">#</a></h1>
+<p>OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.</p>
+<hr />
+<h4 id="listing-existing-openid-connect-clients">Listing existing OpenID Connect clients<a class="headerlink" href="#listing-existing-openid-connect-clients" title="Permanent link">#</a></h4>
+<details>
+ <summary><code>GET</code> <code><b>/</b></code> <code>(gets list of OpenID Connect clients based on search parameters)</code></summary>
+
+##### Parameters
+
+> | name       |  param type | data type      | type      |default value | description                                                                     |
+> |------------|-------------|----------------|-----------|--------------|---------------------------------------------------------------------------------|
+> | limit      |  query      | integer        | optional  |50            |Search size - max size of the results to return                                  |
+> | pattern    |  query      | string         | optional  |N/A           |Comma separated search patter. E.g. `pattern=edu`, `pattern=edu,locale,License`  |
+> | startIndex |  query      | integer        | optional  |1             |Index of the first query result                                                  |
+> | sortBy     |  query      | string         | optional  |inum          |Field whose value will be used to order the returned response                |
+> | sortOrder  |  query      | string         | optional  |ascending     |Search size - max size of the results to return                                  |
+
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `200`         | `application/json`                | `Paginated result`                                                  |
+> | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
+> | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
+
+##### Example cURL
+
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/openid/clients?limit=3&amp;pattern=test&amp;startIndex=1&amp;includeSource=true</span><span class="w"></span>
+</code></pre></div>
+
+##### Sample Response
+> ```javascript
+>{
+>    "start": 0,
+>    "totalEntriesCount": 5,
+>    "entriesCount": 3,
+>    "entries": [
+>        {
+>            "dn": "inum=FF81-2D39,ou=clients,o=jans",
+>            "clientSecret": "FF81-2D39-jans",
+>            "frontChannelLogoutSessionRequired": false,
+>            "redirectUris": [
+>                "https://jans.server2/jans-auth-rp/home.htm",
+>                "https://client.example.com/cb",
+>                "https://client.example.com/cb1",
+>                "https://client.example.com/cb2"
+>            ],
+>            "claimRedirectUris": [
+>                "https://jans.server2/jans-auth/restv1/uma/gather_claims"
+>            ],
+>            "responseTypes": [
+>                "token",
+>                "code",
+>                "id_token"
+>            ],
+>            "grantTypes": [
+>                "authorization_code",
+>                "implicit",
+>                "refresh_token",
+>                "client_credentials"
+>            ],
+>            "applicationType": "web",
+>            "clientName": "Jans Test Client (don't remove)",
+>            "clientNameLocalized": {},
+>            "logoUriLocalized": {},
+>            "clientUriLocalized": {},
+>            "policyUriLocalized": {},
+>            "tosUriLocalized": {},
+>            "subjectType": "public",
+>            "idTokenSignedResponseAlg": "RS256",
+>            "tokenEndpointAuthMethod": "client_secret_basic",
+>            "scopes": [
+>                "inum=F0C4,ou=scopes,o=jans",
+>                "inum=10B2,ou=scopes,o=jans",
+>                "inum=764C,ou=scopes,o=jans",
+>                "inum=43F1,ou=scopes,o=jans",
+>                "inum=341A,ou=scopes,o=jans",
+>                "inum=6D99,ou=scopes,o=jans"
+>            ],
+>            "trustedClient": true,
+>            "persistClientAuthorizations": false,
+>            "includeClaimsInIdToken": false,
+>            "customAttributes": [],
+>            "customObjectClasses": [
+>                "top"
+>            ],
+>            "rptAsJwt": false,
+>            "accessTokenAsJwt": false,
+>            "disabled": false,
+>            "attributes": {
+>                "runIntrospectionScriptBeforeJwtCreation": false,
+>                "keepClientAuthorizationAfterExpiration": false,
+>                "allowSpontaneousScopes": false,
+>                "backchannelLogoutSessionRequired": false,
+>                "parLifetime": 600,
+>                "requirePar": false,
+>                "jansDefaultPromptLogin": false
+>            },
+>            "displayName": "Jans Test Client (don't remove)",
+>            "authenticationMethod": "client_secret_basic",
+>            "tokenBindingSupported": false,
+>            "baseDn": "inum=FF81-2D39,ou=clients,o=jans",
+>            "inum": "FF81-2D39"
+>        },
+>        {
+>            "dn": "inum=AB77-1A2B,ou=clients,o=jans",
+>            "clientSecret": "AB77-1A2B-jans",
+>            "frontChannelLogoutSessionRequired": false,
+>            "redirectUris": [
+>                "https://client.example.com/cb"
+>            ],
+>            "claimRedirectUris": [
+>                "https://jans.server2/jans-auth/restv1/uma/gather_claims"
+>            ],
+>            "responseTypes": [
+>                "code",
+>                "id_token"
+>            ],
+>            "grantTypes": [
+>                "authorization_code",
+>                "implicit",
+>                "refresh_token",
+>                "client_credentials"
+>            ],
+>            "applicationType": "web",
+>            "clientName": "Jans Test Resource Server Client (don't remove)",
+>            "clientNameLocalized": {},
+>            "logoUriLocalized": {},
+>            "clientUriLocalized": {},
+>            "policyUriLocalized": {},
+>            "tosUriLocalized": {},
+>            "subjectType": "public",
+>            "idTokenSignedResponseAlg": "RS256",
+>            "tokenEndpointAuthMethod": "client_secret_basic",
+>            "scopes": [
+>                "inum=6D99,ou=scopes,o=jans",
+>                "inum=7D90,ou=scopes,o=jans"
+>            ],
+>            "trustedClient": true,
+>            "persistClientAuthorizations": false,
+>            "includeClaimsInIdToken": false,
+>            "customAttributes": [],
+>            "customObjectClasses": [
+>                "top"
+>            ],
+>            "rptAsJwt": false,
+>            "accessTokenAsJwt": false,
+>            "disabled": false,
+>            "attributes": {
+>                "runIntrospectionScriptBeforeJwtCreation": false,
+>                "keepClientAuthorizationAfterExpiration": false,
+>                "allowSpontaneousScopes": false,
+>                "backchannelLogoutSessionRequired": false,
+>                "parLifetime": 600,
+>                "requirePar": false,
+>                "jansDefaultPromptLogin": false
+>            },
+>            "displayName": "Jans Test Resource Server Client (don't remove)",
+>            "authenticationMethod": "client_secret_basic",
+>            "tokenBindingSupported": false,
+>            "baseDn": "inum=AB77-1A2B,ou=clients,o=jans",
+>            "inum": "AB77-1A2B"
+>        },
+>        {
+>            "dn": "inum=3E20,ou=clients,o=jans",
+>            "clientSecret": "3E20-jans",
+>            "frontChannelLogoutSessionRequired": false,
+>            "redirectUris": [
+>                "https://client.example.com/cb"
+>            ],
+>            "responseTypes": [
+>                "code",
+>                "id_token"
+>            ],
+>            "grantTypes": [
+>                "authorization_code",
+>                "implicit",
+>                "refresh_token",
+>                "client_credentials"
+>            ],
+>            "applicationType": "web",
+>            "clientName": "Jans Test Requesting Party Client (don't remove)",
+>            "clientNameLocalized": {},
+>            "logoUriLocalized": {},
+>            "clientUriLocalized": {},
+>            "policyUriLocalized": {},
+>            "tosUriLocalized": {},
+>            "subjectType": "public",
+>            "idTokenSignedResponseAlg": "RS256",
+>            "tokenEndpointAuthMethod": "client_secret_basic",
+>            "trustedClient": true,
+>            "persistClientAuthorizations": false,
+>            "includeClaimsInIdToken": false,
+>            "customAttributes": [],
+>            "customObjectClasses": [
+>                "top"
+>            ],
+>            "rptAsJwt": false,
+>            "accessTokenAsJwt": false,
+>            "disabled": false,
+>            "attributes": {
+>                "runIntrospectionScriptBeforeJwtCreation": false,
+>                "keepClientAuthorizationAfterExpiration": false,
+>                "allowSpontaneousScopes": false,
+>                "backchannelLogoutSessionRequired": false,
+>                "parLifetime": 600,
+>                "requirePar": false,
+>                "jansDefaultPromptLogin": false
+>            },
+>            "displayName": "Jans Test Requesting Party Client (don't remove)",
+>            "authenticationMethod": "client_secret_basic",
+>            "tokenBindingSupported": false,
+>            "baseDn": "inum=3E20,ou=clients,o=jans",
+>            "inum": "3E20"
+>        }
+>    ]
+>}
+> ```
+
+</details>
+
+<details>
+  <summary><code>GET</code> <code><b>/{inum}</b></code> <code>(gets OpenID Connect client based on inum)</code></summary>
+
+##### Parameters
+
+> | name       |  param type | data type      | type      |default value | description                            |
+> |------------|-------------|----------------|-----------|--------------|----------------------------------------|
+> | `inum`     |  path       | string         | required  | NA           | OpenID Connect client unique idendifier|
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `200`         | `application/json        `        | `OpenID Connect client details`                                     |
+> | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
+> | `401`         | `application/json`                | `{"code":"404","message":"Not Found"}`                           |
+> | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
+
+##### Example cURL
+
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/openid/clients/bd27a9f6-7772-4049-bd4f-bf7c651fbe7c</span><span class="w"></span>
+</code></pre></div>
+
+##### Sample Response
+
+> ```javascript
+>{
+>    "dn": "inum=bd27a9f6-7772-4049-bd4f-bf7c651fbe7c,ou=clients,o=jans",
+>    "deletable": false,
+>    "clientSecret": "WonHg253UDJmtl7d55z1K0PWWEZ3N9Xg+O33ibJ1JwCVs4ynLhjPxQ==",
+>    "frontChannelLogoutSessionRequired": false,
+>    "redirectUris": [
+>        "https://abc,com"
+>    ],
+>    "responseTypes": [
+>        "code"
+>    ],
+>    "grantTypes": [
+>        "refresh_token",
+>        "authorization_code"
+>    ],
+>    "applicationType": "web",
+>    "clientName": "test1234",
+>    "clientNameLocalized": {},
+>    "logoUriLocalized": {},
+>    "clientUriLocalized": {},
+>    "policyUriLocalized": {},
+>    "tosUriLocalized": {},
+>    "subjectType": "public",
+>    "tokenEndpointAuthMethod": "client_secret_basic",
+>    "scopes": [
+>        "inum=43F1,ou=scopes,o=jans",
+>        "inum=C17A,ou=scopes,o=jans",
+>        "inum=764C,ou=scopes,o=jans"
+>    ],
+>    "trustedClient": false,
+>    "persistClientAuthorizations": false,
+>    "includeClaimsInIdToken": false,
+>    "customAttributes": [],
+>    "customObjectClasses": [
+>        "top",
+>        "jansClntCustomAttributes"
+>    ],
+>    "rptAsJwt": false,
+>    "accessTokenAsJwt": false,
+>    "disabled": false,
+>    "attributes": {
+>        "runIntrospectionScriptBeforeJwtCreation": false,
+>        "keepClientAuthorizationAfterExpiration": false,
+>        "allowSpontaneousScopes": false,
+>        "backchannelLogoutSessionRequired": false,
+>        "parLifetime": 600,
+>        "requirePar": false,
+>        "jansDefaultPromptLogin": false
+>    },
+>    "backchannelUserCodeParameter": false,
+>    "description": "test1234",
+>    "displayName": "test1234",
+>    "authenticationMethod": "client_secret_basic",
+>    "tokenBindingSupported": false,
+>    "baseDn": "inum=bd27a9f6-7772-4049-bd4f-bf7c651fbe7c,ou=clients,o=jans",
+>    "inum": "bd27a9f6-7772-4049-bd4f-bf7c651fbe7c"
+>}
+> ```
+
+</details>
+
+<hr />
+<h4 id="creating-new-openid-connect-client">Creating new OpenID Connect client<a class="headerlink" href="#creating-new-openid-connect-client" title="Permanent link">#</a></h4>
+<details>
+  <summary><code>POST</code> <code><b>/{inum}</b></code> <code>(creates a new OpenID Connect client)</code></summary>
+
+##### Parameters
+
+> | name       |  param type | data type      | type      |default value | description                            |
+> |------------|-------------|----------------|-----------|--------------|----------------------------------------|
+> | None       |  request    | object (JSON)  | required  | NA           | OpenID Connect client json                         |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `application/json        `        | `OpenID Connect client json`                                                 |
+> | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
+> | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
+
+##### Example cURL
+
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">post</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
+</code></pre></div>
+
+##### Sample Request
+
+> ```javascript
+>{
+>  "clientName": "test1234",
+>  "description": "test1234",
+>  "expirable": [],
+>  "softwareSection": false,
+>  "cibaSection": false,
+>  "backchannelUserCodeParameter": false,
+>  "redirectUris": [
+>    "https://abc,com"
+>  ],
+>  "claimRedirectUris": [],
+>  "authorizedOrigins": [],
+>  "requestUris": [],
+>  "postLogoutRedirectUris": [],
+>  "responseTypes": [],
+>  "grantTypes": [],
+>  "scopes": [
+>    "inum=43F1,ou=scopes,o=jans",
+>    "inum=C17A,ou=scopes,o=jans",
+>    "inum=764C,ou=scopes,o=jans"
+>  ],
+>  "attributes": {
+>    "tlsClientAuthSubjectDn": null,
+>    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+>    "keepClientAuthorizationAfterExpiration": false,
+>    "allowSpontaneousScopes": false,
+>    "backchannelLogoutSessionRequired": false,
+>    "backchannelLogoutUri": [],
+>    "rptClaimsScripts": [],
+>    "consentGatheringScripts": [],
+>    "spontaneousScopeScriptDns": [],
+>    "introspectionScripts": [],
+>    "postAuthnScripts": [],
+>    "additionalAudience": [],
+>    "spontaneousScopes": [],
+>    "redirectUrisRegex": "",
+>    "parLifetime": "",
+>    "requirePar": false,
+>    "jansDefaultPromptLogin": false,
+>    "authorizedAcrValues": [],
+>    "updateTokenScriptDns": [],
+>    "ropcScripts": [],
+>    "jansAuthSignedRespAlg": "",
+>    "jansAuthEncRespAlg": "",
+>    "jansAuthEncRespEnc": ""
+>  },
+>  "tlsClientAuthSubjectDn": null,
+>  "frontChannelLogoutSessionRequired": false,
+>  "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+>  "backchannelLogoutSessionRequired": false,
+>  "keepClientAuthorizationAfterExpiration": false,
+>  "allowSpontaneousScopes": false,
+>  "spontaneousScopes": [],
+>  "introspectionScripts": [],
+>  "spontaneousScopeScriptDns": [],
+>  "consentGatheringScripts": [],
+>  "redirectUrisRegex": "",
+>  "parLifetime": "",
+>  "requirePar": false,
+>  "updateTokenScriptDns": [],
+>  "ropcScripts": [],
+>  "jansAuthSignedRespAlg": "",
+>  "jansAuthEncRespAlg": "",
+>  "jansAuthEncRespEnc": "",
+>  "postAuthnScripts": [],
+>  "rptClaimsScripts": [],
+>  "additionalAudience": [],
+>  "backchannelLogoutUri": [],
+>  "jansDefaultPromptLogin": false,
+>  "authorizedAcrValues": [],
+>  "customObjectClasses": [],
+>  "requireAuthTime": false,
+>  "trustedClient": false,
+>  "persistClientAuthorizations": false,
+>  "includeClaimsInIdToken": false,
+>  "rptAsJwt": false,
+>  "accessTokenAsJwt": false,
+>  "disabled": false,
+>  "action_message": "test1234test1234"
+>}
+> ```
+
+
+</details>
+
+<hr />
+<h4 id="updating-existing-openid-connect-client">Updating existing OpenID Connect client<a class="headerlink" href="#updating-existing-openid-connect-client" title="Permanent link">#</a></h4>
+<details>
+  <summary><code>PUT</code> <code><b>/{inum}</b></code> <code>(updates an existings OpenID Connect client)</code></summary>
+
+##### Parameters
+
+> | name       |  param type | data type      | type      |default value | description                            |
+> |------------|-------------|----------------|-----------|--------------|----------------------------------------|
+> | None       |  request    | object (JSON)  | required  | NA           | OpenID Connect client json                         |
+
+##### Responses
+
+> | http code     | content-type                      | response                                                                      |
+> |---------------|-----------------------------------|-------------------------------------------------------------------------------|
+> | `200`         | `application/json        `        | `OpenID Connect client json`                                                  |
+> | `404`         | `application/json`                | `{"code":"404","message":"The requested OpenID Connect client doesn't exist"}`|
+> | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                                     |
+> | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                        |
+
+##### Example cURL
+
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PUT</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">put</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
+</code></pre></div>
+
+##### Sample Request
+
+> ```javascript
+>{
+>    "dn": "inum=bd27a9f6-7772-4049-bd4f-bf7c651fbe7c,ou=clients,o=jans",
+>    "deletable": false,
+>    "clientSecret": "c0b5ce54-d1e0-4a22-999a-8bcd055a3bc2",
+>    "frontChannelLogoutSessionRequired": false,
+>    "redirectUris": [
+>        "https://abc,com"
+>    ],
+>    "responseTypes": [
+>        "code"
+>    ],
+>    "grantTypes": [
+>        "refresh_token",
+>        "authorization_code"
+>    ],
+>    "applicationType": "web",
+>    "clientName": "test1234",
+>    "clientNameLocalized": {},
+>    "logoUriLocalized": {},
+>    "clientUriLocalized": {},
+>    "policyUriLocalized": {},
+>    "tosUriLocalized": {},
+>    "subjectType": "public",
+>    "tokenEndpointAuthMethod": "client_secret_basic",
+>    "scopes": [
+>        "inum=43F1,ou=scopes,o=jans",
+>        "inum=C17A,ou=scopes,o=jans",
+>        "inum=764C,ou=scopes,o=jans"
+>    ],
+>    "trustedClient": false,
+>    "persistClientAuthorizations": false,
+>    "includeClaimsInIdToken": false,
+>    "customAttributes": [],
+>    "customObjectClasses": [
+>        "top",
+>        "jansClntCustomAttributes"
+>    ],
+>    "rptAsJwt": false,
+>    "accessTokenAsJwt": false,
+>    "disabled": false,
+>    "attributes": {
+>        "runIntrospectionScriptBeforeJwtCreation": false,
+>        "keepClientAuthorizationAfterExpiration": false,
+>        "allowSpontaneousScopes": false,
+>        "backchannelLogoutSessionRequired": false,
+>        "parLifetime": 600,
+>        "requirePar": false,
+>        "jansDefaultPromptLogin": false
+>    },
+>    "backchannelUserCodeParameter": false,
+>    "description": "test1234",
+>    "displayName": "test1234",
+>    "authenticationMethod": "client_secret_basic",
+>    "tokenBindingSupported": false,
+>    "baseDn": "inum=bd27a9f6-7772-4049-bd4f-bf7c651fbe7c,ou=clients,o=jans",
+>    "inum": "bd27a9f6-7772-4049-bd4f-bf7c651fbe7c"
+>}
+> ```
+
+</details>
+
+<hr />
+<h4 id="patching-existing-openid-connect-client">Patching existing OpenID Connect client<a class="headerlink" href="#patching-existing-openid-connect-client" title="Permanent link">#</a></h4>
+<details>
+  <summary><code>PATCH</code> <code><b>/{inum}</b></code> <code>(patches an existing OpenID Connect client)</code></summary>
+
+##### Parameters
+
+> | name       |  param type | data type          | type      |default value | description                             |
+> |------------|-------------|--------------------|-----------|--------------|-----------------------------------------|
+> | inum       |  path       | string             | required  | NA           | OpenID Connect client unique idendifier |
+> | None       |  request    | json-patch object  | required  | NA           | json-patch request                      |
+
+
+##### Responses
+
+> | http code     | content-type                      | response                                                               |
+> |---------------|-----------------------------------|------------------------------------------------------------------------|
+> | `200`         | `application/json        `        | `OpenID Connect client details`                                                    |
+> | `404`         | `application/json`                | `{"code":"404","message":"The requested <inum> doesn't exist"}`        |
+> | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
+> | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
+
+##### Example cURL
+
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PATCH</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients/f8c1a111-0919-47e8-a4d4-f7c18f73a644&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">patch</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
+</code></pre></div>
+
+##### Sample Request
+
+> <div class="highlight"><pre><span></span><code><span class="p">[{</span><span class="w"> </span><span class="s2">&quot;op&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/responseTypes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;value&quot;</span><span class="o">:</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">,</span><span class="s2">&quot;token&quot;</span><span class="p">]}]</span><span class="w"> </span>
+</code></pre></div>
+
+</details>
+
+<hr />
+<h4 id="deleting-existing-openid-connect-client">Deleting existing OpenID Connect client<a class="headerlink" href="#deleting-existing-openid-connect-client" title="Permanent link">#</a></h4>
+<details>
+  <summary><code>DELETE</code> <code><b>/{inum}</b></code> <code>(deletes an existings OpenID Connect client)</code></summary>
+
+##### Parameters
+
+> | name       |  param type | data type          | type      |default value | description                             |
+> |------------|-------------|--------------------|-----------|--------------|-----------------------------------------|
+> | inum       |  path       | string             | required  | NA           | OpenID Connect client unique idendifier |
+
+
+##### Responses
+
+> | http code     | content-type                      | response                                                               |
+> |---------------|-----------------------------------|------------------------------------------------------------------------|
+> | `204`         | `application/json        `        | `No Content`                                                    |
+> | `404`         | `application/json`                | `{"code":"404","message":"The requested <inum> doesn't exist"}`        |
+> | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
+> | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
+
+##### Example cURL
+
+> <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">DELETE</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients/f8c1a111-0919-47e8-a4d4-f7c18f73a644&#39;</span><span class="w"></span>
+</code></pre></div>
+
+##### Sample Request
+> None
+
+</details>
+<hr />
 
   <hr>
 <div class="md-source-file">
@@ -10119,7 +10533,7 @@ Be aware that all the dependencies are copied into the <code>server/target/jans-
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-07-21</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-22T17:57:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-22</span>
       
     
   </small>
@@ -10139,42 +10553,6 @@ Be aware that all the dependencies are copied into the <code>server/target/jans-
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Overview
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../security/" class="md-footer__link md-footer__link--next" aria-label="Next: Security" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Security
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

@@ -491,6 +491,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/config-api/attribute/</loc>
+         <lastmod>2022-11-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-api/config-api-configuration/</loc>
+         <lastmod>2022-11-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/config-api/config/</loc>
          <lastmod>2022-11-22</lastmod>
          <changefreq>daily</changefreq>
@@ -502,6 +512,11 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/monitoring/</loc>
+         <lastmod>2022-11-22</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-api/openid-client/</loc>
          <lastmod>2022-11-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
