@@ -20,6 +20,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
     source_files = [
                 (os.path.join(Config.dist_app_dir, 'pyjwt.zip'), base.current_app.app_info['PYJWT']),
                 (os.path.join(Config.dist_app_dir, 'prompt_toolkit.zip'), base.current_app.app_info['PROMPT_TOOLKIT']),
+                (os.path.join(Config.dist_app_dir, 'wcwidth.zip'), base.current_app.app_info['WCWIDTH']),
+                (os.path.join(Config.dist_app_dir, 'pygments.zip'), base.current_app.app_info['PYGMENTS']),
                 ]
 
     def __init__(self):
@@ -71,9 +73,11 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'jans_cli_tui.py')])
 
 
-        #extract pyjwt and prmpt-toolkit from archieve
+        #extract python libraries
         base.extract_from_zip(self.source_files[0][0], 'jwt', os.path.join(self.pylib_dir, 'jwt'))
         base.extract_from_zip(self.source_files[1][0], 'src/prompt_toolkit', os.path.join(self.pylib_dir, 'prompt_toolkit'))
+        base.extract_from_zip(self.source_files[2][0], 'wcwidth', os.path.join(self.pylib_dir, 'wcwidth'))
+        base.extract_from_zip(self.source_files[3][0], 'pygments', os.path.join(self.pylib_dir, 'pygments'))
 
         # extract yaml files
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger-auto.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger-auto.yaml'), ren=True)
