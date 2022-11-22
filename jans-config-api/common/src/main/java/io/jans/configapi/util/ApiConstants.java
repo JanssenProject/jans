@@ -83,6 +83,7 @@ public class ApiConstants {
     public static final String QNAME = "qname";
     public static final String INCLUDE_SOURCE = "includeSource";
     public static final String SOURCE = "/source/";
+    public static final String PLUGIN = "/plugin";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";

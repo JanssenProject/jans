@@ -8,11 +8,17 @@ package io.jans.as.client.ssa.get;
 
 import io.jans.as.client.BaseRequest;
 import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.ssa.SsaRequestParam;
+import io.jans.as.model.util.QueryBuilder;
 import jakarta.ws.rs.core.MediaType;
 
 public class SsaGetRequest extends BaseRequest {
 
     private String accessToken;
+
+    private String jti;
+
+    private Long orgId;
 
     public SsaGetRequest() {
         setContentType(MediaType.APPLICATION_JSON);
@@ -28,8 +34,27 @@ public class SsaGetRequest extends BaseRequest {
         this.accessToken = accessToken;
     }
 
+    public String getJti() {
+        return jti;
+    }
+
+    public void setJti(String jti) {
+        this.jti = jti;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     @Override
     public String getQueryString() {
-        return null;
+        QueryBuilder builder = QueryBuilder.instance();
+        builder.append(SsaRequestParam.JTI.getName(), jti);
+        builder.append(SsaRequestParam.ORG_ID.getName(), orgId != null ? orgId.toString() : "");
+        return builder.toString();
     }
 }

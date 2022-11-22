@@ -45,6 +45,9 @@ import org.slf4j.Logger;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Provides required methods to create a new SSA considering all required conditions.
+ */
 @Stateless
 @Named
 public class SsaCreateAction {
@@ -85,6 +88,27 @@ public class SsaCreateAction {
     @Inject
     private SsaContextBuilder ssaContextBuilder;
 
+    /**
+     * Creates an SSA from the requested parameters.
+     * <p>
+     * Method will return a {@link WebApplicationException} with status {@code 401} if this functionality is not enabled,
+     * request has to have at least scope "ssa.admin",
+     * it will also return a {@link WebApplicationException} with status {@code 500} in case an uncontrolled
+     * error occurs when processing the method.
+     * <p/>
+     * <p>
+     * Response of this method can be modified using the following custom script
+     * <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py">SSA Custom Script</a>,
+     * method create.
+     * </p>
+     * <p>
+     * SSA returned by this method is stored in the corresponding database, so it can be later retrieved, validated or revoked.
+     * <p/>
+     *
+     * @param requestParams Valid json request
+     * @param httpRequest   Http request
+     * @return {@link Response} with status {@code 201} (Created) and response body containing the SSA in JWT format.
+     */
     public Response create(String requestParams, HttpServletRequest httpRequest) {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
         Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
@@ -151,6 +175,15 @@ public class SsaCreateAction {
         return builder.build();
     }
 
+    /**
+     * Get custom attributes from a request, previously configured in SSA global parameters.
+     * <p>
+     * Method prints the warning type in case a request parameter does not exist in the SSA model or SSA global parameter settings.
+     * </p>
+     *
+     * @param jsonRequest Valid json request
+     * @return Map containing all custom attributes where key is the attribute name.
+     */
     private Map<String, String> getCustomAttributes(JSONObject jsonRequest) {
         if (appConfiguration.getSsaConfiguration().getSsaCustomAttributes().isEmpty())
             return new HashMap<>();
@@ -181,6 +214,16 @@ public class SsaCreateAction {
         return customAttributes;
     }
 
+    /**
+     * Get request expiration date using UTC timezone.
+     * <p>
+     * Method converts from epoch time to Date or generates a date based on the global SSA setting when the Date field
+     * of the request is null.
+     * </p>
+     *
+     * @param ssaCreateRequest Request of SSA
+     * @return Respective new Date instance.
+     */
     private Date getExpiration(SsaCreateRequest ssaCreateRequest) {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
         if (ssaCreateRequest.getExpiration() != null && ssaCreateRequest.getExpiration() > 0) {

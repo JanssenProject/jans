@@ -37,6 +37,10 @@ spec:
       dnsConfig:
 {{ toYaml . | indent 8 }}
     {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "fido2.topology-spread-constraints" . | indent 8 }}
+      {{- end }}
       containers:
       - name: {{ include "fido2.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}

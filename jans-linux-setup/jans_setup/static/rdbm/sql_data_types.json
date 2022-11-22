@@ -26,6 +26,17 @@
       "type": "STRING"
     }
   },
+  "displayNameLocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "givenName": {
     "mysql": {
       "size": 128,
@@ -301,6 +312,17 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansLogoURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "jansPolicyURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -310,6 +332,17 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
+    }
+  },
+  "jansPolicyURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansSectorIdentifierURI": {
@@ -334,6 +367,17 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansClntURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "jansTosURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -343,6 +387,17 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
+    }
+  },
+  "jansTosURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansJwt": {

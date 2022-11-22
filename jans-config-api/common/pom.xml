@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.4-SNAPSHOT</version>
+		<version>1.0.5-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -34,10 +34,10 @@
 		</dependency>
 
 		<!-- Others -->
-		<dependency>
+		<!--<dependency>
 			<groupId>com.github.fge</groupId>
 			<artifactId>json-patch</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>

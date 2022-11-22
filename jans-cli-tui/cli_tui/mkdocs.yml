@@ -1,0 +1,136 @@
+# Project information
+site_name: Jans-Cli-Tui
+site_url: 'https://gluu.org/gluu-4/'
+repo_url: 'https://github.com/JanssenProject'
+edit_uri: 'https://github.com/JanssenProject'
+site_description: "Jans-Tui Docs"
+
+# Copyright
+copyright: Copyright &copy; 2022, The Janssen Project
+
+# Plugins
+plugins:
+  - mkdocstrings
+  - search
+  - glightbox
+
+# Configuration
+theme:
+    name: material    
+    highlightjs: true
+    hljs_languages:
+        - yaml
+        - java
+        - bash
+        - python
+    logo: img/logo.png 
+    favicon: img/favicon.ico    
+    features:
+      - navigation.instant
+      - toc.follow
+          - search.suggest
+          - search.highlight
+      - navigation.tabs
+      - navigation.tabs.sticky 
+      - navigation.top
+      - navigation.sections
+      - navigation.tracking
+      - content.code.annotate
+      - navigation.indexes 
+      - navigation.expand
+
+    palette: 
+        - media: "(prefers-color-scheme: light)"
+          scheme: default
+          primary: white
+          accent: green
+          toggle:
+                icon: material/weather-sunny
+                name: Switch to dark mode
+
+        - media: "(prefers-color-scheme: dark)"
+          scheme: slate
+          primary: black
+          accent: green
+          toggle:
+            icon: material/weather-night
+            name: Switch to light mode
+
+# Extensions
+markdown_extensions:
+  - attr_list
+  - admonition
+  - md_in_html
+  - toc:
+  # - pymdownx.superfences:
+  #     custom_fences:
+  #         - name: mermaid
+  #           class: mermaid
+  #           format: !!python/name:pymdownx.superfences.fence_code_format
+  # - pymdownx.tabbed
+
+extra:
+  homepage: 'docs/home/'
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/JanssenProject/jans
+      name: Janssen on GitHub
+    - icon: fontawesome/solid/link
+      link: https://jans.io/docs
+      name: Janssen Website
+
+# Navigation
+nav: 
+    - Introduction:
+      - Welcome : 'docs/home/index.md'
+      - Janssen Modules : 'docs/home/janssen_modules.md'
+
+    - Getting Started: 
+      - Installation : 
+        - VM System Requirements : 'docs/getting_started/installation/vm-requirements.md'
+        - Ubuntu : 'docs/getting_started/installation/ubuntu.md'
+        - RHEL : 'docs/getting_started/installation/rhel.md'
+        - Suse : 'docs/getting_started/installation/suse.md'
+        - Dynamic download : 'docs/getting_started/installation/dynamic-download.md'
+
+    - Guides: 
+      - Jans Cli : 'docs/Gallery/gallery.md'
+      - Jans Tui : 'docs/Gallery/gallery.md'
+
+    - Gallery: 
+      - 'docs/Gallery/gallery.md'
+      - TUI : 'docs/Gallery/tui.md'
+      - CLI : 'docs/Gallery/cli.md'
+
+    - Plugins : 
+      - 'Plugins': 'docs/plugins/plugins.md'
+      - OAuth : 
+        - Main OAuth : 'docs/plugins/oauth/oauth.md'
+        - 'Client Dialog': 'docs/plugins/oauth/edit_client_dialog.md'
+        - 'Scope Dialog': 'docs/plugins/oauth/edit_scope_dialog.md'
+        - 'UMA Dialog': 'docs/plugins/oauth/edit_uma_dialog.md'
+      - FIDO : 
+        - Main FIDO : 'docs/plugins/fido/fido.md'
+      - SCIM : 
+        - Main SCIM : 'docs/plugins/scim/scim.md'
+      - Config API : 
+        - Main Config API : 'docs/plugins/config_api/config_api.md'
+      - Client API : 
+        - Main Client API : 'docs/plugins/client_api/client_api.md'
+      - Scripts : 
+        - Main Scripts : 'docs/plugins/scripts/scripts.md'
+
+    - Components:       
+      - docs/wui_components/wui_components.md  
+      - Dialogs components :
+        - 'jans_cli_dialog': 'docs/wui_components/jans_cli_dialog.md'
+        - 'jans_dialog_with_nav': 'docs/wui_components/jans_dialog_with_nav.md'
+        - 'jans_message_dialog': 'docs/wui_components/jans_message_dialog.md'
+      - Navigation bar components :
+        - 'jans_nav_bar': 'docs/wui_components/jans_nav_bar.md'
+        - 'jans_side_nav_bar': 'docs/wui_components/jans_side_nav_bar.md'
+        - 'jans_vetrical_nav': 'docs/wui_components/jans_vetrical_nav.md'
+      - Custom components :
+        - 'jans_data_picker': 'docs/wui_components/jans_data_picker.md'
+        - 'jans_drop_down': 'docs/wui_components/jans_drop_down.md'

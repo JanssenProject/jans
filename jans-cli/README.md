@@ -171,4 +171,3 @@ Now by selecting 1 it returns our desired result as below image:
 ![default-authentication-method.png](../docs/assets/image-im-cur-default-auth-03042021.png)
 
 So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](https://github.com/JanssenProject/jans/blob/main/docs/admin/config-guide/jans-cli/index.md) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
-

@@ -55,14 +55,13 @@ public class SsaGetActionTest {
         client.setDn("inum=0000,ou=clients,o=jans");
         when(ssaRestWebServiceValidator.getClientFromSession()).thenReturn(client);
 
-        boolean softwareRoles = false;
         String jti = "my-jti";
         Long orgId = 1000L;
-        Response response = ssaGetAction.get(softwareRoles, jti, orgId, mock(HttpServletRequest.class));
+        Response response = ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
         assertNotNull(response.getEntity(), "response entity is null");
         assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
-        verify(log).debug(anyString(), any(), any(), any());
+        verify(log).debug(anyString(), any(), any());
         verify(errorResponseFactory).validateFeatureEnabled(any());
         verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any(), any(), any(), any());
         verify(ssaJsonService).jsonArrayToString(any());
@@ -79,11 +78,10 @@ public class SsaGetActionTest {
         doThrow(error).when(ssaRestWebServiceValidator).getClientFromSession();
         when(log.isErrorEnabled()).thenReturn(Boolean.FALSE);
 
-        boolean softwareRoles = false;
         String jti = "my-jti";
         Long orgId = 1000L;
-        assertThrows(WebApplicationException.class, () -> ssaGetAction.get(softwareRoles, jti, orgId, mock(HttpServletRequest.class)));
-        verify(log).debug(anyString(), any(), any(), any());
+        assertThrows(WebApplicationException.class, () -> ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class)));
+        verify(log).debug(anyString(), any(), any());
         verify(ssaRestWebServiceValidator).getClientFromSession();
         verify(log).isErrorEnabled();
         verify(log, never()).error(anyString(), any(WebApplicationException.class));
@@ -100,11 +98,10 @@ public class SsaGetActionTest {
         doThrow(error).when(ssaRestWebServiceValidator).getClientFromSession();
         when(log.isErrorEnabled()).thenReturn(Boolean.TRUE);
 
-        boolean softwareRoles = false;
         String jti = "my-jti";
         Long orgId = 1000L;
-        assertThrows(WebApplicationException.class, () -> ssaGetAction.get(softwareRoles, jti, orgId, mock(HttpServletRequest.class)));
-        verify(log).debug(anyString(), any(), any(), any());
+        assertThrows(WebApplicationException.class, () -> ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class)));
+        verify(log).debug(anyString(), any(), any());
         verify(ssaRestWebServiceValidator).getClientFromSession();
         verify(log).isErrorEnabled();
         verify(log).error(anyString(), any(WebApplicationException.class));
@@ -120,11 +117,10 @@ public class SsaGetActionTest {
                         .build());
         when(errorResponseFactory.createWebApplicationException(any(Response.Status.class), any(SsaErrorResponseType.class), anyString())).thenThrow(error);
 
-        boolean softwareRoles = false;
         String jti = "my-jti";
         Long orgId = 1000L;
-        assertThrows(WebApplicationException.class, () -> ssaGetAction.get(softwareRoles, jti, orgId, mock(HttpServletRequest.class)));
-        verify(log).debug(anyString(), any(), any(), any());
+        assertThrows(WebApplicationException.class, () -> ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class)));
+        verify(log).debug(anyString(), any(), any());
         verify(ssaRestWebServiceValidator).getClientFromSession();
         verify(log, never()).isErrorEnabled();
         verify(log).error(any(), any(Exception.class));

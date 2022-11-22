@@ -2,6 +2,7 @@ package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.server.ssa.ws.rs.action.SsaCreateAction;
 import io.jans.as.server.ssa.ws.rs.action.SsaGetAction;
+import io.jans.as.server.ssa.ws.rs.action.SsaRevokeAction;
 import io.jans.as.server.ssa.ws.rs.action.SsaValidateAction;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
@@ -31,6 +32,9 @@ public class SsaRestWebServiceImplTest {
     @Mock
     private SsaValidateAction ssaValidateAction;
 
+    @Mock
+    private SsaRevokeAction ssaRevokeAction;
+
     @Test
     public void create_validParams_validResponse() {
         when(ssaCreateAction.create(anyString(), any())).thenReturn(mock(Response.class));
@@ -43,11 +47,11 @@ public class SsaRestWebServiceImplTest {
 
     @Test
     public void get_validParams_validResponse() {
-        when(ssaGetAction.get(anyBoolean(), anyString(), any(), any())).thenReturn(mock(Response.class));
+        when(ssaGetAction.get(anyString(), any(), any())).thenReturn(mock(Response.class));
 
-        Response response = ssaRestWebServiceImpl.get(false, "testJti", 1000L, mock(HttpServletRequest.class));
+        Response response = ssaRestWebServiceImpl.get("testJti", 1000L, mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
-        verify(ssaGetAction).get(anyBoolean(), anyString(), any(), any());
+        verify(ssaGetAction).get(anyString(), any(), any());
         verifyNoMoreInteractions(ssaGetAction);
     }
 
@@ -59,5 +63,15 @@ public class SsaRestWebServiceImplTest {
         assertNotNull(response, "response is null");
         verify(ssaValidateAction).validate(anyString());
         verifyNoMoreInteractions(ssaValidateAction);
+    }
+
+    @Test
+    public void revoke_validParams_validResponse() {
+        when(ssaRevokeAction.revoke(anyString(), any(), any())).thenReturn(mock(Response.class));
+
+        Response response = ssaRestWebServiceImpl.revoke("testJti", 1000L, mock(HttpServletRequest.class));
+        assertNotNull(response, "response is null");
+        verify(ssaRevokeAction).revoke(anyString(), any(), any());
+        verifyNoMoreInteractions(ssaRevokeAction);
     }
 }

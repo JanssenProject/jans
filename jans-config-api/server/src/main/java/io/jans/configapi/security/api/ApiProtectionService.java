@@ -25,8 +25,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -136,11 +134,6 @@ public class ApiProtectionService {
             scope = scopes.get(0);
             log.debug("Scope from DB is - {}", scope.getId());
             scopeList.add(scope);
-            if (scopes.size() > 1) {
-                log.error("{} Scope with same name - {} ", scopes.size(), scopeName);
-                throw new WebApplicationException("Multiple Scope with same name - " + scopeName,
-                        Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
-            }
         }
 
         ScopeType scopeType = ScopeType.OAUTH;
@@ -151,17 +144,20 @@ public class ApiProtectionService {
         // Create/Update scope only if they are config-api-resource scopes
         if (isConfigApiScope(scopeName)) {
 
+            //ensure scope does not exists
+            scopes = scopeService.searchScopesById(scopeName);
+            log.debug("ConfigApiScope scopeName:{} in DB - scopes:{} ", scopeName, scopes);
             if (scopes == null || scopes.isEmpty()) {
-                log.debug("Scope - '{}' does not exist, hence creating it.", scopeName);
-                // Scope does not exists hence create Scope
-                scope = new Scope();
-                String inum = UUID.randomUUID().toString();
-                scope.setId(scopeName);
-                scope.setDisplayName(scopeName);
-                scope.setInum(inum);
-                scope.setDn(scopeService.getDnForScope(inum));
-                scope.setScopeType(scopeType);
-                scopeService.addScope(scope);
+                log.debug("Scope - '{}' does not exist, hence creating it.", scopeName);               
+                    // Scope does not exists hence create Scope
+                    scope = new Scope();
+                    String inum = UUID.randomUUID().toString();
+                    scope.setId(scopeName);
+                    scope.setDisplayName(scopeName);
+                    scope.setInum(inum);
+                    scope.setDn(scopeService.getDnForScope(inum));
+                    scope.setScopeType(scopeType);
+                    scopeService.addScope(scope);
             }
             if (scope != null) {
                 // Update resource

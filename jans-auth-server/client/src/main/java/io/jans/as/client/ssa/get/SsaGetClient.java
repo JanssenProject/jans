@@ -11,7 +11,6 @@ import io.jans.as.model.config.Constants;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.client.Invocation.Builder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
 
 public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
@@ -27,22 +26,12 @@ public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
         return HttpMethod.GET;
     }
 
-    public SsaGetResponse execSsaGet(String accessToken, String jti, Long orgId, Boolean softwareRoles) {
+    public SsaGetResponse execSsaGet(String accessToken, String jti, Long orgId) {
         SsaGetRequest ssaGetRequest = new SsaGetRequest();
         ssaGetRequest.setAccessToken(accessToken);
+        ssaGetRequest.setJti(jti);
+        ssaGetRequest.setOrgId(orgId);
         setRequest(ssaGetRequest);
-
-        URIBuilder uriBuilder = new URIBuilder();
-        if (StringUtils.isNotBlank(jti)) {
-            uriBuilder.addParameter("jti", jti);
-        }
-        if (orgId != null && orgId > 0) {
-            uriBuilder.addParameter("org_id", orgId.toString());
-        }
-        if (softwareRoles != null) {
-            uriBuilder.addParameter("software_roles", softwareRoles.toString());
-        }
-        setUrl(getUrl() + uriBuilder);
         return exec();
     }
 
@@ -50,7 +39,8 @@ public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
         try {
             initClient();
 
-            Builder clientRequest = webTarget.request();
+            String uriWithParams = getUrl() + "?" + getRequest().getQueryString();
+            Builder clientRequest = resteasyClient.target(uriWithParams).request();
             applyCookies(clientRequest);
 
             clientRequest.header("Content-Type", request.getContentType());

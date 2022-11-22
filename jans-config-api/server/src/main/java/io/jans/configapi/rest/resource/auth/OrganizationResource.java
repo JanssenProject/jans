@@ -43,7 +43,7 @@ public class OrganizationResource extends ConfigBaseResource {
 
     @Operation(summary = "Retrieves organization configuration", description = "Retrieves organization configuration", operationId = "get-organization-config", tags = {
             "Organization Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.ORG_CONFIG_READ_ACCESS  }))
+                    ApiAccessConstants.ORG_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuOrganization.class), examples = @ExampleObject(name = "Response json example", value = "example/org/org.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -68,8 +68,15 @@ public class OrganizationResource extends ConfigBaseResource {
     public Response patchOrganization(@NotNull String pathString) throws JsonPatchException, IOException {
         logger.trace("Organization patch request - pathString:{} ", pathString);
         GluuOrganization organization = organizationService.getOrganization();
-        organization = Jackson.applyPatch(pathString, organization);
-        organizationService.updateOrganization(organization);
+        try {
+
+            organization = Jackson.applyPatch(pathString, organization);
+            organizationService.updateOrganization(organization);
+
+        } catch (Exception ex) {
+            logger.error("Error while patching Organization details", ex);
+            thorwInternalServerException(ex);
+        }
         return Response.ok(organizationService.getOrganization()).build();
     }
 

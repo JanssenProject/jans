@@ -1,6 +1,5 @@
 package io.jans.as.server.token.ws.rs;
 
-import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
@@ -128,7 +127,7 @@ public class TokenExchangeService {
 
         tokenRestWebServiceValidator.validateSubjectToken(deviceSecret, subjectToken, sessionId, auditLog);
 
-        TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(new User(), client);
+        TokenExchangeGrant tokenExchangeGrant = authorizationGrantList.createTokenExchangeGrant(sessionIdService.getUser(sessionId), client);
         tokenExchangeGrant.setSessionDn(sessionId.getDn());
 
         executionContext.setGrant(tokenExchangeGrant);

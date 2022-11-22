@@ -14,7 +14,7 @@ jansLevel: 30
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_usercertexternalauthenticator)s
+jansScr::%(person_authentication_user_cert_external_authenticator_usercertexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -102,7 +102,7 @@ jansLevel: 40
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_yubicloudexternalauthenticator)s
+jansScr::%(person_authentication_yubicloud_external_authenticator_yubicloudexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -234,7 +234,7 @@ jansLevel: 20
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_basiclockaccountexternalauthenticator)s
+jansScr::%(person_authentication_basic_lock_account_external_authenticator_basiclockaccountexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -255,7 +255,7 @@ jansLevel: 40
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_otpexternalauthenticator)s
+jansScr::%(person_authentication_otp_external_authenticator_otpexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -288,7 +288,7 @@ jansLevel: 70
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_fido2externalauthenticator)s
+jansScr::%(person_authentication_fido2_external_authenticator_fido2externalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -311,7 +311,7 @@ jansLevel: 60
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_supergluuexternalauthenticator)s
+jansScr::%(person_authentication_super_gluu_external_authenticator_supergluuexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -326,7 +326,7 @@ jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_basicexternalauthenticator)s
+jansScr::%(person_authentication_basic_external_authenticator_basicexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -377,7 +377,7 @@ jansLevel: 50
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_twilio2fa)s
+jansScr::%(person_authentication_twilio_2fa_twilio2fa)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -398,7 +398,7 @@ jansLevel: 45
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
-jansScr::%(person_authentication_smpp2fa)s
+jansScr::%(person_authentication_smpp_2fa_smpp2fa)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -537,14 +537,14 @@ objectClass: top
 description: Agama Script
 displayName: agama
 inum: BADA-BADA
-jansConfProperty: {"value1":"cust_param_name","value2":"customParam1","hide":false,"description":""}
+jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description": ""}
 jansProgLng: python
 jansRevision: 1
-jansScr::%(person_authentication_agamabridge)s
+jansScr::%(person_authentication_agama_bridge_agamabridge)s
 jansScrTyp: person_authentication
 
 dn: inum=B270-381E,ou=scripts,o=jans
@@ -559,7 +559,7 @@ jansLevel: 10
 jansModuleProperty: {"value1":"SCRIPT_FUNCTION","value2":"ldap","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr::%(person_authentication_other_forgot_password_forgot_password)s
+jansScr::%(person_authentication_forgot_password_forgot_password)s
 jansScrTyp: person_authentication
 
 dn: inum=CACD-5902,ou=scripts,o=jans
@@ -576,4 +576,38 @@ jansRevision: 1
 jansScr::%(update_token_updatetoken)s
 jansScrTyp: update_token
 jansProgLng: python
+
+dn: inum=E706-F8A8,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: GitHub Inbound Authentication script
+displayName: github
+inum: E706-F8A8
+jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
+jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
+jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
+jansEnabled: false
+jansLevel: 10
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+jansProgLng: python
+jansRevision: 0
+jansScr::%(person_authentication_github_external_authenticator_githubexternalauthenticator)s
+jansScrTyp: person_authentication
+
+dn: inum=8333-DFBC,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Add GitHub claims to introspection response
+displayName: github-claims-introspection-script
+inum: 8333-DFBC
+jansEnabled: false
+jansLevel: 10
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansProgLng: python
+jansRevision: 0
+jansScr::%(introspection_introspection_github_claims_introspection_github_claims)s
+jansScrTyp: introspection
+
+
 

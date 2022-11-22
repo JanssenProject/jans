@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.4](https://github.com/JanssenProject/jans/compare/v1.0.3...v1.0.4) (2022-11-08)
+
+
+### Features
+
+* for file based scripts check both script revision and file ([#2878](https://github.com/JanssenProject/jans/issues/2878)) ([97ab071](https://github.com/JanssenProject/jans/commit/97ab0712e39605520b3ac8fb8df1c00bf0437797))
+* **jans-auth-server:** added token exchange support to client [#2518](https://github.com/JanssenProject/jans/issues/2518) ([#2855](https://github.com/JanssenProject/jans/issues/2855)) ([943d99f](https://github.com/JanssenProject/jans/commit/943d99f2784e671d361c66c1ddb82c10f567a698))
+* **jans-auth-server:** ssa validation endpoint ([#2842](https://github.com/JanssenProject/jans/issues/2842)) ([de8a86e](https://github.com/JanssenProject/jans/commit/de8a86ed1eb29bd02546e9e22fc6f668ac3217c4))
+* ssa revoke endpoint ([#2865](https://github.com/JanssenProject/jans/issues/2865)) ([9c68f91](https://github.com/JanssenProject/jans/commit/9c68f914e155de492e54121033c8f0ed45d66817))
+
+
+### Bug Fixes
+
+* [#2825](https://github.com/JanssenProject/jans/issues/2825) ([#2828](https://github.com/JanssenProject/jans/issues/2828)) ([5ce21aa](https://github.com/JanssenProject/jans/commit/5ce21aac5df54d2fe9402479fd221fffe9dc77ef))
+* avoid NPE when configuration is missing [#2857](https://github.com/JanssenProject/jans/issues/2857) ([#2863](https://github.com/JanssenProject/jans/issues/2863)) ([4a27091](https://github.com/JanssenProject/jans/commit/4a2709185bd7ba84c3230cb94d4efea940681742))
+* **config-api:** fixes for client creation, enum handling ([#2854](https://github.com/JanssenProject/jans/issues/2854)) ([3121493](https://github.com/JanssenProject/jans/commit/312149393337ff2b2c794053a729c0f0919caa31))
+* fix OR filters join when sub-filters uses lower ([#2850](https://github.com/JanssenProject/jans/issues/2850)) ([3dc6b32](https://github.com/JanssenProject/jans/commit/3dc6b329aacbb6958efd834c85143231595b0d99))
+* **image:** add missing write access in filesystem ([#2846](https://github.com/JanssenProject/jans/issues/2846)) ([db4670d](https://github.com/JanssenProject/jans/commit/db4670d3adabc38b42411fe11bdcb6d6a9b4a0bd)), closes [#2844](https://github.com/JanssenProject/jans/issues/2844)
+* **image:** multiple dynamic scopes created when using 2 replicas ([#2871](https://github.com/JanssenProject/jans/issues/2871)) ([5e0f1e6](https://github.com/JanssenProject/jans/commit/5e0f1e69023da264333e3786fcf994539054be71))
+* **jans-auth-server:** fix language metadata format ([#2883](https://github.com/JanssenProject/jans/issues/2883)) ([e21e206](https://github.com/JanssenProject/jans/commit/e21e206df16b048b1743c3ee441d9fbdb1f8c67e))
+* jans-linux-setup render webapps.xml ([#2839](https://github.com/JanssenProject/jans/issues/2839)) ([ed8fa84](https://github.com/JanssenProject/jans/commit/ed8fa8462b69b37f44d0e5b5bb65345ea96ecc45))
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
 ## 1.0.3 (2022-11-01)
 
 

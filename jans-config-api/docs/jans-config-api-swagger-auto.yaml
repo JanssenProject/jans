@@ -7178,19 +7178,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7355,6 +7355,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         applicationType:
@@ -7369,14 +7370,24 @@ components:
         idTokenTokenBindingCnf:
           type: string
         clientName:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         logoUri:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         clientUri:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         policyUri:
-          $ref: '#/components/schemas/LocalizedString'
+          type: string
         tosUri:
+          type: string
+        clientNameLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        logoUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        clientUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        policyUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        tosUriLocalized:
           $ref: '#/components/schemas/LocalizedString'
         jwksUri:
           type: string
@@ -7611,6 +7622,8 @@ components:
         idTokenLifetime:
           type: integer
           format: int32
+        allowOfflineAccessWithoutConsent:
+          type: boolean
     CustomObjectAttribute:
       type: object
       properties:
@@ -7796,6 +7809,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         subjectTypesSupported:
@@ -8056,6 +8070,7 @@ components:
             - client_credentials
             - refresh_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
             - urn:ietf:params:oauth:grant-type:device_code
         cssLocation:
@@ -8170,6 +8185,10 @@ components:
         openidScopeBackwardCompatibility:
           type: boolean
         disableU2fEndpoint:
+          type: boolean
+        rotateDeviceSecret:
+          type: boolean
+        returnDeviceSecretFromAuthzEndpoint:
           type: boolean
         dcrSignatureValidationEnabled:
           type: boolean
@@ -8620,13 +8639,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -8843,8 +8862,6 @@ components:
           type: string
         jsFaviconPath:
           type: string
-        organizationTitle:
-          type: string
         baseDn:
           type: string
     Scope:
@@ -9027,6 +9044,10 @@ components:
         sessionAttributes:
           type: object
           additionalProperties:
+            type: string
+        deviceSecrets:
+          type: array
+          items:
             type: string
         expirationDate:
           type: string

@@ -36,6 +36,9 @@ import org.slf4j.Logger;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Provides the method to get existing SSAs based on certain conditions.
+ */
 @Stateless
 @Named
 public class SsaGetAction {
@@ -67,14 +70,37 @@ public class SsaGetAction {
     @Inject
     private SsaContextBuilder ssaContextBuilder;
 
-    public Response get(Boolean softwareRoles, String jti, Long orgId, HttpServletRequest httpRequest) {
-        log.debug("Attempting to read ssa: softwareRoles = {}, jti = '{}', orgId = {}", softwareRoles, jti, orgId);
+    /**
+     * Get existing active SSA based on "jti" or "org_id".
+     * <p>
+     * Method will return a {@link WebApplicationException} with status {@code 401} if this functionality is not enabled,
+     * request has to have at least scope "ssa.admin" or "ssa.portal",
+     * it will also return a {@link WebApplicationException} with status {@code 500} in case an uncontrolled
+     * error occurs when processing the method.
+     * </p>
+     * <p>
+     * Response of this method can be modified using the following custom script
+     * <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py">SSA Custom Script</a>,
+     * method get.
+     * </p>
+     * <p>
+     * Method also performs the search based on the scope, if the scope is "ssa.admin" it is based on all SSA records,
+     * but if the scope is "ssa.portal", then it only returns the SSA list corresponding to the same org.
+     * </p>
+     *
+     * @param jti         Unique identifier
+     * @param orgId       Organization ID
+     * @param httpRequest Http request
+     * @return {@link Response} with status {@code 200 (Ok)} and the body containing the list of SSAs.
+     */
+    public Response get(String jti, Long orgId, HttpServletRequest httpRequest) {
+        log.debug("Attempting to read ssa: softwareRoles = {}, orgId = {}", jti, orgId);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
         Response.ResponseBuilder builder = Response.ok();
         try {
             final Client client = ssaRestWebServiceValidator.getClientFromSession();
-            ssaRestWebServiceValidator.checkScopesPolicy(client, Arrays.asList(SsaScopeType.SSA_ADMIN.getValue(), SsaScopeType.SSA_PORTAL.getValue()));
+            ssaRestWebServiceValidator.checkScopesPolicy(client, Arrays.asList(SsaScopeType.SSA_ADMIN.getValue(), SsaScopeType.SSA_PORTAL.getValue(), SsaScopeType.SSA_DEVELOPER.getValue()));
 
             final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(), client.getScopes());
 
@@ -100,6 +126,18 @@ public class SsaGetAction {
         return builder.build();
     }
 
+    /**
+     * Modify the JSONArray through the custom script.
+     *
+     * <p>
+     * Method returns the same json array in case the script execution returned false.
+     * </p>
+     *
+     * @param jsonArray Json array with list of SSA
+     * @param context   Modify ssa response context
+     * @param ssaList   List of SSA
+     * @return Modified Json array.
+     */
     private JSONArray modifyGetScript(JSONArray jsonArray, ModifySsaResponseContext context, List<Ssa> ssaList) {
         if (!modifySsaResponseService.get(jsonArray, context)) {
             return ssaJsonService.getJSONArray(ssaList);

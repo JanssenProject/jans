@@ -35,9 +35,11 @@ import io.jans.fido2.exception.Fido2RuntimeException;
 import org.slf4j.Logger;
 
 /**
+ * Utiltiy class for Certificate related operations
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
+
 @ApplicationScoped
 public class CertificateService {
 

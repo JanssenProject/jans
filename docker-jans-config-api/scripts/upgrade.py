@@ -245,7 +245,9 @@ class Upgrade:
         logger.info("Running upgrade process (if required)")
         self.update_client_redirect_uri()
         self.update_api_dynamic_config()
-        self.update_client_scopes()
+        # temporarily disable client updates
+        # see https://github.com/JanssenProject/jans/issues/2869
+        # self.update_client_scopes()
 
     def update_client_redirect_uri(self):
         kwargs = {}
