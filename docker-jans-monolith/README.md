@@ -91,5 +91,5 @@ After adding the record you can hit endpoints such as https://demoexample.jans.i
 Remove setup and volumes
 
 ```
-docker compose -f jans-mysql-compose.yml down && rm -rf jans-*
+docker compose -f jans-mysql-compose.yml down
 ```
