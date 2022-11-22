@@ -537,7 +537,7 @@ objectClass: top
 description: Agama Script
 displayName: agama
 inum: BADA-BADA
-jansConfProperty: {"value1":"cust_param_name","value2":"customParam1","hide":false,"description":""}
+jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
@@ -584,9 +584,9 @@ description: GitHub Inbound Authentication script
 displayName: github
 inum: E706-F8A8
 jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
-jansConfProperty: {"value1":"github_creds_file","value2":"/opt/github.json","hide":false,"description":""}
+jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
 jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
-jansEnabled: true
+jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
@@ -601,7 +601,7 @@ objectClass: top
 description: Add GitHub claims to introspection response
 displayName: github-claims-introspection-script
 inum: 8333-DFBC
-jansEnabled: true
+jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansProgLng: python

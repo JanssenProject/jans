@@ -67,6 +67,88 @@ def _transform_auth_dynamic_config(conf):
         conf["redirectUrisRegexEnabled"] = bool(distribution != "openbanking")
         should_update = True
 
+    # common config in all distributions
+    if "accessTokenSigningAlgValuesSupported" not in conf:
+        conf["accessTokenSigningAlgValuesSupported"] = [
+            "none",
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "RS384",
+            "RS512",
+            "ES256",
+            "ES384",
+            "ES512",
+            "ES512",
+            "PS256",
+            "PS384",
+            "PS512"
+        ]
+        should_update = True
+
+    if "forceSignedRequestObject" not in conf:
+        conf["forceSignedRequestObject"] = False
+        should_update = True
+
+    if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
+        conf["grantTypesAndResponseTypesAutofixEnabled"] = False
+        should_update = True
+
+    if "sessionIdEnabled" in conf:
+        conf.pop("sessionIdEnabled")
+        should_update = True
+
+    # assert the authorizationRequestCustomAllowedParameters contains dict values instead of string
+    params_with_dict = list(itertools.takewhile(
+        lambda x: isinstance(x, dict), conf["authorizationRequestCustomAllowedParameters"]
+    ))
+    if not params_with_dict:
+        conf["authorizationRequestCustomAllowedParameters"] = [
+            {"paramName": p[0], "returnInResponse": p[1]}
+            for p in [
+                ("customParam1", False),
+                ("customParam2", False),
+                ("customParam3", False),
+                ("customParam4", True),
+                ("customParam5", True),
+            ]
+        ]
+        should_update = True
+
+    if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
+        conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
+        should_update = True
+
+    if "httpLoggingExcludePaths" not in conf:
+        conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
+        should_update = True
+
+    if "requestUriBlockList" not in conf:
+        conf["requestUriBlockList"] = [
+            "localhost",
+            "127.0.0.1",
+        ]
+        should_update = True
+
+    if "ssaConfiguration" not in conf:
+        hostname = manager.config.get("hostname")
+        conf["ssaConfiguration"] = {
+            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
+            "ssaSigningAlg": "RS256",
+            "ssaExpirationInDays": 30
+        }
+        should_update = True
+
+    for grant_type in [
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+    ]:
+        if grant_type not in conf["grantTypesSupported"]:
+            conf["grantTypesSupported"].append(grant_type)
+            should_update = True
+
+    # specific config per distribution
     if distribution == "openbanking":
         if "dcrAuthorizationWithMTLS" not in conf:
             conf["dcrAuthorizationWithMTLS"] = False
@@ -89,9 +171,9 @@ def _transform_auth_dynamic_config(conf):
             conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
             should_update = True
 
-        if conf["redirectUrisRegexEnabled"]:
-            conf["redirectUrisRegexEnabled"] = False
-            should_update = True
+        # if conf["redirectUrisRegexEnabled"]:
+        #     conf["redirectUrisRegexEnabled"] = False
+        #     should_update = True
     else:
         if all([
             os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
@@ -141,84 +223,13 @@ def _transform_auth_dynamic_config(conf):
                 conf["dynamicGrantTypeDefault"].append(grant_type)
                 should_update = True
 
-    if "accessTokenSigningAlgValuesSupported" not in conf:
-        conf["accessTokenSigningAlgValuesSupported"] = [
-            "none",
-            "HS256",
-            "HS384",
-            "HS512",
-            "RS256",
-            "RS384",
-            "RS512",
-            "ES256",
-            "ES384",
-            "ES512",
-            "ES512",
-            "PS256",
-            "PS384",
-            "PS512"
-        ]
-        should_update = True
-
-    if "forceSignedRequestObject" not in conf:
-        conf["forceSignedRequestObject"] = False
-        should_update = True
-
-    if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
-        conf["grantTypesAndResponseTypesAutofixEnabled"] = False
-        should_update = True
-
-    if "sessionIdEnabled" in conf:
-        conf.pop("sessionIdEnabled")
-        should_update = True
-
-    # assert the authorizationRequestCustomAllowedParameters contains dict values instead of string
-    params_with_dict = list(itertools.takewhile(
-        lambda x: isinstance(x, dict), conf["authorizationRequestCustomAllowedParameters"]
-    ))
-    if not params_with_dict:
-        conf["authorizationRequestCustomAllowedParameters"] = list(map(
-            lambda p: {"paramName": p[0], "returnInResponse": p[1]},
-            [
-                ("customParam1", False),
-                ("customParam2", False),
-                ("customParam3", False),
-                ("customParam4", True),
-                ("customParam5", True),
-            ]
-        ))
-        should_update = True
-
-    if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
-        conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
-        should_update = True
-
-    if "httpLoggingExcludePaths" not in conf:
-        conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
-        should_update = True
-
-    if "requestUriBlockList" not in conf:
-        conf["requestUriBlockList"] = [
-            "localhost",
-            "127.0.0.1",
-        ]
-        should_update = True
-
-    if "ssaConfiguration" not in conf:
-        hostname = manager.config.get("hostname")
-        conf["ssaConfiguration"] = {
-            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
-            "ssaSigningAlg": "RS256",
-            "ssaExpirationInDays": 30
-        }
-        should_update = True
-
-    for grant_type in [
-        "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange",
-    ]:
-        if grant_type not in conf["grantTypesSupported"]:
-            conf["grantTypesSupported"].append(grant_type)
+        # ensure agama_flow listed in authorizationRequestCustomAllowedParameters
+        if "agama_flow" not in [
+            p["paramName"] for p in conf["authorizationRequestCustomAllowedParameters"]
+        ]:
+            conf["authorizationRequestCustomAllowedParameters"].append({
+                "paramName": "agama_flow", "returnInResponse": False,
+            })
             should_update = True
 
     # return the conf and flag to determine whether it needs update or not
@@ -457,7 +468,9 @@ class Upgrade:
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
 
-        self.update_auth_dynamic_config()
+        if as_boolean(os.environ.get("CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG", "true")):
+            self.update_auth_dynamic_config()
+
         self.update_auth_errors_config()
         self.update_auth_static_config()
         self.update_attributes_entries()
