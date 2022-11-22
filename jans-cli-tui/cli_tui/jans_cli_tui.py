@@ -17,6 +17,10 @@ from requests.models import Response
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
+pylib_dir = os.path.join(cur_dir, 'cli', 'pylib')
+if os.path.exists(pylib_dir):
+    sys.path.insert(0, pylib_dir)
+
 import prompt_toolkit
 from prompt_toolkit.application import Application
 from prompt_toolkit.application.current import get_app

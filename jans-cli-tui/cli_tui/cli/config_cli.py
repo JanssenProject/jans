@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
-import sys
 import os
+import sys
+
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+pylib_dir = os.path.join(cur_dir, 'pylib')
+if os.path.exists(pylib_dir):
+    sys.path.insert(0, pylib_dir)
+
 import json
 import re
 import urllib3
@@ -37,10 +43,7 @@ home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
-cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
-
-
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 plugins = []
