@@ -66,8 +66,9 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
                 .append("\n")
                 .append("# "+moduleName+" Feature Flags") // add doc header
                 .append("\n")
-                .append("\n")
-                .append("| Feature Flag Name ") // prepare table header
+                .append("\n");
+
+        tableContents.append("| Feature Flag Name ") // prepare table header
                 .append("| Description ")
                 .append("|  | ")
                 .append("\n")

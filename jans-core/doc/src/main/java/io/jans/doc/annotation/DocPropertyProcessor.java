@@ -73,13 +73,14 @@ public class DocPropertyProcessor extends AbstractProcessor {
                 .append("\n")
                 .append("# "+moduleName+" Configuration Properties") // add doc headers
                 .append("\n")
-                .append("\n")
-                .append("| Property Name ") // prepare table header
-                .append("| Description ")
-                .append("|  | ")
-                .append("\n")
-                .append("|-----|-----|-----|")
                 .append("\n");
+
+        tableContents.append("| Property Name ") // prepare table header
+                    .append("| Description ")
+                    .append("|  | ")
+                    .append("\n")
+                    .append("|-----|-----|-----|")
+                    .append("\n");
     }
 
     private void createAndWriteDoc(StringBuilder docContent) {
