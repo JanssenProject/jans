@@ -462,8 +462,9 @@ class JCA_CLI:
 
     def check_access_token(self):
 
-        if not self.access_token :
-            print(self.colored_text("Access token was not found.", warning_color))
+        if not self.access_token:
+            if not self.wrapped:
+                print(self.colored_text("Access token was not found.", warning_color))
             return
 
         try:
@@ -475,9 +476,9 @@ class JCA_CLI:
                              }
                     )
         except Exception as e:
-            print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
-            self.access_token = None
-
+            if not self.wrapped:
+                print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
+                self.access_token = None
 
     def validate_date_time(self, date_str):
         try:
@@ -675,7 +676,7 @@ class JCA_CLI:
     def get_access_token(self, scope):
         if self.use_test_client:
             self.get_scoped_access_token(scope)
-        elif not self.access_token:
+        elif not self.access_token and not self.wrapped:
             self.check_access_token()
             self.get_jwt_access_token()
         return True, ''
