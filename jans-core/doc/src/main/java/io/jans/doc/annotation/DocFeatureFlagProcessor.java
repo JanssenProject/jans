@@ -56,27 +56,23 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
 
     private void prepareDocTagsAndTableHeader(StringBuilder docContents, StringBuilder tableContents) {
         // add tags
-        docContents.append("---\n");
-        docContents.append("tags:\n");
-        docContents.append("- administration\n");
-        docContents.append("- reference\n");
-        docContents.append("- json\n");
-        docContents.append("- feature-flags\n");
-        docContents.append("---\n");
-        docContents.append("\n");
-
-        // add doc headers
-        docContents.append("# "+moduleName+" Feature Flags");
-        docContents.append("\n");
-        docContents.append("\n");
-
-        // prepare table header
-        tableContents.append("| Feature Flag Name ");
-        tableContents.append("| Description ");
-        tableContents.append("|  | ");
-        tableContents.append("\n");
-        tableContents.append("|-----|-----|-----|");
-        tableContents.append("\n");
+        docContents.append("---\n")
+                .append("tags:\n")
+                .append("- administration\n")
+                .append("- reference\n")
+                .append("- json\n")
+                .append("- feature-flags\n")
+                .append("---\n")
+                .append("\n")
+                .append("# "+moduleName+" Feature Flags") // add doc header
+                .append("\n")
+                .append("\n")
+                .append("| Feature Flag Name ") // prepare table header
+                .append("| Description ")
+                .append("|  | ")
+                .append("\n")
+                .append("|-----|-----|-----|")
+                .append("\n");
     }
 
     private void createAndWriteDoc(StringBuilder docContent) {
