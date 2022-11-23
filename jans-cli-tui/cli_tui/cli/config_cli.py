@@ -210,9 +210,9 @@ if not(host and (client_id and client_secret or access_token)):
             client_secret_enc = config['DEFAULT'][secret_enc_key_str]
             client_secret = unobscure(client_secret_enc)
 
-        if 'access_token' in config['DEFAULT']:
+        if 'access_token' in config['DEFAULT'] and config['DEFAULT']['access_token'].strip():
             access_token = config['DEFAULT']['access_token']
-        elif 'access_token_enc' in config['DEFAULT']:
+        elif 'access_token_enc' in config['DEFAULT'] and config['DEFAULT']['access_token_enc'].strip():
             access_token = unobscure(config['DEFAULT']['access_token_enc'])
 
         debug = config['DEFAULT'].get('debug')
