@@ -21,7 +21,7 @@ Docker monolith image packaging for Janssen. This image packs janssen services i
 
 ## Environment Variables
 
-Installation depends on a set of environment variables. These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.
+Installation depends on the set of environment variables shown below. These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.
 
 | ENV                     | Description                                      | Default                                          |
 |-------------------------|--------------------------------------------------|--------------------------------------------------|
@@ -51,13 +51,13 @@ Download the compose file
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
 ```
 
-This docker compose file run two containers, the janssen monolith container and mysql container.
+This docker compose file runs two containers, the janssen monolith container and mysql container.
 
 ```bash
 docker compose -f jans-mysql-compose.yml up -d
 ```
 
-To see the containers running
+To view the containers running
 
 ```bash
 
@@ -70,9 +70,9 @@ docker compose -f jans-mysql-compose.yml ps
 
 docker compose -f jans-mysql-compose.yml exec jans sh #This opens a bash terminal in the running container
 
-/opt/jans/jans-cli/config-cli.py #configure config-cli
+/opt/jans/jans-cli/config-cli.py #configure using the config-cli
 
-/opt/jans/jans-cli/scim-cli.py #configure scim
+/opt/jans/jans-cli/scim-cli.py #configure using the scim-cli
 ```
 
 ## Access endpoints externally
