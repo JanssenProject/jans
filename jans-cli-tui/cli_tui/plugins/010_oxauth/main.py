@@ -74,7 +74,8 @@ class Plugin(DialogUtils):
         self.pid = 'oxauth'
         self.name = '[A]uth Server'
         self.search_text= None
-
+        self.oauth_update_properties_start_index = 0
+        self.app_configuration = {}
         self.oauth_containers = {}
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
@@ -88,19 +89,9 @@ class Plugin(DialogUtils):
 
     async def get_appconfiguration(self) -> None:
         """Coroutine for getting application configuration.
-        """
-        try:
-            response = self.app.cli_object.process_command_by_id(
-                        operation_id='get-properties',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-
-        except Exception as e:
-            self.app.show_message(_("Error getting Jans configuration"), str(e))
-            return
+        """ 
+        cli_args = {'operation_id': 'get-properties'}
+        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
         if response.status_code not in (200, 201):
             self.app.show_message(_("Error getting Jans configuration"), str(response.text))
@@ -449,7 +440,7 @@ class Plugin(DialogUtils):
         Args:
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
-
+        self.oauth_update_properties_start_index = start_index
         # ------------------------------------------------------------------------------- #
         # ----------------------------------- Search ------------------------------------ #
         # ------------------------------------------------------------------------------- #
@@ -479,7 +470,7 @@ class Plugin(DialogUtils):
 
         # ------------------------------------------------------------------------------- #
         # --------------------------------- View Data ----------------------------------- #
-        # ------------------------------------------------------------------------------- #               
+        # ------------------------------------------------------------------------------- #
 
 
         if data:
@@ -549,14 +540,14 @@ class Plugin(DialogUtils):
 
 
         selected_line_data = params['passed']    ##self.uma_result 
-        
+
         title = _("Edit property")
 
-        dialog = ViewProperty(self.app, title=title, data=selected_line_data, get_properties= self.oauth_get_properties, search_properties=self.search_properties, search_text=self.search_text)
-        
+        dialog = ViewProperty(app=self.app, parent=self, title=title, data=selected_line_data)
+
         self.app.show_jans_dialog(dialog)
  
-    def search_properties(self, tbuffer:Buffer,) -> None:
+    def search_properties(self, tbuffer:Buffer) -> None:
         self.app.logger.debug("tbuffer="+str(tbuffer))
         self.app.logger.debug("type tbuffer="+str(type(tbuffer)))
         self.search_text=tbuffer.text
