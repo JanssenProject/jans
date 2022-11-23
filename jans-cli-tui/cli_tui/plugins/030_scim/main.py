@@ -119,9 +119,8 @@ class Plugin(DialogUtils):
             if data[key] and key not in self.app_config:
                 patche_list.append({'op':'add', 'path': key, 'value': data[key]})
 
-
         if not patche_list:
-            self.app.show_message(_("Warning"), _("No changes was done on Scim appilication configuration. Nothing to save."))
+            self.app.show_message(_("Warning"), _("No changes was done on Scim appilication configuration. Nothing to save."), tobefocused=self.app.center_container)
             return
 
         async def coroutine():
