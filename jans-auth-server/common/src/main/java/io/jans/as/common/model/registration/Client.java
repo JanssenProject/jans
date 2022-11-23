@@ -9,6 +9,7 @@ package io.jans.as.common.model.registration;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
@@ -29,7 +30,7 @@ import java.util.Locale;
  * @author Javier Rojas Blum
  * @version October 17, 2022
  */
-@DataEntry(sortBy = {"displayName"})
+@DataEntry(sortBy = {"clientName"})
 @ObjectClass(value = "jansClnt")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Client extends DeletableEntity implements Serializable {
@@ -709,22 +710,27 @@ public class Client extends DeletableEntity implements Serializable {
         return clientNameLocalized;
     }
 
+    @JsonSetter
     public void setClientNameLocalized(LocalizedString clientNameLocalized) {
         this.clientNameLocalized = clientNameLocalized;
     }
 
+    @JsonSetter
     public void setLogoUriLocalized(LocalizedString logoUriLocalized) {
         this.logoUriLocalized = logoUriLocalized;
     }
 
+    @JsonSetter
     public void setClientUriLocalized(LocalizedString clientUriLocalized) {
         this.clientUriLocalized = clientUriLocalized;
     }
 
+    @JsonSetter
     public void setPolicyUriLocalized(LocalizedString policyUriLocalized) {
         this.policyUriLocalized = policyUriLocalized;
     }
 
+    @JsonSetter
     public void setTosUriLocalized(LocalizedString tosUriLocalized) {
         this.tosUriLocalized = tosUriLocalized;
     }
