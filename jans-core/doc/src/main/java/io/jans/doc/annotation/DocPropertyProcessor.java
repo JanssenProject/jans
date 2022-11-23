@@ -6,6 +6,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
@@ -88,19 +89,20 @@ public class DocPropertyProcessor extends AbstractProcessor {
 
     private void createAndWriteDoc(StringBuilder docContent) {
 
-        PrintWriter docWriter = null;
-        try {
-            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", moduleName.toLowerCase().replaceAll("\\s", "")+"-properties.md");
-            docWriter = new PrintWriter(docFile.openWriter());
-            docWriter.write(docContent.toString());
-            docWriter.flush();
-        } catch (IOException e) {
-            // log to system output at compile time and exit
-            System.out.println("Failed to create file for property documentation. Exiting the process");
-            e.printStackTrace();
-            System.exit(1);
-        } finally {
-            docWriter.close();
+        FileObject docFile = null;
+        try{
+            docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", moduleName.toLowerCase().replaceAll("\\s", "")+"-properties.md");
+        }
+        catch (IOException ioe){
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, this.getClass().getName()+": Error occurred while creating annotation documentation file");
+        }
+        if(docFile!=null){
+            try(PrintWriter docWriter = new PrintWriter(docFile.openWriter());) {
+                docWriter.write(docContent.toString());
+                docWriter.flush();
+            } catch (IOException e) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, this.getClass().getName()+": Error occurred while writing annotation documentation file");
+            }
         }
 
     }
@@ -108,7 +110,7 @@ public class DocPropertyProcessor extends AbstractProcessor {
     private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocProperty propertyAnnotation) {
         propDetails.append("### "+ jansProperty.getSimpleName()+"\n\n");
         propDetails.append("- Description: "+ propertyAnnotation.description()+"\n\n");
-        propDetails.append("- Required: "+ (propertyAnnotation.isRequired()==Boolean.TRUE?"Yes":"No")+"\n\n"); //TODO: change to required and yes/no
+        propDetails.append("- Required: "+ (propertyAnnotation.isRequired()?"Yes":"No")+"\n\n");
         propDetails.append("- Default value: "+ propertyAnnotation.defaultValue()+"\n\n");
         propDetails.append("\n");
     }

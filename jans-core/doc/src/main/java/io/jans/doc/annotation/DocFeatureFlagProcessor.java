@@ -6,6 +6,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
@@ -47,15 +48,13 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
                 addToDetails(detailsContent, element, elementAnnotation);
             }
             tableContents.append("\n\n");
-            createAndWriteDoc(docContents.append((tableContents.append(detailsContent.toString()))), "");
+            createAndWriteDoc(docContents.append((tableContents.append(detailsContent.toString()))));
 
         }
         return false;
     }
 
     private void prepareDocTagsAndTableHeader(StringBuilder docContents, StringBuilder tableContents) {
-
-
         // add tags
         docContents.append("---\n");
         docContents.append("tags:\n");
@@ -80,29 +79,29 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
         tableContents.append("\n");
     }
 
-    private void createAndWriteDoc(StringBuilder docContent, String className) {
+    private void createAndWriteDoc(StringBuilder docContent) {
 
-        PrintWriter docWriter = null;
-        try {
-            FileObject docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", moduleName.toLowerCase().replaceAll("\\s", "")+"-feature-flags.md");
-            docWriter = new PrintWriter(docFile.openWriter());
-            docWriter.write(docContent.toString());
-            docWriter.flush();
-        } catch (IOException e) {
-            // log to system output at compile time and exit
-            System.out.println("Failed to create file for feature flag documentation. Exiting the process");
-            e.printStackTrace();
-            System.exit(1);
-        } finally {
-            docWriter.close();
+        FileObject docFile = null;
+        try{
+            docFile = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", moduleName.toLowerCase().replaceAll("\\s", "")+"-feature-flags.md");
         }
-
+        catch (IOException ioe){
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, this.getClass().getName()+": Error occurred while creating annotation documentation file");
+        }
+        if(docFile!=null){
+            try(PrintWriter docWriter = new PrintWriter(docFile.openWriter());) {
+                docWriter.write(docContent.toString());
+                docWriter.flush();
+            } catch (IOException e) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, this.getClass().getName()+": Error occurred while writing annotation documentation file");
+            }
+        }
     }
 
     private static void addToDetails(StringBuilder propDetails, Element jansElement, DocFeatureFlag featureFlagAnnotation) {
         propDetails.append("### "+ jansElement.getSimpleName()+"\n\n");
         propDetails.append("- Description: "+ featureFlagAnnotation.description()+"\n\n");
-        propDetails.append("- Required: "+ (featureFlagAnnotation.isRequired()==Boolean.TRUE?"Yes":"No")+"\n\n");
+        propDetails.append("- Required: "+ (featureFlagAnnotation.isRequired()?"Yes":"No")+"\n\n");
         propDetails.append("- Default value: "+ featureFlagAnnotation.defaultValue()+"\n\n");
         propDetails.append("\n");
     }
