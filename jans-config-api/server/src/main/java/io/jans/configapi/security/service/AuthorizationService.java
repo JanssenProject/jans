@@ -7,7 +7,10 @@
 package io.jans.configapi.security.service;
 
 import io.jans.configapi.util.AuthUtil;
+import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.util.ProtectionScopeType;
+
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;
@@ -15,6 +18,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AuthorizationService implements Serializable {
 
@@ -40,12 +44,16 @@ public abstract class AuthorizationService implements Serializable {
         return authUtil.getRequestedScopes(path);
     }
 
-    public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
+    public Map<ProtectionScopeType, List<String>> getRequestedScopes(ResourceInfo resourceInfo) {
         return authUtil.getRequestedScopes(resourceInfo);
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
         return authUtil.validateScope(authScopes, resourceScopes);
+    }
+    
+    public List<String> getAllScopeList(Map<ProtectionScopeType, List<String>> scopeMap) {
+        return authUtil.getAllScopeList(scopeMap);
     }
 
     public List<String> getApiApprovedIssuer() {

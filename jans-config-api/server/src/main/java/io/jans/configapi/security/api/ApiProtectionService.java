@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -69,8 +68,10 @@ public class ApiProtectionService {
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
         createScopeIfNeeded(apiProtectionType);
-        log.trace("ApiProtectionService:::verifyResources() - getAllTypesOfScopes:{}, allResources:{}, getAllResourcesMap:{} ",
-                ApiProtectionCache.getAllTypesOfScopes(), ApiProtectionCache.getAllResources(), ApiProtectionCache.getAllResourcesMap());
+        log.trace(
+                "ApiProtectionService:::verifyResources() - getAllTypesOfScopes:{}, allResources:{}, getAllResourcesMap:{} ",
+                ApiProtectionCache.getAllTypesOfScopes(), ApiProtectionCache.getAllResources(),
+                ApiProtectionCache.getAllResourcesMap());
 
         updateScopeForClientIfNeeded(clientId);
 
@@ -79,14 +80,14 @@ public class ApiProtectionService {
     private void createScopeIfNeeded(String apiProtectionType) {
         log.debug("ApiProtectionService:::createScopeIfNeeded() - apiProtectionType:{}", apiProtectionType);
 
-        
         List<Scope> scopeList = new ArrayList<>();
         for (RsResource rsResource : rsResourceList) {
             for (Condition condition : rsResource.getConditions()) {
                 String resourceName = condition.getHttpMethods() + ":::" + rsResource.getPath();
-                
-                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, condition.getScopes():{}, condition.getGroupScopes():{}, condition.getSuperScopes():{}", resourceName,
-                        condition.getScopes(), condition.getGroupScopes(), condition.getSuperScopes());
+
+                log.trace(
+                        "ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, condition.getScopes():{}, condition.getGroupScopes():{}, condition.getSuperScopes():{}",
+                        resourceName, condition.getScopes(), condition.getGroupScopes(), condition.getSuperScopes());
 
                 // Process Scopes
                 // If no scopes for the path then skip validation
@@ -94,53 +95,56 @@ public class ApiProtectionService {
                 if (rsScopes != null && !rsScopes.isEmpty()) {
                     processScope(resourceName, ProtectionScopeType.SCOPE, rsScopes);
                 }
-                
+
                 // If no group scopes for the path then skip validation
-                List<io.jans.configapi.core.protect.Scope> groupScopes = condition.getGroupScopes();                
+                List<io.jans.configapi.core.protect.Scope> groupScopes = condition.getGroupScopes();
                 if (groupScopes != null && !groupScopes.isEmpty()) {
                     processScope(resourceName, ProtectionScopeType.GROUP, groupScopes);
                 }
-                
+
                 // If no super scopes for the path then skip validation
                 List<io.jans.configapi.core.protect.Scope> superScopes = condition.getSuperScopes();
                 if (superScopes != null && !superScopes.isEmpty()) {
                     processScope(resourceName, ProtectionScopeType.SUPER, superScopes);
                 }
-                
+
                 log.debug("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, scopeList:{}", resourceName,
                         scopeList);
 
             } // condition
         }
     }
-    
-    private void processScope(String resourceName, ProtectionScopeType protectionScopeType, List<io.jans.configapi.core.protect.Scope> scopeList){
-        log.debug("ApiProtectionService:::processScope() - resourceName:{}, protectionScopeType:{}, scopeList:{}", resourceName, protectionScopeType, scopeList);
-        
-        //return if no scopes 
-        if(scopeList==null || scopeList.isEmpty()) {
+
+    private void processScope(String resourceName, ProtectionScopeType protectionScopeType,
+            List<io.jans.configapi.core.protect.Scope> scopeList) {
+        log.debug("ApiProtectionService:::processScope() - resourceName:{}, protectionScopeType:{}, scopeList:{}",
+                resourceName, protectionScopeType, scopeList);
+
+        // return if no scopes
+        if (scopeList == null || scopeList.isEmpty()) {
             return;
         }
-        
-        for(io.jans.configapi.core.protect.Scope rsScope : scopeList) {
+
+        for (io.jans.configapi.core.protect.Scope rsScope : scopeList) {
             String inum = rsScope.getInum();
-            String scopeName = rsScope.getInum();     
-            
-            //return if no scope details
-            if(StringUtils.isBlank(inum) || StringUtils.isBlank(scopeName)){
+            String scopeName = rsScope.getInum();
+
+            // return if no scope details
+            if (StringUtils.isBlank(inum) || StringUtils.isBlank(scopeName)) {
                 return;
-             }
-            
+            }
+
             List<Scope> scopes = validateScope(resourceName, protectionScopeType, rsScope);
             ApiProtectionCache.putResource(resourceName, scopes);
             ApiProtectionCache.putResourceScopeByType(resourceName, protectionScopeType, scopes);
         }
     }
 
-    private List<Scope> validateScope(String resourceName, ProtectionScopeType protectionScopeType, io.jans.configapi.core.protect.Scope rsScope) {
+    private List<Scope> validateScope(String resourceName, ProtectionScopeType protectionScopeType,
+            io.jans.configapi.core.protect.Scope rsScope) {
         log.debug("Verify Scope in DB - protectionScopeType:{}, rsScope:{} ", protectionScopeType, rsScope);
         List<Scope> scopeList = new ArrayList<>();
-        
+
         // Check in DB
         Scope scope = scopeService.getScope(rsScope.getInum());
         log.debug("Scopes from DB - {}'", scope);
@@ -152,35 +156,37 @@ public class ApiProtectionService {
         }
 
         ScopeType scopeType = ScopeType.OAUTH;
-        log.trace("Scope details - scope:{}, rsScope.getName():{}, exclusiveAuthScopes:{}, isConfigApiScope(scopeName):{} '",
+        log.trace(
+                "Scope details - scope:{}, rsScope.getName():{}, exclusiveAuthScopes:{}, isConfigApiScope(scopeName):{} '",
                 scope, rsScope.getName(), configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes(),
                 isConfigApiScope(rsScope.getName()));
 
         // Create/Update scope only if they are config-api-resource scopes
         if (isConfigApiScope(rsScope.getName())) {
 
-            //ensure scope does not exists
+            // ensure scope does not exists
             scope = scopeService.getScope(rsScope.getInum());
-            log.debug("Re-verify ConfigApiScope rsScope.getName():{} with rsScope.getInum():{} in DB - scope:{} ", rsScope.getName(), rsScope.getInum(), scope);
+            log.debug("Re-verify ConfigApiScope rsScope.getName():{} with rsScope.getInum():{} in DB - scope:{} ",
+                    rsScope.getName(), rsScope.getInum(), scope);
             if (scope == null) {
-                log.debug("Scope - '{}' does not exist, hence creating it.", scope);               
-                    // Scope does not exists hence create Scope
-                    scope = new Scope();
-                    String inum = rsScope.getInum();
-                    scope.setId(rsScope.getName());
-                    scope.setDisplayName(rsScope.getName());
-                    scope.setInum(inum);
-                    scope.setDn(scopeService.getDnForScope(inum));
-                    scope.setScopeType(scopeType);
-                    scopeService.addScope(scope);
-            }
-            if (scope != null) {
-                // Update resource
-                log.debug("Scope - '{}' already exists, hence updating it.", rsScope.getName());
+                log.debug("Scope - '{}' does not exist, hence creating it.", scope);
+                // Scope does not exists hence create Scope
+                scope = new Scope();
+                String inum = rsScope.getInum();
                 scope.setId(rsScope.getName());
+                scope.setDisplayName(rsScope.getName());
+                scope.setInum(inum);
+                scope.setDn(scopeService.getDnForScope(inum));
                 scope.setScopeType(scopeType);
-                scopeService.updateScope(scope);
+                scopeService.addScope(scope);
             }
+
+            // Update resource
+            log.debug("Scope - '{}' already exists, hence updating it.", rsScope.getName());
+            scope.setId(rsScope.getName());
+            scope.setScopeType(scopeType);
+            scopeService.updateScope(scope);
+
         }
 
         // Add to scope if not null

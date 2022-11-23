@@ -36,8 +36,9 @@ public class ApiProtectionCache {
 
     private static final Cache<String, Map<ProtectionScopeType, List<Scope>>> resourceScopeCache = CacheBuilder
             .newBuilder().expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
-    
-    ApiProtectionCache(){}
+
+    ApiProtectionCache() {
+    }
 
     // Scope
     public static void removeAllScopes() {
@@ -115,17 +116,9 @@ public class ApiProtectionCache {
         scopes.putAll(Maps.newHashMap(superScopeCache.asMap()));
         return scopes;
     }
-    
 
-    public static Map<String, Scope> getAllScopesMap() {
-        Map<String, Scope> scopes = Maps.newHashMap(scopeCache.asMap());
-        scopes.putAll(Maps.newHashMap(groupScopeCache.asMap()));
-        scopes.putAll(Maps.newHashMap(superScopeCache.asMap()));
-        return scopes;
-    }
-    
     // Resource
-    public static void removeAllResources() {
+    public static void raemoveAllResources() {
         resourceCache.invalidateAll();
     }
 
@@ -147,7 +140,6 @@ public class ApiProtectionCache {
     }
 
     // ResourceScopeCache
-
     public static void putResource(String resourceName, Map<ProtectionScopeType, List<Scope>> scopeMap) {
         Preconditions.checkNotNull(resourceName);
         resourceScopeCache.put(resourceName, scopeMap);

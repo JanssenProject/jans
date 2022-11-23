@@ -24,7 +24,6 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.lang.StringUtils;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -93,7 +92,7 @@ public class ScopeService {
         try {
             return persistenceEntryManager.find(Scope.class, getDnForScope(inum));
         } catch (Exception ex) {
-            Log.error("Error while finding scope is : {}", ex);
+            logger.error("Error while finding scope with inum:{} is:{}", inum, ex);
         }
         return null;
     }
