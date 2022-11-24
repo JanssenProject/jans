@@ -568,6 +568,38 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getErrorDescription());
     }
 
+    @Test
+    public void registerGrantPasswordRedirectUriNull() {
+        showTitle("registerGrantPasswordRedirectUriNull");
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Test client with grant password redirect uri null", null);
+        registerRequest.setGrantTypes(Collections.singletonList(RESOURCE_OWNER_PASSWORD_CREDENTIALS));
+        registerRequest.setResponseTypes(Collections.singletonList(CODE));
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(response).created().check();
+    }
+
+    @Test
+    public void registerGrantClientCredentialsRedirectUriEmpty() {
+        showTitle("registerGrantClientCredentialsRedirectUriEmpty");
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Test client with grant client_credentials redirect uri empty", Collections.emptyList());
+        registerRequest.setGrantTypes(Collections.singletonList(CLIENT_CREDENTIALS));
+        registerRequest.setResponseTypes(Collections.singletonList(CODE));
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(response).created().check();
+    }
+
     @Parameters({"redirectUris"})
     @Test
     public void deleteClient(final String redirectUris) throws Exception {
