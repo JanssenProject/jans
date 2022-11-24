@@ -72,9 +72,10 @@ public class LocalizedString implements Serializable {
         return values.size();
     }
 
+    @SuppressWarnings("unchecked")
     @JsonIgnore
     public Set<String> getLanguageTags() {
-        return values.keySet();
+        return (values!=null ? values.keySet() : Collections.emptySet());
     }
 
     public String addLdapLanguageTag(String ldapAttributeName, String languageTag) {
