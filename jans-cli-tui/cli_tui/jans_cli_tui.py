@@ -657,6 +657,8 @@ class JansCliApp(Application):
             prop_val = child.children[1].content.buffer.text
             if prop_name == 'jca_client_secret':
                 config_cli.config['DEFAULT']['jca_client_secret_enc'] = config_cli.obscure(prop_val)
+                if 'jca_client_secret' in config_cli.config['DEFAULT']:
+                    del config_cli.config['DEFAULT']['jca_client_secret']
             else:
                 config_cli.config['DEFAULT'][prop_name] = prop_val
             config_cli.write_config()
