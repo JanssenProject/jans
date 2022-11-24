@@ -9914,14 +9914,22 @@
 
   <h1>Certificates</h1>
 
-<p>This is a placeholder</p>
+<p>We are using LetsEncrypt cert to write this documentation. </p>
+<ul>
+<li>Install repository: <code>apt-get install software-properties-common</code> </li>
+<li>Update system: <code>apt-get update</code></li>
+<li>Install certbot: <code>apt-get install python3-certbot-apache</code> </li>
+<li>Issue certificate: <code>certbot --apache -d fqdn_of_Gluu_server</code></li>
+<li>Cert and key are available in: <code>/etc/letsencrypt/live/</code> location</li>
+<li>Reboot your server</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-24T15:38:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-24</span>
       
         <br>
         Created:
