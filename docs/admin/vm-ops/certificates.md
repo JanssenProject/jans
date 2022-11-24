@@ -5,6 +5,10 @@ tags:
   - operations
 ---
 
+# Web server certificate
+
+## Web server certitification installation
+
 We are using LetsEncrypt cert to write this documentation. 
 
  - Install repository: `apt-get install software-properties-common` 
