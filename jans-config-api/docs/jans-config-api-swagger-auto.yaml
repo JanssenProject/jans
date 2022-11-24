@@ -7178,19 +7178,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7526,10 +7526,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -7645,13 +7641,6 @@ components:
         values:
           type: object
           additionalProperties:
-            type: string
-        value:
-          type: string
-        languageTags:
-          uniqueItems: true
-          type: array
-          items:
             type: string
     AppConfiguration:
       type: object
