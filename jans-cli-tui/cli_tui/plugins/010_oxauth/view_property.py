@@ -95,10 +95,15 @@ class ViewProperty(JansGDialog, DialogUtils):
                 prop_type = self.get_item_data(wid)
             data = prop_type['value']
 
-        elif (type(self.value)==list and type(self.value[0]) not in  [dict,list]):
+        elif (type(self.value)==list and (type(self.value[0]) not in  [dict,list])):
+            
             for wid in self.value_content.children:
                 prop_type = self.get_item_data(wid)
-            data = prop_type['value'].split('\n')
+            
+            if  self.get_type(prop_type['key']) != 'checkboxlist':
+                data = prop_type['value'].split('\n')
+            else:
+                data = prop_type['value']
 
         elif type(self.value) == dict :
             for wid in self.value_content.children:
@@ -140,24 +145,28 @@ class ViewProperty(JansGDialog, DialogUtils):
 
     def get_type(self,prop):
         try :
-            if self.schema.get('properties', {})[prop]['type'] == 'string':
+            proper = self.schema.get('properties', {})[prop]
+
+            if proper['type'] == 'string':
                 prop_type= 'TitledText'
 
-            elif self.schema.get('properties', {})[prop]['type'] == 'integer':
+            elif proper['type'] == 'integer':
                 prop_type= 'int-TitledText'
 
-            elif self.schema.get('properties', {})[prop]['type'] == 'boolean':
+            elif proper['type'] == 'boolean':
                 prop_type= 'TitledCheckBox'
 
-            elif self.schema.get('properties', {})[prop]['type'] == 'object':
+            elif proper['type'] == 'object':
                 prop_type= 'dict'
 
-            elif self.schema.get('properties', {})[prop]['type'] == 'array':
-                if 'enum' in self.schema.get('properties', {})[prop]:
+            elif proper['type'] == 'array':
+                if 'enum' in proper or ('enum' in proper['items']):
                    prop_type= 'checkboxlist' 
                 else:
                     if type(self.value[0]) == dict:
                         prop_type= 'list-dict'
+                    elif type(self.value[0]) == list:
+                        prop_type= 'list-list'
                     else:
                         prop_type= 'long-TitledText'
         except:
@@ -165,9 +174,13 @@ class ViewProperty(JansGDialog, DialogUtils):
 
         return prop_type
 
-    def get_listValues(self,prop):
+    def get_listValues(self,prop,type=None):
         try :
-            list_values= self.schema.get('properties', {})[prop]['enum']
+            if type !='nasted':
+                list_values= self.schema.get('properties', {})[prop]['items']['enum']
+            else:
+                list_values= self.schema.get('properties', {})[prop]['items']['items']['enum']
+
         except:
             list_values = []
 
@@ -205,6 +218,15 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 style='class:outh-scope-text'
                                 ),
                                 ],width=D())    
+
+        elif prop_type == 'list-list':
+            self.value_content= HSplit([
+                        self.app.getTitledCheckBoxList(
+                                self.property, 
+                                name=self.property, 
+                                values=self.get_listValues(self.property,'nasted'), 
+                                style='class:outh-client-checkboxlist'),
+                                ],width=D())  
 
         elif prop_type == 'checkboxlist':
             self.value_content= HSplit([
