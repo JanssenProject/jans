@@ -7178,19 +7178,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
         adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -7526,10 +7526,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -7645,13 +7641,6 @@ components:
         values:
           type: object
           additionalProperties:
-            type: string
-        value:
-          type: string
-        languageTags:
-          uniqueItems: true
-          type: array
-          items:
             type: string
     AppConfiguration:
       type: object
@@ -8345,17 +8334,6 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
-        fapi:
-          type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8383,6 +8361,17 @@ components:
             - STAT
             - PAR
             - SSA
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8639,13 +8628,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
