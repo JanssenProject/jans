@@ -206,7 +206,7 @@ class Plugin(DialogUtils):
         """
         if selection in self.oauth_containers:
             if selection == 'properties':
-                self.oauth_update_properties()
+                self.oauth_update_properties(tofocus=False)
             self.oauth_main_area = self.oauth_containers[selection]
         else:
             self.oauth_main_area = self.app.not_implemented
@@ -429,6 +429,7 @@ class Plugin(DialogUtils):
         self,
         start_index: Optional[int]= 0,
         pattern: Optional[str]= '',
+        tofocus:Optional[bool]=True,
         ) -> None:
         """update the current clients data to server
 
@@ -507,7 +508,8 @@ class Plugin(DialogUtils):
                 VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
             ])
             self.app.invalidate()
-            self.app.layout.focus(properties)
+            if tofocus:
+                self.app.layout.focus(properties)
         else:
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['properties'])
 
