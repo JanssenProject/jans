@@ -80,7 +80,10 @@ public class RegisterParamsValidator {
 
         if (grantTypes != null &&
                 (grantTypes.contains(GrantType.AUTHORIZATION_CODE) || grantTypes.contains(GrantType.IMPLICIT)
-                        || (responseTypes.contains(ResponseType.CODE) && !grantTypes.contains(GrantType.DEVICE_CODE))
+                        || (responseTypes.contains(ResponseType.CODE) && (
+                        !grantTypes.contains(GrantType.DEVICE_CODE) &&
+                                !grantTypes.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) &&
+                                !grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                         || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
             if (redirectUris == null || redirectUris.isEmpty()) {
                 return new Pair<>(false, "Redirect uris are empty.");
@@ -284,7 +287,10 @@ public class RegisterParamsValidator {
                 }
             }
         } else valid = !grantTypes.contains(GrantType.AUTHORIZATION_CODE) && !grantTypes.contains(GrantType.IMPLICIT) &&
-                (!responseTypes.contains(ResponseType.CODE) || grantTypes.contains(GrantType.DEVICE_CODE))
+                (!responseTypes.contains(ResponseType.CODE) || (
+                        grantTypes.contains(GrantType.DEVICE_CODE) ||
+                                grantTypes.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) ||
+                                grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                 && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN);
 
 
