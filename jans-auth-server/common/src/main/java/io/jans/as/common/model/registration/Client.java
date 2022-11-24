@@ -30,7 +30,7 @@ import java.util.Locale;
  * @author Javier Rojas Blum
  * @version October 17, 2022
  */
-@DataEntry(sortBy = {"clientName"})
+@DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansClnt")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Client extends DeletableEntity implements Serializable {
