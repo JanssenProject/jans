@@ -249,11 +249,6 @@ class Plugin(DialogUtils):
 
             data =[]
 
-            file1 = open("hopa.log", "w")
-            file1.write(str(response.status_code)+'\n')
-            file1.write(str(response.json()))
-            file1.close()
-
             for d in result.get('entries', []):
                 data.append(
                     [
@@ -641,10 +636,6 @@ class Plugin(DialogUtils):
     def edit_client_dialog(self, **params: Any) -> None:
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
-
-        file1= open("hopa.log",'a')
-        file1.write("selected_line_data : "+str(selected_line_data)+'\n \n')
-        file1.close()
 
         self.EditClientDialog = EditClientDialog(self.app, title=title, data=selected_line_data,save_handler=self.save_client,delete_UMAresource=self.delete_UMAresource)
         self.app.show_jans_dialog(self.EditClientDialog)
