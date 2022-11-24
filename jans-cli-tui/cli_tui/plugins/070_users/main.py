@@ -61,7 +61,7 @@ class Plugin(DialogUtils):
         self.app.center_container = HSplit([
                     VSplit([
                         self.app.getButton(text=_("Get Users"), name='oauth:scopes:get', jans_help=_("Retreive first {} users").format(self.app.entries_per_page), handler=self.get_users),
-                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_user, style='class:outh_containers_scopes.text'),
+                        self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_user, style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Users"), name='oauth:scopes:add', jans_help=_("To add a new user press this button"), handler=self.edit_user_dialog),
                         ],
                         padding=3,
