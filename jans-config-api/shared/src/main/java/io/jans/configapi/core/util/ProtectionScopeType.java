@@ -11,7 +11,14 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang.StringUtils;
 
 public enum ProtectionScopeType {
-    SCOPE, GROUP, SUPER;
+
+    SCOPE("scope"), GROUP("group"), SUPER("super");
+
+    private final String scopeName;
+
+    ProtectionScopeType(String scopeName) {
+        this.scopeName = scopeName;
+    }
 
     String getValue() {
         return toString().toLowerCase();
@@ -32,6 +39,10 @@ public enum ProtectionScopeType {
     @Override
     @JsonValue
     public String toString() {
-        return getValue();
+        return scopeName;
+    }
+
+    public String getScopeName() {
+        return scopeName;
     }
 }

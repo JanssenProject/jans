@@ -54,7 +54,7 @@ public class AcrsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS } , superScopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS} )
     public Response getDefaultAuthenticationMethod() {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
 
@@ -73,7 +73,7 @@ public class AcrsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS } , superScopes = {ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS})
     public Response updateDefaultAuthenticationMethod(@NotNull AuthenticationMethod authenticationMethod) {
         log.debug("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
 

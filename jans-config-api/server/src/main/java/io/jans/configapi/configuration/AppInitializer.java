@@ -153,7 +153,7 @@ public class AppInitializer {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
-        log.info(
+        log.error(
                 "=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{} ",
                 configurationFactory.getApiProtectionType());
 

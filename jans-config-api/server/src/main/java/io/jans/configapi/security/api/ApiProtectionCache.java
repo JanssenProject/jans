@@ -54,8 +54,8 @@ public class ApiProtectionCache {
 
     public static void putScope(Scope scope) {
         Preconditions.checkNotNull(scope);
-        if (scopeCache.getIfPresent(scope.getId()) == null) {
-            scopeCache.put(scope.getId(), scope);
+        if (scopeCache.getIfPresent(scope.getInum()) == null) {
+            scopeCache.put(scope.getInum(), scope);
         }
     }
 
@@ -73,8 +73,8 @@ public class ApiProtectionCache {
 
     public static void putGroupScope(Scope scope) {
         Preconditions.checkNotNull(scope);
-        if (groupScopeCache.getIfPresent(scope.getId()) == null) {
-            groupScopeCache.put(scope.getId(), scope);
+        if (groupScopeCache.getIfPresent(scope.getInum()) == null) {
+            groupScopeCache.put(scope.getInum(), scope);
         }
     }
 
@@ -96,8 +96,8 @@ public class ApiProtectionCache {
 
     public static void putSuperScope(Scope scope) {
         Preconditions.checkNotNull(scope);
-        if (superScopeCache.getIfPresent(scope.getId()) == null) {
-            superScopeCache.put(scope.getId(), scope);
+        if (superScopeCache.getIfPresent(scope.getInum()) == null) {
+            superScopeCache.put(scope.getInum(), scope);
         }
     }
 
