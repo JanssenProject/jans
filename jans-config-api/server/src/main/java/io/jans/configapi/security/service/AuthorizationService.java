@@ -40,9 +40,7 @@ public abstract class AuthorizationService implements Serializable {
         return Response.status(status).entity(detail).build();
     }
 
-    public List<String> getRequestedScopes(String path) {
-        return authUtil.getRequestedScopes(path);
-    }
+
 
     public Map<ProtectionScopeType, List<String>> getRequestedScopes(ResourceInfo resourceInfo) {
         return authUtil.getRequestedScopes(resourceInfo);
