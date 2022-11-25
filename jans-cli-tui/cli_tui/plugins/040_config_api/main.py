@@ -259,9 +259,6 @@ class Plugin():
             role = self.adminui_role.me.text
             desc = self.adminui_role_description.me.text
 
-            # ------------------------------------------------------------#
-            # --------------------- Patch to server ----------------------#
-            # ------------------------------------------------------------#
             if desc :
                 response = self.app.cli_object.process_command_by_id(
                         operation_id='add-adminui-role' ,
@@ -272,9 +269,7 @@ class Plugin():
                         )
             else:
                 return
-            # ------------------------------------------------------------#
-            # -- get_properties or serach again to see Momentary change --#
-            # ------------------------------------------------------------#
+
             if response:
                 self.get_adminui_roles()
                 # self.future.set_result(DialogResult.ACCEPT)
@@ -297,46 +292,35 @@ class Plugin():
         title = role_data.get('role','')
 
         self.adminui_role_description = self.app.getTitledText(
-            _("Domains"), 
-            name='domains', 
+            _("Description"),
+            name='description',
             value=role_data.get('description',''),
-            height=3, 
             style='class:dialog-titled-widget')
 
         self.adminui_role_deletable = self.app.getTitledCheckBox(
             "Deletable", 
             name='deletable', 
-            checked= False, 
+            checked= role_data.get('deletable', False),
             jans_help= "Default to False",
-            style='class:outh-client-checkbox')          
+            style='class:outh-client-checkbox')
 
         def save(dialog: Dialog) -> None:
             desc = self.adminui_role_description.me.text
             deletable = self.adminui_role_deletable.me.checked
 
-            # ------------------------------------------------------------#
-            # --------------------- Patch to server ----------------------#
-            # ------------------------------------------------------------#
-            if desc :
-                response = self.app.cli_object.process_command_by_id(
-                        operation_id='edit-adminui-role' ,
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn='',
-                        data={'role': '{}'.format(title), 'description': '{}'.format(desc), 'deletable':'{}'.format(deletable)},
-                        )
-            else:
-                return
-            # ------------------------------------------------------------#
-            # -- get_properties or serach again to see Momentary change --#
-            # ------------------------------------------------------------#
-            if response:
+            async def coroutine():
+                cli_args = {
+                    'operation_id': 'edit-adminui-role',
+                    'data': {'role': '{}'.format(title), 'description': '{}'.format(desc), 'deletable':'{}'.format(deletable)}
+                    }
+                self.app.start_progressing()
+                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
                 self.get_adminui_roles()
-                # self.future.set_result(DialogResult.ACCEPT)
-                return True
+                if response.status_code != 200:
+                    self.app.show_message(_("Error!"), _("An error ocurred while saving role adminui:\n") + str(response.text), tobefocused=self.app.center_container)
 
-            self.app.show_message(_("Error!"), _("An error ocurred while saving role adminui:\n") + str(response.text))
-
+            asyncio.ensure_future(coroutine())
 
         body = HSplit([self.adminui_role_description,self.adminui_role_deletable])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=save)]
