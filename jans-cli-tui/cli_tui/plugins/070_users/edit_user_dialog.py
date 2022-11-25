@@ -1,5 +1,4 @@
 import re
-import threading
 
 from typing import Optional, Sequence, Union, TypeVar, Callable
 import asyncio

@@ -1,5 +1,4 @@
 import re
-import threading
 
 from asyncio import ensure_future
 from functools import partial
