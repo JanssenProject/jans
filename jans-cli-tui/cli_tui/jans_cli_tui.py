@@ -101,12 +101,13 @@ class JansCliApp(Application):
         self.disabled_plugins = []
         self.status_bar_text = ''
         self.progress_char = ' '
-        self.progress_active = False
         self.progress_iterator = cycle(['⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽'])
         self.styles = dict(style.style_rules)
         self._plugins = []
         self._load_plugins()
         self.cli_object_ok = False
+        self.pbar_text = ""
+        self.progressing_text = ""
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -116,7 +117,8 @@ class JansCliApp(Application):
         self.no_button = Button(text=_("No"), handler=accept_no)
         self.pbar_window = Window(char=lambda: self.progress_char, style='class:progress', width=1)
         self.status_bar = VSplit([
-                                Window(FormattedTextControl(self.update_status_bar), style='class:status', height=1),
+                                Window(FormattedTextControl(lambda: self.pbar_text), style='class:status', height=1),
+                                Window(FormattedTextControl(self.update_status_bar), style='class:status', width=1),
                                 self.pbar_window,
                                 ], height=1
                                 )
@@ -155,7 +157,6 @@ class JansCliApp(Application):
                 mouse_support=True, ## added
             )
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
-        self.create_background_task(self.progress_coroutine())
         self.plugins_initialised = False
 
         self.create_background_task(self.check_jans_cli_ini())
@@ -164,12 +165,14 @@ class JansCliApp(Application):
     async def progress_coroutine(self) -> None:
         """asyncio corotune for progress bar
         """
-        while True:
-            if self.progress_active:
-                self.progress_char = next(self.progress_iterator)
-                self.invalidate()
+        self.progress_active = True
+        while self.progress_active:
+            self.progress_char = next(self.progress_iterator)
+            self.pbar_text="Progressing"
+            self.invalidate()
             await asyncio.sleep(0.15)
-
+        self.progress_char = ' '
+        self.invalidate()
 
     def cli_requests(self, args: dict) -> Response:
         response = self.cli_object.process_command_by_id(
@@ -181,17 +184,17 @@ class JansCliApp(Application):
                         )
         return response
 
-    def start_progressing(self):
-        self.progress_active = True
+    def start_progressing(self, message: Optional[str]="Progressing") -> None:
+        self.progressing_text = message
+        self.create_background_task(self.progress_coroutine())
 
-    def stop_progressing(self):
+    def stop_progressing(self, message: Optional[str]="") -> None:
+        self.progressing_text = message
         self.progress_active = False
-        self.progress_char = ' '
-        self.invalidate()
 
     def _load_plugins(self) -> None:
         # check if admin-ui plugin is available:
-        
+
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
             if plugin_file.parent.joinpath('.enabled').exists():
@@ -579,15 +582,15 @@ class JansCliApp(Application):
         return b
 
     def update_status_bar(self) -> None:
-        text = ''
-        if self.status_bar_text:
-            text = self.status_bar_text
-            self.status_bar_text = ''
+        cur_text = self.pbar_text
+        if self.progressing_text:
+            self.pbar_text = self.progressing_text
+        elif hasattr(self.layout.current_window, 'jans_help') and self.layout.current_window.jans_help:
+            self.pbar_text = self.layout.current_window.jans_help
         else:
-            if hasattr(self.layout.current_window, 'jans_help') and self.layout.current_window.jans_help:
-                text = self.layout.current_window.jans_help
-
-        return text
+            self.pbar_text = ''
+        if cur_text != self.pbar_text:
+            self.invalidate()
 
     def get_plugin_by_id(self, pid: str) -> None:
         for plugin in self._plugins:

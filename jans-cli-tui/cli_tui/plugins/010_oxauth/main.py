@@ -3,11 +3,9 @@ import sys
 import time
 import json
 
-import threading
 import asyncio
 from functools import partial
 from typing import Any, Optional
-
 
 import prompt_toolkit
 from prompt_toolkit.application.current import get_app
@@ -173,7 +171,6 @@ class Plugin(DialogUtils):
                     DynamicContainer(lambda: self.oauth_data_container['properties'])
                     ],style='class:outh_containers_scopes')
 
-
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
@@ -222,18 +219,12 @@ class Plugin(DialogUtils):
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
-        def get_next(
-            start_index: int,  
-            pattern: Optional[str]= '', 
-            ) -> None:
-            self.oauth_update_clients(start_index, pattern='')
-
         async def coroutine():
             endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
             if pattern:
                 endpoint_args +=',pattern:'+pattern
             cli_args = {'operation_id': 'get-oauth-openid-clients', 'endpoint_args': endpoint_args}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Retreiving clients from server..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
 
@@ -276,17 +267,17 @@ class Plugin(DialogUtils):
                 )
                 buttons = []
                 if start_index > 0:
-                    handler_partial = partial(get_next, start_index-self.app.entries_per_page, pattern)
+                    handler_partial = partial(self.oauth_update_clients, start_index-self.app.entries_per_page, pattern)
                     prev_button = Button(_("Prev"), handler=handler_partial)
                     prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
                     buttons.append(prev_button)
                 if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                    handler_partial = partial(get_next, start_index+self.app.entries_per_page, pattern)
+                    handler_partial = partial(self.oauth_update_clients, start_index+self.app.entries_per_page, pattern)
                     next_button = Button(_("Next"), handler=handler_partial)
                     next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
                     buttons.append(next_button)
 
-                self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
+                self.app.layout.focus(clients)
                 self.oauth_data_container['clients'] = HSplit([
                     clients,
                     VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
@@ -298,7 +289,6 @@ class Plugin(DialogUtils):
             else:
                 self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['clients'])
 
-        self.app.start_progressing()
         asyncio.ensure_future(coroutine())
 
 
@@ -359,15 +349,15 @@ class Plugin(DialogUtils):
                 endpoint_args +=',pattern:'+pattern
 
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':endpoint_args}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Retreiving scopes from server..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            self.app.stop_progressing(_("Retreived"))
+
             try:
                 result = response.json()
             except Exception as e:
                 self.app.show_message(_("Error getting response"), str(response))
                 return
-
 
             data =[]
 
@@ -380,7 +370,7 @@ class Plugin(DialogUtils):
                     d['inum']
                     ]
                 )
-            
+
             if data:
 
                 scopes = JansVerticalNav(
@@ -552,42 +542,17 @@ class Plugin(DialogUtils):
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['properties'])
             return
-        t = threading.Thread(target=self.oauth_update_properties, args=(0,tbuffer.text), daemon=True)
-        self.app.start_progressing()
-        t.start()
+
+        self.oauth_update_properties(0, tbuffer.text)
 
     def oauth_update_keys(self) -> None:
 
         """update the current Keys fromserver
         """
 
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                operation_id='get-config-jwks',
-                url_suffix='',
-                endpoint_args='',
-                data_fn=None,
-                data={}
-                        )
-        except Exception as e:
-            self.app.stop_progressing()
-            self.app.show_message(_("Error getting keys"), str(e))
-            return
-
-        self.app.stop_progressing()
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting keys"), str(rsponse.text))
-            return
-
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting keys"), str(rsponse.text))
-            return
-
         data =[]
 
-        for d in result.get('keys', []): 
+        for d in self.jwks_keys.get('keys', []): 
             try:
                 gmt = time.gmtime(int(d['exp'])/1000)
                 exps = time.strftime("%d %b %Y %H:%M:%S", gmt)
@@ -611,7 +576,7 @@ class Plugin(DialogUtils):
                     selectes=0,
                     headerColor='class:outh-verticalnav-headcolor',
                     entriesColor='class:outh-verticalnav-entriescolor',
-                    all_data=result['keys']
+                    all_data=self.jwks_keys['keys']
                 )
 
             self.oauth_data_container['keys'] = HSplit([keys])
@@ -619,15 +584,22 @@ class Plugin(DialogUtils):
             self.app.layout.focus(keys)
 
         else:
-            self.app.show_message(_("Oops"), _("Nothing to display"), tobefocused=self.oauth_containers['keys'])
+            self.app.show_message(_("Oops"), _("No JWKS keys were found"), tobefocused=self.app.center_frame)
 
     def oauth_get_keys(self) -> None:
         """Method to get the Keys from server
         """
-        self.oauth_data_container['keys'] = HSplit([Label(_("Please wait while getting Keys"), style='class:outh-waitscopedata.label')], width=D(), style='class:outh-waitclientdata')
-        t = threading.Thread(target=self.oauth_update_keys, daemon=True)
-        self.app.start_progressing()
-        t.start()
+
+        async def coroutine():
+            cli_args = {'operation_id': 'get-config-jwks'}
+            self.app.start_progressing("Retreiving JWKS keys...")
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            self.jwks_keys = response.json()
+            self.oauth_update_keys()
+
+        asyncio.ensure_future(coroutine())
+
   
     def edit_scope_dialog(self, **params: Any) -> None:
         selected_line_data = params['data']  
