@@ -184,7 +184,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
     def get_admin_ui_roles(self) -> None:
         async def coroutine():
             cli_args = {'operation_id': 'get-all-adminui-roles'}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Retreiving admin UI roles from server..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             self.admin_ui_roles = response.json()

@@ -125,7 +125,7 @@ class Plugin(DialogUtils):
         cli_args = {'operation_id': 'get-user', 'endpoint_args': endpoint_args}
 
         async def coroutine():
-            self.app.start_progressing()
+            self.app.start_progressing(_("Retreiving users from server..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             self.users = response.json()
@@ -163,7 +163,7 @@ class Plugin(DialogUtils):
                 if user.get('userId') == kwargs['selected'][1]:
                     async def coroutine():
                         cli_args = {'operation_id': 'delete-user', 'url_suffix':'inum:{}'.format(user['inum'])}
-                        self.app.start_progressing()
+                        self.app.start_progressing(_("Deleting user {}").format(user['userId']))
                         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                         self.app.stop_progressing()
                         if response:
@@ -244,7 +244,7 @@ class Plugin(DialogUtils):
         async def coroutine():
             operation_id = 'put-user' if dialog.data.get('baseDn') else 'post-user'
             cli_args = {'operation_id': operation_id, 'data': user_info}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Saving user ..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             if response.status_code == 500:
@@ -261,7 +261,7 @@ class Plugin(DialogUtils):
             return
         async def coroutine():
             cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Retreiving claims"))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             result = response.json()
