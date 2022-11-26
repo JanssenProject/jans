@@ -227,6 +227,24 @@ public enum RegisterRequestParam {
     DEFAULT_ACR_VALUES("default_acr_values"),
 
     /**
+     * Integer value which sets minimum acr level.
+     */
+    MINIMUM_ACR_LEVEL("minimum_acr_level"),
+
+    /**
+     * Boolean value,
+     * - if false and minimumAcrLevel is higher then current acr_values then reject request
+     * - if true - resolve acr according to either client's minimumAcrPriorityList or AS auth_level_mapping
+     */
+    MINIMUM_ACR_LEVEL_AUTORESOLVE("minimum_acr_level_autoresolve"),
+
+    /**
+     * Array of strings,
+     * - enables client to specify the acr order of preference, rather then just the next lowest integer value
+     */
+    MINIMUM_ACR_PRIORITY_LIST("minimum_acr_priority_list"),
+
+    /**
      * URI using the https scheme that the Authorization Server can call to initiate a login at the Client.
      */
     INITIATE_LOGIN_URI("initiate_login_uri"),
