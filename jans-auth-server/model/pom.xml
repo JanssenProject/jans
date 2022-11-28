@@ -180,6 +180,11 @@
 			<groupId>com.wordnik</groupId>
 			<artifactId>swagger-annotations</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-doc</artifactId>
+			<version>${jans-core.version}</version>
+		</dependency>
 
 	</dependencies>
 </project>

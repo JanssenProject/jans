@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.jans.doc.annotation.DocProperty;
 
 /**
  * FIDO 2 configuration
@@ -19,23 +20,28 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Fido2Configuration {
 
+    @DocProperty(description = "Authenticators certificates folder")
     private String authenticatorCertsFolder;
-
+    @DocProperty(description = "MDS access token")
     private String mdsAccessToken;
+    @DocProperty(description = "MDS TOC root certificates folder")
     private String mdsCertsFolder;
+    @DocProperty(description = "MDS TOC files folder")
     private String mdsTocsFolder;
-
+    @DocProperty(description = "Boolean value indicating if U2f attestation needs to be checked")
     private boolean checkU2fAttestations = false;
-
+    @DocProperty(description = "Allow to enroll users on enrollment/authentication requests")
     private boolean userAutoEnrollment = false;
 
+    @DocProperty(description = "Expiration time in seconds for pending enrollment/authentication requests")
     private int unfinishedRequestExpiration = 120; // 120 seconds
+    @DocProperty(description = "Expiration time in seconds for approved authentication requests")
     private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
-
+    @DocProperty(description = "Authenticators metadata in json format")
     private String serverMetadataFolder;
-    
+    @DocProperty(description = "List of Requested Credential Types")
     private List<String> requestedCredentialTypes = new ArrayList<String>();
-
+    @DocProperty(description = "Authenticators metadata in json format")
     private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
 
     public String getAuthenticatorCertsFolder() {
