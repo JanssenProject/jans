@@ -170,7 +170,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
                 )
 
-        self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),)
+        self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
 
 
 
@@ -251,7 +251,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 else:
                     widget = self.app.getTitledText(_(display_name), name=claim_, value='', style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, claim_))
                 self.edit_user_content.insert(-1, widget)
-            self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),)
+            self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
 
 
         body = HSplit([Label(_("Select claim to be added to current user.")), claims_checkbox])
