@@ -139,16 +139,17 @@ nav:
         - 'Passwordless Authentication': 'admin/planning/passwordless-auth.md'
         - 'Machine-to-Machine Authentication': 'admin/planning/machine-to-machine.md'
     - 'Installation':
-        - 'admin/install/README.md'
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
-            - 'Docker Quick Start': 'admin/install/vm-install/quick-start-install.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
             - 'Suse': 'admin/install/vm-install/suse.md'
 #            - 'FIPS DISA STIG': 'admin/install/vm-install/disa-stig.md'
             - 'Dynamic Download': 'admin/install/vm-install/dynamic-download.md'
+        - 'Docker Installation': 
+            - 'Quick Start':  'admin/install/docker-install/quick-start.md' 
+            - 'Docker compose': 'admin/install/docker-install/compose.md'
         - 'Helm Deployments':
             - 'admin/install/helm-install/README.md'
             - 'Local Kubernetes Cluster': 'admin/install/helm-install/local.md'
@@ -157,7 +158,7 @@ nav:
 #            - 'Digital Ocean DOK': 'admin/install/helm-install/digitalocean-dok.md'
             - 'Microsoft Azure AKS': 'admin/install/helm-install/microsoft-azure.md'
 #            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
-            - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
+            - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'    
         - 'Setup Instructions': 'admin/install/setup.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
