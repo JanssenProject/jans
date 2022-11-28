@@ -331,7 +331,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
         authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse());
 
-        authzRequestService.setDefaultAcrsIfNeeded(authzRequest, client);
+        authzRequestService.setAcrsIfNeeded(authzRequest);
 
         checkOfflineAccessScopes(responseTypes, prompts, client, scopes);
         checkResponseType(authzRequest, responseTypes, client);

@@ -14,7 +14,9 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.external.ExternalAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,6 +25,10 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
+import java.util.HashMap;
+
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -70,12 +76,155 @@ public class AuthzRequestServiceTest {
     @Mock
     private RedirectionUriService redirectionUriService;
 
+    @Mock
+    private ExternalAuthenticationService externalAuthenticationService;
+
+    @Test
+    public void setAcrsIfNeeded_whenAcrsAreNotSetButDefaultAcrsAreConfigured_shouldSetDefaultAcrs() {
+        Client client = new Client();
+        client.setDefaultAcrValues(new String[]{"passkey"});
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setClient(client);
+
+        authzRequestService.setAcrsIfNeeded(authzRequest);
+        assertEquals(authzRequest.getAcrValues(), "passkey");
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenAcrsHasEnoughLevel_shouldRaiseNoError() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("otp", 5);
+            put("u2f", 10);
+            put("super_gluu", 11);
+            put("passkey", 20);
+            put("usb_fido_key", 30);
+        }});
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("passkey");
+        authzRequest.setClient(client);
+
+        authzRequestService.setAcrsIfNeeded(authzRequest);
+        assertEquals(authzRequest.getAcrValues(), "passkey");
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenAcrsHasNoEnoughLevel_shouldRaiseError() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("otp", 5);
+            put("u2f", 10);
+            put("super_gluu", 11);
+            put("passkey", 20);
+            put("usb_fido_key", 30);
+        }});
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("super_gluu");
+        authzRequest.setClient(client);
+
+        try {
+            authzRequestService.setAcrsIfNeeded(authzRequest);
+        } catch (WebApplicationException e) {
+            return; // successfully got error
+        }
+
+        fail("Failed to throw error.");
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenAcrsHasNoEnoughLevelButAutoResolveIsTrue_shouldRaiseNoError() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("otp", 5);
+            put("u2f", 10);
+            put("super_gluu", 11);
+            put("passkey", 20);
+            put("usb_fido_key", 30);
+        }});
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+        client.getAttributes().setMinimumAcrLevelAutoresolve(true);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("super_gluu");
+        authzRequest.setClient(client);
+
+        authzRequestService.setAcrsIfNeeded(authzRequest);
+
+        assertEquals(authzRequest.getAcrValues(), "passkey");
+        assertTrue(externalAuthenticationService.acrToLevelMapping().get(authzRequest.getAcrValues()) > 14);
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenAcrsHasNoEnoughLevelButAutoResolveIsTrueAndPriorityListSet_shouldHaveAcrFromPriorityListSet() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("otp", 5);
+            put("u2f", 10);
+            put("super_gluu", 11);
+            put("passkey", 20);
+            put("usb_fido_key", 30);
+        }});
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+        client.getAttributes().setMinimumAcrLevelAutoresolve(true);
+        client.getAttributes().setMinimumAcrPriorityList(Collections.singletonList("usb_fido_key"));
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("super_gluu");
+        authzRequest.setClient(client);
+
+        authzRequestService.setAcrsIfNeeded(authzRequest);
+
+        assertEquals(authzRequest.getAcrValues(), "usb_fido_key");
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenAcrsHasNoEnoughLevelButAutoResolveIsTrueAndPriorityListSet_shouldGetErrorIfPriorityListClashWithMinimalLevel() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("otp", 5);
+            put("u2f", 10);
+            put("super_gluu", 11);
+            put("passkey", 20);
+            put("usb_fido_key", 30);
+        }});
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+        client.getAttributes().setMinimumAcrLevelAutoresolve(true);
+        client.getAttributes().setMinimumAcrPriorityList(Collections.singletonList("u2f"));
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("super_gluu");
+        authzRequest.setClient(client);
+
+        try {
+            authzRequestService.setAcrsIfNeeded(authzRequest);
+        } catch (WebApplicationException e) {
+            return; // successfully got error
+        }
+
+        fail("Must fail because priority list has acr which has level lower then minumumAcrLevel");
+    }
+
     @Test
     public void addDeviceSecretToSession_withoutUnabledConfiguration_shouldNotGenerateDeviceSecret() {
         when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(false);
 
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setScope("openid device_sso");
@@ -93,7 +242,7 @@ public class AuthzRequestServiceTest {
         when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(true);
 
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setScope("openid");
@@ -111,7 +260,7 @@ public class AuthzRequestServiceTest {
         when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(true);
 
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setRedirectUriResponse(new RedirectUriResponse(mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
@@ -131,7 +280,7 @@ public class AuthzRequestServiceTest {
         when(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint()).thenReturn(true);
 
         Client client = new Client();
-        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE});
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE});
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setRedirectUriResponse(new RedirectUriResponse(mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));

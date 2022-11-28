@@ -256,6 +256,19 @@ public class RegisterService {
             client.setInitiateLoginUri(requestObject.getInitiateLoginUri());
         }
 
+        final Integer minimumAcrLevel = requestObject.getMinimumAcrLevel();
+        if (minimumAcrLevel != null) {
+            client.getAttributes().setMinimumAcrLevel(minimumAcrLevel);
+        }
+        final Boolean minimumAcrLevelAutoresolve = requestObject.getMinimumAcrLevelAutoresolve();
+        if (minimumAcrLevelAutoresolve != null) {
+            client.getAttributes().setMinimumAcrLevelAutoresolve(minimumAcrLevelAutoresolve);
+        }
+        final List<String> minimumAcrPriorityList = requestObject.getMinimumAcrPriorityList();
+        if (minimumAcrPriorityList != null) {
+            client.getAttributes().setMinimumAcrPriorityList(new ArrayList<>(new HashSet<>(minimumAcrPriorityList)));
+        }
+
         final List<String> groups = requestObject.getGroups();
         if (groups != null && !groups.isEmpty()) {
             client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
