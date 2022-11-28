@@ -43,7 +43,7 @@ sudo pip3 install requests --upgrade
 sudo pip3 install shiv
 sudo snap install microk8s --classic
 sudo microk8s.status --wait-ready
-sudo microk8s.enable dns registry ingress storage
+sudo microk8s.enable dns registry ingress hostpath-storage
 sudo microk8s kubectl get daemonset.apps/nginx-ingress-microk8s-controller -n ingress -o yaml | sed -s "s@ingress-class=public@ingress-class=nginx@g" | microk8s kubectl apply -f -
 sudo apt-get update
 sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
