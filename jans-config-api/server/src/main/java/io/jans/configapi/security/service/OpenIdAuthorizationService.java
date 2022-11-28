@@ -128,6 +128,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
             logger.error("Validate scope, accessresourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
                     resourceScopes);
+            // find missing scopes
+            List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
+            logger.error("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
@@ -136,7 +139,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             // If No auth scope required OR if token contains the authSpecificScope
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
                 logger.error("Validating token scopes as no authSpecificScope required");
-                if (!validateScope(tokenScopes, resourceScopes)) {
+                if ((missingScopes != null && !missingScopes.isEmpty())) {
                     logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
                     throw new WebApplicationException("Insufficient scopes! , Required scope: " + resourceScopes
@@ -145,10 +148,6 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 }
                 return AUTHENTICATION_SCHEME + accessToken;
             }
-
-            // find missing scopes
-            List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
-            logger.error("missingScopes:{}", missingScopes);
 
             // If only authSpecificScope missing then proceed with token creation else throw
             // error
@@ -222,12 +221,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         List<String> missingScopes = findMissingElements(scopeList, tokenScopes);
         logger.error("SUPER Missing Scopes:{}", missingScopes);
 
-        // If
+        // Super scope present so no need to check other types of scope
         if (missingScopes == null || missingScopes.isEmpty()) {
             return missingScopes;
         }
 
-        // Group scope
+        // Group scope present so no need to check normal scope presence
         scopeList = scopeMap.get(ProtectionScopeType.GROUP);
         // find missing scopes
         missingScopes = findMissingElements(scopeList, tokenScopes);

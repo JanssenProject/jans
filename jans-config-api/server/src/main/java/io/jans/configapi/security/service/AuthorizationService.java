@@ -40,8 +40,6 @@ public abstract class AuthorizationService implements Serializable {
         return Response.status(status).entity(detail).build();
     }
 
-
-
     public Map<ProtectionScopeType, List<String>> getRequestedScopes(ResourceInfo resourceInfo) {
         return authUtil.getRequestedScopes(resourceInfo);
     }
@@ -49,7 +47,7 @@ public abstract class AuthorizationService implements Serializable {
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
         return authUtil.validateScope(authScopes, resourceScopes);
     }
-    
+
     public List<String> getAllScopeList(Map<ProtectionScopeType, List<String>> scopeMap) {
         return authUtil.getAllScopeList(scopeMap);
     }
