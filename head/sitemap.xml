@@ -1836,22 +1836,37 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/reference/json/auth-server/</loc>
+         <loc>https://jans.io/docs/head/admin/reference/json/feature-flags/</loc>
          <lastmod>2022-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/reference/json/config-api/</loc>
+         <loc>https://jans.io/docs/head/admin/reference/json/feature-flags/janssenauthserver-feature-flags/</loc>
          <lastmod>2022-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/reference/json/fido/</loc>
+         <loc>https://jans.io/docs/head/admin/reference/json/properties/</loc>
          <lastmod>2022-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/reference/json/scim/</loc>
+         <loc>https://jans.io/docs/head/admin/reference/json/properties/config-api-properties/</loc>
+         <lastmod>2022-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/json/properties/fido2-properties/</loc>
+         <lastmod>2022-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/json/properties/janssenauthserver-properties/</loc>
+         <lastmod>2022-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/json/properties/scim-properties/</loc>
          <lastmod>2022-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
