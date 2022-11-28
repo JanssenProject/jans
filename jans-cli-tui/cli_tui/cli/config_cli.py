@@ -368,7 +368,8 @@ class JCA_CLI:
             access_token = self.access_token
 
         user = self.get_user_info()
-        headers['User-inum'] = user['inum']
+        if 'inum' in user:
+            headers['User-inum'] = user['inum']
 
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
         ret_val.update(headers)
