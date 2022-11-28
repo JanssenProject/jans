@@ -410,10 +410,16 @@ nav:
             - 'Converting Data': 'admin/reference/database/converting-data.md'
         - 'JSON Configuration/Properties':
             - 'admin/reference/json/README.md'
-            - 'Auth Server': 'admin/reference/json/auth-server.md'
-            - 'FIDO': 'admin/reference/json/fido.md'
-            - 'SCIM': 'admin/reference/json/scim.md'
-            - 'Config API': 'admin/reference/json/config-api.md'
+            - 'Properties':
+                - 'admin/reference/json/properties/README.md'
+                - 'Auth Server': 'admin/reference/json/properties/janssenauthserver-properties.md'
+                - 'FIDO': 'admin/reference/json/properties/fido2-properties.md'
+                - 'SCIM': 'admin/reference/json/properties/scim-properties.md'
+                - 'Config API': 'admin/reference/json/properties/config-api-properties.md'
+            - 'Feature Flags':
+                  - 'admin/reference/json/feature-flags/README.md'
+                  - 'Auth Server': 'admin/reference/json/feature-flags/janssenauthserver-feature-flags.md'
+
         - 'Kubernetes':
             - 'admin/reference/kubernetes/README.md'
             - 'Helm Chart': 'admin/reference/kubernetes/helm-chart.md'
