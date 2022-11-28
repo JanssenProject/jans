@@ -7,7 +7,7 @@ tags:
 
 # Web server certificate
 
-## Web server certitification installation
+## Web server certificate installation
 
 We are using LetsEncrypt cert to write this documentation. 
 
