@@ -1,61 +1,20 @@
-import json
 import asyncio
-
-from prompt_toolkit.widgets import Button, TextArea
-from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.dimension import AnyDimension
-
-from prompt_toolkit.widgets import (
-    Button,
-    Label,
-    TextArea,
-)
-
-
-from prompt_toolkit.widgets import (
-    Button,
-    Dialog,
-    VerticalLine,
-)
-
 from cli import config_cli
 from prompt_toolkit.layout.containers import (
-    ConditionalContainer,
-    Float,
     HSplit,
-    VSplit,
-    VerticalAlign,
     DynamicContainer,
-    FloatContainer,
-    Window,
-    AnyContainer
 )
 from prompt_toolkit.widgets import (
-    Box,
     Button,
-    Frame,
-    Label,
     RadioList,
-    TextArea,
+    Dialog,
  )
-
 from utils.static import DialogResult
-from wui_components.jans_dialog import JansDialog
-from wui_components.jans_dialog_with_nav import JansDialogWithNav
-from wui_components.jans_nav_bar import JansNavBar
-from wui_components.jans_side_nav_bar import JansSideNavBar
 from utils.utils import DialogUtils
-
 from wui_components.jans_cli_dialog import JansGDialog
-
-from wui_components.jans_drop_down import DropDownWidget
-
-from typing import Optional, Sequence, Union
-from typing import TypeVar, Callable
+from typing import Optional, Sequence
 from utils.multi_lang import _
 import cli_style
 
@@ -68,9 +27,20 @@ class ViewProperty(JansGDialog, DialogUtils):
             parent,
             data:tuple,
             title: AnyFormattedText= "",
-            search_text: AnyFormattedText= "",
             buttons: Optional[Sequence[Button]]= []
             )-> None:
+        """init for `ViewProperty`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
+            
+        JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
+        DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
+        
+        Args:
+            app (Generic): The main Application class
+            parent (widget): This is the parent widget for the dialog
+            data (tuple): selected line data 
+            title (AnyFormattedText, optional): The Main dialog title. Defaults to "".
+            button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
+        """
         super().__init__(app, title, buttons)
         self.property, self.value = data[0],data[1]
         self.app = app
@@ -84,9 +54,15 @@ class ViewProperty(JansGDialog, DialogUtils):
         self.create_window()
         
     def cancel(self) -> None:
+        """method to invoked when canceling changes in the dialog (Cancel button is pressed)
+        """
+
         self.future.set_result(DialogResult.CANCEL)
 
     def save(self) -> None:
+        """method to invoked when saving the dialog (Save button is pressed)
+        """
+
         data_dict = {}
         list_data =[]
 
@@ -141,9 +117,15 @@ class ViewProperty(JansGDialog, DialogUtils):
                 self.myparent.oauth_update_properties(start_index=self.myparent.oauth_update_properties_start_index)
             asyncio.ensure_future(coroutine())
 
-
-
     def get_type(self,prop):
+        """This Method get a property and get its type from schema to return the widget type to implement
+
+        Args:
+            prop (str): The property name 
+
+        Returns:
+            str: the widget type to implement
+        """
         try :
             proper = self.schema.get('properties', {})[prop]
 
@@ -175,6 +157,15 @@ class ViewProperty(JansGDialog, DialogUtils):
         return prop_type
 
     def get_listValues(self,prop,type=None):
+        """This method get list values for properties own Enum values
+
+        Args:
+            prop (str): The property name
+            type (_type_, optional): If the Items in Property properties had a nasted Enum. Defaults to None.
+
+        Returns:
+            list: List of the properties enum to choose from
+        """
         try :
             if type !='nasted':
                 list_values= self.schema.get('properties', {})[prop]['items']['enum']
@@ -187,6 +178,8 @@ class ViewProperty(JansGDialog, DialogUtils):
         return list_values
 
     def prepare_properties(self):
+        """This method build the main value_content to edit the properties
+        """
 
         prop_type = self.get_type(self.property)
 
@@ -385,8 +378,19 @@ class ViewProperty(JansGDialog, DialogUtils):
         self, 
         cb: RadioList,
         ) -> None:
+        """This method for properties that implemented in multi tab
+
+        Args:
+            cb (RadioList): the New Value from the nasted tab
+        """
         self.selected_tab = cb.current_value
 
     def __pt_container__(self)-> Dialog:
+        """The container for the dialog itself
+
+        Returns:
+            Dialog: View Property
+        """
+
         return self.dialog
 

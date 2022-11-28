@@ -1,36 +1,20 @@
 from collections import OrderedDict
 from typing import Any
-from urllib import response
-
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     DynamicContainer,
-    Window
-)
-from prompt_toolkit.widgets import (
-    Box,
-    Button,
-    Label,
 )
 from prompt_toolkit.widgets import (
     Button,
-    Frame,
     Label,
-    RadioList,
     TextArea,
-    CheckboxList,
-    Checkbox,
+    Dialog
 )
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
-
 from prompt_toolkit.application.current import get_app
 from asyncio import Future, ensure_future
-
-
-import cli_style
-from cli import config_cli
 from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
@@ -42,18 +26,10 @@ from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
 import threading
-from prompt_toolkit.widgets import (
-    Button,
-    Dialog,
-    VerticalLine,
-)
-from prompt_toolkit.layout.containers import AnyContainer
 from prompt_toolkit.buffer import Buffer
-
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.dimension import AnyDimension
-from typing import Optional, Sequence, Union
-from typing import TypeVar, Callable
+from typing import Optional, Sequence
+from typing import Callable
 
 import json
 
@@ -81,6 +57,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             data (list): selected line data 
             button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
             save_handler (method, optional): handler invoked when closing the dialog. Defaults to None.
+            delete_UMAresource (method, optional): handler invoked when deleting UMA-resources
         """
         super().__init__(parent, title, buttons)
         self.save_handler = save_handler
@@ -92,6 +69,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.create_window()
 
     def save(self) -> None:
+        """method to invoked when saving the dialog (Save button is pressed)
+        """
 
         self.data = self.make_data_from_dialog()
         self.data['disabled'] = not self.data['disabled']
@@ -165,6 +144,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.future.set_result(DialogResult.ACCEPT)
 
     def cancel(self) -> None:
+        """method to invoked when canceling changes in the dialog (Cancel button is pressed)
+        """
+
         self.future.set_result(DialogResult.CANCEL)
 
     def create_window(self) -> None:
@@ -852,6 +834,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self, 
         tbuffer: Buffer,
         ) -> None:
+        """This method handel the search for UMA resources
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
+
         if not len(tbuffer.text) > 2:
             self.myparent.show_message(_("Error!"), _("Search string should be at least three characters"))
             return
@@ -961,10 +949,18 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self, 
         selection: str
         ) -> None:
+        """This method for client navigation bar when value is changed
+
+        Args:
+            selection (str): the New Value from the nav-bar
+        """
+
         self.left_nav = selection
 
     def view_uma_resources(self, **params: Any) -> None:
-        
+        """This method view the UMA resources in a dialog
+        """        
+
         selected_line_data = params['data']    ##self.uma_result 
         title = _("Edit user Data (Clients)")
 
@@ -973,5 +969,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.myparent.show_jans_dialog(dialog)
 
     def __pt_container__(self)-> Dialog:
+        """The container for the dialog itself
+
+        Returns:
+            Dialog: The Edit Client Dialog
+        """
+
         return self.dialog
 

@@ -58,8 +58,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         """init for `EditScopeDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
+        JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
         
-        Args:
+                Args:
             parent (widget): This is the parent widget for the dialog, to access `Pageup` and `Pagedown`
             title (str): The Main dialog title
             data (list): selected line data 
@@ -80,6 +81,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.sope_type = self.data.get('scopeType') or 'oauth'
 
     def save(self) -> None:
+        """method to invoked when saving the dialog (Save button is pressed)
+        """
+
         self.myparent.logger.debug('SAVE SCOPE')
 
         data = {}
@@ -105,6 +109,9 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             self.future.set_result(DialogResult.ACCEPT)
 
     def cancel(self) -> None:
+        """method to invoked when canceling changes in the dialog (Cancel button is pressed)
+        """
+
         self.future.set_result(DialogResult.CANCEL)
 
     def create_window(self) -> None:
@@ -175,12 +182,27 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self, 
         cb: RadioList,
         ) -> None:
+        """This method for scope type selection set
+
+        Args:
+            cb (RadioList): the New Value from the nav-bar
+        """
+
         self.sope_type = cb.current_value
 
     def get_named_claims(
         self, 
         claims_list:list
         ) -> list:
+        """This method for getting claim name
+
+        Args:
+            claims_list (list): List for Claims
+
+        Returns:
+            list: List with Names retlated to that claims
+        """
+
         try :
             responce = self.myparent.cli_object.process_command_by_id(
                         operation_id='get-attributes',
@@ -207,7 +229,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     calims_names.append([entry['dn'], entry['displayName']])
 
         return calims_names
-
 
     def delete_claim(self, **kwargs: Any) -> None:
         """This method for the deletion of claim
@@ -411,6 +432,11 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self, 
         textbuffer: Buffer,
         ) -> None:
+        """This method handel the search for claims and adding new claims
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
 
         try :
             responce = self.myparent.cli_object.process_command_by_id(
@@ -465,5 +491,11 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.myparent.show_jans_dialog(dialog)
 
     def __pt_container__(self) -> Dialog:
+        """The container for the dialog itself
+
+        Returns:
+            Dialog: The Edit Scope Dialog
+        """
+
         return self.dialog
 

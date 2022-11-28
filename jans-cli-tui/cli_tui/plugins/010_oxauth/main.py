@@ -1,13 +1,8 @@
-import os
-import sys
 import time
 import json
-
 import asyncio
 from functools import partial
 from typing import Any, Optional
-
-import prompt_toolkit
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.key_binding import KeyBindings
@@ -24,35 +19,22 @@ from prompt_toolkit.widgets import (
     Box,
     Button,
     Label,
-    Frame,
     Dialog,
-    CheckboxList,
     TextArea
 )
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
-
-
 from utils.static import DialogResult
-from prompt_toolkit.layout import ScrollablePane
-from asyncio import Future
-
 from cli import config_cli
 from utils.utils import DialogUtils
 from wui_components.jans_nav_bar import JansNavBar
-from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from wui_components.jans_dialog import JansDialog
-from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_data_picker import DateSelectWidget
 from wui_components.jans_cli_dialog import JansGDialog
-
 from view_property import ViewProperty
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
-
 from utils.multi_lang import _
 import cli_style
 
@@ -66,7 +48,7 @@ class Plugin(DialogUtils):
         """init for Plugin class "oxauth"
 
         Args:
-            app (_type_): _description_
+            app (Generic): The main Application class
         """
         self.app = app
         self.pid = 'oxauth'
@@ -80,10 +62,11 @@ class Plugin(DialogUtils):
         self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
     def init_plugin(self) -> None:
+        """The initialization for this plugin
+        """
 
         self.app.create_background_task(self.get_appconfiguration())
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
-
 
     async def get_appconfiguration(self) -> None:
         """Coroutine for getting application configuration.
@@ -216,7 +199,8 @@ class Plugin(DialogUtils):
         """update the current clients data to server
 
         Args:
-            pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
+            start_index (Optional[int], optional): This is flag for the clients page. Defaults to 0.
+            pattern (Optional[str], optional):endpoint arguments for the client data. Defaults to ''.
         """
 
         async def coroutine():
@@ -291,7 +275,6 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-
     def delete_client(self, **kwargs: Any) -> None:
         """This method for the deletion of the clients data
 
@@ -330,7 +313,6 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-
     def oauth_get_scopes(
             self, 
             start_index: Optional[int]= 0,
@@ -339,7 +321,8 @@ class Plugin(DialogUtils):
         """update the current Scopes data to server
 
         Args:
-            start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
+            start_index (int, optional): add Button("Prev") and Button("Next")to the layout (which page am I in). Defaults to 0.
+            pattern (Optional[str], optional):endpoint arguments for the Scopes data. Defaults to ''.
         """
 
         async def coroutine():
@@ -414,18 +397,21 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-
     def oauth_update_properties(
         self,
         start_index: Optional[int]= 0,
         pattern: Optional[str]= '',
         tofocus:Optional[bool]=True,
         ) -> None:
+
         """update the current clients data to server
 
         Args:
+            start_index (int, optional): add Button("Prev") and Button("Next")to the layout (which page am I in). Defaults to 0.
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
+            tofocus (Optional[bool], optional): To focus the properties or not (used to not focus on navigation). Defaults to True.
         """
+
         self.oauth_update_properties_start_index = start_index
         # ------------------------------------------------------------------------------- #
         # ----------------------------------- Search ------------------------------------ #
@@ -504,6 +490,8 @@ class Plugin(DialogUtils):
             self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.oauth_containers['properties'])
 
     def properties_display_dialog(self, **params: Any) -> None:
+        """Display the properties as Text
+        """
         data_property, data_value = params['selected'][0], params['selected'][1]
         body = HSplit([
                 TextArea(
@@ -521,10 +509,9 @@ class Plugin(DialogUtils):
 
         self.app.show_jans_dialog(dialog)
 
-
     def view_property(self, **params: Any) -> None:
-        #property, value =params['passed']
-
+        """This method view the properties in Dialog to edit
+        """
 
         selected_line_data = params['passed']    ##self.uma_result 
 
@@ -535,6 +522,11 @@ class Plugin(DialogUtils):
         self.app.show_jans_dialog(dialog)
  
     def search_properties(self, tbuffer:Buffer) -> None:
+        """This method handel the search for Properties
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         self.app.logger.debug("tbuffer="+str(tbuffer))
         self.app.logger.debug("type tbuffer="+str(type(tbuffer)))
         self.search_text=tbuffer.text
@@ -546,7 +538,6 @@ class Plugin(DialogUtils):
         self.oauth_update_properties(0, tbuffer.text)
 
     def oauth_update_keys(self) -> None:
-
         """update the current Keys fromserver
         """
 
@@ -600,14 +591,17 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-  
     def edit_scope_dialog(self, **params: Any) -> None:
+        """This Method show the scopes dialog for edit
+        """
         selected_line_data = params['data']  
 
         dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data, save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
 
     def edit_client_dialog(self, **params: Any) -> None:
+        """This Method show the scopes dialog for edit
+        """
         selected_line_data = params['data']  
         title = _("Edit user Data (Clients)")
 
@@ -640,7 +634,6 @@ class Plugin(DialogUtils):
 
         self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
 
-
     def save_scope(self, dialog: Dialog) -> None:
         """This method to save the client data to server
 
@@ -666,6 +659,11 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
     def search_scope(self, tbuffer:Buffer,) -> None:
+        """This method handel the search for Scopes
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['scopes'])
             return
@@ -673,6 +671,11 @@ class Plugin(DialogUtils):
         self.oauth_get_scopes(pattern=tbuffer.text)
 
     def search_clients(self, tbuffer:Buffer,) -> None:
+        """This method handel the search for Clients
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['clients'])
             return
@@ -680,18 +683,20 @@ class Plugin(DialogUtils):
         self.oauth_update_clients(pattern=tbuffer.text)
 
     def add_scope(self) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of Scopes (Add New)
         """
         dialog = EditScopeDialog(self.app, title=_("Add New Scope"), data={}, save_handler=self.save_scope)
         result = self.app.show_jans_dialog(dialog)
 
     def add_client(self) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of clients (Add New)
         """
         dialog = EditClientDialog(self.app, title=_("Add Client"), data={}, save_handler=self.save_client)
         result = self.app.show_jans_dialog(dialog)
 
     def get_help(self, **kwargs: Any):
+        """This method get focused field Description to display on statusbar
+        """
 
         self.app.logger.debug("get_help: "+str(kwargs['data']))
         self.app.logger.debug("get_help: "+str(kwargs['scheme']))
@@ -708,16 +713,8 @@ class Plugin(DialogUtils):
             self.app.status_bar_text= kwargs['data'][1]
             self.app.logger.debug("kwargs['data']: "+str(kwargs['data']))
 
-        
-        # self.app.status_bar_text= kwargs['data'][1]
-
-
     def delete_scope(self, **kwargs: Any):
         """This method for the deletion of the clients data
-
-        Args:
-            selected (_type_): The selected Client
-            event (_type_): _description_
 
         Returns:
             str: The server response
@@ -746,6 +743,11 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
     def delete_UMAresource(self, **kwargs: Any):
+        """This method for the deletion of the UMAresource
+
+        Returns:
+            str: The server response
+        """
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete UMA resoucres with id:")+"\n {} ?".format(kwargs ['selected'][0]))
         async def coroutine():
             focused_before = self.app.layout.current_window
@@ -770,6 +772,8 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
     def oauth_logging(self) -> None:
+        """This method for the Auth Login
+        """
         self.oauth_data_container['logging'] = HSplit([
                         self.app.getTitledWidget(
                                 _('Log Level'),
@@ -818,6 +822,8 @@ class Plugin(DialogUtils):
                      ], style='class:outh_containers_clients', width=D())
 
     def save_logging(self) -> None:
+        """This method to Save the Auth Login to server
+        """
         mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})
         pathches = []
         for key_ in mod_data:
