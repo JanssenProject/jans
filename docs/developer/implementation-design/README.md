@@ -16,13 +16,7 @@ This documentation explains technical design, architecture and interactions of v
 
 ## API Reference
 
-| Service | REST API | Java API |  
-| --- | --- | --- |  
-| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/docs/swagger.yaml)| [Javadoc](https://jenkins.jans.io/javadocs/jans-auth/main/)|  
-| Jans Config API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml)| |  
-| Jans Core | | [Javadoc](https://jenkins.jans.io/javadocs/jans-core/main/)|  
-| Jans FIDO 2 | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-fido2/docs/jansFido2Swagger.yaml) | |  
-| Jans SCIM API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml) | [Javadoc](https://jenkins.jans.io/javadocs/jans-scim/main/) |     
+REST and Java APIs are list [here](../../admin/reference/openapi.md#api-reference)
   
 ## Design Consideration and Guidelines
 
