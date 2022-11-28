@@ -120,25 +120,26 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer)
             throws WebApplicationException {
-        logger.error("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
+        logger.debug("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
                 tokenScopes, resourceInfo, issuer);
         try {
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
-            logger.error("Validate scope, accessresourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
+            logger.debug("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
                     resourceScopes);
+
             // find missing scopes
             List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
-            logger.error("missingScopes:{}", missingScopes);
+            logger.debug("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
-            logger.error(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
+            logger.debug(" resourceScopes:{}, authSpecificScope:{} ", resourceScopes, authSpecificScope);
 
             // If No auth scope required OR if token contains the authSpecificScope
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
-                logger.error("Validating token scopes as no authSpecificScope required");
+                logger.debug("Validating token scopes as no authSpecificScope required");
                 if ((missingScopes != null && !missingScopes.isEmpty())) {
                     logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
@@ -163,7 +164,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             // Generate token with required resourceScopes
             resourceScopes.addAll(authSpecificScope);
             accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
-            logger.error("Introspecting new accessToken:{}", accessToken);
+            logger.debug("Introspecting new accessToken:{}", accessToken);
 
             // Introspect
             IntrospectionResponse introspectionResponse = openIdService
@@ -182,8 +183,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (Exception ex) {
-            if (log.isErrorEnabled()) {
-                log.error("oAuth authorization error:{} ", ex.getMessage());
+            if (logger.isErrorEnabled()) {
+                logger.error("oAuth authorization error:{} ", ex.getMessage());
             }
             throw new WebApplicationException("oAuth authorization error " + ex.getMessage(),
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
@@ -205,44 +206,54 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     }
 
     private List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
-        logger.error("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        logger.debug("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
         List<String> scopeList = new ArrayList<>();
         if (tokenScopes == null || tokenScopes.isEmpty() || scopeMap == null || scopeMap.isEmpty()) {
             return scopeList;
         }
 
         for (Map.Entry<ProtectionScopeType, List<String>> entry : scopeMap.entrySet()) {
-            log.error("Get all entry.getKey():{}, entry.getValue():{} ", entry.getKey(), entry.getValue());
+            logger.error("Get all entry.getKey():{}, entry.getValue():{} ", entry.getKey(), entry.getValue());
         }
 
         // Super scope
         scopeList = scopeMap.get(ProtectionScopeType.SUPER);
-        // find missing scopes
-        List<String> missingScopes = findMissingElements(scopeList, tokenScopes);
-        logger.error("SUPER Missing Scopes:{}", missingScopes);
+        logger.debug("SUPER Scopes:{}", scopeList);
+        List<String> missingScopes = null;
 
-        // Super scope present so no need to check other types of scope
-        if (missingScopes == null || missingScopes.isEmpty()) {
-            return missingScopes;
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // find missing scopes
+            missingScopes = findMissingElements(scopeList, tokenScopes);
+            logger.debug("SUPER Missing Scopes:{}", missingScopes);
+
+            // Super scope present so no need to check other types of scope
+            if (missingScopes == null || missingScopes.isEmpty()) {
+                return missingScopes;
+            }
         }
 
         // Group scope present so no need to check normal scope presence
         scopeList = scopeMap.get(ProtectionScopeType.GROUP);
-        // find missing scopes
-        missingScopes = findMissingElements(scopeList, tokenScopes);
-        logger.error("GROUP Missing Scopes:{}", missingScopes);
+        logger.debug("GROUP Scopes:{}", scopeList);
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // find missing scopes
+            missingScopes = findMissingElements(scopeList, tokenScopes);
+            logger.debug("GROUP Missing Scopes:{}", missingScopes);
 
-        if (missingScopes == null || missingScopes.isEmpty()) {
-            return missingScopes;
+            if (missingScopes == null || missingScopes.isEmpty()) {
+                return missingScopes;
+            }
         }
 
         // Normal scope
         scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
-        // find missing scopes
-        missingScopes = findMissingElements(scopeList, tokenScopes);
-        logger.error("SCOPE Missing Scopes:{}", missingScopes);
+        logger.debug("SCOPE Scopes:{}", scopeList);
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // find missing scopes
+            missingScopes = findMissingElements(scopeList, tokenScopes);
+            logger.debug("SCOPE Missing Scopes:{}", missingScopes);
+        }
         return missingScopes;
-
     }
 
 }

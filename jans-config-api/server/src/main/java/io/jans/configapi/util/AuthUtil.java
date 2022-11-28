@@ -155,42 +155,44 @@ public class AuthUtil {
     }
 
     public Map<ProtectionScopeType, List<String>> getRequestedScopes(ResourceInfo resourceInfo) {
-        log.error("Requested scopes for resourceInfo:{} ", resourceInfo);
+        log.debug("Requested scopes for resourceInfo:{} ", resourceInfo);
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         Map<ProtectionScopeType, List<String>> scopes = new HashMap<>();
-        log.error("Requested scopes for resourceClass:{}, typeAnnotation:{} ", resourceClass, typeAnnotation);
+        log.debug("Requested scopes for resourceClass:{}, typeAnnotation:{} ", resourceClass, typeAnnotation);
+
         if (typeAnnotation == null) {
-            log.error("Requested scopes for resourceClass:{}, typeAnnotation == null ", resourceClass);
+            log.debug("Requested scopes for resourceClass:{}, typeAnnotation == null ", resourceClass);
             addMethodScopes(resourceInfo, scopes);
         } else {
-            log.error("Requested scopes for resourceClass:{}, typeAnnotation is not null ", resourceClass);
+            log.debug("Requested scopes for resourceClass:{}, typeAnnotation is not null ", resourceClass);
             scopes.put(ProtectionScopeType.SCOPE, Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
             scopes.put(ProtectionScopeType.GROUP, Stream.of(typeAnnotation.groupScopes()).collect(Collectors.toList()));
             scopes.put(ProtectionScopeType.SUPER, Stream.of(typeAnnotation.superScopes()).collect(Collectors.toList()));
-            log.error("ProtectionScopeType.SCOPE:{} ", Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
-            log.error("ProtectionScopeType.GROUP:{} ",
-                    Stream.of(typeAnnotation.groupScopes()).collect(Collectors.toList()));
-            log.error("ProtectionScopeType.SUPER:{} ",
+            log.trace("ProtectionScopeType.SCOPE:{}, ProtectionScopeType.GROUP:{} ,  ProtectionScopeType.SUPER:{} ",
+                    Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()),
+                    Stream.of(typeAnnotation.groupScopes()).collect(Collectors.toList()),
                     Stream.of(typeAnnotation.superScopes()).collect(Collectors.toList()));
-            log.error("All scopes:{} ", scopes);
+
+            log.debug("All scopes:{} ", scopes);
             addMethodScopes(resourceInfo, scopes);
         }
-        log.trace("Requested scopes:{} for resourceInfo:{} ", scopes, resourceInfo);
+        log.debug("*** Final Requested scopes:{} for resourceInfo:{} ", scopes, resourceInfo);
         return scopes;
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-        log.error("Validate Scopes for authScopes:{}, resourceScopes:{} ", authScopes, resourceScopes);
+        log.debug("Validate Scopes for authScopes:{}, resourceScopes:{} ", authScopes, resourceScopes);
         Set<String> authScopeSet = new HashSet<>(authScopes);
         Set<String> resourceScopeSet = new HashSet<>(resourceScopes);
         return authScopeSet.containsAll(resourceScopeSet);
     }
 
     private void addMethodScopes(ResourceInfo resourceInfo, Map<ProtectionScopeType, List<String>> scopes) {
-        log.error("Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
+        log.debug("Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
         Method resourceMethod = resourceInfo.getResourceMethod();
         ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
+
         if (methodAnnotation != null) {
             scopes.put(ProtectionScopeType.SCOPE, Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
             scopes.put(ProtectionScopeType.GROUP,
@@ -198,7 +200,7 @@ public class AuthUtil {
             scopes.put(ProtectionScopeType.SUPER,
                     Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
         }
-        log.error("Final Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
+        log.debug("Final Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
     }
 
     public String requestAccessToken(final String clientId, final List<String> scope) {
@@ -308,11 +310,11 @@ public class AuthUtil {
     }
 
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
-        log.error("Fetch Auth server specific scope for resourceInfo:{} ", resourceInfo);
+        log.debug("Fetch Auth server specific scope for resourceInfo:{} ", resourceInfo);
 
         // Get required oauth scopes for the endpoint
         List<String> resourceScopes = getAllScopeList(getRequestedScopes(resourceInfo));
-        log.error(" resource:{} has these scopes:{} and configured exclusiveAuthScopes are {}", resourceInfo,
+        log.debug(" resource:{} has these scopes:{} and configured exclusiveAuthScopes are {}", resourceInfo,
                 resourceScopes, this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
 
         // Check if the path has any exclusiveAuthScopes requirement
@@ -325,7 +327,7 @@ public class AuthUtil {
                     .collect(Collectors.toList());
         }
 
-        log.error("Applicable exclusiveAuthScopes for resourceInfo:{} are {} ", resourceInfo, exclusiveAuthScopesToReq);
+        log.debug("Applicable exclusiveAuthScopes for resourceInfo:{} are {} ", resourceInfo, exclusiveAuthScopesToReq);
         return exclusiveAuthScopesToReq;
     }
 
@@ -372,31 +374,26 @@ public class AuthUtil {
     }
 
     public RevokeSessionResponse revokeSession(final String url, final String token, final String userId) {
-        log.error("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
+        log.debug("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
 
         RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, token, userId);
-        log.error("revokeSessionResponse:{}", revokeSessionResponse);
+        log.debug("revokeSessionResponse:{}", revokeSessionResponse);
         if (revokeSessionResponse != null) {
-
-            log.error("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ",
+            log.debug("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ",
                     revokeSessionResponse.getEntity(), revokeSessionResponse.getStatus());
-
         }
         return revokeSessionResponse;
     }
 
     public List<String> getAllScopeList(Map<ProtectionScopeType, List<String>> scopeMap) {
         List<String> scopeList = new ArrayList<>();
-        log.error("Get all scopeMap:{} ", scopeMap);
+        log.debug("Get all scopeMap:{} ", scopeMap);
         if (scopeMap == null || scopeMap.isEmpty()) {
             return scopeList;
         }
 
-        scopeMap.entrySet().stream().forEach(e -> {
-            log.debug("scopeMap data key:{}, value:{} ", e.getKey(), e.getValue());
-            scopeList.retainAll(e.getValue());
-        });
-        log.error("Get all scopeList:{} ", scopeList);
+        scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
+        log.debug("Get all scopeList:{} ", scopeList);
         return scopeList;
 
     }
