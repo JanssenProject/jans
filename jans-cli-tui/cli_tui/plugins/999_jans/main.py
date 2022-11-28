@@ -73,8 +73,8 @@ class Plugin:
 
         asyncio.ensure_future(coroutine())
 
-        del config_cli.config['DEFAULT']['access_token_enc']
-        del config_cli.config['DEFAULT']['user_data']
+        config_cli.config['DEFAULT'].pop('access_token_enc', None)
+        config_cli.config['DEFAULT'].pop('user_data', None)
         config_cli.write_config()
         self.exit_cli()
 
