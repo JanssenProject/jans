@@ -6,13 +6,12 @@ tags:
 - docker
 ---
 
-# Docker Based Quick Start Installation
+!!! Warning 
+    **This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.**
+
+## Overview
 
 The quickest way to get a Janssen Server up and running is to install a Docker container-based fully featured Janssen Server.
-
-!!! Note
-
-    This method of installation is suitable only for testing, development, or feature exploration purposes. Not for production deployments.  
 
 ## System Requirements
 
@@ -20,16 +19,16 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 ## Install
 
-Run the command given below to start the installation.
-
 Installation depends on a [set of environment variables](https://github.com/JanssenProject/jans/tree/main/docker-jans-monolith#environment-variables).
 These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.
+
+Run this command to start the installation:
 
 ```bash
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
 
-At the end of the process, following messages will confirm that the Janssen server and related services are up and running in respective Docker containers.
+Console messages like below confirms the successful installation:
 
 ```
 [+] Running 3/3
@@ -37,7 +36,7 @@ At the end of the process, following messages will confirm that the Janssen serv
  ⠿ Container docker-jans-monolith-mysql-1     Started                      0.6s
  ⠿ Container docker-jans-monolith-jans-1      Started                      0.9s
  
-Waiting for the Janssen server to come up. Depending on the  resources it may take 3-5 mins for the services to be up.
+Waiting for the Janssen server to come up. Depending on the resources it may take 3-5 mins for the services to be up.
 Testing openid-configuration endpoint.. 
 ```
 
@@ -77,13 +76,13 @@ And then use CLI tools to configure Janssen Server as needed.
 
 ## Uninstall / Remove the Janssen Server
 
-This docker based installation uses `docker compose` under the hood to create containers. Hence to uninstalling Janssen server involves invoking `docker compose` with appropriate yml file. Run command below to stop and remove containers.
+This docker based installation uses `docker compose` under the hood to create containers. Hence uninstalling Janssen server involves invoking `docker compose` with appropriate yml file. Run command below to stop and remove containers.
 
 ```
 docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf jans-*
 ```
 
-Console messages like below confirms the successful removal.
+Console messages like below confirms the successful removal:
 
 ```
 [+] Running 3/3
