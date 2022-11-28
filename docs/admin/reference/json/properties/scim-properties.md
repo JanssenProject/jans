@@ -1,9 +1,9 @@
 ---
 tags:
-  - administration
-  - reference
-  - json
-  - properties
+- administration
+- reference
+- json
+- properties
 ---
 
 # SCIM Configuration Properties
@@ -190,7 +190,5 @@ tags:
 - Required: No
 
 - Default value: None
-
-
 
 

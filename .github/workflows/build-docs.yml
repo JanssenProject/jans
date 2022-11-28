@@ -56,7 +56,10 @@ jobs:
           cp janssen-*.tgz ../
 
       - name: Generate docs
-        run: echo "Custom work on generating docs can go here."
+        run: |
+         echo "Custom work on generating docs can go here."
+         chmod u+x automation/docs/generate-property-docs.sh
+         sudo bash ./automation/docs/generate-property-docs.sh
 
       - name: git config
         run: |
