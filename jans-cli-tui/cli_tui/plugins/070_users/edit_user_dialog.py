@@ -37,9 +37,9 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from prompt_toolkit.formatted_text import AnyFormattedText
 
 from typing import Any, Optional
+from prompt_toolkit.layout import ScrollablePane
 
 
-from view_uma_dialog import ViewUMADialog
 
 from utils.multi_lang import _
 
@@ -170,7 +170,10 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
                 )
 
-        self.edit_user_container = HSplit(self.edit_user_content, height=D(), width=D())
+        self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),)
+
+
+
 
         self.dialog = JansDialogWithNav(
             title=self.title,
@@ -248,7 +251,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 else:
                     widget = self.app.getTitledText(_(display_name), name=claim_, value='', style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, claim_))
                 self.edit_user_content.insert(-1, widget)
-            self.edit_user_container = HSplit(self.edit_user_content, height=D(), width=D())
+            self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),)
+
 
         body = HSplit([Label(_("Select claim to be added to current user.")), claims_checkbox])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
