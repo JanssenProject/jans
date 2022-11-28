@@ -15,7 +15,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
-- Download the latest release package from the Github Janssen Project
+- Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases)
 
 ```
