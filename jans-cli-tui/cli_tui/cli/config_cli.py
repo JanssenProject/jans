@@ -367,6 +367,9 @@ class JCA_CLI:
         if not access_token:
             access_token = self.access_token
 
+        user = self.get_user_info()
+        headers['User-inum'] = user['inum']
+
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
         ret_val.update(headers)
         return ret_val
