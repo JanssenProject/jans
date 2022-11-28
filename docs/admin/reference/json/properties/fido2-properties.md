@@ -1,9 +1,9 @@
 ---
 tags:
-  - administration
-  - reference
-  - json
-  - properties
+- administration
+- reference
+- json
+- properties
 ---
 
 # Fido2 Configuration Properties
@@ -250,7 +250,5 @@ tags:
 - Required: No
 
 - Default value: None
-
-
 
 
