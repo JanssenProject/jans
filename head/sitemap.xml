@@ -71,6 +71,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/client-config/</loc>
+         <lastmod>2022-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/client-crypto/</loc>
          <lastmod>2022-11-28</lastmod>
          <changefreq>daily</changefreq>
