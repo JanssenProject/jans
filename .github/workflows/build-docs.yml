@@ -80,11 +80,10 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
       - name: Generate docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
          echo "Custom work on generating docs can go here."
-         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
-         gh auth login --with-token < token.txt
-         rm token.txt
          # Generate property docs and push to main
          sudo bash ./automation/docs/generate-property-docs.sh 
          cd docs
