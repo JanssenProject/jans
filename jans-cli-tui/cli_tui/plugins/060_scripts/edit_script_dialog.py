@@ -13,6 +13,7 @@ from prompt_toolkit.widgets import (
     Button,
     Dialog,
 )
+import asyncio
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers.python import PythonLexer
 from pygments.lexers.jvm import JavaLexer
@@ -390,10 +391,29 @@ class EditScriptDialog(JansGDialog, DialogUtils):
     def delete_config_property(self, **kwargs: Any) -> None:
         """This method for deleting the coniguration of properties
         """
-        if kwargs['jans_name'] == 'configurationProperties':
-            self.config_properties_container.remove_item(kwargs['selected'])
-        else:
-            self.module_properties_container.remove_item(kwargs['selected'])
+        dialog = self.myparent.get_confirm_dialog(_("Are you sure want to delete property with Key:")+"\n {} ?".format(kwargs['selected'][0]))
+
+        async def coroutine():
+            focused_before = self.myparent.layout.current_window
+            result = await self.myparent.show_dialog_as_float(dialog)
+            try:
+                self.myparent.layout.focus(focused_before)
+            except:
+                self.myparent.stop_progressing()
+                self.myparent.layout.focus(self.myparent.center_frame)
+
+            if result.lower() == 'yes':
+                if kwargs['jans_name'] == 'configurationProperties':
+                    self.config_properties_container.remove_item(kwargs['selected'])
+                else:
+                    self.module_properties_container.remove_item(kwargs['selected'])
+                self.myparent.stop_progressing()
+                
+            return result
+
+        asyncio.ensure_future(coroutine())
+
+
 
     def edit_script_dialog(self) -> None:
         """This method shows the script itself and let the user view or edit it
