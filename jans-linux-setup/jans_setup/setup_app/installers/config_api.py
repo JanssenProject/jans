@@ -131,7 +131,7 @@ class ConfigApiInstaller(JettyInstaller):
                             continue
 
                         if not scope['name'] in scopes:
-                            scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
+                            scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
                             scopes[scope['name']] = {'dn': scope_dn}
                             display_name = 'Config API scope {}'.format(scope['name'])
                             description = 'Config API {} scope {}'.format(scope_level, scope['name'])
@@ -139,7 +139,7 @@ class ConfigApiInstaller(JettyInstaller):
                                         'objectclass': ['top', 'jansScope'],
                                         'description': [description],
                                         'displayName': [display_name],
-                                        'inum': [inum],
+                                        'inum': [scope['inum']],
                                         'jansDefScope': ['false'],
                                         'jansId': [scope['name']],
                                         'jansScopeTyp': [scope_type],
