@@ -17,6 +17,3 @@ mv -f jans-auth-server/model/target/classes/janssenauthserver-properties.md docs
 mv -f jans-auth-server/model/target/classes/janssenauthserver-feature-flags.md docs/admin/reference/json/feature-flags
 mv -f jans-fido2/model/target/classes/fido2-properties.md docs/admin/reference/json/properties
 mv -f jans-scim/model/target/classes/scim-properties.md docs/admin/reference/json/properties
-
-git add -A || echo "Nothing to add"
-git commit -a -S -m "docs: automated property doc generation" || echo "Nothing to commit"
