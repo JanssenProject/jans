@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public enum SoftwareStatementValidationType {
     NONE("none"),
+    BUILTIN("builtin"),
     JWKS("jwks"),
     JWKS_URI("jwks_uri"),
     SCRIPT("script");
