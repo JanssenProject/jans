@@ -1,22 +1,14 @@
-import os
-import sys
 import asyncio
-
 from functools import partial
 from types import SimpleNamespace
-from typing import Sequence, Any, Optional
-
+from typing import Any, Optional
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
-from prompt_toolkit.layout.containers import HSplit, VSplit, Window, DynamicContainer, HorizontalAlign
+from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Frame, Dialog
-from prompt_toolkit.formatted_text import HTML
-from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_cli_dialog import JansGDialog
+from prompt_toolkit.widgets import Button, Dialog
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
-
 from utils.utils import DialogUtils, common_data
 from utils.static import DialogResult
 from utils.multi_lang import _
@@ -33,15 +25,13 @@ class Plugin(DialogUtils):
         """init for Plugin class "users"
 
         Args:
-            app (_type_): _description_
+            app (Generic): The main Application class
         """
         self.app = app
         self.pid = 'users'
         self.name = '[U]sers'
         self.users = {}
         self.widgets_ready = False
-
-
 
     def process(self) -> None:
         pass
@@ -61,7 +51,7 @@ class Plugin(DialogUtils):
         self.app.center_container = HSplit([
                     VSplit([
                         self.app.getButton(text=_("Get Users"), name='oauth:scopes:get', jans_help=_("Retreive first {} users").format(self.app.entries_per_page), handler=self.get_users),
-                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_user, style='class:outh_containers_scopes.text'),
+                        self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_user, style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Users"), name='oauth:scopes:add', jans_help=_("To add a new user press this button"), handler=self.edit_user_dialog),
                         ],
                         padding=3,
@@ -70,7 +60,6 @@ class Plugin(DialogUtils):
                     DynamicContainer(lambda: self.user_list_container),
                     DynamicContainer(lambda: self.nav_buttons),
                     ],style='class:outh_containers_scopes')
-
 
     def update_user_list_container(self, pattern: Optional[str]='') -> None:
         """User management list
@@ -114,7 +103,6 @@ class Plugin(DialogUtils):
 
         self.app.invalidate()
 
-
     def get_users(self, start_index: int=1, pattern: Optional[str]='') -> None:
         """Gets Users from server.
         """
@@ -125,7 +113,7 @@ class Plugin(DialogUtils):
         cli_args = {'operation_id': 'get-user', 'endpoint_args': endpoint_args}
 
         async def coroutine():
-            self.app.start_progressing()
+            self.app.start_progressing(_("Retreiving users from server..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             self.users = response.json()
@@ -141,7 +129,6 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-
     def edit_user_dialog(self, **kwargs: Any) -> None:
         """Method to display the edit user dialog
         """
@@ -155,15 +142,16 @@ class Plugin(DialogUtils):
         edit_user_dialog = EditUserDialog(self.app, title=title, data=data, save_handler=self.save_user)
         self.app.show_jans_dialog(edit_user_dialog)
 
-
     def delete_user(self, **kwargs: Any) -> None:
+        """This method for the deletion of the User 
+        """
 
         def do_delete_user():
             for user in self.users['entries']:
                 if user.get('userId') == kwargs['selected'][1]:
                     async def coroutine():
                         cli_args = {'operation_id': 'delete-user', 'url_suffix':'inum:{}'.format(user['inum'])}
-                        self.app.start_progressing()
+                        self.app.start_progressing(_("Deleting user {}").format(user['userId']))
                         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                         self.app.stop_progressing()
                         if response:
@@ -182,7 +170,6 @@ class Plugin(DialogUtils):
                 tobefocused=self.user_list_container
                 )
  
-
     def save_user(self, dialog: Dialog) -> None:
         """This method to save user data to server
 
@@ -244,7 +231,7 @@ class Plugin(DialogUtils):
         async def coroutine():
             operation_id = 'put-user' if dialog.data.get('baseDn') else 'post-user'
             cli_args = {'operation_id': operation_id, 'data': user_info}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Saving user ..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             if response.status_code == 500:
@@ -255,13 +242,14 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-
     def get_claims(self) -> None:
+        """This method for getting claims
+        """
         if hasattr(common_data.users, 'claims'):
             return
         async def coroutine():
             cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Retreiving claims"))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             result = response.json()
@@ -270,6 +258,11 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
     def search_user(self, tbuffer:Buffer) -> None:
+        """This method handel the search for Users
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.app.center_container)
             return

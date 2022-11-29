@@ -1,19 +1,11 @@
-import re
-import threading
-
-from typing import OrderedDict
-from asyncio import ensure_future
 from functools import partial
-
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
-    DynamicContainer,
     Window
 )
 from prompt_toolkit.widgets import (
-    Box,
     Button,
     Label,
     TextArea,
@@ -21,37 +13,22 @@ from prompt_toolkit.widgets import (
     Button,
     Dialog,
 )
-from prompt_toolkit.application.current import get_app
-
+import asyncio
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers.python import PythonLexer
 from pygments.lexers.jvm import JavaLexer
-
-from cli import config_cli
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
-from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_data_picker import DateSelectWidget
 from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_spinner import Spinner
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.dimension import AnyDimension
-from typing import Optional, Sequence, Union
-from typing import TypeVar, Callable
-
+from typing import Optional, Sequence
+from typing import Callable
 from typing import Any, Optional
-
-
-from view_uma_dialog import ViewUMADialog
-
 from utils.multi_lang import _
-
 
 class EditScriptDialog(JansGDialog, DialogUtils):
     """This Script editing dialog
@@ -66,8 +43,9 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         )-> Dialog:
         """init for `EditScriptDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
+        JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
-        
+                
         Args:
             parent (widget): This is the parent widget for the dialog, to access `Pageup` and `Pagedown`
             title (str): The Main dialog title
@@ -85,6 +63,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.script = self.data.get('script','')
 
     def save(self) -> None:
+        """method to invoked when saving the dialog (Save button is pressed)
+        """
 
         data = {}
 
@@ -133,6 +113,9 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             self.future.set_result(DialogResult.ACCEPT)
 
     def cancel(self) -> None:
+        """method to invoked when canceling changes in the dialog (Cancel button is pressed)
+        """
+
         self.future.set_result(DialogResult.CANCEL)
 
     def create_window(self) -> None:
@@ -319,27 +302,35 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             width=self.myparent.dialog_width,
             )
     
-    
     def get_help(self, **kwargs: Any):
+        """This method get focused field Description to display on statusbar
+        """
 
         # schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/{}'.format(str(kwargs['scheme'])))
     
         if kwargs['scheme'] == 'Properties':
             self.myparent.status_bar_text= kwargs['data'][0]
 
-
-
-
     def script_lang_changed(
         self, 
         value: str,
         ) -> None:
+        """Change the script lang
+
+        Args:
+            value (str): lang to change to (python, java)
+        """
         self.cur_lang = value
 
     def set_location_widget_state(
         self, 
         state: bool,
         ) -> None:
+        """This method check the state of the location to save script
+
+        Args:
+            state (bool): state is changed or not
+        """
         self.location_widget.me.read_only = not state
         self.location_widget.me.focusable = state
         if not state:
@@ -349,10 +340,17 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self, 
         redio_button: RadioList,
         ) -> None:
+        """Location to save Script
+
+        Args:
+            redio_button (RadioList): Where to save the scripts (Database, Filesystem)
+        """
         state = redio_button.current_value == 'file'
         self.set_location_widget_state(state)
 
     def edit_property(self, **kwargs: Any) -> None:
+        """This method for editing the properties 
+        """
 
         if kwargs['jans_name'] == 'moduleProperties':
             key, val = kwargs.get('data', ('',''))
@@ -391,12 +389,35 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.myparent.show_jans_dialog(dialog)
 
     def delete_config_property(self, **kwargs: Any) -> None:
-        if kwargs['jans_name'] == 'configurationProperties':
-            self.config_properties_container.remove_item(kwargs['selected'])
-        else:
-            self.module_properties_container.remove_item(kwargs['selected'])
+        """This method for deleting the coniguration of properties
+        """
+        dialog = self.myparent.get_confirm_dialog(_("Are you sure want to delete property with Key:")+"\n {} ?".format(kwargs['selected'][0]))
+
+        async def coroutine():
+            focused_before = self.myparent.layout.current_window
+            result = await self.myparent.show_dialog_as_float(dialog)
+            try:
+                self.myparent.layout.focus(focused_before)
+            except:
+                self.myparent.stop_progressing()
+                self.myparent.layout.focus(self.myparent.center_frame)
+
+            if result.lower() == 'yes':
+                if kwargs['jans_name'] == 'configurationProperties':
+                    self.config_properties_container.remove_item(kwargs['selected'])
+                else:
+                    self.module_properties_container.remove_item(kwargs['selected'])
+                self.myparent.stop_progressing()
+                
+            return result
+
+        asyncio.ensure_future(coroutine())
+
+
 
     def edit_script_dialog(self) -> None:
+        """This method shows the script itself and let the user view or edit it
+        """
 
         text_editor = TextArea(
                 text=self.script,
@@ -417,5 +438,10 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.myparent.show_jans_dialog(dialog)
 
     def __pt_container__(self)-> Dialog:
+        """The container for the dialog itself
+
+        Returns:
+            Dialog: The Edit Script Dialog
+        """  
         return self.dialog
 

@@ -1,35 +1,22 @@
-import os
-import sys
 from prompt_toolkit.application import Application
-import threading
-import prompt_toolkit
-
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     HorizontalAlign,
     DynamicContainer,
-    Window,
 )
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.buffer import Buffer
-
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Frame
 from wui_components.jans_nav_bar import JansNavBar
-from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window
-from prompt_toolkit.widgets import Button, Label, Frame, Box, Dialog
+from prompt_toolkit.widgets import Button, Label, Box, Dialog
 from wui_components.jans_cli_dialog import JansGDialog
 from collections import OrderedDict
 from functools import partial
-from typing import Any
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from utils.multi_lang import _
 from typing import Any, Optional
-from utils.utils import DialogUtils
-from utils.static import DialogResult
 import asyncio
-from prompt_toolkit.widgets.base import RadioList
 
 class Plugin():
     """This is a general class for plugins 
@@ -41,7 +28,7 @@ class Plugin():
         """init for Plugin class "config_api"
 
         Args:
-            app (_type_): _description_
+            app (Generic): The main Application class
         """
         self.app = app
         self.pid = 'config_api'
@@ -120,7 +107,7 @@ class Plugin():
                             handler=self.get_adminui_permissions),
                         
                         self.app.getTitledText(
-                            _("Search: "), 
+                            _("Search"), 
                             name='oauth:scopes:search', 
                             jans_help=_("Press enter to perform search"), 
                             accept_handler=self.search_adminui_permissions,
@@ -147,7 +134,7 @@ class Plugin():
                             handler=self.get_adminui_mapping),
                         
                         self.app.getTitledText(
-                            _("Search: "), 
+                            _("Search"), 
                             name='oauth:scopes:search', 
                             jans_help=_("Press enter to perform search"), 
                             accept_handler=self.search_adminui_mapping,
@@ -166,10 +153,6 @@ class Plugin():
                      ],style='class:outh_containers_clients')
                                 
         self.nav_selection_changed(list(self.containers)[0])
-
-    #--------------------------------------------------------------------------------#
-    #----------------------------------- accessroles --------------------------------#
-    #--------------------------------------------------------------------------------#
 
     def get_adminui_roles(self) -> None:
         """Method to get the admin ui roles from server
@@ -191,13 +174,9 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
 
-
     def adminui_update_roles(self,
         ) -> None:
-        """update the current clients data to server
-
-        Args:
-            pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
+        """update the current adminui-roles to server
         """
 
         data =[]
@@ -209,10 +188,6 @@ class Plugin():
                 d.get('description'),
                 ]
             )
-
-        # ------------------------------------------------------------------------------- #
-        # --------------------------------- View Data ----------------------------------- #
-        # ------------------------------------------------------------------------------- #               
 
         if data:
             clients = JansVerticalNav(
@@ -239,9 +214,7 @@ class Plugin():
             self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
     def add_adminui_roles(self) -> None:
-        """Method to display the dialog of clients
-        """
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui-roles
         """
 
         self.adminui_role = self.app.getTitledText(
@@ -260,9 +233,6 @@ class Plugin():
             role = self.adminui_role.me.text
             desc = self.adminui_role_description.me.text
 
-            # ------------------------------------------------------------#
-            # --------------------- Patch to server ----------------------#
-            # ------------------------------------------------------------#
             if desc :
                 response = self.app.cli_object.process_command_by_id(
                         operation_id='add-adminui-role' ,
@@ -273,9 +243,7 @@ class Plugin():
                         )
             else:
                 return
-            # ------------------------------------------------------------#
-            # -- get_properties or serach again to see Momentary change --#
-            # ------------------------------------------------------------#
+
             if response:
                 self.get_adminui_roles()
                 # self.future.set_result(DialogResult.ACCEPT)
@@ -289,55 +257,43 @@ class Plugin():
         dialog = JansGDialog(self.app, title=_('Add New Role'), body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
-
     def edit_adminui_roles(self, **params: Any) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of admin-ui roles for editing
         """
 
         role_data = params.get('data', {})
         title = role_data.get('role','')
 
         self.adminui_role_description = self.app.getTitledText(
-            _("Domains"), 
-            name='domains', 
+            _("Description"),
+            name='description',
             value=role_data.get('description',''),
-            height=3, 
             style='class:dialog-titled-widget')
 
         self.adminui_role_deletable = self.app.getTitledCheckBox(
             "Deletable", 
             name='deletable', 
-            checked= False, 
+            checked= role_data.get('deletable', False),
             jans_help= "Default to False",
-            style='class:outh-client-checkbox')          
+            style='class:outh-client-checkbox')
 
         def save(dialog: Dialog) -> None:
             desc = self.adminui_role_description.me.text
             deletable = self.adminui_role_deletable.me.checked
 
-            # ------------------------------------------------------------#
-            # --------------------- Patch to server ----------------------#
-            # ------------------------------------------------------------#
-            if desc :
-                response = self.app.cli_object.process_command_by_id(
-                        operation_id='edit-adminui-role' ,
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn='',
-                        data={'role': '{}'.format(title), 'description': '{}'.format(desc), 'deletable':'{}'.format(deletable)},
-                        )
-            else:
-                return
-            # ------------------------------------------------------------#
-            # -- get_properties or serach again to see Momentary change --#
-            # ------------------------------------------------------------#
-            if response:
+            async def coroutine():
+                cli_args = {
+                    'operation_id': 'edit-adminui-role',
+                    'data': {'role': '{}'.format(title), 'description': '{}'.format(desc), 'deletable':'{}'.format(deletable)}
+                    }
+                self.app.start_progressing()
+                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
                 self.get_adminui_roles()
-                # self.future.set_result(DialogResult.ACCEPT)
-                return True
+                if response.status_code != 200:
+                    self.app.show_message(_("Error!"), _("An error ocurred while saving role adminui:\n") + str(response.text), tobefocused=self.app.center_container)
 
-            self.app.show_message(_("Error!"), _("An error ocurred while saving role adminui:\n") + str(response.text))
-
+            asyncio.ensure_future(coroutine())
 
         body = HSplit([self.adminui_role_description,self.adminui_role_deletable])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=save)]
@@ -345,6 +301,8 @@ class Plugin():
         self.app.show_jans_dialog(dialog)
 
     def delete_adminui_roles(self, **kwargs: Any) -> None:
+        """Method to delete admin-ui roles 
+        """
 
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete adminui_roles :")+"\n {} ?".format(kwargs['selected'][0]))
 
@@ -368,66 +326,45 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
     
-    #--------------------------------------------------------------------------------#
-    #------------------------------------- permissions ------------------------------#
-    #--------------------------------------------------------------------------------#
-
-    def get_adminui_permissions(self) -> None:
+    def get_adminui_permissions(self,
+        start_index: Optional[int]=0, 
+        pattern: Optional[str]= ''
+        ) -> None:
         """Method to get the adminui_permissions data from server
-        """ 
-        self.config_data_container['permissions'] = HSplit([Label(_("Please wait while getting adminui_permissions"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
-        t = threading.Thread(target=self.adminui_update_permissions, daemon=True)
-        self.app.start_progressing()
-        t.start()
 
-    def adminui_update_permissions(
-        self,
-        start_index: Optional[int]= 0, 
-        pattern: Optional[str]= '',
+        Args:
+        start_index (Optional[int], optional): This is flag for the adminui-roles pages. Defaults to 0.
+        pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
+        """
+
+        async def coroutine():
+            cli_args = {'operation_id': 'get-all-adminui-permissions'}
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            self.adminui_permissions_data = response.json()
+            self.adminui_update_permissions(start_index, pattern)
+
+        asyncio.ensure_future(coroutine())
+        
+    def adminui_update_permissions(self,
+        start_index: Optional[int]=0, 
+        pattern: Optional[str]= ''
         ) -> None:
         """update the current adminui_permissions data to server
 
-        Args:
+        Args:.
+            start_index (Optional[int], optional): This is flag for the adminui-roles pages. Defaults to 0.
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
-        def get_next(
-            start_index: int,  
-            pattern: Optional[str]= '', 
-            ) -> None:
-            self.adminui_update_permissions(start_index, pattern='')
-
-        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
-
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                        operation_id='get-all-adminui-permissions',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-
-        except Exception as e:
-            self.app.stop_progressing()
-            self.app.show_message(_("Error getting adminui_permissions"), str(e))
-            return
-
-        self.app.stop_progressing()
-
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting adminui_permissions"), str(rsponse.text))
-            return
-
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting adminui_permissions"), str(rsponse.text))
+        if not hasattr(self, 'adminui_permissions_data'):
+            self.get_adminui_permissions(start_index, pattern)
             return
 
         data =[]
         if pattern:
-            for k in result:
+            for k in self.adminui_permissions_data:
                 if pattern.lower() in k.get('permission').lower():
                     data.append(
                         [
@@ -436,7 +373,7 @@ class Plugin():
                         ]
                     )
         else:
-            for d in result:
+            for d in self.adminui_permissions_data:
                 data.append(
                     [
                     d.get('permission'),
@@ -446,21 +383,21 @@ class Plugin():
 
         if data:
             buttons = []
-            if int(len(data)/ 20) >=1  :
+            if int(len(data)/self.app.entries_per_page) >=1:
+                if start_index!=0:
+                    handler_partial = partial(self.adminui_update_permissions, start_index-1, pattern)
+                    prev_button = Button(_("Prev"), handler=handler_partial)
+                    prev_button.window.jans_help = _("Displays previous %d entries") % self.app.entries_per_page
+                    buttons.append(prev_button)
 
                 if start_index< int(len(data)/ 20) :
-                    handler_partial = partial(get_next, start_index+1, pattern)
+                    handler_partial = partial(self.adminui_update_permissions, start_index+1, pattern)
                     next_button = Button(_("Next"), handler=handler_partial)
-                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                    next_button.window.jans_help = _("Displays next %d entries") % self.app.entries_per_page
                     buttons.append(next_button)
 
-                if start_index!=0:
-                    handler_partial = partial(get_next, start_index-1, pattern)
-                    prev_button = Button(_("Prev"), handler=handler_partial)
-                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                    buttons.append(prev_button)
             data_now = data[start_index*20:start_index*20+20]
-            
+
             adminui_permissions = JansVerticalNav(
                 myparent=self.app,
                 headers=['permission', 'defaultPermissionInToken',],
@@ -473,20 +410,21 @@ class Plugin():
                 selectes=0,
                 headerColor='class:outh-verticalnav-headcolor',
                 entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=result
+                all_data=self.adminui_permissions_data
             )
-            self.app.layout.focus(adminui_permissions)  
+
+            self.app.layout.focus(adminui_permissions)
             self.config_data_container['permissions'] = HSplit([
                 adminui_permissions,
                 VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
             ])
-            get_app().invalidate()
-            self.app.layout.focus(adminui_permissions)          
+            self.app.invalidate()
+            self.app.layout.focus(adminui_permissions)
         else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.config_data_container['permissions'])
+            self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
     def add_adminui_permissions(self) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui-roles
         """
 
         self.adminui_permission = self.app.getTitledText(
@@ -532,22 +470,24 @@ class Plugin():
         dialog = JansGDialog(self.app, title=_('Add New Role'), body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
     
-    def search_adminui_permissions(self, tbuffer:Buffer,) -> None:
+    def search_adminui_permissions(self, tbuffer:Buffer) -> None:
+        """This method handel the search for adminui_permissions
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.containers['permissions'])
+            self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.app.center_container)
             return
 
-        t = threading.Thread(target=self.adminui_update_permissions, args=(0,tbuffer.text), daemon=True)
-        self.app.start_progressing()
-        t.start()
+        self.adminui_update_permissions(0, tbuffer.text)
 
     def edit_adminui_permissions(self, **params: Any) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui_permissions for editing
         """
 
         role_data = params.get('passed', [])
         permission = role_data[0]
-   
 
         defaultPermissionInToken = role_data[1]
 
@@ -587,9 +527,12 @@ class Plugin():
         dialog = JansGDialog(self.app, title='admin ui permissions', body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
-
     def delete_adminui_permissions(self, **kwargs: Any) -> None:
+        """This method for the deletion of the adminui_permissions
 
+        Returns:
+            str: The server response
+        """
 
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete adminui_permissions :")+"\n {} ?".format(kwargs['selected'][0]))
 
@@ -617,76 +560,34 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
   
-    #--------------------------------------------------------------------------------#
-    #------------------------------------- mapping ----------------------------------#
-    #--------------------------------------------------------------------------------#
-
-    def get_adminui_mapping(self) -> None:
+    def get_adminui_mapping(self, pattern: Optional[str]= '') -> None:
         """Method to get the adminui_permissions data from server
-        """ 
-        self.config_data_container['mapping'] = HSplit([Label(_("Please wait while getting adminui_permissions"),style='class:outh-waitclientdata.label')], width=D(),style='class:outh-waitclientdata')
-        t = threading.Thread(target=self.adminui_update_mapping, daemon=True)
-        self.app.start_progressing()
-        t.start()
+        """
+        async def coroutine():
+            cli_args = {'operation_id': 'get-all-adminui-role-permissions'}
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            self.adminui_role_permissions_data = response.json()
+            self.adminui_update_mapping(pattern)
 
-    def adminui_update_mapping(
-        self,
-        start_index: Optional[int]= 0, 
-        pattern: Optional[str]= '',
-        ) -> None:
+        asyncio.ensure_future(coroutine())
+
+    def adminui_update_mapping(self, pattern: Optional[str]= '') -> None:
         """update the current adminui_permissions data to server
 
         Args:
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
-        def get_next(
-            start_index: int,  
-            pattern: Optional[str]= '', 
-            ) -> None:
-            self.adminui_update_mapping(start_index, pattern='')
-
-        endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
-        if pattern:
-            endpoint_args +=',pattern:'+pattern
-        try :
-            rsponse = self.app.cli_object.process_command_by_id(
-                        operation_id='get-all-adminui-role-permissions',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-
-        except Exception as e:
-            self.app.stop_progressing()
-            self.app.show_message(_("Error getting adminui_permissions"), str(e))
-            return
-
-        self.app.stop_progressing()
-
-        if rsponse.status_code not in (200, 201):
-            self.app.show_message(_("Error getting adminui_permissions"), str(rsponse.text))
-            return
-
-        try:
-            result = rsponse.json()
-        except Exception:
-            self.app.show_message(_("Error getting adminui_permissions"), str(rsponse.text))
+        if not hasattr(self, 'adminui_role_permissions_data'):
+            self.get_adminui_mapping(pattern)
             return
 
         data =[]
 
-        # for d in result:
-        #     data.append(
-        #         [
-        #         d.get('role'),
-        #         len(d.get('permissions')),
-        #         ]
-        #     )
-
         if pattern:
-            for k in result:
+            for k in self.adminui_role_permissions_data:
                 if pattern.lower() in k.get('role').lower():
                     data.append(
                         [
@@ -695,7 +596,7 @@ class Plugin():
                         ]
                     )
         else:
-            for d in result:
+            for d in self.adminui_role_permissions_data:
                 data.append(
                     [
                     d.get('role'),
@@ -703,138 +604,42 @@ class Plugin():
                     ]
                 )
 
-
         if data:
-            buttons = []
-            if int(len(data)/ 20) >=1  :
-
-                if start_index< int(len(data)/ 20) :
-                    handler_partial = partial(get_next, start_index+1, pattern)
-                    next_button = Button(_("Next"), handler=handler_partial)
-                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                    buttons.append(next_button)
-
-                if start_index!=0:
-                    handler_partial = partial(get_next, start_index-1, pattern)
-                    prev_button = Button(_("Prev"), handler=handler_partial)
-                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                    buttons.append(prev_button)
-            data_now = data[start_index*20:start_index*20+20]
-            
             adminui_permissions = JansVerticalNav(
                 myparent=self.app,
                 headers=['role', 'permissions',],
                 preferred_size= [0,0],
-                data=data_now,
+                data=data,
                 on_enter=self.edit_adminui_mapping,
                 on_display=self.app.data_display_dialog,
                 # get_help=(self.get_help,'AdminRole'),
                 selectes=0,
                 headerColor='class:outh-verticalnav-headcolor',
                 entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=result
+                all_data=self.adminui_role_permissions_data
             )
             self.app.layout.focus(adminui_permissions)   # clients.focuse..!? TODO >> DONE
-            self.config_data_container['mapping'] = HSplit([
-                adminui_permissions,
-                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-            ])
-            get_app().invalidate()
-            self.app.layout.focus(adminui_permissions)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
-        
+            self.config_data_container['mapping'] = adminui_permissions
+            self.app.invalidate()
+            self.app.layout.focus(adminui_permissions)
+
         else:
-            self.app.show_message(_("Oops"), _("No matching result"),tobefocused = self.config_data_container['mapping'])
+            self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
-    # def add_adminui_mapping(self) -> None:
-    #     try :
-    #         rsponse = self.app.cli_object.process_command_by_id(
-    #                     operation_id='get-all-adminui-roles',
-    #                     url_suffix='',
-    #                     endpoint_args='',
-    #                     data_fn=None,
-    #                     data={}
-    #                     )
-
-    #     except Exception as e:
-    #         self.app.stop_progressing()
-    #         self.app.show_message(_("Error getting clients"), str(e))
-    #         return
-
-    #     values=[]
-    #     for i in rsponse.json():
-    #         values.append((i['role'],i['role']))
-        
-    #     #------------------------------------------------------------------------#
-    #     #- values = [(api-manager,api-manager),(api-admin,api-admin),(api-editor,api-editor),(api-viewer,api-viewer)]#
-    #     #------------------------------------------------------------------------#
-
-    #     self.alt_tabs = {}
-    #     self.alt_tabs['api-manager'] = Label(text=_("api-manager"),style='red')
-    #     self.alt_tabs['api-admin'] = Label(text=_("api-admin"),style='red')
-    #     self.alt_tabs['api-editor'] = Label(text=_("api-editor"),style='red')
-    #     self.alt_tabs['api-viewer'] = Label(text=_("api-viewer"),style='red')
-    #     self.alt_tabs['api-editor2'] = Label(text=_("api-editor2"),style='red')
-    #     self.alt_tabs['api-hopa'] = Label(text=_("api-hopa"),style='red')
-
-    #     def role_selection_changed(
-    #         cb: RadioList,
-    #         ) -> None:
-    #         self.role_type = cb.current_value
-
-    #     self.adminui_mapping= self.app.getTitledRadioButton(
-    #                     _("role"),
-    #                     name='role',
-    #                     values=values,
-    #                     on_selection_changed=role_selection_changed,
-    #                     style='class:outh-scope-radiobutton')
-
-
-    #     def save(dialog: Dialog) -> None:
-
-    #         permission = self.adminui_permission.me.text
-    #         defaultPermissionInToken = self.adminui_role_permissions.me.checked
-
-    #         self.app.logger.debug("defaultPermissionInToken: "+str(defaultPermissionInToken))
-    #         # ------------------------------------------------------------#
-    #         # --------------------- Patch to server ----------------------#
-    #         # ------------------------------------------------------------#
-    #         if permission :
-    #             response = self.app.cli_object.process_command_by_id(
-    #                     operation_id='add-adminui-permission',
-    #                     url_suffix='',
-    #                     endpoint_args='',
-    #                     data_fn='',
-    #                     data={'permission': '{}'.format(permission), 'defaultPermissionInToken': '{}'.format(defaultPermissionInToken)},
-    #                     )
-    #         else:
-    #             return
-    #         # ------------------------------------------------------------#
-    #         # -- get_properties or serach again to see Momentary change --#
-    #         # ------------------------------------------------------------#
-    #         if response:
-    #             self.get_adminui_permissions()
-    #             # self.future.set_result(DialogResult.ACCEPT)
-    #             return True
-
-    #         self.app.show_message(_("Error!"), _("An error ocurred while Addin role adminui permission:\n") + str(response.text))
-
-
-    #     body = HSplit([self.adminui_mapping,DynamicContainer(lambda: self.alt_tabs[self.role_type])])
-    #     buttons = [Button(_("Cancel")), Button(_("OK"), handler=save)]
-    #     dialog = JansGDialog(self.app, title=_('Add New Role'), body=body, buttons=buttons, width=self.app.dialog_width-20)
-    #     self.app.show_jans_dialog(dialog)
-    
     def search_adminui_mapping(self, tbuffer:Buffer,) -> None:
+        """This method handel the search for adminui_mapping
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.containers['mapping'])
             return
 
-        t = threading.Thread(target=self.adminui_update_mapping, args=(0,tbuffer.text), daemon=True)
-        self.app.start_progressing()
-        t.start()
+        self.adminui_update_mapping(tbuffer.text)
 
     def edit_adminui_mapping(self, **params: Any) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui_mapping
         """
         role_data = params.get('data', [])
         permission = role_data.get('role')
@@ -887,10 +692,6 @@ class Plugin():
         buttons = [Button(_("Cancel"))]
         dialog = JansGDialog(self.app, title='admin ui permissions', body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
-
-    #--------------------------------------------------------------------------------#
-    #--------------------------------------------------------------------------------#
-    #--------------------------------------------------------------------------------#
 
     def nav_selection_changed(
                 self,

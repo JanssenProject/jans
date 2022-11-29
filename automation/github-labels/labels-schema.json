@@ -152,12 +152,12 @@
       "title-prefixes": []
     }
   },
-  "comp-jans-cli": {
+  "comp-jans-cli-tui": {
     "color": "0052CC",
-    "description": "Touching folder /jans-cli",
+    "description": "Touching folder /jans-cli-tui",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-cli"],
+      "paths": ["jans-cli-tui"],
       "title-prefixes": []
     }
   },
