@@ -1,22 +1,10 @@
-import os
-import sys
 import asyncio
-
-from typing import Sequence
-
-
 from prompt_toolkit.application import Application
-from prompt_toolkit.layout.containers import HSplit, VSplit, Window, Float
+from prompt_toolkit.layout.containers import HSplit
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Frame
-from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Shadow
-from prompt_toolkit.layout.controls import FormattedTextControl
-
-
+from prompt_toolkit.widgets import Button, Frame
 from utils.multi_lang import _
 from cli import config_cli
-
 
 class Plugin:
     """This is a general class for plugins 
@@ -28,7 +16,7 @@ class Plugin:
         """init for Plugin class "Jans CLI Menu"
 
         Args:
-            app (_type_): _description_
+            app (Generic): The main Application class
         """
         self.app = app
         self.pid = 'jans-menu'
@@ -45,7 +33,6 @@ class Plugin:
                         height=D()
                         )
 
-
     def process(self) -> None:
         pass
 
@@ -55,12 +42,10 @@ class Plugin:
 
         self.app.center_container = self.menu_container
 
-
     def exit_cli(self) -> None:
         """Exits
         """
         self.app.exit(result=False)
-
 
     def logout_exit_cli(self) -> None:
         """Removes auth token and exits
@@ -73,8 +58,8 @@ class Plugin:
 
         asyncio.ensure_future(coroutine())
 
-        del config_cli.config['DEFAULT']['access_token_enc']
-        del config_cli.config['DEFAULT']['user_data']
+        config_cli.config['DEFAULT'].pop('access_token_enc', None)
+        config_cli.config['DEFAULT'].pop('user_data', None)
         config_cli.write_config()
         self.exit_cli()
 

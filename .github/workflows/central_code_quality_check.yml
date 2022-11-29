@@ -20,7 +20,7 @@ on:
       - 'jans-eleven/**'
       - 'agama/**'
       - 'jans-linux-setup/**'
-      - 'jans-cli/**'
+      - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
@@ -42,7 +42,7 @@ on:
       - 'jans-eleven/**'
       - 'agama/**'
       - 'jans-linux-setup/**'
-      - 'jans-cli/**'
+      - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
+        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
     env:
       JVM_PROJECTS: |
         jans-auth-server
@@ -70,7 +70,7 @@ jobs:
         agama
       NON_JVM_PROJECTS: |
         jans-linux-setup
-        jans-cli
+        jans-cli-tui
         jans-pycloudlib
 
     steps:
@@ -112,16 +112,16 @@ jobs:
           echo GH sha: $GITHUB_SHA
 
       - name: Set up JDK 11
-        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli'
+        # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'adopt'
           
       - name: Cache SonarCloud packages for JVM based project
-        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli'
+        # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
@@ -129,8 +129,8 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
           
       - name: Build and analyze JVM based project
-        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli'
+        # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
