@@ -1274,6 +1274,18 @@ paths:
                     processing requests from the Client.
                   items:
                     type: string
+                minimum_acr_level:
+                  type: integer
+                  description: Integer value which sets minimum acr level.
+                  example: 10
+                minimum_acr_level_autoresolve:
+                  type: boolean
+                  description: boolean value, if false and minimum_acr_level is higher then current acr_values then reject request. If true - resolve acr according to either client's minimum_acr_priority_list or AS auth_level_mapping
+                minimum_acr_priority_list:
+                  type: array
+                  description: enables client to specify the acr order of preference, rather then just the next lowest integer value
+                  items:
+                    type: string
                 groups:
                   type: array
                   description: Array of client's groups.
@@ -1612,6 +1624,18 @@ paths:
                   type: array
                   description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for
                     processing requests from the Client.
+                  items:
+                    type: string
+                minimum_acr_level:
+                  type: integer
+                  description: Integer value which sets minimum acr level.
+                  example: 10
+                minimum_acr_level_autoresolve:
+                  type: boolean
+                  description: boolean value, if false and minimum_acr_level is higher then current acr_values then reject request. If true - resolve acr according to either client's minimum_acr_priority_list or AS auth_level_mapping
+                minimum_acr_priority_list:
+                  type: array
+                  description: enables client to specify the acr order of preference, rather then just the next lowest integer value
                   items:
                     type: string
                 initiate_login_uri:
@@ -1954,6 +1978,18 @@ paths:
                     type: array
                     description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for
                       processing requests from the Client.
+                    items:
+                      type: string
+                  minimum_acr_level:
+                    type: integer
+                    description: Integer value which sets minimum acr level.
+                    example: 10
+                  minimum_acr_level_autoresolve:
+                    type: boolean
+                    description: boolean value, if false and minimum_acr_level is higher then current acr_values then reject request. If true - resolve acr according to either client's minimum_acr_priority_list or AS auth_level_mapping
+                  minimum_acr_priority_list:
+                    type: array
+                    description: enables client to specify the acr order of preference, rather then just the next lowest integer value
                     items:
                       type: string
                   initiate_login_uri:
@@ -4282,7 +4318,7 @@ paths:
         - SSA
       summary: Create SSA.
       description: Create `SSA` for the organization with `expiration` (optional).
-      operationId: post-register
+      operationId: post-register-ssa
       security:
         - bearer: [ ]
       requestBody:

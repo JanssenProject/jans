@@ -406,6 +406,15 @@
 						<source>1.8</source>
 						<target>1.8</target>
 						<encoding>UTF-8</encoding>
+						<annotationProcessors>
+							<annotationProcessor>
+								io.jans.doc.annotation.DocPropertyProcessor
+							</annotationProcessor>
+							<annotationProcessor>
+								io.jans.doc.annotation.DocFeatureFlagProcessor
+							</annotationProcessor>
+						</annotationProcessors>
+						<compilerArgument>-Amodule=Janssen Auth Server</compilerArgument>
 					</configuration>
 				</plugin>
 				<plugin>

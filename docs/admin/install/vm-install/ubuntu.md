@@ -15,22 +15,37 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
-Download the latest package from the Github Janssen Project
+- Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases)
 
-!!! note
-    `curl`  and `wget` are required to run the command below which
-strips the version number from the package, you also might need to install python3.
-
-
 ```
-wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*ubuntu20.04_amd64.deb' | head -n 1) -O ~/jans.ubuntu20.04_amd64.deb
+wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.ubuntu20.04_amd64.deb -P ~/
 ```
+
+- Verify integrity of the downloaded package by verifying published `sha256sum`.   
+
+    Download `sha256sum` file for the package
+
+    ```shell
+    wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.ubuntu20.04_amd64.deb.sha256sum -P ~/
+    ```
+
+    Check the hash if it is matching. 
+
+    ```shell
+    sha256sum -c jans_1.0.4.ubuntu20.04_amd64.deb.sha256sum
+    ```
+
+    Output similar to below should confirm the integrity of the downloaded package.
+    
+    ```text
+    <package-name>: OK
+    ```
 
 - Install the package
 
 ```
-apt install -y ~/jans.ubuntu20.04_amd64.deb
+apt install -y ~/jans_1.0.4.ubuntu20.04_amd64.deb
 ```
 
 ## Run the setup script

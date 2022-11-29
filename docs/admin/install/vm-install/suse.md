@@ -19,14 +19,37 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
-Download the latest package from the Github Janssen Project
-[Releases](https://github.com/JanssenProject/jans/releases)
-
-!!! note
-    `curl`  is required to run the command below
+- Download the release package from the Github Janssen Project
+  [Releases](https://github.com/JanssenProject/jans/releases)
 
 ```
-zypper --no-gpg-checks install -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*suse15.x86_64.rpm' | head -n 1)
+wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans-1.0.4-suse15.x86_64.rpm -P ~/
+```
+
+- Verify integrity of the downloaded package using published `sha256sum`.
+
+    Download `sha256sum` file for the package
+
+    ```shell
+    wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans-1.0.4-suse15.x86_64.rpm.sha256sum -P ~/
+    ```
+
+    Check the hash if it is matching.
+
+    ```shell
+    sha256sum -c jans-1.0.4-suse15.x86_64.rpm.sha256sum
+    ```
+
+    Output similar to below should confirm the integrity of the downloaded package.
+
+    ```text
+    <package-name>: OK
+    ```
+
+- Install the package
+
+```
+zypper install ~/jans-1.0.4-suse15.x86_64.rpm
 ```
 
 ## Run the setup script
