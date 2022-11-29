@@ -124,14 +124,14 @@ class ConfigApiInstaller(JettyInstaller):
                 for scope_level in scope_levels:
                     for scope in (condition.get(scope_level, [])):
 
+                        if not scope.get('inum'):
+                            continue
+
                         if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope['name'])):
                             continue
 
                         if not scope['name'] in scopes:
-                            inum = scope['inum']
-                            if not inum:
-                                inum = '1800.' + scope_levels[scope_level] + '.' + os.urandom(4).hex().upper()
-                            scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
+                            scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
                             scopes[scope['name']] = {'dn': scope_dn}
                             display_name = 'Config API scope {}'.format(scope['name'])
                             description = 'Config API {} scope {}'.format(scope_level, scope['name'])
@@ -139,7 +139,7 @@ class ConfigApiInstaller(JettyInstaller):
                                         'objectclass': ['top', 'jansScope'],
                                         'description': [description],
                                         'displayName': [display_name],
-                                        'inum': [inum],
+                                        'inum': [scope['inum']],
                                         'jansDefScope': ['false'],
                                         'jansId': [scope['name']],
                                         'jansScopeTyp': [scope_type],
