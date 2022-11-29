@@ -239,7 +239,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         """
 
-        dialog = self.myparent.get_confirm_dialog(_("Are you sure want to delete claim dn:")+"\n {} ?".format(selected[0]))
+        dialog = self.myparent.get_confirm_dialog(_("Are you sure want to delete claim dn:")+"\n {} ?".format(kwargs['selected'][0]))
         async def coroutine():
             focused_before = self.myparent.layout.current_window
             result = await self.myparent.show_dialog_as_float(dialog)
