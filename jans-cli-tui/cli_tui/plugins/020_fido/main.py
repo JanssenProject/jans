@@ -69,7 +69,25 @@ class Plugin(DialogUtils):
     def delete_requested_party(self, **kwargs: Any) -> None:
         """This method for deleting the requested party
         """
-        self.requested_parties_container.remove_item(kwargs['selected'])
+        
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete requested patry:")+"\n {} ?".format(kwargs['selected'][1]))
+
+        async def coroutine():
+            focused_before = self.app.layout.current_window
+            result = await self.app.show_dialog_as_float(dialog)
+            try:
+                self.app.layout.focus(focused_before)
+            except:
+                self.app.stop_progressing()
+                self.app.layout.focus(self.app.center_frame)
+
+            if result.lower() == 'yes':
+                self.requested_parties_container.remove_item(kwargs['selected'])
+                self.app.stop_progressing()
+                
+            return result
+
+        asyncio.ensure_future(coroutine())
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/AppConfiguration')
