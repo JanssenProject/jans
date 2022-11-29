@@ -5,8 +5,6 @@ from functools import partial
 from typing import Any, Optional
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.eventloop import get_event_loop
-from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
@@ -24,7 +22,6 @@ from prompt_toolkit.widgets import (
 )
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from utils.static import DialogResult
-from cli import config_cli
 from utils.utils import DialogUtils
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -36,7 +33,6 @@ from edit_scope_dialog import EditScopeDialog
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
-import cli_style
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 

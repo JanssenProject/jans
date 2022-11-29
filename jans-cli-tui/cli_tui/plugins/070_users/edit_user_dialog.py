@@ -1,48 +1,29 @@
-import re
-
-from typing import Optional, Sequence, Union, TypeVar, Callable
+from typing import Optional, Sequence, Callable
 import asyncio
 from functools import partial
-
-
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     DynamicContainer,
     Window,
-    AnyContainer
 )
 from prompt_toolkit.widgets import (
-    Box,
     Button,
     Label,
-    TextArea,
-    RadioList,
     CheckboxList,
-    Button,
     Dialog,
 )
 from prompt_toolkit.eventloop import get_event_loop
-
-from cli import config_cli
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
-from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_data_picker import DateSelectWidget
 from utils.utils import DialogUtils, common_data
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from prompt_toolkit.formatted_text import AnyFormattedText
-
 from typing import Any, Optional
 from prompt_toolkit.layout import ScrollablePane
-
-
-
 from utils.multi_lang import _
-
 
 class EditUserDialog(JansGDialog, DialogUtils):
     """This user editing dialog
@@ -57,13 +38,14 @@ class EditUserDialog(JansGDialog, DialogUtils):
             )-> Dialog:
         """init for `EditUserDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
+        JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
-        
+                
         Args:
             parent (widget): This is the parent widget for the dialog, to access `Pageup` and `Pagedown`
             title (str): The Main dialog title
             data (list): selected line data 
-            button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
+            buttons (list, optional): Dialog main buttons with their handlers. Defaults to [].
             save_handler (method, optional): handler invoked when closing the dialog. Defaults to None.
         """
         super().__init__(parent, title, buttons)
@@ -76,10 +58,21 @@ class EditUserDialog(JansGDialog, DialogUtils):
         self.create_window()
 
     def cancel(self) -> None:
+        """method to invoked when canceling changes in the dialog (Cancel button is pressed)
+        """
+
         self.future.set_result(DialogResult.CANCEL)
 
-
     def get_claim_properties(self, claim):
+        """This method for getting claims properties
+
+        Args:
+            claim (str): Claim
+
+        Returns:
+            _type_: properties
+        """
+
         ret_val = {}
         for tmp in common_data.users.claims:
             if tmp['name'] == claim:
@@ -183,8 +176,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
             width=self.app.dialog_width,
             )
 
-
     def get_admin_ui_roles(self) -> None:
+        """This method for getting admin ui roles
+        """
         async def coroutine():
             cli_args = {'operation_id': 'get-all-adminui-roles'}
             self.app.start_progressing(_("Retreiving admin UI roles from server..."))
@@ -195,6 +189,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
         asyncio.ensure_future(coroutine())
 
     def add_admin_ui_role(self) -> None:
+        """This method for adding new admin ui roles
+        """
         if not self.admin_ui_roles:
             self.get_admin_ui_roles()
             return
@@ -218,13 +214,14 @@ class EditUserDialog(JansGDialog, DialogUtils):
         dialog = JansGDialog(self.app, title=_("Select Admin-UI"), body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
-
     def delete_admin_ui_role(self, **kwargs: Any) -> None:
+        """This method for deleting admin ui roles
+        """
         self.admin_ui_roles_container.remove_item(kwargs['selected'])
 
-
-
     def add_claim(self) -> None:
+        """This method for adding new claim
+        """
         cur_claims = []
         for w in self.edit_user_content:
             if hasattr(w, 'me'):
@@ -260,5 +257,11 @@ class EditUserDialog(JansGDialog, DialogUtils):
         self.app.show_jans_dialog(dialog)
 
     def __pt_container__(self)-> Dialog:
+        """The container for the dialog itself
+
+        Returns:
+            Dialog: The Edit User Dialog
+        """
+
         return self.dialog
 
