@@ -3,6 +3,17 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'docs/**'
+      - 'charts/**'
+      - 'mkdocs.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'charts/**'
+      - 'mkdocs.yml'
   release:
     types:
       - published
@@ -14,8 +25,6 @@ on:
         required: false
 jobs:
   build:
-    env:
-      GH_TOKEN: ${{ secrets.GIT_AUTHOR_MKDOCS_DEPLOY }}
     name: Deploy docs
     runs-on: ubuntu-latest
     steps:
@@ -69,6 +78,9 @@ jobs:
           git config user.name "mo-auto"
           git config user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
+          gh auth login --with-token < token.txt
+          rm token.txt
 
       - name: Generate docs
         run: |
