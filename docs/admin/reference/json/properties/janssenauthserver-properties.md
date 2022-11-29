@@ -2288,6 +2288,7 @@ tags:
 
 - Default value: None
 
+
 ### subjectTypesSupported
 
 - Description: This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.
