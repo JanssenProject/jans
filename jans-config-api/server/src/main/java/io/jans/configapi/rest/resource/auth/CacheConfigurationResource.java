@@ -70,11 +70,12 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             "Cache Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache.json"))),
+            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getCacheConfiguration() {
         return Response.ok(loadCacheConfiguration()).build();
     }
@@ -82,14 +83,15 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Operation(summary = "Patch cache configuration.", description = "Patch cache configuration", operationId = "patch-config-cache", tags = {
             "Cache Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-patch.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache.json"))),
+            @ApiResponse(responseCode = "200", description = "Cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchCacheConfiguration(@NotNull String requestString) {
         logger.debug(" CACHE details to patch - requestString:{}", requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -111,7 +113,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.REDIS)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getRedisConfiguration() {
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
     }
@@ -119,14 +122,15 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Operation(summary = "Updates Redis cache configuration.", description = "Updates Redis cache configuration", operationId = "put-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_WRITE_ACCESS }))
-    @RequestBody(description = "RedisConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-redis.json")))
+    @RequestBody(description = "RedisConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-redis.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
+            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.REDIS)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
         logger.debug("REDIS CACHE details to update - redisConfiguration:{}", redisConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -139,15 +143,16 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Operation(summary = "Patch Redis cache configuration.", description = "Patch Redis cache configuration", operationId = "patch-config-cache-redis", tags = {
             "Cache Configuration – Redis" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-redis-patch.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-redis-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
+            @ApiResponse(responseCode = "200", description = "Redis cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RedisConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-redis.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Path(ApiConstants.REDIS)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON) 
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchRedisConfiguration(@NotNull String requestString) {
         logger.debug("REDIS CACHE details to patch - requestString:{} ", requestString);
         mergeModifiedCache(cache -> {
@@ -166,12 +171,13 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             "Cache Configuration – in-Memory" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "In-Memory configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
+            @ApiResponse(responseCode = "200", description = "In-Memory configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.IN_MEMORY)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getInMemoryConfiguration() {
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
     }
@@ -179,14 +185,15 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Operation(summary = "Updates in-Memory cache configuration.", description = "Updates in-Memory cache configuration", operationId = "put-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_WRITE_ACCESS }))
-    @RequestBody(description = "inMemoryConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-in-memory.json")))
+    @RequestBody(description = "inMemoryConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-in-memory.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class)  , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
+            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.IN_MEMORY)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
         logger.debug("IN_MEMORY CACHE details to update - inMemoryConfiguration:{}", inMemoryConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -200,15 +207,16 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @Operation(summary = "Patch In-Memory cache configuration.", description = "Patch In-Memory cache configuration", operationId = "patch-config-cache-in-memory", tags = {
             "Cache Configuration – in-Memory" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)) , examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-in-memory-patch.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-in-memory-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class)  , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
+            @ApiResponse(responseCode = "200", description = "In-Memory cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InMemoryConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-in-memory.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Path(ApiConstants.IN_MEMORY)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchInMemoryConfiguration(@NotNull String requestString) {
         logger.debug("IN_MEMORY CACHE details to patch - requestString:{}", requestString);
         mergeModifiedCache(cache -> {
@@ -231,7 +239,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.NATIVE_PERSISTENCE)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getNativePersistenceConfiguration() {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
@@ -241,12 +250,13 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                     ApiAccessConstants.CACHE_WRITE_ACCESS }))
     @RequestBody(description = "NativePersistenceConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/cache/cache-native-persistence.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-native-persistence.json"))),
+            @ApiResponse(responseCode = "200", description = "Native persistence cache configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = NativePersistenceConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-native-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.NATIVE_PERSISTENCE)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateNativePersistenceConfiguration(
             @NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
         logger.debug("NATIVE_PERSISTENCE CACHE details to update - nativePersistenceConfiguration:{}",
@@ -269,7 +279,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @PATCH
     @Path(ApiConstants.NATIVE_PERSISTENCE)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchNativePersistenceConfiguration(@NotNull String requestString) {
         logger.debug("NATIVE_PERSISTENCE CACHE details to patch - requestString:{} ", requestString);
         mergeModifiedCache(cache -> {
@@ -288,12 +299,13 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             "Cache Configuration – Memcached" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Memcached configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class) , examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-memcached.json"))),
+            @ApiResponse(responseCode = "200", description = "Memcached configuration details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MemcachedConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/cache/cache-memcached.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.MEMCACHED)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.CACHE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getMemcachedConfiguration() {
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
     }
@@ -309,7 +321,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(ApiConstants.MEMCACHED)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
         logger.debug("MEMCACHED CACHE details to update - memcachedConfiguration:{} ", memcachedConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
@@ -330,7 +343,8 @@ public class CacheConfigurationResource extends ConfigBaseResource {
     @PATCH
     @Path(ApiConstants.MEMCACHED)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchMemcachedConfiguration(@NotNull String requestString) {
         logger.debug("MEMCACHED CACHE details to patch - requestString:{} ", requestString);
         mergeModifiedCache(cache -> {
