@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -155,7 +154,8 @@ public class AuthUtil {
     }
 
     public Map<ProtectionScopeType, List<String>> getRequestedScopes(ResourceInfo resourceInfo) {
-        log.debug("Requested scopes for resourceInfo:{} ", resourceInfo);
+        log.info("Requested scopes for resourceInfo:{} ", resourceInfo);
+
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         Map<ProtectionScopeType, List<String>> scopes = new HashMap<>();
@@ -169,6 +169,7 @@ public class AuthUtil {
             scopes.put(ProtectionScopeType.SCOPE, Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
             scopes.put(ProtectionScopeType.GROUP, Stream.of(typeAnnotation.groupScopes()).collect(Collectors.toList()));
             scopes.put(ProtectionScopeType.SUPER, Stream.of(typeAnnotation.superScopes()).collect(Collectors.toList()));
+
             log.trace("ProtectionScopeType.SCOPE:{}, ProtectionScopeType.GROUP:{} ,  ProtectionScopeType.SUPER:{} ",
                     Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()),
                     Stream.of(typeAnnotation.groupScopes()).collect(Collectors.toList()),
@@ -177,19 +178,19 @@ public class AuthUtil {
             log.debug("All scopes:{} ", scopes);
             addMethodScopes(resourceInfo, scopes);
         }
-        log.debug("*** Final Requested scopes:{} for resourceInfo:{} ", scopes, resourceInfo);
+        log.info("*** Final Requested scopes:{} for resourceInfo:{} ", scopes, resourceInfo);
         return scopes;
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-        log.debug("Validate Scopes for authScopes:{}, resourceScopes:{} ", authScopes, resourceScopes);
+        log.info("Validate Scopes for authScopes:{}, resourceScopes:{} ", authScopes, resourceScopes);
         Set<String> authScopeSet = new HashSet<>(authScopes);
         Set<String> resourceScopeSet = new HashSet<>(resourceScopes);
         return authScopeSet.containsAll(resourceScopeSet);
     }
 
     private void addMethodScopes(ResourceInfo resourceInfo, Map<ProtectionScopeType, List<String>> scopes) {
-        log.debug("Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
+        log.info("Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
         Method resourceMethod = resourceInfo.getResourceMethod();
         ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
 
@@ -200,14 +201,14 @@ public class AuthUtil {
             scopes.put(ProtectionScopeType.SUPER,
                     Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
         }
-        log.debug("Final Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
+        log.info("Final Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
     }
 
     public String requestAccessToken(final String clientId, final List<String> scope) {
         log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
         String tokenUrl = getTokenEndpoint();
         Token token = getAccessToken(tokenUrl, clientId, scope);
-        log.info("oAuth AccessToken response - token:{}", token);
+        log.debug("oAuth AccessToken response - token:{}", token);
         if (token != null) {
             return token.getAccessToken();
         }
@@ -215,7 +216,7 @@ public class AuthUtil {
     }
 
     public Token getAccessToken(final String tokenUrl, final String clientId, final List<String> scopes) {
-        log.debug("Access Token Request - tokenUrl:{}, clientId:{}, scopes:{}", tokenUrl, clientId, scopes);
+        log.info("Access Token Request - tokenUrl:{}, clientId:{}, scopes:{}", tokenUrl, clientId, scopes);
 
         // Get clientSecret
         String clientSecret = this.getClientDecryptPassword(clientId);
@@ -246,7 +247,7 @@ public class AuthUtil {
     }
 
     public void assignAllScope(final String clientId) {
-        log.trace("Client to be assigned all scope - {} ", clientId);
+        log.info("Client to be assigned all scope - {} ", clientId);
 
         // Get Client
         Client client = this.clientService.getClientByInum(clientId);
@@ -310,7 +311,7 @@ public class AuthUtil {
     }
 
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
-        log.debug("Fetch Auth server specific scope for resourceInfo:{} ", resourceInfo);
+        log.info("Fetch Auth server specific scope for resourceInfo:{} ", resourceInfo);
 
         // Get required oauth scopes for the endpoint
         List<String> resourceScopes = getAllScopeList(getRequestedScopes(resourceInfo));
@@ -327,15 +328,28 @@ public class AuthUtil {
                     .collect(Collectors.toList());
         }
 
-        log.debug("Applicable exclusiveAuthScopes for resourceInfo:{} are {} ", resourceInfo, exclusiveAuthScopesToReq);
+        log.info("Applicable exclusiveAuthScopes for resourceInfo:{} are {} ", resourceInfo, exclusiveAuthScopesToReq);
         return exclusiveAuthScopesToReq;
     }
 
     public List<String> findMissingElements(List<String> list1, List<String> list2) {
+        if (list1 == null || list1.isEmpty() || list2 == null || list2.isEmpty()) {
+            return Collections.emptyList();
+        }
         return list1.stream().filter(e -> !list2.contains(e)).collect(Collectors.toList());
     }
 
+    public boolean containsAnyElement(List<String> list1, List<String> list2) {
+        if (list1 == null || list1.isEmpty() || list2 == null || list2.isEmpty()) {
+            return false;
+        }
+        return list1.stream().anyMatch(list2::contains);
+    }
+
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
+        if (list1 == null || list1.isEmpty() || list2 == null || list2.isEmpty()) {
+            return false;
+        }
         return CollectionUtils.isEqualCollection(list1, list2);
     }
 

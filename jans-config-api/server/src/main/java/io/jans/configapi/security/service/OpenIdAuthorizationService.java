@@ -61,7 +61,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     ExternalInterceptionService externalInterceptionService;
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path) throws Exception {
+            String path) throws WebApplicationException, Exception {
         logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
@@ -212,22 +212,18 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             return scopeList;
         }
 
-        for (Map.Entry<ProtectionScopeType, List<String>> entry : scopeMap.entrySet()) {
-            logger.error("Get all entry.getKey():{}, entry.getValue():{} ", entry.getKey(), entry.getValue());
-        }
-
         // Super scope
         scopeList = scopeMap.get(ProtectionScopeType.SUPER);
         logger.debug("SUPER Scopes:{}", scopeList);
         List<String> missingScopes = null;
-
+        boolean containsScope = false;
         if (scopeList != null && !scopeList.isEmpty()) {
-            // find missing scopes
-            missingScopes = findMissingElements(scopeList, tokenScopes);
-            logger.debug("SUPER Missing Scopes:{}", missingScopes);
+            // check if token contains any of the super scopes
+            containsScope = containsAnyElement(scopeList, tokenScopes);
+            logger.debug("Token contains SUPER scopes?:{}", containsScope);
 
             // Super scope present so no need to check other types of scope
-            if (missingScopes == null || missingScopes.isEmpty()) {
+            if (containsScope) {
                 return missingScopes;
             }
         }
@@ -236,11 +232,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         scopeList = scopeMap.get(ProtectionScopeType.GROUP);
         logger.debug("GROUP Scopes:{}", scopeList);
         if (scopeList != null && !scopeList.isEmpty()) {
-            // find missing scopes
-            missingScopes = findMissingElements(scopeList, tokenScopes);
-            logger.debug("GROUP Missing Scopes:{}", missingScopes);
+            // check if token contains any of the group scopes
+            containsScope = containsAnyElement(scopeList, tokenScopes);
+            logger.debug("Token contains GROUP scopes?:{}", containsScope);
 
-            if (missingScopes == null || missingScopes.isEmpty()) {
+			// Group scope present so no need to check normal scope
+            if (containsScope) {
                 return missingScopes;
             }
         }
@@ -249,7 +246,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
         logger.debug("SCOPE Scopes:{}", scopeList);
         if (scopeList != null && !scopeList.isEmpty()) {
-            // find missing scopes
+            // check if token contains all the required scopes
             missingScopes = findMissingElements(scopeList, tokenScopes);
             logger.debug("SCOPE Missing Scopes:{}", missingScopes);
         }

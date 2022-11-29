@@ -7178,17 +7178,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        userCanEdit:
           type: boolean
-        adminCanView:
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         userCanAccess:
-          type: boolean
-        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -7620,6 +7620,15 @@ components:
           format: int32
         allowOfflineAccessWithoutConsent:
           type: boolean
+        minimumAcrLevel:
+          type: integer
+          format: int32
+        minimumAcrLevelAutoresolve:
+          type: boolean
+        minimumAcrPriorityList:
+          type: array
+          items:
+            type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -8334,6 +8343,15 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8363,15 +8381,6 @@ components:
             - SSA
         fapi:
           type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
     AuthenticationFilter:
       required:
       - baseDn

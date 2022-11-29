@@ -7,13 +7,13 @@
 package io.jans.configapi.security.service;
 
 import io.jans.configapi.util.AuthUtil;
-import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.util.ProtectionScopeType;
 
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
@@ -34,7 +34,7 @@ public abstract class AuthorizationService implements Serializable {
     transient AuthUtil authUtil;
 
     public abstract String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path) throws Exception;
+            String path) throws WebApplicationException, Exception;
 
     protected Response getErrorResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();
@@ -71,4 +71,9 @@ public abstract class AuthorizationService implements Serializable {
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
         return authUtil.isEqualCollection(list1, list2);
     }
+
+    public boolean containsAnyElement(List<String> list1, List<String> list2) {
+        return authUtil.containsAnyElement(list1, list2);
+    }
+
 }
