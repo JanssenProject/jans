@@ -75,9 +75,11 @@ jobs:
          echo "Custom work on generating docs can go here."
          # Generate property docs and push to main
          sudo bash ./automation/docs/generate-property-docs.sh 
-         git add -A || echo "Nothing to add"
+         cd docs
+         git add . || echo "Nothing to add"
          git commit -a -S -m "docs: automated property doc generation" || echo "Nothing to commit"
          git push
+         cd ..
 
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
