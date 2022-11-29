@@ -148,6 +148,7 @@ jobs:
           LATEST=${{ steps.set_versions.outputs.LATEST }}
           STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout gh-pages
+          git pull origin gh-pages
           # move generated chart from a previous step
           mv ../janssen-*.tgz ./charts/
           cd ./charts
