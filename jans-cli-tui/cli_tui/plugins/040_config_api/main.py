@@ -1,34 +1,22 @@
-import os
-import sys
 from prompt_toolkit.application import Application
-import prompt_toolkit
-
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     HorizontalAlign,
     DynamicContainer,
-    Window,
 )
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.buffer import Buffer
-
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Frame
 from wui_components.jans_nav_bar import JansNavBar
-from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window
-from prompt_toolkit.widgets import Button, Label, Frame, Box, Dialog
+from prompt_toolkit.widgets import Button, Label, Box, Dialog
 from wui_components.jans_cli_dialog import JansGDialog
 from collections import OrderedDict
 from functools import partial
-from typing import Any
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from utils.multi_lang import _
 from typing import Any, Optional
-from utils.utils import DialogUtils
-from utils.static import DialogResult
 import asyncio
-from prompt_toolkit.widgets.base import RadioList
 
 class Plugin():
     """This is a general class for plugins 
@@ -40,7 +28,7 @@ class Plugin():
         """init for Plugin class "config_api"
 
         Args:
-            app (_type_): _description_
+            app (Generic): The main Application class
         """
         self.app = app
         self.pid = 'config_api'
@@ -166,10 +154,6 @@ class Plugin():
                                 
         self.nav_selection_changed(list(self.containers)[0])
 
-    #--------------------------------------------------------------------------------#
-    #----------------------------------- accessroles --------------------------------#
-    #--------------------------------------------------------------------------------#
-
     def get_adminui_roles(self) -> None:
         """Method to get the admin ui roles from server
         """
@@ -190,13 +174,9 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
 
-
     def adminui_update_roles(self,
         ) -> None:
-        """update the current clients data to server
-
-        Args:
-            pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
+        """update the current adminui-roles to server
         """
 
         data =[]
@@ -208,10 +188,6 @@ class Plugin():
                 d.get('description'),
                 ]
             )
-
-        # ------------------------------------------------------------------------------- #
-        # --------------------------------- View Data ----------------------------------- #
-        # ------------------------------------------------------------------------------- #               
 
         if data:
             clients = JansVerticalNav(
@@ -238,9 +214,7 @@ class Plugin():
             self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
     def add_adminui_roles(self) -> None:
-        """Method to display the dialog of clients
-        """
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui-roles
         """
 
         self.adminui_role = self.app.getTitledText(
@@ -283,9 +257,8 @@ class Plugin():
         dialog = JansGDialog(self.app, title=_('Add New Role'), body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
-
     def edit_adminui_roles(self, **params: Any) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of admin-ui roles for editing
         """
 
         role_data = params.get('data', {})
@@ -328,6 +301,8 @@ class Plugin():
         self.app.show_jans_dialog(dialog)
 
     def delete_adminui_roles(self, **kwargs: Any) -> None:
+        """Method to delete admin-ui roles 
+        """
 
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete adminui_roles :")+"\n {} ?".format(kwargs['selected'][0]))
 
@@ -351,10 +326,6 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
     
-    #--------------------------------------------------------------------------------#
-    #------------------------------------- permissions ------------------------------#
-    #--------------------------------------------------------------------------------#
-
     def get_adminui_permissions(self,
         start_index: Optional[int]=0, 
         pattern: Optional[str]= ''
@@ -362,6 +333,7 @@ class Plugin():
         """Method to get the adminui_permissions data from server
 
         Args:
+        start_index (Optional[int], optional): This is flag for the adminui-roles pages. Defaults to 0.
         pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
@@ -375,14 +347,14 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
         
-
     def adminui_update_permissions(self,
         start_index: Optional[int]=0, 
         pattern: Optional[str]= ''
         ) -> None:
         """update the current adminui_permissions data to server
 
-        Args:
+        Args:.
+            start_index (Optional[int], optional): This is flag for the adminui-roles pages. Defaults to 0.
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
@@ -452,7 +424,7 @@ class Plugin():
             self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
     def add_adminui_permissions(self) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui-roles
         """
 
         self.adminui_permission = self.app.getTitledText(
@@ -499,15 +471,19 @@ class Plugin():
         self.app.show_jans_dialog(dialog)
     
     def search_adminui_permissions(self, tbuffer:Buffer) -> None:
+        """This method handel the search for adminui_permissions
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.app.center_container)
             return
 
         self.adminui_update_permissions(0, tbuffer.text)
 
-
     def edit_adminui_permissions(self, **params: Any) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui_permissions for editing
         """
 
         role_data = params.get('passed', [])
@@ -551,9 +527,12 @@ class Plugin():
         dialog = JansGDialog(self.app, title='admin ui permissions', body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
-
     def delete_adminui_permissions(self, **kwargs: Any) -> None:
+        """This method for the deletion of the adminui_permissions
 
+        Returns:
+            str: The server response
+        """
 
         dialog = self.app.get_confirm_dialog(_("Are you sure want to delete adminui_permissions :")+"\n {} ?".format(kwargs['selected'][0]))
 
@@ -581,10 +560,6 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
   
-    #--------------------------------------------------------------------------------#
-    #------------------------------------- mapping ----------------------------------#
-    #--------------------------------------------------------------------------------#
-
     def get_adminui_mapping(self, pattern: Optional[str]= '') -> None:
         """Method to get the adminui_permissions data from server
         """
@@ -652,6 +627,11 @@ class Plugin():
             self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
     def search_adminui_mapping(self, tbuffer:Buffer,) -> None:
+        """This method handel the search for adminui_mapping
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.containers['mapping'])
             return
@@ -659,7 +639,7 @@ class Plugin():
         self.adminui_update_mapping(tbuffer.text)
 
     def edit_adminui_mapping(self, **params: Any) -> None:
-        """Method to display the dialog of clients
+        """Method to display the dialog of adminui_mapping
         """
         role_data = params.get('data', [])
         permission = role_data.get('role')
@@ -712,10 +692,6 @@ class Plugin():
         buttons = [Button(_("Cancel"))]
         dialog = JansGDialog(self.app, title='admin ui permissions', body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
-
-    #--------------------------------------------------------------------------------#
-    #--------------------------------------------------------------------------------#
-    #--------------------------------------------------------------------------------#
 
     def nav_selection_changed(
                 self,

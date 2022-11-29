@@ -69,8 +69,8 @@ class Plugin(DialogUtils):
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
     async def get_appconfiguration(self) -> None:
-        """Coroutine for getting application configuration.
-        """ 
+        'Coroutine for getting application configuration.'
+         
         cli_args = {'operation_id': 'get-properties'}
         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
