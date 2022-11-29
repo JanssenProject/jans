@@ -248,7 +248,10 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     ADMIN_UI_JWKS=http://0.0.0.0:8080/jans-auth/restv1/jwks \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
-    CN_PROMETHEUS_PORT=""
+    CN_PROMETHEUS_PORT="" \
+    CN_AWS_SECRETS_ENDPOINT_URL="" \
+    CN_AWS_SECRETS_PREFIX=jans \
+    CN_AWS_SECRETS_REPLICA_FILE=""
 
 # ==========
 # misc stuff
