@@ -18,9 +18,10 @@ from pathlib import Path
 class JansCliInstaller(BaseInstaller, SetupUtils):
 
     source_files = [
-                (os.path.join(Config.dist_jans_dir, 'jca-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/jca_swagger_client.zip')),
-                (os.path.join(Config.dist_jans_dir, 'scim-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/scim_swagger_client.zip')),
                 (os.path.join(Config.dist_app_dir, 'pyjwt.zip'), base.current_app.app_info['PYJWT']),
+                (os.path.join(Config.dist_app_dir, 'prompt_toolkit.zip'), base.current_app.app_info['PROMPT_TOOLKIT']),
+                (os.path.join(Config.dist_app_dir, 'wcwidth.zip'), base.current_app.app_info['WCWIDTH']),
+                (os.path.join(Config.dist_app_dir, 'pygments.zip'), base.current_app.app_info['PYGMENTS']),
                 ]
 
     def __init__(self):
@@ -39,6 +40,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.config_ini_fn = config_dir.joinpath('jans-cli.ini')
         self.ldif_client = os.path.join(self.output_folder, 'client.ldif')
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.pylib_dir = os.path.join(self.jans_cli_install_dir, 'cli', 'pylib')
 
         if not base.snap:
             self.register_progess()
@@ -52,22 +54,36 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         if os.path.exists(self.jans_cli_install_dir):
             self.run(['mv', '-f', self.jans_cli_install_dir, self.jans_cli_install_dir+'_backup-{}'.format(time.ctime())])
 
+        self.createDirs(self.pylib_dir)
+        ops_dir = os.path.join(self.jans_cli_install_dir, 'cli', 'ops')
+        self.createDirs(ops_dir)
+        self.createDirs(os.path.join(ops_dir, 'jca'))
+        self.createDirs(os.path.join(ops_dir, 'scim'))
+
+
         #extract jans-cli tgz archieve
-        base.extract_from_zip(base.current_app.jans_zip, 'jans-cli/cli', self.jans_cli_install_dir)
+        base.extract_from_zip(base.current_app.jans_zip, 'jans-cli-tui/cli_tui', self.jans_cli_install_dir)
+        #extract pyDes from Jans archieve
+        base.extract_file(base.current_app.jans_zip, 'jans-linux-setup/jans_setup/setup_app/pylib/pyDes.py', os.path.join(self.pylib_dir, 'pyDes.py'), ren=True)
 
-        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
-        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'scim-cli.py')])
-        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'config_cli.py')])
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'cli', 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'jans_cli_tui.py'), os.path.join(self.jans_cli_install_dir, 'config-cli-tui.py')])
+        #self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'scim-cli.py')])
+        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'cli', 'config_cli.py')])
+        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'jans_cli_tui.py')])
 
-        base.extract_from_zip(self.source_files[0][0], 'jca', os.path.join(self.jans_cli_install_dir, 'jca'))
-        base.extract_from_zip(self.source_files[1][0], 'scim', os.path.join(self.jans_cli_install_dir, 'scim'))
 
-        #extract pyjwt from archieve
-        base.extract_from_zip(self.source_files[2][0], 'jwt', os.path.join(self.jans_cli_install_dir, 'pylib/jwt'))
+        #extract python libraries
+        base.extract_from_zip(self.source_files[0][0], 'jwt', os.path.join(self.pylib_dir, 'jwt'))
+        base.extract_from_zip(self.source_files[1][0], 'src/prompt_toolkit', os.path.join(self.pylib_dir, 'prompt_toolkit'))
+        base.extract_from_zip(self.source_files[2][0], 'wcwidth', os.path.join(self.pylib_dir, 'wcwidth'))
+        base.extract_from_zip(self.source_files[3][0], 'pygments', os.path.join(self.pylib_dir, 'pygments'))
 
         # extract yaml files
-        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(self.jans_cli_install_dir, 'jca.yaml'), ren=True)
-        base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(self.jans_cli_install_dir, 'scim.yaml'), ren=True)
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger-auto.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger-auto.yaml'), ren=True)
+        for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
+            base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/'+plugin_yaml_file, os.path.join(ops_dir, 'jca', plugin_yaml_file), ren=True)
+        base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(ops_dir, 'scim', 'scim.yaml'), ren=True)
 
 
     def generate_configuration(self):
@@ -102,6 +118,11 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             config['DEFAULT']['scim_client_secret_enc'] = Config.scim_client_encoded_pw
 
         config['DEFAULT']['jca_plugins'] = ','.join(base.current_app.ConfigApiInstaller.get_plugins())
+
+        # clean old token and user data
+        for prop in ('user_data', 'access_token_enc'):
+            if prop in config['DEFAULT']:
+                del config['DEFAULT'][prop]
 
         config.write(self.config_ini_fn.open('w'))
         self.config_ini_fn.chmod(0o600)

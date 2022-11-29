@@ -62,7 +62,7 @@ setup(
         "ruamel.yaml>=0.16.5",
         "PyJWT==2.3.0",
         "pygments",
-        "prompt_toolkit",
+        "prompt_toolkit==3.0.33",
         "requests",
         "urllib3",
         "pyDes",
