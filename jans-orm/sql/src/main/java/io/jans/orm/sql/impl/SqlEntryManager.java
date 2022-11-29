@@ -989,7 +989,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 	}
 
 	private String getBaseObjectClassForDataOperation(String[] objectClasses) {
-		if (ArrayHelper.isNotEmpty(objectClasses) && objectClasses.length > 0) {
+		if (ArrayHelper.isNotEmpty(objectClasses) && objectClasses.length > 1) {
 			throw new MappingException("SQL ORM supports only one OC!");
 		}
 		
