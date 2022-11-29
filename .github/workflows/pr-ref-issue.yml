@@ -11,8 +11,10 @@ on:
       - reopened
     paths-ignore:
       - "docs/**"
-    tags-ignore:
-      - "release-please-*"
+    branches-ignore:
+      - "release-please-**"
+      - "dependabot/**"
+      - "snyk-**"
   workflow_dispatch:
 jobs:
   check-prs-issue:
