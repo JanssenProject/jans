@@ -48,6 +48,7 @@ Below are example diagrams for popular jans setups with AWS.
 Below are example diagrams for popular jans setups with Azure.
 ### Digital Ocean
 Below are example diagrams for popular jans setups with DOKS.
+
 ## Local/Hybrid
 ### Rancher
 Rancher UI can be deployed to several clouds / multi clouds and also be used to manage local setups.
