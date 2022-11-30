@@ -1,13 +1,6 @@
-import os
-import sys
-
 from functools import partial
 import asyncio
-
-import prompt_toolkit
 from prompt_toolkit.application.current import get_app
-from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
@@ -17,32 +10,16 @@ from prompt_toolkit.layout.containers import (
 )
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import (
-    Box,
     Button,
-    Label,
-    Frame,
     Dialog
 )
 from typing import Any, Optional
 from prompt_toolkit.buffer import Buffer
-
 from utils.static import DialogResult
-
-from cli import config_cli
-from wui_components.jans_nav_bar import JansNavBar
-from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from wui_components.jans_dialog import JansDialog
-from wui_components.jans_dialog_with_nav import JansDialogWithNav
-from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_data_picker import DateSelectWidget
-
 from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
-
 from utils.multi_lang import _
-import cli_style
-
 
 class Plugin():
     """This is a general class for plugins 
@@ -51,10 +28,10 @@ class Plugin():
         self, 
         app: Application
         ) -> None:
-        """init for Plugin class "oxauth"
+        """init for Plugin class "scripts"
 
         Args:
-            app (_type_): _description_
+            app (Generic): The main Application class
         """
         self.app = app
         self.pid = 'scripts'
@@ -87,12 +64,17 @@ class Plugin():
                     DynamicContainer(lambda: self.scripts_list_container)
                     ],style='class:outh_containers_scopes')
 
-
     def get_scripts(
         self, 
         start_index: Optional[int]= 1,
         pattern: Optional[str]= '',
         ) -> None:
+        """Get the current Scripts from server
+
+        Args:
+            start_index (Optional[int], optional): This is flag for the Scripts pages. Defaults to 0.
+            pattern (Optional[str], optional):endpoint arguments for the Scripts. Defaults to ''.
+        """
 
         endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
         if pattern:
@@ -116,7 +98,6 @@ class Plugin():
 
         asyncio.ensure_future(coroutine())
 
-
     def scripts_update_list(
         self, 
         pattern: Optional[str]= '',
@@ -124,7 +105,7 @@ class Plugin():
         """Updates Scripts data from server
 
         Args:
-            start_index (int, optional): add Button("Prev") to the layout. Defaults to 0.
+            pattern (Optional[str], optional):endpoint arguments for the Scripts. Defaults to ''.
         """
 
         data =[]
@@ -175,17 +156,20 @@ class Plugin():
         self.app.layout.focus(self.scripts_listbox)
         get_app().invalidate()
 
-
     def get_help(self, **kwargs: Any):
+        """This method get focused field Description to display on statusbar
+        """
 
         # schema = self.app.cli_object.get_schema_from_reference('#/components/schemas/{}'.format(str(kwargs['scheme'])))
-    
         if kwargs['scheme'] == 'Scripts':
             self.app.status_bar_text= kwargs['data'][2]
 
-
-
     def search_scripts(self, tbuffer:Buffer) -> None:
+        """This method handel the search for scripts
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
         if not len(tbuffer.text) > 2:
             self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.scripts_main_area)
             return
@@ -212,7 +196,7 @@ class Plugin():
             dialog (_type_): the main dialog to save data in
 
         Returns:
-            _type_: bool value to check the status code response
+            bool :  value to check the status code response
         """
 
         async def coroutine():
@@ -231,6 +215,8 @@ class Plugin():
         asyncio.ensure_future(coroutine())
 
     def delete_script(self, **kwargs: Any) -> None:
+        """This method for the deletion of the Scripts
+        """
 
         def do_delete_script():
 

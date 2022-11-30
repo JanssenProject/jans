@@ -192,6 +192,13 @@
             <artifactId>kryo</artifactId>
             <version>5.3.0</version>
         </dependency>
+        
+        <!-- ZIP4J -->
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>2.11.2</version>
+        </dependency>
 
         <!-- TESTS -->
         <dependency>

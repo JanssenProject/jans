@@ -2075,7 +2075,7 @@ tags:
 
 ### returnDeviceSecretFromAuthzEndpoint
 
-- Description:
+- Description: 
 
 - Required: No
 
@@ -2084,7 +2084,7 @@ tags:
 
 ### rotateDeviceSecret
 
-- Description:
+- Description: 
 
 - Required: No
 
@@ -2237,7 +2237,7 @@ tags:
 
 ### ssaConfiguration
 
-- Description:
+- Description: 
 
 - Required: No
 

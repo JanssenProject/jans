@@ -1,7 +1,7 @@
 Install Jans-TUI with pip from GitHub
 --------------------------------------
 ```
-pip3 install https://github.com/JanssenProject/jans/archive/refs/heads/jans-cli-tui-works.zip#subdirectory=jans-cli-tui
+pip3 install https://github.com/JanssenProject/jans/archive/refs/heads/main.zip#subdirectory=jans-cli-tui
 ```
 
 Execute:

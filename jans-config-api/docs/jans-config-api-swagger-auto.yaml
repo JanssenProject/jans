@@ -132,6 +132,8 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/acrs.readonly
+        - https://jans.io/oauth/config/acrs.write
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - Default Authentication Method
@@ -167,6 +169,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/acrs.write
+        - https://jans.io/oauth/config/write-all
   /api/v1/agama:
     get:
       tags:
@@ -243,6 +246,8 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
     post:
       tags:
       - Configuration – Agama Flow
@@ -333,6 +338,8 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
     post:
       tags:
       - Configuration – Agama Flow
@@ -7178,19 +7185,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7620,6 +7627,15 @@ components:
           format: int32
         allowOfflineAccessWithoutConsent:
           type: boolean
+        minimumAcrLevel:
+          type: integer
+          format: int32
+        minimumAcrLevelAutoresolve:
+          type: boolean
+        minimumAcrPriorityList:
+          type: array
+          items:
+            type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -8334,6 +8350,15 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8361,15 +8386,6 @@ components:
             - STAT
             - PAR
             - SSA
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         fapi:
           type: boolean
     AuthenticationFilter:
