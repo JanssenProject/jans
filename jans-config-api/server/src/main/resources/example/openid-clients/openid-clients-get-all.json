@@ -21,19 +21,11 @@
                 "client_credentials"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "Jans Config Api Client"
-                },
-                "value": "Jans Config Api Client",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "Jans Config Api Client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "pairwise",
             "idTokenSignedResponseAlg": "RS256",
             "tokenEndpointAuthMethod": "client_secret_basic",
@@ -141,19 +133,11 @@
                 "refresh_token"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "Jans Config Api Client"
-                },
-                "value": "Jans Config Api Client",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "Jans Config Api Client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "pairwise",
             "idTokenSignedResponseAlg": "RS256",
             "tokenEndpointAuthMethod": "client_secret_basic",
@@ -256,19 +240,11 @@
                 "client_credentials"
             ],
             "applicationType": "native",
-            "clientName": {
-                "values": {
-                    "": "SCIM client"
-                },
-                "value": "SCIM client",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "SCIM client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "pairwise",
             "tokenEndpointAuthMethod": "client_secret_basic",
             "scopes": [
@@ -339,19 +315,11 @@
                 "urn:ietf:params:oauth:grant-type:device_code"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "Jans Role Based Client"
-                },
-                "value": "Jans Role Based Client",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "Jans Role Based Client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "pairwise",
             "idTokenSignedResponseAlg": "RS256",
             "userInfoSignedResponseAlg": "RS256",
@@ -432,19 +400,11 @@
                 "client_credentials"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "Jans Test Client (don't remove)"
-                },
-                "value": "Jans Test Client (don't remove)",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "Jans Test Client (don't remove)",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "public",
             "idTokenSignedResponseAlg": "RS256",
             "tokenEndpointAuthMethod": "client_secret_basic",
@@ -512,19 +472,11 @@
                 "client_credentials"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "Jans Test Resource Server Client (don't remove)"
-                },
-                "value": "Jans Test Resource Server Client (don't remove)",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "Jans Test Resource Server Client (don't remove)",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "public",
             "idTokenSignedResponseAlg": "RS256",
             "tokenEndpointAuthMethod": "client_secret_basic",
@@ -585,19 +537,11 @@
                 "client_credentials"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "Jans Test Requesting Party Client (don't remove)"
-                },
-                "value": "Jans Test Requesting Party Client (don't remove)",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "Jans Test Requesting Party Client (don't remove)",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "public",
             "idTokenSignedResponseAlg": "RS256",
             "tokenEndpointAuthMethod": "client_secret_basic",
@@ -652,19 +596,11 @@
                 "authorization_code"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "test1234"
-                },
-                "value": "test1234",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "test1234",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "public",
             "tokenEndpointAuthMethod": "client_secret_basic",
             "scopes": [
@@ -726,19 +662,11 @@
                 "authorization_code"
             ],
             "applicationType": "web",
-            "clientName": {
-                "values": {
-                    "": "test12345"
-                },
-                "value": "test12345",
-                "languageTags": [
-                    ""
-                ]
-            },
-            "logoUri": {},
-            "clientUri": {},
-            "policyUri": {},
-            "tosUri": {},
+            "clientName": "test12345",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
             "subjectType": "public",
             "tokenEndpointAuthMethod": "client_secret_basic",
             "scopes": [
