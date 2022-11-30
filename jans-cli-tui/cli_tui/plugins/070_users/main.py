@@ -180,7 +180,7 @@ class Plugin(DialogUtils):
             _type_: bool value to check the status code response
         """
 
-        raw_data = self.make_data_from_dialog(tabs={'user': dialog.edit_user_container})
+        raw_data = self.make_data_from_dialog(tabs={'user': dialog.edit_user_container.content})
 
         if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
             self.app.show_message(_("Please fix!"), _("Username and/or Email is empty"))
