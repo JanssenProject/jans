@@ -291,13 +291,16 @@ class JCA_CLI:
     def get_user_info(self):
         user_info = {}
         if 'user_data' in config['DEFAULT']:
-            user_info = jwt.decode(config['DEFAULT']['user_data'],
+            try:
+                user_info = jwt.decode(config['DEFAULT']['user_data'],
                                     options={
                                             'verify_signature': False,
                                             'verify_exp': True,
                                             'verify_aud': False
                                              }
                                     )
+            except:
+                pass
         return user_info
 
 
