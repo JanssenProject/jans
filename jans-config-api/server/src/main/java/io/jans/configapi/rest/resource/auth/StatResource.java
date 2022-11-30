@@ -46,7 +46,7 @@ public class StatResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT })
+    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@HeaderParam("Authorization") String authorization,
             @QueryParam(value = "month") String month, @QueryParam(value = "start_month") String startMonth,

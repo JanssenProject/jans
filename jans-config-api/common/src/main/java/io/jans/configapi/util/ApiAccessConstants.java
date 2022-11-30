@@ -79,4 +79,8 @@ public class ApiAccessConstants {
     public static final String OPENID_READ_ACCESS  = "https://jans.io/oauth/config/openid-read";
     public static final String OPENID_WRITE_ACCESS = "https://jans.io/oauth/config/openid/openid-write";
     public static final String OPENID_DELETE_ACCESS = "https://jans.io/oauth/config/openid/openid-delete";
+    
+    public static final String UMA_READ_ACCESS  = "https://jans.io/oauth/config/uma-read";
+    public static final String UMA_WRITE_ACCESS = "https://jans.io/oauth/config/uma-write";
+    public static final String UMA_DELETE_ACCESS = "https://jans.io/oauth/config/uma-delete";
 }

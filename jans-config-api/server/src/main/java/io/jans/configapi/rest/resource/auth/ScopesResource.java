@@ -80,7 +80,8 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }  , groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -106,7 +107,8 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum,
             @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
@@ -124,7 +126,8 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CREATOR + ApiConstants.CREATORID_PATH)
     public Response getScopeByClientId(@NotNull @PathParam(ApiConstants.CREATORID) String creatorId) {
         log.debug("SCOPES to be fetched by creatorId:{}", creatorId);
@@ -144,7 +147,8 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.TYPE + ApiConstants.TYPE_PATH)
     public Response getScopeByType(@NotNull @PathParam(ApiConstants.TYPE) String type) {
         log.debug("SCOPES to be fetched by type:{}", type);
@@ -164,7 +168,7 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createOpenidScope(@Valid Scope scope) {
         log.debug("SCOPE to be added - scope:{}", scope);
 
@@ -195,7 +199,7 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateScope(@Valid Scope scope) {
         log.debug("SCOPE to be updated - scop:{}", scope.getId());
         String inum = scope.getInum();
@@ -226,7 +230,7 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
@@ -251,7 +255,7 @@ public class ScopesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         log.debug("SCOPES to be deleted - inum:{}", inum);
         Scope scope = scopeService.getScopeByInum(inum);
