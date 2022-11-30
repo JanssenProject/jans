@@ -2,4 +2,4 @@
 grpcio==1.41.0
 click==6.7
 libcst<0.4
-git+https://github.com/JanssenProject/jans@c23a2e505b7eb325a293975d60bbc65d5e367c7d#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans@0e84a4a0ba80477281f16aaf4abd7fee25faae26#egg=jans-pycloudlib&subdirectory=jans-pycloudlib

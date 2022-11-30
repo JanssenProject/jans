@@ -15,6 +15,7 @@ on:
       - "release-please-**"
       - "dependabot/**"
       - "snyk-**"
+      - "update-pycloud-in-**"
   workflow_dispatch:
 jobs:
   check-prs-issue:
