@@ -26,5 +26,7 @@ module = [
     "ldif",
     "sqlalchemy.*",
     "requests_toolbelt.*",
+    "boto3",
+    "botocore.*",
 ]
 ignore_missing_imports = true

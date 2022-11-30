@@ -3,6 +3,17 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'docs/**'
+      - 'charts/**'
+      - 'mkdocs.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'charts/**'
+      - 'mkdocs.yml'
   release:
     types:
       - published
@@ -14,8 +25,6 @@ on:
         required: false
 jobs:
   build:
-    env:
-      GH_TOKEN: ${{ secrets.GIT_AUTHOR_MKDOCS_DEPLOY }}
     name: Deploy docs
     runs-on: ubuntu-latest
     steps:
@@ -23,6 +32,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
@@ -43,6 +53,7 @@ jobs:
         with:
           ref: '${{ github.event.inputs.version }}'
           fetch-depth: 0
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
 
       - name: Copy files from main to ${{ github.event.inputs.version }}
         if: >-
@@ -55,13 +66,31 @@ jobs:
           helm package charts/janssen/
           cp janssen-*.tgz ../
 
-      - name: Generate docs
-        run: echo "Custom work on generating docs can go here."
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
 
-      - name: git config
+      - name: Configure Git
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config user.name "mo-auto"
+          git config user.email "54212639+mo-auto@users.noreply.github.com"
+          git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+
+      - name: Generate docs
+        run: |
+         echo "Custom work on generating docs can go here."
+         # Generate property docs and push to main
+         sudo bash ./automation/docs/generate-property-docs.sh 
+         cd docs
+         git add . || echo "Nothing to add"
+         git commit -a -S -m "docs: automated property doc generation" || echo "Nothing to commit"
+         git push
+         cd ..
 
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
@@ -119,6 +148,7 @@ jobs:
           LATEST=${{ steps.set_versions.outputs.LATEST }}
           STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout gh-pages
+          git pull origin gh-pages
           # move generated chart from a previous step
           mv ../janssen-*.tgz ./charts/
           cd ./charts
@@ -129,8 +159,8 @@ jobs:
           # END move generated chart from a previous step
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -m "Set stable to ${STABLE}"
+          git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"
           echo "${LATEST}" > latest.txt
           git add latest.txt && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -m "Set latest to ${LATEST}"
+          git diff-index --quiet HEAD -- || git commit -S -m "Set latest to ${LATEST}"
           git push origin gh-pages

@@ -6,8 +6,10 @@
 
 package io.jans.as.common.model.registration;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
@@ -600,6 +602,7 @@ public class Client extends DeletableEntity implements Serializable {
         this.idTokenTokenBindingCnf = idTokenTokenBindingCnf;
     }
 
+    @JsonIgnore
     public boolean isTokenBindingSupported() {
         return StringUtils.isNotBlank(idTokenTokenBindingCnf);
     }
@@ -707,11 +710,37 @@ public class Client extends DeletableEntity implements Serializable {
         return clientNameLocalized;
     }
 
+    @JsonSetter
+    public void setClientNameLocalized(LocalizedString clientNameLocalized) {
+        this.clientNameLocalized = clientNameLocalized;
+    }
+
+    @JsonSetter
+    public void setLogoUriLocalized(LocalizedString logoUriLocalized) {
+        this.logoUriLocalized = logoUriLocalized;
+    }
+
+    @JsonSetter
+    public void setClientUriLocalized(LocalizedString clientUriLocalized) {
+        this.clientUriLocalized = clientUriLocalized;
+    }
+
+    @JsonSetter
+    public void setPolicyUriLocalized(LocalizedString policyUriLocalized) {
+        this.policyUriLocalized = policyUriLocalized;
+    }
+
+    @JsonSetter
+    public void setTosUriLocalized(LocalizedString tosUriLocalized) {
+        this.tosUriLocalized = tosUriLocalized;
+    }
+
     /**
      * Sets the name of the Client to be presented to the user.
      *
      * @param clientName The name of the Client to be presented to the user.
      */
+    @JsonIgnore
     public void setClientNameLocalized(String clientName) {
         this.clientName = clientName;
         this.clientNameLocalized.setValue(clientName);
@@ -723,6 +752,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @param clientName The name of the Client to be presented to the user.
      * @param locale     The locale
      */
+    @JsonIgnore
     public void setClientNameLocalized(String clientName, Locale locale) {
         if (StringUtils.isNotBlank(locale.toString())) {
             this.clientNameLocalized.setValue(clientName, locale);
@@ -745,6 +775,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @param logoUri The URL of a logo image for the Client where it can be retrieved.
      */
+    @JsonIgnore
     public void setLogoUriLocalized(String logoUri) {
         this.logoUri = logoUri;
         this.logoUriLocalized.setValue(logoUri);
@@ -756,6 +787,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @param logoUri The URL of a logo image for the Client where it can be retrieved.
      * @param locale  The locale
      */
+    @JsonIgnore
     public void setLogoUriLocalized(String logoUri, Locale locale) {
         if (StringUtils.isNotBlank(locale.toString())) {
             this.logoUriLocalized.setValue(logoUri, locale);
@@ -778,6 +810,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @param clientUri The URL of the home page of the Client.
      */
+    @JsonIgnore
     public void setClientUriLocalized(String clientUri) {
         this.clientUri = clientUri;
         this.clientUriLocalized.setValue(clientUri);
@@ -789,6 +822,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @param clientUri The URL of the home page of the Client.
      * @param locale    The locale
      */
+    @JsonIgnore
     public void setClientUriLocalized(String clientUri, Locale locale) {
         if (StringUtils.isNotBlank(locale.toString())) {
             this.clientUriLocalized.setValue(clientUri, locale);
@@ -813,6 +847,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @param policyUri A URL location about how the profile data will be used.
      */
+    @JsonIgnore
     public void setPolicyUriLocalized(String policyUri) {
         this.policyUri = policyUri;
         this.policyUriLocalized.setValue(policyUri);
@@ -825,6 +860,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @param policyUri A URL location about how the profile data will be used.
      * @param locale    The locale
      */
+    @JsonIgnore
     public void setPolicyUriLocalized(String policyUri, Locale locale) {
         if (StringUtils.isNotBlank(locale.toString())) {
             this.policyUriLocalized.setValue(policyUri, locale);
@@ -849,6 +885,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @param tosUri The terms of service URL.
      */
+    @JsonIgnore
     public void setTosUriLocalized(String tosUri) {
         this.tosUri = tosUri;
         this.tosUriLocalized.setValue(tosUri);
@@ -861,6 +898,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @param tosUri The terms of service URL.
      * @param locale The Locale
      */
+    @JsonIgnore
     public void setTosUriLocalized(String tosUri, Locale locale) {
         if (StringUtils.isNotBlank(locale.toString())) {
             this.tosUriLocalized.setValue(tosUri, locale);
@@ -1419,14 +1457,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     public void setBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
-    }
-
-    public String getDisplayName() {
-        return getClientName();
-    }
-
-    public void setDisplayName(String displayName) {
-        setClientName(displayName);
     }
 
     public String getDescription() {

@@ -139,16 +139,17 @@ nav:
         - 'Passwordless Authentication': 'admin/planning/passwordless-auth.md'
         - 'Machine-to-Machine Authentication': 'admin/planning/machine-to-machine.md'
     - 'Installation':
-        - 'admin/install/README.md'
         - 'VM Installation':
             - 'admin/install/vm-install/README.md'
             - 'VM Requirements': 'admin/install/vm-install/vm-requirements.md'
-            - 'Docker Quick Start': 'admin/install/vm-install/quick-start-install.md'
             - 'Ubuntu': 'admin/install/vm-install/ubuntu.md'
             - 'RHEL': 'admin/install/vm-install/rhel.md'
             - 'Suse': 'admin/install/vm-install/suse.md'
 #            - 'FIPS DISA STIG': 'admin/install/vm-install/disa-stig.md'
             - 'Dynamic Download': 'admin/install/vm-install/dynamic-download.md'
+        - 'Docker Installation': 
+            - 'Quick Start':  'admin/install/docker-install/quick-start.md' 
+            - 'Docker compose': 'admin/install/docker-install/compose.md'
         - 'Helm Deployments':
             - 'admin/install/helm-install/README.md'
             - 'Local Kubernetes Cluster': 'admin/install/helm-install/local.md'
@@ -157,7 +158,7 @@ nav:
 #            - 'Digital Ocean DOK': 'admin/install/helm-install/digitalocean-dok.md'
             - 'Microsoft Azure AKS': 'admin/install/helm-install/microsoft-azure.md'
 #            - 'Red Hat Open Shift': 'admin/install/helm-install/red-hat-open-shift.md'
-            - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'
+            - 'Using Rancher Marketplace': 'admin/install/helm-install/rancher.md'    
         - 'Setup Instructions': 'admin/install/setup.md'
         - 'FAQ': 'admin/install/install-faq.md'
     - 'Kubernetes Operation Guide':
@@ -221,6 +222,7 @@ nav:
                 - 'SCIM User Resources': 'admin/config-guide/jans-cli/cli-user.md'
                 - 'SCIM Group Management': 'admin/config-guide/jans-cli/cli-group.md'
             - 'Authentication via Device Flow': 'admin/config-guide/jans-cli/device-flow.md'
+        - 'Config TUI': 'admin/config-guide/tui.md'
         - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
     - 'Auth Server Admin Guide':
@@ -409,10 +411,16 @@ nav:
             - 'Converting Data': 'admin/reference/database/converting-data.md'
         - 'JSON Configuration/Properties':
             - 'admin/reference/json/README.md'
-            - 'Auth Server': 'admin/reference/json/auth-server.md'
-            - 'FIDO': 'admin/reference/json/fido.md'
-            - 'SCIM': 'admin/reference/json/scim.md'
-            - 'Config API': 'admin/reference/json/config-api.md'
+            - 'Properties':
+                - 'admin/reference/json/properties/README.md'
+                - 'Auth Server': 'admin/reference/json/properties/janssenauthserver-properties.md'
+                - 'FIDO': 'admin/reference/json/properties/fido2-properties.md'
+                - 'SCIM': 'admin/reference/json/properties/scim-properties.md'
+                - 'Config API': 'admin/reference/json/properties/config-api-properties.md'
+            - 'Feature Flags':
+                  - 'admin/reference/json/feature-flags/README.md'
+                  - 'Auth Server': 'admin/reference/json/feature-flags/janssenauthserver-feature-flags.md'
+
         - 'Kubernetes':
             - 'admin/reference/kubernetes/README.md'
             - 'Helm Chart': 'admin/reference/kubernetes/helm-chart.md'

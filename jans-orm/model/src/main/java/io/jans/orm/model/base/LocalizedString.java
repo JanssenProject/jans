@@ -6,10 +6,9 @@
 
 package io.jans.orm.model.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-
-import io.jans.orm.util.StringHelper;
 
 import java.io.Serializable;
 import java.util.*;
@@ -24,7 +23,7 @@ public class LocalizedString implements Serializable {
 
     private static final long serialVersionUID = -7651487701235873969L;
 
-    private final Map<String, String> values;
+    private Map<String, String> values;
 
     public static final String EMPTY_LANG_TAG = "";
     public static final String LANG_SEPARATOR = ";";
@@ -46,24 +45,37 @@ public class LocalizedString implements Serializable {
         values.put(getLanguageTag(locale), value);
     }
 
+    @JsonIgnore
     public String getValue() {
         return getValue(EMPTY_LANG_TAG);
     }
 
+    @JsonIgnore
     public String getValue(String languageTag) {
         return values.getOrDefault(languageTag, null);
+    }
+
+    @JsonIgnore
+    public String getValue(Locale locale) {
+        return getValue(getLanguageTag(locale));
     }
 
     public Map<String, String> getValues() {
         return values;
     }
 
+    public void setValues(Map<String, String> values) {
+        this.values = values;
+    }
+
     public int size() {
         return values.size();
     }
 
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
     public Set<String> getLanguageTags() {
-        return values.keySet();
+        return (values!=null ? values.keySet() : Collections.emptySet());
     }
 
     public String addLdapLanguageTag(String ldapAttributeName, String languageTag) {
@@ -76,7 +88,8 @@ public class LocalizedString implements Serializable {
                 .replace(LANG_SEPARATOR + LANG_PREFIX + LANG_JOINER, "");
     }
 
-    private String getLanguageTag(Locale locale) {
+    @JsonIgnore
+    public static String getLanguageTag(Locale locale) {
         List<String> keyParts = new ArrayList<>();
         keyParts.add(locale.getLanguage());
         keyParts.add(locale.getScript());

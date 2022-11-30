@@ -132,6 +132,8 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/acrs.readonly
+        - https://jans.io/oauth/config/acrs.write
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - Default Authentication Method
@@ -167,6 +169,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/acrs.write
+        - https://jans.io/oauth/config/write-all
   /api/v1/agama:
     get:
       tags:
@@ -243,6 +246,8 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
     post:
       tags:
       - Configuration – Agama Flow
@@ -333,6 +338,8 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
     post:
       tags:
       - Configuration – Agama Flow
@@ -7178,17 +7185,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -7526,10 +7533,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
-        tokenBindingSupported:
-          type: boolean
         authenticationMethod:
           type: string
           enum:
@@ -7624,6 +7627,15 @@ components:
           format: int32
         allowOfflineAccessWithoutConsent:
           type: boolean
+        minimumAcrLevel:
+          type: integer
+          format: int32
+        minimumAcrLevelAutoresolve:
+          type: boolean
+        minimumAcrPriorityList:
+          type: array
+          items:
+            type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -7645,13 +7657,6 @@ components:
         values:
           type: object
           additionalProperties:
-            type: string
-        value:
-          type: string
-        languageTags:
-          uniqueItems: true
-          type: array
-          items:
             type: string
     AppConfiguration:
       type: object
@@ -8345,8 +8350,6 @@ components:
           $ref: '#/components/schemas/EngineConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8383,6 +8386,8 @@ components:
             - STAT
             - PAR
             - SSA
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8639,13 +8644,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

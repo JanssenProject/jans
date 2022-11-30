@@ -104,6 +104,9 @@ public class RegisterRequest extends BaseRequest {
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
     private List<String> defaultAcrValues;
+    private Integer minimumAcrLevel;
+    private Boolean minimumAcrLevelAutoresolve;
+    private List<String> minimumAcrPriorityList;
     private String initiateLoginUri;
     private List<String> groups;
     private List<String> postLogoutRedirectUris;
@@ -154,6 +157,7 @@ public class RegisterRequest extends BaseRequest {
         this.grantTypes = new ArrayList<>();
         this.contacts = new ArrayList<>();
         this.defaultAcrValues = new ArrayList<>();
+        this.minimumAcrPriorityList = new ArrayList<>();
         this.postLogoutRedirectUris = new ArrayList<>();
         this.groups = new ArrayList<>();
         this.requestUris = new ArrayList<>();
@@ -1040,6 +1044,60 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets minimum acr level
+     *
+     * @return minimum acr level
+     */
+    public Integer getMinimumAcrLevel() {
+        return minimumAcrLevel;
+    }
+
+    /**
+     * Sets minimum acr level
+     *
+     * @param minimumAcrLevel minimum acr level
+     */
+    public void setMinimumAcrLevel(Integer minimumAcrLevel) {
+        this.minimumAcrLevel = minimumAcrLevel;
+    }
+
+    /**
+     * Gets minimum acr level auto resolve
+     *
+     * @return minimum acr level auto resolve
+     */
+    public Boolean getMinimumAcrLevelAutoresolve() {
+        return minimumAcrLevelAutoresolve;
+    }
+
+    /**
+     * Sets minimum acr level auto resolve
+     *
+     * @param minimumAcrLevelAutoresolve minimum acr level auto resolve
+     */
+    public void setMinimumAcrLevelAutoresolve(Boolean minimumAcrLevelAutoresolve) {
+        this.minimumAcrLevelAutoresolve = minimumAcrLevelAutoresolve;
+    }
+
+    /**
+     * Gets minimum acr priority list
+     *
+     * @return minimum acr priority list
+     */
+    public List<String> getMinimumAcrPriorityList() {
+        return minimumAcrPriorityList;
+    }
+
+    /**
+     * Sets minimum acr priority list
+     *
+     * @param minimumAcrPriorityList minimum acr priority list
+     */
+    public void setMinimumAcrPriorityList(List<String> minimumAcrPriorityList) {
+        this.minimumAcrPriorityList = minimumAcrPriorityList;
+    }
+
+    /**
      * Returns the Default requested Authentication Context Class Reference values.
      *
      * @return The Default requested Authentication Context Class Reference values.
@@ -1379,6 +1437,9 @@ public class RegisterRequest extends BaseRequest {
         result.setPostLogoutRedirectUris(extractListByKey(requestObject, POST_LOGOUT_REDIRECT_URIS.toString()));
         result.setGroups(extractListByKey(requestObject, GROUPS.toString()));
         result.setDefaultAcrValues(extractListByKey(requestObject, DEFAULT_ACR_VALUES.toString()));
+        result.setMinimumAcrLevel(integerOrNull(requestObject, MINIMUM_ACR_LEVEL.toString()));
+        result.setMinimumAcrLevelAutoresolve(requestObject.optBoolean(MINIMUM_ACR_LEVEL_AUTORESOLVE.toString()));
+        result.setMinimumAcrPriorityList(extractListByKey(requestObject, MINIMUM_ACR_PRIORITY_LIST.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setBackchannelLogoutUris(extractListByKey(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
@@ -1587,6 +1648,15 @@ public class RegisterRequest extends BaseRequest {
         }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
+        }
+        if (minimumAcrLevel != null) {
+            function.apply(MINIMUM_ACR_LEVEL.toString(), minimumAcrLevel.toString());
+        }
+        if (minimumAcrLevelAutoresolve != null) {
+            function.apply(MINIMUM_ACR_LEVEL_AUTORESOLVE.toString(), minimumAcrLevelAutoresolve.toString());
+        }
+        if (minimumAcrPriorityList != null) {
+            function.apply(MINIMUM_ACR_PRIORITY_LIST.toString(), toJSONArray(minimumAcrPriorityList));
         }
         if (StringUtils.isNotBlank(initiateLoginUri)) {
             function.apply(INITIATE_LOGIN_URI.toString(), initiateLoginUri);

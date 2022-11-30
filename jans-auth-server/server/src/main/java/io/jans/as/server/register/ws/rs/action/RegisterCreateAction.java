@@ -100,6 +100,8 @@ public class RegisterCreateAction {
         Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
+            log.trace("Registration request = {}", requestParams);
+
             final JSONObject requestObject = registerService.parseRequestObjectWithoutValidation(requestParams);
             final JSONObject softwareStatement = registerValidator.validateSoftwareStatement(httpRequest, requestObject);
             overrideRequestObjectFromSoftwareStatement(requestObject, softwareStatement);
@@ -112,7 +114,6 @@ public class RegisterCreateAction {
 
             log.info("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, defaultAcrValues = {}",
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
-            log.trace("Registration request = {}", requestParams);
 
             registerValidator.validatePasswordGrantType(r);
             registerValidator.validateDcrAuthorizationWithClientCredentials(r);

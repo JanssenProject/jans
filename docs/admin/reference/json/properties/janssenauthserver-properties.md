@@ -1,12 +1,12 @@
 ---
 tags:
-  - administration
-  - reference
-  - json
-  - properties
+- administration
+- reference
+- json
+- properties
 ---
 
-# jans-auth-server Configuration Properties
+# Janssen Auth Server Configuration Properties
 
 | Property Name | Description |  | 
 |-----|-----|-----|
@@ -2075,7 +2075,7 @@ tags:
 
 ### returnDeviceSecretFromAuthzEndpoint
 
-- Description:
+- Description: 
 
 - Required: No
 
@@ -2084,7 +2084,7 @@ tags:
 
 ### rotateDeviceSecret
 
-- Description:
+- Description: 
 
 - Required: No
 
@@ -2237,7 +2237,7 @@ tags:
 
 ### ssaConfiguration
 
-- Description:
+- Description: 
 
 - Required: No
 
@@ -2530,8 +2530,5 @@ tags:
 - Required: No
 
 - Default value: None
-
-
-
 
 
