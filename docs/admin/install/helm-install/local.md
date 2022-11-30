@@ -18,7 +18,7 @@ For local deployments like `minikube` and `MicroK8s` or cloud installations in d
 Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may be increase or decrease.
 
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
-| ----------------- | -------- | ----- | ---------- | -------------- | ---------------------------------- |
+|-------------------|----------|-------|------------|----------------|------------------------------------|
 | Auth server       | 2.5      | 2.5GB | N/A        | 64 Bit         | Yes                                |
 | LDAP (OpenDJ)     | 1.5      | 2GB   | 10GB       | 64 Bit         | Only if couchbase is not installed |
 | fido2             | 0.5      | 0.5GB | N/A        | 64 Bit         | No                                 |

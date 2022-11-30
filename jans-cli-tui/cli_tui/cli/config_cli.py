@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
-import sys
 import os
+import sys
+
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+pylib_dir = os.path.join(cur_dir, 'pylib')
+if os.path.exists(pylib_dir):
+    sys.path.insert(0, pylib_dir)
+
 import json
 import re
 import urllib3
@@ -37,10 +43,7 @@ home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
-cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
-
-
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 plugins = []
@@ -204,13 +207,19 @@ if not(host and (client_id and client_secret or access_token)):
         if config['DEFAULT'].get(secret_key_str):
             client_secret = config['DEFAULT'][secret_key_str]
         elif config['DEFAULT'].get(secret_enc_key_str):
-            client_secret_enc = config['DEFAULT'][secret_enc_key_str]
-            client_secret = unobscure(client_secret_enc)
+            try:
+                client_secret_enc = config['DEFAULT'][secret_enc_key_str]
+                client_secret = unobscure(client_secret_enc)
+            except Exception:
+                pass
 
-        if 'access_token' in config['DEFAULT']:
+        if 'access_token' in config['DEFAULT'] and config['DEFAULT']['access_token'].strip():
             access_token = config['DEFAULT']['access_token']
-        elif 'access_token_enc' in config['DEFAULT']:
-            access_token = unobscure(config['DEFAULT']['access_token_enc'])
+        elif 'access_token_enc' in config['DEFAULT'] and config['DEFAULT']['access_token_enc'].strip():
+            try:
+                access_token = unobscure(config['DEFAULT']['access_token_enc'])
+            except Exception:
+                pass
 
         debug = config['DEFAULT'].get('debug')
         log_dir = config['DEFAULT'].get('log_dir', log_dir)
@@ -358,6 +367,10 @@ class JCA_CLI:
         if not access_token:
             access_token = self.access_token
 
+        user = self.get_user_info()
+        if 'inum' in user:
+            headers['User-inum'] = user['inum']
+
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
         ret_val.update(headers)
         return ret_val
@@ -459,8 +472,9 @@ class JCA_CLI:
 
     def check_access_token(self):
 
-        if not self.access_token :
-            print(self.colored_text("Access token was not found.", warning_color))
+        if not self.access_token:
+            if not self.wrapped:
+                print(self.colored_text("Access token was not found.", warning_color))
             return
 
         try:
@@ -472,9 +486,9 @@ class JCA_CLI:
                              }
                     )
         except Exception as e:
-            print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
-            self.access_token = None
-
+            if not self.wrapped:
+                print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
+                self.access_token = None
 
     def validate_date_time(self, date_str):
         try:
@@ -672,7 +686,7 @@ class JCA_CLI:
     def get_access_token(self, scope):
         if self.use_test_client:
             self.get_scoped_access_token(scope)
-        elif not self.access_token:
+        elif not self.access_token and not self.wrapped:
             self.check_access_token()
             self.get_jwt_access_token()
         return True, ''

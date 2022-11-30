@@ -1,65 +1,29 @@
-import json
-from asyncio import Future
-from typing import OrderedDict
-
-from prompt_toolkit.widgets import Button, TextArea
-from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
     VSplit,
     DynamicContainer,
 )
-from prompt_toolkit.key_binding import KeyBindings
-
-from prompt_toolkit.widgets import (
-    Button,
-    Label,
-    TextArea,
-
-)
-from asyncio import ensure_future
-
-from prompt_toolkit.widgets import (
-    Button,
-    Dialog,
-    VerticalLine,
-)
-from cli import config_cli
 from prompt_toolkit.layout.containers import (
-    ConditionalContainer,
-    Float,
     HSplit,
     VSplit,
-    VerticalAlign,
     DynamicContainer,
-    FloatContainer,
-    Window,
-    AnyContainer
 )
 from prompt_toolkit.widgets import (
     Box,
     Button,
-    Frame,
     Label,
-    RadioList,
-    TextArea,
+    Dialog,
  )
-
 import cli_style
 from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import DialogResult
-from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_nav_bar import JansNavBar
-from wui_components.jans_side_nav_bar import JansSideNavBar
-from wui_components.jans_dialog import JansDialog
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_drop_down import DropDownWidget
 
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.dimension import AnyDimension
-from typing import Optional, Sequence, Union
-from typing import TypeVar, Callable
+from typing import Optional, Sequence
+from typing import Callable
 
 class ViewUMADialog(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details
@@ -81,8 +45,8 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             parent (widget): This is the parent widget for the dialog
             title (str): The Main dialog title
             data (list): selected line data 
-            button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
-            save_handler (method, optional): handler invoked when closing the dialog. Defaults to None.
+            buttons (list, optional): Dialog main buttons with their handlers. Defaults to [].
+            deleted_uma (method, optional): handler invoked when Deleting UMA-res Defaults to None.
         """
         super().__init__(parent, title, buttons)
         self.data = data
@@ -212,5 +176,11 @@ class ViewUMADialog(JansGDialog, DialogUtils):
             self.oauth_main_area = self.UMA_containers[selection]
         
     def __pt_container__(self)-> Dialog:
+        """The container for the dialog itself
+
+        Returns:
+            Dialog: View Property
+        """
+
         return self.dialog
 

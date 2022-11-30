@@ -1,28 +1,17 @@
-import os
-import sys
 import asyncio
-import time
-
 from collections import OrderedDict
 from functools import partial
 from typing import Any
-
-from prompt_toolkit.application.current import get_app
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Frame, Box, Dialog
+from prompt_toolkit.widgets import Button, Label, Box, Dialog
 from prompt_toolkit.application import Application
-
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
-
-
 from utils.multi_lang import _
 from utils.utils import DialogUtils
-
-import cli_style
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -34,7 +23,7 @@ class Plugin(DialogUtils):
         """init for Plugin class "fido"
 
         Args:
-            app (_type_): _description_
+            app (Generic): The main Application class
         """
         self.app = app
         self.pid = 'fido'
@@ -48,11 +37,14 @@ class Plugin(DialogUtils):
         pass
 
     def init_plugin(self) -> None:
+        """The initialization for this plugin
+        """
 
         self.app.create_background_task(self.get_fido_configuration())
 
-
     def edit_requested_party(self, **kwargs: Any) -> None:
+        """This method for editing the requested party
+        """
         title = _("Enter Request Party Properties")
         schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedParty')
         cur_data = kwargs.get('passed', ['', ''])
@@ -74,9 +66,28 @@ class Plugin(DialogUtils):
         dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons, width=self.app.dialog_width-20)
         self.app.show_jans_dialog(dialog)
 
-
     def delete_requested_party(self, **kwargs: Any) -> None:
-        self.requested_parties_container.remove_item(kwargs['selected'])
+        """This method for deleting the requested party
+        """
+        
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete requested patry:")+"\n {} ?".format(kwargs['selected'][1]))
+
+        async def coroutine():
+            focused_before = self.app.layout.current_window
+            result = await self.app.show_dialog_as_float(dialog)
+            try:
+                self.app.layout.focus(focused_before)
+            except:
+                self.app.stop_progressing()
+                self.app.layout.focus(self.app.center_frame)
+
+            if result.lower() == 'yes':
+                self.requested_parties_container.remove_item(kwargs['selected'])
+                self.app.stop_progressing()
+                
+            return result
+
+        asyncio.ensure_future(coroutine())
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/AppConfiguration')
@@ -188,7 +199,6 @@ class Plugin(DialogUtils):
 
         self.nav_selection_changed(list(self.tabs)[0])
 
-
     async def get_fido_configuration(self) -> None:
         'Coroutine for getting fido2 configuration.'
         try:
@@ -253,8 +263,9 @@ class Plugin(DialogUtils):
         else:
             self.main_area = self.app.not_implemented
 
-
     def save_config(self) -> None:
+        """This method for saving the configuration
+        """
 
         fido2_config = self.make_data_from_dialog(tabs={'configuration': self.tabs['configuration']})
         fido2_static = self.make_data_from_dialog(tabs={'static': self.tabs['static']})
@@ -275,7 +286,6 @@ class Plugin(DialogUtils):
             self.app.stop_progressing()
 
         asyncio.ensure_future(coroutine())
-
 
     def set_center_frame(self) -> None:
         """center frame content

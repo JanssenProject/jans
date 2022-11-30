@@ -204,7 +204,7 @@ def merge_jans_cli_ctx(manager, ctx):
     # - move the configs and secrets creation to configurator
     # - remove them on future release
 
-    # jans-cli client
+    # jans-cli-tui client
     ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
     if not ctx["role_based_client_id"]:
         ctx["role_based_client_id"] = f"2000.{uuid4()}"
