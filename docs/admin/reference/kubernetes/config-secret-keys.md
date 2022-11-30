@@ -37,6 +37,7 @@ kubectl get secret -n jans -o yaml
 | `auth_openidScopeBackwardCompatibility`       | `false`                                            |
 | `auth_sig_keys`                               | `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`|
 | `city`                                        | `Austin`                                           |
+| `couchbaseTrustStoreFn`                       | `/etc/certs/couchbase.pkcs12`                      |
 | `country_code`                                | `US`                                               |
 | `default_openid_jks_dn_name`                  | `CN=Janssen Auth CA Certificates`                  |
 | `hostname`                                    | `demoexample.jans.io`                              |
@@ -61,6 +62,9 @@ kubectl get secret -n jans -o yaml
 | `auth_jks_base64`                         | base64                  |                                   |
 | `auth_openid_jks_pass`                    | base64                  |                                   |
 | `auth_openid_key_base64`                  | base64                  |                                   |
+| `couchbase_password`                      | base64                  |                                   |
+| `couchbase_shib_user_password`            | base64                  |                                   |
+| `couchbase_superuser_password`            | base64                  |                                   |
 | `encoded_admin_password`                  | ldap_encode + base64    |                                   |
 | `encoded_ldapTrustStorePass`              | pyDes + base64          |                                   |
 | `encoded_ox_ldap_pw`                      | pyDes + base64          |                                   |
