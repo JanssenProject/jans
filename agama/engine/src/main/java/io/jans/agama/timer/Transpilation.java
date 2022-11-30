@@ -158,7 +158,7 @@ public class Transpilation {
 
             String error = null, shortError = null;
             try {
-                TranspilationResult result = Transpiler.transpile(qname, map.keySet(), fl.getSource());
+                TranspilationResult result = Transpiler.transpile(qname, fl.getSource());
                 logger.debug("Successful transpilation");
                 
                 FlowMetadata meta = fl.getMetadata();

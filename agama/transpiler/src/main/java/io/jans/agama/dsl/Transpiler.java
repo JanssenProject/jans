@@ -60,7 +60,6 @@ public class Transpiler {
     private final Logger logger = LoggerFactory.getLogger(Transpiler.class);
 
     private String flowId;
-    private Set<String> flowNames;
     private String fanny;
 
     private Processor processor;
@@ -89,18 +88,13 @@ public class Transpiler {
 
     }
     
-    public Transpiler(String flowQName, Set<String> flowQNames) throws TranspilerException {
+    public Transpiler(String flowQName) throws TranspilerException {
 
         if (flowQName == null)
             throw new TranspilerException("Qualified name cannot be null", new NullPointerException());
         
         this.flowId = flowQName;
         fanny = "_" + flowQName.replaceAll("\\.", "_");    //Generates a valid JS function name
-        
-        if (flowQNames != null) {
-            flowNames = new HashSet(flowQNames);
-            flowNames.remove(flowQName);
-        }
 
         processor = new Processor(false);
         xpathCompiler = processor.newXPathCompiler();
@@ -212,8 +206,7 @@ public class Transpiler {
         try {
             XdmNode node = doc.toXdmNode(processor);
             
-            //Ensure only existing flows are referenced
-            checkUnknownInvocation(flowNames, node);
+            checkAutoInvocations(node);
             checkInputsUniqueness(node);
         } catch (SaxonApiException se) {
             throw new TranspilerException("Validation failed", se);
@@ -229,21 +222,13 @@ public class Transpiler {
 
     }
 
-    private void checkUnknownInvocation(Set<String> known, XdmNode node) 
-            throws TranspilerException, SaxonApiException {
-        
-        if (known != null) {
-            List<String> invocations = xpathCompiler.evaluate(Visitor.FLOWCALL_XPATH_EXPR, node)
-                    .stream().map(XdmItem::getStringValue).collect(Collectors.toList());
+    private void checkAutoInvocations(XdmNode node) throws TranspilerException, SaxonApiException {
+    
+        Set<String> invocations = xpathCompiler.evaluate(Visitor.FLOWCALL_XPATH_EXPR, node)
+                .stream().map(XdmItem::getStringValue).collect(Collectors.toSet());
 
-            for (String t : invocations) {
-                if (t.equals(flowId))
-                    throw new TranspilerException("A flow cannot trigger an instance of itself");
-                
-                if (!known.contains(t))
-                    throw new TranspilerException("Invocation of unknown element '" + t + "'");                
-            }
-        }
+        if (invocations.contains(flowId))
+            throw new TranspilerException("A flow must not trigger an instance of itself");            
 
     }
 
@@ -278,19 +263,16 @@ public class Transpiler {
      * Transpiles the input source code to code runnable by Agama flow engine in the
      * form of a Javascript function
      * @param flowQname Qualified name of the input flow
-     * @param flowQNames A list of known flow names. This is used to validate which flows can be
-     * triggered from the input flow (Trigger directive). Passing null disables the validation.
-     * Passing an empty list will make validation fail if any Trigger directive is found
      * @param source Source code of input flow (written using Agama DSL)
      * @return A TranspilerResult object holding the details of the generated function      
      * @throws SyntaxException When the input source has syntactic errors, details are contained
      * in the exception thrown
      * @throws TranspilerException When other kind of processing error occurred.
      */
-    public static TranspilationResult transpile(String flowQname, Set<String> flowQNames, String source)
+    public static TranspilationResult transpile(String flowQname, String source)
             throws TranspilerException, SyntaxException {
 
-        Transpiler tr = new Transpiler(flowQname, flowQNames);
+        Transpiler tr = new Transpiler(flowQname);
         try {
             XdmNode doc = tr.asXML(source);
             
@@ -306,36 +288,29 @@ public class Transpiler {
         }
 
     }
-    
+
     public static void runSyntaxCheck(String flowQname, String source)
             throws SyntaxException, TranspilerException {
 
-        Transpiler tr = new Transpiler(flowQname, null);
+        Transpiler tr = new Transpiler(flowQname);
         tr.validateName(tr.getFlowContext(source));
     }
-    
+
     public static void runSyntaxCheck(String source) throws SyntaxException, TranspilerException {
-        Transpiler tr = new Transpiler("", null);
+        Transpiler tr = new Transpiler("");
         tr.getFlowContext(source);
     }
 
     public static void main(String... args) throws Exception {
-        
-        Set<String> knownFlows = null;
+
         int len = args.length;
         
-        if (len < 2) {
-            System.err.println("Expecting at least 2 params: input file path and flow ID");
+        if (len != 2) {
+            System.err.println("Expecting 2 params: input file path and flow ID");
             return;
-        } else if (len > 2) {
-
-            knownFlows = new HashSet<>();
-            for (int i = 3; i < len; i++) {
-                knownFlows.add(args[i]);
-            }
         }
 
-        Transpiler tr = new Transpiler(args[1], knownFlows);
+        Transpiler tr = new Transpiler(args[1]);
         String dslCode = new String(Files.readAllBytes(Paths.get(args[0])), UTF_8);
         
         XdmNode doc = tr.asXML(dslCode);
