@@ -69,5 +69,18 @@ public class ApiAccessConstants {
     public static final String JANS_AUTH_SESSION_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/session.readonly";
     public static final String JANS_AUTH_SESSION_DELETE_ACCESS = "https://jans.io/oauth/jans-auth-server/session.delete";
     public static final String JANS_AUTH_REVOKE_SESSION  = "revoke_session";
-
+    
+    // Super Scopes
+    public static final String SUPER_ADMIN_READ_ACCESS  = "https://jans.io/oauth/config/read-all";
+    public static final String SUPER_ADMIN_WRITE_ACCESS  = "https://jans.io/oauth/config/write-all";
+    public static final String SUPER_ADMIN_DELETE_ACCESS  = "https://jans.io/oauth/config/delete-all";
+    
+    // Feature Scope
+    public static final String OPENID_READ_ACCESS  = "https://jans.io/oauth/config/openid-read";
+    public static final String OPENID_WRITE_ACCESS = "https://jans.io/oauth/config/openid/openid-write";
+    public static final String OPENID_DELETE_ACCESS = "https://jans.io/oauth/config/openid/openid-delete";
+    
+    public static final String UMA_READ_ACCESS  = "https://jans.io/oauth/config/uma-read";
+    public static final String UMA_WRITE_ACCESS = "https://jans.io/oauth/config/uma-write";
+    public static final String UMA_DELETE_ACCESS = "https://jans.io/oauth/config/uma-delete";
 }

@@ -58,7 +58,8 @@ public class JwksResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JWKS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response get() {
         final String json = configurationService.findConf().getWebKeys().toString();
         log.debug("JWKS json :{}", json);
@@ -74,7 +75,7 @@ public class JwksResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response put(WebKeysConfiguration webkeys) {
         log.debug("JWKS details to be updated - webkeys:{}", webkeys);
         final Conf conf = configurationService.findConf();
@@ -94,7 +95,7 @@ public class JwksResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patch(String requestString) throws JsonPatchException, IOException {
         log.debug("JWKS details to be patched - requestString:{}", requestString);
         final Conf conf = configurationService.findConf();
@@ -116,7 +117,7 @@ public class JwksResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.KEY_PATH)
     public Response getKeyById(@NotNull JSONWebKey jwk) {
         log.debug("Add a new Key to the JWKS:{}", jwk);
@@ -145,7 +146,8 @@ public class JwksResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.JWKS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response getKeyById(@PathParam(ApiConstants.KID) @NotNull String kid) {
         log.debug("Fetch JWK details by kid:{}", kid);
@@ -166,7 +168,7 @@ public class JwksResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response patch(@PathParam(ApiConstants.KID) @NotNull String kid, @NotNull String requestString)
             throws JsonPatchException, IOException {
@@ -201,7 +203,7 @@ public class JwksResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JWKS_DELETE_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response deleteKey(@PathParam(ApiConstants.KID) @NotNull String kid) {
         log.debug("Key to be to be deleted - kid:{}", kid);
