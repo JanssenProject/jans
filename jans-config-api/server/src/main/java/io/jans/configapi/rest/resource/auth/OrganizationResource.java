@@ -49,7 +49,8 @@ public class OrganizationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getOrganization() {
         return Response.ok(organizationService.getOrganization()).build();
     }
@@ -64,7 +65,7 @@ public class OrganizationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS }, groupScopes = { }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchOrganization(@NotNull String pathString) throws JsonPatchException, IOException {
         logger.trace("Organization patch request - pathString:{} ", pathString);
         GluuOrganization organization = organizationService.getOrganization();

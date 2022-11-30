@@ -8,6 +8,7 @@ package io.jans.configapi.security.service;
 
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
 
@@ -23,6 +24,7 @@ import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +61,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     ExternalInterceptionService externalInterceptionService;
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path) throws Exception {
+            String path) throws WebApplicationException, Exception {
         logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
@@ -122,7 +124,14 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 tokenScopes, resourceInfo, issuer);
         try {
             // Get resource scope
-            List<String> resourceScopes = getRequestedScopes(resourceInfo);
+            Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
+            List<String> resourceScopes = getAllScopeList(resourceScopesByType);
+            logger.debug("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
+                    resourceScopes);
+
+            // find missing scopes
+            List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
+            logger.debug("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
@@ -131,7 +140,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             // If No auth scope required OR if token contains the authSpecificScope
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
                 logger.debug("Validating token scopes as no authSpecificScope required");
-                if (!validateScope(tokenScopes, resourceScopes)) {
+                if ((missingScopes != null && !missingScopes.isEmpty())) {
                     logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
                     throw new WebApplicationException("Insufficient scopes! , Required scope: " + resourceScopes
@@ -140,10 +149,6 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 }
                 return AUTHENTICATION_SCHEME + accessToken;
             }
-
-            // find missing scopes
-            List<String> missingScopes = findMissingElements(resourceScopes, tokenScopes);
-            logger.debug("missingScopes:{}", missingScopes);
 
             // If only authSpecificScope missing then proceed with token creation else throw
             // error
@@ -178,8 +183,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (Exception ex) {
-            if (log.isErrorEnabled()) {
-                log.error("oAuth authorization error:{} ", ex.getMessage());
+            if (logger.isErrorEnabled()) {
+                logger.error("oAuth authorization error:{} ", ex.getMessage());
             }
             throw new WebApplicationException("oAuth authorization error " + ex.getMessage(),
                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
@@ -198,6 +203,54 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         JSONObject responseAsJsonObject = Jackson.createJSONObject(requestParameters);
         return externalInterceptionService.authorization(request, response,
                 this.configurationFactory.getApiAppConfiguration(), requestParameters, responseAsJsonObject);
+    }
+
+    private List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
+        logger.debug("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        List<String> scopeList = new ArrayList<>();
+        if (tokenScopes == null || tokenScopes.isEmpty() || scopeMap == null || scopeMap.isEmpty()) {
+            return scopeList;
+        }
+
+        // Super scope
+        scopeList = scopeMap.get(ProtectionScopeType.SUPER);
+        logger.debug("SUPER Scopes:{}", scopeList);
+        List<String> missingScopes = null;
+        boolean containsScope = false;
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // check if token contains any of the super scopes
+            containsScope = containsAnyElement(scopeList, tokenScopes);
+            logger.debug("Token contains SUPER scopes?:{}", containsScope);
+
+            // Super scope present so no need to check other types of scope
+            if (containsScope) {
+                return missingScopes;
+            }
+        }
+
+        // Group scope present so no need to check normal scope presence
+        scopeList = scopeMap.get(ProtectionScopeType.GROUP);
+        logger.debug("GROUP Scopes:{}", scopeList);
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // check if token contains any of the group scopes
+            containsScope = containsAnyElement(scopeList, tokenScopes);
+            logger.debug("Token contains GROUP scopes?:{}", containsScope);
+
+			// Group scope present so no need to check normal scope
+            if (containsScope) {
+                return missingScopes;
+            }
+        }
+
+        // Normal scope
+        scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
+        logger.debug("SCOPE Scopes:{}", scopeList);
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // check if token contains all the required scopes
+            missingScopes = findMissingElements(scopeList, tokenScopes);
+            logger.debug("SCOPE Missing Scopes:{}", missingScopes);
+        }
+        return missingScopes;
     }
 
 }
