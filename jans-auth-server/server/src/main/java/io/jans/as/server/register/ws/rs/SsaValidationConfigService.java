@@ -8,6 +8,7 @@ import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.model.ssa.SsaValidationConfig;
 import io.jans.as.model.ssa.SsaValidationType;
@@ -155,19 +156,19 @@ public class SsaValidationConfigService {
 
         for (SsaValidationConfig config : byIssuer) {
             if (isHmac && isHmacValid(ssa, config)) {
-                return prepareSsaJsonObject(ssa, config);
+                return prepareSsaJsonObject(ssa.getClaims(), config);
             }
 
             if (!isHmac && isSignatureValid(ssa, config)) {
-                return prepareSsaJsonObject(ssa, config);
+                return prepareSsaJsonObject(ssa.getClaims(), config);
             }
         }
 
         return null;
     }
 
-    private JSONObject prepareSsaJsonObject(Jwt ssa, SsaValidationConfig config) throws InvalidJwtException {
-        final JSONObject result = ssa.getClaims().toJsonObject();
+    public JSONObject prepareSsaJsonObject(JwtClaims ssa, SsaValidationConfig config) throws InvalidJwtException {
+        final JSONObject result = ssa.toJsonObject();
         if (!config.getScopes().isEmpty()) {
             log.trace("Set scopes from ssaValidationConfig: {}", config);
             result.putOpt(RegisterRequestParam.SCOPE.toString(), implode(config.getScopes(), " "));

@@ -24,6 +24,7 @@
             <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidatorTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImplTest" />
+            <class name="io.jans.as.server.register.ws.rs.SsaValidationConfigServiceTest" />
             <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
         </classes>
     </test>
