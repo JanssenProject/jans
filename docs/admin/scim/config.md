@@ -84,7 +84,7 @@ Get patch schema and modify it. It should be an array.
 ]
 ```
 
-Now update **SCIM** configuration 
+Now update **SCIM** configuration using below command.
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id patch-scim-config --data pathc-scim.json
