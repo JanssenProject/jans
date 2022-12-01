@@ -6,6 +6,8 @@ on:
     types:
       - opened
       - edited
+    branches:
+      - main
   issues:
     types:
       - opened

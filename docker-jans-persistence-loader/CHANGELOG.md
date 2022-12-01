@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.5-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.4-1...docker-jans-persistence-loader-v1.0.5-1) (2022-12-01)
+
+
+### Features
+
+* **image:** preserve attribute's values in jans-auth config ([#3013](https://github.com/JanssenProject/jans/issues/3013)) ([3e9e7fc](https://github.com/JanssenProject/jans/commit/3e9e7fc56c8d7890920d5e99f8c28f291afcf207))
+* jans cli to jans-cli-tui ([#3063](https://github.com/JanssenProject/jans/issues/3063)) ([fc20e28](https://github.com/JanssenProject/jans/commit/fc20e287feb4cc1b7bb983c44e25a8ae936580f0))
+* **jans-pycloudlib:** add AWS Secrets Manager support for configuration layers ([#3112](https://github.com/JanssenProject/jans/issues/3112)) ([0522e61](https://github.com/JanssenProject/jans/commit/0522e61809b9052adce4fdb0db77e2d71558144e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+
 ## [1.0.4-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.3-1...docker-jans-persistence-loader-v1.0.4-1) (2022-11-08)
 
 

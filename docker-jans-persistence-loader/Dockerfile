@@ -24,7 +24,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=fc20e287feb4cc1b7bb983c44e25a8ae936580f0
+ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_DOCS=jans-config-api/docs
@@ -172,7 +172,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL name="janssenproject/persistence-loader" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.5" \
+    version="1.0.6" \
     release="dev" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"

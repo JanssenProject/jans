@@ -16,19 +16,11 @@
         "client_credentials"
     ],
     "applicationType": "web",
-    "clientName": {
-        "values": {
-            "": "Jans Config Api Client"
-        },
-        "value": "Jans Config Api Client",
-        "languageTags": [
-            ""
-        ]
-    },
-    "logoUri": {},
-    "clientUri": {},
-    "policyUri": {},
-    "tosUri": {},
+    "clientName": "Jans Config Api Client",
+    "logoUri": "",
+    "clientUri": "",
+    "policyUri": "",
+    "tosUri": "",
     "subjectType": "pairwise",
     "idTokenSignedResponseAlg": "RS256",
     "tokenEndpointAuthMethod": "client_secret_basic",

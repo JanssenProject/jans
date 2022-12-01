@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.5 (2022-12-01)
+
+
+### Features
+
+* add jans cli tui ([#2384](https://github.com/JanssenProject/jans/issues/2384)) ([c9c502b](https://github.com/JanssenProject/jans/commit/c9c502b5328677bd3ef4895acf296aa3e05bb333))
+* jans cli to jans-cli-tui ([#3063](https://github.com/JanssenProject/jans/issues/3063)) ([fc20e28](https://github.com/JanssenProject/jans/commit/fc20e287feb4cc1b7bb983c44e25a8ae936580f0))
+
+
+### Bug Fixes
+
+* client-name, logout, user ([#3122](https://github.com/JanssenProject/jans/issues/3122)) ([f374831](https://github.com/JanssenProject/jans/commit/f3748312dc72288d9eea9cf1efba8f2afb5278a9))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* jans-cli-docs update links ([#3118](https://github.com/JanssenProject/jans/issues/3118)) ([04fbb98](https://github.com/JanssenProject/jans/commit/04fbb982324cf8849eb3cfac6800f917c63d5300))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
 ## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-cli-v1.0.3...jans-cli-v1.0.4) (2022-11-08)
 
 

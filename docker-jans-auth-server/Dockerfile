@@ -55,8 +55,8 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.5-SNAPSHOT
-ENV CN_BUILD_DATE='2022-11-17 15:11'
+ENV CN_VERSION=1.0.6-SNAPSHOT
+ENV CN_BUILD_DATE='2022-12-01 12:38'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -96,7 +96,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIE
 # Casa external scripts
 # =====================
 
-ARG FLEX_SOURCE_VERSION=88ebb5ea1f36d831b5a0f1ced2f9cfc66176663a
+ARG FLEX_SOURCE_VERSION=48418cd351655a48c650075a6d60601c368a403d
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=fc20e287feb4cc1b7bb983c44e25a8ae936580f0
+ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -260,7 +260,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/auth-server" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.5" \
+    version="1.0.6" \
     release="dev" \
     summary="Janssen Authorization Server" \
     description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"

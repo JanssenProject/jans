@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-scim</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.5-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>SCIM API</name>
 	<url>http://www.gluu.org</url>
     <distributionManagement>
