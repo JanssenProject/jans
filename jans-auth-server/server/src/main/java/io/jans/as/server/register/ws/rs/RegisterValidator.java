@@ -19,6 +19,7 @@ import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.ssa.SsaValidationType;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Pair;
 import io.jans.as.server.ciba.CIBARegisterParamsValidatorService;
@@ -27,11 +28,6 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -39,6 +35,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
@@ -75,6 +75,9 @@ public class RegisterValidator {
     @Inject
     private RegisterParamsValidator registerParamsValidator;
 
+    @Inject
+    private SsaValidationConfigService ssaValidationConfigService;
+
     public void validateNotBlank(String input, String errorReason) {
         if (StringUtils.isBlank(input)) {
             log.trace("Failed to perform client action, reason: {}", errorReason);
@@ -90,23 +93,12 @@ public class RegisterValidator {
 
             final Jwt jwt = Jwt.parseOrThrow(requestParams);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
+            final SsaValidationConfigContext ssaContext = new SsaValidationConfigContext(jwt, SsaValidationType.DCR);
 
             final boolean isHmac = AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily());
             if (isHmac) {
-                String hmacSecret = appConfiguration.getDcrSignatureValidationSharedSecret();
-                if (StringUtils.isBlank(hmacSecret)) {
-                    hmacSecret = externalDynamicClientRegistrationService.getDcrHmacSecret(httpRequest, jwt);
-                }
-                if (StringUtils.isBlank(hmacSecret)) {
-                    log.error("No hmacSecret provided in Dynamic Client Registration script (method getDcrHmacSecret didn't return actual secret). ");
-                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
-                }
-
-                boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null, null, hmacSecret, signatureAlgorithm);
-                log.trace("Request object validation result: {}", validSignature);
-                if (!validSignature) {
-                    throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
-                }
+                validateRequestObjectHmac(httpRequest, ssaContext);
+                return;
             }
 
             String jwksUri = null;
@@ -126,14 +118,63 @@ public class RegisterValidator {
                     jwt.getEncodedSignature(), jwt.getHeader().getKeyId(), jwks, null, signatureAlgorithm);
 
             log.trace("Request object validation result: {}", validSignature);
-            if (!validSignature) {
-                throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
+            if (validSignature) {
+                return;
             }
+
+            if (validateRequestObjectSignatureWithSsaValidationConfigs(requestParams)) {
+                return;
+            }
+
+            throw new InvalidJwtException("Invalid request object.");
         } catch (Exception e) {
+            if (validateRequestObjectSignatureWithSsaValidationConfigs(requestParams)) {
+                return;
+            }
+
             final String msg = "Unable to validate request object JWT.";
             log.error(msg, e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, msg);
         }
+    }
+
+    private boolean validateRequestObjectSignatureWithSsaValidationConfigs(String requestParams) {
+        try {
+            final SsaValidationConfigContext ssaContext = new SsaValidationConfigContext(Jwt.parseOrThrow(requestParams), SsaValidationType.DCR);
+            final boolean valid = ssaValidationConfigService.hasValidSignature(ssaContext);
+            log.trace("Request object validation result for ssaValidationConfigs: {}", valid);
+            if (valid) {
+                log.trace("Request object successfully validated by ssaValidationConfig: {}", ssaContext.getSuccessfulConfig());
+                return true;
+            }
+        } catch (InvalidJwtException e) {
+            log.error("Unable to validate request object JWT.", e);
+        }
+        return false;
+    }
+
+    private void validateRequestObjectHmac(HttpServletRequest httpRequest, SsaValidationConfigContext ssaContext) throws CryptoProviderException, InvalidJwtException {
+        final Jwt jwt = ssaContext.getJwt();
+
+        if (ssaValidationConfigService.isHmacValid(ssaContext)) {
+            log.trace("Request object successfully validated by ssaValidationConfig: {}", ssaContext.getSuccessfulConfig());
+            return;
+        }
+        String hmacSecret = appConfiguration.getDcrSignatureValidationSharedSecret();
+        if (StringUtils.isBlank(hmacSecret)) {
+            hmacSecret = externalDynamicClientRegistrationService.getDcrHmacSecret(httpRequest, jwt);
+        }
+        if (StringUtils.isBlank(hmacSecret)) {
+            log.error("No hmacSecret provided in Dynamic Client Registration script (method getDcrHmacSecret didn't return actual secret). ");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
+        }
+
+        boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null, null, hmacSecret, jwt.getHeader().getSignatureAlgorithm());
+        log.trace("Request object validation result: {}", validSignature);
+        if (validSignature) {
+            return;
+        }
+        throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
     }
 
     @Nullable
@@ -179,6 +220,8 @@ public class RegisterValidator {
             final SignatureAlgorithm signatureAlgorithm = softwareStatement.getHeader().getSignatureAlgorithm();
 
             final SoftwareStatementValidationType validationType = SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
+            printWarningIfNeeded(validationType);
+
             if (validationType == SoftwareStatementValidationType.NONE) {
                 log.trace("software_statement validation was skipped due to `softwareStatementValidationType` configuration property set to none. (Not recommended.)");
                 return softwareStatement.getClaims().toJsonObject();
@@ -186,6 +229,10 @@ public class RegisterValidator {
 
             if (validationType == SoftwareStatementValidationType.SCRIPT) {
                 return validateSoftwareStatementForScript(httpServletRequest, requestObject, softwareStatement, signatureAlgorithm);
+            }
+
+            if (validationType == SoftwareStatementValidationType.BUILTIN) {
+                return ssaValidationConfigService.validateSsaForBuiltIn(softwareStatement);
             }
 
             if ((validationType == SoftwareStatementValidationType.JWKS_URI ||
@@ -229,6 +276,13 @@ public class RegisterValidator {
             log.error(msg, e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
         }
+    }
+
+    private void printWarningIfNeeded(SoftwareStatementValidationType validationType) {
+        if (validationType == SoftwareStatementValidationType.SCRIPT || validationType == SoftwareStatementValidationType.BUILTIN) {
+            return;
+        }
+        log.warn("It is strongly recommended to use SCRIPT or BUILTIN value for softwareStatementValidationType configuration property.");
     }
 
     @Nullable
