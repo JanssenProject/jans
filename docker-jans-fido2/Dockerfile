@@ -34,7 +34,7 @@ EXPOSE 8080
 # FIDO2
 # =====
 
-ENV CN_VERSION=1.0.5
+ENV CN_VERSION=1.0.6-SNAPSHOT
 ENV CN_BUILD_DATE='2022-12-01 12:39'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -214,8 +214,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/fido2" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.5" \
-    release="1" \
+    version="1.0.6" \
+    release="dev" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"
 

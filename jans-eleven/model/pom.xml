@@ -9,7 +9,7 @@
 	<parent>
 		<artifactId>jans-eleven-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.0.5</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 	
 	<dependencies>

@@ -16,7 +16,7 @@ services:
       - MYSQL_PASSWORD=1t5Fin3#security
       - MYSQL_ROOT_PASSWORD=1t5Fin3#security
   jans:
-    image: janssenproject/monolith:1.0.5_dev
+    image: janssenproject/monolith:1.0.6_dev
     build: .
     restart: always
     ports:

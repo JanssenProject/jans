@@ -31,7 +31,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/config-api
   # -- Image  tag to use for deploying.
-  tag: 1.0.5-1
+  tag: 1.0.6_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
