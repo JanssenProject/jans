@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.4...jans-auth-server-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+* documentation for ssa and remove softwareRoles query param of get ssa ([#3031](https://github.com/JanssenProject/jans/issues/3031)) ([d8e14eb](https://github.com/JanssenProject/jans/commit/d8e14ebbeee357c8c2c31808243cf82933ae4a9b))
+* **jans-auth-server:** check offline_access implementation has all conditions defined in spec [#1945](https://github.com/JanssenProject/jans/issues/1945) ([#3004](https://github.com/JanssenProject/jans/issues/3004)) ([af30e4c](https://github.com/JanssenProject/jans/commit/af30e4c438372fffb7a3ac78a6aea5988af43d5f))
+* **jans-auth-server:** corrected GluuOrganization - refactor getOrganizationName() [#2947](https://github.com/JanssenProject/jans/issues/2947) ([#2948](https://github.com/JanssenProject/jans/issues/2948)) ([9275576](https://github.com/JanssenProject/jans/commit/9275576ed0f925fcd3dbaf06e155e7185c797015))
+* **jans-auth-server:** java docs for ssa ([#2995](https://github.com/JanssenProject/jans/issues/2995)) ([892b87a](https://github.com/JanssenProject/jans/commit/892b87a2af5fa82ba4f5dceb38baba28e2029182))
+* **jans-auth-server:** remove redirect uri on client registration when grant types is password or client credentials ([#3076](https://github.com/JanssenProject/jans/issues/3076)) ([cd876b4](https://github.com/JanssenProject/jans/commit/cd876b46e6bbdec865f5cd1cfe40c2f3b2ca293c))
+* **jans-auth-server:** specify minimum acr for clients [#343](https://github.com/JanssenProject/jans/issues/343) ([#3083](https://github.com/JanssenProject/jans/issues/3083)) ([b0034ec](https://github.com/JanssenProject/jans/commit/b0034ec509ace1a4e30a7e9c6dd23dca48178c62))
+* **jans-auth-server:** swagger docs for ssa ([#2953](https://github.com/JanssenProject/jans/issues/2953)) ([7f93bca](https://github.com/JanssenProject/jans/commit/7f93bca9ff101d85f1ae389602f99c7c6af9bc17))
+* **jans-auth-server:** updated mau on refreshing access token [#2955](https://github.com/JanssenProject/jans/issues/2955) ([#3025](https://github.com/JanssenProject/jans/issues/3025)) ([56de619](https://github.com/JanssenProject/jans/commit/56de61974ae0d2a3d8382191c2aae479a062e9b2))
+
+
+### Bug Fixes
+
+* (jans-auth-server): fixed Client serialization/deserialization issue [#2946](https://github.com/JanssenProject/jans/issues/2946) ([#3064](https://github.com/JanssenProject/jans/issues/3064)) ([31b5bfc](https://github.com/JanssenProject/jans/commit/31b5bfc2d626a94998c6e0a1d9121579858437e3))
+* (jans-auth-server): fixed client's sortby [#3075](https://github.com/JanssenProject/jans/issues/3075) ([#3079](https://github.com/JanssenProject/jans/issues/3079)) ([e6b0e58](https://github.com/JanssenProject/jans/commit/e6b0e58c7336c2c6537fb55557527abe09ab0811))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - removing inwebo ([#2975](https://github.com/JanssenProject/jans/issues/2975)) ([052f91f](https://github.com/JanssenProject/jans/commit/052f91fd45c888efb7480fc7cd403dc005ceca23))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-auth-server:** corrected regression made in token request [#2921](https://github.com/JanssenProject/jans/issues/2921) ([#2922](https://github.com/JanssenProject/jans/issues/2922)) ([deeae74](https://github.com/JanssenProject/jans/commit/deeae748aa465e3789114a93eee251628f9d365b))
+* **jans-auth-server:** wrong import in GluuOrganization class which leads to failure on jans-config-api [#2957](https://github.com/JanssenProject/jans/issues/2957) ([#2958](https://github.com/JanssenProject/jans/issues/2958)) ([af4eda8](https://github.com/JanssenProject/jans/commit/af4eda83147b3fb13f3cc97153d6186c7dcdda74))
+* **jans-auth-server:** wrong userinfo_encryption_enc_values_supported in OpenID Configuration [#2725](https://github.com/JanssenProject/jans/issues/2725) ([#2951](https://github.com/JanssenProject/jans/issues/2951)) ([bc1a8ca](https://github.com/JanssenProject/jans/commit/bc1a8ca8b2c7e3b286f2762d9e84205f402cce4a))
+
 ## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.3...jans-auth-server-v1.0.4) (2022-11-08)
 
 
