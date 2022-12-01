@@ -82,6 +82,7 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
       - name: Generate docs
+        continue-on-error: true
         run: |
          echo "Custom work on generating docs can go here."
          # Generate property docs and push to main
