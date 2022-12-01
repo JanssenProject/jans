@@ -6,6 +6,8 @@ on:
     types:
       - opened
       - edited
+    branches-ignore:
+      - "release-please--**"
   issues:
     types:
       - opened
