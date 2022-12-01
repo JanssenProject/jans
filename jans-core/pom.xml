@@ -55,8 +55,8 @@
 		<module>server</module>
 		<module>radius</module>
 		<module>demo-cdi</module>
-		<module>uma-rs-core</module>
 		<module>doc</module>
+		<module>uma-rs-core</module>
 	</modules>
 
 	<dependencyManagement>
