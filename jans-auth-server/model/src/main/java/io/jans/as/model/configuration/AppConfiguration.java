@@ -8,12 +8,12 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
+import io.jans.as.model.ssa.SsaValidationConfig;
 import io.jans.doc.annotation.DocProperty;
 
 import java.util.ArrayList;
@@ -803,8 +803,16 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Engine Config which offers an alternative way to build authentication flows in Janssen server")
     private EngineConfig agamaConfiguration;
 
-    @DocProperty(description = "")
+    @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR")
+    private List<SsaValidationConfig> dcrSsaValidationConfigs;
+
+    @DocProperty(description = "SSA Configuration")
     private SsaConfiguration ssaConfiguration;
+
+    public List<SsaValidationConfig> getDcrSsaValidationConfigs() {
+        if (dcrSsaValidationConfigs == null) dcrSsaValidationConfigs = new ArrayList<>();
+        return dcrSsaValidationConfigs;
+    }
 
     public Boolean getRequireRequestObjectEncryption() {
         if (requireRequestObjectEncryption == null) requireRequestObjectEncryption = false;

@@ -15,6 +15,7 @@ Dynamic client registration refers to the process by which a client submits a re
 1. For OpenID Connect relying parties - [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html).
 1. For OAuth 2.0 client (without OpenID Connect features) - [OAuth 2.0 Dynamic Client Registration Protocol - RFC 7591](https://tools.ietf.org/html/rfc7591).
 1. CRUD operations on client - [OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592](https://tools.ietf.org/html/rfc7592).
+1. [OpenBanking OpenID Dynamic Client Registration](https://openbanking.atlassian.net/wiki/spaces/DZ/pages/36667724/OpenBanking+OpenID+Dynamic+Client+Registration+Specification+-+v1.0.0-rc2#OpenBankingOpenIDDynamicClientRegistrationSpecification-v1.0.0-rc2-ClientRegistrationRequest) 
 
 ### Client Registration endpoint
 The URI to dynamically register a client to a Janssen Auth Server can be found by checking the `registration_endpoint` claim of the OpenID Connect configuration reponse, typically deployed at `https://<my.jans.server>/.well-known/openid-configuration`
@@ -296,6 +297,129 @@ Output:
   "description": "string"
 }
 ```
+
+### Signed DCR and SSA validation
+
+In OpenBanking case DCR (Dynamic Client Request) is signed and must contain SSA (Software Statement Assertion) inside it.
+
+Non-Normative Example:
+```curl
+POST /register HTTP/1.1
+Content-Type: application/jwt
+Accept: application/json
+Host: auth.bankone.com
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
+```
+
+Decoded DCR Example:
+
+```json
+{
+    "typ": "JWT",
+    "alg": "ES256",
+    "kid": "ABCD1234"
+}
+{
+    "iss": "Amazon TPPID",
+    "iat": 1492760444,
+    "exp": 1524296444,
+    "aud": "https://authn.gluu.org",
+    "scope": "openid makepayment",
+    "token_endpoint_auth_method": "private_key_jwt",
+    "grant_types": ["authorization_code", "refresh_token", "client_credentials"],
+    "response_types": ["code"],
+    "id_token_signed_response_alg": "ES256",
+    "request_object_signing_alg": "ES256",
+    "software_id": "65d1f27c-4aea-4549-9c21-60e495a7a86f",
+    "software_statement":  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlbXB0eSIsInN1YiI6IjEyMzQ1Njc4OTAiLCJuYW1lIjoiSm9obiBEb2UiLCJhZG1pbiI6dHJ1ZSwic2NvcGUiOiJzY29wZTEgc2NvcGUyIiwiY2xhaW1zIjoiY2xhaW0xIGNsYWltMiIsImlhdCI6MTY2OTgwNjc2MywiZXhwIjoxNjY5ODEwMzYzfQ.db0WQh2lmHkNYCWT8tSW684hqWTPJDTElppy42XM_lc"
+}
+{
+    Signature
+}
+``` 
+
+AS has `dcrSsaValidationConfigs` configuration value which holds json array. It can be used to validated both DCR and SSA.
+
+Single item of this array has following properties:
+
+* **id** - REQUIRED primary key for the entity
+* **type** - REQUIRED either `ssa` or `dcr`
+* **displayName** - Human friendly name in case we build an admin GUI for this  
+* **description** - Human friendly details 
+* **scope** - For SSA only -- list of allowed scopes the issuer can enable the client to request automatically. If not present, all scopes are allowed.
+* **allowed_claims** - Any claims not listed in this list will be dropped. If not present, all claims are allowed.
+* **jwks** - Public key 
+* **jwks_uri** - URI of public key
+* **issuers** - For MTLS, list of issuers trusted 
+* **configuration_endpoint** - points to discovery page, e.g. `https://examle.com/.well-known/openid-configuration`
+* **configuration_endpoint_claim** - e.g. `ssa_jwks_endpoint`
+* **shared_secret** -  for MTLS HMAC
+
+One of `jwks`, `jwks_uri` or `issuers` or `configuration_endpoint` is required.
+
+Non-normative example of `dcrSsaValidationConfigs`
+
+```json
+[ {
+  "id" : "735ee1c0-895d-4398-9c1b-9ad852257cc0",
+  "type" : "DCR",
+  "scopes" : [ "read", "write" ],
+  "allowedClaims" : [ "exp", "iat" ],
+  "jwks" : "{jwks here}",
+  "issuers" : [ "Acme" ],
+  "sharedSecret" : "secret"
+}, {
+  "id" : "7907cd0b-0f9f-4b4f-aaa2-0d0614546246",
+  "type" : "SSA",
+  "scopes" : [ "my_read", "my_write" ],
+  "allowedClaims" : [ "test_exp", "test_iat" ],
+  "jwks" : "{jwks here}",
+  "issuers" : [ "jans-auth" ],
+  "sharedSecret" : "secret"
+}, {
+  "id" : "1e95c9b1-04d0-4440-9362-88f4e1e62d76",
+  "type" : "SSA",
+  "jwks" : "{jwks here}",
+  "issuers" : [ "empty" ],
+  "sharedSecret" : "secret"
+} ]
+```
+
+#### Signed DCR validation
+
+DCR can be validated with two approaches.
+
+**Via `dcrSsaValidationConfigs` configuration property - RECOMMENDED**
+
+When create entry in `dcrSsaValidationConfigs` configuration property :
+- `type` MUST be equal to `DCR` value
+- `issuers` MUST have value which equals to `iss` claim in DCR.
+
+**Via other configuration properties**
+
+* **dcrSignatureValidationJwks** - specifies JWKS for DCR's validations
+* **dcrSignatureValidationJwksUri** - specifies JWKS URI for  DCR's validations
+* **dcrIssuers** - List of issues if MTLS private key is used to sign DCR JWT
+* **dcrSignatureValidationSharedSecret** - if HMAC is used, this is the shared secret
+* **dcrSignatureValidationEnabled** - boolean value enables DCR signature validation. Default is false
+* **dcrSignatureValidationSoftwareStatementJwksURIClaim** - specifies claim name inside software statement. Value of claim should point to JWKS URI
+* **dcrSignatureValidationSoftwareStatementJwksClaim** - specifies claim name inside software statement. Value of claim should point to inlined JWKS 
+* **dcrAuthorizationWithClientCredentials** - boolean value indicating if DCR authorization to be performed using client credentials
+
+#### SSA Validation
+
+SSA is validated based on `softwareStatementValidationType` which is enum.
+
+1. **softwareStatementValidationType**=*builtin* - validation is performed against `dcrSsaValidationConfigs` configuration property, where
+   1. `type` MUST be equal to `SSA` value
+   1. `issuers` MUST have value which equals to `iss` claim in DCR.
+1. **softwareStatementValidationType**=*script* - jwks and hmac secret are returned by dynamic client registration script
+1. **softwareStatementValidationType**=*jwks_uri*, allows to specify jwks_uri claim name from software_statement. Claim name specified by `softwareStatementValidationClaimName` configuration property.
+1. **softwareStatementValidationType**=*jwks*, allows to specify jwks claim name from software_statement. Claim name specified by `softwareStatementValidationClaimName` configuration property.
+1. **softwareStatementValidationType**=*none*, no validation.
+
+
 ### Customizing the behavior of the AS using Interception script
 Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the [Software Statement](https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3) that is sent with the registration request.
 
