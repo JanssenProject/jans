@@ -1,0 +1,93 @@
+
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html" template="/WEB-INF/incl/layout/template.xhtml">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}" />
+	</f:metadata>
+	<ui:define name="head">
+		
+		<script type="text/javascript" src="https://ult-inwebo.com/va/client.js" />
+		<script type="text/javascript">
+			
+			//<![CDATA[
+			
+			VA_jQuery(document).ready(
+					function() 
+					{
+						iwstart("myStart", function(iw, data) 
+						{
+							
+							//Successful authentication
+							if (data.action == "authentication"
+									&& data.code == "ok") 
+							{
+								iw.insertFields(data.result);
+								document.getElementById("loginForm:loginButton").click();
+							}
+							
+							//Virtual Authenticator is not activated
+							if (data.type == "error" && data.code == "nok"
+									&& data.result.reason == "no_profile") {
+								//We terminate Virtual Authenticator
+								iwterminate();
+								//Insert code to redirect user to a push authentication page instead of displaying a popup
+								
+								document.getElementById("loginForm:loginButton").click();
+							}
+						});
+					});
+		//	]]>
+		</script>
+		<style type="text/css">
+.login-panel {
+	border-style: solid;
+	border-width: 1px;
+	padding: 1px;
+	background-color: #FFFFFF;
+	border-color: #C4C0B9;
+	width: 100%;
+}
+
+.login-panel-header {
+	background-color: #D4CFC7;
+	background-image: url("./img/panel_header_bg.png");
+	background-position: left top;
+	background-repeat: repeat-x;
+	border-style: solid;
+	border-width: 1px;
+	padding: 2px;
+	border-color: #D4CFC7;
+	color: #000000;
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.login-panel-body {
+	padding: 10px;
+	color: #000000;
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 11px;
+}
+</style>
+	</ui:define>
+	<ui:define name="pageTitle">#{msgs['inwebo.title.va']}</ui:define>
+
+	<ui:define name="body">
+		
+			<div id="myContainer" style="display: none;"></div>
+			<div id="myStart" data-action="authentication" data-container="myContainer" data-quiet-start="1" data-lang="auto" data-nopin="0"
+				data-alias="3edaf592678e1b0f9028403efd70f51c"></div>
+			
+		
+			<h:form id="loginForm" >
+				<h:inputHidden id="username" value="#{credentials.username}"   />
+				<h:inputHidden id="password" value="#{credentials.password}"    />
+				<h:commandButton id="loginButton" value="Login" style="display:none" action="#{authenticator.authenticate}" />
+			</h:form>
+			
+			
+		
+		</ui:define>
+</ui:composition>
