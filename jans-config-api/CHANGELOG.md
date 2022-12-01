@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.4...jans-config-api-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add feature to include custom-claims in user-info endpoint of admin-ui plugin [#2969](https://github.com/JanssenProject/jans/issues/2969) ([#2970](https://github.com/JanssenProject/jans/issues/2970)) ([0549879](https://github.com/JanssenProject/jans/commit/054987944d91fe2021092c30b337e880421533ff))
+
+
+### Bug Fixes
+
+* **config-api:** error handling for agama get and org patch ([#3028](https://github.com/JanssenProject/jans/issues/3028)) ([21dd6e5](https://github.com/JanssenProject/jans/commit/21dd6e5f273e968245508d6a03a8ac7b6cfd3125))
+* **config-api:** fix for swagger spec for scope creation and sessoin endpoint filter ([#2949](https://github.com/JanssenProject/jans/issues/2949)) ([2989f1d](https://github.com/JanssenProject/jans/commit/2989f1dc151a77ecc66408ccccdfbb18d3b9dca8))
+* **config-api:** swagger update for enum and error handling ([#2934](https://github.com/JanssenProject/jans/issues/2934)) ([6b61556](https://github.com/JanssenProject/jans/commit/6b61556b49cca96622c2e59b1e99244a7eaae3ab))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans:** added null check to avoid NullPointerException ([#3077](https://github.com/JanssenProject/jans/issues/3077)) ([42d49b2](https://github.com/JanssenProject/jans/commit/42d49b2ac2ffb50086b5941c93c810cdbaff75ea))
+* the admin-ui role/permission/mapping delete apis are not protected by appropriate permissions [#2991](https://github.com/JanssenProject/jans/issues/2991) ([#2992](https://github.com/JanssenProject/jans/issues/2992)) ([7d68021](https://github.com/JanssenProject/jans/commit/7d680219c1db037fa4ee137a5d7241753c32b20a))
+
 ## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.3...jans-config-api-v1.0.4) (2022-11-08)
 
 
