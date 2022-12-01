@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: auth-server-key-rotation
-version: 1.0.5-dev
+version: 1.0.5
 kubeVersion: ">=v1.21.0-0"
 description: Responsible for regenerating auth-keys per x hours
 type: application
