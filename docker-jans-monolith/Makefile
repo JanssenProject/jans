@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.5
+CN_VERSION?=1.0.6-SNAPSHOT
 IMAGE_NAME=janssenproject/monolith
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 

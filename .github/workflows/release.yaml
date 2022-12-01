@@ -5,23 +5,23 @@ on:
       simple_release_as:
         description: 'Release version for docs'
         required: true
-        default: '1.0.5'
+        default: '1.0.6'
       java_release_as:
         description: 'Release version for the java projects jans-*'
         required: true
-        default: '1.0.5'
+        default: '1.0.6'
       docker_release_as:
         description: 'Release version for the docker images docker-*'
         required: true
-        default: '1.0.5-1'
+        default: '1.0.6-1'
       python_release_as:
         description: 'Release version for the python projects'
         required: true
-        default: '1.0.5'
+        default: '1.0.6'
       mega_release_as:
         description: 'Mega release version'
         required: true
-        default: '1.0.5'
+        default: '1.0.6'
 jobs:
   release-simple-pr:
     runs-on: ubuntu-latest
