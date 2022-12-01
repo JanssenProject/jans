@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: opendj
-version: 1.0.5-dev
+version: 1.0.5
 kubeVersion: ">=v1.21.0-0"
 description: OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 type: application
