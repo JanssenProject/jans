@@ -93,6 +93,7 @@ kubectl get secret -n jans -o yaml
 
 ## Example decoding secrets
 
+### Opening `base64 decoded` secrets
 !!! Note
     We assume Jans is installed in a namespace called `jans`
 
@@ -114,3 +115,32 @@ kubectl get secret -n jans -o yaml
     echo <encodedValue> | base64 -d #replace encodedValue with the value from the previous command
     ```
 
+### Opening `/etc/certs/opendj.pkcs12` file
+
+!!! Note
+    We assume Jans is installed in a namespace called `jans`
+
+1. Make a directory called `delete_me`
+
+    ```bash
+    mkdir delete_me && cd delete_me
+    ```
+   
+1. Get the `ldap_truststore_pass`  from backend secret and save `ldap_truststore_pass`  in a file called `ldap_truststore_pass`
+
+    ```bash
+    kubectl get secret cn -o json -n jans | grep '"ldap_truststore_pass":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' > ldap_truststore_pass
+    ```
+
+1. Base64 decode the `ldap_truststore_pass` and save the decoded `ldap_truststore_pass` in a file called `ldap_truststore_pass_decoded`
+
+    ```bash
+    base64 -d ldap_truststore_pass > ldap_truststore_pass_decoded
+    ```
+
+1. Use `ldap_truststore_pass_decoded` to unlock `/etc/certs/opendj.pkcs12` in opendj pod.
+
+    ```bash
+    keytool -list -v -keystore /etc/certs/opendj.pkcs12 --storepass ldap_truststore_pass_decoded
+    ```
+    
