@@ -34,7 +34,7 @@ EXPOSE 8080
 # FIDO2
 # =====
 
-ENV CN_VERSION=1.0.5-SNAPSHOT
+ENV CN_VERSION=1.0.5
 ENV CN_BUILD_DATE='2022-11-17 08:50'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 

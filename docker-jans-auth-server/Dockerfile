@@ -55,7 +55,7 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.5-SNAPSHOT
+ENV CN_VERSION=1.0.5
 ENV CN_BUILD_DATE='2022-11-17 15:11'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
