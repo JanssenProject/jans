@@ -11,11 +11,8 @@ on:
       - reopened
     paths-ignore:
       - "docs/**"
-    branches-ignore:
-      - "release-please--**"
-      - "dependabot/**"
-      - "snyk-**"
-      - "update-pycloud-in-**"
+    branches:
+      - main
   workflow_dispatch:
 jobs:
   check-prs-issue:
