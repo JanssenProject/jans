@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: nginx-ingress
-version: 1.0.5-dev
+version: 1.0.5
 kubeVersion: ">=v1.21.0-0"
 description: Nginx ingress definitions chart
 type: application
