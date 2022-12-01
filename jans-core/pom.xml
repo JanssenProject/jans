@@ -3,7 +3,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-core-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.5-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>jans-core</name>
 
 	<prerequisites>
@@ -22,7 +22,7 @@
 
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<janssen.version>1.0.5-SNAPSHOT</janssen.version>
+		<janssen.version>1.0.6-SNAPSHOT</janssen.version>
 		<jacoco.version>0.8.7</jacoco.version>
 		
 		<sonar.projectKey>JanssenProject_jans-core</sonar.projectKey>

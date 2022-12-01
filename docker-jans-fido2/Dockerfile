@@ -34,8 +34,8 @@ EXPOSE 8080
 # FIDO2
 # =====
 
-ENV CN_VERSION=1.0.5-SNAPSHOT
-ENV CN_BUILD_DATE='2022-11-17 08:50'
+ENV CN_VERSION=1.0.6-SNAPSHOT
+ENV CN_BUILD_DATE='2022-12-01 12:39'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -54,7 +54,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=fc20e287feb4cc1b7bb983c44e25a8ae936580f0
+ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -202,7 +202,10 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
-    CN_PROMETHEUS_PORT=""
+    CN_PROMETHEUS_PORT="" \
+    CN_AWS_SECRETS_ENDPOINT_URL="" \
+    CN_AWS_SECRETS_PREFIX=jans \
+    CN_AWS_SECRETS_REPLICA_FILE=""
 
 # ==========
 # misc stuff
@@ -211,7 +214,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/fido2" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.5" \
+    version="1.0.6" \
     release="dev" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"

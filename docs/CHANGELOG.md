@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.5](https://github.com/JanssenProject/jans/compare/docs-v1.0.4...docs-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+* add feature to include custom-claims in user-info endpoint of admin-ui plugin [#2969](https://github.com/JanssenProject/jans/issues/2969) ([#2970](https://github.com/JanssenProject/jans/issues/2970)) ([0549879](https://github.com/JanssenProject/jans/commit/054987944d91fe2021092c30b337e880421533ff))
+* documentation for ssa and remove softwareRoles query param of get ssa ([#3031](https://github.com/JanssenProject/jans/issues/3031)) ([d8e14eb](https://github.com/JanssenProject/jans/commit/d8e14ebbeee357c8c2c31808243cf82933ae4a9b))
+* **jans-auth-server:** specify minimum acr for clients [#343](https://github.com/JanssenProject/jans/issues/343) ([#3083](https://github.com/JanssenProject/jans/issues/3083)) ([b0034ec](https://github.com/JanssenProject/jans/commit/b0034ec509ace1a4e30a7e9c6dd23dca48178c62))
+* jans-linux-setup include permission of all user roles ([#3009](https://github.com/JanssenProject/jans/issues/3009)) ([62a421d](https://github.com/JanssenProject/jans/commit/62a421df821067432cbcced0e89cc2a410cd40be))
+
+
+### Bug Fixes
+
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - irrelevant folder, agama script is in agama-bridge ([#2993](https://github.com/JanssenProject/jans/issues/2993)) ([d19b13a](https://github.com/JanssenProject/jans/commit/d19b13ab31e1dbfee9288c6569b289eae213b528))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - SIWA and SIWG (Sign in with Apple-Google), moved to script-catalog ([#2983](https://github.com/JanssenProject/jans/issues/2983)) ([402e7ae](https://github.com/JanssenProject/jans/commit/402e7aebd20322ef465a3805d3834c7174bc9bbc))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) removing duplicated files ([#3007](https://github.com/JanssenProject/jans/issues/3007)) ([9f3d051](https://github.com/JanssenProject/jans/commit/9f3d051308e7b29e5f112e74601aa05c42ed559c))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) scripts-catalog folder restructuring ([#2999](https://github.com/JanssenProject/jans/issues/2999)) ([7b66f2b](https://github.com/JanssenProject/jans/commit/7b66f2b27517ba560555f64d0ab4e49f10ddb374))
+* [#2666](https://github.com/JanssenProject/jans/issues/2666) ([#3011](https://github.com/JanssenProject/jans/issues/3011)) ([f98cbc5](https://github.com/JanssenProject/jans/commit/f98cbc5d43b12b56b81debd367fcfdfdc75830e4))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-fido2:** [#2840](https://github.com/JanssenProject/jans/issues/2840) ([#2974](https://github.com/JanssenProject/jans/issues/2974)) ([d3351e1](https://github.com/JanssenProject/jans/commit/d3351e141fa546074ad98891e655247a0c23e30a))
+* typo ([#2950](https://github.com/JanssenProject/jans/issues/2950)) ([6df810b](https://github.com/JanssenProject/jans/commit/6df810b36c68303f458f694e4ba6ec9c3768364c))
+
 ## [1.0.4](https://github.com/JanssenProject/jans/compare/docs-v1.0.3...docs-v1.0.4) (2022-11-08)
 
 

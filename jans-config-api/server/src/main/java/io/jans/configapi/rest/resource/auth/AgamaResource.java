@@ -61,13 +61,15 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Fetches all agama flow.", description = "Fetches all agama flow.", operationId = "get-agama-flows", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.AGAMA_READ_ACCESS }))
+                    ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama Flows", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFlows(@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -90,13 +92,15 @@ public class AgamaResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets an agama flow based on Qname.", description = "Gets an agama flow based on Qname.", operationId = "get-agama-flow", tags = {
             "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.AGAMA_READ_ACCESS }))
+                    ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.QNAME_PATH)
     public Response getFlowByName(@PathParam(ApiConstants.QNAME) @NotNull String flowName,
             @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
@@ -121,7 +125,8 @@ public class AgamaResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createFlow(@Valid Flow flow)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be added flow:{}, flow.getQName():{}, flow.getSource():{} ", flow, flow.getQname(),
@@ -155,7 +160,8 @@ public class AgamaResource extends ConfigBaseResource {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Path(ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createFlowFromSource(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be created flowName:{}, source:{}", flowName, source);
@@ -196,7 +202,8 @@ public class AgamaResource extends ConfigBaseResource {
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Path(ApiConstants.SOURCE + ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateFlowSource(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be updated flowName:{}, source:{}", flowName, source);
@@ -232,7 +239,8 @@ public class AgamaResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @Path(ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchFlow(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @NotNull JsonPatch jsonPatch)
             throws JsonPatchException, IOException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException {
@@ -267,7 +275,8 @@ public class AgamaResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response delete(@PathParam(ApiConstants.QNAME) @NotNull String flowName) {
         logger.debug(" Flow to delete - flowName:{}", flowName);
         String decodedFlowName = getURLDecodedValue(flowName);

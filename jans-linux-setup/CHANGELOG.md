@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.4...jans-linux-setup-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add feature to include custom-claims in user-info endpoint of admin-ui plugin [#2969](https://github.com/JanssenProject/jans/issues/2969) ([#2970](https://github.com/JanssenProject/jans/issues/2970)) ([0549879](https://github.com/JanssenProject/jans/commit/054987944d91fe2021092c30b337e880421533ff))
+* jans cli to jans-cli-tui ([#3063](https://github.com/JanssenProject/jans/issues/3063)) ([fc20e28](https://github.com/JanssenProject/jans/commit/fc20e287feb4cc1b7bb983c44e25a8ae936580f0))
+
+
+### Bug Fixes
+
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - fido script, doc already moved to script-catalog ([#2982](https://github.com/JanssenProject/jans/issues/2982)) ([10d8df5](https://github.com/JanssenProject/jans/commit/10d8df5480853a0545dbe6350f494d6b4abf3661))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - removing inwebo ([#2975](https://github.com/JanssenProject/jans/issues/2975)) ([052f91f](https://github.com/JanssenProject/jans/commit/052f91fd45c888efb7480fc7cd403dc005ceca23))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - SIWA and SIWG (Sign in with Apple-Google), moved to script-catalog ([#2983](https://github.com/JanssenProject/jans/issues/2983)) ([402e7ae](https://github.com/JanssenProject/jans/commit/402e7aebd20322ef465a3805d3834c7174bc9bbc))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) removing duplicated files ([#3007](https://github.com/JanssenProject/jans/issues/3007)) ([9f3d051](https://github.com/JanssenProject/jans/commit/9f3d051308e7b29e5f112e74601aa05c42ed559c))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) scripts-catalog folder restructuring ([#2999](https://github.com/JanssenProject/jans/issues/2999)) ([7b66f2b](https://github.com/JanssenProject/jans/commit/7b66f2b27517ba560555f64d0ab4e49f10ddb374))
+* disable github authentication and interception scripts by default and other changes. [#3022](https://github.com/JanssenProject/jans/issues/3022) ([#3023](https://github.com/JanssenProject/jans/issues/3023)) ([13f5998](https://github.com/JanssenProject/jans/commit/13f599830c0d6b48bd1cd6f71f3d200ec6bddfe7))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* jans-linux-setup fido2 script placeholder in scripts template ([#2986](https://github.com/JanssenProject/jans/issues/2986)) ([70a4fe0](https://github.com/JanssenProject/jans/commit/70a4fe0d4b6ee958cfaa0b1598092da0fde38620))
+* jans-linux-setup remove opendj sysv script ([#2998](https://github.com/JanssenProject/jans/issues/2998)) ([13eebe4](https://github.com/JanssenProject/jans/commit/13eebe4bdcbc059eb40b3e33b9bfb4a2830e8a0b))
+* jans-linux-setup service description for jans-auth ([#2989](https://github.com/JanssenProject/jans/issues/2989)) ([6566d27](https://github.com/JanssenProject/jans/commit/6566d272de1e2fdcb5040df6d1616bd3164ebdab))
+
 ## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.3...jans-linux-setup-v1.0.4) (2022-11-08)
 
 

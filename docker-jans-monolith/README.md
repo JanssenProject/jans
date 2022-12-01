@@ -93,3 +93,4 @@ Remove setup and volumes
 ```
 docker compose -f jans-mysql-compose.yml down
 ```
+

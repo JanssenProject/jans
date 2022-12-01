@@ -55,7 +55,8 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLdapConfiguration() {
         List<GluuLdapConfiguration> ldapConfigurationList = this.ldapConfigurationService.findLdapConfigurations();
         return Response.ok(ldapConfigurationList).build();
@@ -70,7 +71,8 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         return Response.ok(ldapConfiguration).build();
@@ -86,7 +88,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response addLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.debug("LDAP configuration to be added - ldapConfiguration:{} ", ldapConfiguration);
         // Ensure that an LDAP server with same name does not exists.
@@ -113,7 +115,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.debug("LDAP configuration to be updated - ldapConfiguration:{}", ldapConfiguration);
         findLdapConfigurationByName(ldapConfiguration.getConfigId());
@@ -131,7 +133,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
         logger.debug("LDAP configuration to be deleted - name:{}", name);
         findLdapConfigurationByName(name);
@@ -153,7 +155,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     @PATCH
     @Path(ApiConstants.NAME_PARAM_PATH)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name,
             @NotNull String requestString) throws JsonPatchException, IOException {
         logger.debug("LDAP configuration to be patched - name:{}, requestString:{} ", name, requestString);
@@ -175,7 +177,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(ApiConstants.TEST)
-    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS }, groupScopes = {ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.debug("LDAP configuration to be tested - ldapConfiguration:{}", ldapConfiguration);
 

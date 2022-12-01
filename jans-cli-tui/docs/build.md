@@ -1,9 +1,9 @@
 #### Build
 ```
 pip3 install shiv
-wget https://github.com/JanssenProject/jans/archive/refs/heads/jans-cli-tui-works.zip
-unzip jans-cli-tui-works.zip
-cd jans-jans-cli-tui-works/jans-cli-tui/
+wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip -O jans-main.zip
+unzip jans-main.zip
+cd jans-main/jans-cli-tui/
 make zipapp
 ```
 

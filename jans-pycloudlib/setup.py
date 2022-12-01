@@ -32,8 +32,6 @@ setup(
         "python-consul>=1.0.1",
         "hvac>=0.7.0",
         "kubernetes>=11.0",
-        # "urllib3<1.25,>=1.21.1",
-        # "urllib3>=1.25.2",
         "ldap3>=2.5",
         "backoff>=2.1.2",
         "docker>=3.7.2",
@@ -48,6 +46,7 @@ setup(
         "ldif>=4.1.1",
         # handle CVE-2022-36087
         "oauthlib>=3.2.1",
+        "boto3",
     ],
     classifiers=[
         "Intended Audience :: Developers",
@@ -58,6 +57,8 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     include_package_data=True,
     entry_points={

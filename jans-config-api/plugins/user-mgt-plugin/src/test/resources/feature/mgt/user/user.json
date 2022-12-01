@@ -14,10 +14,10 @@
             "name": "emailVerified",
             "multiValued": false,
             "values": [
-                "TRUE"
+                true
             ],
-            "value": "TRUE",
-            "displayValue": "TRUE"
+            "value": true,
+            "displayValue": true
         },
         {
             "name": "jansAdminUIRole",

@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: fido2
-version: 1.0.5-dev
+version: 1.0.6-dev
 kubeVersion: ">=v1.21.0-0"
 description: FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 type: application
@@ -18,4 +18,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "1.0.5-dev"
+appVersion: "1.0.6-dev"

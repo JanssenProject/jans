@@ -47,10 +47,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
         delete_UMAresource: Callable= None,
         )-> Dialog:
         """init for `EditClientDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
-            
+
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
-        
+
         Args:
             parent (widget): This is the parent widget for the dialog, to access `Pageup` and `Pagedown`
             title (str): The Main dialog title
@@ -100,7 +100,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data['attributes']={'parLifetime':self.data['parLifetime']}
         self.data['attributes']={'requirePar':self.data['requirePar']}
         for list_key in (
-                        
+
                        'backchannelLogoutUri',
                        'additionalAudience',
                        'rptClaimsScripts',  
@@ -113,7 +113,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         'introspectionScripts',
                         'ropcScripts', 
                         'consentGatheringScripts',
-    
+
                             ):
             if self.data[list_key]:
                 self.data['attributes'][list_key] = self.data[list_key].splitlines()
@@ -190,21 +190,21 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             _("Active"), 
                             name='disabled', 
                             checked= not self.data.get('disabled'), 
-                            jans_help=self.myparent.get_help_from_schema(schema, 'disabled'), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'disabled'),
                             style='class:outh-client-checkbox'),
 
                         self.myparent.getTitledText(
                             _("Client Name"), 
-                            name='displayName', 
-                            value=self.data.get('displayName',''), 
-                            jans_help=self.myparent.get_help_from_schema(schema, 'displayName'), 
+                            name='clientName', 
+                            value=self.data.get('clientName',''), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'clientName'),
                             style='class:outh-client-text'),
 
                         self.myparent.getTitledText(
                             _("Client Secret"), 
                             name='clientSecret', 
                             value=self.data.get('clientSecret',''), 
-                            jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'), 
+                            jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'),
                             style='class:outh-client-text'),
 
                         self.myparent.getTitledText(
@@ -213,7 +213,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value=self.data.get('description',''), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'description'),
                             style='class:outh-client-text'),
-                        
+
                         self.myparent.getTitledRadioButton(
                                 _("Authn Method token endpoint"), 
                                 name='tokenEndpointAuthMethod', 
@@ -236,7 +236,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value=self.data.get('sectorIdentifierUri',''), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'sectorIdentifierUri'), 
                             style='class:outh-client-text'),
-                                
+
                         self.myparent.getTitledCheckBoxList(
                                 _("Grant"), 
                                 name='grantTypes', 
@@ -268,7 +268,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             current_value=self.data.get('applicationType'), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'applicationType'),
                             style='class:outh-client-radiobutton'),
-                        
+
                         self.myparent.getTitledText(
                             _("Redirect Uris"), 
                             name='redirectUris', 
@@ -366,7 +366,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     ],width=D(),style='class:outh-client-tabs')
 
         self.tabs['Logout'] = HSplit([
-            
+
                         self.myparent.getTitledText(
                             _("Front channel logout URI"), 
                             name='frontChannelLogoutUri', 
@@ -390,7 +390,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     'backchannelLogoutUri'), 
                             height=3, style='class:outh-client-text'
                             ),
-                        
+
                         self.myparent.getTitledCheckBox(
                             _("Back channel logout session required"), 
                             name='backchannelLogoutSessionRequired', 
@@ -447,7 +447,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 value=self.data.get('softwareStatement',''), 
                 jans_help=self.myparent.get_help_from_schema(schema, 'softwareStatement'),
                 style='class:outh-client-text'),
-            
+
         ],width=D(),style='class:outh-client-tabs')
 
 
@@ -456,7 +456,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     VSplit([
                         self.myparent.getButton(text=_("Get Resources"), name='oauth:Resources:get', jans_help=_("Retreive UMA Resources"), handler=self.oauth_get_uma_resources),
                         self.myparent.getTitledText(_("Search"), name='oauth:Resources:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_uma_resources,style='class:outh-client-textsearch'),
-                    
+
                         ],
                         padding=3,
                         width=D(),
@@ -630,7 +630,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                             style='class:outh-client-checkbox'
                             ),
-                        
+
                         self.myparent.getTitledCheckBox(
                             _("Persist Authorizations"), 
                             name='persistClientAuthorizations', 
@@ -764,7 +764,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/ClientAttributes'), 
                     'ropcScripts'),
                     ),
-                
+
             self.myparent.getTitledText(_("OAuth Consent"),
                 name='consentGatheringScripts',
                 value='\n'.join(self.data.get('attributes', {}).get('consentGatheringScripts',[]) ),
@@ -859,8 +859,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         endpoint_args ='limit:10'
         if pattern:
             endpoint_args +=',pattern:'+pattern
-        
-        
+
         self.myparent.logger.debug('DATA endpoint_args: '+str(endpoint_args))
         try :
             rsponse = self.myparent.cli_object.process_command_by_id(
@@ -890,7 +889,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         for d in result:
             scopes_of_resource = []
             for scope_dn in d.get('scopes', []):
-                
+
                 inum = scope_dn.split(',')[0].split('=')[1]
                 scope_result = {}
                 try :
@@ -906,7 +905,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     display_name = 'None'
                     pass
                 display_name = scope_result.get('displayName') or scope_result.get('inum')
-                
+
                 if display_name:
                     scopes_of_resource.append(display_name)
                 else:
@@ -959,13 +958,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
     def view_uma_resources(self, **params: Any) -> None:
         """This method view the UMA resources in a dialog
-        """        
+        """
 
         selected_line_data = params['data']    ##self.uma_result 
         title = _("Edit user Data (Clients)")
 
         dialog = ViewUMADialog(self.myparent, title=title, data=selected_line_data, deleted_uma=self.delete_UMAresource)
-        
+
         self.myparent.show_jans_dialog(dialog)
 
     def __pt_container__(self)-> Dialog:

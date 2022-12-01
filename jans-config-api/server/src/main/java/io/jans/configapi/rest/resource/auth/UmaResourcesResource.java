@@ -67,7 +67,8 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response fetchUmaResources(
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -92,7 +93,8 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.ID_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getUmaResourceByInum(@PathParam(value = ApiConstants.ID) @NotNull String id) {
         logger.debug("UMA_RESOURCE to fetch by id:{}", id);
         return Response.ok(findOrThrow(id)).build();
@@ -107,7 +109,8 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/" + ApiConstants.CLIENTID + ApiConstants.CLIENTID_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getUmaResourceByAssociatedClient(
             @PathParam(value = ApiConstants.CLIENTID) @NotNull String associatedClientId) {
         logger.debug("UMA_RESOURCE to fetch by associatedClientId:{} ", associatedClientId);
@@ -124,7 +127,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createUmaResource(@Valid UmaResource umaResource) {
         logger.debug("UMA_RESOURCE to be added umaResource:{}", umaResource);
         checkNotNull(umaResource.getName(), AttributeNames.NAME);
@@ -158,7 +161,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateUmaResource(@Valid UmaResource resource) {
         logger.debug("UMA_RESOURCE to be upated - umaResource:{}", resource);
         String id = resource.getId();
@@ -182,7 +185,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
@@ -203,7 +206,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.ID_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
         logger.debug("UMA_RESOURCE to delete - id:{}", id);
         UmaResource umaResource = findOrThrow(id);

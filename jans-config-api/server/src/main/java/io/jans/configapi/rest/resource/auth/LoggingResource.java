@@ -51,7 +51,8 @@ public class LoggingResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLogging() {
         return Response.ok(this.getLoggingConfiguration()).build();
     }
@@ -65,7 +66,7 @@ public class LoggingResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateLogConf(@Valid Logging logging) {
         log.debug("LOGGING configuration to be updated -logging:{}", logging);
         Conf conf = configurationService.findConf();

@@ -49,7 +49,7 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllSessions() {
         final List<SessionId> sessions = sessionService.getSessions();
         logger.debug("sessions:{}", sessions);
@@ -66,7 +66,7 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
-            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION })
+            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.USERDN_PATH)
     public Response getAppConfiguration(@PathParam(ApiConstants.USERDN) @NotNull String userDn) {
         logger.debug("userDn:{}", userDn);

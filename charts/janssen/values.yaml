@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: janssenproject/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.5_dev
+    tag: 1.0.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -114,7 +114,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: janssenproject/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.5_dev
+    tag: 1.0.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -217,6 +217,24 @@ config:
     cnConfigGoogleSecretNamePrefix: janssen
     # [google_secret_manager_envs] END
     # [google_envs] END
+    # [aws_envs] Envs related to using AWS
+    # [aws_secret_manager_envs]
+    # AWS Access key id  that belong to a user/id with SecretsManagerReadWrite policy
+    cnAwsAccessKeyId: ""
+    # AWS Secret Access key that belong to a user/id with SecretsManagerReadWrite policy
+    cnAwsSecretAccessKey: ""
+    # The URL of AWS secretsmanager service (if omitted, will use the one in specified region). Used only when global.configAdapterName and global.configSecretAdapter is set to aws.
+    cnAwsSecretsEndpointUrl: ""
+    # The prefix name of the secrets. Used only when global.configAdapterName and global.configSecretAdapter is set to aws.
+    cnAwsSecretsNamePrefix: janssen
+    # The default AWS Region to use, for example, `us-west-1` or `us-west-2`.
+    cnAwsDefaultRegion: us-west-1
+    # The default profile to use.
+    cnAwsProfile: "janssen"
+    # Example replicated region [{"Region": "us-west-1"}, {"Region": "us-west-2"}]
+    cnAwsSecretsReplicaRegions: []
+    # [aws_secret_manager_envs] END
+    # [aws_envs] END
     # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
     cnLdapUrl: "opendj:1636"
     # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -255,7 +273,7 @@ config:
     # -- Image  to use for deploying.
     repository: janssenproject/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.5_dev
+    tag: 1.0.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -338,7 +356,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: janssenproject/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.5_dev
+    tag: 1.0.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -430,7 +448,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: janssenproject/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.5_dev
+    tag: 1.0.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -574,12 +592,18 @@ global:
     enabled: true
   # -- https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
   jobTtlSecondsAfterFinished: 300
-  # -- The config backend adapter that will hold Janssen configuration layer. google|kubernetes
+  # -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
   configAdapterName: kubernetes
-  # -- The config backend adapter that will hold Janssen secret layer. google|kubernetes
+  # -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
   configSecretAdapter: kubernetes
-  # -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner.
+  # -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
   cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
+  # The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).Leave as this is a sensible default.
+  cnAwsSharedCredentialsFile: /etc/jans/conf/aws_shared_credential_file
+  # The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). Leave as this is a sensible default.
+  cnAwsConfigFile: /etc/jans/conf/aws_config_file
+  # The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.  Used only when global.configAdapterName and global.configSecretAdapter is set to aws. Leave as this is a sensible default.
+  cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
   config-api:
     # -- Name of the config-api service. Please keep it as default.
     configApiServerServiceName: config-api
@@ -942,7 +966,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: janssenproject/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.5_dev
+    tag: 1.0.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1015,7 +1039,7 @@ scim:
     # -- Image  to use for deploying.
     repository: janssenproject/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.5_dev
+    tag: 1.0.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.

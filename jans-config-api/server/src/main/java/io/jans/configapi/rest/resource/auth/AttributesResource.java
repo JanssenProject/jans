@@ -64,11 +64,12 @@ public class AttributesResource extends ConfigBaseResource {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example" , value = "example/attribute/attribute-get-all.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAttributes(
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -94,11 +95,12 @@ public class AttributesResource extends ConfigBaseResource {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class), examples = @ExampleObject(name = "Response example" , value = "example/attribute/attribute-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
@@ -109,13 +111,14 @@ public class AttributesResource extends ConfigBaseResource {
     @Operation(summary = "Adds a new attribute", description = "Adds a new attribute", operationId = "post-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
-    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Request example" , value = "example/attribute/attribute.json")))
+    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class), examples = @ExampleObject(name = "Request example", value = "example/attribute/attribute.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Response example" , value = "example/attribute/attribute.json"))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createAttribute(@Valid GluuAttribute attribute) {
         log.debug(" GluuAttribute details to add - attribute:{}", attribute);
         checkNotNull(attribute.getName(), AttributeNames.NAME);
@@ -132,13 +135,14 @@ public class AttributesResource extends ConfigBaseResource {
     @Operation(summary = "Updates an existing attribute", description = "Updates an existing attribute", operationId = "put-attributes", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
-    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Request example" , value = "example/attribute/attribute.json")))
+    @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class), examples = @ExampleObject(name = "Request example", value = "example/attribute/attribute.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Response example" , value = "example/attribute/attribute.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAttribute(@Valid GluuAttribute attribute) {
         log.debug(" GluuAttribute details to update - attribute:{}", attribute);
         String inum = attribute.getInum();
@@ -158,15 +162,16 @@ public class AttributesResource extends ConfigBaseResource {
     @Operation(summary = "Partially modify a GluuAttribute", description = "Partially modify a GluuAttribute", operationId = "patch-attributes-by-inum", tags = {
             "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = PatchRequest.class)) , examples = @ExampleObject(name = "Patch request example" , value = "example/attribute/attribute-patch.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = PatchRequest.class)), examples = @ExampleObject(name = "Patch request example", value = "example/attribute/attribute-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class) , examples = @ExampleObject(name = "Response example" , value = "example/attribute/attribute.json"))),
+            @ApiResponse(responseCode = "200", description = "Updated GluuAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GluuAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
@@ -188,7 +193,8 @@ public class AttributesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         log.debug(" GluuAttribute details to delete - inum:{}", inum);
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);

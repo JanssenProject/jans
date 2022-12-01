@@ -10,13 +10,15 @@ from functools import cached_property
 from jans.pycloudlib.config import ConsulConfig
 from jans.pycloudlib.config import KubernetesConfig
 from jans.pycloudlib.config import GoogleConfig
+from jans.pycloudlib.config import AwsConfig
 from jans.pycloudlib.secret import KubernetesSecret
 from jans.pycloudlib.secret import VaultSecret
 from jans.pycloudlib.secret import GoogleSecret
+from jans.pycloudlib.secret import AwsSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 
-ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig]
+ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig]
 """Configs adapter type.
 
 Currently supports the following classes:
@@ -24,9 +26,10 @@ Currently supports the following classes:
 * [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
 * [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
 * [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
+* [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
 """
 
-SecretAdapter = _t.Union[VaultSecret, KubernetesSecret, GoogleSecret]
+SecretAdapter = _t.Union[VaultSecret, KubernetesSecret, GoogleSecret, AwsSecret]
 """Secrets adapter type.
 
 Currently supports the following classes:
@@ -34,6 +37,7 @@ Currently supports the following classes:
 * [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
 * [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
 * [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
+* [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
 """
 
 
@@ -153,6 +157,7 @@ class ConfigManager(BaseConfiguration):
         - `consul`: returns an instance of [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
         - `kubernetes`: returns an instance of [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
         - `google`: returns an instance of [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
+        - `aws`: returns an instance of [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
         """
         adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul")
 
@@ -164,6 +169,9 @@ class ConfigManager(BaseConfiguration):
 
         if adapter == "google":
             return GoogleConfig()
+
+        if adapter == "aws":
+            return AwsConfig()
 
         raise ValueError(f"Unsupported config adapter {adapter!r}")
 
@@ -195,6 +203,7 @@ class SecretManager(BaseConfiguration):
         - `vault`: returns an instance of [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
         - `kubernetes`: returns an instance of [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
         - `google`: returns an instance of [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
+        - `aws`: returns an instance of [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
         """
         adapter = os.environ.get("CN_SECRET_ADAPTER", "vault")
 
@@ -206,6 +215,9 @@ class SecretManager(BaseConfiguration):
 
         if adapter == "google":
             return GoogleSecret()
+
+        if adapter == "aws":
+            return AwsSecret()
 
         raise ValueError(f"Unsupported secret adapter {adapter!r}")
 

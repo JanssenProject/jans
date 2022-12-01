@@ -89,6 +89,17 @@ spec:
         {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
+        {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+        - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
+          name: aws-shared-credential-file
+          subPath: aws_shared_credential_file
+        - mountPath: {{ .Values.global.cnAwsConfigFile }}
+          name: aws-config-file
+          subPath: aws_config_file
+        - mountPath: {{ .Values.global.cnAwsSecretsReplicaRegionsFile }}
+          name: aws-secrets-replica-regions
+          subPath: aws_secrets_replica_regions
+        {{- end }}
         {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
           name: google-sa
@@ -118,6 +129,26 @@ spec:
       volumes:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+        - name: aws-shared-credential-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_shared_credential_file
+                path: aws_shared_credential_file
+        - name: aws-config-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_config_file
+                path: aws_config_file
+        - name: aws-secrets-replica-regions
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_secrets_replica_regions
+                path: aws_secrets_replica_regions
       {{- end }}
       {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - name: google-sa
