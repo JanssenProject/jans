@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
-import io.jans.as.model.uma.JsonLogicNode;
-import io.jans.as.model.uma.JsonLogicNodeParser;
 
 import java.io.Serializable;
 import java.util.List;
@@ -19,9 +17,9 @@ import java.util.Map;
 public class RsResource implements Serializable {
 
     @JsonProperty(value = "path")
-    String path;
+    private String path;
     @JsonProperty(value = "conditions")
-    List<Condition> conditions;
+    private List<Condition> conditions;
     @JsonProperty(value = "iat")
     private Integer iat;
     @JsonProperty(value = "exp")
@@ -72,13 +70,21 @@ public class RsResource implements Serializable {
     public List<String> getScopesForTicket(String httpMethod) {
         Condition condition = getConditionMap().get(httpMethod);
         if (condition.getScopeExpression() != null) {
-            final JsonLogicNode node = JsonLogicNodeParser.parseNode(condition.getScopeExpression().toString());
+            final JsonLogicNode node = parseNode(condition.getScopeExpression().toString());
             if (node != null) {
                 return node.getData(); // return all scopes defined in "data" of json object
             }
         }
         return condition.getTicketScopes() != null && !condition.getTicketScopes().isEmpty() ?
                 condition.getTicketScopes() : condition.getScopes();
+    }
+
+    public static JsonLogicNode parseNode(String json) {
+        try {
+            return Jackson.createJsonMapper().readValue(json, JsonLogicNode.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public Map<String, Condition> getConditionMap() {
