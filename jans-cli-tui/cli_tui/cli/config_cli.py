@@ -1538,6 +1538,8 @@ class JCA_CLI:
 
 def main():
 
+    if len(sys.argv) < 2:
+        print("\u001b[38;5;{}mNo arguments were provided. Type {} -h to get help.\u001b[0m".format(warning_color, os.path.realpath(__file__)))
 
     error_log_file = os.path.join(log_dir, 'cli_eorror.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
