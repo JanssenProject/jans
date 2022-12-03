@@ -438,6 +438,7 @@ class JCA_CLI:
                 self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
 
         self.openid_configuration = response.json()
+        self.cli_logger.debug("OpenID Config: %s", self.openid_configuration)
 
         return True
 
