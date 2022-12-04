@@ -168,6 +168,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
+        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
+
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.GET);
         authzRequest.setScope(scope);
@@ -209,6 +211,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
+
+        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.POST);
