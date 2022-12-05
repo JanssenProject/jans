@@ -8,7 +8,7 @@ package io.jans.as.server.uma.ws.rs;
 
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaScopeDescription;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
 import org.jboss.arquillian.test.api.ArquillianResource;

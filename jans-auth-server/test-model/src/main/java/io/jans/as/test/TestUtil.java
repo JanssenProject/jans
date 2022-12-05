@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.model.uma;
+package io.jans.as.test;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
