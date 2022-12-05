@@ -590,12 +590,9 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-model</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
+			<artifactId>jans-auth-test-model</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>

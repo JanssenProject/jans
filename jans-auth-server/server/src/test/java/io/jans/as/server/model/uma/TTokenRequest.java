@@ -17,7 +17,7 @@ import io.jans.as.model.uma.RPTResponse;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaScopeType;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.server.BaseTest;
