@@ -1048,17 +1048,17 @@ class JCA_CLI:
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
         )
+
         self.log_response(response)
-        
+
         if self.wrapped:
             return response
-        
+
         if response.status_code in (404, 401):
             if response.text == 'ID Token is expired':
                 self.access_token = None
                 self.get_access_token(security)
-                self.get_requests(endpoint, params)
-                return
+                return self.get_requests(endpoint, params)
             else:
                 print(self.colored_text("Server returned {}".format(response.status_code), error_color))
                 print(self.colored_text(response.text, error_color))
@@ -1066,7 +1066,6 @@ class JCA_CLI:
 
         try:
             return response.json()
-            print(response.status_code)
         except Exception as e:
             print("An error ocurred while retrieving data")
             self.print_exception(e)
