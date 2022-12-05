@@ -5,7 +5,7 @@ import io.jans.as.model.error.ErrorResponse;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 
-import static io.jans.as.model.uma.TestUtil.assertNotBlank;
+import static io.jans.as.test.TestUtil.assertNotBlank;
 import static org.testng.Assert.*;
 
 /**

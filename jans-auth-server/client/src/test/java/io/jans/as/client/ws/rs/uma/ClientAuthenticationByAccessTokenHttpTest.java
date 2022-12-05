@@ -43,8 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static io.jans.as.model.uma.UmaTestUtil.assertIt;
+import static io.jans.as.test.UmaTestUtil.assertIt;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
