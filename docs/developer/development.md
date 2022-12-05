@@ -146,3 +146,4 @@ Follow the steps below to configure workspace and run tests for client module.
 
 - Now run client tests by creating intellij run config as below
 
+![](../assets/image-run-integ-test-jans-vm.png)
