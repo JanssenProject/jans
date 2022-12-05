@@ -42,6 +42,7 @@ tags:
 | backchannelTokenDeliveryModesSupported | Backchannel Token Delivery Modes Supported | [Details](#backchanneltokendeliverymodessupported) |
 | backchannelUserCodeParameterSupported | Backchannel User Code Parameter Supported | [Details](#backchannelusercodeparametersupported) |
 | baseEndpoint | The base URL for endpoints | [Details](#baseendpoint) |
+| blockWebviewAuthorizationEnabled | Enable/Disable block authorizations that originate from Webview (Mobile apps). | [Details](#blockwebviewauthorizationenabled) |
 | changeSessionIdOnAuthentication | Boolean value specifying whether change session_id on authentication. Default value is true | [Details](#changesessionidonauthentication) |
 | checkSessionIFrame | URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API | [Details](#checksessioniframe) |
 | checkUserPresenceOnRefreshToken | Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check. | [Details](#checkuserpresenceonrefreshtoken) |
@@ -551,6 +552,15 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+### blockWebviewAuthorizationEnabled
+
+- Description: Enable/Disable block authorizations that originate from Webview (Mobile apps).
+
+- Required: No
+
+- Default value: false
 
 
 ### changeSessionIdOnAuthentication
