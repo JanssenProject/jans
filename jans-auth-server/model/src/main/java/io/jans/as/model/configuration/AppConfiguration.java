@@ -809,6 +809,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "SSA Configuration")
     private SsaConfiguration ssaConfiguration;
 
+    @DocProperty(description = "Enable/Disable block authorizations that originate from Webview (Mobile apps).", defaultValue = "false")
+    private Boolean blockWebviewAuthorizationEnabled = false;
+
     public List<SsaValidationConfig> getDcrSsaValidationConfigs() {
         if (dcrSsaValidationConfigs == null) dcrSsaValidationConfigs = new ArrayList<>();
         return dcrSsaValidationConfigs;
@@ -3084,5 +3087,13 @@ public class AppConfiguration implements Configuration {
 
     public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
         this.ssaConfiguration = ssaConfiguration;
+    }
+
+    public Boolean getBlockWebviewAuthorizationEnabled() {
+        return blockWebviewAuthorizationEnabled;
+    }
+
+    public void setBlockWebviewAuthorizationEnabled(Boolean blockWebviewAuthorizationEnabled) {
+        this.blockWebviewAuthorizationEnabled = blockWebviewAuthorizationEnabled;
     }
 }

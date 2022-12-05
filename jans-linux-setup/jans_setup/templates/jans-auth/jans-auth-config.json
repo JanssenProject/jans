@@ -497,5 +497,6 @@
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
         }
-    }
+    },
+    "blockWebviewAuthorizationEnabled": false
 }
