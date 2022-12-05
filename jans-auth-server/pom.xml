@@ -99,14 +99,14 @@
 	</scm>
 
 	<modules>
-		<module>model</module>
-		<module>persistence-model</module>
-		<module>client</module>
-		<module>static</module>
-		<module>common</module>
-		<module>server</module>
-		<module>test-model</module>
-  </modules>
+        <module>model</module>
+        <module>persistence-model</module>
+        <module>test-model</module>
+        <module>client</module>
+        <module>static</module>
+        <module>common</module>
+        <module>server</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>
