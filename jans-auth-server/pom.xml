@@ -101,11 +101,12 @@
 	<modules>
 		<module>model</module>
 		<module>persistence-model</module>
-		<module>client</module>
-		<module>static</module>
-		<module>common</module>
-		<module>server</module>
-  </modules>
+        <module>test-model</module>
+        <module>client</module>
+        <module>static</module>
+        <module>common</module>
+        <module>server</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>
