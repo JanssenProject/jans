@@ -10053,25 +10053,26 @@
     Janssen's FIDO2 server
   </a>
   
-    <nav class="md-nav" aria-label="Janssen's FIDO2 server">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization-authentication-flow-using-interception-script" class="md-nav__link">
+    Customization authentication flow using Interception script
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     References
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#tools" class="md-nav__link">
     Tools
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -10115,13 +10116,16 @@
 <h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
 <h2 id="janssens-fido2-server">Janssen's FIDO2 server<a class="headerlink" href="#janssens-fido2-server" title="Permanent link">#</a></h2>
 <p>FIDO2 as an open standard for authentication is based on public key cryptography.</p>
-<p>Janssen's FIDO2 server - a component inside the Janssen project enables users of RPs to enroll and authenticate themselves using U2F keys, FIDO2 keys or inbuilt platform authenticator.
-1. The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.
-2. The FIDO2 server implements the <a href="https://fidoalliance.org/metadata/metadata-service-overview/">FIDO Metadata Service (MDS3)</a> defined by FIDO Alliance.
-3. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (LDAP, MYSQL, Couchbase etc.)</p>
-<p>Janssen's FIDO server is a standalone server communicates with the RP using an API which can be obtained by querying the following URL :
-<code>https://&lt;myjans-server&gt;/.well-known/fido2-configuration</code>
-Response:</p>
+<p>Janssen's FIDO2 server - a component inside the Janssen project enables users of RPs to enroll and authenticate themselves using U2F keys, FIDO2 keys or inbuilt platform authenticator.</p>
+<ol>
+<li>The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.</li>
+<li>The FIDO2 server implements the <a href="https://fidoalliance.org/metadata/metadata-service-overview/">FIDO Metadata Service (MDS3)</a> defined by FIDO Alliance.</li>
+<li>The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (LDAP, MYSQL, Couchbase etc.)</li>
+</ol>
+<p>Janssen's FIDO server is a standalone server communicates with the RP using an API which can be obtained by querying the following URL :</p>
+<div class="highlight"><pre><span></span><code>https://&lt;myjans-server&gt;/.well-known/fido2-configuration
+</code></pre></div>
+<p>Response:</p>
 <div class="codehilite"><pre><span></span><code>```
 {
   &quot;version&quot;: &quot;1.1&quot;,
@@ -10140,14 +10144,14 @@ Response:</p>
 ```
 </code></pre></div>
 
-<p>### Customization authentication flow using Interception script
-  In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found <a href="../../script-catalog/person_authentication/fido2-external-authenticator/README">here</a>.</p>
-<h3 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h3>
+<h2 id="customization-authentication-flow-using-interception-script">Customization authentication flow using Interception script<a class="headerlink" href="#customization-authentication-flow-using-interception-script" title="Permanent link">#</a></h2>
+<p>In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found <a href="../../script-catalog/person_authentication/fido2-external-authenticator/README">here</a>.</p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h2>
 <ol>
 <li>https://www.w3.org/TR/webauthn-2/</li>
 <li>http://fidoalliance.org/specs/mds/fido-metadata-statement-v3.0-ps-20210518.html</li>
 </ol>
-<h3 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">#</a></h3>
+<h2 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">#</a></h2>
 <ol>
 <li>https://jwt.io/ – For JWT decoding and debugging</li>
 <li>https://www.base64decode.org/ – For Decoding Base64 to UTF8</li>
@@ -10159,7 +10163,7 @@ Response:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-14T11:14:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-14</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-05T05:24:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-05</span>
       
         <br>
         Created:

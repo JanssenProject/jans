@@ -2914,6 +2914,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#signed-dcr-and-ssa-validation" class="md-nav__link">
+    Signed DCR and SSA validation
+  </a>
+  
+    <nav class="md-nav" aria-label="Signed DCR and SSA validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signed-dcr-validation" class="md-nav__link">
+    Signed DCR validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssa-validation" class="md-nav__link">
+    SSA Validation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#customizing-the-behavior-of-the-as-using-interception-script" class="md-nav__link">
     Customizing the behavior of the AS using Interception script
   </a>
@@ -10287,6 +10314,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#signed-dcr-and-ssa-validation" class="md-nav__link">
+    Signed DCR and SSA validation
+  </a>
+  
+    <nav class="md-nav" aria-label="Signed DCR and SSA validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signed-dcr-validation" class="md-nav__link">
+    Signed DCR validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssa-validation" class="md-nav__link">
+    SSA Validation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#customizing-the-behavior-of-the-as-using-interception-script" class="md-nav__link">
     Customizing the behavior of the AS using Interception script
   </a>
@@ -10374,6 +10428,7 @@
 <li>For OpenID Connect relying parties - <a href="https://openid.net/specs/openid-connect-registration-1_0.html">OpenID Connect Dynamic Client Registration 1.0</a>.</li>
 <li>For OAuth 2.0 client (without OpenID Connect features) - <a href="https://tools.ietf.org/html/rfc7591">OAuth 2.0 Dynamic Client Registration Protocol - RFC 7591</a>.</li>
 <li>CRUD operations on client - <a href="https://tools.ietf.org/html/rfc7592">OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592</a>.</li>
+<li><a href="https://openbanking.atlassian.net/wiki/spaces/DZ/pages/36667724/OpenBanking+OpenID+Dynamic+Client+Registration+Specification+-+v1.0.0-rc2#OpenBankingOpenIDDynamicClientRegistrationSpecification-v1.0.0-rc2-ClientRegistrationRequest">OpenBanking OpenID Dynamic Client Registration</a> </li>
 </ol>
 <h3 id="client-registration-endpoint">Client Registration endpoint<a class="headerlink" href="#client-registration-endpoint" title="Permanent link">#</a></h3>
 <p>The URI to dynamically register a client to a Janssen Auth Server can be found by checking the <code>registration_endpoint</code> claim of the OpenID Connect configuration reponse, typically deployed at <code>https://&lt;my.jans.server&gt;/.well-known/openid-configuration</code></p>
@@ -10642,6 +10697,110 @@ Output:
   &quot;description&quot;: &quot;string&quot;
 }
 </code></pre></div></p>
+<h3 id="signed-dcr-and-ssa-validation">Signed DCR and SSA validation<a class="headerlink" href="#signed-dcr-and-ssa-validation" title="Permanent link">#</a></h3>
+<p>In OpenBanking case DCR (Dynamic Client Request) is signed and must contain SSA (Software Statement Assertion) inside it.</p>
+<p>Non-Normative Example:
+<div class="highlight"><pre><span></span><code>POST /register HTTP/1.1
+Content-Type: application/jwt
+Accept: application/json
+Host: auth.bankone.com
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
+</code></pre></div></p>
+<p>Decoded DCR Example:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;typ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JWT&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ABCD1234&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Amazon TPPID&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1492760444</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1524296444</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://authn.gluu.org&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid makepayment&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;private_key_jwt&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;refresh_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;client_credentials&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id_token_signed_response_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;request_object_signing_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;software_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;65d1f27c-4aea-4549-9c21-60e495a7a86f&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;software_statement&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlbXB0eSIsInN1YiI6IjEyMzQ1Njc4OTAiLCJuYW1lIjoiSm9obiBEb2UiLCJhZG1pbiI6dHJ1ZSwic2NvcGUiOiJzY29wZTEgc2NvcGUyIiwiY2xhaW1zIjoiY2xhaW0xIGNsYWltMiIsImlhdCI6MTY2OTgwNjc2MywiZXhwIjoxNjY5ODEwMzYzfQ.db0WQh2lmHkNYCWT8tSW684hqWTPJDTElppy42XM_lc&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">Sig</span><span class="kc">nature</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>AS has <code>dcrSsaValidationConfigs</code> configuration value which holds json array. It can be used to validated both DCR and SSA.</p>
+<p>Single item of this array has following properties:</p>
+<ul>
+<li><strong>id</strong> - REQUIRED primary key for the entity</li>
+<li><strong>type</strong> - REQUIRED either <code>ssa</code> or <code>dcr</code></li>
+<li><strong>displayName</strong> - Human friendly name in case we build an admin GUI for this  </li>
+<li><strong>description</strong> - Human friendly details </li>
+<li><strong>scope</strong> - For SSA only -- list of allowed scopes the issuer can enable the client to request automatically. If not present, all scopes are allowed.</li>
+<li><strong>allowed_claims</strong> - Any claims not listed in this list will be dropped. If not present, all claims are allowed.</li>
+<li><strong>jwks</strong> - Public key </li>
+<li><strong>jwks_uri</strong> - URI of public key</li>
+<li><strong>issuers</strong> - For MTLS, list of issuers trusted </li>
+<li><strong>configuration_endpoint</strong> - points to discovery page, e.g. <code>https://examle.com/.well-known/openid-configuration</code></li>
+<li><strong>configuration_endpoint_claim</strong> - e.g. <code>ssa_jwks_endpoint</code></li>
+<li><strong>shared_secret</strong> -  for MTLS HMAC</li>
+</ul>
+<p>One of <code>jwks</code>, <code>jwks_uri</code> or <code>issuers</code> or <code>configuration_endpoint</code> is required.</p>
+<p>Non-normative example of <code>dcrSsaValidationConfigs</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;735ee1c0-895d-4398-9c1b-9ad852257cc0&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DCR&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;scopes&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;write&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;allowedClaims&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;iat&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;jwks&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{jwks here}&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;issuers&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sharedSecret&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;secret&quot;</span><span class="w"></span>
+<span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7907cd0b-0f9f-4b4f-aaa2-0d0614546246&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SSA&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;scopes&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;my_read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;my_write&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;allowedClaims&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;test_exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;test_iat&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;jwks&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{jwks here}&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;issuers&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;jans-auth&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sharedSecret&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;secret&quot;</span><span class="w"></span>
+<span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1e95c9b1-04d0-4440-9362-88f4e1e62d76&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SSA&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;jwks&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{jwks here}&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;issuers&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;empty&quot;</span><span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sharedSecret&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;secret&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+</code></pre></div>
+<h4 id="signed-dcr-validation">Signed DCR validation<a class="headerlink" href="#signed-dcr-validation" title="Permanent link">#</a></h4>
+<p>DCR can be validated with two approaches.</p>
+<p><strong>Via <code>dcrSsaValidationConfigs</code> configuration property - RECOMMENDED</strong></p>
+<p>When create entry in <code>dcrSsaValidationConfigs</code> configuration property :
+- <code>type</code> MUST be equal to <code>DCR</code> value
+- <code>issuers</code> MUST have value which equals to <code>iss</code> claim in DCR.</p>
+<p><strong>Via other configuration properties</strong></p>
+<ul>
+<li><strong>dcrSignatureValidationJwks</strong> - specifies JWKS for DCR's validations</li>
+<li><strong>dcrSignatureValidationJwksUri</strong> - specifies JWKS URI for  DCR's validations</li>
+<li><strong>dcrIssuers</strong> - List of issues if MTLS private key is used to sign DCR JWT</li>
+<li><strong>dcrSignatureValidationSharedSecret</strong> - if HMAC is used, this is the shared secret</li>
+<li><strong>dcrSignatureValidationEnabled</strong> - boolean value enables DCR signature validation. Default is false</li>
+<li><strong>dcrSignatureValidationSoftwareStatementJwksURIClaim</strong> - specifies claim name inside software statement. Value of claim should point to JWKS URI</li>
+<li><strong>dcrSignatureValidationSoftwareStatementJwksClaim</strong> - specifies claim name inside software statement. Value of claim should point to inlined JWKS </li>
+<li><strong>dcrAuthorizationWithClientCredentials</strong> - boolean value indicating if DCR authorization to be performed using client credentials</li>
+</ul>
+<h4 id="ssa-validation">SSA Validation<a class="headerlink" href="#ssa-validation" title="Permanent link">#</a></h4>
+<p>SSA is validated based on <code>softwareStatementValidationType</code> which is enum.</p>
+<ol>
+<li><strong>softwareStatementValidationType</strong>=<em>builtin</em> - validation is performed against <code>dcrSsaValidationConfigs</code> configuration property, where</li>
+<li><code>type</code> MUST be equal to <code>SSA</code> value</li>
+<li><code>issuers</code> MUST have value which equals to <code>iss</code> claim in DCR.</li>
+<li><strong>softwareStatementValidationType</strong>=<em>script</em> - jwks and hmac secret are returned by dynamic client registration script</li>
+<li><strong>softwareStatementValidationType</strong>=<em>jwks_uri</em>, allows to specify jwks_uri claim name from software_statement. Claim name specified by <code>softwareStatementValidationClaimName</code> configuration property.</li>
+<li><strong>softwareStatementValidationType</strong>=<em>jwks</em>, allows to specify jwks claim name from software_statement. Claim name specified by <code>softwareStatementValidationClaimName</code> configuration property.</li>
+<li><strong>softwareStatementValidationType</strong>=<em>none</em>, no validation.</li>
+</ol>
 <h3 id="customizing-the-behavior-of-the-as-using-interception-script">Customizing the behavior of the AS using Interception script<a class="headerlink" href="#customizing-the-behavior-of-the-as-using-interception-script" title="Permanent link">#</a></h3>
 <p>Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the <a href="https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3">Software Statement</a> that is sent with the registration request.</p>
 <p>Further reading <a href="../../../developer/scripts/client-registration/">here</a></p>
@@ -10654,7 +10813,7 @@ Output:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T14:26:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-01T16:14:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-01</span>
       
         <br>
         Created:
