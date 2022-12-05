@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#overview" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -5934,9 +5939,79 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Config and Secret Keys
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Config and Secret Keys
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jans-configmaps" class="md-nav__link">
+    Jans Configmaps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jans-secrets" class="md-nav__link">
+    Jans Secrets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-decoding-secrets" class="md-nav__link">
+    Example decoding secrets
+  </a>
+  
+    <nav class="md-nav" aria-label="Example decoding secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-base64-decoded-secrets" class="md-nav__link">
+    Opening base64 decoded secrets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#opening-etccertsopendjpkcs12-file" class="md-nav__link">
+    Opening /etc/certs/opendj.pkcs12 file
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10045,6 +10120,62 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jans-configmaps" class="md-nav__link">
+    Jans Configmaps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jans-secrets" class="md-nav__link">
+    Jans Secrets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-decoding-secrets" class="md-nav__link">
+    Example decoding secrets
+  </a>
+  
+    <nav class="md-nav" aria-label="Example decoding secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-base64-decoded-secrets" class="md-nav__link">
+    Opening base64 decoded secrets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#opening-etccertsopendjpkcs12-file" class="md-nav__link">
+    Opening /etc/certs/opendj.pkcs12 file
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -10075,6 +10206,16 @@
         <span class="md-tag">kubernetes</span>
       
     
+      
+      
+        <span class="md-tag">configmap</span>
+      
+    
+      
+      
+        <span class="md-tag">secret</span>
+      
+    
   </nav>
 
 
@@ -10087,14 +10228,358 @@
 
   <h1>Config and Secret Keys</h1>
 
-<p>This is a placeholder</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>The Config Init job creates a set of secrets and configurations used by all Jans services.</p>
+<p>To check the values of the configmaps on the current deployment run:</p>
+<div class="highlight"><pre><span></span><code>kubectl get configmap -n jans -o yaml
+</code></pre></div>
+<p>To check the values of the secrets on the current deployment run :</p>
+<div class="highlight"><pre><span></span><code>kubectl get secret -n jans -o yaml
+</code></pre></div>
+<h2 id="jans-configmaps">Jans Configmaps<a class="headerlink" href="#jans-configmaps" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Example Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>admin_email</code></td>
+<td><code>support@jans.io</code></td>
+</tr>
+<tr>
+<td><code>admin_inum</code></td>
+<td><code>631e2b84-1d3d-4f28-9a9a-026a25febf44</code></td>
+</tr>
+<tr>
+<td><code>auth_enc_keys</code></td>
+<td><code>RSA1_5 RSA-OAEP</code></td>
+</tr>
+<tr>
+<td><code>auth_key_rotated_at</code></td>
+<td><code>1669143906</code></td>
+</tr>
+<tr>
+<td><code>auth_legacyIdTokenClaims</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>auth_openid_jks_fn</code></td>
+<td><code>/etc/certs/auth-keys.jks</code></td>
+</tr>
+<tr>
+<td><code>auth_openid_jwks_fn</code></td>
+<td><code>/etc/certs/auth-keys.json</code></td>
+</tr>
+<tr>
+<td><code>auth_openidScopeBackwardCompatibility</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>auth_sig_keys</code></td>
+<td><code>RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512</code></td>
+</tr>
+<tr>
+<td><code>city</code></td>
+<td><code>Austin</code></td>
+</tr>
+<tr>
+<td><code>couchbaseTrustStoreFn</code></td>
+<td><code>/etc/certs/couchbase.pkcs12</code></td>
+</tr>
+<tr>
+<td><code>country_code</code></td>
+<td><code>US</code></td>
+</tr>
+<tr>
+<td><code>default_openid_jks_dn_name</code></td>
+<td><code>CN=Janssen Auth CA Certificates</code></td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td><code>demoexample.jans.io</code></td>
+</tr>
+<tr>
+<td><code>jca_client_id</code></td>
+<td><code>1800.ca41fad2-6ab6-46b1-b4a9-3387992a8cb0</code></td>
+</tr>
+<tr>
+<td><code>ldap_binddn</code></td>
+<td><code>cn=directory manager</code></td>
+</tr>
+<tr>
+<td><code>ldap_init_host</code></td>
+<td><code>localhost</code></td>
+</tr>
+<tr>
+<td><code>ldap_init_port</code></td>
+<td><code>1636</code></td>
+</tr>
+<tr>
+<td><code>ldap_port</code></td>
+<td><code>1389</code></td>
+</tr>
+<tr>
+<td><code>ldap_site_binddn</code></td>
+<td><code>cn=directory manager</code></td>
+</tr>
+<tr>
+<td><code>ldapTrustStoreFn</code></td>
+<td><code>/etc/certs/opendj.pkcs12</code></td>
+</tr>
+<tr>
+<td><code>ldaps_port</code></td>
+<td><code>1636</code></td>
+</tr>
+<tr>
+<td><code>optional_scopes</code></td>
+<td><code>["fido2", "scim", "sql"]</code></td>
+</tr>
+<tr>
+<td><code>orgName</code></td>
+<td><code>Janssen</code></td>
+</tr>
+<tr>
+<td><code>role_based_client_id</code></td>
+<td><code>2000.4a8f3e8b-96b0-435a-8427-a287c242f4d9</code></td>
+</tr>
+<tr>
+<td><code>scim_client_id</code></td>
+<td><code>12</code></td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td><code>TX</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="jans-secrets">Jans Secrets<a class="headerlink" href="#jans-secrets" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Encode/Decode</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auth_jks_base64</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>auth_openid_jks_pass</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>auth_openid_key_base64</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>couchbase_password</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>couchbase_shib_user_password</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>couchbase_superuser_password</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>encoded_admin_password</code></td>
+<td>ldap_encode + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>encoded_ldapTrustStorePass</code></td>
+<td>pyDes + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>encoded_ox_ldap_pw</code></td>
+<td>pyDes + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>encoded_salt</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>jca_client_encoded_pw</code></td>
+<td>pyDes + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>jca_client_pw</code></td>
+<td>pyDes + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>ldap_pkcs12_base64</code></td>
+<td>pyDes + base64</td>
+<td>/etc/certs/opendj.pkcs12</td>
+</tr>
+<tr>
+<td><code>ldap_ssl_cacert</code></td>
+<td>pyDes + base64</td>
+<td>/etc/certs/opendj.pem</td>
+</tr>
+<tr>
+<td><code>ldap_ssl_cert</code></td>
+<td>pyDes + base64</td>
+<td>/etc/certs/opendj.crt</td>
+</tr>
+<tr>
+<td><code>ldap_ssl_key</code></td>
+<td>pyDes + base64</td>
+<td>/etc/certs/opendj.key</td>
+</tr>
+<tr>
+<td><code>ldap_truststore_pass</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>otp_configuration</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>pairwiseCalculationKey</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>pairwiseCalculationSalt</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>role_based_client_encoded_pw</code></td>
+<td>pyDes + base64</td>
+<td>/etc/certs/jans-radius.jks</td>
+</tr>
+<tr>
+<td><code>role_based_client_pw</code></td>
+<td>pyDes + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>scim_client_encoded_pw</code></td>
+<td>pyDes + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>scim_client_pw</code></td>
+<td>pyDes + base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>sql_password</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>ssl_ca_cert</code></td>
+<td>base64</td>
+<td>/etc/certs/ca.crt</td>
+</tr>
+<tr>
+<td><code>ssl_ca_key</code></td>
+<td>base64</td>
+<td>/etc/certs/ca.key</td>
+</tr>
+<tr>
+<td><code>ssl_cert</code></td>
+<td>base64</td>
+<td>/etc/certs/web_https.crt</td>
+</tr>
+<tr>
+<td><code>ssl_csr</code></td>
+<td>base64</td>
+<td>/etc/certs/web_https.csr</td>
+</tr>
+<tr>
+<td><code>ssl_key</code></td>
+<td>base64</td>
+<td>/etc/certs/web_https.key</td>
+</tr>
+<tr>
+<td><code>super_gluu_creds</code></td>
+<td>base64</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="example-decoding-secrets">Example decoding secrets<a class="headerlink" href="#example-decoding-secrets" title="Permanent link">#</a></h2>
+<h3 id="opening-base64-decoded-secrets">Opening <code>base64 decoded</code> secrets<a class="headerlink" href="#opening-base64-decoded-secrets" title="Permanent link">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We assume Jans is installed in a namespace called <code>jans</code></p>
+</div>
+<ol>
+<li>
+<p>Get the <code>tls-certificate</code> from backend secret</p>
+<div class="highlight"><pre><span></span><code>kubectl get secret tls-certificate -n jans -o yaml
+</code></pre></div>
+</li>
+<li>
+<p>Copy the value of the key you want to decode. For example:
+    <div class="highlight"><pre><span></span><code>data:
+  tls.crt: &lt;encodedValue&gt;
+</code></pre></div></p>
+</li>
+<li>
+<p>Base64 decode the value</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span> &lt;encodedValue&gt; <span class="p">|</span> base64 -d <span class="c1">#replace encodedValue with the value from the previous command</span>
+</code></pre></div>
+</li>
+</ol>
+<h3 id="opening-etccertsopendjpkcs12-file">Opening <code>/etc/certs/opendj.pkcs12</code> file<a class="headerlink" href="#opening-etccertsopendjpkcs12-file" title="Permanent link">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We assume Jans is installed in a namespace called <code>jans</code></p>
+</div>
+<ol>
+<li>
+<p>Make a directory called <code>delete_me</code></p>
+<div class="highlight"><pre><span></span><code>mkdir delete_me <span class="o">&amp;&amp;</span> <span class="nb">cd</span> delete_me
+</code></pre></div>
+</li>
+<li>
+<p>Get the <code>ldap_truststore_pass</code>  from backend secret and save <code>ldap_truststore_pass</code>  in a file called <code>ldap_truststore_pass</code></p>
+<div class="highlight"><pre><span></span><code>kubectl get secret cn -o json -n jans <span class="p">|</span> grep <span class="s1">&#39;&quot;ldap_truststore_pass&quot;:&#39;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s#.*:\(\)#\1#&#39;</span> <span class="p">|</span> tr -d <span class="s1">&#39;&quot;&#39;</span> <span class="p">|</span> tr -d <span class="s2">&quot;,&quot;</span> <span class="p">|</span> tr -d <span class="s1">&#39;[:space:]&#39;</span> &gt; ldap_truststore_pass
+</code></pre></div>
+</li>
+<li>
+<p>Base64 decode the <code>ldap_truststore_pass</code> and save the decoded <code>ldap_truststore_pass</code> in a file called <code>ldap_truststore_pass_decoded</code></p>
+<div class="highlight"><pre><span></span><code>base64 -d ldap_truststore_pass &gt; ldap_truststore_pass_decoded
+</code></pre></div>
+</li>
+<li>
+<p>Use <code>ldap_truststore_pass_decoded</code> to unlock <code>/etc/certs/opendj.pkcs12</code> in opendj pod.</p>
+<div class="highlight"><pre><span></span><code>keytool -list -v -keystore /etc/certs/opendj.pkcs12 --storepass ldap_truststore_pass_decoded
+</code></pre></div>
+</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-05T09:21:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-05</span>
       
         <br>
         Created:
