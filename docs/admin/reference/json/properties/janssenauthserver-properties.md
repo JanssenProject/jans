@@ -74,6 +74,7 @@ tags:
 | dcrSignatureValidationSharedSecret | Specifies shared secret for Dynamic Client Registration | [Details](#dcrsignaturevalidationsharedsecret) |
 | dcrSignatureValidationSoftwareStatementJwksClaim | Specifies claim name inside software statement. Value of claim should point to inlined JWKS | [Details](#dcrsignaturevalidationsoftwarestatementjwksclaim) |
 | dcrSignatureValidationSoftwareStatementJwksURIClaim | Specifies claim name inside software statement. Value of claim should point to JWKS URI | [Details](#dcrsignaturevalidationsoftwarestatementjwksuriclaim) |
+| dcrSsaValidationConfigs | DCR SSA Validation configurations used to perform validation of SSA or DCR | [Details](#dcrssavalidationconfigs) |
 | defaultSignatureAlgorithm | The default signature algorithm to sign ID Tokens | [Details](#defaultsignaturealgorithm) |
 | defaultSubjectType | The default subject type used for dynamic client registration | [Details](#defaultsubjecttype) |
 | deviceAuthzEndpoint | URL for the Device Authorization | [Details](#deviceauthzendpoint) |
@@ -229,7 +230,7 @@ tags:
 | softwareStatementValidationClaimName | Validation claim name for software statement | [Details](#softwarestatementvalidationclaimname) |
 | softwareStatementValidationType | Validation type used for software statement | [Details](#softwarestatementvalidationtype) |
 | spontaneousScopeLifetime | The lifetime of spontaneous scope in seconds | [Details](#spontaneousscopelifetime) |
-| ssaConfiguration |  | [Details](#ssaconfiguration) |
+| ssaConfiguration | SSA Configuration | [Details](#ssaconfiguration) |
 | statAuthorizationScope | Scope required for Statistical Authorization | [Details](#statauthorizationscope) |
 | staticDecryptionKid | Specifies static decryption Kid | [Details](#staticdecryptionkid) |
 | staticKid | Specifies static Kid | [Details](#statickid) |
@@ -834,6 +835,15 @@ tags:
 ### dcrSignatureValidationSoftwareStatementJwksURIClaim
 
 - Description: Specifies claim name inside software statement. Value of claim should point to JWKS URI
+
+- Required: No
+
+- Default value: None
+
+
+### dcrSsaValidationConfigs
+
+- Description: DCR SSA Validation configurations used to perform validation of SSA or DCR
 
 - Required: No
 
@@ -2237,7 +2247,7 @@ tags:
 
 ### ssaConfiguration
 
-- Description: 
+- Description: SSA Configuration
 
 - Required: No
 
