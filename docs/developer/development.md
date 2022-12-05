@@ -133,10 +133,9 @@ Janssen Server is composed of multiple modules. Below are the instructions for c
 Follow the steps below to configure workspace and run tests for client module.
 
 - Under `jans-auth-server/client/profile` module, make a copy of default profile directory and name the new profile as `janssen2.op.io`
-- Under `jans-auth-server/client/profile/default` directory, Edit `config-oxauth-test-data.properties` file and update the host name in the value of three properties:
+- Under `jans-auth-server/client/profile/default` directory, Edit `config-oxauth-test-data.properties` file and update the host name in the value of following properties:
    - `test.server.name=<old-host>:8443` -> `test.server.name=janssen2.op.io` (Remember to remove the port)
    - `swd.resource=acct:test_user@<old-host>:8443` -> `swd.resource=acct:test_user@janssen2.op.io` (Remember to remove the port)
-   - `clientKeyStoreFile=profiles/<old-profile-name>/client_keystore.p12` -> `clientKeyStoreFile=profiles/janssen2.op.io/client_keystore.p12`
 - now at, `jans-auth-server/client` directory level, run following maven command
 
   ```
@@ -146,3 +145,4 @@ Follow the steps below to configure workspace and run tests for client module.
   this will create new artifacts under `client/target` as per mentioned in profile `default`
 
 - Now run client tests by creating intellij run config as below
+
