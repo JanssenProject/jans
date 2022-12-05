@@ -28,7 +28,7 @@ import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 
-import static io.jans.as.model.uma.UmaTestUtil.assertIt;
+import static io.jans.as.test.UmaTestUtil.assertIt;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
