@@ -10,7 +10,7 @@ tags:
 
 ## Overview
 
-## [Installation]
+## Installation
 
 Installation of a Jans TUI ( Text-Based User Interface ) need a Jans server to be installed as base. After that download and build Jans-ClI-TUI and make it. 
 
