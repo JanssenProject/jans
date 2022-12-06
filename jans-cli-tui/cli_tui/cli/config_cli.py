@@ -46,7 +46,7 @@ config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 sys.path.append(cur_dir)
 
-my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
+my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) or '-scim' in sys.argv else 'jca'
 plugins = []
 
 warning_color = 214
@@ -113,22 +113,22 @@ def get_plugin_name_from_title(title):
 # load yaml files
 cfg_yaml = {}
 op_list = []
-for opmode in os.listdir(os.path.join(cur_dir, 'ops')):
-    cfg_yaml[opmode] = {}
-    for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', opmode, '*.yaml')):
-        fn, ext = os.path.splitext(os.path.basename(yaml_fn))
-        with open(yaml_fn) as f:
-            config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
-            plugin_name = get_plugin_name_from_title(config_['info']['title'])
-            cfg_yaml[opmode][plugin_name] = config_
+cfg_yaml[my_op_mode] = {}
+for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', my_op_mode, '*.yaml')):
+    fn, ext = os.path.splitext(os.path.basename(yaml_fn))
+    with open(yaml_fn) as f:
+        config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
+        plugin_name = get_plugin_name_from_title(config_['info']['title'])
+        cfg_yaml[my_op_mode][plugin_name] = config_
 
-            for path in config_['paths']:
-                for method in config_['paths'][path]:
-                    if isinstance(config_['paths'][path][method], dict):
-                        for tag_ in config_['paths'][path][method].get('tags', []):
-                            tag = get_named_tag(tag_)
-                            if not tag in op_list:
-                                op_list.append(tag)
+        for path in config_['paths']:
+            for method in config_['paths'][path]:
+                if isinstance(config_['paths'][path][method], dict):
+                    for tag_ in config_['paths'][path][method].get('tags', []):
+                        tag = get_named_tag(tag_)
+                        if not tag in op_list:
+                            op_list.append(tag)
+
 
 op_list.sort()
 
@@ -163,6 +163,7 @@ parser.add_argument("--patch-remove", help="Key for remove patch operation. For 
 parser.add_argument("-no-color", help="Do not colorize json dumps", action='store_true')
 parser.add_argument("--log-dir", help="Log directory", default=log_dir)
 parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
+parser.add_argument("-scim", help="SCIM Mode", action='store_true', default=False)
 
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
@@ -1139,15 +1140,21 @@ class JCA_CLI:
             self.print_exception(response.text)
 
 
-    def put_requests(self, endpoint, data):
+    def put_requests(self, endpoint, data, params={}):
 
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
         mime_type = self.get_mime_for_endpoint(endpoint)
 
+        url_param_name = self.get_url_param(endpoint.path)
+
+        url = 'https://{}{}'.format(self.host, endpoint.path)
+        if params and url_param_name in params:
+            url = url.format(**{url_param_name: params.pop(url_param_name)})
+
         response = requests.put(
-                url='https://{}{}'.format(self.host, endpoint.path),
+                url=url,
                 headers=self.get_request_header({'Accept': mime_type}),
                 json=data,
                 verify=self.verify_ssl,
@@ -1209,7 +1216,7 @@ class JCA_CLI:
                 for method in cfg_yaml[my_op_mode][plugin]['paths'][path_name]:
                     path = cfg_yaml[my_op_mode][plugin]['paths'][path_name][method]
                     if isinstance(path, dict):
-                        for tag_ in path['tags']:
+                        for tag_ in path.get('tags', []):
                             tag = get_named_tag(tag_)
                             if tag == op_name:
                                 title = cfg_yaml[my_op_mode][plugin]['info']['title']
@@ -1243,7 +1250,8 @@ class JCA_CLI:
                             break
         if schema_path:
             print()
-            print("To get sample schema type {0} --schema <schma>, for example {0} --schema {2}{1}".format(sys.argv[0], os.path.basename(schema_path), mode_suffix))
+            scim_arg = ' -scim' if '-scim' in sys.argv else ''
+            print("To get sample schema type {0}{3} --schema <schma>, for example {0}{3} --schema {2}{1}".format(sys.argv[0], os.path.basename(schema_path), mode_suffix, scim_arg))
 
     def render_json_entry(self, val):
         if isinstance(val, str) and val.startswith('_file '):
@@ -1328,7 +1336,9 @@ class JCA_CLI:
         if path['__method__'] == 'post':
             response = self.post_requests(endpoint, data)
         elif path['__method__'] == 'put':
-            response = self.put_requests(endpoint, data)
+            params = endpoint_params.copy()
+            params.update(suffix_param)
+            response = self.put_requests(endpoint, data, params)
 
         if self.wrapped:
             return response

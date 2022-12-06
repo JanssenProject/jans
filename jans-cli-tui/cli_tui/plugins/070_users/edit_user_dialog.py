@@ -87,6 +87,10 @@ class EditUserDialog(JansGDialog, DialogUtils):
             for ca in self.data.get('customAttributes', []):
                 if ca['name'] == attribute:
                     values = ca.get('values', [])
+                    #check if there is a bool value
+                    for val in values:
+                        if isinstance(val, bool):
+                            return val
                     if multi:
                         return values
                     ret_val = ', '.join(values)
@@ -153,7 +157,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         for ca in self.data.get('customAttributes', []):
 
-            if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname'):
+            if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname', 'jansActive'):
                 continue
 
             claim_prop = self.get_claim_properties(ca['name'])
@@ -238,7 +242,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         for claim in common_data.users.claims:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
-            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus'):
+            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive'):
                 continue
             claims_list.append((claim['name'], claim['displayName']))
 
