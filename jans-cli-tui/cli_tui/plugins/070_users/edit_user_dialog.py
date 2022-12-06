@@ -86,9 +86,11 @@ class EditUserDialog(JansGDialog, DialogUtils):
         def get_custom_attribute(attribute, multi=False):
             for ca in self.data.get('customAttributes', []):
                 if ca['name'] == attribute:
+                    values = ca.get('values', [])
                     if multi:
-                        return ca['values']
-                    return ', '.join(ca['values'])
+                        return values
+                    ret_val = ', '.join(values)
+                    return ret_val
             return [] if multi else ''
 
         if self.data:
@@ -150,15 +152,20 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 )
 
         for ca in self.data.get('customAttributes', []):
+
             if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname'):
                 continue
+
             claim_prop = self.get_claim_properties(ca['name'])
+
             if claim_prop.get('dataType', 'string') in ('string', 'json'):
+                value = get_custom_attribute(ca['name'])
                 self.edit_user_content.insert(-1, 
-                    self.app.getTitledText(_(claim_prop.get('displayName', ca['name'])), name=ca['name'], value=get_custom_attribute(ca['name']), style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
+                    self.app.getTitledText(_(claim_prop.get('displayName', ca['name'])), name=ca['name'], value=value, style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
                 )
+
             elif claim_prop.get('dataType') == 'boolean':
-                checked = get_custom_attribute(ca['name']).lower() == 'true'
+                checked = get_custom_attribute(ca['value']).lower() == 'true'
                 self.edit_user_content.insert(-1, 
                     self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
                 )
