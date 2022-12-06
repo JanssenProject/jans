@@ -209,13 +209,13 @@ class Plugin(DialogUtils):
             self.app.stop_progressing()
 
             if response.status_code not in (200, 201):
-                self.app.show_message(_("Error getting clients"), str(response.text))
+                self.app.show_message(_("Error getting clients"), str(response.text),tobefocused=self.oauth_containers['clients'])
                 return
 
             try:
                 result = response.json()
             except Exception:
-                self.app.show_message(_("Error getting clients"), str(response.text))
+                self.app.show_message(_("Error getting clients"), str(response.text),tobefocused=self.oauth_containers['clients'])
                 return
 
             data =[]
