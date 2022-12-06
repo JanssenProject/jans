@@ -1,5 +1,6 @@
 ---
 tags:
+- installation
 - administration
 - configuration
 - config
@@ -25,3 +26,20 @@ Installation of a Jans TUI ( Text-Based User Interface ) need a Jans server to b
 ### Run 
 
  - `./config-cli-tui.pyz` 
+
+## Administration
+
+It's possible to manage Janssen server with Jans-Cli-TUI. There are lot of available options here which administrator can use for daily activities. 
+Some of them are stated below. 
+
+This is what it looks like when run `config-cli-tui.pyz`, this is the main panel. ![image](../../assets/Jans_TUI_Main_panel.png)
+
+### Auth Server
+
+### FIDO
+
+### SCIM
+
+### Scripts
+
+### Users
