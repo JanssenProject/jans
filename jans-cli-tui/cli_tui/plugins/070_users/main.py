@@ -155,9 +155,10 @@ class Plugin(DialogUtils):
                         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                         self.app.stop_progressing()
                         if response:
-                            self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.user_list_container)
+                            self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)))
                         else:
                             self.users_list_box.remove_item(kwargs['selected'])
+                        # self.get_users()
                     asyncio.ensure_future(coroutine())
                     break
 
