@@ -3209,6 +3209,28 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Assets of an ADS project",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "adsPrjAssets"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Misc details associated to an ADS project",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "adsPrjDeplDetails"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "jans Display Name Localized",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -4337,6 +4359,28 @@
       ],
       "names": [
         "agmFlow"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansStartDate",
+        "jansActive",
+        "jansEndDate",
+        "adsPrjAssets",
+        "adsPrjDeplDetails"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "adsPrjDeployment"
       ],
       "oid": "jansObjClass",
       "sup": [
