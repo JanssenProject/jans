@@ -83,6 +83,6 @@ jobs:
       - name: "[Pull Request] Report Commit Standard Status"
         if: steps.pr_get_commit_message.outcome != 'success' && github.event_name == 'pull_request'
         run: |
-          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/tree/${{github.head_ref}}) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last commit merging into https://github.com/${{github.repository}}/tree/${{github.base_ref}}. Here is why : ${{ steps.pr_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/tree/$GITHUB_HEAD_REF) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last commit merging into https://github.com/${{github.repository}}/tree/${{github.base_ref}}. Here is why : ${{ steps.pr_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           exit 1
 
