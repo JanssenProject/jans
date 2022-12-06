@@ -9934,6 +9934,73 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#run-integration-tests-with-a-janssen-server-vm" class="md-nav__link">
+    Run Integration Tests with a Janssen Server VM
+  </a>
+  
+    <nav class="md-nav" aria-label="Run Integration Tests with a Janssen Server VM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-setup" class="md-nav__link">
+    Component Setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-janssen-server" class="md-nav__link">
+    Install Janssen Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-developer-workspace" class="md-nav__link">
+    Configure developer workspace
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure developer workspace">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auth-server-client-module" class="md-nav__link">
+    Auth-server client module
+  </a>
+  
+    <nav class="md-nav" aria-label="Auth-server client module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup-certificate" class="md-nav__link">
+    setup certificate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile-setup" class="md-nav__link">
+    Profile setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -10094,6 +10161,73 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#run-integration-tests-with-a-janssen-server-vm" class="md-nav__link">
+    Run Integration Tests with a Janssen Server VM
+  </a>
+  
+    <nav class="md-nav" aria-label="Run Integration Tests with a Janssen Server VM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-setup" class="md-nav__link">
+    Component Setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-janssen-server" class="md-nav__link">
+    Install Janssen Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-developer-workspace" class="md-nav__link">
+    Configure developer workspace
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure developer workspace">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auth-server-client-module" class="md-nav__link">
+    Auth-server client module
+  </a>
+  
+    <nav class="md-nav" aria-label="Auth-server client module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup-certificate" class="md-nav__link">
+    setup certificate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile-setup" class="md-nav__link">
+    Profile setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -10120,15 +10254,18 @@
 <h1 id="developing-for-janssen-project">Developing for Janssen Project<a class="headerlink" href="#developing-for-janssen-project" title="Permanent link">#</a></h1>
 <h2 id="remote-debugging">Remote Debugging<a class="headerlink" href="#remote-debugging" title="Permanent link">#</a></h2>
 <p>Janssen Server modules run as a Java process. Hence, like any other Java process the module
-JVMs can be configured to open a debug port where remote debugger can be attached. Steps below will show how to configure <code>auth-server</code> module for remote debugging.</p>
+JVMs can be configured to open a debug port where a remote debugger can be attached. The steps below will show how to configure <code>auth-server</code> module for remote debugging.</p>
 <ol>
-<li>
-<p>Pass the commandline options to the JVM</p>
-<p>On the Janssen Server host, open the service config file <code>/etc/default/jans-auth</code> and add following JVM parameters to as <code>JAVA_OPTIONS</code></p>
-<p><div class="highlight"><pre><span></span><code>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001
+<li>Pass the command-line options to the JVM</li>
+</ol>
+<p>On the Janssen Server host, open the service config file <code>/etc/default/jans-auth</code> and add the following JVM parameters to as <code>JAVA_OPTIONS</code></p>
+<div class="codehilite"><pre><span></span><code>```
+-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001
+```
 </code></pre></div>
-This will open port 6001 for remote debugger. Any other port can also be used based on availability.</p>
-</li>
+
+<p>This will open port 6001 for the remote debugger. Any other port can also be used based on availability.</p>
+<ol>
 <li>
 <p>Restart <code>jans-auth</code> services</p>
 <div class="highlight"><pre><span></span><code>systemctl restart jans-auth.service
@@ -10136,33 +10273,116 @@ This will open port 6001 for remote debugger. Any other port can also be used ba
 </li>
 <li>
 <p>Check if the port is open and accessible from within the Janssen Server host</p>
-<p>Use <code>jdb</code> tool from JDK to test if the JVM port has been opened</p>
-<div class="highlight"><pre><span></span><code>./&lt;path-to-JDK&gt;/bin/jdb -attach 6001
+</li>
+</ol>
+<p>Use the <code>jdb</code> tool from JDK to test if the JVM port has been opened</p>
+<div class="codehilite"><pre><span></span><code>```
+./&lt;path-to-JDK&gt;/bin/jdb -attach 6001
+```
 </code></pre></div>
-<p>if the port is open, it'll give you output like below:</p>
-<p><div class="highlight"><pre><span></span><code>Set uncaught java.lang.Throwable
+
+<p>if the port is open, it'll give you output like the below:</p>
+<div class="codehilite"><pre><span></span><code>```
+Set uncaught java.lang.Throwable
 Set deferred uncaught java.lang.Throwable
 Initializing jdb ...
 &gt;
+```
 </code></pre></div>
-press ctrl+c to come out of it.</p>
-</li>
+
+<p>press ctrl+c to come out of it.</p>
+<ol>
 <li>
 <p>Ensure that the port is accessible from outside the host VM as well and firewalls are configured accordingly</p>
 </li>
 <li>
-<p>Connect to remote port on Janssen Server host from Janssen workspace. Use any IDE (Intellij, Eclipse etc.) to create and run a remote debugging profile providing IP and debug port of the Janssen Server host.</p>
-<p>For IntelliJIdea, create a debug configuration as below:</p>
-<p><img alt="" src="../../assets/image-jans-remote-debug-intellij.png" /></p>
+<p>Connect to the remote port on the Janssen Server host from the Janssen workspace. Use any IDE (Intellij, Eclipse, etc.) to create and run a remote debugging profile providing IP and debug port of the Janssen Server host.</p>
 </li>
 </ol>
+<p>For IntelliJIdea, create a debug configuration as below:</p>
+<p><img alt="" src="../../assets/image-jans-remote-debug-intellij.png" /></p>
+<h2 id="run-integration-tests-with-a-janssen-server-vm">Run Integration Tests with a Janssen Server VM<a class="headerlink" href="#run-integration-tests-with-a-janssen-server-vm" title="Permanent link">#</a></h2>
+<p>In this guide, we will look at steps to run the Janssen integration test suite against a locally installed Janssen server on the developer machine.</p>
+<h3 id="component-setup">Component Setup<a class="headerlink" href="#component-setup" title="Permanent link">#</a></h3>
+<p><img alt="Component Diagram" src="../../assets/image-run-integration-test-from-workspace-06122022.png" /></p>
+<h3 id="install-janssen-server">Install Janssen Server<a class="headerlink" href="#install-janssen-server" title="Permanent link">#</a></h3>
+<p>Install the Janssen server using one of the methods described in <a href="../../admin/install/">this</a> guide. Make a note of the <code>host name</code> that you assign to the Janssen server during the installation. For this guide, the Janssen host name would be <code>janssen2.op.io</code></p>
+<p>Now access the <code>.well-known</code> end-points (sample below) of the Janssen server from the browser to ascertain that the Janssen server running inside local VM is healthy and also accessible from the developer's machine.</p>
+<div class="highlight"><pre><span></span><code>https://janssen2.op.io/jans-auth/.well-known/openid-configuration
+</code></pre></div>
+<p>Response received should be JSON formatted Janssen configuration details, similar to those below.</p>
+<div class="highlight"><pre><span></span><code>{
+&quot;request_parameter_supported&quot; : true,
+&quot;pushed_authorization_request_endpoint&quot; : &quot;https://janssen2.op.io/jans-auth/restv1/par&quot;,
+&quot;introspection_endpoint&quot; : &quot;https://janssen2.op.io/jans-auth/restv1/introspection&quot;,
+&quot;claims_parameter_supported&quot; : false,
+&quot;issuer&quot; : &quot;https://janssen2.op.io&quot;,
+&quot;userinfo_encryption_enc_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
+&quot;id_token_encryption_enc_values_supported&quot; : [ &quot;A128CBC+HS256&quot;, &quot;A256CBC+HS512&quot;, &quot;A128GCM&quot;, &quot;A256GCM&quot; ],
+&quot;authorization_endpoint&quot; : &quot;https://janssen2.op.io/jans-auth/restv1/authorize&quot;,
+&quot;service_documentation&quot; : &quot;http://jans.org/docs&quot;,
+&quot;authorization_encryption_alg_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
+&quot;id_generation_endpoint&quot; : &quot;https://janssen2.op.io/jans-auth/restv1/id&quot;,
+&quot;claims_supported&quot; : [ &quot;street_address&quot;, &quot;country&quot;, &quot;zoneinfo&quot;, &quot;birthdate&quot;, &quot;role&quot;, &quot;gender&quot;, &quot;user_name&quot;, &quot;formatted&quot;, &quot;phone_mobile_number&quot;, &quot;preferred_username&quot;, &quot;inum&quot;, &quot;locale&quot;, &quot;updated_at&quot;, &quot;post_office_box&quot;, &quot;nickname&quot;, &quot;preferred_language&quot;, &quot;email&quot;, &quot;website&quot;, &quot;email_verified&quot;, &quot;profile&quot;, &quot;locality&quot;, &quot;room_number&quot;, &quot;phone_number_verified&quot;, &quot;given_name&quot;, &quot;middle_name&quot;, &quot;picture&quot;, &quot;name&quot;, &quot;phone_number&quot;, &quot;postal_code&quot;, &quot;region&quot;, &quot;family_name&quot;, &quot;jansAdminUIRole&quot; ],
+&quot;scope_to_claims_mapping&quot; : [ {
+  &quot;user_name&quot; : [ &quot;user_name&quot; ]
+}, {
+  &quot;https://jans.io/scim/users.write&quot; : [ ]
+}, {
+  &quot;https://jans.io/scim/groups.read&quot; : [ ]
+}, {
+  &quot;https://jans.io/scim/all-resources.search&quot; : [ ]
+}, {
+  &quot;https://jans.io/scim/fido.write&quot; : [ ]
+}, {
+  &quot;https://jans.io/scim/groups.write&quot; : [ ]
+}, {
+  &quot;https://jans.io/scim/fido2.read&quot; : [ ]
+}, {
+  &quot;https://jans.io/scim/fido.read&quot; : [ ]
+}, {
+  &quot;https://jans.io/scim/fido2.write&quot; : [ ]
+</code></pre></div>
+<h3 id="configure-developer-workspace">Configure developer workspace<a class="headerlink" href="#configure-developer-workspace" title="Permanent link">#</a></h3>
+<p>We are going to configure the developer workspace in IntelliJIdea IDE. Using IDE, get Janssen server code from <a href="https://github.com/JanssenProject/jans">Janssen GitHub repository</a>.</p>
+<p>Janssen Server is composed of multiple modules. Below are the instructions for configuring each module for tests.</p>
+<h4 id="auth-server-client-module">Auth-server client module<a class="headerlink" href="#auth-server-client-module" title="Permanent link">#</a></h4>
+<h5 id="setup-certificate">setup certificate<a class="headerlink" href="#setup-certificate" title="Permanent link">#</a></h5>
+<ul>
+<li>Update Java cacerts</li>
+</ul>
+<p>extract certificate for Janssen server with name <code>janssen2.op.io</code></p>
+<p><div class="highlight"><pre><span></span><code>openssl s_client -connect test.local.jans.io:443 2&gt;&amp;1 |sed -ne &#39;/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p&#39; &gt; /tmp/httpd.crt
+</code></pre></div>
+  this command takes few seconds to return.</p>
+<p>Update cacerts of your JRE which is being used by the code workspace. For example, if JRE being used my maven is <code>/usr/lib/jvm/java-11-amazon-corretto</code>. It will prompt for cert store password. The default is <code>changeit</code>.</p>
+<div class="highlight"><pre><span></span><code>keytool -import -alias janssen2.op.io -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
+</code></pre></div>
+<h5 id="profile-setup">Profile setup<a class="headerlink" href="#profile-setup" title="Permanent link">#</a></h5>
+<p>Follow the steps below to configure workspace and run tests for the client module.</p>
+<ul>
+<li>Under <code>jans-auth-server/client/profile</code> module, make a copy of default profile directory and name the new profile as <code>janssen2.op.io</code></li>
+<li>Under <code>jans-auth-server/client/profile/default</code> directory, Edit <code>config-oxauth-test-data.properties</code> file and update the hostname in the value of the following properties:<ul>
+<li><code>test.server.name=&lt;old-host&gt;:8443</code> -&gt; <code>test.server.name=janssen2.op.io</code> (Remember to remove the port)</li>
+<li><code>swd.resource=acct:test_user@&lt;old-host&gt;:8443</code> -&gt; <code>swd.resource=acct:test_user@janssen2.op.io</code> (Remember to remove the port)</li>
+</ul>
+</li>
+<li>now at, <code>jans-auth-server/client</code> directory level, run the following maven command</li>
+</ul>
+<div class="highlight"><pre><span></span><code>mvn -Dcfg=default -Dcvss-score=9 -Dfindbugs.skip=true -Dlog4j.default.log.level=TRACE -Ddependency.check=false -DskipTests clean install
+</code></pre></div>
+<p>this will create new artifacts under <code>client/target</code> as per mentioned in profile <code>default</code></p>
+<ul>
+<li>Now run client tests by creating intellij run config as below</li>
+</ul>
+<p><img alt="" src="../../assets/image-run-integ-test-jans-vm.png" /></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-31T07:42:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-31</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-05T11:48:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-05</span>
       
         <br>
         Created:

@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview" class="md-skip">
+        <a href="#configuration-overview" class="md-skip">
           Skip to content
         </a>
       
@@ -2469,9 +2469,82 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Configuration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#config-server" class="md-nav__link">
+    Config Server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tools" class="md-nav__link">
+    Tools
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-versus-server-configuration" class="md-nav__link">
+    Client versus Server Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    Customization
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operations" class="md-nav__link">
+    Operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-and-cache" class="md-nav__link">
+    Database and Cache
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10052,6 +10125,63 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#config-server" class="md-nav__link">
+    Config Server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tools" class="md-nav__link">
+    Tools
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-versus-server-configuration" class="md-nav__link">
+    Client versus Server Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    Customization
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operations" class="md-nav__link">
+    Operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-and-cache" class="md-nav__link">
+    Database and Cache
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -10092,19 +10222,69 @@
   </a>
 
 
-<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
-<p>Please use the left navigation menu to browse the content of this section while we are still working on developing content for <code>Overview</code> page.</p>
-<div class="admonition contribute">
-<p class="admonition-title">Contribute</p>
-</div>
-<p>If you’d like to contribute to this document, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a></p>
+<h1 id="configuration-overview">Configuration Overview<a class="headerlink" href="#configuration-overview" title="Permanent link">#</a></h1>
+<p>In some ways, this whole Auth Server admin guide is about configuration. But
+you have to start somewhere! This page provides a quick overview before you dive
+in!</p>
+<h2 id="config-server">Config Server<a class="headerlink" href="#config-server" title="Permanent link">#</a></h2>
+<p>The Configuration Server is a JSON/REST API that writes to the database,
+generates the keys, and does much of the other work you need to make your
+Janssen Project infrastructure solve your digital identity challenges.
+See the [Config API Guide](../config-api/README.md for more information.</p>
+<h2 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">#</a></h2>
+<ol>
+<li>API - you can call the configuration endpoints with the API tool of your
+choice, like <code>curl</code>. With this mechanism, you can use client credential grant
+to obtain an OAuth token--just make sure it has the required scope to call the
+method / endpoint. See the <a href="../../config-guide/curl/">Curl Guide</a> for more
+info.</li>
+<li>CLI - The CLI, or Command Line Interface, calls the API for you. It uses the
+device flow to authenticate the person who is behind the config changes. See the
+<a href="../config-guide/jans-cli/README.md">Configuration CLI Guide</a> for more info.</li>
+<li>TUI - The TUI, or Text User Interface, is a menu-based interactive tool that
+provides a more intuitive experience. When you make changes via the TUI, it also
+creates a log of the equivalent CLI command, in case you want a shortcut next
+time around. See the <a href="../config-guide/jans-tui.md">TUI Guide</a>
+for more info.</li>
+</ol>
+<h2 id="client-versus-server-configuration">Client versus Server Configuration<a class="headerlink" href="#client-versus-server-configuration" title="Permanent link">#</a></h2>
+<p>Some behaviors are controlled at the server level. For example, should your
+Auth Server allow dynamic client registration? Other features you can configure
+either at the server or client level. For example, do you want user claims in
+an <code>id_token</code>? Maybe you always want them (server), or maybe only sometimes
+(client). See the <a href="../../reference/json/">JSON Configuration/Properties</a>
+for an overview of the server level configuration options. For client
+configuration options, see the <a href="../client-management/client-schema/">Client Schema</a>
+page.</p>
+<h2 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h2>
+<p>Janssen is a very flexible platform, that lets you customize many of the flows
+to meet your exact requirements. The black magic behind this flexibility is
+interception scripts--these are standard programming interfaces that enable
+you to add or change the behavior of Jans endpoints. Just to give one example,
+perhaps you need to add data from an external API into an OAuth access token?
+In this case, you could use the Update Token interception script. There are
+around 20 of these scripts. For a full list, see the
+<a href="../../developer/scripts/">Scripts Documentation</a>.</p>
+<h2 id="customization">Customization<a class="headerlink" href="#customization" title="Permanent link">#</a></h2>
+<p>You don't want out of the box look and feel provided by Janssen. We know we
+are UX-challenged, backend developer geeks. Check out the
+<a href="../../developer/customization/">Customization Guide</a> for info about how
+to add adapt the user facing content to achieve your UX dreams.</p>
+<h2 id="operations">Operations<a class="headerlink" href="#operations" title="Permanent link">#</a></h2>
+<p>Janssen Project software has to run somewhere, right now... either on VM's or
+in containers. There are specifics instructions about each contained in these
+docs.</p>
+<h2 id="database-and-cache">Database and Cache<a class="headerlink" href="#database-and-cache" title="Permanent link">#</a></h2>
+<p>One of the biggest challenges in running the Janssen Platform is persistence.
+Make sure you understand how Janssen Project stores your data, or in some
+cases, caches it.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T06:08:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-05T18:37:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-05</span>
       
         <br>
         Created:
