@@ -10042,6 +10042,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#supported-standards" class="md-nav__link">
+    Supported Standards
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -10078,14 +10093,68 @@
 
 
 <h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
-<p>The Jans Auth Server is the heart of the system. </p>
+<p>Auth Server provides the federated identity functionality of the Janssen Platform.
+The server is a fork of <a href="https://github.com/GluuFederation/oxAuth/">oxAuth</a>,
+the engine of Gluu Server 4. The design goal of Auth Server was speed,
+scalability and flexibility for large scale enterprise deployments. It is based
+on the Java <a href="https://weld.cdi-spec.org/">Weld</a> framework, a stable platform that
+provides many features out of the box.</p>
+<p>Auth Server is a fairly comprehensive implementation of OpenID Connect, which
+itself is built on top of OAuth 2.0. See the latest <a href="https://openid.net/certification/">OpenID certifications</a> for OpenID Providers, FAPI OpenID Providers, and
+FAPI-CIBA OpenID Providers for the latest results.</p>
+<h2 id="supported-standards">Supported Standards<a class="headerlink" href="#supported-standards" title="Permanent link">#</a></h2>
+<p><strong>OpenID</strong></p>
+<ul>
+<li><a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a></li>
+<li><a href="https://openid.net/specs/openid-connect-discovery-1_0.html">OpenID Connect Discovery 1.0</a></li>
+<li><a href="https://openid.net/specs/openid-connect-registration-1_0.html">OpenID Connect Dynamic Registration</a></li>
+<li><a href="https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html">OpenID Connect Client-Initiated Backchannel Authentication Flow - Core 1.0</a></li>
+<li><a href="https://openid.net/specs/openid-financial-api-part-1-1_0.html">Financial-grade API Security Profile 1.0 - Part 1: Baseline</a></li>
+<li><a href="https://openid.net/specs/openid-financial-api-part-2-1_0.html">Financial-grade API Security Profile 1.0 - Part 2: Advanced</a></li>
+<li><a href="https://openid.net/specs/openid-connect-frontchannel-1_0.html">OpenIDConnect Front-Channel Logout 1.0</a></li>
+<li><a href="https://openid.net/specs/openid-connect-backchannel-1_0.html">OpenID Connect Back-Channel Logout 1.0</a></li>
+<li><a href="https://openid.net/specs/openid-connect-session-1_0.html">OpenID Connect Session Management</a></li>
+<li><a href="https://bitbucket.org/openid/fapi/src/master/oauth-v2-jarm.md">Draft - JWT Secured Authorization Response Mode for OAuth 2.0 (JARM)</a></li>
+<li><a href="https://bitbucket.org/openid/fapi/src/master/Financial_API_WD_CIBA.md">Draft - Financial-grade API: Client Initiated Backchannel Authentication Profile</a></li>
+<li><a href="https://openid.net/specs/openid-connect-native-sso-1_0.html#name-authorization-request">Draft -  OpenID Connect Native SSO for Mobile Apps 1.0</a></li>
+</ul>
+<p><strong> OAuth </strong></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6749.html">RFC 6749 The OAuth 2.0 Authorization Framework</a></li>
+<li><a href="https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html">OAuth 2.0 Multiple Response Type Encoding Practices</a></li>
+<li><a href="https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html">OAuth 2.0 Form Post Response Mode</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6750.html">RFC 6750 The OAuth 2.0 Authorization Framework: Bearer Token Usage</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7009.html">RFC 7009 OAuth 2.0 Token Revocation</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7519.html">RFC 7519 JSON Web Token (JWT)</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7591.html">RFC 7591 OAuth 2.0 Dynamic Client Registration Protocol</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7592.html">RFC 7592 OAuth 2.0 Dynamic Client Registration Management Protocol</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7636.html">RFC 7636 Proof Key for Code Exchange by OAuth Public Clients</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7662.html">RFC 7662 OAuth 2.0 Token Introspection</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8252.html">RFC 8252 OAuth 2.0 for Native Apps</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8414.html">RFC 8414 OAuth 2.0 Authorization Server Metadata</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8628.html">RFC 8628 OAuth 2.0 Device Authorization Grant</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8693.html">RFC 8693 OAuth 2.0 Token Exchange</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8705.html">RFC 8705 OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9068.html">RFC 9068 JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9126.html">RFC 9126 OAuth 2.0 Pushed Authorization Requests</a></li>
+<li><a href="https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-11.html">Draft - OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer (DPoP)</a></li>
+<li><a href="https://www.ietf.org/archive/id/draft-ietf-oauth-jwt-introspection-response-12.html">Draft - JWT Response for OAuth Token Introspection</a></li>
+</ul>
+<p><strong> User Managed Access (UMA) </strong></p>
+<ul>
+<li><a href="https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-federated-authz-2.0.html">Federated Authorization for User-Managed Access (UMA) 2.0</a></li>
+<li><a href="https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.htmlFederated Authorization for User-Managed Access (UMA) 2.0">User-Managed Access (UMA) 2.0 Grant for OAuth 2.0 Authorization</a></li>
+</ul>
+<p>For the above specifications, Auth Server implements many features--all of the
+MUST's, but also many of the SHOULD's and MAY's. If you find any discrepancies,
+please raise an <a href="https://github.com/JanssenProject/jans/issues">issue</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-05T18:37:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-05</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-06T23:18:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-06</span>
       
         <br>
         Created:
