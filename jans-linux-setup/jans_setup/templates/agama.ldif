@@ -12,3 +12,8 @@ dn: ou=flows,ou=agama,o=jans
 objectClass: organizationalUnit
 objectClass: top
 ou: flows
+
+dn: ou=deployments,ou=agama,o=jans
+objectClass: organizationalUnit
+objectClass: top
+ou: deployments
