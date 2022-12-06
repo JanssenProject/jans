@@ -66,7 +66,6 @@ echo -e "Testing scim-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/scim-configuration
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
-docker exec docker-jans-monolith-jans-1 /opt/jans/jans-cli/config-cli.py --operation-id get-config-health
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
