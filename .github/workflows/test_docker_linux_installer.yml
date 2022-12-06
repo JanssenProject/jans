@@ -31,8 +31,9 @@ jobs:
         sudo apt-get update
         sudo python3 -m pip install --upgrade pip
         pip3 install setuptools --upgrade
-        pip3 install dockerfile-parse
+        pip3 install dockerfile-parse ruamel.yaml
         python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-monolith') ; dfparser.envs['JANS_SOURCE_VERSION'] = '${{ github.sha }}'"
+        python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('./docker-jans-monolith/jans-mysql-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; yaml.dump(data, compose)"
         ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
         sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip
