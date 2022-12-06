@@ -312,7 +312,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             ]
         calims_data = self.get_named_claims(self.data.get('claims', []))
         
-        if calims_data :
+        if True :
             self.claims_container = JansVerticalNav(
                     myparent=self.myparent,
                     headers=['dn', 'Display Name'],
@@ -327,6 +327,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     )
 
             open_id_widgets.append(self.claims_container)
+     
 
         self.alt_tabs['openid'] = HSplit(open_id_widgets, width=D())
 
