@@ -10,6 +10,7 @@ tags:
 While fancy container orchestrated deployments are all the rage, there are still
 lots of reasons to deploy Janssen on a good, old-fashioned, virtual machine,
 or even an actual bare-metal server! Here is a partial list:
+
 1. **Lower bar for system administration** - Cloud native requires specialized
 training which your operational staff doesn't need if you stick with plain
 Linux packages.
