@@ -85,6 +85,8 @@ jobs:
         continue-on-error: true
         run: |
          echo "Custom work on generating docs can go here."
+         # Run cn docs 
+         sudo bash ./automation/docs/generated-cn-docs.sh
          # Generate property docs and push to main
          sudo bash ./automation/docs/generate-property-docs.sh 
          cd docs
