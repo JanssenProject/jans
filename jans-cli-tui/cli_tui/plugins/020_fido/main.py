@@ -211,11 +211,11 @@ class Plugin(DialogUtils):
                         )
 
         except Exception as e:
-            self.app.show_message(_("Error getting Fido2 configuration"), str(e))
+            self.app.show_message(_("Error getting Fido2 configuration"), str(e), tobefocused=self.app.center_container)
             return
 
         if response.status_code not in (200, 201):
-            self.app.show_message(_("Error getting Fido2 configuration"), str(response.text))
+            self.app.show_message(_("Error getting Fido2 configuration"), str(response.text), tobefocused=self.app.center_container)
             return
 
         self.data = response.json()
