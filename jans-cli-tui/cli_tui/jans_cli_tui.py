@@ -13,6 +13,7 @@ import concurrent.futures
 from pathlib import Path
 from itertools import cycle
 from requests.models import Response
+from logging.handlers import RotatingFileHandler
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
@@ -247,7 +248,7 @@ class JansCliApp(Application):
         if not os.path.exists(config_cli.log_dir):
             os.makedirs(config_cli.log_dir, exist_ok=True)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        file_handler = logging.FileHandler(os.path.join(config_cli.log_dir, 'dev-tui.log'))
+        file_handler = RotatingFileHandler(os.path.join(config_cli.log_dir, 'dev-tui.log'), maxBytes=10*1024*1024, backupCount=10)
 
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)

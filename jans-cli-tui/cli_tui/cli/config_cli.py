@@ -37,6 +37,7 @@ from urllib.parse import urlencode
 from collections import OrderedDict
 from urllib.parse import urljoin
 from http.client import HTTPConnection
+from logging.handlers import RotatingFileHandler
 from pygments import highlight, lexers, formatters
 
 home_dir = Path.home()
@@ -309,7 +310,7 @@ class JCA_CLI:
         self.cli_logger.setLevel(logging.DEBUG)
         self.cli_logger.propagate = True
         HTTPConnection.debuglevel = 1
-        file_handler = logging.FileHandler(os.path.join(log_dir, 'cli_debug.log'))
+        file_handler = RotatingFileHandler(os.path.join(log_dir, 'cli_debug.log'), maxBytes=10*1024*1024, backupCount=10)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s"))
         self.cli_logger.addHandler(file_handler)
