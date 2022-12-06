@@ -327,11 +327,16 @@ class JansCliApp(Application):
         if self.cli_object_ok:
             response = self.cli_requests({'operation_id': 'is-license-active'})
             if response.status_code == 404:
-                for entry in self.nav_bar.navbar_entries:
-                    if entry[0] == 'config_api':
-                        self.nav_bar.navbar_entries.remove(entry)
-                        self.remove_plugin(entry[0])
-                        self.invalidate()
+                self.disable_plugin('config_api')
+
+    def disable_plugin(self, pid) -> None:
+
+        for entry in self.nav_bar.navbar_entries:
+            if entry[0] == pid:
+                self.nav_bar.navbar_entries.remove(entry)
+                self.remove_plugin(entry[0])
+                self.invalidate()
+                break
 
 
     async def check_jans_cli_ini(self) -> None:
