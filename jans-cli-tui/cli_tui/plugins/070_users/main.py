@@ -158,7 +158,7 @@ class Plugin(DialogUtils):
                             self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)))
                         else:
                             self.users_list_box.remove_item(kwargs['selected'])
-                        # self.get_users()
+                        self.get_users()
                     asyncio.ensure_future(coroutine())
                     break
 
@@ -168,7 +168,6 @@ class Plugin(DialogUtils):
                 title=_("Confirm"),
                 message=_("Are you sure you want to delete user {}?").format(kwargs['selected'][1]),
                 buttons=buttons,
-                tobefocused=self.user_list_container
                 )
  
     def save_user(self, dialog: Dialog) -> None:
