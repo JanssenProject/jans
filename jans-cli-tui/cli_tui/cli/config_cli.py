@@ -242,13 +242,15 @@ debug = get_bool(debug)
 
 class JCA_CLI:
 
-    def __init__(self, host, client_id, client_secret, access_token, test_client=False):
+    def __init__(self, host, client_id, client_secret, access_token, test_client=False, wrapped=None):
         self.host = self.idp_host = host
         self.client_id = client_id
         self.client_secret = client_secret
         self.use_test_client = test_client
         self.getCredentials()
-        self.wrapped = __name__ != "__main__"
+        self.wrapped = wrapped
+        if wrapped == None:
+            self.wrapped = __name__ != "__main__"
         self.access_token = access_token or config['DEFAULT'].get('access_token')
         self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.idp_host)
         self.discovery_endpoint = '/.well-known/openid-configuration'
@@ -1553,7 +1555,7 @@ def main():
         print("\u001b[38;5;{}mNo arguments were provided. Type {} -h to get help.\u001b[0m".format(warning_color, os.path.realpath(__file__)))
 
     error_log_file = os.path.join(log_dir, 'cli_eorror.log')
-    cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
+    cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client, wrapped=False)
 
     if args.revoke_session:
         cli_object.revoke_session()
