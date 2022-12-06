@@ -244,11 +244,10 @@ class JansCliApp(Application):
     def init_logger(self) -> None:
         self.logger = logging.getLogger('JansCli')
         self.logger.setLevel(logging.DEBUG)
-        logs_dir = os.path.join('jans_cli_logs', home_dir)
-        if not os.path.exists(logs_dir):
-            os.makedirs(logs_dir, exist_ok=True)
+        if not os.path.exists(config_cli.log_dir):
+            os.makedirs(config_cli.log_dir, exist_ok=True)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        file_handler = logging.FileHandler(os.path.join(logs_dir, 'dev-tui.log'))
+        file_handler = logging.FileHandler(os.path.join(config_cli.log_dir, 'dev-tui.log'))
 
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
