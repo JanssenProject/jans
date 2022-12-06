@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#to-build" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -1702,9 +1707,52 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Standalone Installation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Standalone Installation
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#to-build" class="md-nav__link">
+    To Build
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-execute" class="md-nav__link">
+    To Execute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-with-pip-from-github" class="md-nav__link">
+    Installing with pip from GitHub
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -10045,6 +10093,35 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#to-build" class="md-nav__link">
+    To Build
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-execute" class="md-nav__link">
+    To Execute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-with-pip-from-github" class="md-nav__link">
+    Installing with pip from GitHub
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -10092,14 +10169,51 @@
 
   <h1>Standalone Installation</h1>
 
-<p>This is a placeholder</p>
+<hr />
+<p>tags:
+  - administration
+  - configuration
+  - cli
+  - commandline</p>
+<hr />
+<p>Configure the Janssen server using the <code>jans-cli-tui</code> a Text based User Interface app which can be installed on any PC</p>
+<h3 id="to-build">To Build<a class="headerlink" href="#to-build" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>pip3 install shiv
+wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip -O jans-main.zip
+unzip jans-main.zip
+cd jans-main/jans-cli-tui/
+make zipapp
+</code></pre></div>
+<h3 id="to-execute">To Execute<a class="headerlink" href="#to-execute" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>./config-cli-tui.pyz
+</code></pre></div>
+<p>You will be prompted for credentials if you do not have <code>~/.config/jans-cli.ini</code>. 
+Contact your administrator for credentials.</p>
+<div class="highlight"><pre><span></span><code>cat /opt/jans/jans-setup/setup.properties.last | grep role
+role_based_client_encoded_pw=4jnkODv3KRV6xNm1oGQ8+g\=\=
+role_based_client_id=2000.eac308d1-95e3-4e38-87cf-1532af310a9e
+role_based_client_pw=GnEkCqg4Vsks
+</code></pre></div>
+<h3 id="installing-with-pip-from-github">Installing with pip from GitHub<a class="headerlink" href="#installing-with-pip-from-github" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>pip3 install https://github.com/JanssenProject/jans/archive/refs/heads/main.zip#subdirectory=jans-cli-tui
+</code></pre></div>
+<p>Execute:</p>
+<div class="highlight"><pre><span></span><code>config-cli-tui
+</code></pre></div>
+<p>Obtain Credidentials for CLI from the Janssen server:</p>
+<div class="highlight"><pre><span></span><code># cat /opt/jans/jans-setup/setup.properties.last | grep role
+role_based_client_encoded_pw=dDpwNN3lv94JF+ibgVFT7A\=\=
+role_based_client_id=2000.076aa5d9-fa8d-42a0-90d2-b83b5ea535d5
+role_based_client_pw=mrF8tcBd6m9Q
+</code></pre></div>
+<p><code>role_based_client_id</code> is the <strong>Client ID</strong> and <code>role_based_client_pw</code> is the <strong>Client Secret</strong></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-06T15:25:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-06</span>
       
         <br>
         Created:
