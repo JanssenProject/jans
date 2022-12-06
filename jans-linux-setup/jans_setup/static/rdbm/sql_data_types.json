@@ -861,5 +861,23 @@
       "size": 128,
       "type": "STRING"
     }      
+  },
+  "adsPrjAssets": {
+    "mysql": {
+      "type": "LONGTEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "adsPrjDeplDetails": {
+    "mysql": {
+      "size": 2048,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 2048,
+      "type": "STRING"
+    }
   }
 }
