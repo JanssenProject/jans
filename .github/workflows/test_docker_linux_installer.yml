@@ -28,11 +28,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Test Jans monolith demo
       run: |
-        sudo apt-get update
-        sudo python3 -m pip install --upgrade pip
-        pip3 install setuptools --upgrade
-        pip3 install dockerfile-parse
-        python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-monolith') ; dfparser.envs['JANS_SOURCE_VERSION'] = '${{ github.sha }}'"
         ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
-        sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip
+        sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip ${{ github.sha }}

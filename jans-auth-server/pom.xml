@@ -99,13 +99,14 @@
 	</scm>
 
 	<modules>
-		<module>model</module>
-		<module>persistence-model</module>
-		<module>client</module>
-		<module>static</module>
-		<module>common</module>
-		<module>server</module>
-  </modules>
+        <module>model</module>
+        <module>persistence-model</module>
+        <module>test-model</module>
+        <module>client</module>
+        <module>static</module>
+        <module>common</module>
+        <module>server</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>
@@ -151,9 +152,8 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>jans-auth-model</artifactId>
+				<artifactId>jans-auth-test-model</artifactId>
 				<version>${project.version}</version>
-				<type>test-jar</type>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
@@ -252,7 +252,7 @@
 			<dependency>
 				<groupId>commons-net</groupId>
 				<artifactId>commons-net</artifactId>
-				<version>3.0</version>
+				<version>3.9.0</version>
 			</dependency>
 
             <!-- Test -->

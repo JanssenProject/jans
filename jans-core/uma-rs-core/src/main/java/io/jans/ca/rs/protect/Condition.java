@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,16 +13,16 @@ import java.util.List;
  * @version 0.9, 18/04/2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Condition {
+public class Condition implements Serializable {
 
     @JsonProperty(value = "httpMethods")
-    List<String> httpMethods;
+    private List<String> httpMethods;
     @JsonProperty(value = "scopes")
-    List<String> scopes;
+    private List<String> scopes;
     @JsonProperty(value = "scope_expression")
-    JsonNode scope_expression;
+    private transient JsonNode scopeExpression;
     @JsonProperty(value = "ticketScopes")
-    List<String> ticketScopes;
+    private List<String> ticketScopes;
 
     public List<String> getTicketScopes() {
         return ticketScopes;
@@ -48,11 +49,11 @@ public class Condition {
     }
 
     public JsonNode getScopeExpression() {
-        return scope_expression;
+        return scopeExpression;
     }
 
     public void setScopeExpression(JsonNode scopeExpression) {
-        this.scope_expression = scopeExpression;
+        this.scopeExpression = scopeExpression;
     }
 
     @Override
@@ -61,7 +62,7 @@ public class Condition {
         sb.append("Condition");
         sb.append("{httpMethods=").append(httpMethods);
         sb.append(", scopes=").append(scopes);
-        sb.append(", scope_expression=").append(scope_expression);
+        sb.append(", scopeExpression=").append(scopeExpression);
         sb.append(", ticketScopes=").append(ticketScopes);
         sb.append('}');
         return sb.toString();

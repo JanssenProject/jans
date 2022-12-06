@@ -42,6 +42,7 @@ tags:
 | backchannelTokenDeliveryModesSupported | Backchannel Token Delivery Modes Supported | [Details](#backchanneltokendeliverymodessupported) |
 | backchannelUserCodeParameterSupported | Backchannel User Code Parameter Supported | [Details](#backchannelusercodeparametersupported) |
 | baseEndpoint | The base URL for endpoints | [Details](#baseendpoint) |
+| blockWebviewAuthorizationEnabled | Enable/Disable block authorizations that originate from Webview (Mobile apps). | [Details](#blockwebviewauthorizationenabled) |
 | changeSessionIdOnAuthentication | Boolean value specifying whether change session_id on authentication. Default value is true | [Details](#changesessionidonauthentication) |
 | checkSessionIFrame | URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API | [Details](#checksessioniframe) |
 | checkUserPresenceOnRefreshToken | Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check. | [Details](#checkuserpresenceonrefreshtoken) |
@@ -74,6 +75,7 @@ tags:
 | dcrSignatureValidationSharedSecret | Specifies shared secret for Dynamic Client Registration | [Details](#dcrsignaturevalidationsharedsecret) |
 | dcrSignatureValidationSoftwareStatementJwksClaim | Specifies claim name inside software statement. Value of claim should point to inlined JWKS | [Details](#dcrsignaturevalidationsoftwarestatementjwksclaim) |
 | dcrSignatureValidationSoftwareStatementJwksURIClaim | Specifies claim name inside software statement. Value of claim should point to JWKS URI | [Details](#dcrsignaturevalidationsoftwarestatementjwksuriclaim) |
+| dcrSsaValidationConfigs | DCR SSA Validation configurations used to perform validation of SSA or DCR | [Details](#dcrssavalidationconfigs) |
 | defaultSignatureAlgorithm | The default signature algorithm to sign ID Tokens | [Details](#defaultsignaturealgorithm) |
 | defaultSubjectType | The default subject type used for dynamic client registration | [Details](#defaultsubjecttype) |
 | deviceAuthzEndpoint | URL for the Device Authorization | [Details](#deviceauthzendpoint) |
@@ -229,7 +231,7 @@ tags:
 | softwareStatementValidationClaimName | Validation claim name for software statement | [Details](#softwarestatementvalidationclaimname) |
 | softwareStatementValidationType | Validation type used for software statement | [Details](#softwarestatementvalidationtype) |
 | spontaneousScopeLifetime | The lifetime of spontaneous scope in seconds | [Details](#spontaneousscopelifetime) |
-| ssaConfiguration |  | [Details](#ssaconfiguration) |
+| ssaConfiguration | SSA Configuration | [Details](#ssaconfiguration) |
 | statAuthorizationScope | Scope required for Statistical Authorization | [Details](#statauthorizationscope) |
 | staticDecryptionKid | Specifies static decryption Kid | [Details](#staticdecryptionkid) |
 | staticKid | Specifies static Kid | [Details](#statickid) |
@@ -552,6 +554,15 @@ tags:
 - Default value: None
 
 
+### blockWebviewAuthorizationEnabled
+
+- Description: Enable/Disable block authorizations that originate from Webview (Mobile apps).
+
+- Required: No
+
+- Default value: false
+
+
 ### changeSessionIdOnAuthentication
 
 - Description: Boolean value specifying whether change session_id on authentication. Default value is true
@@ -834,6 +845,15 @@ tags:
 ### dcrSignatureValidationSoftwareStatementJwksURIClaim
 
 - Description: Specifies claim name inside software statement. Value of claim should point to JWKS URI
+
+- Required: No
+
+- Default value: None
+
+
+### dcrSsaValidationConfigs
+
+- Description: DCR SSA Validation configurations used to perform validation of SSA or DCR
 
 - Required: No
 
@@ -2237,7 +2257,7 @@ tags:
 
 ### ssaConfiguration
 
-- Description: 
+- Description: SSA Configuration
 
 - Required: No
 

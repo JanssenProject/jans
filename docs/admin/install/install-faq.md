@@ -146,6 +146,14 @@ Individual modules of the Janssen Server will continue to write their operationa
 
 -----------------------------
 
+## How do I check the version of Janssen server?
+
+```commandline
+/opt/jans/bin/show_version.py
+```
+
+-----------------------------
+
 ## After installation, what's next?
 
 After successful installation of the Janssen Server, move on to the [configuration steps](../config-guide/jans-cli/cli-index/) in the Command Line Interface documentation to align Janssen with your organizational requirements.

@@ -4,7 +4,8 @@ set -eo pipefail
 JANS_FQDN=$1
 JANS_PERSISTENCE=$2
 EXT_IP=$3
-
+# commit to build jans off
+JANS_BUILD_COMMIT=$4
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
@@ -43,6 +44,16 @@ git clone --filter blob:none --no-checkout https://github.com/janssenproject/jan
     && git sparse-checkout set docker-jans-monolith \
     && cd "$WORKING_DIRECTORY"
 
+# -- Parse compose and docker file
+sudo apt-get update
+sudo python3 -m pip install --upgrade pip
+pip3 install setuptools --upgrade
+pip3 install dockerfile-parse ruamel.yaml
+if [[ "$JANS_BUILD_COMMIT" ]]; then
+  python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['JANS_SOURCE_VERSION'] = '$JANS_BUILD_COMMIT'"
+fi
+python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-mysql-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; yaml.dump(data, compose)"
+# --
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml up -d
 fi
@@ -66,7 +77,6 @@ echo -e "Testing scim-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/scim-configuration
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
-docker exec docker-jans-monolith-jans-1 /opt/jans/jans-cli/config-cli.py --operation-id get-config-health
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
