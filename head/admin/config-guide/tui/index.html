@@ -89,6 +89,18 @@
     
       <div data-md-component="outdated" hidden>
         
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
       </div>
     
     
@@ -6106,21 +6118,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-configurator/" class="md-nav__link">
-        Configurator
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-auth-server/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-jans-auth-server.md" class="md-nav__link">
         Auth Server
       </a>
     </li>
@@ -6134,77 +6132,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-config-init/" class="md-nav__link">
-        Config Initialization
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-config-api/" class="md-nav__link">
-        Config API
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-fido/" class="md-nav__link">
-        FIDO
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-scim/" class="md-nav__link">
-        SCIM
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-persistence/" class="md-nav__link">
-        Persistence
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-cert-mgr/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-jans-certmanager.md" class="md-nav__link">
         Cert Manager
       </a>
     </li>
@@ -6218,7 +6146,91 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/image-opendj/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-jans-config-api.md" class="md-nav__link">
+        Config API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes/docker-jans-configurator.md" class="md-nav__link">
+        Configurator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes/docker-jans-fido2.md" class="md-nav__link">
+        FIDO2
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes/docker-jans-monolith.md" class="md-nav__link">
+        Monolith
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes/docker-jans-persistence-loader.md" class="md-nav__link">
+        Persistence
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes/docker-jans-scim.md" class="md-nav__link">
+        SCIM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -10323,7 +10335,7 @@ Some of them are stated below. </p>
 <ul>
 <li>In below screenshot, we are getting the list of existing clients. <img alt="image" src="../../../assets/Jans_TUI_Auth_Server_Get_client_list.png" /></li>
 <li>It's possible to get details of any client as well. Just hit enter on any client and  you will see information like this. <img alt="image" src="../../../assets/Jans_TUI_Auth_Server_Client_detail.png" /></li>
-<li>With the button which is located on right upper side named "Add Client", it's possible to create new client. <img alt="image" src="../assets/Jans_TUI_Auth_Server_Add_new_client.png" /></li>
+<li>With the button which is located on right upper side named "Add Client", it's possible to create new client. <img alt="image" src="../../../assets/Jans_TUI_Auth_Server_Add_new_client.png" /></li>
 </ul>
 <h3 id="fido">FIDO<a class="headerlink" href="#fido" title="Permanent link">#</a></h3>
 <h3 id="scim">SCIM<a class="headerlink" href="#scim" title="Permanent link">#</a></h3>
@@ -10335,7 +10347,7 @@ Some of them are stated below. </p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-06T18:25:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-07T02:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-07</span>
       
         <br>
         Created:
