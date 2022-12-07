@@ -1,5 +1,6 @@
 package io.jans.agama.engine.service;
 
+import io.jans.ads.timer.DeployerTimer;
 import io.jans.agama.timer.FlowRunsCleaner;
 import io.jans.agama.timer.Transpilation;
 import io.jans.service.cdi.event.ApplicationInitialized;
@@ -17,12 +18,16 @@ public class AppInitializer {
     
     @Inject
     private FlowRunsCleaner fcleaner;
+    
+    @Inject
+    private DeployerTimer deployerTimer;
 
     public void run(@Observes @ApplicationInitialized(ApplicationScoped.class) 
             ApplicationInitializedEvent event) {
 
         trTimer.initTimer();
         fcleaner.initTimer();
+        deployerTimer.initTimer();
         
     }
 
