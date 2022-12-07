@@ -8,6 +8,10 @@ tags:
 
 # Attribute
 
+
+!!! Important
+    The interactive mode of the CLI will be deprecated upon the full release of the Configuration TUI in the coming months.
+    
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 Using **Janssen CLI**, You can perform some quick operations in _Attribute_. Such as:
