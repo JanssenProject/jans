@@ -8,6 +8,9 @@ tags:
 
 # SMTP Configuration
 
+!!! Important
+    The interactive mode of the CLI will be deprecated upon the full release of the Configuration TUI in the coming months.
+
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 Janssen CLI also supports SMTP configuration. You can do the following things as stated below:
