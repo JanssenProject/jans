@@ -566,7 +566,6 @@ nav:
             - 'Rollback': 'admin/upgrade/kubernetes/rollback.md'
         - 'FAQ': 'admin/upgrade/upgrade-faq.md'
     - 'Script Catalog':
-        - 'Agama Inbound Identity': 'script-catalog/agama/inboundID/README.md'
         - 'Application Session': 'script-catalog/application_session/sample-script/README.md'
         - 'Cache Refresh': 'script-catalog/cache_refresh/sample-script/README.md'
         - 'CIBA End User': 'script-catalog/ciba/end-user-notification/README.md'
@@ -593,7 +592,6 @@ nav:
         - 'Person Authentication':
             - 'script-catalog/person_authentication/README.md'
             - 'Agama Bridge': 'script-catalog/person_authentication/agama-bridge/README.md'
-            - 'Agama External Authenticator': 'script-catalog/person_authentication/agama-external-authenticator/README.md'
             - 'Basic External Authenticator': 'script-catalog/person_authentication/basic-external-authenticator/README.md'
             - 'Basic Lock Account extn Authenticator': 'script-catalog/person_authentication/basic-lock-account-external-authenticator/README.md'
             - 'Casa': 'script-catalog/person_authentication/casa/README.md'
