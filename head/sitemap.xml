@@ -1886,6 +1886,51 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-auth-server/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-certmanager/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-config-api/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-configurator/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-fido2/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-monolith/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-persistence-loader/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-scim/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-opendj/</loc>
+         <lastmod>2022-12-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/helm-chart/</loc>
          <lastmod>2022-12-07</lastmod>
          <changefreq>daily</changefreq>
