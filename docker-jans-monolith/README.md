@@ -4,6 +4,7 @@ tags:
 - installation
 - quick-start
 - docker compose
+- docker image
 ---
 
 > **Warning**
