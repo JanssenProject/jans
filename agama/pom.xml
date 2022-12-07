@@ -41,10 +41,7 @@
     </repositories>
 
     <modules>
-        <module>model</module>
         <module>transpiler</module>
-        <module>engine</module>
-        <module>inboundID</module>
     </modules>
 
     <dependencyManagement>
