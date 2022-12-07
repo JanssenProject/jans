@@ -1,3 +1,11 @@
+---
+tags:
+- administration
+- reference
+- kubernetes
+- docker image
+---
+
 ## Overview
 
 Persistence is a special container to load initial data for LDAP or Couchbase.
