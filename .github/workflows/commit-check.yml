@@ -5,32 +5,14 @@ on:
   pull_request:
     branches-ignore:
       - "update-pycloud-in-**"
+      - "release-please-**"
+      - "snyk-**"
+      - "dependabot/**"
     types:
       - opened
       - edited
       - reopened
       - synchronize
-    paths:
-      - "!docker-jans-**/CHANGELOG.md"
-      - "!docker-jans-**/version.txt"
-      - "!jans-pycloudlib/CHANGELOG.md"
-      - "!jans-pycloudlib/jans/pycloudlib/version.py"
-  pull_request_target:
-    branches-ignore:
-      - "update-pycloud-in-**"
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-    paths:
-      - "!docker-jans-**/CHANGELOG.md"
-      - "!docker-jans-**/version.txt"
-      - "!jans-pycloudlib/CHANGELOG.md"
-      - "!jans-pycloudlib/jans/pycloudlib/version.py"
-  push:
-    branches-ignore:
-      - "update-pycloud-in-**"
     paths:
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"

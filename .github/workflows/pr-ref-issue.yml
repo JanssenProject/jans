@@ -16,14 +16,15 @@ on:
   workflow_dispatch:
 jobs:
   check-prs-issue:
+    if:  startsWith(github.head_ref, 'release-please') || startsWith(github.head_ref, 'dependabot/' || startsWith(github.head_ref, 'snyk-')
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
     steps:
-      - name: Wait for 15 seconds so that GH can attach issue to the PR if already mentioned by author
-        run: sleep 15s
+      - name: Wait for 25 seconds so that GH can attach issue to the PR if already mentioned by author
+        run: sleep 25s
         shell: bash
       - name: Install dependencies
         run: |
