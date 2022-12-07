@@ -12,7 +12,6 @@ on:
       - "!**.md"
   pull_request:
     branches:
-      - master
       - main
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-dates
@@ -21,10 +20,6 @@ on:
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
-  pull_request_target:
-    branches:
-      # below protected branches prefix only allows internal teams to push to it
-      - cn-*
   workflow_dispatch:
     inputs:
       services:

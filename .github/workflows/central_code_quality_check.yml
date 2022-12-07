@@ -6,7 +6,6 @@ name: Code quality check
 on:
   push:
     branches:
-      - master
       - main
       - '!update-pycloud-in-**'
     paths:
@@ -25,12 +24,14 @@ on:
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
-  # TODO: Optimize so that workflow is only triggered for `opened` and `synchronize` actions
   pull_request:
     branches:
       - master
       - main
       - '!update-pycloud-in-**'
+    types:
+      - opened
+      - synchronize
     paths:
       - 'jans-auth-server/**'
       - 'jans-orm/**'
