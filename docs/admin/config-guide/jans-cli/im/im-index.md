@@ -8,6 +8,9 @@ tags:
 
 # Menu Driven Interactive Mode
 
+!!! Important
+    The interactive mode of the CLI will be deprecated upon the full release of the Configuration TUI in the coming months.
+
 We will refer _Menu-driven Interactive Mode_ as **IM**. To run IM just simply execute jans-cli as follows:
 ```
 /opt/jans/jans-cli/config-cli.py
