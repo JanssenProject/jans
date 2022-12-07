@@ -7,6 +7,7 @@ on:
       - 'docs/**'
       - 'charts/**'
       - 'mkdocs.yml'
+      - 'docker-jans-**/README.md'
   pull_request:
     branches:
       - main
@@ -14,6 +15,7 @@ on:
       - 'docs/**'
       - 'charts/**'
       - 'mkdocs.yml'
+      - 'docker-jans-**/README.md'
   release:
     types:
       - published

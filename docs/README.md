@@ -10,7 +10,7 @@ The Janssen Server is highly extensible and customizable. Resources for deployme
 
 ## Developer Guide
 
-There are many ways the community can contribute to the Janssen Project. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PRs, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. Resources to get started are available [here](CONTRIBUTING.md).
+There are many ways the community can contribute to the Janssen Project. Of course, you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PRs, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. Resources to get started are available [here](CONTRIBUTING.md).
 
 ## Governance Guide
 
