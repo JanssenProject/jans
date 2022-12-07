@@ -651,10 +651,9 @@ class PropertiesUtils(SetupUtils):
                     BackendStrings.REMOTE_PGSQL,
                     ]
 
-        if not os.path.exists(os.path.join(Config.install_dir, 'package')):
-            backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
-            if 'couchbase' in self.getBackendTypes():
-                backend_types.insert(2, BackendStrings.LOCAL_COUCHBASE)
+        backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
+        if 'couchbase' in self.getBackendTypes():
+            backend_types.insert(2, BackendStrings.LOCAL_COUCHBASE)
 
         nlist = []
         for i, btype in enumerate(backend_types):
