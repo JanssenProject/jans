@@ -182,6 +182,7 @@ nav:
         - 'Web Services': 'admin/vm-ops/web-services.md'
         - 'FAQ': 'admin/vm-ops/faq.md'
     - 'Configuration Guide':
+        - 'Config TUI': 'admin/config-guide/tui.md'
         - 'Configuration CLI':
             - 'Overview': 'admin/config-guide/jans-cli/cli-index.md'
             - 'Standalone Installation': 'admin/config-guide/jans-cli/install.md'
@@ -202,7 +203,6 @@ nav:
             - 'SCIM User Resources': 'admin/config-guide/jans-cli/cli-user.md'
             - 'SCIM Group Management': 'admin/config-guide/jans-cli/cli-group.md'
             - 'Authentication via Device Flow': 'admin/config-guide/jans-cli/device-flow.md'
-        - 'Config TUI': 'admin/config-guide/tui.md'
         - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
     - 'Auth Server Admin Guide':
