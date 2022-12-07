@@ -1,3 +1,11 @@
+---
+tags:
+- administration
+- reference
+- kubernetes
+- docker image
+---
+
 ## Overview
 
 Configuration manager is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.

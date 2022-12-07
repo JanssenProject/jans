@@ -4,7 +4,6 @@ name: Scan Image
 on:
   push:
     branches:
-      - master
       - main
       - "!update-pycloud-in-**"
     paths:
@@ -12,12 +11,10 @@ on:
       - "!**.md"
   pull_request:
     branches:
-      - master
       - main
       - "!update-pycloud-in-**"
     paths:
       - "docker-jans-**/**"
-      - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
   workflow_dispatch:

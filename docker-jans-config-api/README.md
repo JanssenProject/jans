@@ -1,3 +1,11 @@
+---
+tags:
+- administration
+- reference
+- kubernetes
+- docker image
+---
+
 # Overview
 
 Docker image packaging for config-api.
