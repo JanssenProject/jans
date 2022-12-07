@@ -3,7 +3,7 @@ name: testcases
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
@@ -11,7 +11,7 @@ on:
       - "!**.md"
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"

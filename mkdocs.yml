@@ -26,6 +26,7 @@ plugins:
 # Configuration
 theme:
     name: material
+    custom_dir: overrides
     highlightjs: true
     hljs_languages:
         - yaml
@@ -426,15 +427,15 @@ nav:
             - 'Helm Chart': 'admin/reference/kubernetes/helm-chart.md'
             - 'Config and Secret Keys': 'admin/reference/kubernetes/config-secret-keys.md'
             - 'Image Config Properties':
-                - 'Configurator': 'admin/reference/kubernetes/image-configurator.md'
-                - 'Auth Server': 'admin/reference/kubernetes/image-auth-server.md'
-                - 'Config Initialization': 'admin/reference/kubernetes/image-config-init.md'
-                - 'Config API': 'admin/reference/kubernetes/image-config-api.md'
-                - 'FIDO': 'admin/reference/kubernetes/image-fido.md'
-                - 'SCIM': 'admin/reference/kubernetes/image-scim.md'
-                - 'Persistence': 'admin/reference/kubernetes/image-persistence.md'
-                - 'Cert Manager': 'admin/reference/kubernetes/image-cert-mgr.md'
-                - 'Gluu OpenDJ': 'admin/reference/kubernetes/image-opendj.md'
+                - 'Auth Server': 'admin/reference/kubernetes/docker-jans-auth-server.md'
+                - 'Cert Manager': 'admin/reference/kubernetes/docker-jans-certmanager.md'
+                - 'Config API': 'admin/reference/kubernetes/docker-jans-config-api.md'
+                - 'Configurator': 'admin/reference/kubernetes/docker-jans-configurator.md'
+                - 'FIDO2': 'admin/reference/kubernetes/docker-jans-fido2.md'
+                - 'Monolith': 'admin/reference/kubernetes/docker-jans-monolith.md'
+                - 'Persistence': 'admin/reference/kubernetes/docker-jans-persistence-loader.md'
+                - 'SCIM': 'admin/reference/kubernetes/docker-jans-scim.md'
+                - 'Gluu OpenDJ': 'admin/reference/kubernetes/docker-opendj.md'
     - 'Jans Eleven Admin Guide':
         - 'admin/eleven/README.md'
         - 'Supported Algorithms': 'admin/eleven/supported-algs.md'

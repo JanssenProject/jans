@@ -1,3 +1,11 @@
+---
+tags:
+- administration
+- reference
+- kubernetes
+- docker image
+---
+
 ## Overview
 
 Container image to manage X.509 certificates and crypto keys in Janssen Server.
