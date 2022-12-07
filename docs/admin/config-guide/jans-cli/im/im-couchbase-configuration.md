@@ -8,6 +8,9 @@ tags:
 
 # Couchbase Configuration
 
+!!! Important
+    The interactive mode of the CLI will be deprecated upon the full release of the Configuration TUI in the coming months.
+
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 From the main menu, select option 15 to enter into Couchbase configuration menu. You will get the following menu like LDAP configuration.
