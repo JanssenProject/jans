@@ -139,6 +139,7 @@ public class AgamaPersistenceService {
             
             if (fls.isEmpty()) {
                 logger.warn("Flow '{}' does not exist!", flowName);
+                return null;
             }
             
             return fls.get(0);
