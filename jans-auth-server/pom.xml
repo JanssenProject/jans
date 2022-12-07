@@ -54,7 +54,8 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<weld.version>4.0.3.Final</weld.version>
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
-	</properties>
+        <jboss-jaxrs-api_3.0_spec.version>1.0.1.Final</jboss-jaxrs-api_3.0_spec.version>
+    </properties>
 
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
@@ -100,11 +101,14 @@
 
 	<modules>
         <module>model</module>
+        <module>agama/model</module>
         <module>persistence-model</module>
         <module>test-model</module>
         <module>client</module>
         <module>static</module>
         <module>common</module>
+        <module>agama/engine</module>
+        <module>agama/inboundID</module>
         <module>server</module>
     </modules>
 

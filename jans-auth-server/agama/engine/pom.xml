@@ -8,8 +8,9 @@
 
     <parent>
         <groupId>io.jans</groupId>
-        <artifactId>agama</artifactId>
+        <artifactId>jans-auth-server-parent</artifactId>
         <version>1.0.6-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     
     <properties>
@@ -71,12 +72,12 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>agama-model</artifactId>
-            <version>${jans.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>agama-transpiler</artifactId>
-            <version>${jans.version}</version>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- SERVLET -->
@@ -89,6 +90,8 @@
         <dependency>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_3.0_spec</artifactId>
+            <version>${jboss-jaxrs-api_3.0_spec.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- WELD -->
@@ -215,7 +218,7 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>agama-inbound</artifactId>
-            <version>${jans.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
