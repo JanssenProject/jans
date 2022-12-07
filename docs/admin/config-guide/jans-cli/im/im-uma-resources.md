@@ -8,6 +8,10 @@ tags:
 
 # UMA
 
+
+!!! Important
+    The interactive mode of the CLI will be deprecated upon the full release of the Configuration TUI in the coming months.
+    
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 UMA helps to manage user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
