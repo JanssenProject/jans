@@ -8,6 +8,9 @@ tags:
 
 # Group Resources
 
+!!! Important
+    The interactive mode of the CLI will be deprecated upon the full release of the Configuration TUI in the coming months.
+
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 Group resources are used to organize user resources. These are the following options:
