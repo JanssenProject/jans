@@ -32,10 +32,8 @@ Configure the Janssen AS using steps explained in the [link](#curl-commands-to-c
 
 #### 1. A simple client registration request (with mandatory parameter):
 	```
-	curl -X POST -k -i 'https://my.jans.server/jans-auth/restv1/register'  \
-	     --data '{ \
-	              "redirect_uris": ["https://client.example.org/cb"] \
-	             }' \
+	curl -X POST -k -H 'Content-Type: application/json' -i 'https://my.jans.server/jans-auth/restv1/register' \
+                 --data '{"redirect_uris": ["https://my.jans.client/page"]}'
 	```
 
 #### 2. A typical client registration request :
