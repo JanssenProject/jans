@@ -33,7 +33,7 @@ public class DeployerTimer {
 
     private AtomicBoolean isActive;
     
-    private static final int DELAY = 8 + (int) (10 * Math.random());    //seconds   //TODO: change 8 with 5
+    private static final int DELAY = 5 + (int) (10 * Math.random());    //seconds
     private static final int INTERVAL = 30;    // seconds
 
     public void initTimer() {

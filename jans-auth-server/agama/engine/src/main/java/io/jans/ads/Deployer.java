@@ -229,7 +229,7 @@ public class Deployer {
                 meta.setInputs(tresult.getInputs());
                 meta.setTimeout(tresult.getTimeout());
                 meta.setTimestamp(System.currentTimeMillis());
-                //TODO: setProperties, how to handle?. Also no displayname, author or description
+                //No displayname, author or description. No handling of properties either
     
                 String compiled = tresult.getCode();
                 fl.setMetadata(meta);
@@ -238,7 +238,7 @@ public class Deployer {
                 
                 fl.setQname(qname);
                 fl.setTransHash(futils.hash(compiled));
-                //TODO: setRevision(0) assumed, and enabled by default?
+                // revision = 0 and enabled by default assumed
                 fl.setEnabled(true);
                 
                 if (add) {
@@ -293,7 +293,6 @@ public class Deployer {
         
         //Make a zip with ftl and fl folders
         ZipParameters params = new ZipParameters();
-        //params.setIncludeRootFolder​(false);??
         params.setCompressionMethod(CompressionMethod.STORE);
         
         Path newZipPath = Paths.get(root.toString(), rndName());
