@@ -8,6 +8,9 @@ tags:
 
 # JWT Management
 
+!!! Important
+    The interactive mode of the CLI will be deprecated upon the full release of the Configuration TUI in the coming months.
+    
 > Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public 
