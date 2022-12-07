@@ -44,6 +44,15 @@ With "Auth Server" option, administrator can operate openid client configuration
 
 ### FIDO
 
+Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with a username/password as the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have an option to install the FIDO2 component. 
+
+Using Janssen CLI-TUI, you can view/update details of the FIDO2 configuration. 
+
+There are two configurations included here: 
+
+ - Dynamic Configuration ![image](../../assets/Jans_TUI_Fido_Dynamic_Configuration.png)
+ - Static Configuration ![image](../../assets/Jans_TUI_Fido_Static_Configuration.png)
+
 ### SCIM
 
 ### Scripts
