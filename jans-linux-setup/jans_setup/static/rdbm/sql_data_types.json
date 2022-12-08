@@ -832,12 +832,18 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
   },
   "agFlowTrans": {
     "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
       "type": "TEXT"
     },
     "spanner": {
@@ -848,12 +854,19 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
   },
   "jansCustomMessage": {
     "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
       "size": 128,
       "type": "VARCHAR"
     },
@@ -866,12 +879,19 @@
     "mysql": {
       "type": "LONGTEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
   },
   "adsPrjDeplDetails": {
     "mysql": {
+      "size": 2048,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
       "size": 2048,
       "type": "VARCHAR"
     },
