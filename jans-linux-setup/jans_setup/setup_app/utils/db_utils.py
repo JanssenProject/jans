@@ -721,7 +721,7 @@ class DBUtils:
         if Config.rdbm_type == 'mysql':
             for tbl in self.Base.classes:
                 for col in tbl.__table__.columns:
-                    if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment.lower() == 'json':
+                    if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment and col.comment.lower() == 'json':
                         col.type = sqlalchemy.dialects.mysql.json.JSON()
 
         base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
