@@ -106,7 +106,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                        'rptClaimsScripts',  
                        'spontaneousScopeScriptDns',
                        'jansAuthorizedAcr',
-                        'tlsClientAuthSubjectDn',                     
+                        'tlsClientAuthSubjectDn',
                         'spontaneousScopes',
                         'updateTokenScriptDns',
                         'postAuthnScripts',
@@ -586,7 +586,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
             self.drop_down_select_first.append(swagger_key)
 
-            values = [ (alg, alg) for alg in self.myparent.cli_object.openid_configuration[openid_key] ]
+            values = [ (alg, alg) for alg in self.myparent.cli_object.openid_configuration.get(openid_key,[]) ]
 
             encryption_signing.append(self.myparent.getTitledWidget(
                                 title,

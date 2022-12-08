@@ -71,7 +71,7 @@ class Plugin(DialogUtils):
         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
         if response.status_code not in (200, 201):
-            self.app.show_message(_("Error getting Jans configuration"), str(response.text))
+            self.app.show_message(_("Error getting Jans configuration"), str(response.text), tobefocused=self.app.center_frame)
             return
 
         self.app_configuration = response.json()
@@ -102,7 +102,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
                         self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first {} Scopes").format(self.app.entries_per_page), handler=self.oauth_get_scopes),
-                        self.app.getTitledText(_("Search: "), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
+                        self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button"), handler=self.add_scope),
                         ],
                         padding=3,
@@ -138,7 +138,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['properties'] = HSplit([
                     VSplit([
                         self.app.getTitledText(
-                            _("Search: "), 
+                            _("Search"), 
                             name='oauth:properties:search', 
                             jans_help=_("Press enter to perform search"), 
                             accept_handler=self.search_properties,
@@ -209,13 +209,13 @@ class Plugin(DialogUtils):
             self.app.stop_progressing()
 
             if response.status_code not in (200, 201):
-                self.app.show_message(_("Error getting clients"), str(response.text))
+                self.app.show_message(_("Error getting clients"), str(response.text),tobefocused=self.oauth_containers['clients'])
                 return
 
             try:
                 result = response.json()
             except Exception:
-                self.app.show_message(_("Error getting clients"), str(response.text))
+                self.app.show_message(_("Error getting clients"), str(response.text),tobefocused=self.oauth_containers['clients'])
                 return
 
             data =[]
