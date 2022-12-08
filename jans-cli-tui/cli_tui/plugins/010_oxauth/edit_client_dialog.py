@@ -106,7 +106,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                        'rptClaimsScripts',  
                        'spontaneousScopeScriptDns',
                        'jansAuthorizedAcr',
-                        'tlsClientAuthSubjectDn',                     
+                        'tlsClientAuthSubjectDn',
                         'spontaneousScopes',
                         'updateTokenScriptDns',
                         'postAuthnScripts',
