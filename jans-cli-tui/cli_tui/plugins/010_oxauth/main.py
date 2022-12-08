@@ -71,7 +71,7 @@ class Plugin(DialogUtils):
         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
         if response.status_code not in (200, 201):
-            self.app.show_message(_("Error getting Jans configuration"), str(response.text))
+            self.app.show_message(_("Error getting Jans configuration"), str(response.text), tobefocused=self.app.center_frame)
             return
 
         self.app_configuration = response.json()
