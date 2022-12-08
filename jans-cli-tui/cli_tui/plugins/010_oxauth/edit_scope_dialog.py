@@ -102,6 +102,11 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         if 'attributes' in self.data.keys():
             self.data['attributes'] = {'showInConfigurationEndpoint':self.data['attributes']}
 
+        cfr = self.check_required_fields(self.dialog.content)
+        self.myparent.logger.debug('CFR: '+str(cfr))
+        if not cfr:
+            return
+
         close_me = True
         if self.save_handler:
             close_me = self.save_handler(self)
@@ -147,7 +152,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     name='id', 
                     value=self.data.get('id',''), 
                     jans_help=self.myparent.get_help_from_schema(self.schema, 'id'),
-                    style='class:outh-scope-text'),
+                    style='class:outh-client-textrequired'),
 
                 self.myparent.getTitledText(
                     _("inum"), 
@@ -312,7 +317,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             ]
         calims_data = self.get_named_claims(self.data.get('claims', []))
         
-        if calims_data :
+        if True :
             self.claims_container = JansVerticalNav(
                     myparent=self.myparent,
                     headers=['dn', 'Display Name'],
@@ -327,6 +332,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     )
 
             open_id_widgets.append(self.claims_container)
+     
 
         self.alt_tabs['openid'] = HSplit(open_id_widgets, width=D())
 

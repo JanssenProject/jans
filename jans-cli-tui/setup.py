@@ -33,6 +33,17 @@ class PostInstallCommand(install):
                 os.path.join(yaml_dir, plugin_yaml_file)
                 )
 
+        scim_yaml_dir = os.path.join(self.install_lib, 'cli_tui/cli/ops/scim')
+        if not os.path.exists(scim_yaml_dir):
+            os.makedirs(scim_yaml_dir, exist_ok=True)
+
+        scim_plugin_yaml_file = 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml'
+        print("downloding", os.path.basename(scim_plugin_yaml_file))
+        urlretrieve(
+            scim_plugin_yaml_file,
+            os.path.join(scim_yaml_dir, os.path.basename(scim_plugin_yaml_file))
+            )
+
 def find_version(*file_paths):
     here = os.path.abspath(os.path.dirname(__file__))
     with codecs.open(os.path.join(here, *file_paths), 'r') as f:
@@ -79,7 +90,9 @@ setup(
 
     entry_points={
         "console_scripts": [
-            "config-cli-tui=cli_tui.jans_cli_tui:run"
+            "config-cli-tui=cli_tui.jans_cli_tui:run",
+            "config-cli=cli_tui.cli.config_cli:main",
+            "scim-cli=cli_tui.cli.config_cli:main",
         ],
     },
     cmdclass={
