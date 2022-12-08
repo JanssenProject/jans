@@ -118,6 +118,7 @@ public class ApiApplication extends Application {
         classes.add(HealthCheckResource.class);
         classes.add(OrganizationResource.class);
         classes.add(AgamaResource.class);
+        classes.add(ADSDeploymentsResource.class);
         classes.add(SessionResource.class);
 
         return classes;
