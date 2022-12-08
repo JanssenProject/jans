@@ -226,6 +226,33 @@ nav:
         - 'Config TUI': 'admin/config-guide/tui.md'
         - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
+    - 'Database Guide':
+        - 'admin/reference/database/README.md'
+        - 'RDBMS Erwin Table': 'admin/reference/database/rdbms-erwin.md'
+        - 'LDAP': 
+            - 'LDAP Schema': 'admin/reference/database/ldap-schema.md'
+            - 'LDAP Configuration': 'admin/reference/database/ldap-config.md'
+            - 'LDAP Operation': 'admin/reference/database/ldap-ops.md'
+            - 'LDAP Namespace Diagram': 'admin/reference/database/ldap-namespace.md'
+        - 'Couchbase':    
+            - 'Couchbase Schema': 'admin/reference/database/cb-schema.md'
+            - 'Couchbase Configuration': 'admin/reference/database/cb-config.md'
+            - 'Couchbase Operation': 'admin/reference/database/cb-ops.md'
+            - 'Couchbase Buckets': 'admin/reference/database/cb-buckets.md'
+        - 'MySQL':
+            - 'MySQL Schema': 'admin/reference/database/mysql-schema.md'
+            - 'MySQL Configuration': 'admin/reference/database/mysql-config.md'
+            - 'MySQL Operation': 'admin/reference/database/mysql-ops.md'
+#        - 'MariaDB': 'admin/reference/database/mariadb.md'
+        - 'Spanner':
+            - 'Spanner Schema': 'admin/reference/database/spanner-schema.md'
+            - 'Spanner Configuration': 'admin/reference/database/spanner-config.md'
+            - 'Spanner Operation': 'admin/reference/database/spanner-ops.md'
+ #       - 'PostgreSQL':    
+ #           - 'PostgreSQL Schema': 'admin/reference/database/postgres-schema.md'
+ #           - 'PostgreSQL Configuration': 'admin/reference/database/postgres-config.md'
+ #           - 'PostgreSQL Operation': 'admin/reference/database/postgres-ops.md'
+        - 'Converting Data': 'admin/reference/database/converting-data.md'
     - 'Auth Server Admin Guide':
         - 'admin/auth-server/README.md'
         - 'Configuration': 'admin/auth-server/config.md'
@@ -388,28 +415,6 @@ nav:
     - 'Reference Guide':
         - 'admin/reference/README.md'
         - 'Javadocs / OpenAPI': 'admin/reference/openapi.md'
-        - 'Database Reference':
-            - 'admin/reference/database/README.md'
-            - 'RDBMS Erwin Table': 'admin/reference/database/rdbms-erwin.md'
-            - 'LDAP Schema': 'admin/reference/database/ldap-schema.md'
-            - 'LDAP Configuration': 'admin/reference/database/ldap-config.md'
-            - 'LDAP Operation': 'admin/reference/database/ldap-ops.md'
-            - 'LDAP Namespace Diagram': 'admin/reference/database/ldap-namespace.md'
-            - 'Couchbase Schema': 'admin/reference/database/cb-schema.md'
-            - 'Couchbase Configuration': 'admin/reference/database/cb-config.md'
-            - 'Couchbase Operation': 'admin/reference/database/cb-ops.md'
-            - 'Couchbase Buckets': 'admin/reference/database/cb-buckets.md'
-            - 'MySQL Schema': 'admin/reference/database/mysql-schema.md'
-            - 'MySQL Configuration': 'admin/reference/database/mysql-config.md'
-            - 'MySQL Operation': 'admin/reference/database/mysql-ops.md'
-    #        - 'MariaDB': 'admin/reference/database/mariadb.md'
-            - 'Spanner Schema': 'admin/reference/database/spanner-schema.md'
-            - 'Spanner Configuration': 'admin/reference/database/spanner-config.md'
-            - 'Spanner Operation': 'admin/reference/database/spanner-ops.md'
-     #       - 'PostgreSQL Schema': 'admin/reference/database/postgres-schema.md'
-     #       - 'PostgreSQL Configuration': 'admin/reference/database/postgres-config.md'
-     #       - 'PostgreSQL Operation': 'admin/reference/database/postgres-ops.md'
-            - 'Converting Data': 'admin/reference/database/converting-data.md'
         - 'JSON Configuration/Properties':
             - 'admin/reference/json/README.md'
             - 'Properties':
