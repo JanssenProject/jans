@@ -13,6 +13,7 @@ import concurrent.futures
 from pathlib import Path
 from itertools import cycle
 from requests.models import Response
+from logging.handlers import RotatingFileHandler
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
@@ -244,11 +245,10 @@ class JansCliApp(Application):
     def init_logger(self) -> None:
         self.logger = logging.getLogger('JansCli')
         self.logger.setLevel(logging.DEBUG)
-        logs_dir = os.path.join('jans_cli_logs', home_dir)
-        if not os.path.exists(logs_dir):
-            os.makedirs(logs_dir, exist_ok=True)
+        if not os.path.exists(config_cli.log_dir):
+            os.makedirs(config_cli.log_dir, exist_ok=True)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        file_handler = logging.FileHandler(os.path.join(logs_dir, 'dev-tui.log'))
+        file_handler = RotatingFileHandler(os.path.join(config_cli.log_dir, 'dev-tui.log'), maxBytes=10*1024*1024, backupCount=10)
 
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
@@ -327,11 +327,16 @@ class JansCliApp(Application):
         if self.cli_object_ok:
             response = self.cli_requests({'operation_id': 'is-license-active'})
             if response.status_code == 404:
-                for entry in self.nav_bar.navbar_entries:
-                    if entry[0] == 'config_api':
-                        self.nav_bar.navbar_entries.remove(entry)
-                        self.remove_plugin(entry[0])
-                        self.invalidate()
+                self.disable_plugin('config_api')
+
+    def disable_plugin(self, pid) -> None:
+
+        for entry in self.nav_bar.navbar_entries:
+            if entry[0] == pid:
+                self.nav_bar.navbar_entries.remove(entry)
+                self.remove_plugin(entry[0])
+                self.invalidate()
+                break
 
 
     async def check_jans_cli_ini(self) -> None:
