@@ -20,7 +20,7 @@
 /jans-auth-server/ @yurem @yuriyz
 /jans-fido2/ @yurem
 /jans-scim/ @jgomer2001
-/jans-config-api/ @pujavs @yuriyz
+/jans-config-api/ @pujavs @yuriyz @yurem
 /jans-cli-tui/ @devrimyatar
 /jans-linux-setup/ @devrimyatar @smansoft @yuriyz @yurem
 /jans-linux-setup/jans_setup/setup_app/version.py @moabu
