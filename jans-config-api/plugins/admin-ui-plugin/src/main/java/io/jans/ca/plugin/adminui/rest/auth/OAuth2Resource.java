@@ -25,7 +25,7 @@ import jakarta.ws.rs.core.Response;
 @Hidden
 @Path("/app")
 public class OAuth2Resource {
-
+    //appType: admin-ui, ads
     static final String OAUTH2_CONFIG = "/{appType}/oauth2/config";
     static final String OAUTH2_ACCESS_TOKEN = "/{appType}/oauth2/access-token";
     static final String OAUTH2_API_PROTECTION_TOKEN = "/{appType}/oauth2/api-protection-token";
