@@ -184,7 +184,7 @@ nav:
     - 'Configuration Guide':
         - 'Config TUI': 'admin/config-guide/tui.md'
         - 'Configuration CLI':
-            - 'Overview': 'admin/config-guide/jans-cli/cli-index.md'
+            - 'admin/config-guide/jans-cli/README.md'
             - 'Standalone Installation': 'admin/config-guide/jans-cli/install.md'
             - 'Attribute': 'admin/config-guide/jans-cli/cli-attribute.md'
             - 'Default Authentication': 'admin/config-guide/jans-cli/cli-default-authentication-method.md'
