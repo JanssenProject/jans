@@ -104,6 +104,70 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         "500":
           description: InternalServerError
+  /api/v1/ads-deployment:
+    get:
+      operationId: getDeployment
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+    post:
+      operationId: deploy
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/zip:
+            schema:
+              type: array
+              items:
+                type: string
+                format: byte
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+    delete:
+      operationId: undeploy
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /api/v1/ads-deployment/list:
+    get:
+      operationId: getDeployments
+      parameters:
+      - name: start
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: count
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
   /api/v1/acrs:
     get:
       tags:
@@ -7081,19 +7145,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8244,8 +8308,23 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
+        dcrSsaValidationConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SsaValidationConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        blockWebviewAuthorizationEnabled:
+          type: boolean
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8273,15 +8352,6 @@ components:
             - STAT
             - PAR
             - SSA
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         fapi:
           type: boolean
     AuthenticationFilter:
@@ -8437,6 +8507,43 @@ components:
         ssaExpirationInDays:
           type: integer
           format: int32
+    SsaValidationConfig:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+          - NONE
+          - SSA
+          - DCR
+        displayName:
+          type: string
+        description:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        allowedClaims:
+          type: array
+          items:
+            type: string
+        jwks:
+          type: string
+        jwksUri:
+          type: string
+        issuers:
+          type: array
+          items:
+            type: string
+        configurationEndpoint:
+          type: string
+        configurationEndpointClaim:
+          type: string
+        sharedSecret:
+          type: string
     PersistenceConfiguration:
       type: object
       properties:
