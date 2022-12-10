@@ -145,7 +145,7 @@ public class AgamaFlowService implements Serializable {
         if (StringUtils.isBlank(flowName)) {
             return AGAMA_FLOWS_BASE;
         }
-        return String.format(String.format("%s,%s", Flow.ATTR_NAMES.QNAME, flowName, AGAMA_FLOWS_BASE));
+        return String.format("%s=%s,%s", Flow.ATTR_NAMES.QNAME, flowName, AGAMA_FLOWS_BASE);
     }
 
     public AgamaConfiguration getAgamaConfiguration() {
