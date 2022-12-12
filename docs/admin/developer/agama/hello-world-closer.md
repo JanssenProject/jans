@@ -24,7 +24,7 @@ In normal circumstances the flow is launched through a web browser via an [OIDC 
 
 ### First request cycle
 
-The GET request for `agama.fls` is processed by [this servlet](https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/servlet/ExecutionServlet.java). Most of logic takes place at method `startFlow` of [FlowService](
+The GET request for `agama.fls` is processed by [this servlet](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/servlet/ExecutionServlet.java). Most of logic takes place at method `startFlow` of [FlowService](
 https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/service/FlowService.java) bean. Here, the associated data of the flow in question is retrieved from the database. Its transpiled code in addition to utility code ([util.js](https://github.com/JanssenProject/jans/blob/main/agama/transpiler/src/main/resources/util.js)) is loaded and the main entry point called - see invocation of `callFunctionWithContinuations`. This will throw a `ContinuationPending` exception once the equivalent instruction to `RRF` (or `RFAC`) is found in the transpiled code.
 
 The above means that at line 6 of [Hello world](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/agama/test#L6), the DSL code execution is interrupted: method `processPause` collects the required data for template rendering, like template location and its associated data model. This is saved to permanent storage in addition to the "state of the program", that is the values of all variables defined so far in the flow - this is known as the "continuation".
@@ -33,7 +33,7 @@ Finally the `ExecutionServlet` sends a response consisting of a redirect. This c
 
 ### Second request cycle
 
-As a consequence of the HTTP redirect received, the browser will request the server a URL like `/jans-auth/fl/hello/index.fls`. Note how this is correlated to the template path defined in the flow. Here the GET handler of `ExecutionServlet` takes control again, this time calling the `sendPageContents` method defined in the parent class [BaseServlet](https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/servlet/BaseServlet.java). `sendPageContents` performs the actual page rendering - specifically for `hello/index.ftlh` in this case - and the produced markup is sent to browser.
+As a consequence of the HTTP redirect received, the browser will request the server a URL like `/jans-auth/fl/hello/index.fls`. Note how this is correlated to the template path defined in the flow. Here the GET handler of `ExecutionServlet` takes control again, this time calling the `sendPageContents` method defined in the parent class [BaseServlet](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/servlet/BaseServlet.java). `sendPageContents` performs the actual page rendering - specifically for `hello/index.ftlh` in this case - and the produced markup is sent to browser.
 
 So far we have "covered" the first two letters of the RRF instruction.
 
