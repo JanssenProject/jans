@@ -2,2727 +2,2732 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://jans.io/docs/head/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/CHANGELOG/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/CODE_OF_CONDUCT/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/CONTRIBUTING/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/client-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/client-schema/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/client-scripts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/sector-identifiers/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/software-statements/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/client-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/client-crypto/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/grants/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/pre-authorization/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/redirect-uris/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/client-management/configuration/response-types/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/crypto/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/crypto/key-generation/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/crypto/key-storage/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/crypto/supported-algorithms/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/authorization/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/backchannel-authentication/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/client-registration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/clientinfo/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/device-authorization/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/end-session/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/introspection/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/session-revocation/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/ssa/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/token-revocation/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/userinfo/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/international/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/international/client-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/international/scope-descriptions/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/international/web-pages/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/logging/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/logging/audit-logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/logging/custom-logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/logging/log-levels/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/logging/log4j2/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/logging/standard-logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/client-credential-grant/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/device-grant/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/dpop/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/mtls/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/par/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/password-grant/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/pkce/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/acrs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/ciba/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/id-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/jarm/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/native-sso/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/prompt-parameter/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/request-objects/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/siop/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/subject-identifiers/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/consent/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/consent/customize/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/consent/list-delete/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/logout/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/logout/back-channel/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/logout/customizing-logout/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/logout/forcing-logout/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/logout/front-channel/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/user-claims/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/user-claims/built-in-claims/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/user-claims/claim-uniqueness-validation/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/openid-features/user-claims/custom-claims/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/failed-success-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/health/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/mau/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/tokens-issued/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/user-client-count/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/session-management/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/session-management/idp-v-rp/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/session-management/multiple-browser-sessions/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/session-management/multiple-sessions-one-browser/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/session-management/what-is/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/oauth-access-tokens/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/oauth-refresh-tokens/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/openid-id-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/openid-userinfo-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/uma-rpt-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/uma-features/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/uma-features/claims-gathering-endpoint/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/auth-server/uma-features/rpt-endpoint/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/attribute/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/monitoring/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/openid-client/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/plugins/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-api/security/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/curl/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/scim-cli/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/tui/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-attribute/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-cache-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-couchbase-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-custom-scripts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-default-authentication-method/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-group/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-index/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-jans-authorization-server/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-janssen-fido2-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-jwk-json-web-key-jwk/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-ldap-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-logging-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-oauthscopes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-oauthumaresources/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-openid-connect-client-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-smtp-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-user/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/device-flow/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/install/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-attribute/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-authentication-method/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-cache-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-couchbase-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-custom-scripts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-group/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-index/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-jans-authorization-server/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-janssen-fido2/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-janssen-logging-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-json-web-key/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-ldap-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-oauth-scopes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-openid-connect-clients/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-smtp-server-configuration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-uma-resources/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/im/im-user/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/back-channel-scripts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/cors/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/external-libraries/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/front-channel-scripts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/interception-scripts-debug/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/interception-scripts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/managed-beans/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/dsl-full/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/dsl/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/engine-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/faq/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/flows-lifecycle/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/hello-world-closer/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/java-classpath/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/lifecycle/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/logging/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/quick-start/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/samples/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/ui-pages/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/customization/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/customization/custom-client-logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/customization/customize-web-pages/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/application-session/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/ciba/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/client-registration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/config-api/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/consent-gathering/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/dynamic-scope/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/end-session/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/id-generator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/id-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/introspection/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/openid-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/persistence/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/person-authentication-interface/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/person-authentication/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/post-authentication/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/revoke-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/rpoc/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/scim/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/spontaneous-scope/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/uma-claims-jwt/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/uma-claims-web/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/uma-rpt/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/update-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/auth-server-test/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/cloudhsm/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/google-key-mgt/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/health/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/monitoring/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/softhsm/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/eleven/supported-algs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/bluetooth-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/key-mgt/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/monitoring/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/platform-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/scim/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/usb-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/fido/vendor-metadata/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/install-faq/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/setup/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/docker-install/compose/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/docker-install/quick-start/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/amazon-eks/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/digitalocean-dok/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/google-gke/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/local/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/microsoft-azure/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/rancher/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/helm-install/red-hat-open-shift/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/disa-stig/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/dynamic-download/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/rhel/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/suse/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/ubuntu/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/install/vm-install/vm-requirements/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/backup-restore/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/cert-management/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/customization/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/faq/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/health-check/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/scaling/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/start-order/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/application-portal/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/benchmarking/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/caching/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/central-auth-service/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/certificates-keys/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/components/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/customization/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/delegated-user-admin/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/discovery/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/dns/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/identity-access-governance/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/identity-management/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/kubernetes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/load-balancers/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/machine-to-machine/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/multi-tenancy/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/passwordless-auth/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/persistence/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/platform-goal/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/role-based-access-management/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/security-best-practices/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/self-service-password-2fa/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/stepped-up-auth/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/timeout-management/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/use-cases/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/vm-cluster/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/planning/vm-single-instance/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/adaptive-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/casa/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/faq/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/forcing-reauthn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/impersonation/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/inbound-oidc/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/inbound-saml/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/locking-accounts/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/mobile-apps/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/passportjs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/password-expirations/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/passwordless/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/registration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/returning-group/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/single-page-apps/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/social-login/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/web-apps/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/access-tokens/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/client-credential-grant-flow/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/oauth-api-gateway/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/opa-access-tokens/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/openapi-best-practice/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/scope-access/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/software-statements/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/api-access-control/user-claims-tokens/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/drupal/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/kafka/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/magento/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/moodle/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/nextcloud/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/rancher/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/rocket/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/teleport/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/apps/wordpress/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/angular/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/appauth-android/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/appauth-ios/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/appauth-js/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/asp-net/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/authn-with-apache-reverse-proxy/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/django/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/flask/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/mod-auth-openidc/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/node/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/react-native/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/react/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/custom-web-development/spring-boot/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/forgot-password/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/forgot-password/email/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/forgot-password/sms/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/open-banking/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/open-banking/client-registration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/open-banking/fapi-authn-request/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/open-banking/requirements/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/aws/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/docusign/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/google/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/jira/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/office365/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/salesforce/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/webex/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saas/zoom/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saml/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saml/federation/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saml/idp-init-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/recipes/saml/sso-sp/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/javadocs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/openapi/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/cb-buckets/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/cb-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/cb-ops/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/cb-schema/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/converting-data/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/ldap-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/ldap-namespace/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/ldap-ops/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/ldap-schema/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mariadb/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mysql-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mysql-ops/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mysql-schema-ERdiagram/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mysql-schema-indexes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mysql-schema/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/postgres-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/postgres-schema/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/rdbms-erwin/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/spanner-config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/spanner-ops/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/database/spanner-schema/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/feature-flags/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/feature-flags/janssenauthserver-feature-flags/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/properties/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/properties/config-api-properties/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/properties/fido2-properties/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/properties/janssenauthserver-properties/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/json/properties/scim-properties/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/config-secret-keys/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-auth-server/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-certmanager/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-config-api/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-configurator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-fido2/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-monolith/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-persistence-loader/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-scim/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-opendj/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/helm-chart/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/bulk-users/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/config/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/custom-attributes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/monitoring/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/oauth-protection/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/scim/security/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/to-be-placed/add-custom-ldifs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/to-be-placed/google/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/upgrade-faq/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/backup/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/paths/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/rollback/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/vm/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/vm/backup/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/vm/paths/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/upgrade/vm/rollback/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/backup/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/certificates/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/checking-service-status/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/faq/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/logs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/managing-key-rotation/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/restarting-services/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/web-services/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/agama-catalog/community/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/agama-catalog/jans/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/agama-catalog/jans/inboundID/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/agama-catalog/jans/inboundID/apple/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/agama-catalog/vendor/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/assets/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/developer-faq/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/development/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/testing/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/ci-cd/github-ci/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/ci-cd/jenkins-ci/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/ci-cd/release-process/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/agama/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-auth-server/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-cli/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-config-api/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-core/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-eleven/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-fido2/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-notify/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-orm/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/jans-scim/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/developer/implementation-design/technical-overview-template/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/governance/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/governance/charter/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/governance/copyright-notices/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/governance/triage/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/application_session/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/cache_refresh/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/ciba/end-user-notification/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/client_registration/OpenBanking/client-registration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/client_registration/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/config_api/config-api-interception/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/consent_gathering/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/discovery/discovery/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/dynamic-permission/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/memberof-attribute/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/org-name/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/session-parameter/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/work-phone/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/end_session/end-session/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/id_generator/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/idp/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/introspection/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/introspection/introspection/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/introspection/introspection-custom-parameters/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/introspection/introspection-role-based-scope/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/persistence_extension/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/agama-bridge/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/apple-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/basic-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/basic-lock-account-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/casa/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/duo-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/fido2-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/forgot_password/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/google-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/acr_router/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/allowed_countries/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/authz/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/azuread/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.change_password/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.client_group/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.external_logout/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.lock.account/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.multi_auth_conf/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.multi_login/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.multiple_test_email_addresses/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.one_session/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.password_expiration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.reset_to_step/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/bcrypt_ssha_migration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/bioid/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cas2/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cas2_duo/Readme/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/Generate%20certs%20guide/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/Generate%20certs%20without%20configs/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/Quick%20certs%20guide%20for%20testing/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/ciba/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/compromised_password/readme/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/custom_registration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/duo/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/fortinet/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/gplus/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/idfirst/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/idfirst/README_idfirst/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/inwebo/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/otp/Properties%20description/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/passport/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/phonefactor/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/postauthn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/registration/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/saml/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/saml-passport/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/super_gluu/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/toopher/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/twilio_sms/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/uaf/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/uaf/Properties%20description/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/wikid/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/wwpass/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/wwpass/INSTALLATION/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/yubicloud/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/otp-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/smpp-2fa/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/super-gluu-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/twilio-2fa/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/user-cert-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/person_authentication/yubicloud-external-authenticator/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/post_authn/post-authn/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-2fa/</loc>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-custom-params/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/revoke_token/revoke-token/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/scim/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/scim/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/spontaneous_scope/spontaneous-scope/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/uma_claims_gathering/uma-claims-gathering/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/uma_rpt_claims/uma-rpt-claims/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/uma_rpt_policy/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/uma_rpt_policy/uma-client-authz-rpt-policy/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/uma_rpt_policy/uma-rpt-policy/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/update_token/sample-script/</loc>
-         <lastmod>2022-12-09</lastmod>
+         <lastmod>2022-12-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
