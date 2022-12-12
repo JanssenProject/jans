@@ -106,7 +106,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         // 5. Validate id_token
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .check();
 
         // 6. Request new access token using the refresh token.
@@ -330,7 +330,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         // 5. Validate id_token
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .check();
 
         // 6. Request new access token using the refresh token.

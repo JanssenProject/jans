@@ -239,7 +239,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         // 5. Validate id_token 
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationTime()
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .check();
@@ -361,7 +361,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         // 5. Validate id_token 
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationTime()
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .check();

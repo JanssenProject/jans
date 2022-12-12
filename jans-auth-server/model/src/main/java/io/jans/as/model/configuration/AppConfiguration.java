@@ -337,10 +337,10 @@ public class AppConfiguration implements Configuration {
     private String defaultSignatureAlgorithm;
 
     @DocProperty(description = "OpenID Connect Version")
-    private String oxOpenIdConnectVersion;
+    private String jansOpenIdConnectVersion;
 
     @DocProperty(description = "URL for the Inum generator Service")
-    private String oxId;
+    private String jansId;
 
     @DocProperty(description = "Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire", defaultValue = "-1")
     private int dynamicRegistrationExpirationTime = -1;
@@ -531,19 +531,19 @@ public class AppConfiguration implements Configuration {
 
     //oxEleven
     @DocProperty(description = "oxEleven Test Mode Token")
-    private String oxElevenTestModeToken;
+    private String jansElevenTestModeToken;
 
     @DocProperty(description = "oxEleven Generate Key endpoint URL")
-    private String oxElevenGenerateKeyEndpoint;
+    private String jansElevenGenerateKeyEndpoint;
 
     @DocProperty(description = "oxEleven Sign endpoint UR")
-    private String oxElevenSignEndpoint;
+    private String jansElevenSignEndpoint;
 
     @DocProperty(description = "oxEleven Verify Signature endpoint URL")
-    private String oxElevenVerifySignatureEndpoint;
+    private String jansElevenVerifySignatureEndpoint;
 
     @DocProperty(description = "oxEleven Delete Key endpoint URL")
-    private String oxElevenDeleteKeyEndpoint;
+    private String jansElevenDeleteKeyEndpoint;
 
     @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
@@ -2085,20 +2085,20 @@ public class AppConfiguration implements Configuration {
         this.defaultSignatureAlgorithm = defaultSignatureAlgorithm;
     }
 
-    public String getOxOpenIdConnectVersion() {
-        return oxOpenIdConnectVersion;
+    public String getJansOpenIdConnectVersion() {
+        return jansOpenIdConnectVersion;
     }
 
-    public void setOxOpenIdConnectVersion(String oxOpenIdConnectVersion) {
-        this.oxOpenIdConnectVersion = oxOpenIdConnectVersion;
+    public void setJansOpenIdConnectVersion(String jansOpenIdConnectVersion) {
+        this.jansOpenIdConnectVersion = jansOpenIdConnectVersion;
     }
 
-    public String getOxId() {
-        return oxId;
+    public String getJansId() {
+        return jansId;
     }
 
-    public void setOxId(String oxId) {
-        this.oxId = oxId;
+    public void setJansId(String jansId) {
+        this.jansId = jansId;
     }
 
     public int getDynamicRegistrationExpirationTime() {
@@ -2381,44 +2381,44 @@ public class AppConfiguration implements Configuration {
         this.keyStoreSecret = keyStoreSecret;
     }
 
-    public String getOxElevenTestModeToken() {
-        return oxElevenTestModeToken;
+    public String getJansElevenTestModeToken() {
+        return jansElevenTestModeToken;
     }
 
-    public void setOxElevenTestModeToken(String oxElevenTestModeToken) {
-        this.oxElevenTestModeToken = oxElevenTestModeToken;
+    public void setJansElevenTestModeToken(String jansElevenTestModeToken) {
+        this.jansElevenTestModeToken = jansElevenTestModeToken;
     }
 
-    public String getOxElevenGenerateKeyEndpoint() {
-        return oxElevenGenerateKeyEndpoint;
+    public String getJansElevenGenerateKeyEndpoint() {
+        return jansElevenGenerateKeyEndpoint;
     }
 
-    public void setOxElevenGenerateKeyEndpoint(String oxElevenGenerateKeyEndpoint) {
-        this.oxElevenGenerateKeyEndpoint = oxElevenGenerateKeyEndpoint;
+    public void setJansElevenGenerateKeyEndpoint(String jansElevenGenerateKeyEndpoint) {
+        this.jansElevenGenerateKeyEndpoint = jansElevenGenerateKeyEndpoint;
     }
 
-    public String getOxElevenSignEndpoint() {
-        return oxElevenSignEndpoint;
+    public String getJansElevenSignEndpoint() {
+        return jansElevenSignEndpoint;
     }
 
-    public void setOxElevenSignEndpoint(String oxElevenSignEndpoint) {
-        this.oxElevenSignEndpoint = oxElevenSignEndpoint;
+    public void setJansElevenSignEndpoint(String jansElevenSignEndpoint) {
+        this.jansElevenSignEndpoint = jansElevenSignEndpoint;
     }
 
-    public String getOxElevenVerifySignatureEndpoint() {
-        return oxElevenVerifySignatureEndpoint;
+    public String getJansElevenVerifySignatureEndpoint() {
+        return jansElevenVerifySignatureEndpoint;
     }
 
-    public void setOxElevenVerifySignatureEndpoint(String oxElevenVerifySignatureEndpoint) {
-        this.oxElevenVerifySignatureEndpoint = oxElevenVerifySignatureEndpoint;
+    public void setJansElevenVerifySignatureEndpoint(String jansElevenVerifySignatureEndpoint) {
+        this.jansElevenVerifySignatureEndpoint = jansElevenVerifySignatureEndpoint;
     }
 
-    public String getOxElevenDeleteKeyEndpoint() {
-        return oxElevenDeleteKeyEndpoint;
+    public String getJansElevenDeleteKeyEndpoint() {
+        return jansElevenDeleteKeyEndpoint;
     }
 
-    public void setOxElevenDeleteKeyEndpoint(String oxElevenDeleteKeyEndpoint) {
-        this.oxElevenDeleteKeyEndpoint = oxElevenDeleteKeyEndpoint;
+    public void setJansElevenDeleteKeyEndpoint(String jansElevenDeleteKeyEndpoint) {
+        this.jansElevenDeleteKeyEndpoint = jansElevenDeleteKeyEndpoint;
     }
 
     public Boolean getEndSessionWithAccessToken() {
