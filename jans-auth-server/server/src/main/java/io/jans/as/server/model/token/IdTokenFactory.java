@@ -181,7 +181,7 @@ public class IdTokenFactory {
         if (authorizationGrant.getGrantType() != null) {
             jwr.setClaim("grant", authorizationGrant.getGrantType().getValue());
         }
-        jwr.setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
+        jwr.setClaim(JwtClaimName.JANS_OPENID_CONNECT_VERSION, appConfiguration.getJansOpenIdConnectVersion());
 
         User user = authorizationGrant.getUser();
         List<Scope> dynamicScopes = new ArrayList<>();
