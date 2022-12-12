@@ -308,6 +308,7 @@ class DBUtils:
             self.spanner.update_data(table=table, columns=["doc_id", component], values=[[key, value]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
+            key = ldif_utils.get_key_from(dn)
             n1ql = 'UPDATE `{}` USE KEYS "{}" SET {}={}'.format(key, self.default_bucket, component, value)
             self.cbm.exec_query(n1ql)
 
