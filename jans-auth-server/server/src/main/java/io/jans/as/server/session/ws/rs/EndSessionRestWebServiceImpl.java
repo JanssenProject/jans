@@ -312,7 +312,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return null;
     }
 
-    protected Jwt validateIdTokenHint(String idTokenHint, SessionId sidSession, String postLogoutRedirectUri) {
+    private Jwt validateIdTokenHint(String idTokenHint, SessionId sidSession, String postLogoutRedirectUri) {
         final boolean isIdTokenHintRequired = isTrue(appConfiguration.getForceIdTokenHintPrecense());
 
         if (isIdTokenHintRequired && StringUtils.isBlank(idTokenHint)) { // must be present for logout tests #1279
@@ -372,6 +372,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         if (isTrue(appConfiguration.getAllowEndSessionWithUnmatchedSid())) {
             return;
         }
+
         final String sidClaim = jwt.getClaims().getClaimAsString("sid");
         if (sidSession != null && StringUtils.equals(sidSession.getOutsideSid(), sidClaim)) {
             return;
