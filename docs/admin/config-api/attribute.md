@@ -2,21 +2,21 @@
 tags:
   - administration
   - config-api
-  - endpoints
+  - attributes
 ---
 
-# Attributes (original SAML jargon) or "user claims" (OpenID jargon)
+# Attributes
 
-Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources.
+Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources. In OpenID Connect, these are called user claims.
 
 ------------------------------------------------------------------------------------------
 
-#### Listing existing attributes
+## Listing existing attributes
 
 <details>
  <summary><code>GET</code> <code><b>/</b></code> <code>(gets list of attributes based on search parameters)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                                                                     |
 > |------------|-------------|----------------|-----------|--------------|---------------------------------------------------------------------------------|
@@ -28,7 +28,7 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | sortOrder  |  query      | string         | optional  |ascending     |Search size - max size of the results to return                                  |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -36,13 +36,13 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba" -X GET http://my.jans.server/jans-config-api/api/v1/attributes?limit=5&pattern=edu,locale,carLicense&startIndex=1
 > ```
 
-##### Sample Response
+### Sample Response
 > ```javascript
 >  {
 >    "start": 0,
@@ -121,17 +121,16 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 </details>
 
-
 <details>
   <summary><code>GET</code> <code><b>/{inum}</b></code> <code>(gets attribute based on inum)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | `inum`     |  path       | string         | required  | NA           | Attribute unique idendifier            |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -139,13 +138,13 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba" -X GET http://my.jans.server/jans-config-api/api/v1/attributes/08E2
 > ```
 
-##### Sample Response
+### Sample Response
 
 > ```javascript
 >  {
@@ -187,18 +186,18 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 ------------------------------------------------------------------------------------------
 
-#### Creating new attribute
+## Creating new attribute
 
 <details>
   <summary><code>POST</code> <code><b>/{inum}</b></code> <code>(creates a new attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | Attribute json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -206,13 +205,13 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X POST -k -H 'Content-Type: application/json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/attributes' --data @post.json
 > ```
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 > {
@@ -249,18 +248,18 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 ------------------------------------------------------------------------------------------
 
-#### Updating existing attribute
+## Updating existing attribute
 
 <details>
   <summary><code>PUT</code> <code><b>/{inum}</b></code> <code>(updates an existing attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | Attribute json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -269,13 +268,13 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X PUT -k -H 'Content-Type: application/json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/attributes' --data @put.json
 > ```
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 > {
@@ -317,12 +316,12 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 ------------------------------------------------------------------------------------------
 
-#### Patching existing attribute
+## Patching existing attribute
 
 <details>
   <summary><code>PATCH</code> <code><b>/{inum}</b></code> <code>(patches an existing attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                            |
 > |------------|-------------|--------------------|-----------|--------------|----------------------------------------|
@@ -330,7 +329,7 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | None       |  request    | json-patch object  | required  | NA           | json-patch request                     |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -339,13 +338,13 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X PATCH -k -H 'Content-Type: application/json-patch+json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/attributes/08E2' --data @patch.json
 > ```
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 > [ {"op":"replace", "path":"/displayName", "value": "PatchCustomAttribute123" } ]
@@ -355,19 +354,19 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 ------------------------------------------------------------------------------------------
 
-#### Deleting existing attribute
+## Deleting existing attribute
 
 <details>
   <summary><code>DELETE</code> <code><b>/{inum}</b></code> <code>(deletes an existing attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                            |
 > |------------|-------------|--------------------|-----------|--------------|----------------------------------------|
 > | inum       |  path       | string             | required  | NA           | Attribute unique idendifier            |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -376,13 +375,13 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X DELETE -k -H 'Content-Type: application/json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/attributes/08E2'
 > ```
 
-##### Sample Request
+### Sample Request
 > None
 
 </details>
