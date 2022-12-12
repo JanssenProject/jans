@@ -76,7 +76,17 @@ where `flow.js` might look like this:
 {
   "qname": "com.acme.myflow",
   "source": "Flow com.acme.myflow\n\tBasepath \"\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nFinish \"john_doe\"",
-  "enabled": true,
+  "enabled": true
+}
+```
+
+**Notes:**
+
+- Only `qname` and `source` are required in the JSON payload
+- If `enabled` is absent, a `false` value is used by default in the JSON-based endpoint. The text-based version always assumes `true`. This property allows or prevents launching a flow directly from the browser
+
+<!--
+,
   "metadata": {
     "displayName": "Biometric authentication",
     "author": "John",
@@ -86,14 +96,8 @@ where `flow.js` might look like this:
       "secret": "change it"
     }
   }
-}
-```
-
-**Notes:**
-
-- Only `qname` and `source` are required in the JSON payload
 - `properties` in `metadata` refers to the configuration parameters of the flow. See `Configs` keyword [here](./dsl-full.md#header-basics)
-- If `enabled` is absent, a `false` value is used by default in the JSON-based endpoint. The text-based version always assumes `true`. This property allows or prevents launching a flow directly from the browser
+-->
 
 ## Upload required assets
 
