@@ -10507,24 +10507,28 @@
 <div class="highlight"><pre><span></span><code>{
   &quot;qname&quot;: &quot;com.acme.myflow&quot;,
   &quot;source&quot;: &quot;Flow com.acme.myflow\n\tBasepath \&quot;\&quot;\n\nin = { name: \&quot;John\&quot; }\nRRF \&quot;index.ftlh\&quot; in\n\nFinish \&quot;john_doe\&quot;&quot;,
-  &quot;enabled&quot;: true,
-  &quot;metadata&quot;: {
-    &quot;displayName&quot;: &quot;Biometric authentication&quot;,
-    &quot;author&quot;: &quot;John&quot;,
-    &quot;description&quot;: &quot;This has not been written yet&quot;,
-    &quot;properties&quot;: {
-      &quot;api_key&quot;: &quot;e2987c51&quot;,
-      &quot;secret&quot;: &quot;change it&quot;
-    }
-  }
+  &quot;enabled&quot;: true
 }
 </code></pre></div>
 <p><strong>Notes:</strong></p>
 <ul>
 <li>Only <code>qname</code> and <code>source</code> are required in the JSON payload</li>
-<li><code>properties</code> in <code>metadata</code> refers to the configuration parameters of the flow. See <code>Configs</code> keyword <a href="../dsl-full/#header-basics">here</a></li>
 <li>If <code>enabled</code> is absent, a <code>false</code> value is used by default in the JSON-based endpoint. The text-based version always assumes <code>true</code>. This property allows or prevents launching a flow directly from the browser</li>
 </ul>
+<!--
+,
+  "metadata": {
+    "displayName": "Biometric authentication",
+    "author": "John",
+    "description": "This has not been written yet",
+    "properties": {
+      "api_key": "e2987c51",
+      "secret": "change it"
+    }
+  }
+- `properties` in `metadata` refers to the configuration parameters of the flow. See `Configs` keyword [here](./dsl-full.md#header-basics)
+-->
+
 <h2 id="upload-required-assets">Upload required assets<a class="headerlink" href="#upload-required-assets" title="Permanent link">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -10725,7 +10729,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-12T19:42:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-12</span>
       
         <br>
         Created:

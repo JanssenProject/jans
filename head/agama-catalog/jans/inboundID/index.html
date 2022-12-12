@@ -10563,7 +10563,7 @@
 <p>Launch the main flow (learn about this topic <a href="https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described <a href="#main-flow">here</a>. </p>
 <h2 id="configuration-parameters-of-flows">Configuration parameters of flows<a class="headerlink" href="#configuration-parameters-of-flows" title="Permanent link">#</a></h2>
 <h3 id="main-flow-configurations">Main flow configurations<a class="headerlink" href="#main-flow-configurations" title="Permanent link">#</a></h3>
-<p>Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
+<p>Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
 <p>This is an example of a configuration for a couple of identity providers:</p>
 <div class="highlight"><pre><span></span><code>{
 
@@ -10647,7 +10647,7 @@
 </ul>
 <h3 id="provider-flow-configurations">Provider flow configurations<a class="headerlink" href="#provider-flow-configurations" title="Permanent link">#</a></h3>
 <p>Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows <strong>must not</strong> receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of <code>Inputs</code> but <code>Configs</code> directive in the <a href="https://jans.io/docs/admin/developer/agama/dsl-full/#header-basics">header</a>.</p>
-<p>In practice many identity providers adhere to the OAuth2 <code>code</code> grant, so you can re-use the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java">this</a> Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.</p>
+<p>In practice many identity providers adhere to the OAuth2 <code>code</code> grant, so you can re-use the structure represented by <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java">this</a> Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.</p>
 <p>The table below explains the meaning of its properties:</p>
 <table>
 <thead>
@@ -10720,14 +10720,14 @@
 }
 </code></pre></div>
 <p>None of this attributes exist in Janssen, database adheres to LDAP naming. Conformant names would be <code>uid</code>, <code>mail</code>, <code>sn</code>, and <code>givenName</code>. Also, let's assume you want to set <code>displayName</code> to a string composed by the first and last names separated by a white space. Writing a mapping is required.</p>
-<p>A mapping is implemented in Java in the form of a <code>java.util.function.UnaryOperator&lt;Map&lt;String, Object&gt;&gt;</code>, that is, a function that takes a <code>Map&lt;String, Object&gt;</code> as input and returns a <code>Map&lt;String, Object&gt;</code> as result. Several examples are provided <a href="https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java">here</a>. </p>
+<p>A mapping is implemented in Java in the form of a <code>java.util.function.UnaryOperator&lt;Map&lt;String, Object&gt;&gt;</code>, that is, a function that takes a <code>Map&lt;String, Object&gt;</code> as input and returns a <code>Map&lt;String, Object&gt;</code> as result. Several examples are provided <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java">here</a>. </p>
 <p>Note property <code>mappingClassField</code> of every provider defined in the <a href="#main-flow-configurations">main flow</a> points to the fully qualified name of a mapping. Some important considerations:</p>
 <ul>
 <li>A mapping has to be declared as a public field in a public class</li>
 <li>Not all mappings have to belong to the same class</li>
 <li>Several providers can use the same mapping</li>
 </ul>
-<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined <a href="https://jans.io/docs/admin/developer/agama/java-classpath/">here</a>. A "template" for quickly start writing a mapping is already <a href="https://github.com/JanssenProject/jans/raw/main/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   </p>
+<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined <a href="https://jans.io/docs/admin/developer/agama/java-classpath/">here</a>. A "template" for quickly start writing a mapping is already <a href="https://github.com/JanssenProject/jans/raw/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   </p>
 <ul>
 <li>Add an instruction like <code>Call io.jans.inbound.CustomMappings#class</code> at the beginning of the flow body for the class to be effectively reloaded when the file is modified</li>
 <li>Set <code>mappingClassField</code> to <code>io.jans.inbound.CustomMappings.SAMPLE_MAPPING</code> for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly</li>
@@ -10771,7 +10771,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-23T11:44:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-12T19:42:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-12</span>
       
         <br>
         Created:

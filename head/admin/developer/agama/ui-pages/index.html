@@ -10407,7 +10407,7 @@
 <p>In Agama, every template is generally "injected" some data, see <a href="../dsl/#rrf">RRF</a>. This data in FreeMarker terms is known as "data-model". In practice, this will be an Agama <a href="../dsl-full/#maps">map</a> which can be accessed from the templates using standard FreeMarker notation. This <em>map</em> is attached a couple of additional keys for developer's convenience:</p>
 <ul>
 <li>
-<p><code>webCtx</code>. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect <a href="https://github.com/JanssenProject/jans/blob/main/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java">here</a>. Take a look at the getters; writing <code>${webCtx.contextPath}</code> in a template will insert the result of calling method <code>getContextPath</code> - normally the string <code>/jans-auth</code>.</p>
+<p><code>webCtx</code>. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java">here</a>. Take a look at the getters; writing <code>${webCtx.contextPath}</code> in a template will insert the result of calling method <code>getContextPath</code> - normally the string <code>/jans-auth</code>.</p>
 </li>
 <li>
 <p><code>msgs</code>. It gives access to the localized messages of jans-auth application. Some developers might know this as the "internationalization labels" or "resource bundle" of an application. This is a collection of <code>.properties</code> files where common UI-related messages in different languages can be found. A message (label) is identified by a key, so in a template <code>${msgs.&lt;KEY&gt;}</code> could be used. As most keys in resource bundles have dot characters, the alternative notation <code>${webCtx["KEY"]}</code> works better for FreeMarker, for example <code>${msgs["login.errorMessage"]}</code>.</p>
@@ -10547,7 +10547,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T12:54:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-12T19:42:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-12</span>
       
         <br>
         Created:
