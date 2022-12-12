@@ -106,7 +106,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -200,7 +200,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .check();
 
@@ -265,7 +265,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AssertBuilder.jwt(jwt)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -329,7 +329,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 3. Validate id_token
         AssertBuilder.jwtParse(idToken)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .check();
 
@@ -433,7 +433,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AssertBuilder.jwt(jwt)
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .claimsPresence(JwtClaimName.NONCE, JwtClaimName.CODE_HASH)
                 .check();
         assertEquals(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE), nonce);
@@ -619,7 +619,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .check();
 
@@ -708,7 +708,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AssertBuilder.jwt(jwt)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();

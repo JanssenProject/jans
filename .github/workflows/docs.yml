@@ -10,6 +10,7 @@ on:
 
 jobs:
   docs:
+    if: github.repository_owner == 'JanssenProject'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
