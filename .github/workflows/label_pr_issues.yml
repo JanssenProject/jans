@@ -16,6 +16,8 @@ on:
 
 jobs:
   label:
+    # This cannot run on forks as the user mo-auto does not have access to forks
+    if: github.repository_owner == 'JanssenProject'
     name: label PR
     runs-on: ubuntu-latest
     steps:
