@@ -287,6 +287,8 @@ class DBUtils:
 
     def set_configuration(self, component, value, dn='ou=configuration,o=jans'):
         if self.moddb == BackendTypes.LDAP:
+            if value is None:
+                value = []
             ldap_operation_result = self.ldap_conn.modify(
                 dn,
                 {component: [ldap3.MODIFY_REPLACE, value]}
@@ -304,12 +306,12 @@ class DBUtils:
 
         elif self.moddb == BackendTypes.SPANNER:
             table = self.get_spanner_table_for_dn(dn)
-            key = ldif_utils.get_key_from(dn)
-            self.spanner.update_data(table=table, columns=["doc_id", component], values=[[key, value]])
+            doc_id = self.get_doc_id_from_dn(dn)
+            self.spanner.update_data(table=table, columns=["doc_id", component], values=[[doc_id, value]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             key = ldif_utils.get_key_from(dn)
-            n1ql = 'UPDATE `{}` USE KEYS "{}" SET {}={}'.format(key, self.default_bucket, component, value)
+            n1ql = 'UPDATE `{}` USE KEYS "{}" SET {}={}'.format(self.default_bucket, key, component, value)
             self.cbm.exec_query(n1ql)
 
 
