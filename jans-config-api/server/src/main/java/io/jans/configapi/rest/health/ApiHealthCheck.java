@@ -93,7 +93,7 @@ public class ApiHealthCheck extends ConfigBaseResource {
         liveness.setStatus("UP");
   
         logger.debug("ApiHealthCheck::getLivenessResponse() - liveness:{}",liveness);
-        return Response.ok(liveness.toString()).build();
+        return Response.ok(liveness).build();
     }
 
     @Operation(summary = "Returns application readiness status", description = "Returns application readiness status", operationId = "get-config-health-ready", tags = {

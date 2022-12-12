@@ -128,14 +128,17 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
     @Override
     protected <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromDbMap,
             List<AttributeDataModification> attributeDataModifications, boolean forceUpdate) {
+        LOG.error("CouchbaseEntryManager::updateMergeChanges() - baseDn:{}, entry:{}, isConfigurationUpdate:{}, entryClass:{}, attributesFromDbMap:{}, attributeDataModifications:{}, forceUpdate:{}", baseDn, entry, isConfigurationUpdate, entryClass, attributesFromDbMap, attributeDataModifications, forceUpdate);
         // Update object classes if entry contains custom object classes
         if (!isConfigurationUpdate) {
             String[] objectClasses = getObjectClasses(entry, entryClass);
+            LOG.error("CouchbaseEntryManager::updateMergeChanges() - objectClasses:{} ",objectClasses);
             if (ArrayHelper.isEmpty(objectClasses)) {
                 throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses to persist! Entry is invalid: '%s'", entry));
             }
 
             AttributeData objectClassAttributeData = attributesFromDbMap.get(OBJECT_CLASS.toLowerCase());
+            LOG.error("CouchbaseEntryManager::updateMergeChanges() - objectClassAttributeData:{} ",objectClassAttributeData);
             if (objectClassAttributeData == null) {
                 throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses in DB! Entry is invalid: '%s'", entry));
             }
