@@ -24,7 +24,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
     private Jwt jwt;
     private boolean notNullAccesTokenHash;
     private boolean notNullAuthenticationTime;
-    private boolean notNullOxOpenIDConnectVersion;
+    private boolean notNullJansOpenIDConnectVersion;
     private boolean notNullAuthenticationContextClassReference;
     private boolean notNullAuthenticationMethodReferences;
     private boolean notNullClaimsAddressdata;
@@ -42,7 +42,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
         this.jwt = jwt;
         this.notNullAccesTokenHash = false;
         this.notNullAuthenticationTime = false;
-        this.notNullOxOpenIDConnectVersion = false;
+        this.notNullJansOpenIDConnectVersion = false;
         this.notNullAuthenticationContextClassReference = false;
         this.notNullAuthenticationMethodReferences = false;
         this.claimsPresence = null;
@@ -65,8 +65,8 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
         return this;
     }
 
-    public JwtAssertBuilder notNullOxOpenIDConnectVersion() {
-        this.notNullOxOpenIDConnectVersion = true;
+    public JwtAssertBuilder notNullJansOpenIDConnectVersion() {
+        this.notNullJansOpenIDConnectVersion = true;
         return this;
     }
 
@@ -177,8 +177,8 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
             assertNotNullClaim(JwtClaimName.AUTHENTICATION_TIME);
         if (notNullAccesTokenHash)
             assertNotNullClaim(JwtClaimName.ACCESS_TOKEN_HASH);
-        if (notNullOxOpenIDConnectVersion)
-            assertNotNullClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION);
+        if (notNullJansOpenIDConnectVersion)
+            assertNotNullClaim(JwtClaimName.JANS_OPENID_CONNECT_VERSION);
         if (notNullAuthenticationContextClassReference)
             assertNotNullClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
         if (notNullAuthenticationMethodReferences)
