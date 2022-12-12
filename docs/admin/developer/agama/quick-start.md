@@ -43,9 +43,7 @@ These are elements used to build the user interface such as templates, images, s
 
 Templates are written using [FreeMarker Template Language](https://freemarker.apache.org/docs/index.html) (FTL). This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in Agama have the extension `ftlh`.
 
-In Agama, templates must reside in the filesystem under `/opt/jans/jetty/jans-auth/agama/ftl` directory.
-
-All the other assets (CSS, JS, etc.) are expected to be under `/opt/jans/jetty/jans-auth/agama/fl`.
+In Agama, templates must reside in the filesystem under `/opt/jans/jetty/jans-auth/agama/ftl` directory. All other assets (CSS, JS, etc.) are expected to be under `/opt/jans/jetty/jans-auth/agama/fl`. Later we'll see a flow can designate a given directory for its assets, thus, such directory must be created at both places (inside `ftl` and `fl` folders).
 
 ### Java classes
 
