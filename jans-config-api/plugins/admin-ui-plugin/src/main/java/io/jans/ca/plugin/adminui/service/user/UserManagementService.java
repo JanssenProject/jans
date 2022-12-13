@@ -31,7 +31,7 @@ public class UserManagementService {
 
     public List<AdminRole> getAllRoles() throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             return adminConf.getDynamic().getRoles();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription(), e);
@@ -41,7 +41,7 @@ public class UserManagementService {
 
     public AdminRole getRoleObjByName(String role) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<AdminRole> roles = adminConf.getDynamic().getRoles().stream().filter(ele -> ele.getRole().equals(role)).collect(Collectors.toList());
             if (roles.isEmpty()) {
                 log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
@@ -59,7 +59,7 @@ public class UserManagementService {
 
     public List<AdminRole> addRole(AdminRole roleArg) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
 
             if (roles.contains(roleArg)) {
@@ -78,7 +78,7 @@ public class UserManagementService {
 
     public List<AdminRole> editRole(AdminRole roleArg) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
 
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
             if (roles.stream().noneMatch(ele -> ele.equals(roleArg))) {
@@ -104,7 +104,7 @@ public class UserManagementService {
 
     public List<AdminRole> deleteRole(String role) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
 
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
                     .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
@@ -146,7 +146,7 @@ public class UserManagementService {
 
     public List<AdminPermission> getPermissions() throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             return adminConf.getDynamic().getPermissions();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
@@ -156,7 +156,7 @@ public class UserManagementService {
 
     public AdminPermission getPermissionObjByName(String permission) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions().stream().filter(ele -> ele.getPermission().equals(permission)).collect(Collectors.toList());
             if (permissions.isEmpty()) {
                 log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
@@ -174,7 +174,7 @@ public class UserManagementService {
 
     public List<AdminPermission> addPermission(AdminPermission permissionArg) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
 
             if (permissions.contains(permissionArg)) {
@@ -193,7 +193,7 @@ public class UserManagementService {
 
     public List<AdminPermission> editPermission(AdminPermission permissionArg) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
 
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
             if (permissions.stream().noneMatch(ele -> ele.equals(permissionArg))) {
@@ -218,7 +218,7 @@ public class UserManagementService {
 
     public List<AdminPermission> deletePermission(String permission) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
 
             boolean anyPermissionMapped = adminConf.getDynamic().getRolePermissionMapping()
                     .stream().anyMatch(ele -> ele.getPermissions().contains(permission));
@@ -247,7 +247,7 @@ public class UserManagementService {
 
     public List<RolePermissionMapping> getAllAdminUIRolePermissionsMapping() throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             return adminConf.getDynamic().getRolePermissionMapping();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription(), e);
@@ -257,7 +257,7 @@ public class UserManagementService {
 
     public List<RolePermissionMapping> addPermissionsToRole(RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<RolePermissionMapping> roleScopeMappingList = getRolePermMapByRole(adminConf, rolePermissionMappingArg);
 
             if (CollectionUtils.isNotEmpty(roleScopeMappingList)) {
@@ -290,7 +290,7 @@ public class UserManagementService {
 
     public List<RolePermissionMapping> mapPermissionsToRole(RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<RolePermissionMapping> roleScopeMappingList = getRolePermMapByRole(adminConf, rolePermissionMappingArg);
 
             if (roleScopeMappingList == null || roleScopeMappingList.isEmpty()) {
@@ -329,7 +329,7 @@ public class UserManagementService {
 
     public RolePermissionMapping getAdminUIRolePermissionsMapping(String role) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
                     .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
@@ -350,7 +350,7 @@ public class UserManagementService {
 
     public List<RolePermissionMapping> removePermissionsFromRole(String role) throws ApplicationException {
         try {
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             if (isFalse(getRoleObjByName(role).getDeletable())) {
                 log.error(ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
