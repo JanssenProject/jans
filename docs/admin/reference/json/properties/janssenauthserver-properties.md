@@ -137,6 +137,13 @@ tags:
 | introspectionSkipAuthorization | Specifies if authorization to be skipped for introspection | [Details](#introspectionskipauthorization) |
 | invalidateSessionCookiesAfterAuthorizationFlow | Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization | [Details](#invalidatesessioncookiesafterauthorizationflow) |
 | issuer | URL using the https scheme that OP asserts as Issuer identifier | [Details](#issuer) |
+| jansElevenDeleteKeyEndpoint | oxEleven Delete Key endpoint URL | [Details](#janselevendeletekeyendpoint) |
+| jansElevenGenerateKeyEndpoint | oxEleven Generate Key endpoint URL | [Details](#janselevengeneratekeyendpoint) |
+| jansElevenSignEndpoint | oxEleven Sign endpoint UR | [Details](#janselevensignendpoint) |
+| jansElevenTestModeToken | oxEleven Test Mode Token | [Details](#janseleventestmodetoken) |
+| jansElevenVerifySignatureEndpoint | oxEleven Verify Signature endpoint URL | [Details](#janselevenverifysignatureendpoint) |
+| jansId | URL for the Inum generator Service | [Details](#jansid) |
+| jansOpenIdConnectVersion | OpenID Connect Version | [Details](#jansopenidconnectversion) |
 | jmsBrokerURISet | JMS Broker URI Set | [Details](#jmsbrokeruriset) |
 | jmsPassword | JMS Password | [Details](#jmspassword) |
 | jmsUserName | JMS UserName | [Details](#jmsusername) |
@@ -177,13 +184,6 @@ tags:
 | openidSubAttribute | Specifies which LDAP attribute is used for the subject identifier claim | [Details](#openidsubattribute) |
 | opPolicyUri | URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP | [Details](#oppolicyuri) |
 | opTosUri | URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service | [Details](#optosuri) |
-| oxElevenDeleteKeyEndpoint | oxEleven Delete Key endpoint URL | [Details](#oxelevendeletekeyendpoint) |
-| oxElevenGenerateKeyEndpoint | oxEleven Generate Key endpoint URL | [Details](#oxelevengeneratekeyendpoint) |
-| oxElevenSignEndpoint | oxEleven Sign endpoint UR | [Details](#oxelevensignendpoint) |
-| oxElevenTestModeToken | oxEleven Test Mode Token | [Details](#oxeleventestmodetoken) |
-| oxElevenVerifySignatureEndpoint | oxEleven Verify Signature endpoint URL | [Details](#oxelevenverifysignatureendpoint) |
-| oxId | URL for the Inum generator Service | [Details](#oxid) |
-| oxOpenIdConnectVersion | OpenID Connect Version | [Details](#oxopenidconnectversion) |
 | pairwiseCalculationKey | Key to calculate algorithmic pairwise IDs | [Details](#pairwisecalculationkey) |
 | pairwiseCalculationSalt | Salt to calculate algorithmic pairwise IDs | [Details](#pairwisecalculationsalt) |
 | pairwiseIdType | the pairwise ID type | [Details](#pairwiseidtype) |
@@ -1409,6 +1409,69 @@ tags:
 - Default value: None
 
 
+### jansElevenDeleteKeyEndpoint
+
+- Description: oxEleven Delete Key endpoint URL
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenGenerateKeyEndpoint
+
+- Description: oxEleven Generate Key endpoint URL
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenSignEndpoint
+
+- Description: oxEleven Sign endpoint UR
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenTestModeToken
+
+- Description: oxEleven Test Mode Token
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenVerifySignatureEndpoint
+
+- Description: oxEleven Verify Signature endpoint URL
+
+- Required: No
+
+- Default value: None
+
+
+### jansId
+
+- Description: URL for the Inum generator Service
+
+- Required: No
+
+- Default value: None
+
+
+### jansOpenIdConnectVersion
+
+- Description: OpenID Connect Version
+
+- Required: No
+
+- Default value: None
+
+
 ### jmsBrokerURISet
 
 - Description: JMS Broker URI Set
@@ -1763,69 +1826,6 @@ tags:
 ### opTosUri
 
 - Description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenDeleteKeyEndpoint
-
-- Description: oxEleven Delete Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenGenerateKeyEndpoint
-
-- Description: oxEleven Generate Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenSignEndpoint
-
-- Description: oxEleven Sign endpoint UR
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenTestModeToken
-
-- Description: oxEleven Test Mode Token
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenVerifySignatureEndpoint
-
-- Description: oxEleven Verify Signature endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### oxId
-
-- Description: URL for the Inum generator Service
-
-- Required: No
-
-- Default value: None
-
-
-### oxOpenIdConnectVersion
-
-- Description: OpenID Connect Version
 
 - Required: No
 

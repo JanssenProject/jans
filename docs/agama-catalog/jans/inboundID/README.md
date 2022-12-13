@@ -180,7 +180,7 @@ Launch the main flow (learn about this topic [here](https://jans.io/docs/admin/d
     
 ### Main flow configurations
 
-Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
+Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
 
 This is an example of a configuration for a couple of identity providers:
 
@@ -227,7 +227,7 @@ The table below explains the meaning of properties:
 
 Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows **must not** receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of `Inputs` but `Configs` directive in the [header](https://jans.io/docs/admin/developer/agama/dsl-full/#header-basics).
 
-In practice many identity providers adhere to the OAuth2 `code` grant, so you can re-use the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java) Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.
+In practice many identity providers adhere to the OAuth2 `code` grant, so you can re-use the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java) Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.
 
 The table below explains the meaning of its properties:
 
@@ -274,7 +274,7 @@ As an example suppose a provider returned the following:
 
 None of this attributes exist in Janssen, database adheres to LDAP naming. Conformant names would be `uid`, `mail`, `sn`, and `givenName`. Also, let's assume you want to set `displayName` to a string composed by the first and last names separated by a white space. Writing a mapping is required.
 
-A mapping is implemented in Java in the form of a `java.util.function.UnaryOperator<Map<String, Object>>`, that is, a function that takes a `Map<String, Object>` as input and returns a `Map<String, Object>` as result. Several examples are provided [here](https://github.com/JanssenProject/jans/blob/main/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java). 
+A mapping is implemented in Java in the form of a `java.util.function.UnaryOperator<Map<String, Object>>`, that is, a function that takes a `Map<String, Object>` as input and returns a `Map<String, Object>` as result. Several examples are provided [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java). 
 
 Note property `mappingClassField` of every provider defined in the [main flow](#main-flow-configurations) points to the fully qualified name of a mapping. Some important considerations:
 
@@ -282,7 +282,7 @@ Note property `mappingClassField` of every provider defined in the [main flow](#
 - Not all mappings have to belong to the same class
 - Several providers can use the same mapping
 
-While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://jans.io/docs/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/raw/main/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
+While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://jans.io/docs/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/raw/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
 
 - Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the flow body for the class to be effectively reloaded when the file is modified
 - Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly
