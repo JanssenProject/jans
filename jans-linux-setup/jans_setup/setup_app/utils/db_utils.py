@@ -285,29 +285,33 @@ class DBUtils:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
             self.cbm.exec_query(n1ql)
 
-    def set_configuration(self, component, value):
+    def set_configuration(self, component, value, dn='ou=configuration,o=jans'):
         if self.moddb == BackendTypes.LDAP:
+            if value is None:
+                value = []
             ldap_operation_result = self.ldap_conn.modify(
-                'ou=configuration,o=jans',
+                dn,
                 {component: [ldap3.MODIFY_REPLACE, value]}
                 )
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
-            result = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
+            result = self.get_sqlalchObj_for_dn(dn)
             table_name = result.objectClass
             sqlalchemy_table = self.Base.classes[table_name]
-            sqlalchemyObj = self.session.query(sqlalchemy_table).filter(sqlalchemy_table.dn =='ou=configuration,o=jans').first()
+            sqlalchemyObj = self.session.query(sqlalchemy_table).filter(sqlalchemy_table.dn ==dn).first()
             cur_val = getattr(sqlalchemyObj, component)
             setattr(sqlalchemyObj, component, value)
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
-            self.spanner.update_data(table='jansAppConf', columns=["doc_id", component], values=[["configuration", value]])
-
+            table = self.get_spanner_table_for_dn(dn)
+            doc_id = self.get_doc_id_from_dn(dn)
+            self.spanner.update_data(table=table, columns=["doc_id", component], values=[[doc_id, value]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
+            key = ldif_utils.get_key_from(dn)
+            n1ql = 'UPDATE `{}` USE KEYS "{}" SET {}={}'.format(self.default_bucket, key, component, value)
             self.cbm.exec_query(n1ql)
 
 
