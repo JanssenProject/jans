@@ -17,7 +17,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @version 0.9, 03/01/2013
  */
 @DataEntry
-@ObjectClass(value = "jansAdminConfDyn")
+@ObjectClass(value = "jansAppConf")
 public class AdminConf {
     @DN
     private String dn;
@@ -25,6 +25,10 @@ public class AdminConf {
     @JsonObject
     @AttributeName(name = "jansConfDyn")
     private DynamicConfig dynamic;
+
+    @JsonObject
+    @AttributeName(name = "jansConfApp")
+    private MainSettings mainSettings;
 
     @AttributeName(name = "jansRevision")
     private long revision;
@@ -53,6 +57,13 @@ public class AdminConf {
         this.dynamic = dynamic;
     }
 
+    public MainSettings getMainSettings() {
+        return mainSettings;
+    }
+
+    public void setMainSettings(MainSettings mainSettings) {
+        this.mainSettings = mainSettings;
+    }
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
