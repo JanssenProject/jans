@@ -148,6 +148,26 @@ public class AgamaResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(minimize(flow, false)).build();
     }
 
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path("/syntax-check/" + ApiConstants.QNAME_PATH)
+    public Response doSyntaxCheck(@PathParam(ApiConstants.QNAME) String qname, String source) {
+        
+        Exception e = null;
+        try {
+            Transpiler.runSyntaxCheck(qname, source);
+            e = new TranspilerException("");
+        } catch (SyntaxException | TranspilerException te) {
+            logger.info("Syntax check failed");
+            e = te;
+        }
+        e.setStackTrace(new StackTraceElement[0]);
+        return Response.ok().entity(e).build();
+
+    }
+    
     @Operation(summary = "Create a new agama flow from source", description = "Create a new agama flow from source.", operationId = "post-agama-flow-from-source", tags = {
             "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.AGAMA_WRITE_ACCESS }))
