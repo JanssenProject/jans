@@ -338,7 +338,7 @@ public class ScopeService {
 
         PagedResult<CustomScope> pagedResult = persistenceEntryManager.findPagedEntries(getDnForScope(null),
                 CustomScope.class, searchFilter, null, searchRequest.getSortBy(),
-                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex() - 1,
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
                 searchRequest.getCount(), searchRequest.getMaxCount());
 
         if (pagedResult != null) {
