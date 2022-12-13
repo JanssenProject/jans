@@ -93,6 +93,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
                             return val
                     if multi:
                         return values
+                    while None in values:
+                        values.remove(None)
                     ret_val = ', '.join(values)
                     return ret_val
             return [] if multi else ''
