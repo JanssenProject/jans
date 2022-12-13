@@ -3,17 +3,75 @@ tags:
   - administration
   - kubernetes
   - operations
+  - logs
 ---
 
-## This content is in progress
+## Overview
+The Janssen logs can be viewed using the following command:
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+```
+kubectl logs -n jans <pod-name>
+```
 
-## Have questions in the meantime?
+## Log Levels
+The following log levels can be configured through the configuration CLI:
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+| Log Level | Messages Logged |  
+|---------- |------------                  |  
+|Trace      | All messages                 |  
+|Debug      | Debug level and above        |  
+|Info       | Informational level and above|  
+|Warn       | Warning level and above      |  
+|Error      | Error level and above        |  
+|Fatal      | Only fatal errors            |  
+|Off        | Logging is disabled          |
 
-## Want to contribute?
+### Configuring Log Levels
+To get the log level of components deployed
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+```bash
+kubectl get configmap -n jans janssen-config-cm -o yaml```
+```
+
+Example output of auth-server:
+```yaml
+CN_AUTH_APP_LOGGERS: 
+'{
+"audit_log_level":"INFO",
+"audit_log_target":"FILE",
+"auth_log_level":"INFO",
+"auth_log_target":"STDOUT",
+"http_log_level":"INFO",
+"http_log_target":"FILE",
+"ldap_stats_log_level":"INFO",
+"ldap_stats_log_target":"FILE",
+"persistence_duration_log_level":"INFO",
+"persistence_duration_log_target":"FILE",
+"persistence_log_level":"INFO",
+"persistence_log_target":"FILE",
+"script_log_level":"INFO",
+"script_log_target":"FILE"
+}'
+```
+
+To override the default logging level in auth-server, create an override.yaml file
+
+```yaml
+auth-server:
+  appLoggers:
+      authLogTarget: "STDOUT"
+      authLogLevel: "TRACE"
+      httpLogLevel: "TRACE"
+      persistenceLogLevel: "TRACE"
+      persistenceDurationLogLevel: "TRACE"
+      ldapStatsLogLevel: "TRACE"
+      scriptLogLevel: "TRACE"
+      auditStatsLogLevel: "TRACE"
+```
+
+If want to change the log levels of components that are already deployed, run the following command: 
+
+```bash
+kubectl edit configmap -n jans janssen-config-cm
+```
 
