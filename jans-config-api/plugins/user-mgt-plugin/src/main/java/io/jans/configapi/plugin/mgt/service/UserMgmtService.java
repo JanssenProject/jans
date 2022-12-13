@@ -90,7 +90,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
 
         return persistenceEntryManager.findPagedEntries(getPeopleBaseDn(), User.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 

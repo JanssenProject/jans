@@ -32,18 +32,17 @@ import jakarta.ws.rs.core.Application;
 
         license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 
-        tags = { @Tag(name = "Attribute"), @Tag(name = "Default Authentication Method"),@Tag(name = "Cache Configuration"),
-                @Tag(name = "Cache Configuration – Memcached"), @Tag(name = "Cache Configuration – Redis"),
-                @Tag(name = "Cache Configuration – in-Memory"), @Tag(name = "Cache Configuration – Native-Persistence"),
-                @Tag(name = "Configuration – Properties"),
+        tags = { @Tag(name = "Attribute"), @Tag(name = "Default Authentication Method"),
+                @Tag(name = "Cache Configuration"), @Tag(name = "Cache Configuration – Memcached"),
+                @Tag(name = "Cache Configuration – Redis"), @Tag(name = "Cache Configuration – in-Memory"),
+                @Tag(name = "Cache Configuration – Native-Persistence"), @Tag(name = "Configuration – Properties"),
                 @Tag(name = "Configuration – SMTP"), @Tag(name = "Configuration – Logging"),
                 @Tag(name = "Configuration – JWK - JSON Web Key (JWK)"), @Tag(name = "Custom Scripts"),
-                @Tag(name = "Database - LDAP configuration"),
-                @Tag(name = "OAuth - OpenID Connect - Clients"), @Tag(name = "OAuth - UMA Resources"),
-                @Tag(name = "OAuth - Scopes"), @Tag(name = "Configuration – Agama Flow"),
+                @Tag(name = "Database - LDAP configuration"), @Tag(name = "OAuth - OpenID Connect - Clients"),
+                @Tag(name = "OAuth - UMA Resources"), @Tag(name = "OAuth - Scopes"),
+                @Tag(name = "Agama - Configuration"), @Tag(name = "Agama - Developer Studio"),
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
-                @Tag(name = "Auth - Session Management"),
-                @Tag(name = "Organization Configuration"),
+                @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
                 @Tag(name = "Auth Server Health - Check") },
 
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })

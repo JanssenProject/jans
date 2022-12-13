@@ -122,7 +122,7 @@ public class ApiConstants {
     
     //Pagination
     public static final String DEFAULT_LIST_SIZE = "50";
-    public static final String DEFAULT_LIST_START_INDEX = "1";
+    public static final String DEFAULT_LIST_START_INDEX = "0";
     public static final int DEFAULT_MAX_COUNT = 200;  
     public static final String SORT_BY = "sortBy";
     public static final String SORT_ORDER = "sortOrder";
