@@ -22,8 +22,10 @@ import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.CertUtils;
+import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.Util;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -55,6 +57,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -597,6 +600,39 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         } catch (SignatureException e) {
             return verifier.verify(signature);
         }
+    }
+
+    /**
+     * 
+     * @return
+     */
+    private SecurityProviderUtility.KeyStorageType solveKeyStorageType() {
+        SecurityProviderUtility.SecurityModeType securityMode = SecurityProviderUtility.getSecurityMode();
+        if (securityMode == null) {
+            throw new InvalidParameterException("Security Mode wasn't initialized. Call installBCProvider() before");
+        }
+        String keyStoreExt = FilenameUtils.getExtension(keyStoreFile);
+        SecurityProviderUtility.KeyStorageType keyStorageType = SecurityProviderUtility.KeyStorageType.fromExtension(keyStoreExt);
+        boolean ksTypeFound = false;
+        for (SecurityProviderUtility.KeyStorageType ksType : securityMode.getKeystorageTypes()) {
+            if (keyStorageType == ksType) {
+                ksTypeFound = true;
+                break;
+            }
+        }
+        if (!ksTypeFound) {
+            switch (securityMode) {
+            case BCFIPS_SECURITY_MODE: {
+                keyStorageType =  SecurityProviderUtility.KeyStorageType.BCFKS_KS;
+                break;
+            }
+            case BCPROV_SECURITY_MODE: {
+                keyStorageType = SecurityProviderUtility.KeyStorageType.PKCS12_KS;
+                break;
+            }
+            }
+        }
+        return keyStorageType;
     }
 
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-auth-server</artifactId>
 	<name>Jans authentication server</name>
@@ -213,23 +214,23 @@
 				</configuration>
 			</plugin>
 
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.6</version>
-                <executions>
-                    <execution>
-                        <id>get-the-git-infos</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.2.6</version>
+				<executions>
+					<execution>
+						<id>get-the-git-infos</id>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<failOnNoGitDirectory>false</failOnNoGitDirectory>
+				</configuration>
+			</plugin>
 
 			<!-- Jetty plugin -->
 			<plugin>
@@ -266,15 +267,15 @@
 	</reporting>
 
 	<dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_common</artifactId>
-            <version>0.9.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.agkn</groupId>
-            <artifactId>hll</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_common</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.agkn</groupId>
+			<artifactId>hll</artifactId>
+		</dependency>
 		<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
 		<dependency>
 			<groupId>com.wywy</groupId>
@@ -367,10 +368,10 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-core-script</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-script</artifactId>
+		</dependency>
 
 		<!-- Eleven -->
 		<dependency>
@@ -393,24 +394,24 @@
 		</dependency>
 
 		<!-- agama -->
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>agama-engine</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>agama-engine</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- Weld -->
 		<dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 
-       <!--  <dependency>
-            <groupId>net.bootsfaces</groupId>
-            <artifactId>bootsfaces</artifactId>
-            <version>1.4.1</version>
-            <scope>compile</scope>
-        </dependency> -->
+		<!--  <dependency>
+			<groupId>net.bootsfaces</groupId>
+			<artifactId>bootsfaces</artifactId>
+			<version>1.4.1</version>
+			<scope>compile</scope>
+		</dependency> -->
 
 			<!-- OmniFaces -->
 		<dependency>
@@ -510,9 +511,9 @@
 
 		<!-- JMS -->
 		<dependency>
-		    <groupId>jakarta.jms</groupId>
-		    <artifactId>jakarta.jms-api</artifactId>
-		    <version>${jakarta.jms.api.version}</version>
+			<groupId>jakarta.jms</groupId>
+			<artifactId>jakarta.jms-api</artifactId>
+			<version>${jakarta.jms.api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -582,10 +583,10 @@
 			<groupId>org.mvel</groupId>
 			<artifactId>mvel2</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+		</dependency>
 
 		<!-- Test -->
 		<dependency>
@@ -599,8 +600,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-            <groupId>jakarta.websocket</groupId>
-            <artifactId>jakarta.websocket-api</artifactId>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -628,9 +629,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.reflections</groupId>
-		    <artifactId>reflections</artifactId>
-		    <version>0.9.10</version>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.10</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -726,12 +727,12 @@
 
 			<dependencies>
 				<dependency>
-		            <groupId>jakarta.enterprise</groupId>
-		            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+					<groupId>jakarta.enterprise</groupId>
+					<artifactId>jakarta.enterprise.cdi-api</artifactId>
 				</dependency>
 				<dependency>
-				    <groupId>org.glassfish</groupId>
-				    <artifactId>jakarta.faces</artifactId>
+					<groupId>org.glassfish</groupId>
+					<artifactId>jakarta.faces</artifactId>
 				</dependency>
 
 				<!-- <dependency>
@@ -739,7 +740,7 @@
 					<artifactId>el-impl</artifactId>
 					<exclusions>
 						<exclusion>
-                            <groupId>javax.el</groupId>
+							<groupId>javax.el</groupId>
 							<artifactId>el-api</artifactId>
 						</exclusion>
 					</exclusions>
@@ -767,10 +768,10 @@
 					<groupId>org.jboss.weld.module</groupId>
 					<artifactId>weld-jsf</artifactId>
 				</dependency>
-			    <dependency>
-    		        <groupId>jakarta.ejb</groupId>
-                    <artifactId>jakarta.ejb-api</artifactId>
-                </dependency>
+				<dependency>
+					<groupId>jakarta.ejb</groupId>
+					<artifactId>jakarta.ejb-api</artifactId>
+				</dependency>
 
  
 				<!-- Test: Embedded Jetty -->
@@ -799,14 +800,14 @@
 					<artifactId>jetty-plus</artifactId>
 					<scope>test</scope>
 				</dependency>
-                <dependency>
-                    <groupId>com.nimbusds</groupId>
-                    <artifactId>nimbus-jose-jwt</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.bitbucket.b_c</groupId>
-                    <artifactId>jose4j</artifactId>
-                </dependency>
+				<dependency>
+					<groupId>com.nimbusds</groupId>
+					<artifactId>nimbus-jose-jwt</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.bitbucket.b_c</groupId>
+					<artifactId>jose4j</artifactId>
+				</dependency>
 			</dependencies>
 
 			<build>
@@ -821,8 +822,8 @@
 								</manifest>
 								<manifestEntries>
 									<Implementation-Build>${buildNumber}</Implementation-Build>
-                                    <!--suppress UnresolvedMavenProperty -->
-                                    <Build-Branch>${git.branch}</Build-Branch>
+									<!--suppress UnresolvedMavenProperty -->
+									<Build-Branch>${git.branch}</Build-Branch>
 								</manifestEntries>
 							</archive>
 
@@ -1048,9 +1049,9 @@
 			<dependencies>
 <!--
 				<dependency>
-				    <groupId>com.eatthepath</groupId>
-				    <artifactId>pushy</artifactId>
-				    <version>0.15.1</version>
+					<groupId>com.eatthepath</groupId>
+					<artifactId>pushy</artifactId>
+					<version>0.15.1</version>
 				</dependency>
 -->
 				<dependency>
