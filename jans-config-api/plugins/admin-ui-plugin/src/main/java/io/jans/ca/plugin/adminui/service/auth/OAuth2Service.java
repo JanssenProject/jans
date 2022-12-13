@@ -48,14 +48,14 @@ public class OAuth2Service {
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
-    public TokenResponse getAccessToken(String code) throws ApplicationException {
+    public TokenResponse getAccessToken(String code, String appType) throws ApplicationException {
         try {
             log.debug("Getting access token with code");
             if (Strings.isNullOrEmpty(code)) {
                 log.error(ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
             }
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(code);
@@ -85,11 +85,11 @@ public class OAuth2Service {
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
-    public TokenResponse getApiProtectionToken(String userInfoJwt) throws ApplicationException {
+    public TokenResponse getApiProtectionToken(String userInfoJwt, String appType) throws ApplicationException {
         try {
             log.debug("Getting api-protection token");
 
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setAuthUsername(auiConfiguration.getTokenServerClientId());
@@ -134,9 +134,9 @@ public class OAuth2Service {
         }
     }
 
-    public Map<String, Object> introspectToken(String accessToken) {
+    public Map<String, Object> introspectToken(String accessToken, String appType) {
         log.info("Token introspection from auth-server.");
-        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuthServerIntrospectionEndpoint());
         request.header("Authorization", "Bearer " + accessToken);
 
@@ -154,10 +154,10 @@ public class OAuth2Service {
         }
         return null;
     }
-    public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest) throws ApplicationException {
+    public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest, String appType) throws ApplicationException {
         try {
             log.debug("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             String accessToken = org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getAccessToken()) ? userInfoRequest.getAccessToken() : null;
 
@@ -167,11 +167,11 @@ public class OAuth2Service {
             }
 
             if (org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getCode()) && org.apache.logging.log4j.util.Strings.isBlank(accessToken)) {
-                TokenResponse tokenResponse = getAccessToken(userInfoRequest.getCode());
+                TokenResponse tokenResponse = getAccessToken(userInfoRequest.getCode(), appType);
                 accessToken = tokenResponse.getAccessToken();
             }
             log.debug("Access Token : {}", accessToken);
-            Map<String, Object> introspectionResponse = introspectToken(accessToken);
+            Map<String, Object> introspectionResponse = introspectToken(accessToken, appType);
 
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             body.putSingle("access_token", accessToken);
