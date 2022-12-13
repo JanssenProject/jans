@@ -9,9 +9,9 @@ tags:
 
 ## Jans Config API Plugins
 Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
+
 The plugin architecture implemented in Jans Config API allows the deployer to add/remove new rest APIs (plugin) without changing the core application. 
 A plugin contains one or more Rest API(s) packaged in a Java ARchive (jar file). It is added to Jans Config API by adding the plugin jar file path in the external **extraClasspath** of the jetty context file.
-
 
 ## Pre-requisites
 
@@ -22,7 +22,6 @@ The plugin developer should have an understanding of the following:
 - **JAX-RS**: JAX-RS for creating RESTful web services.
 - **Maven**: Maven to build projects and manage dependencies. 
 - **Web application container (Jetty)**
-
 
 ## Sample plugin
 
@@ -38,22 +37,22 @@ To help bootstrap the plugin development, we have put together a sample plugin.
 
 #### beans.xml
 
-The `resources/META-INF/beans.xml` is the CDI deployment descriptor required in `bean archive`. Deployment descriptor helps WELD to explore beans, interceptors, decorators, etc in the `bean archive`. Refer [WELD docs](https://docs.jboss.org/weld/reference/latest/en-US/html/ee.html#packaging-and-deployment) to know more about deployment descriptors.
+The `resources/META-INF/beans.xml` is the CDI deployment descriptor required in `bean archive`. Deployment descriptor helps WELD to explore beans, interceptors, decorators, etc in the `bean archive`. Refer to the [WELD docs](https://docs.jboss.org/weld/reference/latest/en-US/html/ee.html#packaging-and-deployment) to learn more about deployment descriptors.
 
 #### HelloWorldExtension.java
 
-A CDI portable extension is a mechanism by which we can implement additional functionalities on top of the CDI container. In this sample plugin, we have created an Extension `HelloWorldExtension.java` implementing `jakarta.enterprise.inject.spi.Extension`. An extension can observe lifecycle events and also can modify the container’s metamodel. Please refer [WELD documentation](https://docs.jboss.org/weld/reference/latest/en-US/html/extend.html#extend) for details.
+A CDI portable extension is a mechanism by which we can implement additional functionalities on top of the CDI container. In this sample plugin, we have created an extension called `HelloWorldExtension.java`, implementing `jakarta.enterprise.inject.spi.Extension`. An extension can observe lifecycle events and also can modify the container’s metamodel. Please refer to the [WELD documentation](https://docs.jboss.org/weld/reference/latest/en-US/html/extend.html#extend) for details.
 
 We need to register our extension as a service provider by creating a file named `resources/META-INF/services/jakarta.enterprise.inject.spi.Extension` (as shown below).
 > com.spl.plugin.helloworld.ext.HelloWorldExtension
 
 #### HelloWorldApplication.java
 
-com.spl.plugin.helloworld.rest.HelloWorldApplication.java class is annotated with the `@ApplicationPath` annotation which identifies the application path that serves as the base URI for all resources of the plugin and is used to register JAX-RS resources and providers.
+The `com.spl.plugin.helloworld.rest.HelloWorldApplication.java` class is annotated with the `@ApplicationPath` annotation which identifies the application path that serves as the base URI for all resources of the plugin and is used to register JAX-RS resources and providers.
 
 #### HelloWorldResource.java 
 
-This is sample JAX-RS resource with an endpoint returning `Hello World!` string as http response.
+This is a sample JAX-RS resource with an endpoint returning `Hello World!` string as http response.
 
 ## Plugin Deployment
 
@@ -77,7 +76,9 @@ Jans Config API is offered as one of the several components of the Jans Auth Ser
 
 </Configure>
 ```
+
 3. Restart `jans-config-api` service.
+
 ```
 systemctl restart jans-config-api.service
 ```
