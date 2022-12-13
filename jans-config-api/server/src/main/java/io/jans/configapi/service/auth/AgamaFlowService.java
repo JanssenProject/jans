@@ -91,7 +91,7 @@ public class AgamaFlowService implements Serializable {
 
         return persistenceEntryManager.findPagedEntries(getAgamaFlowDn(null), Flow.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
