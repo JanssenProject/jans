@@ -30,7 +30,8 @@ tags:
 - name: OAuth - OpenID Connect - Clients
 - name: OAuth - UMA Resources
 - name: OAuth - Scopes
-- name: Configuration – Agama Flow
+- name: Agama - Configuration
+- name: Agama - Developer Studio
 - name: Statistics - User
 - name: Health - Check
 - name: Server Stats
@@ -104,6 +105,154 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         "500":
           description: InternalServerError
+  /api/v1/ads-deployment:
+    get:
+      tags:
+      - Agama - Developer Studio
+      summary: Fetches deployed Agama project based on name.
+      description: Fetches deployed Agama project based on name.
+      operationId: get-agama-dev-studio-prj-by-name
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Agama project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
+    post:
+      tags:
+      - Agama - Developer Studio
+      summary: Deploy an Agama project.
+      description: Deploy an Agama project.
+      operationId: post-agama-dev-studio-prj
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/zip:
+            schema:
+              type: array
+              items:
+                type: string
+                format: byte
+      responses:
+        "202":
+          description: Agama project accepted
+          content:
+            application/zip:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
+    delete:
+      tags:
+      - Agama - Developer Studio
+      summary: Delete a deployed Agama project.
+      description: Delete a deployed Agama project.
+      operationId: delete-agama-dev-studio-prj
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
+  /api/v1/ads-deployment/list:
+    get:
+      tags:
+      - Agama - Developer Studio
+      summary: Retrieve the list of projects deployed currently.
+      description: Retrieve the list of projects deployed currently.
+      operationId: get-agama-dev-prj
+      parameters:
+      - name: start
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: count
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Agama projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
   /api/v1/acrs:
     get:
       tags:
@@ -173,7 +322,7 @@ paths:
   /api/v1/agama:
     get:
       tags:
-      - Configuration – Agama Flow
+      - Agama - Configuration
       summary: Fetches all agama flow.
       description: Fetches all agama flow.
       operationId: get-agama-flows
@@ -194,7 +343,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:
@@ -250,7 +399,7 @@ paths:
         - https://jans.io/oauth/config/read-all
     post:
       tags:
-      - Configuration – Agama Flow
+      - Agama - Configuration
       summary: Create a new agama flow
       description: Create a new agama flow
       operationId: post-agama-flow
@@ -295,7 +444,7 @@ paths:
   /api/v1/agama/{qname}:
     get:
       tags:
-      - Configuration – Agama Flow
+      - Agama - Configuration
       summary: Gets an agama flow based on Qname.
       description: Gets an agama flow based on Qname.
       operationId: get-agama-flow
@@ -342,7 +491,7 @@ paths:
         - https://jans.io/oauth/config/read-all
     post:
       tags:
-      - Configuration – Agama Flow
+      - Agama - Configuration
       summary: Create a new agama flow from source
       description: Create a new agama flow from source.
       operationId: post-agama-flow-from-source
@@ -391,7 +540,7 @@ paths:
         - https://jans.io/oauth/config/agama.write
     delete:
       tags:
-      - Configuration – Agama Flow
+      - Agama - Configuration
       summary: Deletes an agama flow based on Qname
       description: Deletes an agama flow based on Qname
       operationId: delete-agama-flow
@@ -415,7 +564,7 @@ paths:
         - https://jans.io/oauth/config/agama.delete
     patch:
       tags:
-      - Configuration – Agama Flow
+      - Agama - Configuration
       summary: Partially modify a Agama Flow
       description: Partially modify a Agama Flow
       operationId: patch-agama-flow
@@ -466,7 +615,7 @@ paths:
   /api/v1/agama/source/{qname}:
     put:
       tags:
-      - Configuration – Agama Flow
+      - Agama - Configuration
       summary: Update agama flow from source file
       description: Update agama flow from source file.
       operationId: put-agama-flow-from-source
@@ -542,7 +691,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:
@@ -1623,7 +1772,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:
@@ -3416,7 +3565,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:
@@ -3854,7 +4003,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:
@@ -4869,7 +5018,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:
@@ -6453,7 +6602,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:
@@ -6896,6 +7045,58 @@ components:
           format: date-time
         facterData:
           $ref: '#/components/schemas/FacterData'
+    Deployment:
+      type: object
+      properties:
+        dn:
+          type: string
+        id:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        taskActive:
+          type: boolean
+        finishedAt:
+          type: string
+          format: date-time
+        assets:
+          type: string
+        details:
+          $ref: '#/components/schemas/DeploymentDetails'
+        baseDn:
+          type: string
+    DeploymentDetails:
+      type: object
+      properties:
+        projectName:
+          type: string
+        folders:
+          type: array
+          items:
+            type: string
+        flowsError:
+          type: object
+          additionalProperties:
+            type: string
+        error:
+          type: string
+    PagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            type: object
     AuthenticationMethod:
       type: object
       properties:
@@ -6949,22 +7150,6 @@ components:
         properties:
           type: object
           additionalProperties:
-            type: object
-    PagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
             type: object
     JsonPatch:
       type: object
@@ -7085,15 +7270,15 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -7856,9 +8041,9 @@ components:
           format: int32
         defaultSignatureAlgorithm:
           type: string
-        oxOpenIdConnectVersion:
+        jansOpenIdConnectVersion:
           type: string
-        oxId:
+        jansId:
           type: string
         dynamicRegistrationExpirationTime:
           type: integer
@@ -8021,15 +8206,15 @@ components:
           type: string
         staticDecryptionKid:
           type: string
-        oxElevenTestModeToken:
+        jansElevenTestModeToken:
           type: string
-        oxElevenGenerateKeyEndpoint:
+        jansElevenGenerateKeyEndpoint:
           type: string
-        oxElevenSignEndpoint:
+        jansElevenSignEndpoint:
           type: string
-        oxElevenVerifySignatureEndpoint:
+        jansElevenVerifySignatureEndpoint:
           type: string
-        oxElevenDeleteKeyEndpoint:
+        jansElevenDeleteKeyEndpoint:
           type: string
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
@@ -8244,8 +8429,14 @@ components:
           type: string
         agamaConfiguration:
           $ref: '#/components/schemas/EngineConfig'
+        dcrSsaValidationConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SsaValidationConfig'
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
+        blockWebviewAuthorizationEnabled:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8437,6 +8628,43 @@ components:
         ssaExpirationInDays:
           type: integer
           format: int32
+    SsaValidationConfig:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+          - NONE
+          - SSA
+          - DCR
+        displayName:
+          type: string
+        description:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        allowedClaims:
+          type: array
+          items:
+            type: string
+        jwks:
+          type: string
+        jwksUri:
+          type: string
+        issuers:
+          type: array
+          items:
+            type: string
+        configurationEndpoint:
+          type: string
+        configurationEndpointClaim:
+          type: string
+        sharedSecret:
+          type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -8540,13 +8768,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
