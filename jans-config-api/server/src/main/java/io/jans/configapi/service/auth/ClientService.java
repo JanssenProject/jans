@@ -142,7 +142,7 @@ public class ClientService implements Serializable {
 
         return persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 

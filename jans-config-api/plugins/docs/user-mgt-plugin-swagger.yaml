@@ -40,7 +40,7 @@ paths:
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
         schema:

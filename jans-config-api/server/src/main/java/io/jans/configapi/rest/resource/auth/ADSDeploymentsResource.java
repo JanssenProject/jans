@@ -2,6 +2,13 @@ package io.jans.configapi.rest.resource.auth;
 
 import io.jans.ads.model.Deployment;
 import io.jans.orm.model.PagedResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -19,6 +26,14 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
     @Inject
     private ADSDeploymentsService ads;
 
+    @Operation(summary = "Retrieve the list of projects deployed currently.", description = "Retrieve the list of projects deployed currently.", operationId = "get-agama-dev-prj", tags = {
+    "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+    @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Agama projects", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-get-all.json"))),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("list")
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
@@ -35,6 +50,17 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
 
     }
 
+    @Operation(summary = "Fetches deployed Agama project based on name.", description = "Fetches deployed Agama project based on name.", operationId = "get-agama-dev-studio-prj-by-name", tags = {
+    "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+    @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Deployment.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-get.json"))),
+    @ApiResponse(responseCode = "204", description = "No Content"),
+    @ApiResponse(responseCode = "400", description = "Bad Request"),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "404", description = "Not Found"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
@@ -60,6 +86,16 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
 
     }
 
+    @Operation(summary = "Deploy an Agama project.", description = "Deploy an Agama project.", operationId = "post-agama-dev-studio-prj", tags = {
+    "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+    @ApiResponses(value = {
+    @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = "application/zip", schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-post.json"))),
+    @ApiResponse(responseCode = "400", description = "Bad Request"),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "409", description = "Conflict"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Consumes("application/zip")
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, 
@@ -80,6 +116,17 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
 
     }
 
+    @Operation(summary = "Delete a deployed Agama project.", description = "Delete a deployed Agama project.", operationId = "delete-agama-dev-studio-prj", tags = {
+    "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+    @ApiResponses(value = {
+    @ApiResponse(responseCode = "204", description = "No Content"),
+    @ApiResponse(responseCode = "400", description = "Bad Request"),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "404", description = "Not Found"),
+    @ApiResponse(responseCode = "409", description = "Conflict"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, 
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
