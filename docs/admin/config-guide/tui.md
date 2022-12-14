@@ -55,6 +55,10 @@ There are two configurations included here:
 
 ### SCIM
 
+System for Cross-domain Identity Management, in short SCIM, is a specification that simplifies the exchange of user identity information across different domains. The Janssen Server provides implementation for the SCIM specification.
+
+With Janssen CLI-TUI, it's possible to view / update SCIM configuration. 
+
 ### Scripts
 
 ### Users
