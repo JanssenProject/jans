@@ -16,17 +16,18 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Provider
 public class LoggingFilter implements ContainerRequestFilter {
+    
+    private static Logger logger = LoggerFactory.getLogger("audit");
 
     @Context
     UriInfo info;
 
     @Context
     HttpServletRequest request;
-
-    @Inject
-    Logger logger;
 
     public void filter(ContainerRequestContext context) {
         logger.info("***********************************************************************");
