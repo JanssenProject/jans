@@ -68,6 +68,7 @@ For load testing jmeter test is used located [here](https://github.com/JanssenPr
 1. Create users by pattern:
    1. username: `test_user1`, `test_user2`, ... `test_userN` 
    1. secret: `test_user_password`
+   Following script can be used [add_sequenced_jans_user_rdbm.py](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/tools/benchmark/add_sequenced_jans_user_rdbm.py)
 1. Configure Script
    1. Open jmeter script by GUI
    1. Set Host: `"Authorization Code Flow" -> "User Defined Variables"`: `host`
