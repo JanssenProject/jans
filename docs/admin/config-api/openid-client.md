@@ -11,12 +11,12 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 ------------------------------------------------------------------------------------------
 
-#### Listing existing OpenID Connect clients
+## Listing existing OpenID Connect clients
 
 <details>
  <summary><code>GET</code> <code><b>/</b></code> <code>(gets list of OpenID Connect clients based on search parameters)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                                                                     |
 > |------------|-------------|----------------|-----------|--------------|---------------------------------------------------------------------------------|
@@ -27,7 +27,7 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | sortOrder  |  query      | string         | optional  |ascending     |Search size - max size of the results to return                                  |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -35,13 +35,13 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba" -X GET http://my.jans.server/jans-config-api/api/v1/openid/clients?limit=3&pattern=test&startIndex=1&includeSource=true
 > ```
 
-##### Sample Response
+### Sample Response
 > ```javascript
 >{
 >    "start": 0,
@@ -236,13 +236,13 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 <details>
   <summary><code>GET</code> <code><b>/{inum}</b></code> <code>(gets OpenID Connect client based on inum)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | `inum`     |  path       | string         | required  | NA           | OpenID Connect client unique idendifier|
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -251,13 +251,13 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | `401`         | `application/json`                | `{"code":"404","message":"Not Found"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba" -X GET http://my.jans.server/jans-config-api/api/v1/openid/clients/bd27a9f6-7772-4049-bd4f-bf7c651fbe7c
 > ```
 
-##### Sample Response
+### Sample Response
 
 > ```javascript
 >{
@@ -323,18 +323,18 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 ------------------------------------------------------------------------------------------
 
-#### Creating new OpenID Connect client
+## Creating new OpenID Connect client
 
 <details>
   <summary><code>POST</code> <code><b>/{inum}</b></code> <code>(creates a new OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | OpenID Connect client json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -342,13 +342,13 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X POST -k -H 'Content-Type: application/json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/openid/clients' --data @post.json
 > ```
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 >{
@@ -438,18 +438,18 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 ------------------------------------------------------------------------------------------
 
-#### Updating existing OpenID Connect client
+## Updating existing OpenID Connect client
 
 <details>
   <summary><code>PUT</code> <code><b>/{inum}</b></code> <code>(updates an existings OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | OpenID Connect client json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                                      |
 > |---------------|-----------------------------------|-------------------------------------------------------------------------------|
@@ -458,13 +458,13 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                                     |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                        |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X PUT -k -H 'Content-Type: application/json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/openid/clients' --data @put.json
 > ```
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 >{
@@ -530,12 +530,12 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 ------------------------------------------------------------------------------------------
 
-#### Patching existing OpenID Connect client
+## Patching existing OpenID Connect client
 
 <details>
   <summary><code>PATCH</code> <code><b>/{inum}</b></code> <code>(patches an existing OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                             |
 > |------------|-------------|--------------------|-----------|--------------|-----------------------------------------|
@@ -543,7 +543,7 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | None       |  request    | json-patch object  | required  | NA           | json-patch request                      |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -552,13 +552,13 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X PATCH -k -H 'Content-Type: application/json-patch+json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/openid/clients/f8c1a111-0919-47e8-a4d4-f7c18f73a644' --data @patch.json
 > ```
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 > [{ "op": "replace", "path": "/responseTypes", "value":["code","token"]}] 
@@ -568,19 +568,19 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 ------------------------------------------------------------------------------------------
 
-#### Deleting existing OpenID Connect client
+## Deleting existing OpenID Connect client
 
 <details>
   <summary><code>DELETE</code> <code><b>/{inum}</b></code> <code>(deletes an existings OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                             |
 > |------------|-------------|--------------------|-----------|--------------|-----------------------------------------|
 > | inum       |  path       | string             | required  | NA           | OpenID Connect client unique idendifier |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -589,13 +589,13 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > ```javascript
 >  curl -X DELETE -k -H 'Content-Type: application/json' -H 'Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1' -i 'https://my.jans.server/jans-config-api/api/v1/openid/clients/f8c1a111-0919-47e8-a4d4-f7c18f73a644'
 > ```
 
-##### Sample Request
+### Sample Request
 > None
 
 </details>
