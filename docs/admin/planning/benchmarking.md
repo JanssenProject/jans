@@ -52,3 +52,71 @@ Janssen Auth Server supports a number of deployment models--both VM and cloud
 native. While cloud native architecture enables true horizontal scalability,
 it comes at a cost. Benchmarking can help you understand if that cost is
 justified.
+
+## Load test
+
+### Authorization Code Flow jmeter test
+
+For load testing jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/jmeter/test/Authorization%20Code%20Flow_jans.jmx)
+
+**Prerequisite**
+
+1. Create OpenID Connect client with 
+   1. Response Types: ['code', 'id_token]
+   1. Grant Types: ['authorization_code', `implicit`, 'refresh_token']
+   1. Redirect Uri: valid redirect uri which is resolvable by machine which runs this load test
+1. Create users by pattern:
+   1. username: `test_user1`, `test_user2`, ... `test_userN` 
+   1. secret: `test_user_password`
+   Following script can be used [add_sequenced_jans_user_rdbm.py](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/tools/benchmark/add_sequenced_jans_user_rdbm.py)
+1. Configure Script
+   1. Open jmeter script by GUI
+   1. Set Host: `"Authorization Code Flow" -> "User Defined Variables"`: `host`
+   1. Update Location Regular Expression: `"Authorization Code Flow" -> "User Defined Variables"`: `location_regexp` - It must match `redirect_uri` correctly to extract `code` returned back by AS.
+      Consider following location header: `Location: https://yuriyz-modern-gnat.gluu.info/?code=626651bf-9d3c-430c-b0ec-8724dd065742&scope=openid&session_state=6255bbb4443a76a0f509b604cf651ad281bacbbde241389f2d05859783e41e1f.87f6112c-cb2c-4fe5-bd49-80e46b47e41f`
+      RegExp for it is : `Location: https:\/\/yuriyz-modern-gnat\.gluu\.info(.*)`
+   1. Put Client details: `"Authorization Code Flow" -> "User Defined Variables"`: `client_id`, `client_secret`, `redirect_uri`
+   1. Put User details: set user password to`test_user_password`. 
+      If any modification or logic is required for setting username and password please change code in: `Authorization Code Flow` -> `Main` -> `Simple Controller` -> `/login` -> `JSR223 PreProcessor : identify user credentials`
+      
+
+`JSR223 PreProcessor : identify user credentials` has following logic for user selection      
+
+```java
+double weight = 0.7d;
+
+int min = 1;
+int max = 1000;
+
+int minX = 1001;
+int maxX = 100000;
+
+float chance = new Random().nextFloat();
+if (chance <= weight) {
+	min = minX;
+	max = maxX;
+}
+
+int userNumber = new Random().nextInt(max - min + 1) + min;
+String username = "test_user" + userNumber;
+
+//log.info("username: " + username);
+
+vars.put("username", username);
+```
+
+Please change it if needed.
+         
+If everything was done correctly you should see:
+1. in jmeter log correctly parsed code:
+```code
+ 15:04:31 INFO  - jmeter.extractor.JSR223PostProcessor: login post processor, code : , redirect_to:/jans-auth/restv1/authorize?scope=openid+profile+email+user_name&response_type=code&redirect_uri=https%3A%2F%2Fyuriyz-modern-gnat.gluu.info%2F&nonce=nonce&client_id=37d82f27-39f2-423d-85a0-1449b4378b26&sid=5b02e2b5-9403-40a3-a902-ac45e84c6f84 
+2022/12/13 15:04:31 INFO  - jmeter.extractor.JSR223PostProcessor: login post processor, code : 626651bf-9d3c-430c-b0ec-8724dd065742, redirect_to:/?code=626651bf-9d3c-430c-b0ec-8724dd065742&scope=openid&session_state=6255bbb4443a76a0f509b604cf651ad281bacbbde241389f2d05859783e41e1f.87f6112c-cb2c-4fe5-bd49-80e46b47e41f 
+```
+2. `/token` step must be passed successfully (marked=passed which confirmed that `access_token` and `id_token` are present in response).
+
+Don't run jmeter in GUI mode for real load. Use non-GUI mode.
+```bash
+jmeter -n -t Authorization_Code_Flow_jans.jmx
+```
+   
