@@ -475,6 +475,8 @@ nav:
     - 'Config API Admin Guide':
         - 'admin/config-api/README.md'
         - 'Configuration': 'admin/config-api/config.md'
+        - 'Attributes': 'admin/config-api/attribute.md'
+        - 'OpenID Client': 'admin/config-api/openid-client.md'
         - 'Security': 'admin/config-api/security.md'
         - 'Logs': 'admin/config-api/logs.md'
         - 'Monitoring': 'admin/config-api/monitoring.md'
