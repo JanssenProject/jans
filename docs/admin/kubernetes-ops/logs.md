@@ -26,9 +26,9 @@ The following log levels can be configured through the configuration CLI:
 |Fatal      | Only fatal errors            |  
 |Off        | Logging is disabled          |
 
-### Configuring Log Levels
+## Configuring Log Levels
 
-## auth-server
+### auth-server
 To get the log level of current log level of auth-server:
 
 ```bash
@@ -87,7 +87,7 @@ kubectl logs <auth-server-pod> -n <namespace>
 ```
 
 
-## config-api
+### config-api
 To get the log level of current log level of config-api
 
 ```bash
