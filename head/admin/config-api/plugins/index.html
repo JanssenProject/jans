@@ -6856,6 +6856,10 @@
         
           
         
+          
+        
+          
+        
       
       
         
@@ -6886,6 +6890,34 @@
     <li class="md-nav__item">
       <a href="../config/" class="md-nav__link">
         Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../attribute/" class="md-nav__link">
+        Attributes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openid-client/" class="md-nav__link">
+        OpenID Client
       </a>
     </li>
   
@@ -10438,8 +10470,8 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p><a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of <a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server">Jans Auth Server</a>.</p>
 <h2 id="jans-config-api-plugins">Jans Config API Plugins<a class="headerlink" href="#jans-config-api-plugins" title="Permanent link">#</a></h2>
-<p>Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
-The plugin architecture implemented in Jans Config API allows the deployer to add/remove new rest APIs (plugin) without changing the core application. 
+<p>Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.</p>
+<p>The plugin architecture implemented in Jans Config API allows the deployer to add/remove new rest APIs (plugin) without changing the core application. 
 A plugin contains one or more Rest API(s) packaged in a Java ARchive (jar file). It is added to Jans Config API by adding the plugin jar file path in the external <strong>extraClasspath</strong> of the jetty context file.</p>
 <h2 id="pre-requisites">Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permanent link">#</a></h2>
 <p>The plugin developer should have an understanding of the following:</p>
@@ -10461,24 +10493,24 @@ A plugin contains one or more Rest API(s) packaged in a Java ARchive (jar file).
 </ol>
 <h3 id="exploring-hello-world-plugin">Exploring Hello World Plugin<a class="headerlink" href="#exploring-hello-world-plugin" title="Permanent link">#</a></h3>
 <h4 id="beansxml">beans.xml<a class="headerlink" href="#beansxml" title="Permanent link">#</a></h4>
-<p>The <code>resources/META-INF/beans.xml</code> is the CDI deployment descriptor required in <code>bean archive</code>. Deployment descriptor helps WELD to explore beans, interceptors, decorators, etc in the <code>bean archive</code>. Refer <a href="https://docs.jboss.org/weld/reference/latest/en-US/html/ee.html#packaging-and-deployment">WELD docs</a> to know more about deployment descriptors.</p>
+<p>The <code>resources/META-INF/beans.xml</code> is the CDI deployment descriptor required in <code>bean archive</code>. Deployment descriptor helps WELD to explore beans, interceptors, decorators, etc in the <code>bean archive</code>. Refer to the <a href="https://docs.jboss.org/weld/reference/latest/en-US/html/ee.html#packaging-and-deployment">WELD docs</a> to learn more about deployment descriptors.</p>
 <h4 id="helloworldextensionjava">HelloWorldExtension.java<a class="headerlink" href="#helloworldextensionjava" title="Permanent link">#</a></h4>
-<p>A CDI portable extension is a mechanism by which we can implement additional functionalities on top of the CDI container. In this sample plugin, we have created an Extension <code>HelloWorldExtension.java</code> implementing <code>jakarta.enterprise.inject.spi.Extension</code>. An extension can observe lifecycle events and also can modify the container’s metamodel. Please refer <a href="https://docs.jboss.org/weld/reference/latest/en-US/html/extend.html#extend">WELD documentation</a> for details.</p>
+<p>A CDI portable extension is a mechanism by which we can implement additional functionalities on top of the CDI container. In this sample plugin, we have created an extension called <code>HelloWorldExtension.java</code>, implementing <code>jakarta.enterprise.inject.spi.Extension</code>. An extension can observe lifecycle events and also can modify the container’s metamodel. Please refer to the <a href="https://docs.jboss.org/weld/reference/latest/en-US/html/extend.html#extend">WELD documentation</a> for details.</p>
 <p>We need to register our extension as a service provider by creating a file named <code>resources/META-INF/services/jakarta.enterprise.inject.spi.Extension</code> (as shown below).</p>
 <blockquote>
 <p>com.spl.plugin.helloworld.ext.HelloWorldExtension</p>
 </blockquote>
 <h4 id="helloworldapplicationjava">HelloWorldApplication.java<a class="headerlink" href="#helloworldapplicationjava" title="Permanent link">#</a></h4>
-<p>com.spl.plugin.helloworld.rest.HelloWorldApplication.java class is annotated with the <code>@ApplicationPath</code> annotation which identifies the application path that serves as the base URI for all resources of the plugin and is used to register JAX-RS resources and providers.</p>
+<p>The <code>com.spl.plugin.helloworld.rest.HelloWorldApplication.java</code> class is annotated with the <code>@ApplicationPath</code> annotation which identifies the application path that serves as the base URI for all resources of the plugin and is used to register JAX-RS resources and providers.</p>
 <h4 id="helloworldresourcejava">HelloWorldResource.java<a class="headerlink" href="#helloworldresourcejava" title="Permanent link">#</a></h4>
-<p>This is sample JAX-RS resource with an endpoint returning <code>Hello World!</code> string as http response.</p>
+<p>This is a sample JAX-RS resource with an endpoint returning <code>Hello World!</code> string as http response.</p>
 <h2 id="plugin-deployment">Plugin Deployment<a class="headerlink" href="#plugin-deployment" title="Permanent link">#</a></h2>
 <p>Jans Config API is offered as one of the several components of the Jans Auth Server. A plugin jar can be added to Jans Config API by following below steps.</p>
 <ol>
 <li>On an installed Jans Auth Server with Jans Config API (as component) copy plugin jar to <code>/opt/jans/jetty/jans-config-api/custom/libs</code> location.</li>
 <li>Add the location of plugin jar inside tag with name <strong>extraClasspath</strong> (multiple plugins can be added comma separated) of <code>/opt/jans/jetty/jans-config-api/webapps/jans-config-api.xml</code> file.</li>
 </ol>
-<p><div class="highlight"><pre><span></span><code>&lt;?xml version=&quot;1.0&quot;  encoding=&quot;ISO-8859-1&quot;?&gt;
+<div class="highlight"><pre><span></span><code>&lt;?xml version=&quot;1.0&quot;  encoding=&quot;ISO-8859-1&quot;?&gt;
 &lt;!DOCTYPE Configure PUBLIC &quot;-//Jetty//Configure//EN&quot; &quot;http://www.eclipse.org/jetty/configure_9_0.dtd&quot;&gt;
 
 &lt;Configure class=&quot;org.eclipse.jetty.webapp.WebAppContext&quot;&gt;
@@ -10492,16 +10524,18 @@ A plugin contains one or more Rest API(s) packaged in a Java ARchive (jar file).
 
 &lt;/Configure&gt;
 </code></pre></div>
-3. Restart <code>jans-config-api</code> service.
+<ol>
+<li>Restart <code>jans-config-api</code> service.</li>
+</ol>
 <div class="highlight"><pre><span></span><code>systemctl restart jans-config-api.service
-</code></pre></div></p>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-22T17:57:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-14T09:54:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-14</span>
       
         <br>
         Created:

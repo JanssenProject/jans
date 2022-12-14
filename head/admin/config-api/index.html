@@ -6856,6 +6856,10 @@
         
           
         
+          
+        
+          
+        
       
       
         
@@ -6886,6 +6890,34 @@
     <li class="md-nav__item">
       <a href="config/" class="md-nav__link">
         Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="attribute/" class="md-nav__link">
+        Attributes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="openid-client/" class="md-nav__link">
+        OpenID Client
       </a>
     </li>
   
@@ -10312,35 +10344,35 @@
 <h1 id="config-api">config-api<a class="headerlink" href="#config-api" title="Permanent link">#</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p><a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> provides a central place to manage and configure jans modules.
-It helps in configuring auth-server, users, fido2 and scim modules.
-Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server] (https://github.com/JanssenProject/jans/tree/main/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
-<img alt="Config-API-Architecture" src="../../../assets/config-api-architecture.png" />
-If you want to learn more about Weld, please visit its website: https://weld.cdi-spec.org/</p>
+It helps in configuring auth-server, users, fido2 and scim modules.</p>
+<p>Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of <a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server">Jans Auth Server</a>, which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)</p>
+<p><img alt="Config-API-Architecture" src="../../../assets/config-api-architecture.png" /></p>
+<p>If you want to learn more about Weld, please visit its website: https://weld.cdi-spec.org/</p>
 <h2 id="packaging-and-running-the-application">Packaging and running the application<a class="headerlink" href="#packaging-and-running-the-application" title="Permanent link">#</a></h2>
 <p>The application can be packaged using <code>./mvnw package</code>.
 It produces the <code>jans-config-api.war</code> file in the <code>server/target</code> directory.
 Be aware that all the dependencies are copied into the <code>server/target/jans-config-api/WEB-INF/lib</code> directory.</p>
 <h2 id="plugins">Plugins<a class="headerlink" href="#plugins" title="Permanent link">#</a></h2>
 <p>Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
-![Refer] (/plugins.md) for more details.</p>
+<a href="/plugins.md">Refer here</a> for more details.</p>
 <h2 id="endpoints-protection">Endpoints protection<a class="headerlink" href="#endpoints-protection" title="Permanent link">#</a></h2>
 <p>Config API endpoints are OAuth 2.0 protected. It supports simple bearer and JWT token.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">#</a></h2>
-<p>Learn more in the <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml">jans-config-api documentation</a>.</p>
+<p>Learn more in the <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml">jans-config-api OpenAPI documentation</a>.</p>
 <h3 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">#</a></h3>
 <h4 id="attribute">Attribute<a class="headerlink" href="#attribute" title="Permanent link">#</a></h4>
 <p>Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources.
-![Refer] (./attribute.md) for more details.</p>
+<a href="attribute/">Refer here</a> for more details.</p>
 <h4 id="default-authentication-method">Default Authentication Method<a class="headerlink" href="#default-authentication-method" title="Permanent link">#</a></h4>
 <p>Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources.
-![Refer] (/default-authentication-method.md) for more details.</p>
+<a href="/default-authentication-method.md">Refer here</a> for more details.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-30T18:01:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-14T09:54:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-14</span>
       
         <br>
         Created:

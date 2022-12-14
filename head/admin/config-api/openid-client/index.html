@@ -19,7 +19,7 @@
     
     
       
-        <title>OpenID Connect Client - Janssen Documentation</title>
+        <title>OpenID Client - Janssen Documentation</title>
       
     
     
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OpenID Connect Client
+              OpenID Client
             
           </span>
         </div>
@@ -225,13 +225,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link">
+      <a href="../../" class="md-tabs__link md-tabs__link--active">
         Administration
       </a>
     </li>
@@ -325,12 +327,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" checked>
       
       
       
@@ -6826,18 +6830,24 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_14" type="checkbox" id="__nav_1_14" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_14" type="checkbox" id="__nav_1_14" checked>
       
       
       
         
           
             
+          
+        
+          
+        
           
         
           
@@ -6881,6 +6891,103 @@
       <a href="../config/" class="md-nav__link">
         Configuration
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../attribute/" class="md-nav__link">
+        Attributes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          OpenID Client
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        OpenID Client
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#listing-existing-openid-connect-clients" class="md-nav__link">
+    Listing existing OpenID Connect clients
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-new-openid-connect-client" class="md-nav__link">
+    Creating new OpenID Connect client
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-existing-openid-connect-client" class="md-nav__link">
+    Updating existing OpenID Connect client
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patching-existing-openid-connect-client" class="md-nav__link">
+    Patching existing OpenID Connect client
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deleting-existing-openid-connect-client" class="md-nav__link">
+    Deleting existing OpenID Connect client
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -10278,11 +10385,11 @@
 <h1 id="openid-connect-client">OpenID Connect Client<a class="headerlink" href="#openid-connect-client" title="Permanent link">#</a></h1>
 <p>OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.</p>
 <hr />
-<h4 id="listing-existing-openid-connect-clients">Listing existing OpenID Connect clients<a class="headerlink" href="#listing-existing-openid-connect-clients" title="Permanent link">#</a></h4>
+<h2 id="listing-existing-openid-connect-clients">Listing existing OpenID Connect clients<a class="headerlink" href="#listing-existing-openid-connect-clients" title="Permanent link">#</a></h2>
 <details>
  <summary><code>GET</code> <code><b>/</b></code> <code>(gets list of OpenID Connect clients based on search parameters)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                                                                     |
 > |------------|-------------|----------------|-----------|--------------|---------------------------------------------------------------------------------|
@@ -10293,7 +10400,7 @@
 > | sortOrder  |  query      | string         | optional  |ascending     |Search size - max size of the results to return                                  |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -10301,12 +10408,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/openid/clients?limit=3&amp;pattern=test&amp;startIndex=1&amp;includeSource=true</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Response
+### Sample Response
 > ```javascript
 >{
 >    "start": 0,
@@ -10500,13 +10607,13 @@
 <details>
   <summary><code>GET</code> <code><b>/{inum}</b></code> <code>(gets OpenID Connect client based on inum)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | `inum`     |  path       | string         | required  | NA           | OpenID Connect client unique idendifier|
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -10515,12 +10622,12 @@
 > | `401`         | `application/json`                | `{"code":"404","message":"Not Found"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/openid/clients/bd27a9f6-7772-4049-bd4f-bf7c651fbe7c</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Response
+### Sample Response
 
 > ```javascript
 >{
@@ -10585,17 +10692,17 @@
 </details>
 
 <hr />
-<h4 id="creating-new-openid-connect-client">Creating new OpenID Connect client<a class="headerlink" href="#creating-new-openid-connect-client" title="Permanent link">#</a></h4>
+<h2 id="creating-new-openid-connect-client">Creating new OpenID Connect client<a class="headerlink" href="#creating-new-openid-connect-client" title="Permanent link">#</a></h2>
 <details>
   <summary><code>POST</code> <code><b>/{inum}</b></code> <code>(creates a new OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | OpenID Connect client json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -10603,12 +10710,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">post</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 >{
@@ -10697,17 +10804,17 @@
 </details>
 
 <hr />
-<h4 id="updating-existing-openid-connect-client">Updating existing OpenID Connect client<a class="headerlink" href="#updating-existing-openid-connect-client" title="Permanent link">#</a></h4>
+<h2 id="updating-existing-openid-connect-client">Updating existing OpenID Connect client<a class="headerlink" href="#updating-existing-openid-connect-client" title="Permanent link">#</a></h2>
 <details>
   <summary><code>PUT</code> <code><b>/{inum}</b></code> <code>(updates an existings OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | OpenID Connect client json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                                      |
 > |---------------|-----------------------------------|-------------------------------------------------------------------------------|
@@ -10716,12 +10823,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                                     |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                        |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PUT</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">put</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 
 > ```javascript
 >{
@@ -10786,11 +10893,11 @@
 </details>
 
 <hr />
-<h4 id="patching-existing-openid-connect-client">Patching existing OpenID Connect client<a class="headerlink" href="#patching-existing-openid-connect-client" title="Permanent link">#</a></h4>
+<h2 id="patching-existing-openid-connect-client">Patching existing OpenID Connect client<a class="headerlink" href="#patching-existing-openid-connect-client" title="Permanent link">#</a></h2>
 <details>
   <summary><code>PATCH</code> <code><b>/{inum}</b></code> <code>(patches an existing OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                             |
 > |------------|-------------|--------------------|-----------|--------------|-----------------------------------------|
@@ -10798,7 +10905,7 @@
 > | None       |  request    | json-patch object  | required  | NA           | json-patch request                      |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -10807,12 +10914,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PATCH</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients/f8c1a111-0919-47e8-a4d4-f7c18f73a644&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">patch</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 
 > <div class="highlight"><pre><span></span><code><span class="p">[{</span><span class="w"> </span><span class="s2">&quot;op&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/responseTypes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;value&quot;</span><span class="o">:</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">,</span><span class="s2">&quot;token&quot;</span><span class="p">]}]</span><span class="w"> </span>
 </code></pre></div>
@@ -10820,18 +10927,18 @@
 </details>
 
 <hr />
-<h4 id="deleting-existing-openid-connect-client">Deleting existing OpenID Connect client<a class="headerlink" href="#deleting-existing-openid-connect-client" title="Permanent link">#</a></h4>
+<h2 id="deleting-existing-openid-connect-client">Deleting existing OpenID Connect client<a class="headerlink" href="#deleting-existing-openid-connect-client" title="Permanent link">#</a></h2>
 <details>
   <summary><code>DELETE</code> <code><b>/{inum}</b></code> <code>(deletes an existings OpenID Connect client)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                             |
 > |------------|-------------|--------------------|-----------|--------------|-----------------------------------------|
 > | inum       |  path       | string             | required  | NA           | OpenID Connect client unique idendifier |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -10840,12 +10947,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">DELETE</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/openid/clients/f8c1a111-0919-47e8-a4d4-f7c18f73a644&#39;</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 > None
 
 </details>
@@ -10856,7 +10963,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-22T17:57:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-14T09:54:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-14</span>
       
         <br>
         Created:
@@ -10880,6 +10987,42 @@
       </main>
       
         <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../attribute/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Attributes" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Attributes
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../security/" class="md-footer__link md-footer__link--next" aria-label="Next: Security" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Security
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

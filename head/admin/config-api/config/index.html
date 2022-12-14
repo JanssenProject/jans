@@ -6856,6 +6856,10 @@
         
           
         
+          
+        
+          
+        
       
       
         
@@ -7010,14 +7014,14 @@
         
           <li class="md-nav__item">
   <a href="#mandatoryattributes" class="md-nav__link">
-    MandatoryAttributes:
+    MandatoryAttributes
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#exclusion-attributes" class="md-nav__link">
-    Exclusion attributes:
+    Exclusion attributes
   </a>
   
 </li>
@@ -7043,6 +7047,34 @@
   
 </nav>
       
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../attribute/" class="md-nav__link">
+        Attributes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openid-client/" class="md-nav__link">
+        OpenID Client
+      </a>
     </li>
   
 
@@ -10453,14 +10485,14 @@
         
           <li class="md-nav__item">
   <a href="#mandatoryattributes" class="md-nav__link">
-    MandatoryAttributes:
+    MandatoryAttributes
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#exclusion-attributes" class="md-nav__link">
-    Exclusion attributes:
+    Exclusion attributes
   </a>
   
 </li>
@@ -10521,8 +10553,8 @@
 
 <h1 id="config-api-configuration">Config-api-configuration<a class="headerlink" href="#config-api-configuration" title="Permanent link">#</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>[Jans Config Api] (https://github.com/JanssenProject/jans/tree/main/jans-config-api) configuration enables to manage application-level configuration.
-! <a href="https://github.com/JanssenProject/jans/raw/main/docs/assets/config-api-configuration.png"></a></p>
+<p><a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> configuration enables to manage application-level configuration.</p>
+<p><img alt="" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/config-api-configuration.png" /></p>
 <h3 id="existing-config-api-dynamic-configuration">Existing Config-api dynamic configuration<a class="headerlink" href="#existing-config-api-dynamic-configuration" title="Permanent link">#</a></h3>
 <blockquote>
 <p><code>javascript
@@ -10604,18 +10636,18 @@
 <h3 id="api-protection">Api protection<a class="headerlink" href="#api-protection" title="Permanent link">#</a></h3>
 <p><code>apiProtectionType</code> property states the protocol used for API authorization. Currently supported value is <code>oauth2</code>.</p>
 <blockquote>
-<p><code>`javascript
- ...
-"apiProtectionType": "oauth2"
- ...</code></p>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="s2">&quot;apiProtectionType&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;oauth2&quot;</span><span class="w"></span>
+<span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
 </blockquote>
 <h3 id="api-protection-auth-server">Api protection auth server<a class="headerlink" href="#api-protection-auth-server" title="Permanent link">#</a></h3>
 <p><code>apiApprovedIssuer</code> property enables to set more than one authorization servers. By default, the current auth-server is set. You can add more server separated by comma.</p>
 <blockquote>
-<p><code>`javascript
- ...
-apiApprovedIssuer": ["https://jans.server1,https://jans.server2"]
- ...</code></p>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="nx">apiApprovedIssuer</span><span class="s2">&quot;: [&quot;</span><span class="nx">https</span><span class="o">:</span><span class="c1">//jans.server1,https://jans.server2&quot;]</span><span class="w"></span>
+<span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
 </blockquote>
 <h3 id="logging-level">Logging level<a class="headerlink" href="#logging-level" title="Permanent link">#</a></h3>
 <p><code>loggingLevel</code> property can be used to the change the logging level to the desired values <code>(TRACE, DEBUG, INFO, WARN, ERROR)</code>. By default, the level is set to <code>INFO</code></p>
@@ -10626,62 +10658,62 @@ apiApprovedIssuer": ["https://jans.server1,https://jans.server2"]
  ...</code></p>
 </blockquote>
 <h3 id="scopes-other-than-the-one-defined-by-config-api">Scopes other than the one defined by config-api<a class="headerlink" href="#scopes-other-than-the-one-defined-by-config-api" title="Permanent link">#</a></h3>
-<p>Config API endpoints are oAuth2 protected. These scopes are created while installation. However, there are few endpoints that require scopes defined by other modules like auth-server. 
-A list of these scopes is maintained in configuration in order to avoid creation of these scopes during Config API start-up.
+<p>Config API endpoints are oAuth2 protected. These scopes are created while installation. However, there are few endpoints that require scopes defined by other modules like auth-server. </p>
+<p>A list of these scopes is maintained in configuration in order to avoid creation of these scopes during Config API start-up.
 <code>exclusiveAuthScopes</code> property can be used to the change the logging level to the desired value <code>(TRACE, DEBUG, INFO, WARN, ERROR)</code>. By default, the level is set to <code>INFO</code></p>
 <blockquote>
-<p><code>javascript
- ...
- "exclusiveAuthScopes": [
-   "jans_stat",
-   "https://jans.io/scim/users.read",
-   "https://jans.io/scim/users.write"
- ],
- ...</code></p>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="w"> </span><span class="s2">&quot;exclusiveAuthScopes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;jans_stat&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;https://jans.io/scim/users.read&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;https://jans.io/scim/users.write&quot;</span><span class="w"></span>
+<span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
 </blockquote>
 <h3 id="user-mandatory-and-exclusion-attributes">User - Mandatory and exclusion attributes<a class="headerlink" href="#user-mandatory-and-exclusion-attributes" title="Permanent link">#</a></h3>
-<h4 id="mandatoryattributes">MandatoryAttributes:<a class="headerlink" href="#mandatoryattributes" title="Permanent link">#</a></h4>
+<h4 id="mandatoryattributes">MandatoryAttributes<a class="headerlink" href="#mandatoryattributes" title="Permanent link">#</a></h4>
 <p><code>userMandatoryAttributes</code> can be used to define mandatory attributes for User while creation and update.</p>
 <blockquote>
-<p><code>javascript
- ...
-  "userMandatoryAttributes": [
-  "mail",
-  "displayName",
-  "jansStatus",
-  "userPassword",
-  "givenName"
- ],
- ...</code></p>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;userMandatoryAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;jansStatus&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;userPassword&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">&quot;givenName&quot;</span><span class="w"></span>
+<span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
 </blockquote>
-<h4 id="exclusion-attributes">Exclusion attributes:<a class="headerlink" href="#exclusion-attributes" title="Permanent link">#</a></h4>
+<h4 id="exclusion-attributes">Exclusion attributes<a class="headerlink" href="#exclusion-attributes" title="Permanent link">#</a></h4>
 <p><code>userExclusionAttributes</code> can be used to define User attributes that are not to be returned  in API response. More attributes that are to be skipped in response can be added to the list.</p>
 <blockquote>
-<p><code>`javascript
- ...
- "userExclusionAttributes": [
-   "userPassword"
- ],
- ...</code></p>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="w"> </span><span class="s2">&quot;userExclusionAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;userPassword&quot;</span><span class="w"></span>
+<span class="w"> </span><span class="p">],</span><span class="w"></span>
+<span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
 </blockquote>
 <h3 id="agama-flow-configuration">Agama flow configuration<a class="headerlink" href="#agama-flow-configuration" title="Permanent link">#</a></h3>
 <p><code>agamaConfiguration</code> stores Agama related configuration used in Agama related endpoints.</p>
 <p><code>mandatoryAttributes</code> list defines required attributes for Agama flow creation and update.
 <code>optionalAttributes</code> list specify the optional attributes.</p>
 <blockquote>
-<p><code>javascript
- ...
- "agamaConfiguration": {
-    "mandatoryAttributes": [
-   "qname",
-   "source"
-    ],
-   "optionalAttributes": [
-   "serialVersionUID",
-   "enabled"
-    ]
- }
- ...</code></p>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="w"> </span><span class="s2">&quot;agamaConfiguration&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;mandatoryAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;qname&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;source&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;optionalAttributes&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;serialVersionUID&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="s2">&quot;enabled&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">]</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
 </blockquote>
 
   <hr>
@@ -10689,7 +10721,7 @@ A list of these scopes is maintained in configuration in order to avoid creation
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-30T18:01:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-14T09:54:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-14</span>
       
         <br>
         Created:
@@ -10734,13 +10766,13 @@ A list of these scopes is maintained in configuration in order to avoid creation
       
       
         
-        <a href="../security/" class="md-footer__link md-footer__link--next" aria-label="Next: Security" rel="next">
+        <a href="../attribute/" class="md-footer__link md-footer__link--next" aria-label="Next: Attributes" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Security
+              Attributes
             </div>
           </div>
           <div class="md-footer__button md-icon">

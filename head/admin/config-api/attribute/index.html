@@ -19,7 +19,7 @@
     
     
       
-        <title>Attributes (original SAML jargon) or "user claims" (OpenID jargon) - Janssen Documentation</title>
+        <title>Attributes - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#attributes-original-saml-jargon-or-user-claims-openid-jargon" class="md-skip">
+        <a href="#attributes" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Attributes (original SAML jargon) or "user claims" (OpenID jargon)
+              Attributes
             
           </span>
         </div>
@@ -225,13 +225,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link">
+      <a href="../../" class="md-tabs__link md-tabs__link--active">
         Administration
       </a>
     </li>
@@ -325,12 +327,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" checked>
       
       
       
@@ -6826,18 +6830,24 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_14" type="checkbox" id="__nav_1_14" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_14" type="checkbox" id="__nav_1_14" checked>
       
       
       
         
           
             
+          
+        
+          
+        
           
         
           
@@ -6880,6 +6890,103 @@
     <li class="md-nav__item">
       <a href="../config/" class="md-nav__link">
         Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Attributes
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Attributes
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#listing-existing-attributes" class="md-nav__link">
+    Listing existing attributes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-new-attribute" class="md-nav__link">
+    Creating new attribute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-existing-attribute" class="md-nav__link">
+    Updating existing attribute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patching-existing-attribute" class="md-nav__link">
+    Patching existing attribute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deleting-existing-attribute" class="md-nav__link">
+    Deleting existing attribute
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openid-client/" class="md-nav__link">
+        OpenID Client
       </a>
     </li>
   
@@ -10262,7 +10369,7 @@
     
       
       
-        <span class="md-tag">endpoints</span>
+        <span class="md-tag">attributes</span>
       
     
   </nav>
@@ -10275,14 +10382,14 @@
   </a>
 
 
-<h1 id="attributes-original-saml-jargon-or-user-claims-openid-jargon">Attributes (original SAML jargon) or "user claims" (OpenID jargon)<a class="headerlink" href="#attributes-original-saml-jargon-or-user-claims-openid-jargon" title="Permanent link">#</a></h1>
-<p>Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources.</p>
+<h1 id="attributes">Attributes<a class="headerlink" href="#attributes" title="Permanent link">#</a></h1>
+<p>Attributes are individual pieces of user data, like uid or email, that are required by applications in order to identify a user and grant access to protected resources. In OpenID Connect, these are called user claims.</p>
 <hr />
-<h4 id="listing-existing-attributes">Listing existing attributes<a class="headerlink" href="#listing-existing-attributes" title="Permanent link">#</a></h4>
+<h2 id="listing-existing-attributes">Listing existing attributes<a class="headerlink" href="#listing-existing-attributes" title="Permanent link">#</a></h2>
 <details>
  <summary><code>GET</code> <code><b>/</b></code> <code>(gets list of attributes based on search parameters)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                                                                     |
 > |------------|-------------|----------------|-----------|--------------|---------------------------------------------------------------------------------|
@@ -10294,7 +10401,7 @@
 > | sortOrder  |  query      | string         | optional  |ascending     |Search size - max size of the results to return                                  |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -10302,12 +10409,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/attributes?limit=5&amp;pattern=edu,locale,carLicense&amp;startIndex=1</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Response
+### Sample Response
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="s2">&quot;start&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span><span class="w"></span>
 <span class="w">   </span><span class="s2">&quot;totalEntriesCount&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">78</span><span class="p">,</span><span class="w"></span>
@@ -10388,13 +10495,13 @@
 <details>
   <summary><code>GET</code> <code><b>/{inum}</b></code> <code>(gets attribute based on inum)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | `inum`     |  path       | string         | required  | NA           | Attribute unique idendifier            |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -10402,12 +10509,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s2">&quot;Authorization:Bearer 697479e0-e6f4-453d-bf7a-ddf31b53efba&quot;</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">GET</span><span class="w"> </span><span class="nx">http</span><span class="o">:</span><span class="c1">//my.jans.server/jans-config-api/api/v1/attributes/08E2</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Response
+### Sample Response
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
@@ -10447,17 +10554,17 @@
 </details>
 
 <hr />
-<h4 id="creating-new-attribute">Creating new attribute<a class="headerlink" href="#creating-new-attribute" title="Permanent link">#</a></h4>
+<h2 id="creating-new-attribute">Creating new attribute<a class="headerlink" href="#creating-new-attribute" title="Permanent link">#</a></h2>
 <details>
   <summary><code>POST</code> <code><b>/{inum}</b></code> <code>(creates a new attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | Attribute json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
@@ -10465,12 +10572,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                              |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">post</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 
 > <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="s2">&quot;adminCanAccess&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
@@ -10505,17 +10612,17 @@
 </details>
 
 <hr />
-<h4 id="updating-existing-attribute">Updating existing attribute<a class="headerlink" href="#updating-existing-attribute" title="Permanent link">#</a></h4>
+<h2 id="updating-existing-attribute">Updating existing attribute<a class="headerlink" href="#updating-existing-attribute" title="Permanent link">#</a></h2>
 <details>
   <summary><code>PUT</code> <code><b>/{inum}</b></code> <code>(updates an existing attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
 > | None       |  request    | object (JSON)  | required  | NA           | Attribute json                         |
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -10524,12 +10631,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PUT</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">put</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 
 > <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="s2">&quot;dn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inum=08E2,ou=attributes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
@@ -10569,11 +10676,11 @@
 </details>
 
 <hr />
-<h4 id="patching-existing-attribute">Patching existing attribute<a class="headerlink" href="#patching-existing-attribute" title="Permanent link">#</a></h4>
+<h2 id="patching-existing-attribute">Patching existing attribute<a class="headerlink" href="#patching-existing-attribute" title="Permanent link">#</a></h2>
 <details>
   <summary><code>PATCH</code> <code><b>/{inum}</b></code> <code>(patches an existing attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                            |
 > |------------|-------------|--------------------|-----------|--------------|----------------------------------------|
@@ -10581,7 +10688,7 @@
 > | None       |  request    | json-patch object  | required  | NA           | json-patch request                     |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -10590,12 +10697,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">PATCH</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes/08E2&#39;</span><span class="w"> </span><span class="o">--</span><span class="nx">data</span><span class="w"> </span><span class="err">@</span><span class="nx">patch</span><span class="p">.</span><span class="nx">json</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 
 > <div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="o">:</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="s2">&quot;/displayName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;value&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;PatchCustomAttribute123&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 </code></pre></div>
@@ -10603,18 +10710,18 @@
 </details>
 
 <hr />
-<h4 id="deleting-existing-attribute">Deleting existing attribute<a class="headerlink" href="#deleting-existing-attribute" title="Permanent link">#</a></h4>
+<h2 id="deleting-existing-attribute">Deleting existing attribute<a class="headerlink" href="#deleting-existing-attribute" title="Permanent link">#</a></h2>
 <details>
   <summary><code>DELETE</code> <code><b>/{inum}</b></code> <code>(deletes an existing attribute)</code></summary>
 
-##### Parameters
+### Parameters
 
 > | name       |  param type | data type          | type      |default value | description                            |
 > |------------|-------------|--------------------|-----------|--------------|----------------------------------------|
 > | inum       |  path       | string             | required  | NA           | Attribute unique idendifier            |
 
 
-##### Responses
+### Responses
 
 > | http code     | content-type                      | response                                                               |
 > |---------------|-----------------------------------|------------------------------------------------------------------------|
@@ -10623,12 +10730,12 @@
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                              |
 > | `500`         | `application/json`                | `{"code":"500","message":"Error msg"}`                                 |
 
-##### Example cURL
+### Example cURL
 
 > <div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nx">curl</span><span class="w"> </span><span class="o">-</span><span class="nx">X</span><span class="w"> </span><span class="nx">DELETE</span><span class="w"> </span><span class="o">-</span><span class="nx">k</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">H</span><span class="w"> </span><span class="s1">&#39;Authorization: Bearer ba9b8810-7a2b-4e4a-a18a-689d7eacf7d1&#39;</span><span class="w"> </span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="s1">&#39;https://my.jans.server/jans-config-api/api/v1/attributes/08E2&#39;</span><span class="w"></span>
 </code></pre></div>
 
-##### Sample Request
+### Sample Request
 > None
 
 </details>
@@ -10639,7 +10746,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-22T17:57:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-14T09:54:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-14</span>
       
         <br>
         Created:
@@ -10663,6 +10770,42 @@
       </main>
       
         <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../config/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Configuration" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Configuration
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../openid-client/" class="md-footer__link md-footer__link--next" aria-label="Next: OpenID Client" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              OpenID Client
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
