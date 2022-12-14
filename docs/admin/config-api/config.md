@@ -7,9 +7,9 @@ tags:
 # Config-api-configuration
 
 ## Overview
-[Jans Config Api] (https://github.com/JanssenProject/jans/tree/main/jans-config-api) configuration enables to manage application-level configuration.
-! [](https://github.com/JanssenProject/jans/raw/main/docs/assets/config-api-configuration.png)
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) configuration enables to manage application-level configuration.
 
+![](https://github.com/JanssenProject/jans/raw/main/docs/assets/config-api-configuration.png)
 
 ### Existing Config-api dynamic configuration
 
@@ -74,17 +74,21 @@ tags:
 > ```
 
 ## Revision update
+
 `jansRevision` property of the configuration is used to manage any change
 ![](https://github.com/JanssenProject/jans/raw/main/docs/assets/config-api-configuration-revision)
 
 ### Two options to make effect of the changes done to the configuration
+
 1. Restart jans-config-api
 2. Increment the `jansRevision` property of the configuration without restarting the application. The timer job will detect the change and fetch the latest configuration from the DB.
 
-
 ## Important attributes
+
 ### OAuth authorization
-```configOauthEnabled``` property can be used to enable or disable the oAuth2 authorization. By default, its set to true.
+
+`configOauthEnabled` property can be used to enable or disable the oAuth2 authorization. By default, its set to true.
+
 > ```javascript
 >  ...
 > "configOauthEnabled": true
@@ -92,35 +96,42 @@ tags:
 >```
 
 ### Api protection 
-```apiProtectionType``` property states the protocol used for API authorization. Currently supported value is `oauth2`.
+
+`apiProtectionType` property states the protocol used for API authorization. Currently supported value is `oauth2`.
+
 > ```javascript
 >  ...
 > "apiProtectionType": "oauth2"
 >  ...
->``
+> ```
 
 ### Api protection auth server
-```apiApprovedIssuer``` property enables to set more than one authorization servers. By default, the current auth-server is set. You can add more server separated by comma.
+
+`apiApprovedIssuer` property enables to set more than one authorization servers. By default, the current auth-server is set. You can add more server separated by comma.
+
 > ```javascript
 >  ...
 > apiApprovedIssuer": ["https://jans.server1,https://jans.server2"]
 >  ...
->``
-
+> ```
 
 ### Logging level 
-```loggingLevel``` property can be used to the change the logging level to the desired values ```(TRACE, DEBUG, INFO, WARN, ERROR)```. By default, the level is set to `INFO`
+
+`loggingLevel` property can be used to the change the logging level to the desired values `(TRACE, DEBUG, INFO, WARN, ERROR)`. By default, the level is set to `INFO`
+
 > ```javascript
 >  ...
 > "loggingLevel":"DEBUG",
 >  ...
 >``
 
-
 ### Scopes other than the one defined by config-api
+
 Config API endpoints are oAuth2 protected. These scopes are created while installation. However, there are few endpoints that require scopes defined by other modules like auth-server. 
+
 A list of these scopes is maintained in configuration in order to avoid creation of these scopes during Config API start-up.
-```exclusiveAuthScopes``` property can be used to the change the logging level to the desired value ```(TRACE, DEBUG, INFO, WARN, ERROR)```. By default, the level is set to `INFO`
+`exclusiveAuthScopes` property can be used to the change the logging level to the desired value `(TRACE, DEBUG, INFO, WARN, ERROR)`. By default, the level is set to `INFO`
+
 > ```javascript
 >  ...
 >  "exclusiveAuthScopes": [
@@ -129,12 +140,14 @@ A list of these scopes is maintained in configuration in order to avoid creation
 >    "https://jans.io/scim/users.write"
 >  ],
 >  ...
->```
+> ```
 
 ### User - Mandatory and exclusion attributes
 
-#### MandatoryAttributes: 
-```userMandatoryAttributes``` can be used to define mandatory attributes for User while creation and update.
+#### MandatoryAttributes 
+
+`userMandatoryAttributes` can be used to define mandatory attributes for User while creation and update.
+
 > ```javascript
 >  ...
 >   "userMandatoryAttributes": [
@@ -145,24 +158,28 @@ A list of these scopes is maintained in configuration in order to avoid creation
 >	"givenName"
 >  ],
 >  ...
->```
+> ```
 
-#### Exclusion attributes:
-```userExclusionAttributes``` can be used to define User attributes that are not to be returned  in API response. More attributes that are to be skipped in response can be added to the list.
+#### Exclusion attributes
+
+`userExclusionAttributes` can be used to define User attributes that are not to be returned  in API response. More attributes that are to be skipped in response can be added to the list.
+
 > ```javascript
 >  ...
 >  "userExclusionAttributes": [
 >    "userPassword"
 >  ],
 >  ...
->``
+> ```
 
 
 ### Agama flow configuration
-```agamaConfiguration``` stores Agama related configuration used in Agama related endpoints.
+
+`agamaConfiguration` stores Agama related configuration used in Agama related endpoints.
 
 `mandatoryAttributes` list defines required attributes for Agama flow creation and update.
 `optionalAttributes` list specify the optional attributes.
+
 > ```javascript
 >  ...
 >  "agamaConfiguration": {
@@ -176,4 +193,4 @@ A list of these scopes is maintained in configuration in order to avoid creation
 >     ]
 >  }
 >  ...
->```
+> ```
