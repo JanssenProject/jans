@@ -80,7 +80,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         target_dir = os.path.join(base.current_app.JansAuthInstaller.agama_root, 'ftl')
         base.extract_from_zip(
                 base.current_app.jans_zip,
-                'agama/engine/src/test/resources/templates',
+                'jans-auth-server/agama/engine/src/test/resources/templates',
                 target_dir
                 )
         self.chown(target_dir, Config.jetty_user, Config.jetty_group, recursive=True)
