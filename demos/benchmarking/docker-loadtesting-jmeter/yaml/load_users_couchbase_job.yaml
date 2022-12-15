@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-users
+  name: load-users-cm
+data:
+  COUCHBASE_PW: Test1234#
+  COUCHBASE_URL: cb.cbns.svc.cluster.local
+  LOAD_USERS_TO_COUCHBASE: "true"
+  LOAD_USERS_TO_LDAP: "false"
+  NUMBERS_OF_USERS_TO_LOAD: "500000000"
+  LDAP_URL: "opendj:1636"
+  LDAP_PW: Test1234#
+  LDAP_DN: "cn=directory manager"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: load-users
+  name: load-users
+spec:
+  template:
+    metadata:
+      labels:
+        app: load-users
+    spec:
+      hostAliases:
+        - ip: NGINX_IP
+          hostnames:
+            - FQDN
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-users-cm
+        image: janssenproject/demo_loadtesting:1.0.0_dev
+        name: load-users
+        resources:
+          limits:
+            cpu: 10000m
+            memory: 5000Mi
+          requests:
+            cpu: 10000m
+            memory: 5000Mi
+      restartPolicy: Never

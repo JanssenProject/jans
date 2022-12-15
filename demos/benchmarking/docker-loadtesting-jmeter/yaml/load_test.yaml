@@ -1,0 +1,51 @@
+apiVersion: v1
+data:
+  AUTHZ_CLIENT_ID: 1001.21beb9f2-e8de-4b10-949f-5cf31a28f95b # Saved from steps above
+  AUTHZ_CLIENT_SECRET: FWLmNKmVcQZt # Saved from steps above
+  # First batch is the users from min - max that login 10% every time
+  FIRST_BATCH_MAX: "5000000"
+  FIRST_BATCH_MIN: "0"
+  # Second batch is the users from min - max that login 90% every time
+  SECOND_BATCH_MAX: "50000000"
+  SECOND_BATCH_MIN: "5000001"
+  FQDN: demoexample.jans.io
+  ROPC_CLIENT_ID: c1b9628e-84f5-43e6-bf00-b341543703d9 # Saved from steps above
+  ROPC_CLIENT_SECRET: test_ro_client_password # Saved from steps above
+  RUN_AUTHZ_TEST: "true" # or "false"
+  RUN_ROPC_TEST: "true" # or "false"
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-testing
+  name: load-testing-cm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: load-testing
+  name: load-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-testing
+  template:
+    metadata:
+      labels:
+        app: load-testing
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-testing-cm
+        image: janssenproject/demo_loadtesting:1.0.0_dev
+        imagePullPolicy: Always
+        name: load-testing
+        resources:
+          requests:
+            memory: "4000Mi"
+            cpu: "4000m"
+          limits:
+            memory: "4000Mi"
+            cpu: "4000m"

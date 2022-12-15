@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-users
+  name: load-users-cm
+data:
+  GOOGLE_APPLICATION_CREDENTIALS: '/etc/certs/google_service_account.json'
+  GOOGLE_PROJECT_ID: cb.cbns.svc.cluster.local
+  GOOGLE_SPANNER_INSTANCE_ID: "cn-test"
+  GOOGLE_SPANNER_DATABASE_ID: "test"
+  LOAD_USERS_TO_SPANNER: "true"
+  LOAD_USERS_TO_LDAP: "false"
+  LOAD_USERS_TO_COUCHBASE: "false"
+  NUMBERS_OF_USERS_TO_LOAD: "500000000"
+  LDAP_URL: "opendj:1636"
+  LDAP_PW: Test1234#
+  LDAP_DN: "cn=directory manager"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: load-users
+  name: load-users
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: load-users
+    spec:
+      hostAliases:
+        - ip: NGINX_IP
+          hostnames:
+            - FQDN
+      volumes:
+      - name: google-sa
+        secret:
+          secretName: google-sa
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-users-cm
+        image: janssenproject/demo_loadtesting:1.0.0_dev
+        volumeMounts:
+        - mountPath: /etc/jans/conf/google-credentials.json
+          name: google-sa
+          subPath: google-credentials.json
+        name: load-users
+        resources:
+          limits:
+            cpu: 30000m
+            memory: 60000Mi
+          requests:
+            cpu: 30000m
+            memory: 60000Mi
+      restartPolicy: Never
