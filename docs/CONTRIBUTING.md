@@ -214,6 +214,36 @@ tags:
 ---
 ```
 
+### Referencing Janssen Project Release in Documents
+
+When a reference to the current release is required in the documentation content, use the text `replace-janssen-version`
+instead of mentioning the current release number. Janssen Project build system will replace `replace-janssen-version`
+text with the current release number at the time of every release. i.e. at the time of releasing documentation for the Janssen Project release of v1.0.5, all occurrences of
+`replace-janssen-version` will be replaced by `v1.0.5`.
+
+For example, below is the URL used in the documentation to point to the specification of API for corresponding Janssen 
+Project release. It is important that this link points to corresponding specification of that release.
+
+```
+https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml
+```
+
+In every new release of Janssen Project (and corresponding Janssen documentation) only the `replace-janssen-version` part
+of the URL changes. So, at the time of releasing the documentation for `v1.0.4`, the build system will update the 
+`replace-janssen-version` in the URL so the URL becomes
+
+```
+https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.4/jans-auth-server/docs/swagger.yaml
+```
+
+At the time of releasing `v1.0.5`, the build system will update the same URL as below
+
+```
+https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.5/jans-auth-server/docs/swagger.yaml
+```
+
+This way, URL always points to the specification in corresponding release without updating it manually everytime before release.
+
 ### General Text
  - Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line
  - Keep explanations short and clear
