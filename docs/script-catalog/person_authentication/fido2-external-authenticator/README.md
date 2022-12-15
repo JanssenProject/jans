@@ -67,6 +67,16 @@ Follow the steps below to enable FIDO2 authentication:
 
 !!! Note
     If FIDO2 is set as a default authentication mechanism users will **not** be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).  
+    
+    
+### Test the feature 
+To test, enter the complete URL for authorization in a browser or create a simple webpage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.
+
+An example of a complete URL looks like this -
+```
+https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_uri=https://<your.jans.server>/admin&client_id=<replace_with_inum_client_id>&scope=openid+profile+email+user_name&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
+```
+
 
 ## FIDO2 login page
 Below is an illustration of the Janssen Server's default FIDO2 login page:
