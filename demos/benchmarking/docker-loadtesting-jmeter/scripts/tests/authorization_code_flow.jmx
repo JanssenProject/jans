@@ -353,10 +353,12 @@ if (chance &lt;= weight) {
 
 int userNumber = new Random().nextInt(max - min + 1) + min;
 String username = &quot;TEST_USERS_PREFIX_STRING&quot; + userNumber;
+String password = &quot;topsecret&quot; + userNumber;
 
 //log.info(&quot;username: &quot; + username);
 
 vars.put(&quot;username&quot;, username);
+vars.put(&quot;password&quot;, password);
 
 log.info(&quot;username: &quot; + vars.get(&quot;username&quot;) + &quot;, password: &quot; + vars.get(&quot;password&quot;));
 </stringProp>
