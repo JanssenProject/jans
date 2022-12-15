@@ -372,6 +372,12 @@
             <artifactId>jans-core-script</artifactId>
         </dependency>
 
+		<!-- Fido2 -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-fido2-client</artifactId>
+		</dependency>
+
 		<!-- Eleven -->
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -1053,6 +1059,12 @@
 				    <version>0.15.1</version>
 				</dependency>
 -->
+				<dependency>
+					<groupId>com.notnoop.apns</groupId>
+					<artifactId>apns</artifactId>
+					<version>1.0.0.Beta6</version>
+					<scope>compile</scope>
+				</dependency>
 				<dependency>
 					<groupId>com.google.gcm</groupId>
 					<artifactId>gcm-server</artifactId>

@@ -36,6 +36,7 @@ import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.ldap.TokenEntity;
+import io.jans.as.server.service.fido.u2f.RequestService;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
@@ -77,6 +78,10 @@ public class CleanerTimer {
 
     @Inject
     private CacheProvider cacheProvider;
+
+    @Inject
+    @Named("u2fRequestService")
+    private RequestService u2fRequestService;
 
     @Inject
     private AppConfiguration appConfiguration;

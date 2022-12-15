@@ -44,16 +44,17 @@
             var label = '${identity.getWorkingParameter('super_gluu_label')}';
             var qr_options = ${identity.getWorkingParameter('super_gluu_qr_options')};
             var authmethod = '${identity.getWorkingParameter('super_gluu_auth_method')}';
+            var step_sg = '${identity.getWorkingParameter('step_sg')}';
             
             $(document).ready(function() {
-            	if (authmethod == "enroll") {
+            	if (authmethod == "enroll" || step_sg == "one_step") {
             		document.getElementById("login").style.display = "none";
             		document.getElementById("subsequent").style.display = "none";
             		document.getElementById("enroll").style.display = "";  
             		
             		gluu_auth.renderQrCode('#enrollcontainer', request, qr_options, label);
                     gluu_auth.startProgressBar('#enrollprogressbar', 90, onSignInCallback);
-            	} else if (authmethod == "login"){
+            	} else if (authmethod == "login" ){
             		document.getElementById("login").style.display = "";
             		document.getElementById("subsequent").style.display = "none";
             		document.getElementById("enroll").style.display = "none";
