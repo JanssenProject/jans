@@ -112,7 +112,7 @@ jmeter -n -t Authorization_Code_Flow_jans.jmx
 
 ### Authorization Code Flow jmeter test
 
-For load testing with Authorization Code Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/jmeter/test/Authorization%20Code%20Flow_jans.jmx)
+For load testing with Authorization Code Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/Authorization%20Code%20Flow_jans.jmx)
 
 1. Configure Script
    1. Open jmeter script by GUI
@@ -135,7 +135,7 @@ If everything was done correctly you should see:
 
 ### Resource Owner Password Grant (ROPC) Flow jmeter test
 
-For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/jmeter/test/ResourceOwnerPasswordCredentials_jans.jmx)
+For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/ResourceOwnerPasswordCredentials_jans.jmx)
 
 1. Configure Script
    1. Open jmeter script by GUI
