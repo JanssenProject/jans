@@ -141,13 +141,14 @@ public interface PersistenceEntryManager extends EntityManager {
     void setPersistenceExtension(PersistenceExtension persistenceExtension);
 
     <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName);
-
+    
     Class<?> getCustomAttributesListItemType(Object entry, AttributesList attributesList,
 			String propertyName);
 	List<AttributeData> getAttributeDataListFromCustomAttributesList(Object entry, AttributesList attributesList,
 			String propertyName);
 	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
 			String propertyName, Collection<AttributeData> attributes);
+	List<AttributeData> getAttributesList(Object entry);
 
     boolean destroy();
 

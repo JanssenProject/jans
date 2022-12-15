@@ -7287,17 +7287,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        adminCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
         userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -7747,10 +7747,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -8456,17 +8456,6 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
-        fapi:
-          type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8494,6 +8483,17 @@ components:
             - STAT
             - PAR
             - SSA
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
