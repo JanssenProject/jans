@@ -43,9 +43,8 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
         
         // this is NOT a search but a paged listing
         int maxcount = getMaxCount();
-        PagedResult<Deployment> res = ads.list(start > 0 ? start - 1 : 0, count > 0 ? count : maxcount, maxcount);
+        PagedResult<Deployment> res = ads.list(start < 0 ? 0 : start, count > 0 ? count : maxcount, maxcount);
         res.getEntries().forEach(d -> d.getDetails().setFolders(null));
-        res.setStart(start + 1);
         return Response.ok(res).build();
 
     }
