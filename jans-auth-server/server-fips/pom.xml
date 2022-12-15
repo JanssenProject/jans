@@ -21,7 +21,7 @@
 
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>${project.basedir}/../server/src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
 					<include>**/*.xml</include>
@@ -33,7 +33,7 @@
 
 		<testResources>
 			<testResource>
-				<directory>src/main/webapp</directory>
+				<directory>${project.basedir}/../server/src/main/webapp</directory>
 				<includes>
 					<include>WEB-INF/**</include>
 				</includes>

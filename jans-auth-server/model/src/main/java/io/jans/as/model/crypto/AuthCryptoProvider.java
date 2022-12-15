@@ -143,7 +143,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     public void load() throws IOException, NoSuchAlgorithmException, CertificateException {
         try (InputStream is = new FileInputStream(keyStoreFile)) {
             keyStore.load(is, keyStoreSecret.toCharArray());
-            LOG.debug("Loaded keys from JKS.");
+            LOG.debug("Loaded keys from KeyStore.");
             LOG.trace("Loaded keys:" + getKeys());
         }
     }
