@@ -3,17 +3,38 @@ tags:
   - administration
   - kubernetes
   - operations
+  - backup
+  - restore
 ---
 
+The Jans Server should be backed up frequently, **we recommend once daily**.
 
-## This content is in progress
+There are multiple methods for backing up jans server. One way is manually using imperative commands. The other is automatically using open source tools.
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+## Manual Backup and Restore
 
-## Have questions in the meantime?
+Configmap backup:
+```bash
+kubectl get configmap -n <namespace> --field-selector metadata.name!=kube-root-ca.crt -o yaml > configmap-backup.yaml
+```
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+Secret backup:
+```bash
+kubectl get secret -n <namespace> -o yaml > secret-backup.yaml
+```
 
-## Want to contribute?
+Configmap restore:
+```bash
+kubectl create -f configmap-backup.yaml
+```
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+Secret restore:
+```bash
+kubectl create -f secret-backup.yaml
+```
+
+## Automatic Backup and Restore
+
+There are several tools that helps in automatic backups and restore, like [Kasten K10](https://www.kasten.io/kubernetes/use-cases/backup-restore).
+
+You can follow online [guides](https://medium.com/geekculture/kubernetes-backup-restore-is-now-effortless-e788fccd8cde) to deploy it and using it to configure automatic backups.
