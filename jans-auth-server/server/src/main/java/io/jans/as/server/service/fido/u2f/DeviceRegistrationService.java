@@ -98,13 +98,13 @@ public class DeviceRegistrationService {
 
         String baseDn = userService.getDnForUser(null);
 
-        Filter deviceObjectClassFilter = Filter.createEqualityFilter("objectClass", "oxDeviceRegistration");
+        Filter deviceObjectClassFilter = Filter.createEqualityFilter("objectClass", "jansDeviceRegistration");
         Filter deviceHashCodeFilter = Filter.createEqualityFilter("jansDeviceHashCode", getKeyHandleHashCode(keyHandleDecoded));
         Filter deviceKeyHandleFilter = Filter.createEqualityFilter("jansDeviceKeyHandle", keyHandle);
         Filter appIdFilter = Filter.createEqualityFilter("jansApp", appId);
 
         Filter filter = Filter.createANDFilter(deviceObjectClassFilter, deviceHashCodeFilter, appIdFilter, deviceKeyHandleFilter);
-
+        log.debug("Filter --> "+filter);
         return ldapEntryManager.findEntries(baseDn, DeviceRegistration.class, filter, returnAttributes);
     }
 
