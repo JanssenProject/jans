@@ -103,12 +103,14 @@ jobs:
          cd ..
           
          # Replace release number markers with actual release number
-         cd docs
-         egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/$VERSION/g"
-         git add . || echo "Nothing to add"
-         git commit -a -S -m "docs: replace release marker with release number" || echo "Nothing to commit"
-         git push
-         cd ..
+         if [ ! -z "$VERSION" ]; then
+           cd docs
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/$VERSION/g"
+           git add . || echo "Nothing to add"
+           git commit -a -S -m "docs: replace release marker with release number" || echo "Nothing to commit"
+           git push
+           cd ..
+         fi
 
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
