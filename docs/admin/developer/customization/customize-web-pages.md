@@ -69,7 +69,7 @@ Resource bundle names to support other languages should be placed under the same
 
 ### Custom image files:
 1. All images should be placed under `/opt/jans/jetty/jans-auth/custom/static/img`
-2. Reference it in .xhtml file using the URL `https://your.jans.server/oxauth/ext/resources/img/fileName.png` or `/oxauth/ext/resources/img/fileName.jpg`
+2. Reference it in .xhtml file using the URL `https://your.jans.server/jans-auth/ext/resources/img/fileName.png` or `/jans-auth/ext/resources/img/fileName.jpg`
 
 ### Page layout, header, footer (xhtml Template) customization
 
