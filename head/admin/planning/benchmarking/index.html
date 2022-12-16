@@ -725,6 +725,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#resource-owner-password-grant-ropc-flow-jmeter-test" class="md-nav__link">
+    Resource Owner Password Grant (ROPC) Flow jmeter test
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -9905,6 +9912,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#resource-owner-password-grant-ropc-flow-jmeter-test" class="md-nav__link">
+    Resource Owner Password Grant (ROPC) Flow jmeter test
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -9995,8 +10009,6 @@ native. While cloud native architecture enables true horizontal scalability,
 it comes at a cost. Benchmarking can help you understand if that cost is
 justified.</p>
 <h2 id="load-test">Load test<a class="headerlink" href="#load-test" title="Permanent link">#</a></h2>
-<h3 id="authorization-code-flow-jmeter-test">Authorization Code Flow jmeter test<a class="headerlink" href="#authorization-code-flow-jmeter-test" title="Permanent link">#</a></h3>
-<p>For load testing jmeter test is used located <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/jmeter/test/Authorization%20Code%20Flow_jans.jmx">here</a></p>
 <p><strong>Prerequisite</strong></p>
 <ol>
 <li>Create OpenID Connect client with </li>
@@ -10007,16 +10019,8 @@ justified.</p>
 <li>username: <code>test_user1</code>, <code>test_user2</code>, ... <code>test_userN</code> </li>
 <li>secret: <code>test_user_password</code>
    Following script can be used <a href="https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/tools/benchmark/add_sequenced_jans_user_rdbm.py">add_sequenced_jans_user_rdbm.py</a></li>
-<li>Configure Script</li>
-<li>Open jmeter script by GUI</li>
-<li>Set Host: <code>"Authorization Code Flow" -&gt; "User Defined Variables"</code>: <code>host</code></li>
-<li>Update Location Regular Expression: <code>"Authorization Code Flow" -&gt; "User Defined Variables"</code>: <code>location_regexp</code> - It must match <code>redirect_uri</code> correctly to extract <code>code</code> returned back by AS.
-      Consider following location header: <code>Location: https://yuriyz-modern-gnat.gluu.info/?code=626651bf-9d3c-430c-b0ec-8724dd065742&amp;scope=openid&amp;session_state=6255bbb4443a76a0f509b604cf651ad281bacbbde241389f2d05859783e41e1f.87f6112c-cb2c-4fe5-bd49-80e46b47e41f</code>
-      RegExp for it is : <code>Location: https:\/\/yuriyz-modern-gnat\.gluu\.info(.*)</code></li>
-<li>Put Client details: <code>"Authorization Code Flow" -&gt; "User Defined Variables"</code>: <code>client_id</code>, <code>client_secret</code>, <code>redirect_uri</code></li>
-<li>Put User details: set user password to<code>test_user_password</code>. 
-      If any modification or logic is required for setting username and password please change code in: <code>Authorization Code Flow</code> -&gt; <code>Main</code> -&gt; <code>Simple Controller</code> -&gt; <code>/login</code> -&gt; <code>JSR223 PreProcessor : identify user credentials</code></li>
 </ol>
+<p><strong>User Selection Logic</strong></p>
 <p><code>JSR223 PreProcessor : identify user credentials</code> has following logic for user selection      </p>
 <div class="highlight"><pre><span></span><code><span class="kt">double</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.7d</span><span class="p">;</span><span class="w"></span>
 
@@ -10040,22 +10044,55 @@ justified.</p>
 <span class="n">vars</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;username&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">username</span><span class="p">);</span><span class="w"></span>
 </code></pre></div>
 <p>Please change it if needed.</p>
+<p><strong>Threads&amp;RampUp</strong></p>
+<p>Configure test script threads properties in <code>&lt;Root&gt; -&gt; Main</code> Thread Group inside script, like:</p>
+<ul>
+<li>Number Of Threads</li>
+<li>Ramp-Up Period (in seconds)</li>
+<li>Loop Count (or Forever)</li>
+</ul>
+<p><strong>jmeter in non-GUI mode</strong></p>
+<p>Don't run jmeter in GUI mode for real load. Use non-GUI mode.
+<div class="highlight"><pre><span></span><code>jmeter -n -t Authorization_Code_Flow_jans.jmx
+</code></pre></div></p>
+<h3 id="authorization-code-flow-jmeter-test">Authorization Code Flow jmeter test<a class="headerlink" href="#authorization-code-flow-jmeter-test" title="Permanent link">#</a></h3>
+<p>For load testing with Authorization Code Flow jmeter test is used located <a href="https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/Authorization%20Code%20Flow_jans.jmx">here</a></p>
+<ol>
+<li>Configure Script</li>
+<li>Open jmeter script by GUI</li>
+<li>Set Thread properties according to your needs: <code>Authorization Code Flow -&gt; Main</code></li>
+<li>Set Host: <code>"Authorization Code Flow" -&gt; "User Defined Variables"</code>: <code>host</code></li>
+<li>Update Location Regular Expression: <code>"Authorization Code Flow" -&gt; "User Defined Variables"</code>: <code>location_regexp</code> - It must match <code>redirect_uri</code> correctly to extract <code>code</code> returned back by AS.
+      Consider following location header: <code>Location: https://yuriyz-modern-gnat.gluu.info/?code=626651bf-9d3c-430c-b0ec-8724dd065742&amp;scope=openid&amp;session_state=6255bbb4443a76a0f509b604cf651ad281bacbbde241389f2d05859783e41e1f.87f6112c-cb2c-4fe5-bd49-80e46b47e41f</code>
+      RegExp for it is : <code>Location: https:\/\/yuriyz-modern-gnat\.gluu\.info(.*)</code></li>
+<li>Put Client details: <code>"Authorization Code Flow" -&gt; "User Defined Variables"</code>: <code>client_id</code>, <code>client_secret</code>, <code>redirect_uri</code></li>
+<li>Put User details: set user password to<code>test_user_password</code>. 
+      If any modification or logic is required for setting username and password please change code in: <code>Authorization Code Flow</code> -&gt; <code>Main</code> -&gt; <code>Simple Controller</code> -&gt; <code>/login</code> -&gt; <code>JSR223 PreProcessor : identify user credentials</code></li>
+</ol>
 <p>If everything was done correctly you should see:
 1. in jmeter log correctly parsed code:
 <div class="highlight"><pre><span></span><code> 15:04:31 INFO  - jmeter.extractor.JSR223PostProcessor: login post processor, code : , redirect_to:/jans-auth/restv1/authorize?scope=openid+profile+email+user_name&amp;response_type=code&amp;redirect_uri=https%3A%2F%2Fyuriyz-modern-gnat.gluu.info%2F&amp;nonce=nonce&amp;client_id=37d82f27-39f2-423d-85a0-1449b4378b26&amp;sid=5b02e2b5-9403-40a3-a902-ac45e84c6f84 
 2022/12/13 15:04:31 INFO  - jmeter.extractor.JSR223PostProcessor: login post processor, code : 626651bf-9d3c-430c-b0ec-8724dd065742, redirect_to:/?code=626651bf-9d3c-430c-b0ec-8724dd065742&amp;scope=openid&amp;session_state=6255bbb4443a76a0f509b604cf651ad281bacbbde241389f2d05859783e41e1f.87f6112c-cb2c-4fe5-bd49-80e46b47e41f 
 </code></pre></div>
 2. <code>/token</code> step must be passed successfully (marked=passed which confirmed that <code>access_token</code> and <code>id_token</code> are present in response).</p>
-<p>Don't run jmeter in GUI mode for real load. Use non-GUI mode.
-<div class="highlight"><pre><span></span><code>jmeter -n -t Authorization_Code_Flow_jans.jmx
-</code></pre></div></p>
+<h3 id="resource-owner-password-grant-ropc-flow-jmeter-test">Resource Owner Password Grant (ROPC) Flow jmeter test<a class="headerlink" href="#resource-owner-password-grant-ropc-flow-jmeter-test" title="Permanent link">#</a></h3>
+<p>For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test is used located <a href="https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/ResourceOwnerPasswordCredentials_jans.jmx">here</a></p>
+<ol>
+<li>Configure Script</li>
+<li>Open jmeter script by GUI</li>
+<li>Set Thread properties according to your needs: <code>ROPC -&gt; Main</code></li>
+<li>Set Host: <code>"ROPC" -&gt; "User Defined Variables"</code>: <code>host</code></li>
+<li>Put Client details: <code>"ROPC" -&gt; "User Defined Variables"</code>: <code>client_id</code>, <code>client_secret</code></li>
+<li>Put User details: set user password to<code>test_user_password</code>. 
+      If any modification or logic is required for setting username and password please change code in: <code>ROPC</code> -&gt; <code>Main</code> -&gt; <code>Simple Controller</code> -&gt; <code>/token</code> -&gt; <code>JSR223 PreProcessor : identify user credentials</code></li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-14T11:52:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-14</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-15T12:37:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-15</span>
       
         <br>
         Created:

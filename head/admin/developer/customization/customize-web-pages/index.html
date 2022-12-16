@@ -4998,6 +4998,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reference-login-pages" class="md-nav__link">
+    Reference login pages:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#customized-resource-bundles" class="md-nav__link">
     Customized resource bundles:
   </a>
@@ -5021,13 +5028,6 @@
         <li class="md-nav__item">
   <a href="#page-layout-header-footer-xhtml-template-customization" class="md-nav__link">
     Page layout, header, footer (xhtml Template) customization
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-pages" class="md-nav__link">
-    Example pages:
   </a>
   
 </li>
@@ -9964,6 +9964,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reference-login-pages" class="md-nav__link">
+    Reference login pages:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#customized-resource-bundles" class="md-nav__link">
     Customized resource bundles:
   </a>
@@ -9987,13 +9994,6 @@
         <li class="md-nav__item">
   <a href="#page-layout-header-footer-xhtml-template-customization" class="md-nav__link">
     Page layout, header, footer (xhtml Template) customization
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-pages" class="md-nav__link">
-    Example pages:
   </a>
   
 </li>
@@ -10030,6 +10030,46 @@
         <span class="md-tag">customization</span>
       
     
+      
+      
+        <span class="md-tag">internationalization</span>
+      
+    
+      
+      
+        <span class="md-tag">i18n</span>
+      
+    
+      
+      
+        <span class="md-tag">locale</span>
+      
+    
+      
+      
+        <span class="md-tag">css</span>
+      
+    
+      
+      
+        <span class="md-tag">images</span>
+      
+    
+      
+      
+        <span class="md-tag">header</span>
+      
+    
+      
+      
+        <span class="md-tag">footer</span>
+      
+    
+      
+      
+        <span class="md-tag">template</span>
+      
+    
   </nav>
 
 
@@ -10051,7 +10091,7 @@
 <li>Error page: <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/error.xhtml">error.xhtml</a></li>
 </ul>
 <h3 id="to-override-default-pages-listed-above">To override default pages listed above:<a class="headerlink" href="#to-override-default-pages-listed-above" title="Permanent link">#</a></h3>
-<p>Put a modified <code>login.xhtml</code> or <code>authorize.xhtml</code> or <code>error.xhtml</code> or <code>logout.xhtml</code> under <code>/opt/gluu/jetty/jans-auth/custom/pages/</code></p>
+<p>Put a modified <code>login.xhtml</code> or <code>authorize.xhtml</code> or <code>error.xhtml</code> or <code>logout.xhtml</code> under <code>/opt/jans/jetty/jans-auth/custom/pages/</code></p>
 <h3 id="directory-structure-for-customization">Directory structure for customization<a class="headerlink" href="#directory-structure-for-customization" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>/opt/jans/jetty/jans-auth/
 |-- custom
@@ -10062,7 +10102,7 @@
 </code></pre></div>
 <h3 id="adding-a-new-web-page-for-person-authentication-scripts">Adding a new web page for Person Authentication scripts<a class="headerlink" href="#adding-a-new-web-page-for-person-authentication-scripts" title="Permanent link">#</a></h3>
 <ol>
-<li>If <code>enterOTP.xhtml</code> is your webpage for step 2 of authentication, place under <code>/opt/jans/jetty/jans-auth/custom/pages/enterOTP.xhtml</code></li>
+<li>If <code>enterOTP.xhtml</code> is your webpage for step 2 of authentication, place under <code>/opt/jans/jetty/jans-auth/custom/pages/auth/enterOTP.xhtml</code></li>
 <li>Reference it in the custom script as follows:
 <div class="highlight"><pre><span></span><code>    def getPageForStep(self, configurationAttributes, step):
         # Used to specify the page you want to return for a given step
@@ -10072,6 +10112,8 @@
           return &quot;/auth/enterOTP.xhtml&quot;
 </code></pre></div></li>
 </ol>
+<h3 id="reference-login-pages">Reference login pages:<a class="headerlink" href="#reference-login-pages" title="Permanent link">#</a></h3>
+<p><a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth">Here</a> you will find several login pages for different authentication methods.</p>
 <h3 id="customized-resource-bundles">Customized resource bundles:<a class="headerlink" href="#customized-resource-bundles" title="Permanent link">#</a></h3>
 <ol>
 <li>
@@ -10097,29 +10139,27 @@ Resource bundle names to support other languages should be placed under the same
 </ol>
 <h3 id="custom-css-files">Custom CSS files:<a class="headerlink" href="#custom-css-files" title="Permanent link">#</a></h3>
 <ol>
-<li>Place the file in <code>/opt/gluu/jetty/jans-auth/custom/static/stylesheet/theme.css</code></li>
+<li>Place the file in <code>/opt/jans/jetty/jans-auth/custom/static/stylesheet/theme.css</code></li>
 <li>Reference it in .xhtml file using the URL <code>https://your.jans.server/jans-auth/ext/resources/stylesheet/theme.css</code> or <code>/jans-auth/ext/resources/stylesheet/theme.css</code></li>
 </ol>
 <h3 id="custom-image-files">Custom image files:<a class="headerlink" href="#custom-image-files" title="Permanent link">#</a></h3>
 <ol>
-<li>All images should be placed under <code>/opt/gluu/jetty/jans-auth/custom/static/img</code></li>
-<li>Reference it in .xhtml file using the URL <code>https://your.jans.server/oxauth/ext/resources/img/fileName.png</code> or <code>/oxauth/ext/resources/img/fileName.jpg</code></li>
+<li>All images should be placed under <code>/opt/jans/jetty/jans-auth/custom/static/img</code></li>
+<li>Reference it in .xhtml file using the URL <code>https://your.jans.server/jans-auth/ext/resources/img/fileName.png</code> or <code>/jans-auth/ext/resources/img/fileName.jpg</code></li>
 </ol>
 <h3 id="page-layout-header-footer-xhtml-template-customization">Page layout, header, footer (xhtml Template) customization<a class="headerlink" href="#page-layout-header-footer-xhtml-template-customization" title="Permanent link">#</a></h3>
-<p>Templates refers to the common interface layout and style. For example, a same banner, logo in common header and copyright information in footer.</p>
+<p>Templates refers to the common interface layout and style. For example, a banner, logo in common header and copyright information in footer.</p>
 <ol>
 <li><code>mkdir -p /opt/jans/jetty/jans-auth/custom/pages/WEB-INF/incl/layout/</code>    </li>
 <li>Place a modified <code>template.xhtml</code> in the above location which will override the <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml">default template file</a> from the war</li>
 </ol>
-<h3 id="example-pages">Example pages:<a class="headerlink" href="#example-pages" title="Permanent link">#</a></h3>
-<p><a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth">Here</a> you will find several login pages for different authentication methods.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T14:26:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-16T06:54:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-16</span>
       
         <br>
         Created:
