@@ -3,6 +3,14 @@ tags:
   - administration
   - developer
   - customization
+  - internationalization 
+  - i18n
+  - locale
+  - css
+  - images
+  - header
+  - footer
+  - template
 ---
 
 All web pages are **xhtml** files.
@@ -14,7 +22,7 @@ All web pages are **xhtml** files.
 * Error page: [error.xhtml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/error.xhtml)
 
 ### To override default pages listed above:
-Put a modified `login.xhtml` or `authorize.xhtml` or `error.xhtml` or `logout.xhtml` under `/opt/gluu/jetty/jans-auth/custom/pages/`
+Put a modified `login.xhtml` or `authorize.xhtml` or `error.xhtml` or `logout.xhtml` under `/opt/jans/jetty/jans-auth/custom/pages/`
 
 ### Directory structure for customization
 ```
@@ -56,11 +64,11 @@ Resource bundle names to support other languages should be placed under the same
 
 ### Custom CSS files:
 
-1. Place the file in `/opt/gluu/jetty/jans-auth/custom/static/stylesheet/theme.css`
+1. Place the file in `/opt/jans/jetty/jans-auth/custom/static/stylesheet/theme.css`
 2. Reference it in .xhtml file using the URL `https://your.jans.server/jans-auth/ext/resources/stylesheet/theme.css` or `/jans-auth/ext/resources/stylesheet/theme.css`
 
 ### Custom image files:
-1. All images should be placed under `/opt/gluu/jetty/jans-auth/custom/static/img`
+1. All images should be placed under `/opt/jans/jetty/jans-auth/custom/static/img`
 2. Reference it in .xhtml file using the URL `https://your.jans.server/oxauth/ext/resources/img/fileName.png` or `/oxauth/ext/resources/img/fileName.jpg`
 
 ### Page layout, header, footer (xhtml Template) customization
