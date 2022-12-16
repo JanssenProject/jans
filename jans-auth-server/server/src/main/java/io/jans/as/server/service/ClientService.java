@@ -74,7 +74,22 @@ public class ClientService {
     private StaticConfiguration staticConfiguration;
 
     public void persist(Client client) {
+    	ignoreCustomObjectClassesForNonLDAP(client);
         ldapEntryManager.persist(client);
+    }
+
+
+    private Client ignoreCustomObjectClassesForNonLDAP(Client client) {
+        String persistenceType = ldapEntryManager.getPersistenceType();
+        log.debug("persistenceType: {}", persistenceType);
+        if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
+        	log.debug(
+                    "Setting CustomObjectClasses :{} to null as it's used only for LDAP and current persistenceType is {} ",
+                    client.getCustomObjectClasses(), persistenceType);
+            client.setCustomObjectClasses(null);
+        }
+
+        return client;
     }
 
     public void merge(Client client) {
