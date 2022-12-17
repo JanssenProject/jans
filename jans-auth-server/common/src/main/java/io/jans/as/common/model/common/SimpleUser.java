@@ -22,11 +22,11 @@ public class SimpleUser extends io.jans.orm.model.base.SimpleUser {
     public Object getAttribute(String attributeName, boolean optional, boolean multivalued) throws InvalidClaimException {
         Object attribute = null;
 
-        List<String> values = getAttributeValues(attributeName);
+        List<Object> values = getAttributeObjectValues(attributeName);
         if (values != null) {
             if (multivalued) {
                 JSONArray array = new JSONArray();
-                for (String v : values) {
+                for (Object v : values) {
                     array.put(v);
                 }
                 attribute = array;
