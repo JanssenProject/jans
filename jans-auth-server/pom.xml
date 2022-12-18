@@ -105,9 +105,6 @@
 		<module>persistence-model</module>
 		<module>test-model</module>
 		<module>client</module>
-
-		<module>client-fips</module>
-
 		<module>static</module>
 		<module>common</module>
 		<module>agama/engine</module>
