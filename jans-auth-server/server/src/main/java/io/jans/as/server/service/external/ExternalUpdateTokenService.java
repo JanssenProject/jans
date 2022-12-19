@@ -15,9 +15,10 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.service.custom.script.ExternalScriptService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.WebApplicationException;
 import org.jetbrains.annotations.NotNull;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.function.Function;
 
@@ -42,7 +43,10 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
             final boolean result = updateTokenType.modifyIdToken(jsonWebResponse, context);
             log.trace("Finished 'updateToken' method, script name: {}, jsonWebResponse: {}, context: {}, result: {}", script.getName(), jsonWebResponse, context, result);
 
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
@@ -84,7 +88,10 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
             final int result = updateTokenType.getRefreshTokenLifetimeInSeconds(context);
             log.trace("Finished 'getRefreshTokenLifetimeInSeconds' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
 
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
@@ -133,7 +140,10 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
             final boolean result = updateTokenType.modifyRefreshToken(refreshToken, context);
             log.trace("Finished 'modifyRefreshToken' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
 
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
@@ -167,7 +177,10 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
             final boolean result = updateTokenType.modifyAccessToken(accessToken, context);
             log.trace("Finished 'modifyAccessToken' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
 
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
@@ -201,7 +214,10 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
             final int result = updateTokenType.getAccessTokenLifetimeInSeconds(context);
             log.trace("Finished 'getAccessTokenLifetimeInSeconds' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
 
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
@@ -235,7 +251,10 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
             final int result = updateTokenType.getIdTokenLifetimeInSeconds(context);
             log.trace("Finished 'getIdTokenLifetimeInSeconds' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
 
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
