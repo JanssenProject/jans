@@ -32,7 +32,7 @@ The dynamic scope script implements the [DynamicScopeType](https://github.com/Ja
 |`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
 | `dynamicScopeContext` | [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/DynamicScopeExternalContext.java) |
 
-## Use case: Add dynamic scope with the `org_id` claim
+## Use case: Add dynamic scope with the `org_name` claim
 
 This script has been adapted from the Gluu Server [sample dynamic scope script](https://gluu.org/docs/gluu-server/4.4/admin-guide/sample-dynamic-script.py)
 
@@ -80,7 +80,7 @@ class DynamicScope(DynamicScopeType):
 
     def getApiVersion(self):
         return 1
-        
+
     def getSupportedClaims(self, configurationAttributes):
         return Arrays.asList("org_name")
 ```
