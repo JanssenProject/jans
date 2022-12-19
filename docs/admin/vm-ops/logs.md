@@ -24,44 +24,48 @@ The following log levels can be configured through the configuration CLI:
 ### Configuring Log Levels
 Use the following commands to get information on the logging module configuration:
 
-```bash
-$ /opt/jans/jans-cli/config-cli.py --info ConfigurationLogging
-# Log configuration operations
-Operation ID: get-config-logging
-  Description: Returns Jans Authorization Server logging settings.
-Operation ID: put-config-logging
-  Description: Updates Jans Authorization Server logging settings.
-  Schema: /components/schemas/LoggingConfiguration
-
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
-
-$ /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
-# Generic configuration schema
-{
-  "loggingLevel": "TRACE",
-  "loggingLayout": "json",
-  "httpLoggingEnabled": true,
-  "disableJdkLogger": false,
-  "enabledOAuthAuditLogging": true,
-  "externalLoggerConfiguration": null,
-  "httpLoggingExcludePaths": [
-    "/auth/img",
-    "/auth/stylesheet"
-  ]
-}
-
-$ /opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
-# Current log configuration
-{
-  "loggingLevel": "INFO",
-  "loggingLayout": "text",
-  "httpLoggingEnabled": false,
-  "disableJdkLogger": true,
-  "enabledOAuthAuditLogging": false,
-  "externalLoggerConfiguration": null,
-  "httpLoggingExcludePaths": null
-}
-```
+- To get the logging configuration operation ID: `/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging`
+  - Output would be: 
+    ```
+    # Log configuration operations
+    Operation ID: get-config-logging
+    Description: Returns Jans Authorization Server logging settings.
+    Operation ID: put-config-logging
+    Description: Updates Jans Authorization Server logging settings.
+    Schema: /components/schemas/LoggingConfiguration
+    ```
+- To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, 
+  for example `/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration`
+   - Output: 
+    ```
+    # Generic configuration schema
+     {
+       "loggingLevel": "TRACE",
+       "loggingLayout": "json",
+       "httpLoggingEnabled": true,
+       "disableJdkLogger": false,
+       "enabledOAuthAuditLogging": true,
+       "externalLoggerConfiguration": null,
+       "httpLoggingExcludePaths": [
+         "/auth/img",
+         "/auth/stylesheet"
+       ]
+     }
+    ``` 
+- Status of current configuration logging: `/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging`
+  - Output: 
+    ``` 
+      # Current log configuration
+      {
+        "loggingLevel": "INFO",
+        "loggingLayout": "text",
+        "httpLoggingEnabled": false,
+        "disableJdkLogger": true,
+        "enabledOAuthAuditLogging": false,
+        "externalLoggerConfiguration": null,
+        "httpLoggingExcludePaths": null
+      }
+    ```
 
 Let's assume we want to update logging configuration to `TRACE`. To do this, create a file `/tmp/log.json` with the following content:
 ```json
@@ -77,7 +81,7 @@ Let's assume we want to update logging configuration to `TRACE`. To do this, cre
 ```
 And use the PUT operation with this file as the payload:
 ```
-$ /opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log.json
+/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log.json
 ```
 The server will now have logs set to TRACE.
 
