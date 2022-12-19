@@ -20,7 +20,7 @@ This installation uses Gluu Testing certificate.
 ### Download Installer
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O install.py
+wget https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 ```
 
 ### Execute Installer

@@ -25,7 +25,7 @@ These environment variables can be set to customize installation as per the need
 Run this command to start the installation:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
+wget https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
 
 Console messages like below confirms the successful installation:

@@ -170,7 +170,7 @@ curl https://jans-ui.jans.io/.well-known/openid-configuration
 ### 2. Client creation
 
 Steps:
-1. Download this [json file](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/server/src/test/resources/feature/openid/clients/client.json), update the values and save it as client.json.
+1. Download this [json file](https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-config-api/server/src/test/resources/feature/openid/clients/client.json), update the values and save it as client.json.
 <br/>Few important fields to populate are `scope`,`responseTypes`,`redirectUris` (The only mandatory field), `grantTypes`
 1. Run curl command
 ```

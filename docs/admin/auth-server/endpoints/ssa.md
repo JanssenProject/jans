@@ -3,7 +3,7 @@
 The SSA is a JSON Web Token (JWT) containing client metadata and some custom attributes.
 
 You can check the following
-[Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/docs/swagger.yaml)
+[Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml)
 for more details of the endpoints.
 
 ## SSA Security
