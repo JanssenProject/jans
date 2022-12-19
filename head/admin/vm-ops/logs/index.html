@@ -10134,43 +10134,47 @@
 </table>
 <h3 id="configuring-log-levels">Configuring Log Levels<a class="headerlink" href="#configuring-log-levels" title="Permanent link">#</a></h3>
 <p>Use the following commands to get information on the logging module configuration:</p>
-<div class="highlight"><pre><span></span><code>$ /opt/jans/jans-cli/config-cli.py --info ConfigurationLogging
-<span class="c1"># Log configuration operations</span>
+<ul>
+<li>To get the logging configuration operation ID: <code>/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging</code></li>
+<li>Output would be: 
+    <div class="highlight"><pre><span></span><code># Log configuration operations
 Operation ID: get-config-logging
-  Description: Returns Jans Authorization Server logging settings.
+Description: Returns Jans Authorization Server logging settings.
 Operation ID: put-config-logging
-  Description: Updates Jans Authorization Server logging settings.
-  Schema: /components/schemas/LoggingConfiguration
-
-To get sample schema <span class="nb">type</span> /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, <span class="k">for</span> example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
-
-$ /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
-<span class="c1"># Generic configuration schema</span>
-<span class="o">{</span>
-  <span class="s2">&quot;loggingLevel&quot;</span>: <span class="s2">&quot;TRACE&quot;</span>,
-  <span class="s2">&quot;loggingLayout&quot;</span>: <span class="s2">&quot;json&quot;</span>,
-  <span class="s2">&quot;httpLoggingEnabled&quot;</span>: true,
-  <span class="s2">&quot;disableJdkLogger&quot;</span>: false,
-  <span class="s2">&quot;enabledOAuthAuditLogging&quot;</span>: true,
-  <span class="s2">&quot;externalLoggerConfiguration&quot;</span>: null,
-  <span class="s2">&quot;httpLoggingExcludePaths&quot;</span>: <span class="o">[</span>
-    <span class="s2">&quot;/auth/img&quot;</span>,
-    <span class="s2">&quot;/auth/stylesheet&quot;</span>
-  <span class="o">]</span>
-<span class="o">}</span>
-
-$ /opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
-<span class="c1"># Current log configuration</span>
-<span class="o">{</span>
-  <span class="s2">&quot;loggingLevel&quot;</span>: <span class="s2">&quot;INFO&quot;</span>,
-  <span class="s2">&quot;loggingLayout&quot;</span>: <span class="s2">&quot;text&quot;</span>,
-  <span class="s2">&quot;httpLoggingEnabled&quot;</span>: false,
-  <span class="s2">&quot;disableJdkLogger&quot;</span>: true,
-  <span class="s2">&quot;enabledOAuthAuditLogging&quot;</span>: false,
-  <span class="s2">&quot;externalLoggerConfiguration&quot;</span>: null,
-  <span class="s2">&quot;httpLoggingExcludePaths&quot;</span>: null
-<span class="o">}</span>
-</code></pre></div>
+Description: Updates Jans Authorization Server logging settings.
+Schema: /components/schemas/LoggingConfiguration
+</code></pre></div></li>
+<li>To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, 
+  for example <code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration</code></li>
+<li>Output: 
+    <div class="highlight"><pre><span></span><code># Generic configuration schema
+ {
+   &quot;loggingLevel&quot;: &quot;TRACE&quot;,
+   &quot;loggingLayout&quot;: &quot;json&quot;,
+   &quot;httpLoggingEnabled&quot;: true,
+   &quot;disableJdkLogger&quot;: false,
+   &quot;enabledOAuthAuditLogging&quot;: true,
+   &quot;externalLoggerConfiguration&quot;: null,
+   &quot;httpLoggingExcludePaths&quot;: [
+     &quot;/auth/img&quot;,
+     &quot;/auth/stylesheet&quot;
+   ]
+ }
+</code></pre></div></li>
+<li>Status of current configuration logging: <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging</code></li>
+<li>Output: 
+    <div class="highlight"><pre><span></span><code>  # Current log configuration
+  {
+    &quot;loggingLevel&quot;: &quot;INFO&quot;,
+    &quot;loggingLayout&quot;: &quot;text&quot;,
+    &quot;httpLoggingEnabled&quot;: false,
+    &quot;disableJdkLogger&quot;: true,
+    &quot;enabledOAuthAuditLogging&quot;: false,
+    &quot;externalLoggerConfiguration&quot;: null,
+    &quot;httpLoggingExcludePaths&quot;: null
+  }
+</code></pre></div></li>
+</ul>
 <p>Let's assume we want to update logging configuration to <code>TRACE</code>. To do this, create a file <code>/tmp/log.json</code> with the following content:
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TRACE&quot;</span><span class="p">,</span><span class="w"></span>
@@ -10183,7 +10187,7 @@ $ /opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 And use the PUT operation with this file as the payload:
-<div class="highlight"><pre><span></span><code>$ /opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log.json
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log.json
 </code></pre></div>
 The server will now have logs set to TRACE.</p>
 <h2 id="setup-logs">Setup Logs<a class="headerlink" href="#setup-logs" title="Permanent link">#</a></h2>
@@ -10270,7 +10274,7 @@ The server will now have logs set to TRACE.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-01T17:04:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-17T19:30:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-17</span>
       
         <br>
         Created:
