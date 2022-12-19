@@ -65,6 +65,7 @@
 		<module>client</module>
 		<module>service</module>
 		<module>server</module>
+		<module>server-fips</module>
 	</modules>
 	
 	<dependencyManagement>

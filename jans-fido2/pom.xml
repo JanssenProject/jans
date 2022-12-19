@@ -73,6 +73,7 @@
 		<module>model</module>
 		<module>client</module>
 		<module>server</module>
+		<module>server-fips</module>
 	</modules>
 	
 	<dependencyManagement>
