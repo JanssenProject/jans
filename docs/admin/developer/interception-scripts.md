@@ -28,7 +28,7 @@ customization of the authorization (or consent) process. By default, the OP will
 request authorization for each scope, and display the respective scope description.
 1. Update User
 1. [Client Registration](./scripts/client-registration.md): Allows implementing custom business logic during dynamic client registration, including validating SSA's and granting scopes.
-1. Dynamic scopes : Enables admin to generate scopes on the fly, for example by
+1. [Dynamic Scopes](./scripts/dynamic-scope.md) : Enables admin to generate scopes on the fly, for example by
 calling external APIs
 1. ID Generator
 1. Session Management
