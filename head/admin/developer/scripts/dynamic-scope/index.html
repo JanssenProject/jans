@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -5187,23 +5187,70 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#interface" class="md-nav__link">
+    Interface
   </a>
+  
+    <nav class="md-nav" aria-label="Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inherited-methods" class="md-nav__link">
+    Inherited Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-methods" class="md-nav__link">
+    New Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#objects" class="md-nav__link">
+    Objects
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#use-case-add-dynamic-scope-with-the-org_name-claim" class="md-nav__link">
+    Use case: Add dynamic scope with the org_name claim
   </a>
+  
+    <nav class="md-nav" aria-label="Use case: Add dynamic scope with the org_name claim">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-type-python" class="md-nav__link">
+    Script Type: Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#script-type-java" class="md-nav__link">
+    Script Type: Java
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -9894,23 +9941,70 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#interface" class="md-nav__link">
+    Interface
   </a>
+  
+    <nav class="md-nav" aria-label="Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inherited-methods" class="md-nav__link">
+    Inherited Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-methods" class="md-nav__link">
+    New Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#objects" class="md-nav__link">
+    Objects
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#use-case-add-dynamic-scope-with-the-org_name-claim" class="md-nav__link">
+    Use case: Add dynamic scope with the org_name claim
   </a>
+  
+    <nav class="md-nav" aria-label="Use case: Add dynamic scope with the org_name claim">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-type-python" class="md-nav__link">
+    Script Type: Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#script-type-java" class="md-nav__link">
+    Script Type: Java
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -9958,19 +10052,212 @@
 
   <h1>Dynamic Scope</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>The dynamic scope custom script allows the authorization server to generate a list of claims (and their values) on the fly, depending on circumstances such as the ID of the client requesting it, authenticated user's session parameters, values of other users' attributes, results of some calculations implementing specific business logic and/or requests to remote APIs or databases. Claims are then returned the usual way in a response to a call to the <code>/userinfo</code> endpoint. </p>
+<h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
+<p>The dynamic scope script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/scope/DynamicScopeType.java">DynamicScopeType</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
+<h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Method header</th>
+<th align="left">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+</tr>
+<tr>
+<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
+<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+</tr>
+<tr>
+<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-methods">New Methods<a class="headerlink" href="#new-methods" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Method header</th>
+<th align="left">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>def update(self, dynamicScopeContext, configurationAttributes)</code></td>
+<td align="left">Main dynamic scope method. Peforms any needed logic, updates JSON Web Token and returns True if dynamic scope was added successfully, false otherwise.</td>
+</tr>
+<tr>
+<td align="left"><code>def getSupportedClaims(self, configurationAttributes)</code></td>
+<td align="left">Returns an array of claims that are allowed to be added by the custom script</td>
+</tr>
+</tbody>
+</table>
+<h3 id="objects">Objects<a class="headerlink" href="#objects" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Object name</th>
+<th align="left">Object description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>customScript</code></td>
+<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+</tr>
+<tr>
+<td align="left"><code>configurationAttributes</code></td>
+<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+</tr>
+<tr>
+<td align="left"><code>SimpleCustomProperty</code></td>
+<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+</tr>
+<tr>
+<td align="left"><code>dynamicScopeContext</code></td>
+<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/DynamicScopeExternalContext.java">Reference</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="use-case-add-dynamic-scope-with-the-org_name-claim">Use case: Add dynamic scope with the <code>org_name</code> claim<a class="headerlink" href="#use-case-add-dynamic-scope-with-the-org_name-claim" title="Permanent link">#</a></h2>
+<p>This script has been adapted from the Gluu Server <a href="https://gluu.org/docs/gluu-server/4.4/admin-guide/sample-dynamic-script.py">sample dynamic scope script</a></p>
+<h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">java.util</span> <span class="kn">import</span> <span class="n">Arrays</span><span class="p">,</span> <span class="n">ArrayList</span>
+<span class="kn">from</span> <span class="nn">io.jans.model.custom.script.type.scope</span> <span class="kn">import</span> <span class="n">DynamicScopeType</span>
+
+
+<span class="k">class</span> <span class="nc">DynamicScope</span><span class="p">(</span><span class="n">DynamicScopeType</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Dynamic scope. Initialization&quot;</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Dynamic scope. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Dynamic scope. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Dynamic scope. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dynamicScopeContext</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Dynamic scope. Update method&quot;</span>
+
+        <span class="n">dynamicScopes</span> <span class="o">=</span> <span class="n">dynamicScopeContext</span><span class="o">.</span><span class="n">getDynamicScopes</span><span class="p">()</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">dynamicScopeContext</span><span class="o">.</span><span class="n">getUser</span><span class="p">()</span>
+        <span class="n">jsonToken</span> <span class="o">=</span> <span class="n">dynamicScopeContext</span><span class="o">.</span><span class="n">getJsonToken</span><span class="p">()</span>
+        <span class="n">claims</span> <span class="o">=</span> <span class="n">jsonToken</span><span class="o">.</span><span class="n">getClaims</span><span class="p">()</span>
+
+        <span class="c1"># Iterate through list of dynamic scopes in order to add custom scopes if needed</span>
+        <span class="nb">print</span> <span class="s2">&quot;Dynamic scope. Dynamic scopes:&quot;</span><span class="p">,</span> <span class="n">dynamicScopes</span>
+        <span class="k">for</span> <span class="n">dynamicScope</span> <span class="ow">in</span> <span class="n">dynamicScopes</span><span class="p">:</span>
+            <span class="c1"># Add organization name if there is scope = org_name</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">StringHelper</span><span class="o">.</span><span class="n">equalsIgnoreCase</span><span class="p">(</span><span class="n">dynamicScope</span><span class="p">,</span> <span class="s2">&quot;org_name&quot;</span><span class="p">)):</span>
+                <span class="n">claims</span><span class="o">.</span><span class="n">setClaim</span><span class="p">(</span><span class="s2">&quot;org_name&quot;</span><span class="p">,</span> <span class="s2">&quot;Test Value&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Add work phone if there is scope = work_phone</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">getSupportedClaims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Arrays</span><span class="o">.</span><span class="n">asList</span><span class="p">(</span><span class="s2">&quot;org_name&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Arrays</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.ArrayList</span><span class="p">;</span><span class="w"></span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.scope.DynamicScopeType</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.DynamicScopeExternalContext</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.model.token.JsonWebResponse</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.model.jwt.JwtClaims</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.util.StringHelper</span><span class="p">;</span><span class="w"></span>
+
+
+
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DynamicScope</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">DynamicScopeType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dyanmic Scope. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dyanmic Scope. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dynamic Scope. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dynamic Scope. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dynamic Scope. Destroying...&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dynamic Scope. Destroyed.&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">dynamicScopeContext</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dynamic Scope. Updating...&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">DynamicScopeExternalContext</span><span class="w"> </span><span class="n">dynamicContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">DynamicScopeExternalContext</span><span class="p">)</span><span class="w"> </span><span class="n">dynamicScopeContext</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dynamicScopes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="n">dynamicContext</span><span class="p">.</span><span class="na">getDynamicScopes</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">JsonWebResponse</span><span class="w"> </span><span class="n">jwt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dynamicContext</span><span class="p">.</span><span class="na">getJsonWebResponse</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">JwtClaims</span><span class="w"> </span><span class="n">claims</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jwt</span><span class="p">.</span><span class="na">getClaims</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Dynamic Scope. Dynamic scopes: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dynamicScopes</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">dynamicScope</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">dynamicScopes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringHelper</span><span class="p">.</span><span class="na">equalsIgnoreCase</span><span class="p">(</span><span class="n">dynamicScope</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;org_name&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">claims</span><span class="p">.</span><span class="na">setClaim</span><span class="p">(</span><span class="s">&quot;org_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Test Value&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="k">continue</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getSupportedClaims</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Arrays</span><span class="p">.</span><span class="na">asList</span><span class="p">(</span><span class="s">&quot;org_name&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-19T22:32:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-19</span>
       
         <br>
         Created:
