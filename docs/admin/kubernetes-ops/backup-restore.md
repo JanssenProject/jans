@@ -13,24 +13,50 @@ There are multiple methods for backing up jans server. One way is manually using
 
 ## Manual Backup and Restore
 
-Configmap backup:
+### Manual Backup
+1.  Configmap backup:
 ```bash
-kubectl get configmap -n <namespace> --field-selector metadata.name!=kube-root-ca.crt -o yaml > configmap-backup.yaml
+kubectl get configmap cn -n <namespace> -o yaml > configmap-backup.yaml
 ```
 
-Secret backup:
+2.  Secret backup:
 ```bash
-kubectl get secret -n <namespace> -o yaml > secret-backup.yaml
+kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 ```
 
-Configmap restore:
+3.  yaml configuration backup:
+```bash
+helm get manifest <release-name> -n <namespace> > values.yaml
+```
+
+4.  Keep note of installed chart version:
+
+```bash
+helm search repo <release-name> -l
+```
+
+
+### Manual Restore
+
+1.  Create namespace
+```bash
+kubectl create namespace <namespace>
+```
+
+2.  Configmap restore:
 ```bash
 kubectl create -f configmap-backup.yaml
 ```
 
-Secret restore:
+3.  Secret restore:
 ```bash
 kubectl create -f secret-backup.yaml
+```
+
+4.  Install jans using values.yaml with the same chart version:
+
+```bash
+helm install <release-name> janssen/janssen -f values.yaml --version=<backup-chart-verion> -n <namespace>
 ```
 
 ## Automatic Backup and Restore
