@@ -31,7 +31,6 @@ request authorization for each scope, and display the respective scope descripti
 1. Dynamic scopes : Enables admin to generate scopes on the fly, for example by
 calling external APIs
 1. ID Generator
-1. Cache Refresh
 1. Session Management
 1. SCIM
 1. Inrospection
