@@ -47,11 +47,10 @@ import io.jans.orm.model.AttributeData;
 @Priority(Interceptor.Priority.APPLICATION)
 public class RequestReaderInterceptor {
 
-    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
+    //private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
     private static final Logger LOG = LoggerFactory.getLogger(RequestReaderInterceptor.class);
 
-    private static final String[] IGNORE_METHODS = { "@jakarta.ws.rs.GET()", "@jakarta.ws.rs.DELETE()",
-            "@jakarta.ws.rs.OPTIONS()", "@jakarta.ws.rs.PATCH()" };
+    private static final String[] IGNORE_METHODS = {};
 
     @Context
     UriInfo info;
@@ -180,10 +179,10 @@ public class RequestReaderInterceptor {
             AuditLogConf auditLogConf = getAuditLogConf();
             LOG.error("RequestReaderInterceptor - auditLogConf:{}", auditLogConf);
             if (auditLogConf != null && auditLogConf.isEnabled()) {
-                AUDIT_LOG.info("====== Request for endpoint:{}, method:{}, from:{}, user:{}, data:{} ", info.getPath(),
+                LOG.info("====== Request for endpoint:{}, method:{}, from:{}, user:{}, data:{} ", info.getPath(),
                         context.getMethod(), request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"), obj);
                 Map<String, String> attributeMap = getAuditHeaderAttributes(auditLogConf);
-                AUDIT_LOG.error("attributeMap:{} ", attributeMap);
+                LOG.error("attributeMap:{} ", attributeMap);
             }
 
         } catch (Exception ex) {
@@ -196,7 +195,7 @@ public class RequestReaderInterceptor {
     private <T> void performAttributeDataConversion(T obj) {
         try {
             List<AttributeData> attributes = persistenceEntryManager.getAttributesList(obj);
-            AUDIT_LOG.error("RequestReaderInterceptor -  Data  for encoding -  attributes:{}", attributes);
+            LOG.error("RequestReaderInterceptor -  Data  for encoding -  attributes:{}", attributes);
         } catch (Exception ex) {
             ex.printStackTrace();
             LOG.error("Exception while data conversion:{}", ex.getMessage());
