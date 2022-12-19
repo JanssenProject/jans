@@ -39,7 +39,7 @@ This script has been adapted from the Gluu Server [sample dynamic scope script](
 ### Script Type: Python
 ```python
 from java.util import Arrays, ArrayList
-import io.jans.model.custom.script.type.scope.DynamicScopeType
+from io.jans.model.custom.script.type.scope import DynamicScopeType
 
 
 class DynamicScope(DynamicScopeType):
