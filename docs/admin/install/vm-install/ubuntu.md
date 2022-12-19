@@ -19,7 +19,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.ubuntu20.04_amd64.deb -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.ubuntu20.04_amd64.deb -P /tmp
 ```
 
 - Verify integrity of the downloaded package by verifying published `sha256sum`.   
@@ -27,13 +27,13 @@ wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.
     Download `sha256sum` file for the package
 
     ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.ubuntu20.04_amd64.deb.sha256sum -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.ubuntu20.04_amd64.deb.sha256sum -P /tmp
     ```
 
     Check the hash if it is matching. 
 
     ```shell
-    sha256sum -c jans_1.0.4.ubuntu20.04_amd64.deb.sha256sum
+    sha256sum -c /tmp/jans_1.0.4.ubuntu20.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
@@ -45,7 +45,7 @@ wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans_1.0.4.
 - Install the package
 
 ```
-apt install -y ~/jans_1.0.4.ubuntu20.04_amd64.deb
+apt install -y /tmp/jans_1.0.4.ubuntu20.04_amd64.deb
 ```
 
 ## Run the setup script
