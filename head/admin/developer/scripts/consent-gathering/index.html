@@ -8280,8 +8280,6 @@
           
         
           
-            
-          
         
       
       
@@ -9220,7 +9218,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../script-catalog/update_token/sample-script/" class="md-nav__link">
+      <a href="../../../../script-catalog/update_token/sample-script/README.md" class="md-nav__link">
         Update Token
       </a>
     </li>
@@ -9847,6 +9845,16 @@
         <span class="md-tag">scripts</span>
       
     
+      
+      
+        <span class="md-tag">ConsentGathering</span>
+      
+    
+      
+      
+        <span class="md-tag">ConsentGatheringType</span>
+      
+    
   </nav>
 
 
@@ -9860,7 +9868,7 @@
   <h1>Consent Gathering</h1>
 
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>OAuth 2.0 allows providers to prompt users for consent before releasing their personal information to a client (application). The standard consent process is binary: approve or deny. Using the consent gathering interception script, the consent flow can be customized to meet unique business requirements, for instance to support payment authorization, where you need to present transactional information, or where you need to step-up authentication to add security. </p>
+<p>OAuth 2.0 allows providers to prompt users for consent before releasing their personal information to a client (application). The standard consent process is binary: approve or deny. Using the consent gathering interception script, the consent flow can be customized to meet unique business requirements, for instance to support payment authorization, where you need to present transactional information, or where you need to step-up authentication to add security.</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
 <p>The consent gathering script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/ConsentGatheringType.java">ConsentGathering</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
@@ -9970,7 +9978,7 @@
         <span class="k">return</span> <span class="mi">11</span>
 
     <span class="c1"># All user entered values can be access via Map&lt;String, String&gt; context.getPageAttributes()</span>
-    <span class="k">def</span> <span class="nf">authorize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span> 
+    <span class="k">def</span> <span class="nf">authorize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Authorizing...&quot;</span>
 
         <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -10126,7 +10134,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-14T17:13:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-14</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-20T09:13:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-20</span>
       
         <br>
         Created:
