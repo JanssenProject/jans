@@ -31,10 +31,10 @@ request authorization for each scope, and display the respective scope descripti
 1. [Dynamic Scopes](./scripts/dynamic-scope.md) : Enables admin to generate scopes on the fly, for example by
 calling external APIs
 1. ID Generator
-1. [Update Token][Inrospection](./scripts/update-token)
+1. [Update Token](./scripts/update-token.md)
 1. Session Management
 1. SCIM
-1. [Inrospection](./scripts/introspection)
+1. [Introspection](./scripts/introspection.md)
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
