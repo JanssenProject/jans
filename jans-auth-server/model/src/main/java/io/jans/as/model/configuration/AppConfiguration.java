@@ -14,6 +14,7 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
+import io.jans.as.model.userinfo.UserInfoConfiguration;
 import io.jans.doc.annotation.DocProperty;
 
 import java.util.ArrayList;
@@ -811,6 +812,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Enable/Disable block authorizations that originate from Webview (Mobile apps).", defaultValue = "false")
     private Boolean blockWebviewAuthorizationEnabled = false;
+
+    @DocProperty(description = "UserInfo Configuration")
+    private UserInfoConfiguration userInfoConfiguration;
 
     public List<SsaValidationConfig> getDcrSsaValidationConfigs() {
         if (dcrSsaValidationConfigs == null) dcrSsaValidationConfigs = new ArrayList<>();
@@ -3095,5 +3099,13 @@ public class AppConfiguration implements Configuration {
 
     public void setBlockWebviewAuthorizationEnabled(Boolean blockWebviewAuthorizationEnabled) {
         this.blockWebviewAuthorizationEnabled = blockWebviewAuthorizationEnabled;
+    }
+
+    public UserInfoConfiguration getUserInfoConfiguration() {
+        return userInfoConfiguration;
+    }
+
+    public void setUserInfoConfiguration(UserInfoConfiguration userInfoConfiguration) {
+        this.userInfoConfiguration = userInfoConfiguration;
     }
 }
