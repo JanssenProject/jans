@@ -1,0 +1,36 @@
+Flow io.jans.agama.test.invocations
+    Basepath ""
+
+s = "agama"
+
+// invoke a method of a non-existing class
+| E = Call io.jans.dev#guru 1 2 3
+When E is null or E.class.name is not "java.lang.ClassNotFoundException"  
+    Finish false
+
+// invoke a method of non-parsable class
+| E = Call co.coo.Foo#new
+When E is null or E.class.name is not "groovy.util.ScriptException"  
+    Finish false
+
+// instance a known class using a non-existing constructor
+| E = Call java.lang.Object#new s
+When E is null or E.class.name is not "java.lang.InstantiationException"  
+    Finish false
+    
+// invoke an unknown method of a known class (java.lang.String)
+| E = Call s reverse
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
+    Finish false
+
+// invoke a known method passing less args than expected
+| E = Call s repeat
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
+    Finish false
+
+// invoke a known method passing more args than expected
+| E = Call java.lang.String#valueOf 1 "2" null false
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
+    Finish false
+
+Finish true
