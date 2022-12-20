@@ -18,6 +18,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -77,6 +78,10 @@ public class ActionService {
                         if (rex == null) rex = re;
                     } catch (ScriptException se) {
                         throw se;
+                    } catch (Exception ex) {
+                        //Sometimes ScriptException is not thrown when there are parsing problems,
+                        //wrapping it here...
+                        throw new ScriptException(ex);
                     }
                 }
                 
@@ -211,10 +216,21 @@ public class ActionService {
                 //from a Java call
                 Type parameterizedType = p.getParameterizedType();
                 String ptypeName = parameterizedType.getTypeName();
-                
-                //ptypeName and typeName are equal when there is no type information in the parameter
-                //(method signature). For instance: String[], List, MyBean (no parameterized types)
-                if (ptypeName.equals(typeName) && paramType.isInstance(arg)) { 
+
+                boolean straight = false;
+                if (paramType.isInstance(arg)) {
+                    //ptypeName and typeName are equal when there is no type information in the parameter
+                    //(method signature). For instance: String[], List, MyBean (no parameterized types)
+                    straight = ptypeName.equals(typeName);
+
+                    if (!straight && ParameterizedType.class.isInstance(parameterizedType)) {
+                        //make straight assignment if all type params are like <?,?,...>
+                        straight = Stream.of(((ParameterizedType) parameterizedType).getActualTypeArguments())
+                                .map(Type::getTypeName).allMatch("?"::equals);
+                    }
+                }
+
+                if (straight) {
                     javaArgs[i] = arg;
                 } else {
                     logger.warn("Trying to parse argument of class {} to {}", argClass.getCanonicalName(), ptypeName);

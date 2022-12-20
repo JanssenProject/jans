@@ -73,6 +73,8 @@ public class PrimitiveUtils {
             switch (prim) {
                 case BYTE:
                     return value.byteValue();
+                case DOUBLE:
+                    return value.doubleValue();
                 case FLOAT:
                     return value.floatValue();
                 case INTEGER:
