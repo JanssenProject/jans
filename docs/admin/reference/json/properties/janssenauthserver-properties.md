@@ -66,6 +66,7 @@ tags:
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
+| dateFormatterPattern | List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc. | [Details](#dateformatterpattern) |
 | dcrAuthorizationWithClientCredentials | Boolean value indicating if DCR authorization to be performed using client credentials | [Details](#dcrauthorizationwithclientcredentials) |
 | dcrAuthorizationWithMTLS | Boolean value indicating if DCR authorization allowed with MTLS | [Details](#dcrauthorizationwithmtls) |
 | dcrIssuers | List of DCR issuers | [Details](#dcrissuers) |
@@ -259,6 +260,7 @@ tags:
 | useHighestLevelScriptIfAcrScriptNotFound | Enable/Disable usage of highest level script in case ACR script does not exist | [Details](#usehighestlevelscriptifacrscriptnotfound) |
 | useLocalCache | Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds | [Details](#uselocalcache) |
 | useNestedJwtDuringEncryption | Boolean value specifying whether to use nested Jwt during encryption | [Details](#usenestedjwtduringencryption) |
+| userInfoConfiguration | UserInfo Configuration | [Details](#userinfoconfiguration) |
 | userInfoEncryptionAlgValuesSupported | This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionalgvaluessupported) |
 | userInfoEncryptionEncValuesSupported | This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionencvaluessupported) |
 | userInfoEndpoint | The User Info endpoint URL | [Details](#userinfoendpoint) |
@@ -764,6 +766,15 @@ tags:
 ### customHeadersWithAuthorizationResponse
 
 - Description: Choose whether to enable the custom response header parameter to return custom headers with the authorization response
+
+- Required: No
+
+- Default value: None
+
+
+### dateFormatterPattern
+
+- Description: List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc.
 
 - Required: No
 
@@ -2505,6 +2516,15 @@ tags:
 - Required: No
 
 - Default value: true
+
+
+### userInfoConfiguration
+
+- Description: UserInfo Configuration
+
+- Required: No
+
+- Default value: None
 
 
 ### userInfoEncryptionAlgValuesSupported
