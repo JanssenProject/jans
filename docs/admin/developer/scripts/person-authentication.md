@@ -33,7 +33,7 @@ Jans-auth server comprises of a number of beans, configuration files and Facelet
 
 ### A. Custom script
 The **PersonAuthenticationType** script is described by a java interface whose methods should be overridden to implement an authentication workflow.
-The [article](person-authentication-interface) talks about these methods in detail and the psuedo code for each method.
+The [article](./person-authentication-interface) talks about these methods in detail and the psuedo code for each method.
 
 ### B. UI pages:
 All web pages are **xhtml** files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.
