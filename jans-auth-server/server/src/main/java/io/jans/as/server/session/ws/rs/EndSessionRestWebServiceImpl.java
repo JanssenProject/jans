@@ -312,7 +312,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return null;
     }
 
-    private Jwt validateIdTokenHint(String idTokenHint, SessionId sidSession, String postLogoutRedirectUri) {
+    public Jwt validateIdTokenHint(String idTokenHint, SessionId sidSession, String postLogoutRedirectUri) {
         final boolean isIdTokenHintRequired = isTrue(appConfiguration.getForceIdTokenHintPrecense());
 
         if (isIdTokenHintRequired && StringUtils.isBlank(idTokenHint)) { // must be present for logout tests #1279
