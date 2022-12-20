@@ -44,7 +44,7 @@ class InstallOption:
 class SetupProfiles:
     JANS = 'jans'
     OPENBANKING   = 'openbanking'
-
+    DISA_STIG = 'disa-stig'
 
 COMPLETED = -99
 ERROR = -101

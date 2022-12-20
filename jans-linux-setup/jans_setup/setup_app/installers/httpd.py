@@ -172,6 +172,12 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.start()
 
     def write_httpd_config(self):
+
+        tls_versions = ['+TLSv1.2']
+        if hasattr(ssl, 'HAS_TLSv1_3') and ssl.HAS_TLSv1_3:
+            tls_versions.append('+TLSv1.3')
+        Config.templateRenderingDict['ssl_versions'] = ' '.join(tls_versions)
+
         self.update_rendering_dict()
         for tmp in (self.apache2_conf, self.apache2_ssl_conf, self.apache2_24_conf, self.apache2_ssl_24_conf):
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)

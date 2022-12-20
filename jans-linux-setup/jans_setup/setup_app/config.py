@@ -415,7 +415,8 @@ class Config:
             self.mapping_locations = { group: 'ldap' for group in self.couchbaseBucketDict }
 
         self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
+            'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'),
+            'jans_auth_client_noprivder_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar')
                 }
 
         Config.addPostSetupService = []

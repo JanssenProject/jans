@@ -41,7 +41,7 @@ parser.add_argument('-uninstall', help="Uninstall Jans server and removes all fi
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-yes', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
-parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
+parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking', 'disa-stig'], default='jans')
 parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
 parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
 parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))

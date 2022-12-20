@@ -276,7 +276,7 @@ class Crypto64:
 
         cmd = " ".join([Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
-                        "-cp", Config.non_setup_properties['oxauth_client_jar_fn'], 
+                        "-cp", Config.non_setup_properties['jans_auth_client_jar_fn'], 
                         Config.non_setup_properties['key_gen_path'],
                         "-keystore",
                         jks_path,
@@ -302,7 +302,7 @@ class Crypto64:
         cmd = " ".join([Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
-                        Config.non_setup_properties['oxauth_client_jar_fn'], 
+                        Config.non_setup_properties['jans_auth_client_jar_fn'], 
                         Config.non_setup_properties['key_export_path'],
                         "-keystore",
                         jks_path,

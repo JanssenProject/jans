@@ -107,13 +107,13 @@ class JansInstaller(BaseInstaller, SetupUtils):
             sys.exit(1)
 
         #Download jans-auth-client-jar-with-dependencies
-        if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
+        if not os.path.exists(Config.non_setup_properties['jans_auth_client_jar_fn']):
             oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
-            base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
+            base.download(oxauth_client_jar_url, Config.non_setup_properties['jans_auth_client_jar_fn'])
 
         self.logIt("Determining key generator path")
-        oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['oxauth_client_jar_fn'])
+        oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['jans_auth_client_jar_fn'])
 
         for f in oxauth_client_jar_zf.namelist():
             if os.path.basename(f) == 'KeyGenerator.class':
@@ -124,7 +124,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
 
         if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
-            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['oxauth_client_jar_fn']), True, True)
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['jans_auth_client_jar_fn']), True, True)
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
