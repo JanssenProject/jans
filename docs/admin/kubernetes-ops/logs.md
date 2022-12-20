@@ -172,23 +172,6 @@ fido2_log_level":"INFO",
 "persistence_log_target":"FILE"}'
 ```
 
-To override the current logging level in fido2, you can either change it directly using `kubectl edit` command, or add the desired changed to a yaml file and apply it using `helm`: 
-
-- Hack it - Change it directly:
-
-> **Warning**
-> This can cause the deployments to break, but if you wish you may edit it directly and restart the wanted deployment
-
-
-Edit using the following command: 
-```bash
-kubectl edit configmap <helm-release-name>-config-cm -n <namespace>
-```
-
-Restart the wanted deployment:
-```bash
-kubectl rollout restart deployment <fido2-deployment> -n <namespace>
-```
 
 To override the current logging level in fido2, you can either add the desired changes to a yaml file and apply it using `helm`, or
 change it directly using [kubectl edit](#hack-it) command:
@@ -244,24 +227,6 @@ ldap_stats_log_level":"INFO",
 "script_log_target":"FILE"}'
 ```
 
-To override the current logging level in scim, you can either change it directly using `kubectl edit` command, or add the desired changed to a yaml file and apply it using `helm`: 
-
-- Hack it - Change it directly:
-
-> **Warning**
-> This can cause the deployments to break, but if you wish you may edit it directly and restart the wanted deployment
-
-
-Edit using the following command: 
-```bash
-kubectl edit configmap <helm-release-name>-config-cm -n <namespace>
-```
-
-Restart the wanted deployment:
-```bash
-kubectl rollout restart deployment <scim-deployment> -n <namespace>
-```
-
 To override the current logging level in scim, you can either add the desired changes to a yaml file and apply it using `helm`, or
 change it directly using [kubectl edit](#hack-it) command:
 
@@ -298,7 +263,7 @@ kubectl logs <scim-pod> -n <namespace>
 ### Hack it
 
 > **Warning**
-> This can cause the deployments to break, but if you wish you may edit it directly and restart the wanted deployment
+> This can cause deployments to break, but if you wish you may edit it directly and restart the wanted deployment
 
 
 Edit using the following command: 
@@ -308,5 +273,5 @@ kubectl edit configmap <helm-release-name>-config-cm -n <namespace>
 
 Restart the wanted deployment:
 ```bash
-kubectl rollout restart deployment <scim-deployment> -n <namespace>
+kubectl rollout restart deployment <deployment-name> -n <namespace>
 ```
