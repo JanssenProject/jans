@@ -67,10 +67,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
     }
 
     public PagedResult<User> searchUsers(SearchRequest searchRequest) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Search Users with searchRequest:{}", escapeLog(searchRequest));
-        }
-
+        logger.debug("Search Users with searchRequest:{}", escapeLog(searchRequest));
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
@@ -87,7 +84,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
             }
             searchFilter = Filter.createORFilter(filters);
         }
-
+        logger.debug("Users searchFilter:{}", searchFilter);
         return persistenceEntryManager.findPagedEntries(getPeopleBaseDn(), User.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
