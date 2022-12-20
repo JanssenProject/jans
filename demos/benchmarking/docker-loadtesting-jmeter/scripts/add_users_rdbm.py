@@ -106,8 +106,8 @@ def load_users(interval):
     sql_cmds = []
     while start <= end:
         inum = str(uuid.uuid4()).upper()
-        name = user_id_prefix + str(start)
-        sn = user_id_prefix + '_sn' + str(start)
+        name = user_id_prefix + str(int(start))
+        sn = user_id_prefix + '_sn' + str(int(start))
         dn = 'inum={},ou=people,o=jans'.format(inum)
         username = name
         cn = name + ' ' + sn
@@ -138,6 +138,7 @@ def load_users(interval):
             cur.execute(cmd)
             conn.commit()
         except Exception as e:
+            logger.error(f"{cmd} did not execute!")
             logger.error(e)
     conn.close()
     logger.info("-------------------")
@@ -151,3 +152,7 @@ def main():
                                             user_split_parallel_threads)
     results = Parallel(n_jobs=-1, backend="multiprocessing")(
         map(delayed(load_users), user_numbers_intervals))
+
+
+if __name__ == "__main__":
+    main()
