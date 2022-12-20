@@ -62,23 +62,8 @@ CN_AUTH_APP_LOGGERS:
 }'
 ```
 
-To override the current logging level in auth-server, you can either change it directly using `kubectl edit` command, or add the desired changed to a yaml file and apply it using `helm`: 
-
-- Hack it - Change it directly:
-
-> **Warning**
-> This can cause the deployments to break, but if you wish you may edit it directly and restart the wanted deployment
-
-
-Edit using the following command: 
-```bash
-kubectl edit configmap <helm-release-name>-config-cm -n <namespace>
-```
-
-Restart the wanted deployment:
-```bash
-kubectl rollout restart deployment <auth-server-deployment> -n <namespace>
-```
+To override the current logging level in auth-server, you can either add the desired changes to a yaml file and apply it using `helm`, or
+change it directly using [kubectl edit](#hack-it) command:
 
 - Add changes to yaml:
 
@@ -136,23 +121,8 @@ config_api_log_level":"INFO",
 "script_log_target":"FILE"}'
 ```
 
-To override the current logging level in config-api, you can either change it directly using `kubectl edit` command or, add the desired changed to a yaml file and apply it using `helm`: 
-
-- Hack it - Change it directly:
-
-> **Warning**
-> This can cause the deployments to break, but if you wish you may edit it directly and restart the wanted deployment
-
-
-Edit using the following command: 
-```bash
-kubectl edit configmap <helm-release-name>-config-cm -n <namespace>
-```
-
-Restart the wanted deployment:
-```bash
-kubectl rollout restart deployment <auth-server-deployment> -n <namespace>
-```
+To override the current logging level in config-api, you can either add the desired changes to a yaml file and apply it using `helm`, or
+change it directly using [kubectl edit](#hack-it) command:
 
 - Add changes to yaml:
 
@@ -219,6 +189,9 @@ Restart the wanted deployment:
 ```bash
 kubectl rollout restart deployment <fido2-deployment> -n <namespace>
 ```
+
+To override the current logging level in fido2, you can either add the desired changes to a yaml file and apply it using `helm`, or
+change it directly using [kubectl edit](#hack-it) command:
 
 - Add changes to yaml:
 
@@ -289,6 +262,9 @@ Restart the wanted deployment:
 kubectl rollout restart deployment <scim-deployment> -n <namespace>
 ```
 
+To override the current logging level in scim, you can either add the desired changes to a yaml file and apply it using `helm`, or
+change it directly using [kubectl edit](#hack-it) command:
+
 - Add changes to yaml:
 
 add these changes to your `override.yaml` file:
@@ -317,4 +293,20 @@ helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
 View the logs of scim:
 ```bash
 kubectl logs <scim-pod> -n <namespace>
+```
+
+### Hack it
+
+> **Warning**
+> This can cause the deployments to break, but if you wish you may edit it directly and restart the wanted deployment
+
+
+Edit using the following command: 
+```bash
+kubectl edit configmap <helm-release-name>-config-cm -n <namespace>
+```
+
+Restart the wanted deployment:
+```bash
+kubectl rollout restart deployment <scim-deployment> -n <namespace>
 ```
