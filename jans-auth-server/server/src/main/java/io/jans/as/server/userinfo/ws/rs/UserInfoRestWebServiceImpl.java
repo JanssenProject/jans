@@ -69,12 +69,8 @@ import jakarta.ws.rs.core.SecurityContext;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Provides interface for User Info REST web services
@@ -366,7 +362,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     } else if (value instanceof Boolean) {
                         jsonWebResponse.getClaims().setClaim(key, (Boolean) value);
                     } else if (value instanceof Date) {
-                        jsonWebResponse.getClaims().setClaim(key, ((Date) value).getTime() / 1000);
+                        Date casteValue = (Date) value;
+                        Optional<String> optionalValue = getFormattedValueFromUserInfoConfiguration(key, casteValue);
+                        if (optionalValue.isPresent()) {
+                            jsonWebResponse.getClaims().setClaim(key, optionalValue.get());
+                        } else {
+                            jsonWebResponse.getClaims().setClaim(key, casteValue.getTime() / 1000);
+                        }
                     } else {
                         jsonWebResponse.getClaims().setClaim(key, String.valueOf(value));
                     }
@@ -448,5 +450,18 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         return false;
+    }
+
+    private Optional<String> getFormattedValueFromUserInfoConfiguration(String key, Date value) {
+        String patternValue = appConfiguration.getUserInfoConfiguration().getDateFormatterPattern().get(key);
+        if (patternValue != null) {
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(patternValue);
+                return Optional.of(simpleDateFormat.format(value));
+            } catch (Exception e) {
+                log.warn("Error during SimpleDateFormat instance: {}", e.getMessage());
+            }
+        }
+        return Optional.empty();
     }
 }
