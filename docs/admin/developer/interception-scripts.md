@@ -31,13 +31,13 @@ request authorization for each scope, and display the respective scope descripti
 1. [Dynamic Scopes](./scripts/dynamic-scope.md) : Enables admin to generate scopes on the fly, for example by
 calling external APIs
 1. ID Generator
+1. [Update Token][Inrospection](./scripts/update-token)
 1. Session Management
 1. SCIM
-1. Inrospection
+1. [Inrospection](./scripts/introspection)
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
-
 
 ## Implementation languages - Jython or pure Java
 
@@ -195,7 +195,9 @@ where <library_name> is the name of the library to install.
 
 ### Debugging a Jython script
 
-This [article](../interception-scripts-debug) covers the details.
+1. This [article](../interception-scripts-debug-ce) covers the details for debugging a script in a developer environment (CE).
+
+2. This [article](../interception-scripts-debug) covers the details for debugging a script in a CN environment.
 
 ***
 
@@ -256,7 +258,7 @@ The post-config-scripts and put-config-scripts require various details about the
 ### Basic schema of a custom script
 Command:
 
-`/opt/jans/jans-cli/config-cli.py --schema CustomScript`
+`/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript `
 
 Output:
 ```json
