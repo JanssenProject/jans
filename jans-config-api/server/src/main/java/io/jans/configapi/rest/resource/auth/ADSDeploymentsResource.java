@@ -87,8 +87,8 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
 
     @Operation(summary = "Deploy an Agama project.", description = "Deploy an Agama project.", operationId = "post-agama-dev-studio-prj", tags = {
     "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
-            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+            ApiAccessConstants.AGAMA_WRITE_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = "application/zip", schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-post.json"))),
     @ApiResponse(responseCode = "400", description = "Bad Request"),
@@ -117,8 +117,7 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
 
     @Operation(summary = "Delete a deployed Agama project.", description = "Delete a deployed Agama project.", operationId = "delete-agama-dev-studio-prj", tags = {
     "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
-            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+            ApiAccessConstants.AGAMA_DELETE_ACCESS }))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "204", description = "No Content"),
     @ApiResponse(responseCode = "400", description = "Bad Request"),
@@ -127,8 +126,8 @@ public class ADSDeploymentsResource extends ConfigBaseResource {
     @ApiResponse(responseCode = "409", description = "Conflict"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, 
-            superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, 
+            superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response undeploy(@QueryParam("name") String projectName) {
         
         if (projectName == null)
