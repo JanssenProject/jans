@@ -395,5 +395,10 @@
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
     "redirectUrisRegexEnabled": false,
     "useHighestLevelScriptIfAcrScriptNotFound": true,
-    "blockWebviewAuthorizationEnabled": false
+    "blockWebviewAuthorizationEnabled": false,
+    "userInfoConfiguration": {
+        "dateFormatterPattern": {
+            "birthdate": "yyyy-MM-dd"
+        }
+    }
 }
