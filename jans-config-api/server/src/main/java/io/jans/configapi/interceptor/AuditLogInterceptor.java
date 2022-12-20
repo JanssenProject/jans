@@ -86,7 +86,7 @@ public class AuditLogInterceptor {
                 AUDIT_LOG.info("====== Request for endpoint:{}, method:{}, from:{}, user:{}, data:{} ", info.getPath(),
                         context.getMethod(), request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"), obj);
                 Map<String, String> attributeMap = getAuditHeaderAttributes(auditLogConf);
-                AUDIT_LOG.error("attributeMap:{} ", attributeMap);
+                AUDIT_LOG.info("attributeMap:{} ", attributeMap);
             }
 
         } catch (Exception ex) {

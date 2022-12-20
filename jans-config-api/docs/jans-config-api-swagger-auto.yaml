@@ -211,8 +211,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/write-all
+        - https://jans.io/oauth/config/agama.delete
   /api/v1/ads-deployment/list:
     get:
       tags:
@@ -7298,19 +7297,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanAccess:
+        whitePagesCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
