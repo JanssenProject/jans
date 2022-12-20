@@ -174,9 +174,6 @@ public class BaseResource {
             count = 0;
         }
 
-        // SCIM searches are 1 indexed
-        startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
-
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }

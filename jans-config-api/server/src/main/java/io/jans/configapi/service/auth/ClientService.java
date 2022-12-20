@@ -20,6 +20,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.configapi.core.model.SearchRequest;
+import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -67,6 +68,9 @@ public class ClientService implements Serializable {
 
     @Inject
     transient AppConfiguration appConfiguration;
+    
+    @Inject
+    ConfigurationService configurationService;
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);
@@ -356,8 +360,11 @@ public class ClientService implements Serializable {
 
         // custom object class
         final String customOC = appConfiguration.getDynamicRegistrationCustomObjectClass();
-        if (StringUtils.isNotBlank(customOC)) {
+        String persistenceType = configurationService.getPersistenceType();
+        if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType) && StringUtils.isNotBlank(customOC)) {
             client.setCustomObjectClasses(new String[] { customOC });
+        }else {
+            client.setCustomObjectClasses(null);
         }
 
         // custom attributes (custom attributes must be in custom object class)

@@ -148,13 +148,21 @@ public class AgamaResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(minimize(flow, false)).build();
     }
 
+    @Operation(summary = "Determine if the text passed is valid Agama code", description = "Determine if the text passed is valid Agama code", operationId = "agama-syntax-check", tags = {
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agama Syntax Check message", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Exception.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path("/syntax-check/" + ApiConstants.QNAME_PATH)
     public Response doSyntaxCheck(@PathParam(ApiConstants.QNAME) String qname, String source) {
-        
+
         Exception e = null;
         try {
             Transpiler.runSyntaxCheck(qname, source);
@@ -167,7 +175,7 @@ public class AgamaResource extends ConfigBaseResource {
         return Response.ok().entity(e).build();
 
     }
-    
+
     @Operation(summary = "Create a new agama flow from source", description = "Create a new agama flow from source.", operationId = "post-agama-flow-from-source", tags = {
             "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.AGAMA_WRITE_ACCESS }))
@@ -313,6 +321,9 @@ public class AgamaResource extends ConfigBaseResource {
         Flow flow = null;
         try {
             flow = agamaFlowService.getFlowByName(flowName);
+            if (flow == null && throwError) {
+                throw new NotFoundException(getNotFoundError("Flow - '" + flowName + "'"));
+            }
         } catch (EntryPersistenceException e) {
             logger.error("No flow found with the name:{} ", flowName);
             if (throwError) {

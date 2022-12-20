@@ -13,6 +13,15 @@
             </Policies>
             <DefaultRolloverStrategy max="30" />
         </RollingFile>
+		
+        <RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
 
 		<RollingFile name="JANS_CONFIGAPI_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/configapi_persistence.log" filePattern="${sys:log.base}/logs/configapi_persistence-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
@@ -59,7 +68,10 @@
         <Logger name="io.jans.configapi" level="${log4j.default.log.level}">
             <AppenderRef ref="FILE" />
         </Logger>
-
+		
+		<Logger name="audit" level="INFO" additivity="false">
+            <AppenderRef ref="AUDIT_FILE" />
+        </Logger>
 
 		<Logger name="io.jans.orm" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_CONFIGAPI_PERSISTENCE_FILE" />

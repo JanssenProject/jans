@@ -36,6 +36,7 @@ public class ApiAppConfiguration implements Configuration {
     private List<String> userExclusionAttributes;
     private List<String> userMandatoryAttributes;
     private AgamaConfiguration agamaConfiguration;
+    private AuditLogConf auditLogConf;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -230,6 +231,14 @@ public class ApiAppConfiguration implements Configuration {
     public void setAgamaConfiguration(AgamaConfiguration agamaConfiguration) {
         this.agamaConfiguration = agamaConfiguration;
     }
+        
+    public AuditLogConf getAuditLogConf() {
+        return auditLogConf;
+    }
+
+    public void setAuditLogConf(AuditLogConf auditLogConf) {
+        this.auditLogConf = auditLogConf;
+    }
 
     @Override
     public String toString() {
@@ -246,6 +255,7 @@ public class ApiAppConfiguration implements Configuration {
                 + " , userExclusionAttributes="+ userExclusionAttributes
                 + " , userMandatoryAttributes="+ userMandatoryAttributes
                 + " , agamaConfiguration="+ agamaConfiguration
+                + " , auditLogConf="+ auditLogConf
                 + "]";
     }
 
