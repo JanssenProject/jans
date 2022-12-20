@@ -35,6 +35,7 @@ calling external APIs
 1. Session Management
 1. SCIM
 1. [Introspection](./scripts/introspection.md)
+1. [Post Authentication](./scripts/post-authentication.md)
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
