@@ -1629,6 +1629,70 @@
         }
       ]
     },
+	    {
+      "path": "/jans-config-api/api/v1/ads-deployment",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.43",
+              "name": "https://jans.io/oauth/config/agama.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.44",
+              "name": "https://jans.io/oauth/config/agama.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.44",
+              "name": "https://jans.io/oauth/config/agama.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.45",
+              "name": "https://jans.io/oauth/config/agama.delete"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.3",
+              "name": "https://jans.io/oauth/config/delete-all"
+            }
+          ]
+        }
+      ]
+    },
     {
       "path": "/jans-config-api/api/v1/jans-auth-server/session",
       "conditions": [

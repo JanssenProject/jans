@@ -183,9 +183,8 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
+        - https://jans.io/oauth/config/write-all
     delete:
       tags:
       - Agama - Developer Studio
@@ -212,9 +211,8 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
+        - https://jans.io/oauth/config/write-all
   /api/v1/ads-deployment/list:
     get:
       tags:
@@ -614,7 +612,11 @@ paths:
         - https://jans.io/oauth/config/agama.write
   /api/v1/agama/syntax-check/{qname}:
     post:
-      operationId: doSyntaxCheck
+      tags:
+      - Agama - Configuration
+      summary: Determine if the text passed is valid Agama code
+      description: Determine if the text passed is valid Agama code
+      operationId: agama-syntax-check
       parameters:
       - name: qname
         in: path
@@ -627,10 +629,21 @@ paths:
             schema:
               type: string
       responses:
-        default:
-          description: default response
+        "200":
+          description: Agama Syntax Check message
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+        - https://jans.io/oauth/config/agama.write
+        - https://jans.io/oauth/config/read-all
   /api/v1/agama/source/{qname}:
     put:
       tags:
@@ -7285,17 +7298,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
         userCanAccess:
-          type: boolean
-        adminCanAccess:
           type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -7633,6 +7646,8 @@ components:
         ttl:
           type: integer
           format: int32
+        displayName:
+          type: string
         authenticationMethod:
           type: string
           enum:
@@ -8456,6 +8471,8 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8492,8 +8509,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8787,13 +8802,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

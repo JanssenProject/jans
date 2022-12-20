@@ -613,7 +613,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	protected <T> Map<String, PropertyAnnotation> getAttributesMap(T entry, List<PropertyAnnotation> propertiesAnnotations,
 			boolean isIgnoreAttributesList) {
 		Map<String, PropertyAnnotation> attributes = new HashMap<String, PropertyAnnotation>();
-		LOG.error("BaseEntryManager::getAttributesMap() - entry:{}, propertiesAnnotations:{}, isIgnoreAttributesList:{}", entry, propertiesAnnotations, isIgnoreAttributesList);
+
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			String propertyName = propertiesAnnotation.getPropertyName();
 			Annotation ldapAttribute;
@@ -656,7 +656,6 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			return null;
 		}
 
-		LOG.error("BaseEntryManager::getAttributesMap() - attributes:{}", attributes);
 		return attributes;
 	}
 
@@ -1668,44 +1667,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		return attributeData;
 	}
-	
-	public List<AttributeData> getAttributesList(Object entry) {
-	    LOG.error("BaseEntryManager::getAttributesList() - entry:{}", entry);
-	    if (entry == null) {
-            throw new MappingException("Entry to persist is null");
-        }
-
-        // Check entry class
-        Class<?> entryClass = entry.getClass();
-        checkEntryClass(entryClass, false);
-        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-        LOG.error(String.format("BaseEntryManager::getAttributesList() - propertiesAnnotations: %s", propertiesAnnotations));
-        Object dnValue = getDNValue(entry, entryClass);
-
-        Integer expirationValue = getExpirationValue(entry, entryClass, false);
-
-        List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
-        LOG.error(String.format("BaseEntryManager::getAttributesList() - object attributes 1 : %s", attributes));
-        
-        // Add object classes
-        String[] objectClasses = getObjectClasses(entry, entryClass);
-        attributes.add(new AttributeData(OBJECT_CLASS, objectClasses, true));
-
-        LOG.error(String.format("BaseEntryManager::getAttributesList() - object attributes 2 : %s", attributes));
-        
-        List<AttributeData> attributesToPersist = getAttributesListForPersist(entry, propertiesAnnotations);
-        LOG.error(String.format("BaseEntryManager::getAttributesList() - list of attributes for persist: %s", attributesToPersist));
-        
-        Map<String, AttributeData> attributesToPersistMap = getAttributesMap(attributesToPersist);
-        LOG.error(String.format("BaseEntryManager::getAttributesList() - map of attributes for persist: %s", attributesToPersistMap));
-        
-        return attributes;
-	}
 
 	public List<AttributeData> getAttributeDataListFromCustomAttributesList(Object entry, AttributesList attributesList,
 			String propertyName) {
-	    
-	    LOG.error("BaseEntryManager::getAttributeDataListFromCustomAttributesList() - entry:{}, attributesList:{}, propertyName:{}", entry, attributesList, propertyName);
 		Class<?> entryClass = entry.getClass();
 		List<AttributeData> listAttributes = new ArrayList<AttributeData>();
 
@@ -1770,7 +1734,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				listAttributes.add(attribute);
 			}
 		}
-		LOG.error("BaseEntryManager::getAttributeDataListFromCustomAttributesList() - listAttributes:{}", listAttributes);
+
 		return listAttributes;
 	}
 
