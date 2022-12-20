@@ -3,10 +3,12 @@ tags:
   - administration
   - developer
   - scripts
+  - ConsentGathering
+  - ConsentGatheringType
 ---
 
 ## Overview
-OAuth 2.0 allows providers to prompt users for consent before releasing their personal information to a client (application). The standard consent process is binary: approve or deny. Using the consent gathering interception script, the consent flow can be customized to meet unique business requirements, for instance to support payment authorization, where you need to present transactional information, or where you need to step-up authentication to add security. 
+OAuth 2.0 allows providers to prompt users for consent before releasing their personal information to a client (application). The standard consent process is binary: approve or deny. Using the consent gathering interception script, the consent flow can be customized to meet unique business requirements, for instance to support payment authorization, where you need to present transactional information, or where you need to step-up authentication to add security.
 
 ## Interface
 The consent gathering script implements the [ConsentGathering](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/ConsentGatheringType.java) interface. This extends methods from the base script type in addition to adding new methods:
@@ -65,7 +67,7 @@ class ConsentGathering(ConsentGatheringType):
         return 11
 
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
-    def authorize(self, step, context): 
+    def authorize(self, step, context):
         print "Consent-Gathering. Authorizing..."
 
         if step == 1:
@@ -95,7 +97,7 @@ class ConsentGathering(ConsentGatheringType):
 
         if step == 2:
             pageAttributes = context.getPageAttributes()
-            
+
             # Generate random consent gathering request
             consentRequest = "Requested transaction #%s approval for the amount of sum $ %s.00" % ( random.randint(100000, 1000000), random.randint(1, 100) )
             pageAttributes.put("consent_request", consentRequest)
