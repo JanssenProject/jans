@@ -156,6 +156,10 @@ class EditUserDialog(JansGDialog, DialogUtils):
             self.edit_user_content.insert(2,
                     self.app.getTitledText(_("Password *"), name='userPassword', value='', style='class:script-titledtext', jans_help=self.app.get_help_from_schema(self.schema, 'userPassword'))
                 )
+        else :
+            self.edit_user_content.insert(2,  
+            self.app.getTitledText(_("Change Password"), name='userPassword', value='', style='class:script-titledtext', jans_help="Enter New Password")
+            )
 
         for ca in self.data.get('customAttributes', []):
 
