@@ -25,14 +25,12 @@ kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 ```
 
 3.  yaml configuration backup:
-```bash
-helm get manifest <release-name> -n <namespace> > values.yaml
-```
+
+Save the values.yaml that was used in the initial jans installation using helm
 
 4.  Keep note of installed chart version:
-
 ```bash
-helm search repo <release-name> -l
+helm show chart janssen/janssen | grep version: | awk '{print $2}' |  head -1
 ```
 
 
