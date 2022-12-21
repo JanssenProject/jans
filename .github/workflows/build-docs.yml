@@ -126,22 +126,21 @@ jobs:
          if [ ! -z "$VERSION" ]; then
           for module in $JVM_PROJECTS
            do
-             path=$module
              echo "Generating javadocs for module: $module and all it's sub-modules"
              mvn -f $module/pom.xml javadoc:javadoc
           
              echo "Move generated javadocs from all sub-modules to respective doc site location"
           
              echo "getting all sub-module names"
-             sub_modules=($( mvn help:evaluate -Dexpression=project.modules -q -DforceStdout | tail -n +2 | head -n -1 | sed 's/\s*<.*>\(.*\)<.*>/\1/'))
+             generated_doc_paths=( $( find $module -type d  -path '*/target/site/apidocs' | sed -r 's|/[^/]+$||' | sed -r 's|/[^/]+$||' | sed -r 's|/[^/]+$||'))
           
-             echo "Loop through sub-modules and move javadocs"
-             for sub_module in "${sub_modules[@]}"
+             echo "Loop through paths where javadoc got generated and move them to documentation site"
+             for source_path in "${generated_doc_paths[@]}"
              do
-               # check if the directory `docs/admin/reference/javadocs/$module/$sub_module` exists, if not then create one
-               mkdir -p docs/admin/reference/javadocs/$module/$sub_module
-               echo "copy javadocs for $module/$sub_module"
-               cp -rv ./$module/$sub_module/target/site/apidocs/* ./docs/admin/reference/javadocs/$module/$sub_module/
+               # check if the directory `docs/admin/reference/javadocs/$source_path` exists, if not then create one
+               mkdir -p docs/admin/reference/javadocs/$source_path
+               echo "copy javadocs for $source_path"
+               cp -rv ./$source_path/target/site/apidocs/* ./docs/admin/reference/javadocs/$source_path/
              done
            done
           cd docs
