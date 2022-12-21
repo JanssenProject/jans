@@ -118,13 +118,15 @@ public class ScriptUtils {
     public static Object callAction(Object instance, String actionClassName, String methodName,
             Object[] params) throws Exception {
         
-        return CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
-        //TODO: remove?
-        //if (Map.class.isInstance(value) && !NativeJavaMap.class.equals(value.getClass())) {
-        //    Scriptable scope = CdiUtil.bean(FlowService.class).getGlobalScope();
-        //    return new NativeJavaMap(scope, value);
-        //}
-        
+        try {
+            return CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
+        } catch (Exception e) {
+            LOG.warn("Exception raised when executing Call (method {}): {}. " +
+                "You can catch it in your Agama code and use the Log directive to print a stacktrace",
+                methodName, e.getMessage());                
+            throw e;
+        }
+
     }
 
     //Issue a call to this method only if the request scope is active
