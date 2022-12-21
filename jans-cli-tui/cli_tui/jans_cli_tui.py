@@ -62,20 +62,17 @@ from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from typing import TypeVar, Callable
 from prompt_toolkit.widgets import Button, Dialog, Label
-
-# -------------------------------------------------------------------------- #
 from cli import config_cli
 from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
-
 from cli_style import style
-
 import cli_style
-
 from utils.multi_lang import _
-# -------------------------------------------------------------------------- #
+from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
+from prompt_toolkit.keys import Keys
+
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -109,6 +106,7 @@ class JansCliApp(Application):
         self.cli_object_ok = False
         self.pbar_text = ""
         self.progressing_text = ""
+        self.mouse_float=True
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -380,6 +378,166 @@ class JansCliApp(Application):
         self.bindings.add('f1')(self.help)
         self.bindings.add('escape')(self.escape)
         self.bindings.add('s-up')(self.up)
+        self.bindings.add(Keys.Vt100MouseEvent)(self.mouse)
+
+
+
+    def mouse(self,event):  ### mouse: [<35;108;20M
+
+        pieces = event.data.split(";")  ##['LEFT', 'MOUSE_DOWN', '146', '10']
+        mouse_click=int(pieces[0][3:])
+        mouse_state=str(pieces[2][-1:])
+        x = int(pieces[1])
+        y = int(pieces[2][:-1])
+
+        mouse_event, x, y = map(int, [mouse_click,x,y])
+        m = mouse_state
+
+        mouse_event = {
+            (0, 'M'): MouseEventType.MOUSE_DOWN,
+            (0, 'm'): MouseEventType.MOUSE_UP,
+            (2, 'M'): MouseEventType.MOUSE_DOWN,
+            (2, 'm'): MouseEventType.MOUSE_UP,
+            (64, 'M'): MouseEventType.SCROLL_UP,
+            (65, 'M'): MouseEventType.SCROLL_DOWN,
+        }.get((mouse_event, m))
+
+        mouse_click = {
+            0: "LEFT",
+            2: "RIGHT"
+        }.get(mouse_click)
+
+
+        # ------------------------------------------------------------------------------------ #
+        # ------------------------------------------------------------------------------------ #
+        # ------------------------------------------------------------------------------------ #
+        res=[]
+        res.append(HTML('<style >{}</style>'.format("Copy")))
+        res.append("\n")        
+        res.append(HTML('<style >{}</style>'.format("Cut")))
+        res.append("\n")
+        res.append(HTML('<style >{}</style>'.format("Paste")))
+        res.append("\n")
+
+        content= Window(
+            content=FormattedTextControl(
+                text=merge_formatted_text(res),
+                focusable=True,
+            ), height=D())
+        floa=Float(content=content, left=x,top=y)
+        floa.name='mouse'
+        
+        # ------------------------------------------------------------------------------------ #
+        # ------------------------------------------------------------------------------------ #
+        # ------------------------------------------------------------------------------------ #
+
+        if mouse_click == "RIGHT" and mouse_event == MouseEventType.MOUSE_DOWN :
+            if self.mouse_float == True :
+                self.root_layout.floats.append(floa)
+                self.mouse_cord=(x,y)
+                self.mouse_float = False
+            else:
+                try:
+                    if get_app().layout.container.floats:
+                        if get_app().layout.container.floats[-1].name =='mouse':
+                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
+                            self.root_layout.floats.append(floa)
+                            self.mouse_cord=(x,y)
+                            self.mouse_float = False
+                        else:
+                            self.root_layout.floats.append(floa)
+                            self.mouse_cord=(x,y)
+                            self.mouse_float = False
+                    else:
+                        self.root_layout.floats.append(floa)
+                        self.mouse_cord=(x,y)
+                        self.mouse_float = False
+                except Exception as e:
+                    pass
+        
+        elif mouse_click == "LEFT" and mouse_event == MouseEventType.MOUSE_DOWN and self.mouse_float == False:
+            try:
+                if get_app().layout.container.floats:
+                    if get_app().layout.container.floats[-1].name =='mouse':
+                       
+                        if self.mouse_select =='Copy':
+                            data = get_app().current_buffer.copy_selection(False)
+                            get_app().clipboard.set_data(data) 
+                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
+                            self.mouse_float = True
+                           
+                        elif self.mouse_select =='Paste':
+                            data = get_app().clipboard.get_data()
+                            get_app().current_buffer.paste_clipboard_data(data)
+                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
+                            self.mouse_float = True
+
+                        elif self.mouse_select =='Cut':
+                            data = get_app().current_buffer.copy_selection(True)
+                            get_app().clipboard.set_data(data) 
+                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
+                            self.mouse_float = True
+                         
+                        else:
+                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
+                            self.mouse_float = True
+
+            except Exception as e:
+                pass
+        
+    
+        if get_app().layout.container.floats:
+            try :
+                get_float_name = get_app().layout.container.floats[-1].name 
+            except:
+                get_float_name = ''
+
+            if get_float_name =='mouse':
+                if self.mouse_cord[0] <= x and self.mouse_cord[0] >= x-5:
+                    if self.mouse_cord[1] == y-1:
+                        res = []
+                        res.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#00FF00', "Copy ")))
+                        res.append("\n")
+                        res.append(HTML('<style >{}</style>'.format("Cut")))
+                        res.append("\n")
+                        res.append(HTML('<style >{}</style>'.format("Paste")))
+                        res.append("\n")
+                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
+                        self.mouse_select = 'Copy' 
+                        
+                    elif self.mouse_cord[1] == y-2:
+                        res = []
+                        res.append(HTML('<style >{}</style>'.format("Copy")))
+                        res.append("\n")
+                        res.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#00FF00', "Cut  ")))
+                        res.append("\n")
+                        res.append(HTML('<style >{}</style>'.format("Paste")))
+                        res.append("\n")
+                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res)
+                        self.mouse_select = 'Cut'   
+                    
+                    elif self.mouse_cord[1] == y-3:
+                        res = []
+                        res.append(HTML('<style >{}</style>'.format("Copy")))
+                        res.append("\n")
+                        res.append(HTML('<style >{}</style>'.format("Cut")))
+                        res.append("\n")
+                        res.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#00FF00', "Paste")))
+                        res.append("\n")
+                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
+                        self.mouse_select = 'Paste'
+                    else:
+                        self.mouse_select = 'None'
+                else:
+                        res = []
+                        res.append(HTML('<style >{}</style>'.format("Copy")))
+                        res.append("\n")
+                        res.append(HTML('<style >{}</style>'.format("Cut")))
+                        res.append("\n")
+                        res.append(HTML('<style >{}</style>'.format("Paste")))
+                        res.append("\n")
+                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res)
+                        self.mouse_select = 'None'
 
     def up(self, ev: KeyPressEvent) -> None:
         get_app().layout.focus(Frame(self.nav_bar.nav_window))

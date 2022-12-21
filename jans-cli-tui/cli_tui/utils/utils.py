@@ -8,7 +8,8 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
 import sys
 
-from wui_components.jans_date_picker import DateSelectWidget
+sys.path.append("./")
+from cli_tui.wui_components.jans_date_picker import DateSelectWidget
 
 common_data = SimpleNamespace()
 
