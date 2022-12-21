@@ -39,16 +39,20 @@ sql_host = os.environ.get("RDBMS_HOST", "localhost")
 sql_db = os.environ.get("RDBMS_DB", "jans")
 sql_user = os.environ.get("RDBMS_USER", "jans")
 sql_password = os.environ.get("RDBMS_PASSWORD", "")
-qchar = ""
-schar = ""
+
+if db_type == 'pgsql':
+    qchar = '"'
+    schar = '\''
+
+elif db_type == 'mysql':
+    qchar = '`'
+    schar = '"'
 
 
 def connect():
     conn = None
     cur = None
     if db_type == 'pgsql':
-        qchar = '"'
-        schar = '\''
         conn = psycopg2.connect(user=sql_user,
                                 password=sql_password,
                                 host=sql_host,
@@ -57,8 +61,6 @@ def connect():
         cur = conn.cursor()
 
     elif db_type == 'mysql':
-        qchar = '`'
-        schar = '"'
         conn = pymysql.connect(host=sql_host,
                                user=sql_user,
                                password=sql_password,

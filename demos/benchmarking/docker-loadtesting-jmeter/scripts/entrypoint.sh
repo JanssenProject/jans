@@ -29,14 +29,14 @@ fi
 
 replace_all() {
   IFS='.' read -ra FQDN_PARTS <<< "$FQDN"
-  sed "s#FQDN#$FQDN#g" \
-    | sed "s#AUTHZ_CLIENT_ID#$AUTHZ_CLIENT_ID#g" \
+  sed "s#AUTHZ_CLIENT_ID#$AUTHZ_CLIENT_ID#g" \
     | sed "s#ROPC_CLIENT_ID#$ROPC_CLIENT_ID#g" \
     | sed "s#AUTHZ_CLIENT_SECRET#$AUTHZ_CLIENT_SECRET#g" \
     | sed "s#ROPC_CLIENT_SECRET#$ROPC_CLIENT_SECRET#g" \
     | sed "s#FQDN_PART1#${FQDN_PARTS[1]}#g" \
     | sed "s#FQDN_PART2#${FQDN_PARTS[2]}#g" \
     | sed "s#FQDN_PART3#${FQDN_PARTS[3]}#g" \
+    | sed "s#FQDN#$FQDN#g" \
     | sed "s#FIRST_BATCH_MIN#$FIRST_BATCH_MIN#g" \
     | sed "s#FIRST_BATCH_MAX#$FIRST_BATCH_MAX#g" \
     | sed "s#SECOND_BATCH_MIN#$SECOND_BATCH_MIN#g" \
@@ -52,7 +52,7 @@ if [[ "$RUN_AUTHZ_TEST" = "true" ]]
 then
   echo "Authentication code flow is activated."
   # Add -o modules.console.disable=true to disable TUI
-  bzt /scripts/tests/authorization_code_flow.jmx
+  bzt /scripts/authorization_code_flow.jmx
   exit 0
 fi
 
@@ -60,7 +60,7 @@ if [[ "$RUN_ROPC_TEST" = "true" ]]
 then
   echo "Resource owner password credential grant flow is activated."
   # Add -o modules.console.disable=true to disable TUI
-  bzt /scripts/tests/ropc.jmx
+  bzt /scripts/ropc.jmx
   exit 0
 fi
 

@@ -9,7 +9,7 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="host" elementType="Argument">
             <stringProp name="Argument.name">host</stringProp>
-            <stringProp name="Argument.value">https://FQDN</stringProp>
+            <stringProp name="Argument.value">FQDN</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="scope" elementType="Argument">
@@ -29,7 +29,7 @@
           </elementProp>
           <elementProp name="redirect_uri" elementType="Argument">
             <stringProp name="Argument.name">redirect_uri</stringProp>
-            <stringProp name="Argument.value">https://FQDN/</stringProp>
+            <stringProp name="Argument.value">https://FQDN</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="client_id" elementType="Argument">
