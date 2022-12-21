@@ -35,10 +35,10 @@ kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 
 4.  Keep note of installed chart version:
 ```bash
-helm list -n <namespace> | grep -oP '(?<=janssen- )[^ ]*'
+helm list -n <namespace>
 ```
 
-Repelace `janssen` with your `helm-release-name`
+Keep note of the chart version. For example: `1.0.5`
 
 ### Manual Restore
 
