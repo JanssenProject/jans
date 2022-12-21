@@ -38,7 +38,7 @@ kubectl get configmap -n <namespace> <helm-release-name>-config-cm -o yaml | gre
 To get the current log level of auth-server:
 
 ```bash
-kubectl get configmap -n <namespace> janssen-config-cm -o yaml | grep CN_AUTH_APP_LOGGERS 
+kubectl get configmap -n <namespace> <helm-release-name>-config-cm -o yaml | grep CN_AUTH_APP_LOGGERS 
 ```
 
 Example output:
@@ -94,7 +94,7 @@ helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
 
 View the logs of auth-server:
 ```bash
-kubectl logs <auth-server-pod> -n <namespace>
+kubectl logs -f deployment/<helm-release-name>-auth-server -n <namespace>
 ```
 
 
@@ -102,7 +102,7 @@ kubectl logs <auth-server-pod> -n <namespace>
 To get the current log level of config-api:
 
 ```bash
-kubectl get configmap -n <namspace> janssen-config-cm -o yaml | grep CN_CONFIG_API_APP_LOGGERS 
+kubectl get configmap -n <namspace> <helm-release-name>-config-cm -o yaml | grep CN_CONFIG_API_APP_LOGGERS 
 ```
 
 Example output:
@@ -151,7 +151,7 @@ helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
 
 View the logs of config-api:
 ```bash
-kubectl logs <config-api-pod> -n <namespace>
+kubectl logs -f deployment/<helm-release-name>-config-api -n <namespace>
 ```
 
 
@@ -159,7 +159,7 @@ kubectl logs <config-api-pod> -n <namespace>
 To get the current log level of fido2:
 
 ```bash
-kubectl get configmap -n <namespace> janssen-config-cm -o yaml | grep CN_FIDO2_APP_LOGGERS 
+kubectl get configmap -n <namespace> <helm-release-name>-config-cm -o yaml | grep CN_FIDO2_APP_LOGGERS 
 ```
 
 Example output:
@@ -200,7 +200,7 @@ helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
 
 View the logs of fido2:
 ```bash
-kubectl logs <fido2-pod> -n <namespace>
+kubectl logs -f deployment/<helm-release-name>-fido2 -n <namespace>
 ```
 
 
@@ -208,7 +208,7 @@ kubectl logs <fido2-pod> -n <namespace>
 To get the current log level of scim:
 
 ```bash
-kubectl get configmap -n <namespace> janssen-config-cm -o yaml | grep CN_SCIM_APP_LOGGERS 
+kubectl get configmap -n <namespace> <helm-release-name>-config-cm -o yaml | grep CN_SCIM_APP_LOGGERS 
 ```
 
 Example output:
@@ -257,7 +257,7 @@ helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
 
 View the logs of scim:
 ```bash
-kubectl logs <scim-pod> -n <namespace>
+kubectl logs -f deployment/<helm-release-name>-scim -n <namespace>
 ```
 
 ### Hack it
