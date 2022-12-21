@@ -21,7 +21,7 @@ from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
-from cli_tui.wui_components.jans_date_picker import DateSelectWidget
+from wui_components.jans_date_picker import DateSelectWidget
 from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
