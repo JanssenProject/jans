@@ -24,15 +24,21 @@ kubectl get configmap cn -n <namespace> -o yaml > configmap-backup.yaml
 kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 ```
 
-3.  yaml configuration backup:
+3.  Get the user supplied values:
 
-Save the values.yaml that was used in the initial jans installation using helm
+    Save the values.yaml that was used in the initial jans installation using helm.
+
+    In the event that the user supplied or override values yaml was lost, you can obtain it by executing the following command:
+    ```bash
+    helm get values <release name> -n <namespace>
+    ```
 
 4.  Keep note of installed chart version:
 ```bash
-helm show chart janssen/janssen | grep version: | awk '{print $2}' |  head -1
+helm list -n <namespace> | grep -oP '(?<=janssen- )[^ ]*'
 ```
 
+Repelace `janssen` with your `helm-release-name`
 
 ### Manual Restore
 
@@ -51,10 +57,10 @@ kubectl create -f configmap-backup.yaml
 kubectl create -f secret-backup.yaml
 ```
 
-4.  Install jans using values.yaml with the same chart version:
+4.  Insall jans using the override or user supplied values with the same chart version:
 
 ```bash
-helm install <release-name> janssen/janssen -f values.yaml --version=<backup-chart-verion> -n <namespace>
+helm install <release-name> janssen/janssen -f values.yaml --version=<backup-chart-version> -n <namespace>
 ```
 
 ## Automatic Backup and Restore
