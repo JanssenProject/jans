@@ -527,10 +527,6 @@ class Plugin(DialogUtils):
         self.app.logger.debug("type tbuffer="+str(type(tbuffer)))
         self.search_text=tbuffer.text
 
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['properties'])
-            return
-
         self.oauth_update_properties(0, tbuffer.text)
 
     def oauth_update_keys(self) -> None:
@@ -660,9 +656,6 @@ class Plugin(DialogUtils):
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['scopes'])
-            return
 
         self.oauth_get_scopes(pattern=tbuffer.text)
 
@@ -672,9 +665,6 @@ class Plugin(DialogUtils):
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.oauth_containers['clients'])
-            return
 
         self.oauth_update_clients(pattern=tbuffer.text)
 

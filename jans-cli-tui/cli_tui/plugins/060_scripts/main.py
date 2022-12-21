@@ -170,10 +170,7 @@ class Plugin():
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.scripts_main_area)
-            return
-
+ 
         self.get_scripts(pattern=tbuffer.text)
 
     def add_script_dialog(self, **kwargs: Any):
