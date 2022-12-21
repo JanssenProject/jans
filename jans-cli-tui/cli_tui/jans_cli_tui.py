@@ -22,6 +22,17 @@ pylib_dir = os.path.join(cur_dir, 'cli', 'pylib')
 if os.path.exists(pylib_dir):
     sys.path.insert(0, pylib_dir)
 
+no_tui = False
+if '--no-tui' in sys.argv:
+    sys.argv.remove('--no-tui')
+    no_tui = True
+
+from cli import config_cli
+
+if no_tui:
+    config_cli.main()
+    sys.exit()
+
 import prompt_toolkit
 from prompt_toolkit.application import Application
 from prompt_toolkit.application.current import get_app
@@ -62,7 +73,7 @@ from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from typing import TypeVar, Callable
 from prompt_toolkit.widgets import Button, Dialog, Label
-from cli import config_cli
+
 from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
