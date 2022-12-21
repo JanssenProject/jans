@@ -7297,19 +7297,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanView:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8470,17 +8470,10 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
+        userInfoConfiguration:
+          $ref: '#/components/schemas/UserInfoConfiguration'
         fapi:
           type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8508,6 +8501,15 @@ components:
             - STAT
             - PAR
             - SSA
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
     AuthenticationFilter:
       required:
       - baseDn
@@ -8698,6 +8700,13 @@ components:
           type: string
         sharedSecret:
           type: string
+    UserInfoConfiguration:
+      type: object
+      properties:
+        dateFormatterPattern:
+          type: object
+          additionalProperties:
+            type: string
     PersistenceConfiguration:
       type: object
       properties:
