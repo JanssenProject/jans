@@ -196,9 +196,6 @@ class Plugin(DialogUtils):
 
         if 'baseDn' not in dialog.data:
             user_info['userPassword'] = raw_data['userPassword']
-        else:
-            if raw_data['userPassword']:
-                user_info['userPassword'] = raw_data['userPassword']
 
         for key_ in ('inum', 'baseDn', 'dn'):
             if key_ in raw_data:
