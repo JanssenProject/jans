@@ -66,7 +66,7 @@ class Plugin():
 
     def get_scripts(
         self, 
-        start_index: Optional[int]= 1,
+        start_index: Optional[int]= 0,
         pattern: Optional[str]= '',
         ) -> None:
         """Get the current Scripts from server

@@ -103,7 +103,7 @@ class Plugin(DialogUtils):
 
         self.app.invalidate()
 
-    def get_users(self, start_index: int=1, pattern: Optional[str]='') -> None:
+    def get_users(self, start_index: int=0, pattern: Optional[str]='') -> None:
         """Gets Users from server.
         """
 
