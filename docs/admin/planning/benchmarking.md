@@ -61,6 +61,7 @@ justified.
    1. Response Types: ['code', 'id_token]
    1. Grant Types: ['authorization_code', `implicit`, 'refresh_token']
    1. Redirect Uri: valid redirect uri which is resolvable by machine which runs this load test
+   1. Set client trusted (`jansTrustedClnt: true`)
 1. Create users by pattern:
    1. username: `test_user1`, `test_user2`, ... `test_userN` 
    1. secret: `test_user_password`
