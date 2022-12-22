@@ -115,6 +115,10 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
+            <artifactId>jans-auth-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
             <artifactId>jans-core-timer-weld</artifactId>
         </dependency>
         <dependency>
@@ -127,6 +131,7 @@
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-servlet-initializer</artifactId>
         </dependency>
+
 
         <!-- Weld -->
         <dependency>

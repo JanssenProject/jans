@@ -16,10 +16,11 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
+import io.jans.fido2.service.u2f.RequestService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DeletableEntity;
 import io.jans.orm.search.filter.Filter;
@@ -62,6 +63,13 @@ public class CleanerTimer {
 	@Inject
 	private RegistrationPersistenceService registrationPersistenceService;
 
+    @Inject
+	@Named("u2fRequestService")
+	private RequestService u2fRequestService;
+
+    @Inject
+    private StaticConfiguration staticConfiguration;
+    
 	@Inject
 	private Event<TimerEvent> cleanerEvent;
 
@@ -157,11 +165,14 @@ public class CleanerTimer {
 
 	public Set<String> createCleanServiceBaseDns() {
 		final Set<String> cleanServiceBaseDns = Sets.newHashSet();
+		final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
 /*
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
 
 		log.debug("Built-in base dns: " + cleanServiceBaseDns);
 */
+		cleanServiceBaseDns.add(String.format("ou=registration_requests,%s", u2fBase));
+        cleanServiceBaseDns.add(String.format("ou=registered_devices,%s", u2fBase));
 		return cleanServiceBaseDns;
 	}
 

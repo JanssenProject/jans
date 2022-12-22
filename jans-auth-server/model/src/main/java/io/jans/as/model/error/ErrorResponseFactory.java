@@ -15,7 +15,7 @@ import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.Configuration;
-import io.jans.as.model.fido.u2f.U2fErrorResponseType;
+
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.ssa.SsaErrorResponseType;
@@ -187,9 +187,9 @@ public class ErrorResponseFactory implements Configuration {
                 list = messages.getUma();
             } else if (type instanceof UserInfoErrorResponseType) {
                 list = messages.getUserInfo();
-            } else if (type instanceof U2fErrorResponseType) {
+            } /*else if (type instanceof U2fErrorResponseType) {
                 list = messages.getFido();
-            } else if (type instanceof BackchannelAuthenticationErrorResponseType) {
+            }*/ else if (type instanceof BackchannelAuthenticationErrorResponseType) {
                 list = messages.getBackchannelAuthentication();
             } else if (type instanceof SsaErrorResponseType) {
                 list = messages.getSsa();

@@ -32,14 +32,13 @@ import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.common.model.session.SessionId;
-import io.jans.as.server.model.fido.u2f.DeviceRegistration;
-import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.service.fido.u2f.RequestService;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
+import io.jans.fido2.model.u2f.DeviceRegistration;
+import io.jans.fido2.model.u2f.RegisterRequestMessageLdap;
 import io.jans.model.ApplicationType;
 import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.orm.PersistenceEntryManager;
@@ -79,10 +78,7 @@ public class CleanerTimer {
     @Inject
     private CacheProvider cacheProvider;
 
-    @Inject
-    @Named("u2fRequestService")
-    private RequestService u2fRequestService;
-
+   
     @Inject
     private AppConfiguration appConfiguration;
 

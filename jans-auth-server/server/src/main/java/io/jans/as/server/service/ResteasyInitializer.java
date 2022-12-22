@@ -31,9 +31,6 @@ import io.jans.as.server.uma.ws.rs.UmaRptIntrospectionWS;
 import io.jans.as.server.uma.ws.rs.UmaScopeIconWS;
 import io.jans.as.server.uma.ws.rs.UmaScopeWS;
 import io.jans.as.server.userinfo.ws.rs.UserInfoRestWebServiceImpl;
-import io.jans.as.server.ws.rs.fido.u2f.U2fAuthenticationWS;
-import io.jans.as.server.ws.rs.fido.u2f.U2fConfigurationWS;
-import io.jans.as.server.ws.rs.fido.u2f.U2fRegistrationWS;
 import io.jans.as.server.ws.rs.stat.StatWS;
 
 import jakarta.ws.rs.ApplicationPath;
@@ -77,9 +74,6 @@ public class ResteasyInitializer extends Application {
         classes.add(UmaScopeIconWS.class);
         classes.add(UmaScopeWS.class);
 
-        classes.add(U2fConfigurationWS.class);
-        classes.add(U2fAuthenticationWS.class);
-        classes.add(U2fRegistrationWS.class);
 
         classes.add(CheckSessionStatusRestWebServiceImpl.class);
 
