@@ -183,8 +183,18 @@ nav:
         - 'Web Services': 'admin/vm-ops/web-services.md'
         - 'FAQ': 'admin/vm-ops/faq.md'
     - 'Configuration Guide':
-        - 'Config TUI': 'admin/config-guide/tui.md'
-        - 'Configuration CLI':
+        - 'Config API Server':
+            - 'admin/config-guide/config-api/README.md'
+            - 'Settings': 'admin/config-guide/config-api/settings.md'
+            - 'Attributes': 'admin/config-guide/config-api/attribute.md'
+            - 'OpenID Client': 'admin/config-guide/config-api/openid-client.md'
+            - 'Security': 'admin/config-guide/config-api/security.md'
+            - 'Logs': 'admin/config-guide/config-api/logs.md'
+            - 'Monitoring': 'admin/config-guide/config-api/monitoring.md'
+            - 'Plugins': 'admin/config-guide/config-api/plugins.md'
+        - 'CURL Guide': 'admin/config-guide/curl.md'
+        - 'Text User Interface (TUI)': 'admin/config-guide/tui.md'
+        - 'Command Line Interface (CLI)':
             - 'admin/config-guide/jans-cli/README.md'
             - 'Standalone Installation': 'admin/config-guide/jans-cli/install.md'
             - 'Attribute': 'admin/config-guide/jans-cli/cli-attribute.md'
@@ -204,7 +214,6 @@ nav:
             - 'SCIM User Resources': 'admin/config-guide/jans-cli/cli-user.md'
             - 'SCIM Group Management': 'admin/config-guide/jans-cli/cli-group.md'
             - 'Authentication via Device Flow': 'admin/config-guide/jans-cli/device-flow.md'
-        - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
     - 'Database Guide':
         - 'admin/reference/database/README.md'
@@ -441,15 +450,6 @@ nav:
         - 'Security Considerations': 'admin/scim/security.md'
         - 'Bulk Adding Users': 'admin/scim/bulk-users.md'
         - 'Adding Custom Attributes': 'admin/scim/custom-attributes.md'
-    - 'Config API Admin Guide':
-        - 'admin/config-api/README.md'
-        - 'Configuration': 'admin/config-api/config.md'
-        - 'Attributes': 'admin/config-api/attribute.md'
-        - 'OpenID Client': 'admin/config-api/openid-client.md'
-        - 'Security': 'admin/config-api/security.md'
-        - 'Logs': 'admin/config-api/logs.md'
-        - 'Monitoring': 'admin/config-api/monitoring.md'
-        - 'Plugins': 'admin/config-api/plugins.md'
     - 'Janssen Recipes':
         - 'admin/recipes/README.md'
         - 'Returning Group/Role User Information': 'admin/recipes/returning-group.md'
