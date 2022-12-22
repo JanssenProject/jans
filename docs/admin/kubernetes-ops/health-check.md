@@ -12,9 +12,9 @@ Health checks are used to determine if a container is working as it should or no
 
 Jans deployed components uses two types of probes:
 
-1.  Readiness probes: used to know when a container is ready to start accepting traffic
+1.  [Readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/): used to know when a container is ready to start accepting traffic
 
-2.  Liveness probes: used to know when to restart a container
+2.  [Liveness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/): used to know when to restart a container
 
 
 ## Jans Liveness and Readiness probes 
@@ -23,7 +23,7 @@ Here is a list of the liveness and readiness probes of the deployed jans compone
 
 ### Opendj 
 
-Opendj uses [healthckeck.py](https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py) in liveness probe.
+Opendj uses [healthcheck.py](https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py) in liveness probe.
 This python script connects to opendj to test its liveness.
 
 ```yaml
@@ -49,7 +49,7 @@ This python script connects to opendj to test its liveness.
 ```
 ### auth-server
 
-Auth-sever executes the python3 [healthckeck.py](https://github.com/JanssenProject/jans/blob/main/docker-jans-auth-server/scripts/healthcheck.py) in liveness and readiness probes.
+Auth-sever executes the python3 [healthcheck.py](https://github.com/JanssenProject/jans/blob/main/docker-jans-auth-server/scripts/healthcheck.py) in liveness and readiness probes.
 This python scripts parses the healthcheck endpoint to make sure the status is up.
 
 ```yaml
