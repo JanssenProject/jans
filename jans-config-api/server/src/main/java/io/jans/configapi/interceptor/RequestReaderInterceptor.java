@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.configapi.core.interceptor.RequestInterceptor;
 
-import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.annotation.Priority;
@@ -28,9 +27,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -44,13 +40,10 @@ import io.jans.orm.model.AttributeData;
 
 @Interceptor
 @RequestInterceptor
-@Priority(Interceptor.Priority.APPLICATION)
+@Priority(Interceptor.Priority.APPLICATION + 1)
 public class RequestReaderInterceptor {
 
-    //private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
     private static final Logger logger = LoggerFactory.getLogger(RequestReaderInterceptor.class);
-
-
     private static final String[] IGNORE_METHODS = {};
 
     @Context
@@ -74,16 +67,11 @@ public class RequestReaderInterceptor {
     @SuppressWarnings({ "all" })
     @AroundInvoke
     public Object aroundReadFrom(InvocationContext context) throws Exception {
-        System.out.println("\n\n\n RequestReaderInterceptor: entry -  request:{} " + request + "  info:{} " + info
-                + ". resourceInfo=" + resourceInfo + " , context:{} " + context + " , persistenceEntryManager"
-                + persistenceEntryManager + " \n\n\n");
-        logger.error("\n\n\n RequestReaderInterceptor: entry -  request:{} " + request + "  info:{} " + info
-                + ". resourceInfo=" + resourceInfo + " , context:{} " + context + " , persistenceEntryManager"
-                + persistenceEntryManager + " \n\n\n");
+        logger.error("\n\n\n RequestReaderInterceptor: entry -  info:{}, request:{}, httpHeaders:{}, resourceInfo:{}, persistenceEntryManager:{}",info, request, httpHeaders, resourceInfo, persistenceEntryManager);
         try {
             logger.error(
                     "======================= RequestReaderInterceptor Performing DataType Conversion ============================");
-            
+
             // context
             logger.error(
                     "======RequestReaderInterceptor - context.getClass():{}, context.getConstructor(), context.getContextData():{},  context.getMethod():{},  context.getParameters():{}, context.getTarget():{}, context.getInputStream():{} ",
@@ -132,7 +120,8 @@ public class RequestReaderInterceptor {
 
             if (context.getMethod().getAnnotations()[i] != null && Arrays.stream(IGNORE_METHODS)
                     .anyMatch(context.getMethod().getAnnotations()[i].toString()::equals)) {
-                logger.error("======RequestReaderInterceptor - context.getMethod() matched and hence will be ignored!!!!");
+                logger.error(
+                        "======RequestReaderInterceptor - context.getMethod() matched and hence will be ignored!!!!");
                 return true;
             }
         }
@@ -169,36 +158,12 @@ public class RequestReaderInterceptor {
                         clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                // Audit log
-                
-                logAuditData(context, obj);
-
                 if (!clazz.isPrimitive()) {
                     performAttributeDataConversion(obj);
                     logger.error("RequestReaderInterceptor final - obj -  obj:{} ", obj);
                 }
             }
         }
-    }
-
-    private <T> void logAuditData(InvocationContext context, T obj) {
-        logger.error("RequestReaderInterceptor -  Audit Log data  request:{}, httpHeaders:{}, resourceInfo:{} ", request,
-                httpHeaders, resourceInfo);
-        try {
-            AuditLogConf auditLogConf = getAuditLogConf();
-            logger.error("RequestReaderInterceptor - auditLogConf:{}", auditLogConf);
-            if (auditLogConf != null && auditLogConf.isEnabled()) {
-                logger.info("====== Request for endpoint:{}, method:{}, from:{}, user:{}, data:{} ", info.getPath(),
-                        context.getMethod(), request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"), obj);
-                Map<String, String> attributeMap = getAuditHeaderAttributes(auditLogConf);
-                logger.error("attributeMap:{} ", attributeMap);
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error("Exception while data conversion:{}", ex.getMessage());
-        }
-
     }
 
     private <T> void performAttributeDataConversion(T obj) {
@@ -210,29 +175,6 @@ public class RequestReaderInterceptor {
             logger.error("Exception while data conversion:{}", ex.getMessage());
         }
 
-    }
-
-    private AuditLogConf getAuditLogConf() {
-        return this.authUtil.getAuditLogConf();
-    }
-
-    private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf) {
-        logger.error("AuditLogConfig:{} ", auditLogConf);
-        if (auditLogConf == null) {
-            return Collections.emptyMap();
-        }
-        List<String> attributes = auditLogConf.getHeaderAttributes();
-        logger.error("AuditHeaderAttributes:{} ", attributes);
-        Map<String, String> attributeMap = null;
-        if (attributes != null && !attributes.isEmpty()) {
-            attributeMap = new HashMap<>();
-            for (String attributeName : attributes) {
-                logger.error("attributeName:{} ", attributeName);
-                String attributeValue = httpHeaders.getHeaderString(attributeName);
-                attributeMap.put(attributeName, attributeValue);
-            }
-        }
-        return attributeMap;
     }
 
 }

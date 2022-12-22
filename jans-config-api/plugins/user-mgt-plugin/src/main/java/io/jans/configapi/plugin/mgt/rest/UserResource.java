@@ -2,7 +2,6 @@ package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -56,13 +55,8 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private class UserPagedResult extends PagedResult<CustomUser>{};
 
-
-
     @Inject
     Logger logger;
-
-    @Inject
-    EncryptionService encryptionService;
 
     @Inject
     MgtUtil mgtUtil;

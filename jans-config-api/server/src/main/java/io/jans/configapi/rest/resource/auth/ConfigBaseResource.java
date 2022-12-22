@@ -7,6 +7,8 @@
 package io.jans.configapi.rest.resource.auth;
 
 import io.jans.configapi.core.rest.BaseResource;
+import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
+import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 
@@ -18,6 +20,8 @@ import org.slf4j.Logger;
  * @author Mougang T.Gasmyr
  *
  */
+@RequestAuditInterceptor
+@RequestInterceptor
 public class ConfigBaseResource extends BaseResource {
 
     @Inject

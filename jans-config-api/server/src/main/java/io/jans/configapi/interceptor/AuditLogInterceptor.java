@@ -36,6 +36,7 @@ import jakarta.interceptor.InvocationContext;
 public class AuditLogInterceptor {
 
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
+    private static final Logger LOG = LoggerFactory.getLogger(AuditLogInterceptor.class);
 
     @Context
     UriInfo info;
@@ -52,8 +53,7 @@ public class AuditLogInterceptor {
     @SuppressWarnings({ "all" })
     @AroundInvoke
     public Object aroundReadFrom(InvocationContext context) throws Exception {
-        System.out.println("\n\n SOP - AuditLogInterceptor::aroundReadFrom() - context = "+context);
-        AUDIT_LOG.info("\n\n AuditLogInterceptor::aroundReadFrom() - context:{}", context);
+        LOG.info("Audit Log Interceptor - context:{}", context);
         try {
             processRequest(context);
 
@@ -64,20 +64,21 @@ public class AuditLogInterceptor {
     }
 
     private void processRequest(InvocationContext context) {
-        System.out.println("\n\n SOP - AuditLogInterceptor::processRequest() - context = "+context);
-        AUDIT_LOG.info("\n\n AuditLogInterceptor::processRequest() - context:{}", context);
+        LOG.info("Audit Log Interceptor process - context:{}", context);
         Object[] ctxParameters = context.getParameters();
         Method method = context.getMethod();
         Class[] clazzArray = method.getParameterTypes();
-        
-        System.out.println("\n\n SOP - AuditLogInterceptor::processRequest() - ctxParameters ="+ctxParameters+", method ="+method+" , clazzArray = "+clazzArray);
-        AUDIT_LOG.info("\n\n AuditLogInterceptor::processRequest() - ctxParameters:{}, method:{}, clazzArray:{}", ctxParameters, method, clazzArray);
+
+        LOG.debug("Audit Log Interceptor process - ctxParameters:{}, method:{}, clazzArray:{}", ctxParameters, method,
+                clazzArray);
+        AUDIT_LOG.info("\n Audit Log Interceptor process - ctxParameters:{}, method:{}, clazzArray:{}", ctxParameters,
+                method, clazzArray);
+
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
 
                 Object obj = ctxParameters[i];
-                System.out.println("\n\n SOP - AuditLogInterceptor::processRequest() - obj ="+obj);
-                AUDIT_LOG.info("\n\n AuditLogInterceptor::processRequest() - obj:{}", obj);
+                LOG.info("Request obj:{}", obj);
                 // Audit log
                 logAuditData(context, obj);
 
@@ -87,15 +88,13 @@ public class AuditLogInterceptor {
 
     private <T> void logAuditData(InvocationContext context, T obj) {
         try {
+
+            // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
-            System.out.println("\n\n SOP - AuditLogInterceptor::logAuditData() - auditLogConf ="+auditLogConf);
-            AUDIT_LOG.info("\n\n AuditLogInterceptor::logAuditData() - auditLogConf:{}", auditLogConf);
+            LOG.info("auditLogConf:{}", auditLogConf);
             if (auditLogConf != null && auditLogConf.isEnabled()) {
-                System.out.println("\n\n SOP - AuditLogInterceptor::logAuditData() - endpoint ="+info.getPath()+" , method = "+context.getMethod()+", from = "+request.getRemoteAddr()+" , user = "+httpHeaders.getHeaderString("User-inum")+" , data = "+obj);
                 AUDIT_LOG.info("====== Request for endpoint:{}, method:{}, from:{}, user:{}, data:{} ", info.getPath(),
                         context.getMethod(), request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"), obj);
-                Map<String, String> attributeMap = getAuditHeaderAttributes(auditLogConf);
-                AUDIT_LOG.info("attributeMap:{} ", attributeMap);
             }
 
         } catch (Exception ex) {
@@ -109,14 +108,12 @@ public class AuditLogInterceptor {
     }
 
     private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf) {
-        System.out.println("\n\n SOP - AuditLogInterceptor::getAuditHeaderAttributes() - auditLogConf ="+auditLogConf);
-        AUDIT_LOG.info("\n\n AuditLogInterceptor::getAuditHeaderAttributes() - auditLogConf:{}", auditLogConf);
+        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - auditLogConf:{}", auditLogConf);
         if (auditLogConf == null) {
             return Collections.emptyMap();
         }
         List<String> attributes = auditLogConf.getHeaderAttributes();
-        System.out.println("\n\n SOP - AuditLogInterceptor::getAuditHeaderAttributes() - attributes ="+attributes);
-        AUDIT_LOG.info("\n\n AuditLogInterceptor::getAuditHeaderAttributes() - attributes:{}", attributes);
+        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - attributes:{}", attributes);
         Map<String, String> attributeMap = null;
         if (attributes != null && !attributes.isEmpty()) {
             attributeMap = new HashMap<>();
@@ -126,8 +123,8 @@ public class AuditLogInterceptor {
                 attributeMap.put(attributeName, attributeValue);
             }
         }
-        System.out.println("\n\n SOP - AuditLogInterceptor::getAuditHeaderAttributes() - attributeMap ="+attributeMap);
-        AUDIT_LOG.info("\n\n AuditLogInterceptor::getAuditHeaderAttributes() - attributeMap:{}", attributeMap);
+        AUDIT_LOG.info("attributeMap:{} ", attributeMap);
+        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - attributeMap:{}", attributeMap);
         return attributeMap;
     }
 
