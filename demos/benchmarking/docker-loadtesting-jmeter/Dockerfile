@@ -16,7 +16,7 @@ RUN apt-get update \
 # Environmental Variables
 # ===============
 
-ENV FQDN="https://example.jans.io" \
+ENV FQDN="https://demoexample.jans.io" \
     AUTHZ_CLIENT_ID="" \
     AUTHZ_CLIENT_SECRET="" \
     ROPC_CLIENT_ID="" \
@@ -28,6 +28,7 @@ ENV FQDN="https://example.jans.io" \
     RUN_AUTHZ_TEST=false \
     RUN_ROPC_TEST=false \
     TEST_USERS_PREFIX_STRING="test_user" \
+    THREADCOUNT=200 \
     COUCHBASE_URL="" \
     COUCHBASE_PW="" \
     USER_NUMBER_STARTING_POINT=0 \

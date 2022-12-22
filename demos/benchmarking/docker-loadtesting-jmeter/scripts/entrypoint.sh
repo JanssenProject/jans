@@ -41,6 +41,7 @@ replace_all() {
     | sed "s#FIRST_BATCH_MAX#$FIRST_BATCH_MAX#g" \
     | sed "s#SECOND_BATCH_MIN#$SECOND_BATCH_MIN#g" \
     | sed "s#SECOND_BATCH_MAX#$SECOND_BATCH_MAX#g" \
+    | sed "s#THREADCOUNT#$THREADCOUNT#g" \
     | sed "s#TEST_USERS_PREFIX_STRING#$TEST_USERS_PREFIX_STRING#g"
 
 }

@@ -19,12 +19,12 @@
           </elementProp>
           <elementProp name="username" elementType="Argument">
             <stringProp name="Argument.name">username</stringProp>
-            <stringProp name="Argument.value">admin</stringProp>
+            <stringProp name="Argument.value">user1</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="password" elementType="Argument">
             <stringProp name="Argument.name">password</stringProp>
-            <stringProp name="Argument.value">7IiUu*5/HA8H</stringProp>
+            <stringProp name="Argument.value">topsecret</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="redirect_uri" elementType="Argument">
@@ -76,16 +76,15 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">200</stringProp>
+        <stringProp name="ThreadGroup.num_threads">THREADCOUNT</stringProp>
         <stringProp name="ThreadGroup.ramp_time">10</stringProp>
         <longProp name="ThreadGroup.start_time">1479823133000</longProp>
         <longProp name="ThreadGroup.end_time">1479823133000</longProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
         <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Simple Controller" enabled="true"/>
@@ -185,7 +184,7 @@
               <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="RegExp username fieldname Extractor" enabled="true">
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="RegExp username fieldname Extractor" enabled="false">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">usernameField</stringProp>
               <stringProp name="RegexExtractor.regex">&lt;input id=&quot;loginForm:username&quot; name=&quot;(.+?)&quot; type=&quot;text&quot;</stringProp>
@@ -194,7 +193,7 @@
               <stringProp name="RegexExtractor.match_number">1</stringProp>
             </RegexExtractor>
             <hashTree/>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="RegExp password fieldname Extractor" enabled="true">
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="RegExp password fieldname Extractor" enabled="false">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">userpasswordField</stringProp>
               <stringProp name="RegexExtractor.regex">&lt;input id=&quot;loginForm:password&quot; name=&quot;(.+?)&quot; type=&quot;password&quot;</stringProp>
@@ -339,9 +338,11 @@
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script">double weight = 0.7d;
 
+// 10%
 int min = FIRST_BATCH_MIN;
 int max = FIRST_BATCH_MAX;
 
+// 90%
 int minX = SECOND_BATCH_MIN;
 int maxX = SECOND_BATCH_MAX;
 
@@ -910,7 +911,6 @@ for (int i = 0; i &lt; collectionProperty.size(); i++) {
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay">3</stringProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
         <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
@@ -1168,7 +1168,6 @@ for (Map.Entry entry : props.entrySet()) {
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
         <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
