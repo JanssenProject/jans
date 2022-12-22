@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#key-generation" class="md-skip">
           Skip to content
         </a>
       
@@ -3148,6 +3148,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Key Generation
@@ -3164,6 +3166,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -3172,23 +3176,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#generating-cryptographic-keys" class="md-nav__link">
+    Generating Cryptographic Keys
+  </a>
+  
+    <nav class="md-nav" aria-label="Generating Cryptographic Keys">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backup" class="md-nav__link">
+    Backup
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#key-generate" class="md-nav__link">
+    Key Generate
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8643,6 +8653,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8651,23 +8663,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#generating-cryptographic-keys" class="md-nav__link">
+    Generating Cryptographic Keys
+  </a>
+  
+    <nav class="md-nav" aria-label="Generating Cryptographic Keys">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backup" class="md-nav__link">
+    Backup
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#key-generate" class="md-nav__link">
+    Key Generate
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8713,21 +8731,46 @@
   </a>
 
 
-  <h1>Key Generation</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h1 id="key-generation">Key Generation<a class="headerlink" href="#key-generation" title="Permanent link">#</a></h1>
+<h2 id="generating-cryptographic-keys">Generating Cryptographic Keys<a class="headerlink" href="#generating-cryptographic-keys" title="Permanent link">#</a></h2>
+<p>The Jans Server is compatible with the <a href="https://docs.oracle.com/javase/7/docs/api/javax/crypto/KeyGenerator.html">Java KeyGenerator</a> to create new cryptographic keys if needed.</p>
+<h3 id="backup">Backup<a class="headerlink" href="#backup" title="Permanent link">#</a></h3>
+<ul>
+<li>Backup <code>jansConfWebKeys</code> attribute data from LDAP. Location of this attribute is: <code>o=jans &gt; ou=configuration &gt; ou=jans-auth</code></li>
+<li>Backup <code>jans-auth-keys.p12</code> from <code>/etc/certs/</code></li>
+</ul>
+<p>[N.B] Below if <code>Keystore</code> location is anywhere except <code>/etc/certs/</code> no need to backup.</p>
+<h3 id="key-generate">Key Generate<a class="headerlink" href="#key-generate" title="Permanent link">#</a></h3>
+<p>To get KeyGenerator, run the following command inside the terminal.</p>
+<p>You can put expiration according to your own policy. For testing purpose we are keeping it 2 days.</p>
+<p><div class="highlight"><pre><span></span><code>/opt/jre/bin/java -Dlog4j.defaultInitOverride=true -cp /opt/dist/jans/jans-auth-client-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore /etc/certs/jans-auth-keys.p12 -keypasswd &lt;Password&gt; -sig_keys RS256 RS384 -enc_keys RSA1_5 RSA-OAEP -dnname &quot;CN=jansAuth CA Certificates&quot; -expiration 2 &gt; /etc/certs/jans-auth-keys.json
+</code></pre></div>
+Lets see our newly generated crypto keys</p>
+<div class="highlight"><pre><span></span><code>keytool -list -v -keystore /etc/certs/jans-auth-keys.p12 -storetype pkcs12 -storepass &lt;password&gt;
+</code></pre></div>
+<p>The jans implementation of KeyGenerator accepts the following arguments:
+|Argument   |Description|
+|------|------|
+|-at|   oxEleven Access Token|
+|-dnname|   DN of certificate issuer|
+|-key_length|Length of hash key|
+|-enc_keys  |Encryption keys to generate (For example: RSA_OAEP, RSA1_5)|
+|-expiration|   Expiration in days|
+|-expiration_hours|Expiration in hours|
+|-h |Show help|
+|-keypasswd|    Key Store password|
+|-keystore| Key Store file (such as /etc/certs/jans-auth-keys.p12)|
+|-ox11| oxEleven Generate Key Endpoint.|
+|-sig_keys| Signature keys to generate. (For example: RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512)|
+|test_prop_file||
+|_keyId|Key name suffix|</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-22T16:51:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-22</span>
       
         <br>
         Created:
