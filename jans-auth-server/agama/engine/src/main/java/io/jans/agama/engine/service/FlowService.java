@@ -125,8 +125,7 @@ public class FlowService {
                 terminateFlow();
                 makeCrashException(e);
             }
-            
-            //TODO: review exception handling, enable polling if needed
+
         } catch (IOException ie) {
             throw new FlowCrashException(ie.getMessage(), ie);
         }

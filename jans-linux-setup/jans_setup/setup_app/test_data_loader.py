@@ -83,7 +83,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 'jans-auth-server/agama/engine/src/test/resources/templates',
                 target_dir
                 )
-        self.chown(target_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+        scripts_target = os.path.join(base.current_app.JansAuthInstaller.agama_root, 'scripts')
+        base.extract_from_zip(
+                base.current_app.jans_zip,
+                'jans-auth-server/agama/engine/src/test/resources/libs',
+                scripts_target
+                )
+        self.chown(base.current_app.JansAuthInstaller.agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
 
         prop_src_fn = os.path.join(agama_out_dir, 'config-agama-test.properties')
         self.renderTemplateInOut(prop_src_fn, agama_temp_dir, os.path.join(Config.output_dir, 'test/jans-auth'))
