@@ -28,17 +28,17 @@ customization of the authorization (or consent) process. By default, the OP will
 request authorization for each scope, and display the respective scope description.
 1. Update User
 1. [Client Registration](./scripts/client-registration.md): Allows implementing custom business logic during dynamic client registration, including validating SSA's and granting scopes.
-1. Dynamic scopes : Enables admin to generate scopes on the fly, for example by
+1. [Dynamic Scopes](./scripts/dynamic-scope.md) : Enables admin to generate scopes on the fly, for example by
 calling external APIs
 1. ID Generator
-1. Cache Refresh
+1. [Update Token](./scripts/update-token.md)
 1. Session Management
 1. SCIM
-1. Inrospection
+1. [Introspection](./scripts/introspection.md)
+1. [Post Authentication](./scripts/post-authentication.md)
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
-
 
 ## Implementation languages - Jython or pure Java
 
@@ -196,7 +196,9 @@ where <library_name> is the name of the library to install.
 
 ### Debugging a Jython script
 
-This [article](../interception-scripts-debug) covers the details.
+1. This [article](../interception-scripts-debug-ce) covers the details for debugging a script in a developer environment (CE).
+
+2. This [article](../interception-scripts-debug) covers the details for debugging a script in a CN environment.
 
 ***
 
@@ -260,42 +262,41 @@ Command:
 `/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript `
 
 Output:
-```
+```json
 {
-  "dn": null,
-  "inum": null,
-  "name": "string",
-  "aliases": [],
-  "description": null,
-  "script": "string",
-  "scriptType": "IDP",
-  "programmingLanguage": "PYTHON",
-  "moduleProperties": {
-    "value1": null,
-    "value2": null,
-    "description": null
-  },
-  "configurationProperties": {
-    "value1": null,
-    "value2": null,
-    "description": null,
-    "hide": true
-  },
-  "level": "integer",
-  "revision": 0,
-  "enabled": false,
-  "scriptError": {
-    "raisedAt": null,
-    "stackTrace": null
-  },
-  "modified": false,
-  "internal": false
+    "dn": "string",
+    "inum": "string",
+    "name": "string",
+    "aliases": [
+        "string"
+    ],
+    "description": "string",
+    "script": "string",
+    "scriptType": "ciba_end_user_notification",
+    "programmingLanguage": "python",
+    "level": 45,
+    "revision": 156,
+    "enabled": true,
+    "scriptError": {
+        "raisedAt": {
+        "type": "string",
+        "format": "date-time"
+        },
+        "stackTrace": {
+        "type": "string"
+        }
+    },
+    "modified": true,
+    "internal": true,
+    "locationType": "file",
+    "locationPath": "string",
+    "baseDn": "string"
 }
 ```
 To add or modify a script first, we need to create the script's python file (e.g. /tmp/sample.py) and then create a JSON file by following the above schema and update the fields as :
 
 /tmp/sample.json
-```
+```json
 {
   "name": "mySampleScript",
   "aliases": null,

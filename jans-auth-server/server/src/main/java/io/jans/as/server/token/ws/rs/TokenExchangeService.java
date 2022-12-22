@@ -66,7 +66,8 @@ public class TokenExchangeService {
     private AttributeService attributeService;
 
     public void rotateDeviceSecretOnRefreshToken(HttpServletRequest httpRequest, AuthorizationGrant refreshGrant, String scope) {
-        if (!scope.contains(ScopeConstants.DEVICE_SSO)) {
+        if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
+            log.debug("Skip rotate device secret on refresh token. No device_sso scope.");
             return;
         }
         if (StringUtils.isBlank(refreshGrant.getSessionDn())) {
