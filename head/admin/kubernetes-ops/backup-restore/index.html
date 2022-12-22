@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#manual-backup-and-restore" class="md-skip">
           Skip to content
         </a>
       
@@ -1374,22 +1374,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#manual-backup-and-restore" class="md-nav__link">
+    Manual Backup and Restore
   </a>
+  
+    <nav class="md-nav" aria-label="Manual Backup and Restore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-backup" class="md-nav__link">
+    Manual Backup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-restore" class="md-nav__link">
+    Manual Restore
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#automatic-backup-and-restore" class="md-nav__link">
+    Automatic Backup and Restore
   </a>
   
 </li>
@@ -8649,22 +8662,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#manual-backup-and-restore" class="md-nav__link">
+    Manual Backup and Restore
   </a>
+  
+    <nav class="md-nav" aria-label="Manual Backup and Restore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-backup" class="md-nav__link">
+    Manual Backup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-restore" class="md-nav__link">
+    Manual Restore
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#automatic-backup-and-restore" class="md-nav__link">
+    Automatic Backup and Restore
   </a>
   
 </li>
@@ -8701,6 +8727,16 @@
         <span class="md-tag">operations</span>
       
     
+      
+      
+        <span class="md-tag">backup</span>
+      
+    
+      
+      
+        <span class="md-tag">restore</span>
+      
+    
   </nav>
 
 
@@ -8713,19 +8749,68 @@
 
   <h1>Backup and Restore</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<p>The Jans Server should be backed up frequently, <strong>we recommend once daily</strong>.</p>
+<p>There are multiple methods for backing up jans server. One way is manually using imperative commands. The other is automatically using open source tools.</p>
+<h2 id="manual-backup-and-restore">Manual Backup and Restore<a class="headerlink" href="#manual-backup-and-restore" title="Permanent link">#</a></h2>
+<h3 id="manual-backup">Manual Backup<a class="headerlink" href="#manual-backup" title="Permanent link">#</a></h3>
+<ol>
+<li>
+<p>Configmap backup:
+<div class="highlight"><pre><span></span><code>kubectl get configmap cn -n &lt;namespace&gt; -o yaml &gt; configmap-backup.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p>Secret backup:
+<div class="highlight"><pre><span></span><code>kubectl get secret cn -n &lt;namespace&gt; -o yaml &gt; secret-backup.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p>Get the user supplied values:</p>
+<p>Save the values.yaml that was used in the initial jans installation using helm.</p>
+<p>In the event that the user supplied or override values yaml was lost, you can obtain it by executing the following command:
+<div class="highlight"><pre><span></span><code>helm get values &lt;release name&gt; -n &lt;namespace&gt;
+</code></pre></div></p>
+</li>
+<li>
+<p>Keep note of installed chart version:
+<div class="highlight"><pre><span></span><code>helm list -n &lt;namespace&gt;
+</code></pre></div></p>
+</li>
+</ol>
+<p>Keep note of the chart version. For example: <code>1.0.5</code></p>
+<h3 id="manual-restore">Manual Restore<a class="headerlink" href="#manual-restore" title="Permanent link">#</a></h3>
+<ol>
+<li>
+<p>Create namespace
+<div class="highlight"><pre><span></span><code>kubectl create namespace &lt;namespace&gt;
+</code></pre></div></p>
+</li>
+<li>
+<p>Configmap restore:
+<div class="highlight"><pre><span></span><code>kubectl create -f configmap-backup.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p>Secret restore:
+<div class="highlight"><pre><span></span><code>kubectl create -f secret-backup.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p>Insall jans using the override or user supplied values with the same chart version:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>helm install &lt;release-name&gt; janssen/janssen -f values.yaml --version<span class="o">=</span>&lt;backup-chart-version&gt; -n &lt;namespace&gt;
+</code></pre></div>
+<h2 id="automatic-backup-and-restore">Automatic Backup and Restore<a class="headerlink" href="#automatic-backup-and-restore" title="Permanent link">#</a></h2>
+<p>There are several tools that helps in automatic backups and restore, like <a href="https://www.kasten.io/kubernetes/use-cases/backup-restore">Kasten K10</a>.</p>
+<p>You can follow online <a href="https://medium.com/geekculture/kubernetes-backup-restore-is-now-effortless-e788fccd8cde">guides</a> to deploy it and using it to configure automatic backups.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-22T13:42:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-22</span>
       
         <br>
         Created:
