@@ -148,7 +148,6 @@ public interface PersistenceEntryManager extends EntityManager {
 			String propertyName);
 	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
 			String propertyName, Collection<AttributeData> attributes);
-	List<AttributeData> getAttributesList(Object entry);
 
     boolean destroy();
 

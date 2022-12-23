@@ -72,15 +72,15 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         }
         return result;
     }
-    
-    public GluuAttribute getAttributeUsingName(String name) {
-        GluuAttribute result = null;
+
+    public GluuAttribute getAttributeUsingName(String claimName) {
+        GluuAttribute gluuAttribute = null;
         try {
-            result = persistenceEntryManager.find(GluuAttribute.class, getDnForAttribute(name));
+            gluuAttribute = getByClaimName(claimName);
         } catch (Exception ex) {
-            log.error("Failed to load attribute with name:{}, ex:{}", name, ex);
+            log.error("Failed to load attribute with name:{}, ex:{}", claimName, ex);
         }
-        return result;
+        return gluuAttribute;
     }
 
 }
