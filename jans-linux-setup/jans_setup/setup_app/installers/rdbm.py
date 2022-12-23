@@ -7,6 +7,7 @@ import shutil
 
 from string import Template
 
+from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
@@ -92,13 +93,30 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
-                    self.restart('postgresql')
+                    self.run(['postgresql-setup', 'initdb'])
+                elif base.clone_type == 'deb':
+                    self.run([paths.cmd_chmod, '640', '/etc/ssl/private/ssl-cert-snakeoil.key'])
+
+                self.restart('postgresql')
+
                 cmd_create_db = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE DATABASE {};\\""'''.format(Config.rdbm_db)
                 cmd_create_user = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE USER {} WITH PASSWORD '{}';\\""'''.format(Config.rdbm_user, Config.rdbm_password)
                 cmd_grant_previlages = '''su - postgres -c "psql -U postgres -d postgres -c \\"GRANT ALL PRIVILEGES ON DATABASE {} TO {};\\""'''.format(Config.rdbm_db, Config.rdbm_user)
 
                 for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages):
                     self.run(cmd, shell=True)
+
+                if base.clone_type == 'rpm':
+                    hba_file_path_query = self.run('''su - postgres -c "psql -U postgres -d postgres -t -c \\"SHOW hba_file;\\""''', shell=True)
+                    if hba_file_path_query and hba_file_path_query.strip():
+                        self.stop('postgresql')
+                        hba_file_path = hba_file_path_query.strip()
+                        hba_file_content = self.readFile(hba_file_path)
+                        hba_file_content = 'host\t{0}\t{1}\t127.0.0.1/32\tmd5\nhost\t{0}\t{1}\t::1/128\tmd5\n'.format(Config.rdbm_db, Config.rdbm_user) + hba_file_content
+                        self.writeFile(hba_file_path, hba_file_content)
+                        self.start('postgresql')
+
+            self.enable('postgresql')
 
         self.dbUtils.bind(force=True)
 
