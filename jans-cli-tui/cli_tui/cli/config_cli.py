@@ -1126,7 +1126,11 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
-        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': 'application/json-patch+json'})
+        content_key = 'application/json-patch+json'
+        for content_key in endpoint.info.get('requestBody', {}).get('content', {}):
+            break
+
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': content_key})
         data = data
         response = requests.patch(
             url=url,
@@ -1361,17 +1365,18 @@ class JCA_CLI:
             except ValueError as ve:
                 self.exit_with_error(str(ve))
 
-            if not isinstance(data, list):
+            if ('configuser' not in endpoint.path) and (not isinstance(data, list)):
                 self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
 
-        op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        if 'configuser' not in endpoint.path:
+            op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
 
-        for item in data:
-            if not item['op'] in op_modes:
-                print("op must be one of {}".format(', '.join(op_modes)))
-                sys.exit()
-            if not item['path'].startswith('/'):
-                item['path'] = '/' + item['path']
+            for item in data:
+                if not item['op'] in op_modes:
+                    print("op must be one of {}".format(', '.join(op_modes)))
+                    sys.exit()
+                if not item['path'].startswith('/'):
+                    item['path'] = '/' + item['path']
 
         response = self.patch_requests(endpoint, suffix_param, data)
 
