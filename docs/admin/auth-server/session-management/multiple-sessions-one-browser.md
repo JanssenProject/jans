@@ -5,14 +5,22 @@ tags:
   - session
 ---
 
-## This content is in progress
+## Select Account
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+AS supports different accounts. To be able select account or login as another user within same user-agent authorization request must have `prompt=select_account`.
 
-## Have questions in the meantime?
+When user is logged in cookies looks as:
+```
+session_id: de510ab6-b06c-4393-86d8-12a7c501aafe
+current_sessions: ["de510ab6-b06c-4393-86d8-12a7c501aafe"]
+```
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+If RP sends Authorization Request with `prompt=select_account` and selects hits `Login as another user` button and authenticate then cookies looks as:
+```
+session_id: c691e83d-eb1b-41f0-b453-fab905681b5b
+current_sessions: ["de510ab6-b06c-4393-86d8-12a7c501aafe", "c691e83d-eb1b-41f0-b453-fab905681b5b"]
+```
 
-## Want to contribute?
+AS represents accounts based on `current_sessions` cookies. It may contain outdated references but AS will filter it out and update on request. Thus page represents always actual/active sessions.
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+![selectAccount](../img/admin-guide/selectAccount.png)
