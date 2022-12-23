@@ -25,10 +25,22 @@ OAuth Device Flow for user authentication--the default `admin` user created
 during setup has the correct roles to use all the TUI features. Client
 credentials, tokens and other data is stored in file `~/.config/jans-cli.ini` in
 encoded format. The user-role mappings roles are defined in a Jans Auth Server
-[introspection scrip](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/introspection/introspection-role-based-scope/introspection_role_based_scope.py)
+[introspection script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/introspection/introspection-role-based-scope/introspection_role_based_scope.py)
 
 ```
 ~/.config/jans-cli.ini
+```
+
+## Plugins
+
+It's possible to extend the TUI by writing a plugin. Each plugin is loaded
+dynamically according to the numeric priority of the folders in
+`/opt/jans/jans-cli/plugins`. To enable a plugin, you need to edit
+`jans-cli.ini`. The default plugins are:
+
+```
+jca_plugins = user-mgt,scim,fido2,admin-ui
+
 ```
 
 ## Administration
