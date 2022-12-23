@@ -69,7 +69,7 @@ The dependencies have to be added separately as mentioned in the steps below. Us
 
 1. Create `cs.json` with the contents of a CUSTOM script. To do that, run the following command.
 ```
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript > /tmp/cs.json
+/opt/jans/jans-cli/config-cli.py --schema CustomScript > /tmp/cs.json
 ```
 2. Edit the file's contents to reflect the addition of the duo custom script. 
  *  Set enabled flag `true`
