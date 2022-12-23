@@ -10,7 +10,7 @@ tags:
 After the browser has a session, if a person visits the website, the requesting party can obtain a code without the user having to authenticate or authorize. In some cases, it is desirable to insert custom business logic before granting the code or tokens from the authorization endpoint. Post Authentication script allows to force re-authentication or re-authorization (even if client is "Pre-authorized" or client authorization persistence is on).
 
 ## Interface
-The consent gathering script implements the [PostAuthnType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/postauthn/PostAuthnType.java) interface. This extends methods from the base script type in addition to adding new methods:
+The post authentication script implements the [PostAuthnType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/postauthn/PostAuthnType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
 
