@@ -1697,6 +1697,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#plugins" class="md-nav__link">
+    Plugins
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#administration" class="md-nav__link">
     Administration
   </a>
@@ -8703,6 +8710,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#plugins" class="md-nav__link">
+    Plugins
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#administration" class="md-nav__link">
     Administration
   </a>
@@ -8829,8 +8843,15 @@ OAuth Device Flow for user authentication--the default <code>admin</code> user c
 during setup has the correct roles to use all the TUI features. Client
 credentials, tokens and other data is stored in file <code>~/.config/jans-cli.ini</code> in
 encoded format. The user-role mappings roles are defined in a Jans Auth Server
-<a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/introspection/introspection-role-based-scope/introspection_role_based_scope.py">introspection scrip</a></p>
+<a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/introspection/introspection-role-based-scope/introspection_role_based_scope.py">introspection script</a></p>
 <div class="highlight"><pre><span></span><code>~/.config/jans-cli.ini
+</code></pre></div>
+<h2 id="plugins">Plugins<a class="headerlink" href="#plugins" title="Permanent link">#</a></h2>
+<p>It's possible to extend the TUI by writing a plugin. Each plugin is loaded
+dynamically according to the numeric priority of the folders in
+<code>/opt/jans/jans-cli/plugins</code>. To enable a plugin, you need to edit
+<code>jans-cli.ini</code>. The default plugins are:</p>
+<div class="highlight"><pre><span></span><code>jca_plugins = user-mgt,scim,fido2,admin-ui
 </code></pre></div>
 <h2 id="administration">Administration<a class="headerlink" href="#administration" title="Permanent link">#</a></h2>
 <p>When you run the TUI, this is the home panel:
@@ -8878,7 +8899,7 @@ domains. The Janssen Server provides implementation for the SCIM specification.<
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-22T16:54:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-23T20:57:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-23</span>
       
         <br>
         Created:

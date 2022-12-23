@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#openid-configuration-endpoint-aka-well-knownopenid-configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -2909,22 +2909,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#openid-configuration-endpoint-aka-well-knownopenid-configuration" class="md-nav__link">
+    OpenID Configuration Endpoint aka .well-known/openid-configuration
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#notes-on-specific-op-server-metadata-claims" class="md-nav__link">
+    Notes on specific OP Server Metadata claims
   </a>
   
 </li>
@@ -8651,22 +8644,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#openid-configuration-endpoint-aka-well-knownopenid-configuration" class="md-nav__link">
+    OpenID Configuration Endpoint aka .well-known/openid-configuration
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#notes-on-specific-op-server-metadata-claims" class="md-nav__link">
+    Notes on specific OP Server Metadata claims
   </a>
   
 </li>
@@ -8715,19 +8701,277 @@
 
   <h1>Configuration</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="openid-configuration-endpoint-aka-well-knownopenid-configuration">OpenID Configuration Endpoint aka <code>.well-known/openid-configuration</code><a class="headerlink" href="#openid-configuration-endpoint-aka-well-knownopenid-configuration" title="Permanent link">#</a></h2>
+<p>The Configuration Endpoint returns both the OP server metadata, and OAuth
+AS metdata, most of which
+is defined in the <a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID Discovery Spec</a>, although other configuration metadata is defined
+in other OpenID specifications, or in OAuth specifications.</p>
+<p>If you want to customize the configuration response, you can use the
+<a href="../../developer/scripts/config/openid-config.md">OpenID Config Interception Script</a>,
+which enables you to filter the results, modify claim values, or add claims.</p>
+<p>If you want to explicitly allow only certain OpenID Metadata claims, you can
+supply a list of the claims in the <code>opConfigMetadataAllowList</code> Auth Server
+Property.</p>
+<p>Below is a list of all the current available claims, and where they are specified.</p>
+<table>
+<thead>
+<tr>
+<th>Claim</th>
+<th align="right">Origin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>access_token_signing_alg_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>acr_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>authorization_encryption_alg_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>authorization_encryption_enc_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>authorization_endpoint</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>authorization_signing_alg_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>backchannel_authentication_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>backchannel_logout_session_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>backchannel_logout_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>backchannel_token_delivery_modes_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>backchannel_user_code_parameter_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>check_session_iframe</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>claim_types_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>claims_locales_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>claims_parameter_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>claims_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>clientinfo_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>device_authorization_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>display_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>dpop_signing_alg_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>end_session_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>frontchannel_logout_session_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>frontchannel_logout_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>grant_types_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>id_token_encryption_alg_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>id_token_encryption_enc_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>id_token_signing_alg_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>id_token_token_binding_cnf_values_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>introspection_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>issuer</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>jwks_uri</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>op_tos_uri</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>pushed_authorization_request_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>registration_endpoint</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>request_object_encryption_alg_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>request_object_encryption_enc_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>request_object_signing_alg_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>request_parameter_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>request_uri_parameter_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>require_pushed_authorization_requests</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>require_request_uri_registration</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>response_modes_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>response_types_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>revocation_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>scopes_supported</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>service_documentation</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>session_revocation_endpoint</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>ssa_endpoint</td>
+<td align="right">Janssen</td>
+</tr>
+<tr>
+<td>subject_types_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>tls_client_certificate_bound_access_tokens</td>
+<td align="right">?</td>
+</tr>
+<tr>
+<td>token_endpoint</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>token_endpoint_auth_methods_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>token_endpoint_auth_signing_alg_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>ui_locales_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>userinfo_encryption_alg_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>userinfo_encryption_enc_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>userinfo_endpoint</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+<tr>
+<td>userinfo_signing_alg_values_supported</td>
+<td align="right"><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata">OpenID</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="notes-on-specific-op-server-metadata-claims">Notes on specific OP Server Metadata claims<a class="headerlink" href="#notes-on-specific-op-server-metadata-claims" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p><strong>claims_supported</strong> Each user claim (in Jans jargon, "Attribute") has a property called <code>jansHideOnDiscovery</code>--if you don't want a claim to appear in <code>.well-known/openid-configuration</code>, set this to <code>true</code> for the Attribute entity.</p>
+</li>
+<li>
+<p><strong>ssa_endpoint</strong> This is the endpoint which issues Software Statement
+Assertions JWT's. It is an OAuth protected endpoint.</p>
+</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-23T20:57:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-23</span>
       
         <br>
         Created:

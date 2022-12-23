@@ -8798,7 +8798,7 @@
 </blockquote>
 <p>This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server.</p>
 <p>There are few operations we can do using <code>jans-cli</code> commands. To get list of operations id run below command:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationJWKJSONWebKeyJWK
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationJwkJsonWebKeyJwk
 </code></pre></div>
 <p>It returns operations id with details information.</p>
 <p><div class="highlight"><pre><span></span><code>Operation ID: get-config-jwks
@@ -8907,7 +8907,7 @@ Let's explore each of these operations.</p>
   &quot;y&quot;: null
 }
 </code></pre></div>
-<p>Let's update the json file; In our case, I have added sample data for testing purpose only. </p>
+<p>Let's update the json file; In our case, I have added sample data for testing purpose only.</p>
 <div class="highlight"><pre><span></span><code>&quot;kid&quot;: &quot;dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5&quot;,
 &quot;kty&quot;: &quot;RSA&quot;,
 &quot;use&quot;: &quot;enc&quot;,
@@ -8926,7 +8926,7 @@ Let's explore each of these operations.</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-jwks-key --data /tmp/jwk.json
 </code></pre></div>
 <h2 id="update-replace-json-web-key-jwk">Update / Replace JSON Web Key (JWK)<a class="headerlink" href="#update-replace-json-web-key-jwk" title="Permanent link">#</a></h2>
-<p>To <code>update / replace</code> any JWK configuration, let get the schema first. </p>
+<p>To <code>update / replace</code> any JWK configuration, let get the schema first.</p>
 <div class="highlight"><pre><span></span><code>Operation ID: put-config-jwks
   Description: Puts/replaces JSON Web Keys (JWKS).
   Schema: /components/schemas/WebKeysConfiguration
@@ -9147,7 +9147,7 @@ Updated Json Web Key:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-23T20:57:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-23</span>
       
         <br>
         Created:
