@@ -22,6 +22,7 @@ The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://gi
 
 ### New Methods
 | Method header | Method description |
+|:-----|:------|
 | `def authenticate(self, context)` | This method is called after normal ROPC authentication. This method can cancel normal authentication if it returns false and sets `context.setUser(null)` |
 
 ### Objects
