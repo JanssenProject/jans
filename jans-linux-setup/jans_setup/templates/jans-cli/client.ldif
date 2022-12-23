@@ -35,5 +35,5 @@ jansScope: inum=F0C4,ou=scopes,o=jans
 jansSignedRespAlg: RS256
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
-jansTrustedClnt: false
+jansTrustedClnt: true
 jansAccessTknLife: 2592000
