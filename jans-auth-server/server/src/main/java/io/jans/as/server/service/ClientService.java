@@ -78,7 +78,6 @@ public class ClientService {
         ldapEntryManager.persist(client);
     }
 
-
     private Client ignoreCustomObjectClassesForNonLDAP(Client client) {
         String persistenceType = ldapEntryManager.getPersistenceType();
         log.debug("persistenceType: {}", persistenceType);
