@@ -53,9 +53,33 @@ public class AuditLogInterceptor {
     @SuppressWarnings({ "all" })
     @AroundInvoke
     public Object aroundReadFrom(InvocationContext context) throws Exception {
-        LOG.info("Audit Log Interceptor - context:{}", context);
+
         try {
-            processRequest(context);
+            LOG.info("Audit Log Interceptor - context:{}, info:{}, request:{}, httpHeaders:{}, AUDIT_LOG:{}", context,
+                    info, request, httpHeaders, AUDIT_LOG);
+            AUDIT_LOG.info("\n ********************** Request ********************** ");
+
+            // Get Audit config
+            AuditLogConf auditLogConf = getAuditLogConf();
+            LOG.info("auditLogConf:{}", auditLogConf);
+
+            // Log if enabled
+            if (auditLogConf != null && auditLogConf.isEnabled()) {
+
+                // Request audit
+                String beanClassName = context.getClass().getName();
+                String method = context.getMethod().getName();
+
+                AUDIT_LOG.info("endpoint:{}, beanClassName:{}, method:{}, from:{}, user:{} ", info.getPath(),
+                        beanClassName, method, request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"));
+
+                // Header attribute audit
+                Map<String, String> headerData = getAuditHeaderAttributes(auditLogConf);
+                AUDIT_LOG.info("headerData:{} ", headerData);
+
+                // Request object audit
+                processRequest(context, auditLogConf);
+            }
 
         } catch (Exception ex) {
             throw new WebApplicationException(ex);
@@ -63,44 +87,24 @@ public class AuditLogInterceptor {
         return context.proceed();
     }
 
-    private void processRequest(InvocationContext context) {
-        LOG.info("Audit Log Interceptor process - context:{}", context);
+    private void processRequest(InvocationContext context, AuditLogConf auditLogConf) {
+        LOG.info("Process Audit Log Interceptor - context:{}, auditLogConf:{}", context, auditLogConf);
+
         Object[] ctxParameters = context.getParameters();
         Method method = context.getMethod();
         Class[] clazzArray = method.getParameterTypes();
 
         LOG.debug("Audit Log Interceptor process - ctxParameters:{}, method:{}, clazzArray:{}", ctxParameters, method,
                 clazzArray);
-        AUDIT_LOG.info("\n Audit Log Interceptor process - ctxParameters:{}, method:{}, clazzArray:{}", ctxParameters,
-                method, clazzArray);
 
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
-
                 Object obj = ctxParameters[i];
                 LOG.info("Request obj:{}", obj);
-                // Audit log
-                logAuditData(context, obj);
+                AUDIT_LOG.info("objectType:{}, obj:{} ", clazzArray[i], obj);
 
             }
         }
-    }
-
-    private <T> void logAuditData(InvocationContext context, T obj) {
-        try {
-
-            // Get Audit config
-            AuditLogConf auditLogConf = getAuditLogConf();
-            LOG.info("auditLogConf:{}", auditLogConf);
-            if (auditLogConf != null && auditLogConf.isEnabled()) {
-                AUDIT_LOG.info("====== Request for endpoint:{}, method:{}, from:{}, user:{}, data:{} ", info.getPath(),
-                        context.getMethod(), request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"), obj);
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
     }
 
     private AuditLogConf getAuditLogConf() {
@@ -114,6 +118,7 @@ public class AuditLogInterceptor {
         }
         List<String> attributes = auditLogConf.getHeaderAttributes();
         LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - attributes:{}", attributes);
+        
         Map<String, String> attributeMap = null;
         if (attributes != null && !attributes.isEmpty()) {
             attributeMap = new HashMap<>();
@@ -123,7 +128,7 @@ public class AuditLogInterceptor {
                 attributeMap.put(attributeName, attributeValue);
             }
         }
-        AUDIT_LOG.info("attributeMap:{} ", attributeMap);
+
         LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - attributeMap:{}", attributeMap);
         return attributeMap;
     }

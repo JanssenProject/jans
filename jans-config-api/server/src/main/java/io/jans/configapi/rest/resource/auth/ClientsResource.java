@@ -17,11 +17,13 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.AuthUtil;
+import io.jans.model.GluuAttribute;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -48,6 +50,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,6 +84,9 @@ public class ClientsResource extends ConfigBaseResource {
 
     @Inject
     ScopeService scopeService;
+
+    @Inject
+    AttributeService attributeService;
 
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -156,6 +162,11 @@ public class ClientsResource extends ConfigBaseResource {
         // scope validation
         checkScopeFormat(client);
 
+        // Claim validation
+        if (client.getClaims() != null && client.getClaims().length > 0) {
+            validateClaim(client);
+        }
+
         String clientSecret = client.getClientSecret();
 
         if (StringHelper.isEmpty(clientSecret)) {
@@ -201,6 +212,11 @@ public class ClientsResource extends ConfigBaseResource {
 
         // scope validation
         checkScopeFormat(client);
+
+        // Claim validation
+        if (client.getClaims() != null && client.getClaims().length > 0) {
+            validateClaim(client);
+        }
 
         client.setClientId(existingClient.getClientId());
         client.setBaseDn(clientService.getDnForClient(inum));
@@ -370,4 +386,48 @@ public class ClientsResource extends ConfigBaseResource {
             return null;
         }
     }
+
+    private Client validateClaim(Client client) {
+        if (client == null) {
+            return client;
+        }
+
+        // check claims
+        logger.debug("client.getClaims():{}", client.getClaims());
+        List<String> claims = client.getClaims() != null ? Arrays.asList(client.getClaims()) : null;
+        logger.debug("Client claims:{}", claims);
+
+        List<String> validClaims = new ArrayList<>();
+        List<String> invalidClaims = new ArrayList<>();
+
+        for (String claim : claims) {
+            logger.debug("Is claim:{} valid-DN?:{}", claim, authUtil.isValidDn(claim));
+            GluuAttribute gluuAttribute = null;
+            if (authUtil.isValidDn(claim)) {
+                gluuAttribute = attributeService.getAttributeUsingDn(claim);
+            } else {
+                gluuAttribute = attributeService.getAttributeUsingName(claim);
+            }
+            logger.debug("Attribute from DB - {}'", gluuAttribute);
+            if (gluuAttribute != null) {
+                validClaims.add(claim);
+            } else {
+                invalidClaims.add(claim);
+            }
+        }
+        logger.debug("Claim validation result - validClaims:{}, invalidClaims:{} ", validClaims, invalidClaims);
+
+        if (!invalidClaims.isEmpty()) {
+            thorwBadRequestException("Invalid claim in request -> " + invalidClaims.toString());
+        }
+
+        // reset Claims
+        if (!validClaims.isEmpty()) {
+            String[] scopeArr = validClaims.stream().toArray(String[]::new);
+            client.setClaims(scopeArr);
+        }
+
+        return client;
+    }
+
 }

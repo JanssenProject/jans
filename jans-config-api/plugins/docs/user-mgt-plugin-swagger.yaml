@@ -648,7 +648,7 @@ paths:
       requestBody:
         description: UserPatchRequest
         content:
-          application/json-patch+json:
+          application/json:
             schema:
               $ref: '#/components/schemas/UserPatchRequest'
             examples:
@@ -785,10 +785,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     CustomUser:
       type: object
       properties:

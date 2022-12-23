@@ -20,7 +20,6 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.configapi.core.model.SearchRequest;
-import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -68,9 +67,9 @@ public class ClientService implements Serializable {
 
     @Inject
     transient AppConfiguration appConfiguration;
-    
+
     @Inject
-    ConfigurationService configurationService;
+    transient ConfigurationService configurationService;
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);
@@ -330,11 +329,6 @@ public class ClientService implements Serializable {
         logger.debug("client.getScopes():{}, appConfiguration.getDynamicRegistrationScopesParamEnabled():{}",
                 client.getScopes(), appConfiguration.getDynamicRegistrationScopesParamEnabled());
 
-        List<String> claims = client.getClaims() != null ? Arrays.asList(client.getClaims()) : null;
-        if (claims != null && !claims.isEmpty()) {
-            List<String> claimsDn = attributeService.getAttributesDn(claims);
-            client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
-        }
         logger.debug("client.getClaims():{}, client.getAttributes().getAuthorizedAcrValues():{}", client.getClaims(),
                 client.getAttributes().getAuthorizedAcrValues());
 
@@ -361,9 +355,10 @@ public class ClientService implements Serializable {
         // custom object class
         final String customOC = appConfiguration.getDynamicRegistrationCustomObjectClass();
         String persistenceType = configurationService.getPersistenceType();
-        if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType) && StringUtils.isNotBlank(customOC)) {
+        if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)
+                && StringUtils.isNotBlank(customOC)) {
             client.setCustomObjectClasses(new String[] { customOC });
-        }else {
+        } else {
             client.setCustomObjectClasses(null);
         }
 
