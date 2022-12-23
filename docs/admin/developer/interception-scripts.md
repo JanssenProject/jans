@@ -259,7 +259,7 @@ The post-config-scripts and put-config-scripts require various details about the
 ### Basic schema of a custom script
 Command:
 
-`/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript `
+`/opt/jans/jans-cli/config-cli.py --schema CustomScript `
 
 Output:
 ```json
