@@ -41,13 +41,13 @@ class Plugin(DialogUtils):
         self, 
         app: Application
         ) -> None:
-        """init for Plugin class "oxauth"
+        """init for Plugin class "oauth"
 
         Args:
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'oxauth'
+        self.pid = 'oauth'
         self.name = '[A]uth Server'
         self.search_text= None
         self.oauth_update_properties_start_index = 0
