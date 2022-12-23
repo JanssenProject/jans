@@ -244,7 +244,7 @@ nav:
         - 'Converting Data': 'admin/reference/database/converting-data.md'
     - 'Auth Server Admin Guide':
         - 'admin/auth-server/README.md'
-        - 'Configuration': 'admin/auth-server/config.md'
+        - 'Auth Server Config': 'admin/auth-server/config.md'
         - 'Session Management':
             - 'admin/auth-server/session-management/README.md'
             - 'What is a session?': 'admin/auth-server/session-management/what-is.md'
@@ -260,7 +260,7 @@ nav:
             - 'UMA RPT Token': 'admin/auth-server/tokens/uma-rpt-token.md'
         - 'Endpoints':
             - 'admin/auth-server/endpoints/README.md'
-            - 'Configuration': 'admin/auth-server/endpoints/configuration.md'
+            - 'OpenID Configuration': 'admin/auth-server/endpoints/configuration.md'
             - 'Client Registration': 'admin/auth-server/endpoints/client-registration.md'
             - 'Authorization': 'admin/auth-server/endpoints/authorization.md'
             - 'Token': 'admin/auth-server/endpoints/token.md'
