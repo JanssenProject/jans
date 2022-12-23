@@ -29,7 +29,7 @@ Jans Config API follow a flexible plugin architecture in which the new features 
 Config API endpoints are OAuth 2.0 protected. It supports simple bearer and JWT token.
 
 ## Documentation
-Learn more in the [jans-config-api OpenAPI documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml).
+Learn more API endpoint using [jans-config-api OpenAPI documentation](../reference/openapi.md).
 
 ### Endpoints
 
