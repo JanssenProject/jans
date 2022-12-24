@@ -8676,78 +8676,133 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;
 </ul>
 <h2 id="get-all-jans-auth-server-configuration-properties">Get All Jans Auth Server Configuration Properties<a class="headerlink" href="#get-all-jans-auth-server-configuration-properties" title="Permanent link">#</a></h2>
 <p>It returns all the information of the Jans Authorization server.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties
+<div class="highlight"><pre><span></span><code> python3 jans-cli-tui/cli_tui/cli/config_cli.py --operation-id get-properties
+ ```
 
-
-Getting access token for scope https://jans.io/oauth/jans-auth-server/config/properties.readonly
+ You will get output like below
+```json
 {
-  &quot;issuer&quot;: &quot;https://testjans.gluu.com&quot;,
-  &quot;baseEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1&quot;,
-  &quot;authorizationEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/authorize&quot;,
-  &quot;tokenEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/token&quot;,
-  &quot;tokenRevocationEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/revoke&quot;,
-  &quot;userInfoEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/userinfo&quot;,
-  &quot;clientInfoEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/clientinfo&quot;,
-  &quot;checkSessionIFrame&quot;: &quot;https://testjans.gluu.com/jans-auth/opiframe.htm&quot;,
-  &quot;endSessionEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/end_session&quot;,
-  &quot;jwksUri&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/jwks&quot;,
-  &quot;registrationEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/register&quot;,
-  &quot;openIdDiscoveryEndpoint&quot;: &quot;https://testjans.gluu.com/.well-known/webfinger&quot;,
-  &quot;openIdConfigurationEndpoint&quot;: &quot;https://testjans.gluu.com/.well-known/openid-configuration&quot;,
-  &quot;idGenerationEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/id&quot;,
-  &quot;introspectionEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/introspection&quot;,
-  &quot;deviceAuthzEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/device_authorization&quot;,
+  &quot;issuer&quot;: &quot;https://example.jans.io&quot;,
+  &quot;baseEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1&quot;,
+  &quot;authorizationEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/authorize&quot;,
+  &quot;tokenEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/token&quot;,
+  &quot;tokenRevocationEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/revoke&quot;,
+  &quot;userInfoEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/userinfo&quot;,
+  &quot;clientInfoEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/clientinfo&quot;,
+  &quot;checkSessionIFrame&quot;: &quot;https://example.jans.io/jans-auth/opiframe.htm&quot;,
+  &quot;endSessionEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/end_session&quot;,
+  &quot;jwksUri&quot;: &quot;https://example.jans.io/jans-auth/restv1/jwks&quot;,
+  &quot;registrationEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/register&quot;,
+  &quot;openIdDiscoveryEndpoint&quot;: &quot;https://example.jans.io/.well-known/webfinger&quot;,
+  &quot;openIdConfigurationEndpoint&quot;: &quot;https://example.jans.io/.well-known/openid-configuration&quot;,
+  &quot;idGenerationEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/id&quot;,
+  &quot;introspectionEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/introspection&quot;,
+  &quot;parEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/par&quot;,
+  &quot;requirePar&quot;: false,
+  &quot;deviceAuthzEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/device_authorization&quot;,
   &quot;sessionAsJwt&quot;: false,
+  &quot;requireRequestObjectEncryption&quot;: false,
+  &quot;requirePkce&quot;: false,
+  &quot;allowAllValueForRevokeEndpoint&quot;: false,
   &quot;sectorIdentifierCacheLifetimeInMinutes&quot;: 1440,
-  &quot;umaConfigurationEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/uma2-configuration&quot;,
+  &quot;umaConfigurationEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/uma2-configuration&quot;,
   &quot;umaRptAsJwt&quot;: false,
   &quot;umaRptLifetime&quot;: 3600,
   &quot;umaTicketLifetime&quot;: 3600,
-  &quot;umaPctLifetime&quot;: 2592000,
-  &quot;umaResourceLifetime&quot;: 2592000,
+  &quot;umaPctLifetime&quot;: 1728000,
+  &quot;umaResourceLifetime&quot;: 1728000,
   &quot;umaAddScopesAutomatically&quot;: true,
   &quot;umaValidateClaimToken&quot;: false,
   &quot;umaGrantAccessIfNoPolicies&quot;: false,
   &quot;umaRestrictResourceToAssociatedClient&quot;: false,
+  &quot;statTimerIntervalInSeconds&quot;: 0,
+  &quot;statAuthorizationScope&quot;: &quot;jans_stat&quot;,
+  &quot;allowSpontaneousScopes&quot;: false,
   &quot;spontaneousScopeLifetime&quot;: 86400,
   &quot;openidSubAttribute&quot;: &quot;inum&quot;,
+  &quot;publicSubjectIdentifierPerClientEnabled&quot;: true,
+  &quot;subjectIdentifiersPerClientSupported&quot;: [
+    &quot;mail&quot;,
+    &quot;uid&quot;
+  ],
   &quot;responseTypesSupported&quot;: [
-    &quot;[&#39;code&#39;, &#39;token&#39;]&quot;,
-    &quot;[&#39;id_token&#39;, &#39;code&#39;, &#39;token&#39;]&quot;,
-    &quot;[&#39;id_token&#39;]&quot;,
-    &quot;[&#39;code&#39;]&quot;,
-    &quot;[&#39;token&#39;]&quot;,
-    &quot;[&#39;id_token&#39;, &#39;code&#39;]&quot;,
-    &quot;[&#39;id_token&#39;, &#39;token&#39;]&quot;
+    [
+      &quot;token&quot;,
+      &quot;id_token&quot;
+    ],
+    [
+      &quot;token&quot;,
+      &quot;id_token&quot;,
+      &quot;code&quot;
+    ],
+    [
+      &quot;id_token&quot;,
+      &quot;code&quot;
+    ],
+    [
+      &quot;token&quot;
+    ],
+    [
+      &quot;id_token&quot;
+    ],
+    [
+      &quot;token&quot;,
+      &quot;code&quot;
+    ],
+    [
+      &quot;code&quot;
+    ]
   ],
   &quot;responseModesSupported&quot;: [
-    &quot;query&quot;,
+    &quot;fragment.jwt&quot;,
+    &quot;form_post.jwt&quot;,
+    &quot;query.jwt&quot;,
+    &quot;jwt&quot;,
     &quot;form_post&quot;,
+    &quot;query&quot;,
     &quot;fragment&quot;
   ],
   &quot;grantTypesSupported&quot;: [
-    &quot;password&quot;,
-    &quot;authorization_code&quot;,
     &quot;refresh_token&quot;,
+    &quot;password&quot;,
     &quot;urn:ietf:params:oauth:grant-type:device_code&quot;,
+    &quot;urn:ietf:params:oauth:grant-type:token-exchange&quot;,
     &quot;client_credentials&quot;,
     &quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;,
-    &quot;implicit&quot;,
-    &quot;urn:ietf:params:oauth:grant-type:token-exchange&quot;
+    &quot;authorization_code&quot;,
+    &quot;implicit&quot;
   ],
   &quot;subjectTypesSupported&quot;: [
     &quot;public&quot;,
     &quot;pairwise&quot;
   ],
-  &quot;defaultSubjectType&quot;: [
-    &quot;p&quot;,
-    &quot;a&quot;,
-    &quot;i&quot;,
-    &quot;r&quot;,
-    &quot;w&quot;,
-    &quot;i&quot;,
-    &quot;s&quot;,
-    &quot;e&quot;
+  &quot;defaultSubjectType&quot;: &quot;pairwise&quot;,
+  &quot;authorizationSigningAlgValuesSupported&quot;: [
+    &quot;HS256&quot;,
+    &quot;HS384&quot;,
+    &quot;HS512&quot;,
+    &quot;RS256&quot;,
+    &quot;RS384&quot;,
+    &quot;RS512&quot;,
+    &quot;ES256&quot;,
+    &quot;ES384&quot;,
+    &quot;ES512&quot;,
+    &quot;ES512&quot;,
+    &quot;PS256&quot;,
+    &quot;PS384&quot;,
+    &quot;PS512&quot;
+  ],
+  &quot;authorizationEncryptionAlgValuesSupported&quot;: [
+    &quot;RSA1_5&quot;,
+    &quot;RSA-OAEP&quot;,
+    &quot;A128KW&quot;,
+    &quot;A256KW&quot;
+  ],
+  &quot;authorizationEncryptionEncValuesSupported&quot;: [
+    &quot;A128CBC+HS256&quot;,
+    &quot;A256CBC+HS512&quot;,
+    &quot;A128GCM&quot;,
+    &quot;A256GCM&quot;
   ],
   &quot;userInfoSigningAlgValuesSupported&quot;: [
     &quot;HS256&quot;,
@@ -8758,7 +8813,11 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     &quot;RS512&quot;,
     &quot;ES256&quot;,
     &quot;ES384&quot;,
-    &quot;ES512&quot;
+    &quot;ES512&quot;,
+    &quot;ES512&quot;,
+    &quot;PS256&quot;,
+    &quot;PS384&quot;,
+    &quot;PS512&quot;
   ],
   &quot;userInfoEncryptionAlgValuesSupported&quot;: [
     &quot;RSA1_5&quot;,
@@ -8782,7 +8841,11 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     &quot;RS512&quot;,
     &quot;ES256&quot;,
     &quot;ES384&quot;,
-    &quot;ES512&quot;
+    &quot;ES512&quot;,
+    &quot;ES512&quot;,
+    &quot;PS256&quot;,
+    &quot;PS384&quot;,
+    &quot;PS512&quot;
   ],
   &quot;idTokenEncryptionAlgValuesSupported&quot;: [
     &quot;RSA1_5&quot;,
@@ -8796,6 +8859,23 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     &quot;A128GCM&quot;,
     &quot;A256GCM&quot;
   ],
+  &quot;accessTokenSigningAlgValuesSupported&quot;: [
+    &quot;none&quot;,
+    &quot;HS256&quot;,
+    &quot;HS384&quot;,
+    &quot;HS512&quot;,
+    &quot;RS256&quot;,
+    &quot;RS384&quot;,
+    &quot;RS512&quot;,
+    &quot;ES256&quot;,
+    &quot;ES384&quot;,
+    &quot;ES512&quot;,
+    &quot;ES512&quot;,
+    &quot;PS256&quot;,
+    &quot;PS384&quot;,
+    &quot;PS512&quot;
+  ],
+  &quot;forceSignedRequestObject&quot;: false,
   &quot;requestObjectSigningAlgValuesSupported&quot;: [
     &quot;none&quot;,
     &quot;HS256&quot;,
@@ -8806,7 +8886,11 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     &quot;RS512&quot;,
     &quot;ES256&quot;,
     &quot;ES384&quot;,
-    &quot;ES512&quot;
+    &quot;ES512&quot;,
+    &quot;ES512&quot;,
+    &quot;PS256&quot;,
+    &quot;PS384&quot;,
+    &quot;PS512&quot;
   ],
   &quot;requestObjectEncryptionAlgValuesSupported&quot;: [
     &quot;RSA1_5&quot;,
@@ -8837,9 +8921,12 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     &quot;RS512&quot;,
     &quot;ES256&quot;,
     &quot;ES384&quot;,
-    &quot;ES512&quot;
+    &quot;ES512&quot;,
+    &quot;ES512&quot;,
+    &quot;PS256&quot;,
+    &quot;PS384&quot;,
+    &quot;PS512&quot;
   ],
-  &quot;dynamicRegistrationCustomAttributes&quot;: null,
   &quot;displayValuesSupported&quot;: [
     &quot;page&quot;,
     &quot;popup&quot;
@@ -8860,28 +8947,7 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     &quot;RSA1_5&quot;,
     &quot;RSA-OAEP&quot;
   ],
-  &quot;serviceDocumentation&quot;: [
-    &quot;h&quot;,
-    &quot;t&quot;,
-    &quot;t&quot;,
-    &quot;p&quot;,
-    &quot;:&quot;,
-    &quot;/&quot;,
-    &quot;/&quot;,
-    &quot;j&quot;,
-    &quot;a&quot;,
-    &quot;n&quot;,
-    &quot;s&quot;,
-    &quot;.&quot;,
-    &quot;o&quot;,
-    &quot;r&quot;,
-    &quot;g&quot;,
-    &quot;/&quot;,
-    &quot;d&quot;,
-    &quot;o&quot;,
-    &quot;c&quot;,
-    &quot;s&quot;
-  ],
+  &quot;serviceDocumentation&quot;: &quot;http://jans.org/docs&quot;,
   &quot;claimsLocalesSupported&quot;: [
     &quot;en&quot;
   ],
@@ -8903,6 +8969,10 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   &quot;requestUriParameterSupported&quot;: true,
   &quot;requestUriHashVerificationEnabled&quot;: false,
   &quot;requireRequestUriRegistration&quot;: false,
+  &quot;requestUriBlockList&quot;: [
+    &quot;localhost&quot;,
+    &quot;127.0.0.1&quot;
+  ],
   &quot;opPolicyUri&quot;: &quot;http://www.jans.io/doku.php?id=jans:policy&quot;,
   &quot;opTosUri&quot;: &quot;http://www.jans.io/doku.php?id=jans:tos&quot;,
   &quot;authorizationCodeLifetime&quot;: 60,
@@ -8912,27 +8982,17 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   &quot;accessTokenLifetime&quot;: 300,
   &quot;cleanServiceInterval&quot;: 60,
   &quot;cleanServiceBatchChunkSize&quot;: 10000,
-  &quot;cleanServiceBaseDns&quot;: null,
   &quot;keyRegenerationEnabled&quot;: true,
   &quot;keyRegenerationInterval&quot;: 48,
-  &quot;defaultSignatureAlgorithm&quot;: [
-    &quot;R&quot;,
-    &quot;S&quot;,
-    &quot;2&quot;,
-    &quot;5&quot;,
-    &quot;6&quot;
-  ],
-  &quot;oxOpenIdConnectVersion&quot;: &quot;openidconnect-1.0&quot;,
-  &quot;oxId&quot;: &quot;https://testjans.gluu.com/oxid/service/jans/inum&quot;,
-  &quot;dynamicRegistrationEnabled&quot;: true,
+  &quot;defaultSignatureAlgorithm&quot;: &quot;RS256&quot;,
+  &quot;jansOpenIdConnectVersion&quot;: &quot;openidconnect-1.0&quot;,
+  &quot;jansId&quot;: &quot;https://example.jans.io/oxid/service/jans/inum&quot;,
   &quot;dynamicRegistrationExpirationTime&quot;: -1,
   &quot;dynamicRegistrationPersistClientAuthorizations&quot;: true,
   &quot;trustedClientEnabled&quot;: true,
   &quot;skipAuthorizationForOpenIdScopeAndPairwiseId&quot;: false,
   &quot;dynamicRegistrationScopesParamEnabled&quot;: true,
   &quot;dynamicRegistrationPasswordGrantTypeEnabled&quot;: false,
-  &quot;dynamicRegistrationAllowedPasswordGrantScopes&quot;: null,
-  &quot;dynamicRegistrationCustomObjectClass&quot;: null,
   &quot;personCustomObjectClassList&quot;: [
     &quot;jansCustomPerson&quot;,
     &quot;jansPerson&quot;
@@ -8947,29 +9007,29 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   &quot;useNestedJwtDuringEncryption&quot;: true,
   &quot;expirationNotificatorMapSizeLimit&quot;: 100000,
   &quot;expirationNotificatorIntervalInSeconds&quot;: 600,
+  &quot;redirectUrisRegexEnabled&quot;: true,
+  &quot;useHighestLevelScriptIfAcrScriptNotFound&quot;: true,
   &quot;authenticationFiltersEnabled&quot;: false,
   &quot;clientAuthenticationFiltersEnabled&quot;: false,
   &quot;clientRegDefaultToCodeFlowWithRefresh&quot;: true,
+  &quot;grantTypesAndResponseTypesAutofixEnabled&quot;: false,
   &quot;authenticationFilters&quot;: [
     {
       &quot;filter&quot;: &quot;(&amp;(mail=*{0}*)(inum={1}))&quot;,
       &quot;bind&quot;: false,
-      &quot;bind-password-attribute&quot;: null,
-      &quot;base-dn&quot;: null
+      &quot;baseDn&quot;: &quot;ou=people,o=jans&quot;
     },
     {
       &quot;filter&quot;: &quot;uid={0}&quot;,
       &quot;bind&quot;: true,
-      &quot;bind-password-attribute&quot;: null,
-      &quot;base-dn&quot;: null
+      &quot;bindPasswordAttribute&quot;: &quot;pwd&quot;,
+      &quot;baseDn&quot;: &quot;ou=people,o=jans&quot;
     }
   ],
   &quot;clientAuthenticationFilters&quot;: [
     {
       &quot;filter&quot;: &quot;myCustomAttr1={0}&quot;,
-      &quot;bind&quot;: null,
-      &quot;bind-password-attribute&quot;: null,
-      &quot;base-dn&quot;: null
+      &quot;baseDn&quot;: &quot;ou=clients,o=jans&quot;
     }
   ],
   &quot;corsConfigurationFilters&quot;: [
@@ -8979,7 +9039,6 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
       &quot;corsAllowedOrigins&quot;: &quot;*&quot;,
       &quot;corsAllowedMethods&quot;: &quot;GET,POST,HEAD,OPTIONS&quot;,
       &quot;corsAllowedHeaders&quot;: &quot;Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers&quot;,
-      &quot;corsExposedHeaders&quot;: null,
       &quot;corsSupportCredentials&quot;: true,
       &quot;corsLoggingEnabled&quot;: false,
       &quot;corsPreflightMaxAge&quot;: 1800,
@@ -8988,63 +9047,43 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   ],
   &quot;sessionIdUnusedLifetime&quot;: 86400,
   &quot;sessionIdUnauthenticatedUnusedLifetime&quot;: 120,
-  &quot;sessionIdEnabled&quot;: true,
   &quot;sessionIdPersistOnPromptNone&quot;: true,
   &quot;sessionIdRequestParameterEnabled&quot;: false,
   &quot;changeSessionIdOnAuthentication&quot;: true,
   &quot;sessionIdPersistInCache&quot;: false,
+  &quot;includeSidInResponse&quot;: false,
   &quot;sessionIdLifetime&quot;: 86400,
   &quot;serverSessionIdLifetime&quot;: 86400,
   &quot;configurationUpdateInterval&quot;: 3600,
   &quot;enableClientGrantTypeUpdate&quot;: true,
   &quot;dynamicGrantTypeDefault&quot;: [
-    &quot;authorization_code&quot;,
     &quot;refresh_token&quot;,
     &quot;urn:ietf:params:oauth:grant-type:device_code&quot;,
+    &quot;urn:ietf:params:oauth:grant-type:token-exchange&quot;,
     &quot;client_credentials&quot;,
     &quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;,
-    &quot;urn:ietf:params:oauth:grant-type:token-exchange&quot;,
+    &quot;authorization_code&quot;,
     &quot;implicit&quot;
   ],
-  &quot;cssLocation&quot;: null,
-  &quot;jsLocation&quot;: null,
-  &quot;imgLocation&quot;: null,
   &quot;metricReporterInterval&quot;: 300,
   &quot;metricReporterKeepDataDays&quot;: 15,
-  &quot;metricReporterEnabled&quot;: false,
-  &quot;pairwiseIdType&quot;: [
-    &quot;a&quot;,
-    &quot;l&quot;,
-    &quot;g&quot;,
-    &quot;o&quot;,
-    &quot;r&quot;,
-    &quot;i&quot;,
-    &quot;t&quot;,
-    &quot;h&quot;,
-    &quot;m&quot;,
-    &quot;i&quot;,
-    &quot;c&quot;
-  ],
-  &quot;pairwiseCalculationKey&quot;: &quot;rYX4K1hkDOAc0ie6ESr6T4N2z&quot;,
-  &quot;pairwiseCalculationSalt&quot;: &quot;1smvd6pswngMcjB4xVcMuIiuyH&quot;,
+  &quot;pairwiseIdType&quot;: &quot;algorithmic&quot;,
+  &quot;pairwiseCalculationKey&quot;: &quot;Yr1IUdevJZPRszoeOJps9&quot;,
+  &quot;pairwiseCalculationSalt&quot;: &quot;3NrpD7CuD6yN8g1pvovDT8CWmr&quot;,
   &quot;shareSubjectIdBetweenClientsWithSameSectorId&quot;: true,
   &quot;webKeysStorage&quot;: &quot;keystore&quot;,
   &quot;dnName&quot;: &quot;CN=Jans Auth CA Certificates&quot;,
-  &quot;keyStoreFile&quot;: &quot;/etc/certs/jans-auth-keys.jks&quot;,
-  &quot;keyStoreSecret&quot;: &quot;nXfbJvxuVRNi&quot;,
+  &quot;keyStoreFile&quot;: &quot;/etc/certs/jans-auth-keys.p12&quot;,
+  &quot;keyStoreSecret&quot;: &quot;wCPqCzNQxwLg&quot;,
   &quot;keySelectionStrategy&quot;: &quot;OLDER&quot;,
-  &quot;oxElevenTestModeToken&quot;: null,
-  &quot;oxElevenGenerateKeyEndpoint&quot;: &quot;https://testjans.gluu.com/oxeleven/rest/oxeleven/generateKey&quot;,
-  &quot;oxElevenSignEndpoint&quot;: &quot;https://testjans.gluu.com/oxeleven/rest/oxeleven/sign&quot;,
-  &quot;oxElevenVerifySignatureEndpoint&quot;: &quot;https://testjans.gluu.com/oxeleven/rest/oxeleven/verifySignature&quot;,
-  &quot;oxElevenDeleteKeyEndpoint&quot;: &quot;https://testjans.gluu.com/oxeleven/rest/oxeleven/deleteKey&quot;,
+  &quot;keySignWithSameKeyButDiffAlg&quot;: false,
+  &quot;jansElevenGenerateKeyEndpoint&quot;: &quot;https://example.jans.io/oxeleven/rest/oxeleven/generateKey&quot;,
+  &quot;jansElevenSignEndpoint&quot;: &quot;https://example.jans.io/oxeleven/rest/oxeleven/sign&quot;,
+  &quot;jansElevenVerifySignatureEndpoint&quot;: &quot;https://example.jans.io/oxeleven/rest/oxeleven/verifySignature&quot;,
+  &quot;jansElevenDeleteKeyEndpoint&quot;: &quot;https://example.jans.io/oxeleven/rest/oxeleven/deleteKey&quot;,
   &quot;introspectionAccessTokenMustHaveUmaProtectionScope&quot;: false,
+  &quot;introspectionSkipAuthorization&quot;: false,
   &quot;endSessionWithAccessToken&quot;: false,
-  &quot;cookieDomain&quot;: null,
-  &quot;enabledOAuthAuditLogging&quot;: null,
-  &quot;jmsBrokerURISet&quot;: null,
-  &quot;jmsUserName&quot;: null,
-  &quot;jmsPassword&quot;: null,
   &quot;clientWhiteList&quot;: [
     &quot;*&quot;
   ],
@@ -9062,26 +9101,53 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   &quot;logClientNameOnClientAuthentication&quot;: false,
   &quot;disableJdkLogger&quot;: true,
   &quot;authorizationRequestCustomAllowedParameters&quot;: [
-    &quot;customParam2&quot;,
-    &quot;customParam3&quot;,
-    &quot;customParam1&quot;
+    {
+      &quot;paramName&quot;: &quot;customParam3&quot;,
+      &quot;returnInResponse&quot;: false
+    },
+    {
+      &quot;paramName&quot;: &quot;customParam1&quot;,
+      &quot;returnInResponse&quot;: false
+    },
+    {
+      &quot;paramName&quot;: &quot;customParam4&quot;,
+      &quot;returnInResponse&quot;: true
+    },
+    {
+      &quot;paramName&quot;: &quot;customParam5&quot;,
+      &quot;returnInResponse&quot;: true
+    },
+    {
+      &quot;paramName&quot;: &quot;customParam2&quot;,
+      &quot;returnInResponse&quot;: false
+    },
+    {
+      &quot;paramName&quot;: &quot;agama_flow&quot;,
+      &quot;returnInResponse&quot;: false
+    }
   ],
-  &quot;legacyDynamicRegistrationScopeParam&quot;: false,
   &quot;openidScopeBackwardCompatibility&quot;: false,
   &quot;disableU2fEndpoint&quot;: false,
+  &quot;rotateDeviceSecret&quot;: false,
+  &quot;returnDeviceSecretFromAuthzEndpoint&quot;: false,
+  &quot;dcrSignatureValidationEnabled&quot;: false,
+  &quot;dcrAuthorizationWithClientCredentials&quot;: false,
+  &quot;dcrAuthorizationWithMTLS&quot;: false,
   &quot;useLocalCache&quot;: true,
   &quot;fapiCompatibility&quot;: false,
   &quot;forceIdTokenHintPrecense&quot;: false,
+  &quot;rejectEndSessionIfIdTokenExpired&quot;: false,
+  &quot;allowEndSessionWithUnmatchedSid&quot;: false,
   &quot;forceOfflineAccessScopeToEnableRefreshToken&quot;: true,
   &quot;errorReasonEnabled&quot;: false,
   &quot;removeRefreshTokensForClientOnLogout&quot;: true,
   &quot;skipRefreshTokenDuringRefreshing&quot;: false,
   &quot;refreshTokenExtendLifetimeOnRotation&quot;: false,
+  &quot;checkUserPresenceOnRefreshToken&quot;: false,
   &quot;consentGatheringScriptBackwardCompatibility&quot;: false,
   &quot;introspectionScriptBackwardCompatibility&quot;: false,
   &quot;introspectionResponseScopesBackwardCompatibility&quot;: false,
   &quot;softwareStatementValidationType&quot;: &quot;script&quot;,
-  &quot;softwareStatementValidationClaimName&quot;: null,
   &quot;authenticationProtectionConfiguration&quot;: {
     &quot;attemptExpiration&quot;: 15,
     &quot;maximumAllowedAttemptsWithoutDelay&quot;: 4,
@@ -9093,16 +9159,14 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   &quot;deviceAuthzRequestExpiresIn&quot;: 1800,
   &quot;deviceAuthzTokenPollInterval&quot;: 5,
   &quot;deviceAuthzResponseTypeToProcessAuthz&quot;: &quot;code&quot;,
-  &quot;backchannelClientId&quot;: null,
-  &quot;backchannelRedirectUri&quot;: &quot;https://testjans.gluu.com/jans-auth/ciba/home.htm&quot;,
-  &quot;backchannelAuthenticationEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/bc-authorize&quot;,
-  &quot;backchannelDeviceRegistrationEndpoint&quot;: &quot;https://testjans.gluu.com/jans-auth/restv1/bc-deviceRegistration&quot;,
+  &quot;backchannelRedirectUri&quot;: &quot;https://example.jans.io/jans-auth/ciba/home.htm&quot;,
+  &quot;backchannelAuthenticationEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/bc-authorize&quot;,
+  &quot;backchannelDeviceRegistrationEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/bc-deviceRegistration&quot;,
   &quot;backchannelTokenDeliveryModesSupported&quot;: [
     &quot;poll&quot;,
     &quot;ping&quot;,
     &quot;push&quot;
   ],
-  &quot;backchannelAuthenticationRequestSigningAlgValuesSupported&quot;: null,
   &quot;backchannelUserCodeParameterSupported&quot;: false,
   &quot;backchannelBindingMessagePattern&quot;: &quot;^[a-zA-Z0-9]{4,8}$&quot;,
   &quot;backchannelAuthenticationResponseExpiresIn&quot;: 3600,
@@ -9112,29 +9176,67 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     &quot;uid&quot;,
     &quot;mail&quot;
   ],
-  &quot;cibaEndUserNotificationConfig&quot;: {
-    &quot;apiKey&quot;: null,
-    &quot;authDomain&quot;: null,
-    &quot;databaseURL&quot;: null,
-    &quot;projectId&quot;: null,
-    &quot;storageBucket&quot;: null,
-    &quot;messagingSenderId&quot;: null,
-    &quot;appId&quot;: null,
-    &quot;notificationUrl&quot;: null,
-    &quot;notificationKey&quot;: null,
-    &quot;publicVapidKey&quot;: null
-  },
+  &quot;cibaEndUserNotificationConfig&quot;: {},
   &quot;backchannelRequestsProcessorJobIntervalSec&quot;: 5,
   &quot;backchannelRequestsProcessorJobChunkSize&quot;: 100,
   &quot;cibaGrantLifeExtraTimeSec&quot;: 180,
   &quot;cibaMaxExpirationTimeAllowedSec&quot;: 1800,
-  &quot;cibaEnabled&quot;: false,
+  &quot;dpopSigningAlgValuesSupported&quot;: [
+    &quot;RS256&quot;,
+    &quot;RS384&quot;,
+    &quot;RS512&quot;,
+    &quot;ES256&quot;,
+    &quot;ES384&quot;,
+    &quot;ES512&quot;,
+    &quot;ES512&quot;,
+    &quot;PS256&quot;,
+    &quot;PS384&quot;,
+    &quot;PS512&quot;
+  ],
+  &quot;dpopTimeframe&quot;: 5,
+  &quot;dpopJtiCacheTime&quot;: 3600,
+  &quot;allowIdTokenWithoutImplicitGrantType&quot;: false,
   &quot;discoveryCacheLifetimeInMinutes&quot;: 60,
+  &quot;discoveryDenyKeys&quot;: [
+    &quot;id_generation_endpoint&quot;,
+    &quot;auth_level_mapping&quot;,
+    &quot;scope_to_claims_mapping&quot;,
+    &quot;op_policy_uri&quot;
+  ],
   &quot;httpLoggingEnabled&quot;: false,
-  &quot;httpLoggingExcludePaths&quot;: null,
-  &quot;externalLoggerConfiguration&quot;: null,
-  &quot;redirectUrisRegexEnabled&quot;: false,
-  &quot;useHighestLevelScriptIfAcrScriptNotFound&quot;: true
+  &quot;agamaConfiguration&quot;: {
+    &quot;enabled&quot;: false,
+    &quot;rootDir&quot;: &quot;/opt/jans/jetty/jans-config-api/agama&quot;,
+    &quot;templatesPath&quot;: &quot;/ftl&quot;,
+    &quot;scriptsPath&quot;: &quot;/scripts&quot;,
+    &quot;serializerType&quot;: &quot;KRYO&quot;,
+    &quot;maxItemsLoggedInCollections&quot;: 9,
+    &quot;pageMismatchErrorPage&quot;: &quot;mismatch.ftlh&quot;,
+    &quot;interruptionErrorPage&quot;: &quot;timeout.ftlh&quot;,
+    &quot;crashErrorPage&quot;: &quot;crash.ftlh&quot;,
+    &quot;finishedFlowPage&quot;: &quot;finished.ftlh&quot;,
+    &quot;bridgeScriptPage&quot;: &quot;agama.xhtml&quot;,
+    &quot;defaultResponseHeaders&quot;: {
+      &quot;Cache-Control&quot;: &quot;max-age=0, no-store&quot;
+    }
+  },
+  &quot;ssaConfiguration&quot;: {
+    &quot;ssaEndpoint&quot;: &quot;https://example.jans.io/jans-auth/restv1/ssa&quot;,
+    &quot;ssaSigningAlg&quot;: &quot;RS256&quot;,
+    &quot;ssaExpirationInDays&quot;: 30
+  },
+  &quot;blockWebviewAuthorizationEnabled&quot;: false,
+  &quot;userInfoConfiguration&quot;: {
+    &quot;dateFormatterPattern&quot;: {
+      &quot;birthdate&quot;: &quot;yyyy-MM-dd&quot;
+    }
+  },
+  &quot;fapi&quot;: false,
+  &quot;allResponseTypesSupported&quot;: [
+    &quot;token&quot;,
+    &quot;id_token&quot;,
+    &quot;code&quot;
+  ]
 }
 </code></pre></div>
 <h2 id="partially-modify-jans-auth-server-configuration-properties">Partially Modify Jans Auth Server Configuration Properties<a class="headerlink" href="#partially-modify-jans-auth-server-configuration-properties" title="Permanent link">#</a></h2>
@@ -9174,7 +9276,7 @@ So, the <code>.json</code> file will look like this:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-28T15:30:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-24T17:45:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-24</span>
       
         <br>
         Created:
