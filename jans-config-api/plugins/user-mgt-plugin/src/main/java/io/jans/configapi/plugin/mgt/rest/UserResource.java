@@ -2,7 +2,6 @@ package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -56,13 +55,8 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private class UserPagedResult extends PagedResult<CustomUser>{};
 
-
-
     @Inject
     Logger logger;
-
-    @Inject
-    EncryptionService encryptionService;
 
     @Inject
     MgtUtil mgtUtil;
@@ -218,7 +212,7 @@ public class UserResource extends BaseResource {
     @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_WRITE_ACCESS }))
-    @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-patch.json")))
+    @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Patched CustomUser Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
