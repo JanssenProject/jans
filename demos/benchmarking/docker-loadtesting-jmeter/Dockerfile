@@ -20,36 +20,33 @@ ENV FQDN="https://demoexample.jans.io" \
     AUTHZ_CLIENT_ID="" \
     AUTHZ_CLIENT_SECRET="" \
     ROPC_CLIENT_ID="" \
-    ROPC_CLIENT_SECRET="test_ro_client_password" \
-    FIRST_BATCH_MIN=0 \
-    FIRST_BATCH_MAX=5000000 \
-    SECOND_BATCH_MIN=5000001\
-    SECOND_BATCH_MAX=50000000 \
+    ROPC_CLIENT_SECRET="" \
     RUN_AUTHZ_TEST=false \
     RUN_ROPC_TEST=false \
     TEST_USERS_PREFIX_STRING="test_user" \
-    THREADCOUNT=200 \
+    THREAD_COUNT=200 \
     COUCHBASE_URL="" \
     COUCHBASE_PW="" \
     USER_NUMBER_STARTING_POINT=0 \
     USER_NUMBER_ENDING_POINT=50000000 \
-    LOAD_USERS_TO_COUCHBASE="" \
-    LOAD_USERS_TO_LDAP="" \
-    LOAD_USERS_TO_SPANNER="" \
-    LOAD_USERS_TO_RDBMS="" \
+    LOAD_USERS_TO_COUCHBASE=false \
+    LOAD_USERS_TO_LDAP=false \
+    LOAD_USERS_TO_SPANNER=false \
+    LOAD_USERS_TO_RDBMS=false \
+    USER_SPLIT_PARALLEL_THREADS=20 \
     GOOGLE_APPLICATION_CREDENTIALS=""\
     GOOGLE_PROJECT_ID=""\
     GOOGLE_SPANNER_INSTANCE_ID=""\
     GOOGLE_SPANNER_DATABASE_ID=""\
-    LDAP_URL="" \
+    LDAP_URL="opendj:1636" \
     LDAP_PW="" \
-    LDAP_DN="" \
+    LDAP_DN="cn=directory manager" \
     # pgsql or mysql
-    RDBMS_TYPE="" \
-    RDBMS_DB="" \
-    RDBMS_USER="" \
+    RDBMS_TYPE="mysql" \
+    RDBMS_DB="jans" \
+    RDBMS_USER="jans" \
     RDBMS_PASSWORD="" \
-    RDBMS_HOST=""
+    RDBMS_HOST="localhost"
 
 # ===============
 # Install Couchbase Client

@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-users
+  name: load-users-ldap-cm
+data:
+  LDAP_URL: opendj:1636
+  LDAP_PW: Test1234#
+  LOAD_USERS_TO_LDAP: "true"
+  USER_NUMBER_STARTING_POINT: "0"
+  USER_NUMBER_ENDING_POINT: "100000"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: load-users
+  name: load-users-ldap
+spec:
+  template:
+    metadata:
+      labels:
+        app: load-users
+    spec:
+      #hostAliases:
+      #  - ip: NGINX_IP
+      #    hostnames:
+      #      - FQDN
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-users-ldap-cm
+        image: janssenproject/demo_loadtesting:1.0.0_dev
+        name: load-users
+        resources:
+          limits:
+            cpu: 10000m
+            memory: 5000Mi
+          requests:
+            cpu: 10000m
+            memory: 5000Mi
+      restartPolicy: Never

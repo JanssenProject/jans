@@ -1,18 +1,15 @@
 apiVersion: v1
 data:
-  AUTHZ_CLIENT_ID: 1001.21beb9f2-e8de-4b10-949f-5cf31a28f95b # Saved from steps above
-  AUTHZ_CLIENT_SECRET: FWLmNKmVcQZt # Saved from steps above
+  AUTHZ_CLIENT_ID: "aa4c8edf-1d68-462b-ac49-178c7b1db8fd"
+  AUTHZ_CLIENT_SECRET: "9c077c8a-dc84-4baa-abde-edc1a343e3e3"
   # First batch is the users from min - max that login 10% every time
-  FIRST_BATCH_MAX: "5000000"
+  FIRST_BATCH_MAX: "1000"
   FIRST_BATCH_MIN: "0"
   # Second batch is the users from min - max that login 90% every time
-  SECOND_BATCH_MAX: "50000000"
-  SECOND_BATCH_MIN: "5000001"
+  SECOND_BATCH_MAX: "5000"
+  SECOND_BATCH_MIN: "1002"
   FQDN: demoexample.jans.io
-  ROPC_CLIENT_ID: c1b9628e-84f5-43e6-bf00-b341543703d9 # Saved from steps above
-  ROPC_CLIENT_SECRET: test_ro_client_password # Saved from steps above
   RUN_AUTHZ_TEST: "true" # or "false"
-  RUN_ROPC_TEST: "true" # or "false"
 kind: ConfigMap
 metadata:
   labels:
@@ -35,6 +32,10 @@ spec:
       labels:
         app: load-testing
     spec:
+      #hostAliases:
+      #- ip: 35.159.30.85
+      #  hostnames:
+      #  - demoexample.jans.io
       containers:
       - envFrom:
         - configMapRef:
@@ -44,8 +45,8 @@ spec:
         name: load-testing
         resources:
           requests:
-            memory: "4000Mi"
-            cpu: "4000m"
+            memory: "2000Mi"
+            cpu: "2000m"
           limits:
-            memory: "4000Mi"
-            cpu: "4000m"
+            memory: "2000Mi"
+            cpu: "2000m"

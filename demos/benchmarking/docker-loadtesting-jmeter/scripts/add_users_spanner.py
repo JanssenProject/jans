@@ -43,10 +43,10 @@ logger.info("Starting to add users to Spanner. This will add user{} to user{} ".
     str(user_number_starting_point), str(user_number_ending_point)))
 project_id = os.environ.get("GOOGLE_PROJECT_ID", "")
 client = spanner.Client(project=project_id)
-instance_id = os.environ.get("GOOGLE_SPANNER_INSTANCE_ID", "cn-test")
+instance_id = os.environ.get("GOOGLE_SPANNER_INSTANCE_ID", "")
 instance = client.instance(instance_id)
 
-database_id = os.environ.get("GOOGLE_SPANNER_DATABASE_ID", "load")
+database_id = os.environ.get("GOOGLE_SPANNER_DATABASE_ID", "")
 database = instance.database(database_id)
 
 

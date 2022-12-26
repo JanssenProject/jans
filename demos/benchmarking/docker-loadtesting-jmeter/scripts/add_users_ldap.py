@@ -30,7 +30,7 @@ user_id_prefix = os.environ.get("TEST_USERS_PREFIX_STRING", "test_user")
 logger.info("Starting to add users to LDAP. This will add user{} to user{} ".format(str(user_number_starting_point),
                                                                                     str(user_number_ending_point)))
 bind_dn = os.environ.get("LDAP_DN", "cn=directory manager")
-ldapPass = os.environ.get("LDAP_PW", "Test1234#")
+ldapPass = os.environ.get("LDAP_PW", "")
 ldap_host = os.environ.get("LDAP_URL", "opendj:1636")
 
 
