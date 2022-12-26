@@ -163,6 +163,7 @@ public class ClientsResource extends ConfigBaseResource {
         checkScopeFormat(client);
 
         // Claim validation
+        String[] claims = client.getClaims();
         if (client.getClaims() != null && client.getClaims().length > 0) {
             validateClaim(client);
         }
@@ -184,7 +185,7 @@ public class ClientsResource extends ConfigBaseResource {
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
-
+        result.setClaims(claims);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -214,6 +215,7 @@ public class ClientsResource extends ConfigBaseResource {
         checkScopeFormat(client);
 
         // Claim validation
+        String[] claims = client.getClaims();
         if (client.getClaims() != null && client.getClaims().length > 0) {
             validateClaim(client);
         }
@@ -230,7 +232,7 @@ public class ClientsResource extends ConfigBaseResource {
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
         result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-
+        result.setClaims(claims);
         return Response.ok(result).build();
     }
 
@@ -410,7 +412,7 @@ public class ClientsResource extends ConfigBaseResource {
             }
             logger.debug("Attribute from DB - {}'", gluuAttribute);
             if (gluuAttribute != null) {
-                validClaims.add(claim);
+                validClaims.add(gluuAttribute.getDn());
             } else {
                 invalidClaims.add(claim);
             }
