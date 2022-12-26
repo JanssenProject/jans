@@ -55,10 +55,10 @@ def _transform_api_dynamic_config(conf):
         }
         should_update = True
 
-    if "auditLog" not in conf:
-        conf["auditLog"] = {
+    if "auditLogConf" not in conf:
+        conf["auditLogConf"] = {
             "enabled": True,
-            "headerAttributes": ["User-inum"]
+            "headerAttributes": ["User-inum"],
         }
         should_update = True
     return conf, should_update
