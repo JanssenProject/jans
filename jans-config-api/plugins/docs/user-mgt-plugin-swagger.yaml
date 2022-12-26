@@ -648,7 +648,7 @@ paths:
       requestBody:
         description: UserPatchRequest
         content:
-          application/json-patch+json:
+          application/json:
             schema:
               $ref: '#/components/schemas/UserPatchRequest'
             examples:
