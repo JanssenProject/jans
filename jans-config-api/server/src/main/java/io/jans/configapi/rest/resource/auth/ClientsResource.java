@@ -13,6 +13,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
