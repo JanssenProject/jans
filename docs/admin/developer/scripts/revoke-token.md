@@ -31,6 +31,7 @@ The revoke token script implements the [RevokeTokenType](https://github.com/Jans
 | `context` | [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java) |
 
 ## Use Case: Basic Token Revocation
+This script has been adapted from the Gluu Server [sample revoke token script](https://github.com/GluuFederation/community-edition-setup/blob/version_4.4.0/static/extension/revoke_token/revoke_token.py).
 
 ### Script Type: Python
 ```python
