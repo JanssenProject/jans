@@ -215,7 +215,7 @@ public class ApiProtectionService {
         try {
             Client client = this.clientService.getClientByInum(clientId);
             log.debug("updateScopeForClientIfNeeded() - Verify client:{} ", client);
-
+            log.debug("updateScopeForClientIfNeeded() - 1 - client.getClientSecret():{} ", client.getClientSecret());
             if (client != null) {
                 // Assign scope
                 // Prepare scope array
@@ -245,6 +245,7 @@ public class ApiProtectionService {
             client = this.clientService.getClientByInum(clientId);
             log.debug(" Verify scopes post assignment, clientId:{}, scopes:{}", clientId,
                     Arrays.asList(client.getScopes()));
+            log.debug("updateScopeForClientIfNeeded() - 2 - client.getClientSecret():{} ", client.getClientSecret());
         } catch (Exception ex) {
             log.error("Error while searching internal client", ex);
         }
