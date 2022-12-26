@@ -11,7 +11,9 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.SearchRequest;
+
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -44,6 +46,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
+@RequestInterceptor
 public class UserResource extends BaseResource {
 
     private static final String USER = "user";

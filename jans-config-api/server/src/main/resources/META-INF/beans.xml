@@ -4,5 +4,6 @@
         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/beans_3_0.xsd"
         bean-discovery-mode="all" version="3.0">
 	<interceptors>
+		<class>io.jans.configapi.interceptor.RequestReaderInterceptor</class>
 	</interceptors>
 </beans>
