@@ -275,9 +275,9 @@ nav:
             - 'Backchannel Authentication': 'admin/auth-server/endpoints/backchannel-authentication.md'
         - 'Crypto':
             - 'admin/auth-server/crypto/README.md'
-            - 'Supported Algorithms': 'admin/auth-server/crypto/supported-algorithms.md'
+            - 'Keys': 'admin/auth-server/crypto/keys.md'
             - 'Key Storage': 'admin/auth-server/crypto/key-storage.md'
-            - 'Key Generation': 'admin/auth-server/crypto/key-generation.md'
+            - 'Key Generation and Rotation': 'admin/auth-server/crypto/key-generation.md'
         - 'OpenID Features':
             - 'admin/auth-server/openid-features/README.md'
             - 'Pairwise/Public Subject Identifiers': 'admin/auth-server/openid-features/subject-identifiers.md'
