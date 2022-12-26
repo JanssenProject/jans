@@ -186,6 +186,8 @@ public class ClientsResource extends ConfigBaseResource {
         Client result = clientService.getClientByInum(inum);
         result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
         result.setClaims(claims);
+
+        logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -233,6 +235,8 @@ public class ClientsResource extends ConfigBaseResource {
         Client result = clientService.getClientByInum(existingClient.getClientId());
         result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
         result.setClaims(claims);
+
+        logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
 
