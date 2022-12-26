@@ -77,15 +77,16 @@ class JansAuthInstaller(JettyInstaller):
 
 
     def get_config_api_scopes(self):
-        data = base.current_app.ConfigApiInstaller.read_config_api_swagger()
+        scopes_def = base.current_app.ConfigApiInstaller.get_scope_defs()
         scope_list = []
 
-        for epath in data['paths']:
-            for m in data['paths'][epath]:
-                if 'security' in data['paths'][epath][m]:
-                    scope_items = [item['oauth2'] for item in data['paths'][epath][m]['security']]
-                    for scopes in scope_items:
-                        scope_list += scopes
+        for resource in scopes_def['resources']:
+
+            for condition in resource.get('conditions', []):
+
+                for scope in condition.get('scopes', []):
+                    if scope.get('inum') and scope.get('name'):
+                        scope_list.append(scope['name'])
 
         return scope_list
 
