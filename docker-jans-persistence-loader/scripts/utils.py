@@ -199,11 +199,6 @@ def merge_auth_ctx(ctx):
 
 
 def merge_jans_cli_ctx(manager, ctx):
-    # WARNING:
-    # - deprecated configs and secrets for role_based
-    # - move the configs and secrets creation to configurator
-    # - remove them on future release
-
     # jans-cli-tui client
     ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
     if not ctx["role_based_client_id"]:
