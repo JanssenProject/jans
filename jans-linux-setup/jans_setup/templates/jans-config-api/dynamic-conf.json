@@ -54,7 +54,7 @@
 	 "enabled"
      ]
   },
-  "auditLog": {
+  "auditLogConf": {
      "enabled": true,
      "headerAttributes": [
 	  "User-inum"
