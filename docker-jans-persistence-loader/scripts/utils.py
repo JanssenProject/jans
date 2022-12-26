@@ -299,7 +299,7 @@ def get_ldif_mappings(group, optional_scopes=None):
     return ldif_mappings
 
 
-def get_config_api_swagger(path="/app/static/jans-config-api-swagger.yaml"):
+def get_config_api_swagger(path="/app/static/jans-config-api-swagger-auto.yaml"):
     with open(path) as f:
         txt = f.read()
     txt = txt.replace("\t", " ")

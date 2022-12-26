@@ -53,7 +53,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
     && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/ \
-    && cp ${JANS_CONFIG_API_DOCS}/jans-config-api-swagger.yaml -P /app/static/ \
+    && cp ${JANS_CONFIG_API_DOCS}/jans-config-api-swagger-auto.yaml -P /app/static/ \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
