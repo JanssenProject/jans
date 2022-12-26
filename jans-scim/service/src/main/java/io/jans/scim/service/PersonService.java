@@ -6,6 +6,18 @@
 
 package io.jans.scim.service;
 
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+
 import io.jans.as.model.common.IdType;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.PersistenceEntryManager;
@@ -23,20 +35,8 @@ import io.jans.scim.util.OxTrustConstants;
 import io.jans.util.ArrayHelper;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.time.Instant;
-import java.util.UUID;
-
-import org.slf4j.Logger;
 
 /**
  * Provides operations with persons
@@ -91,6 +91,8 @@ public class PersonService implements Serializable {
 			if (persons == null || persons.size() == 0) {
 				person.setCreationDate(new Date());
 				attributeService.applyMetaData(person.getCustomAttributes());
+
+				ignoreCustomObjectClassesForNonLDAP(person);
 				persistenceEntryManager.persist(person);
 			} else {
 				throw new DuplicateEntryException("Duplicate UID value: " + person.getUid());
@@ -104,6 +106,19 @@ public class PersonService implements Serializable {
 		}
 
 	}
+
+    private GluuCustomPerson ignoreCustomObjectClassesForNonLDAP(GluuCustomPerson person) {
+        String persistenceType = persistenceEntryManager.getPersistenceType();
+        log.debug("persistenceType: {}", persistenceType);
+        if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
+        	log.debug(
+                    "Setting CustomObjectClasses :{} to null as it's used only for LDAP and current persistenceType is {} ",
+                    person.getCustomObjectClasses(), persistenceType);
+        	person.setCustomObjectClasses(null);
+        }
+
+        return person;
+    }
 
 	public void updatePerson(GluuCustomPerson person) throws Exception {
 		try {
