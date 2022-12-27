@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -2955,6 +2955,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Userinfo
@@ -2971,6 +2973,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2979,15 +2983,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+    Disabling The Endpoint Using Feature Flag
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#configuration-properties" class="md-nav__link">
+    Configuration Properties
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
   </a>
   
 </li>
@@ -8643,6 +8654,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8651,15 +8664,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+    Disabling The Endpoint Using Feature Flag
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#configuration-properties" class="md-nav__link">
+    Configuration Properties
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
   </a>
   
 </li>
@@ -8700,6 +8720,11 @@
     
       
       
+        <span class="md-tag">userinfo</span>
+      
+    
+      
+      
         <span class="md-tag">endpoint</span>
       
     
@@ -8713,12 +8738,40 @@
   </a>
 
 
-  <h1>Userinfo</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
+<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
+<p>Userinfo endpoint is an OAuth2 protected endpoint that is used to retrieve claims about an authenticated end-user.
+Userinfo endpoint is defined in the <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">OpenID Connect specification</a>.</p>
+<p>URL to access userinfo endpoint on Janssen Server is listed in the response of Janssen Server's well-known 
+<a href="../configuration/">configuration endpoint</a> given below. </p>
+<div class="highlight"><pre><span></span><code>https://&lt;jans-server-host&gt;/jans-auth/.well-known/openid-configuration
+</code></pre></div>
+<p><code>userinfo_endpoint</code> claim in the response specifies the URL for userinfo endpoint. By default, userinfo endpoint looks
+like below:</p>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/userinfo
+</code></pre></div>
+<p>In response to a valid request, the userinfo endpoint returns user information in JSON format similar to below: </p>
+<p>TODO: add sample response</p>
+<p>Since userinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to 
+access the endpoint. More information about request and response of the userinfo endpoint can be found in 
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info">jans-auth-server module</a>.</p>
+<h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
+<p>Using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#userinfo">USERINFO feature flag</a></p>
+<p>TODO: add documentation on how to set-unset feature flags</p>
+<h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
+<p>Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. <a href="link to CURL command that will be used to set properties">Set property 
+values</a> according to your need. </p>
+<p>TODO: add documentation about how to set properties
+TODO: Add better description to properties</p>
+<ul>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#mtlsuserinfoendpoint">mtlsUserInfoEndpoint</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#userinfoconfiguration">userInfoConfiguration</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#userinfoencryptionalgvaluessupported">userInfoEncryptionAlgValuesSupported</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#userinfoencryptionencvaluessupported">userInfoEncryptionEncValuesSupported</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#userinfoendpoint">userInfoEndpoint</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#userinfosigningalgvaluessupported">userInfoSigningAlgValuesSupported</a></li>
+</ul>
+<h2 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h2>
+<p>Response from userinfo can be further customized using <a href="../../../developer/scripts/dynamic-scope/">dynamic scope</a> interception script. </p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
@@ -8727,7 +8780,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-27T13:39:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-27</span>
       
         <br>
         Created:
