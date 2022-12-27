@@ -12,7 +12,7 @@ import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.model.ssa.SsaValidationConfig;
 import io.jans.as.model.ssa.SsaValidationType;
-import io.jans.as.model.util.JwtUtil;
+import io.jans.as.server.service.net.UriService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -41,6 +41,9 @@ public class SsaValidationConfigService {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private UriService uriService;
 
     public List<SsaValidationConfig> getByIssuer(String issuer, SsaValidationType type) {
         if (StringUtils.isBlank(issuer)) {
@@ -130,7 +133,7 @@ public class SsaValidationConfigService {
     private JSONObject loadJwks(SsaValidationConfig config) {
         JSONObject jwks = null;
         if (StringUtils.isNotBlank(config.getJwksUri())) {
-            jwks = JwtUtil.getJSONWebKeys(config.getJwksUri());
+            jwks = uriService.loadJson(config.getJwksUri());
         }
 
         if (jwks == null && StringUtils.isNotBlank(config.getJwks())) {
@@ -138,10 +141,10 @@ public class SsaValidationConfigService {
         }
 
         if (jwks == null && StringUtils.isNotBlank(config.getConfigurationEndpoint()) && StringUtils.isNotBlank(config.getConfigurationEndpointClaim())) {
-            final JSONObject responseJson = JwtUtil.getJSONWebKeys(config.getConfigurationEndpoint());
+            final JSONObject responseJson = uriService.loadJson(config.getConfigurationEndpoint());
             final String jwksEndpoint = responseJson.optString(config.getConfigurationEndpointClaim());
             if (StringUtils.isNotBlank(jwksEndpoint)) {
-                jwks = JwtUtil.getJSONWebKeys(jwksEndpoint);
+                jwks = uriService.loadJson(jwksEndpoint);
             }
         }
         return jwks;
