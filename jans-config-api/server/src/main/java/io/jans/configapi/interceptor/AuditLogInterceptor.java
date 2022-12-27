@@ -36,6 +36,7 @@ import jakarta.interceptor.InvocationContext;
 public class AuditLogInterceptor {
 
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
+    private static final Logger LOG = LoggerFactory.getLogger(AuditLogInterceptor.class);
 
     @Context
     UriInfo info;
@@ -54,7 +55,31 @@ public class AuditLogInterceptor {
     public Object aroundReadFrom(InvocationContext context) throws Exception {
 
         try {
-            processRequest(context);
+            LOG.info("Audit Log Interceptor - context:{}, info:{}, request:{}, httpHeaders:{}, AUDIT_LOG:{}", context,
+                    info, request, httpHeaders, AUDIT_LOG);
+            AUDIT_LOG.info("\n ********************** Request ********************** ");
+
+            // Get Audit config
+            AuditLogConf auditLogConf = getAuditLogConf();
+            LOG.info("auditLogConf:{}", auditLogConf);
+
+            // Log if enabled
+            if (auditLogConf != null && auditLogConf.isEnabled()) {
+
+                // Request audit
+                String beanClassName = context.getClass().getName();
+                String method = context.getMethod().getName();
+
+                AUDIT_LOG.info("endpoint:{}, beanClassName:{}, method:{}, from:{}, user:{} ", info.getPath(),
+                        beanClassName, method, request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"));
+
+                // Header attribute audit
+                Map<String, String> headerData = getAuditHeaderAttributes(auditLogConf);
+                AUDIT_LOG.info("headerData:{} ", headerData);
+
+                // Request object audit
+                processRequest(context, auditLogConf);
+            }
 
         } catch (Exception ex) {
             throw new WebApplicationException(ex);
@@ -62,37 +87,24 @@ public class AuditLogInterceptor {
         return context.proceed();
     }
 
-    private void processRequest(InvocationContext context) {
+    private void processRequest(InvocationContext context, AuditLogConf auditLogConf) {
+        LOG.info("Process Audit Log Interceptor - context:{}, auditLogConf:{}", context, auditLogConf);
 
         Object[] ctxParameters = context.getParameters();
         Method method = context.getMethod();
         Class[] clazzArray = method.getParameterTypes();
 
+        LOG.debug("Audit Log Interceptor process - ctxParameters:{}, method:{}, clazzArray:{}", ctxParameters, method,
+                clazzArray);
+
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
-
                 Object obj = ctxParameters[i];
-                // Audit log
-                logAuditData(context, obj);
+                LOG.info("Request obj:{}", obj);
+                AUDIT_LOG.info("objectType:{}, obj:{} ", clazzArray[i], obj);
 
             }
         }
-    }
-
-    private <T> void logAuditData(InvocationContext context, T obj) {
-        try {
-            AuditLogConf auditLogConf = getAuditLogConf();
-            if (auditLogConf != null && auditLogConf.isEnabled()) {
-                AUDIT_LOG.info("====== Request for endpoint:{}, method:{}, from:{}, user:{}, data:{} ", info.getPath(),
-                        context.getMethod(), request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"), obj);
-                Map<String, String> attributeMap = getAuditHeaderAttributes(auditLogConf);
-                AUDIT_LOG.info("attributeMap:{} ", attributeMap);
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
     }
 
     private AuditLogConf getAuditLogConf() {
@@ -100,12 +112,13 @@ public class AuditLogInterceptor {
     }
 
     private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf) {
-
+        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - auditLogConf:{}", auditLogConf);
         if (auditLogConf == null) {
             return Collections.emptyMap();
         }
         List<String> attributes = auditLogConf.getHeaderAttributes();
-
+        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - attributes:{}", attributes);
+        
         Map<String, String> attributeMap = null;
         if (attributes != null && !attributes.isEmpty()) {
             attributeMap = new HashMap<>();
@@ -115,6 +128,8 @@ public class AuditLogInterceptor {
                 attributeMap.put(attributeName, attributeValue);
             }
         }
+
+        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - attributeMap:{}", attributeMap);
         return attributeMap;
     }
 
