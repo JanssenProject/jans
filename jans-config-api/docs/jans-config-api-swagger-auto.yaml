@@ -7299,17 +7299,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -7645,8 +7645,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -7658,6 +7656,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -7761,10 +7761,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -8481,8 +8481,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8510,6 +8508,8 @@ components:
             - STAT
             - PAR
             - SSA
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8810,13 +8810,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

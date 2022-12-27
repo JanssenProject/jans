@@ -99,7 +99,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		Class<?> entryClass = entry.getClass();
 		checkEntryClass(entryClass, false);
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-
+		LOG.error(String.format("BaseEntryManager::propertiesAnnotations: %s", propertiesAnnotations));
 		Object dnValue = getDNValue(entry, entryClass);
 
 		Integer expirationValue = getExpirationValue(entry, entryClass, false);
@@ -110,7 +110,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String[] objectClasses = getObjectClasses(entry, entryClass);
 		attributes.add(new AttributeData(OBJECT_CLASS, objectClasses, true));
 
-		LOG.debug(String.format("LDAP attributes for persist: %s", attributes));
+		LOG.error(String.format("LDAP attributes for persist: %s", attributes));
 
 		persist(dnValue.toString(), objectClasses, attributes, expirationValue);
 	}
@@ -613,7 +613,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	protected <T> Map<String, PropertyAnnotation> getAttributesMap(T entry, List<PropertyAnnotation> propertiesAnnotations,
 			boolean isIgnoreAttributesList) {
 		Map<String, PropertyAnnotation> attributes = new HashMap<String, PropertyAnnotation>();
-		LOG.error("BaseEntryManager::getAttributesMap() - entry:{}, propertiesAnnotations:{}, isIgnoreAttributesList:{}", entry, propertiesAnnotations, isIgnoreAttributesList);
+		//LOG.error("BaseEntryManager::getAttributesMap() - entry:{}, propertiesAnnotations:{}, isIgnoreAttributesList:{}", entry, propertiesAnnotations, isIgnoreAttributesList);
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			String propertyName = propertiesAnnotation.getPropertyName();
 			Annotation ldapAttribute;
@@ -656,7 +656,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			return null;
 		}
 
-		LOG.error("BaseEntryManager::getAttributesMap() - attributes:{}", attributes);
+		//LOG.error("BaseEntryManager::getAttributesMap() - attributes:{}", attributes);
 		return attributes;
 	}
 
@@ -1680,7 +1680,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
         checkEntryClass(entryClass, false);
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         LOG.error(String.format("BaseEntryManager::getAttributesList() - propertiesAnnotations: %s", propertiesAnnotations));
-        Object dnValue = getDNValue(entry, entryClass);
+        //Object dnValue = getDNValue(entry, entryClass);
 
         Integer expirationValue = getExpirationValue(entry, entryClass, false);
 

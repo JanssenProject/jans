@@ -7,6 +7,8 @@
 package io.jans.configapi.core.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
+import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.util.Util;
@@ -31,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RequestInterceptor
 public class BaseResource {
    
     @Inject

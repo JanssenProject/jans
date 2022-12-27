@@ -46,7 +46,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@RequestInterceptor
+
 public class UserResource extends BaseResource {
 
     private static final String USER = "user";

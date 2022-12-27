@@ -6,8 +6,10 @@
 
 package io.jans.configapi.interceptor;
 
+import io.jans.model.GluuAttribute;
+import io.jans.model.attribute.AttributeDataType;
 import io.jans.configapi.core.interceptor.RequestInterceptor;
-
+import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.annotation.Priority;
@@ -36,7 +38,7 @@ import io.jans.orm.model.AttributeData;
 
 @Interceptor
 @RequestInterceptor
-@Priority(Interceptor.Priority.APPLICATION + 1)
+@Priority(Interceptor.Priority.APPLICATION)
 public class RequestReaderInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestReaderInterceptor.class);
@@ -56,6 +58,9 @@ public class RequestReaderInterceptor {
 
     @Inject
     AuthUtil authUtil;
+    
+    @Inject
+    AttributeService attributeService;
 
     @Inject
     PersistenceEntryManager persistenceEntryManager;
@@ -98,6 +103,7 @@ public class RequestReaderInterceptor {
             processRequest(context);
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             logger.error("Exception while data conversion:{}", ex.getMessage());
         }
         return context.proceed();
@@ -166,7 +172,30 @@ public class RequestReaderInterceptor {
 
     private <T> void performAttributeDataConversion(T obj) {
         List<AttributeData> attributes = persistenceEntryManager.getAttributesList(obj);
-        logger.debug("RequestReaderInterceptor -  Data  for encoding -  attributes:{}", attributes);
+        logger.debug("Attribute List  for encoding -  obj.getClass():{}, attributes:{}", obj.getClass(), attributes);
+        
+        //get attribute details
+        if(attributes!=null && !attributes.isEmpty()) {
+            for(AttributeData attData : attributes) {
+                logger.debug("AttributeData  for encoding -  attData:{}", attData);
+                GluuAttribute gluuAttribute = attributeService.getAttributeUsingName(attData.getName());
+                logger.debug("Attribute details  gluuAttribute:{}", gluuAttribute);
+                if(gluuAttribute!=null) {
+                    AttributeDataType attributeDataType = gluuAttribute.getDataType();
+                    logger.debug(" attributeDataType:{}", attributeDataType);
+                    if (AttributeDataType.DATE.equals(attributeDataType)) {
+                       /* final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+                        if (value instanceof Date) {
+                            attribute = value;
+                        } else if (value != null) {
+                            attribute = entryManager.decodeTime(user.getDn(), value.toString());
+                        }*/
+                    }
+                }
+                
+            }
+            
+        }
 
     }
 
