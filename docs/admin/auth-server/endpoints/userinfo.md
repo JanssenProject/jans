@@ -2,16 +2,36 @@
 tags:
   - administration
   - auth-server
+  - userinfo
   - endpoint
 ---
 
-## This content is in progress
+# Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Userinfo endpoint is used to retrieve claims about an authenticated end-user. It is a OAuth2 protected endpoint that
+can be accessed using valid access token. Userinfo endpoint is part of the [OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo).
 
-## Have questions in the meantime?
+URL for userinfo endpoint can be obtained from the response of Janssen Server's well-known 
+[configuration endpoint](./configuration.md) given below. `userinfo_endpoint` claim in the response specifies the URL.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+```text
+https://<jans-server-host>/jans-auth/.well-known/openid-configuration
+```
+
+More information about request and response of the userinfo endpoint can be found in the [OpenAPI specification](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
+
+## Disabling The Endpoint Using Feature Flag
+
+Using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo) 
+
+## Relevant Properties
+
+- [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
+- [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
+- [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
+- [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
+- [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
+- [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
 
 ## Want to contribute?
 
