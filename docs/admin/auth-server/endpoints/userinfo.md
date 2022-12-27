@@ -18,7 +18,16 @@ URL to access userinfo endpoint on Janssen Server is listed in the response of J
 https://<jans-server-host>/jans-auth/.well-known/openid-configuration
 ```
 
-`userinfo_endpoint` claim in the response specifies the URL for userinfo endpoint.
+`userinfo_endpoint` claim in the response specifies the URL for userinfo endpoint. By default, userinfo endpoint looks
+like below:
+
+```
+https://janssen.server.host/jans-auth/restv1/userinfo
+```
+
+In response to a valid request, the userinfo endpoint returns user information in JSON format similar to below: 
+
+TODO: add sample response
 
 Since userinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to 
 access the endpoint. More information about request and response of the userinfo endpoint can be found in 
@@ -26,12 +35,17 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 
 ## Disabling The Endpoint Using Feature Flag
 
-Using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo) 
+Using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo)
+
+TODO: add documentation on how to set-unset feature flags
 
 ## Configuration Properties
 
 Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. [Set property 
 values](link to CURL command that will be used to set properties) according to your need. 
+
+TODO: add documentation about how to set properties
+TODO: Add better description to properties
 
 - [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
 - [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
