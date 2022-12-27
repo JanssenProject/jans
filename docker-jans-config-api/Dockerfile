@@ -116,7 +116,7 @@ RUN mkdir -p /opt/prometheus \
 
 ENV JANS_SOURCE_VERSION=bd2cdf8501d60959498078bbb31650965c321c73
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
-ARG JANS_CONFIG_API_DOCS=jans-config-api/docs
+ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -125,7 +125,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_CONFIG_API_DOCS}
+    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
 
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
@@ -143,7 +143,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
-    && cp ${JANS_CONFIG_API_DOCS}/jans-config-api-swagger-auto.yaml /app/static/
+    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/static/
 
 # =======
 # Cleanup
