@@ -2,16 +2,61 @@
 tags:
   - administration
   - auth-server
+  - userinfo
   - endpoint
 ---
 
-## This content is in progress
+# Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Userinfo endpoint is an OAuth2 protected endpoint that is used to retrieve claims about an authenticated end-user.
+Userinfo endpoint is defined in the [OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo).
 
-## Have questions in the meantime?
+URL to access userinfo endpoint on Janssen Server is listed in the response of Janssen Server's well-known 
+[configuration endpoint](./configuration.md) given below. 
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+```text
+https://<jans-server-host>/jans-auth/.well-known/openid-configuration
+```
+
+`userinfo_endpoint` claim in the response specifies the URL for userinfo endpoint. By default, userinfo endpoint looks
+like below:
+
+```
+https://janssen.server.host/jans-auth/restv1/userinfo
+```
+
+In response to a valid request, the userinfo endpoint returns user information in JSON format similar to below: 
+
+TODO: add sample response
+
+Since userinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to 
+access the endpoint. More information about request and response of the userinfo endpoint can be found in 
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
+
+## Disabling The Endpoint Using Feature Flag
+
+Using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo)
+
+TODO: add documentation on how to set-unset feature flags
+
+## Configuration Properties
+
+Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. [Set property 
+values](link to CURL command that will be used to set properties) according to your need. 
+
+TODO: add documentation about how to set properties
+TODO: Add better description to properties
+
+- [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
+- [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
+- [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
+- [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
+- [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
+- [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
+
+## Interception Scripts
+
+Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script. 
 
 ## Want to contribute?
 
