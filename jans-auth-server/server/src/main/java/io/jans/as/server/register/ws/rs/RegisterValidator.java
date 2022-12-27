@@ -20,7 +20,6 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.ssa.SsaValidationType;
-import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Pair;
 import io.jans.as.server.ciba.CIBARegisterParamsValidatorService;
 import io.jans.as.server.model.common.AbstractToken;
@@ -28,6 +27,7 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.as.server.service.net.UriService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -77,6 +77,9 @@ public class RegisterValidator {
 
     @Inject
     private SsaValidationConfigService ssaValidationConfigService;
+
+    @Inject
+    private UriService uriService;
 
     public void validateNotBlank(String input, String errorReason) {
         if (StringUtils.isBlank(input)) {
@@ -191,7 +194,7 @@ public class RegisterValidator {
     @Nullable
     private JSONObject getJwks(HttpServletRequest httpRequest, Jwt jwt, String jwksUri, String jwksStr) {
         if (StringUtils.isNotBlank(jwksUri)) {
-            return JwtUtil.getJSONWebKeys(jwksUri);
+            return uriService.loadJson(jwksUri);
         }
 
         if (StringUtils.isNotBlank(jwksStr)) {
@@ -259,8 +262,11 @@ public class RegisterValidator {
             }
 
             JSONObject jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
-                    new JSONObject(jwksClaim) :
-                    JwtUtil.getJSONWebKeys(jwksUriClaim);
+                    null :
+                    uriService.loadJson(jwksUriClaim);
+            if (jwks == null && StringUtils.isNotBlank(jwksClaim)) {
+                jwks = new JSONObject(jwksClaim);
+            }
 
             boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
                     softwareStatement.getEncodedSignature(),
