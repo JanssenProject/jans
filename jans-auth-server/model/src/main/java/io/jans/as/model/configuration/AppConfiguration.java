@@ -570,6 +570,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "JMS Password")
     private String jmsPassword;
 
+    @DocProperty(description = "This list specifies which external URIs can be called by AS (if empty any URI can be called)")
+    private List<String> externalUriWhiteList;
+
     @DocProperty(description = "This list specifies which client redirection URIs are white-listed")
     private List<String> clientWhiteList;
 
@@ -2471,6 +2474,15 @@ public class AppConfiguration implements Configuration {
 
     public void setJmsPassword(String jmsPassword) {
         this.jmsPassword = jmsPassword;
+    }
+
+    public List<String> getExternalUriWhiteList() {
+        if (externalUriWhiteList == null) externalUriWhiteList = new ArrayList<>();
+        return externalUriWhiteList;
+    }
+
+    public void setExternalUriWhiteList(List<String> externalUriWhiteList) {
+        this.externalUriWhiteList = externalUriWhiteList;
     }
 
     public List<String> getClientWhiteList() {
