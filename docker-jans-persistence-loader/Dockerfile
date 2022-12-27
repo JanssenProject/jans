@@ -27,7 +27,7 @@ RUN python3 -m ensurepip \
 ENV JANS_SOURCE_VERSION=bd2cdf8501d60959498078bbb31650965c321c73
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
-ARG JANS_CONFIG_API_DOCS=jans-config-api/docs
+ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -37,7 +37,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
     && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR} \
-    && git sparse-checkout add ${JANS_CONFIG_API_DOCS}
+    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
 
 RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj /app/templates
 
@@ -53,7 +53,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
     && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/ \
-    && cp ${JANS_CONFIG_API_DOCS}/jans-config-api-swagger-auto.yaml -P /app/static/ \
+    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json -P /app/static/ \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \

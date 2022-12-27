@@ -2,11 +2,8 @@ import contextlib
 import json
 import os
 import typing as _t
-from itertools import chain
 from pathlib import Path
 from uuid import uuid4
-
-import ruamel.yaml
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -299,25 +296,22 @@ def get_ldif_mappings(group, optional_scopes=None):
     return ldif_mappings
 
 
-def get_config_api_swagger(path="/app/static/jans-config-api-swagger-auto.yaml"):
+def get_config_api_scopes(path="/app/static/config-api-rs-protect.json"):
+    scopes = []
+
     with open(path) as f:
-        txt = f.read()
-    txt = txt.replace("\t", " ")
-    return ruamel.yaml.load(txt, Loader=ruamel.yaml.RoundTripLoader)
+        scope_defs = json.loads(f.read())
 
+    for resource in scope_defs["resources"]:
+        for condition in resource["conditions"]:
+            scopes += [
+                scope["name"]
+                for scope in condition["scopes"]
+                if scope.get("inum") and scope.get("name")
+            ]
 
-def get_config_api_scopes():
-    swagger = get_config_api_swagger()
-    scope_list = []
-
-    for _, methods in swagger["paths"].items():
-        for _, attrs in methods.items():
-            if "security" not in attrs:
-                continue
-            scope_list += [attr["oauth2"] for attr in attrs["security"]]
-
-    # make sure there's no duplication
-    return list(set(chain(*scope_list)))
+    # ensure no duplicates and sorted
+    return sorted(set(scopes))
 
 
 def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.json"):
@@ -329,7 +323,7 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
     for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
         if api_role["role"] == "api-admin":
             # merge scopes without duplication
-            role_mapping["rolePermissionMapping"][i]["permissions"] = list(set(
+            role_mapping["rolePermissionMapping"][i]["permissions"] = sorted(set(
                 role_mapping["rolePermissionMapping"][i]["permissions"] + scope_list
             ))
             break
