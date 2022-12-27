@@ -18,6 +18,7 @@
             <class name="io.jans.as.server.service.RedirectionUriServiceTest" />
             <class name="io.jans.as.server.service.external.ExternalAuthenticationServiceTest" />
             <class name="io.jans.as.server.servlet.OpenIdConfigurationTest" />
+            <class name="io.jans.as.server.service.net.UriServiceTest" />
 
             <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
