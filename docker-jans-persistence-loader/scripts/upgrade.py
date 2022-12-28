@@ -148,6 +148,31 @@ def _transform_auth_dynamic_config(conf):
             conf["grantTypesSupported"].append(grant_type)
             should_update = True
 
+    # change ox to jans
+    for old_attr, new_attr in [
+        ("oxElevenGenerateKeyEndpoint", "jansElevenGenerateKeyEndpoint"),
+        ("oxElevenSignEndpoint", "jansElevenSignEndpoint"),
+        ("oxElevenVerifySignatureEndpoint", "jansElevenVerifySignatureEndpoint"),
+        ("oxElevenDeleteKeyEndpoint", "jansElevenDeleteKeyEndpoint"),
+        ("oxElevenJwksEndpoint", "jansElevenJwksEndpoint"),
+        ("oxOpenIdConnectVersion", "jansOpenIdConnectVersion"),
+        ("oxId", "jansId"),
+    ]:
+        if new_attr not in conf:
+            conf[new_attr] = conf.pop(old_attr, None)
+            should_update = True
+
+    if "blockWebviewAuthorizationEnabled" not in conf:
+        conf["blockWebviewAuthorizationEnabled"] = False
+        should_update = True
+
+    if "userInfoConfiguration" not in conf:
+        conf["userInfoConfiguration"] = {
+            "dateFormatterPattern": {
+                "birthdate": "yyyy-MM-dd",
+            },
+        }
+
     # specific config per distribution
     if distribution == "openbanking":
         if "dcrAuthorizationWithMTLS" not in conf:
@@ -731,7 +756,7 @@ class Upgrade:
         id_ = "ou=admin-ui,ou=configuration,o=jans"
 
         if self.backend.type in ("sql", "spanner"):
-            kwargs = {"table_name": "jansAdminConfDyn"}
+            kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}

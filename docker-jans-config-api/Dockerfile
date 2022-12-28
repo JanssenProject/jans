@@ -43,7 +43,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.6-SNAPSHOT
-ENV CN_BUILD_DATE='2022-12-01 12:42'
+ENV CN_BUILD_DATE='2022-12-25 08:17'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -74,19 +74,19 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2022-12-01 12:42'
+ENV SCIM_PLUGIN_BUILD_DATE='2022-12-22 12:53'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-12-01 12:42'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-12-22 12:53'
 ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
-ENV FIDO2_PLUGIN_BUILD_DATE='2022-12-01 12:42'
+ENV FIDO2_PLUGIN_BUILD_DATE='2022-12-22 12:53'
 ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${FIDO2_PLUGIN_SOURCE_URL} -O /usr/share/java/fido2-plugin.jar
 
-ENV USER_MGT_PLUGIN_BUILD_DATE='2022-12-01 12:42'
+ENV USER_MGT_PLUGIN_BUILD_DATE='2022-12-22 12:53'
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
@@ -114,9 +114,9 @@ RUN mkdir -p /opt/prometheus \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
+ENV JANS_SOURCE_VERSION=bd2cdf8501d60959498078bbb31650965c321c73
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
-ARG JANS_CONFIG_API_DOCS=jans-config-api/docs
+ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -125,7 +125,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_CONFIG_API_DOCS}
+    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
 
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
@@ -143,7 +143,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
-    && cp ${JANS_CONFIG_API_DOCS}/jans-config-api-swagger-auto.yaml /app/static/
+    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/static/
 
 # =======
 # Cleanup
