@@ -15,9 +15,11 @@ to enable and configure logging for CLI and TUI tools:
 
 - Log in as root user
 - open config file for editing `~/.config/jans-cli.ini`
-- Update value for `debug` to `true`
-- Add new entry for `log_dir` key with value pointing to directory where logs need to be generated. e.g `debug = true
-  log_dir = /opt/jans`
+- Update value for `debug` to `true` and add new entry for `log_dir` key with value pointing to directory where logs need to be generated. e.g 
+  ```
+  debug = true
+  log_dir = /opt/jans
+  ```
 - Close currently open TUI session if any and open a new one
 - Logs should get available at location configured in `log_dir` in files `cli_debug.log` and `dev-tui.log`
 
