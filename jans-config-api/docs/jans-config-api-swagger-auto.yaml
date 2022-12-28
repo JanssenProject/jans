@@ -7297,19 +7297,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
         userCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7645,6 +7645,8 @@ components:
         ttl:
           type: integer
           format: int32
+        displayName:
+          type: string
         authenticationMethod:
           type: string
           enum:
@@ -7656,8 +7658,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        displayName:
-          type: string
         baseDn:
           type: string
         inum:
@@ -7761,10 +7761,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -8268,6 +8268,10 @@ components:
           type: string
         jmsPassword:
           type: string
+        externalUriWhiteList:
+          type: array
+          items:
+            type: string
         clientWhiteList:
           type: array
           items:

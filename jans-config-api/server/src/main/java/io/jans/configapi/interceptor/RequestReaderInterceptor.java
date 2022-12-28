@@ -24,8 +24,9 @@ import jakarta.ws.rs.core.UriInfo;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
 import io.jans.orm.model.AttributeData;
+import io.jans.orm.reflect.property.PropertyAnnotation;
 
 @Interceptor
 @RequestInterceptor
@@ -68,21 +70,21 @@ public class RequestReaderInterceptor {
     @SuppressWarnings({ "all" })
     @AroundInvoke
     public Object aroundReadFrom(InvocationContext context) throws Exception {
-        logger.debug(
+        logger.error(
                 "\n\n\n RequestReaderInterceptor: entry -  info:{}, request:{}, httpHeaders:{}, resourceInfo:{}, persistenceEntryManager:{}",
                 info, request, httpHeaders, resourceInfo, persistenceEntryManager);
         try {
-            logger.debug(
+            logger.error(
                     "======================= RequestReaderInterceptor Performing DataType Conversion ============================");
 
             // context
-            logger.debug(
+            logger.error(
                     "======RequestReaderInterceptor - context.getClass():{}, context.getConstructor(), context.getContextData():{},  context.getMethod():{},  context.getParameters():{}, context.getTarget():{}, context.getInputStream():{} ",
                     context.getClass(), context.getConstructor(), context.getContextData(), context.getMethod(),
                     context.getParameters(), context.getTarget());
 
             // method
-            logger.debug(
+            logger.error(
                     "======RequestReaderInterceptor - context.getMethod().getAnnotatedExceptionTypes().toString() :{}, context.getMethod().getAnnotatedParameterTypes().toString() :{}, context.getMethod().getAnnotatedReceiverType().toString() :{}, context.getMethod().getAnnotation(jakarta.ws.rs.GET.class):{}, context.getMethod().getAnnotations().toString() :{}., context.getMethod().getAnnotationsByType(jakarta.ws.rs.GET.class):{} ",
                     context.getMethod().getAnnotatedExceptionTypes().toString(),
                     context.getMethod().getAnnotatedParameterTypes().toString(),
@@ -92,10 +94,10 @@ public class RequestReaderInterceptor {
                     context.getMethod().getAnnotationsByType(jakarta.ws.rs.GET.class));
 
             boolean contains = isIgnoreMethod(context);
-            logger.debug("====== isIgnoreMethod:{}", contains);
+            logger.error("====== isIgnoreMethod:{}", contains);
 
             if (contains) {
-                logger.debug("====== Exiting RequestReaderInterceptor as no action required for {} method. ======",
+                logger.error("====== Exiting RequestReaderInterceptor as no action required for {} method. ======",
                         context.getMethod());
                 return context.proceed();
             }
@@ -110,21 +112,21 @@ public class RequestReaderInterceptor {
     }
 
     private boolean isIgnoreMethod(InvocationContext context) {
-        logger.debug("Checking if method to be ignored");
+        logger.error("Checking if method to be ignored");
         if (context.getMethod().getAnnotations() == null || context.getMethod().getAnnotations().length <= 0) {
             return false;
         }
 
         for (int i = 0; i < context.getMethod().getAnnotations().length; i++) {
-            logger.debug("======RequestReaderInterceptor - context.getMethod().getAnnotations():{} ",
+            logger.error("======RequestReaderInterceptor - context.getMethod().getAnnotations():{} ",
                     context.getMethod().getAnnotations()[i]);
 
-            logger.debug("======RequestReaderInterceptor - anyMatch:{} ",
+            logger.error("======RequestReaderInterceptor - anyMatch:{} ",
                     Arrays.stream(IGNORE_METHODS).anyMatch(context.getMethod().getAnnotations()[i].toString()::equals));
 
             if (context.getMethod().getAnnotations()[i] != null && Arrays.stream(IGNORE_METHODS)
                     .anyMatch(context.getMethod().getAnnotations()[i].toString()::equals)) {
-                logger.debug(
+                logger.error(
                         "======RequestReaderInterceptor - context.getMethod() matched and hence will be ignored!!!!");
                 return true;
             }
@@ -133,17 +135,17 @@ public class RequestReaderInterceptor {
     }
 
     private void processRequest(InvocationContext context) {
-        logger.debug(
+        logger.error(
                 "RequestReaderInterceptor Data -  context:{} , context.getClass():{}, context.getContextData():{}, context.getMethod():{} , context.getParameters():{} , context.getTarget():{} ",
                 context, context.getClass(), context.getContextData(), context.getMethod(), context.getParameters(),
                 context.getTarget());
-        logger.debug(
+        logger.error(
                 "RequestReaderInterceptor Data -  context:{} , context.getClass():{}, context.getContextData():{}, context.getMethod():{} , context.getParameters():{} , context.getTarget():{} ",
                 context, context.getClass(), context.getContextData(), context.getMethod(), context.getParameters(),
                 context.getTarget());
 
         Object[] ctxParameters = context.getParameters();
-        logger.debug("RequestReaderInterceptor - Processing  Data -  ctxParameters:{} ", ctxParameters);
+        logger.error("RequestReaderInterceptor - Processing  Data -  ctxParameters:{} ", ctxParameters);
 
         Method method = context.getMethod();
 
@@ -151,52 +153,62 @@ public class RequestReaderInterceptor {
         Parameter[] parameters = method.getParameters();
         Class[] clazzArray = method.getParameterTypes();
 
-        logger.debug("RequestReaderInterceptor - Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ",
+        logger.error("RequestReaderInterceptor - Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ",
                 paramCount, parameters, clazzArray);
 
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
-                logger.debug("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
+                logger.error("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
                         clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (!clazz.isPrimitive()) {
                     performAttributeDataConversion(obj);
-                    logger.debug("RequestReaderInterceptor final - obj -  obj:{} ", obj);
+                    logger.error("RequestReaderInterceptor final - obj -  obj:{} ", obj);
                 }
             }
         }
     }
 
     private <T> void performAttributeDataConversion(T obj) {
-        List<AttributeData> attributes = persistenceEntryManager.getAttributesList(obj);
-        logger.debug("Attribute List  for encoding -  obj.getClass():{}, attributes:{}", obj.getClass(), attributes);
+        List<AttributeData> attributes = persistenceEntryManager.getAttributeDataList(obj);
+        logger.error("RequestReaderInterceptor::Attribute List  for encoding -  obj.getClass():{}, attributes:{}", obj.getClass(), attributes);
         
         //get attribute details
         if(attributes!=null && !attributes.isEmpty()) {
             for(AttributeData attData : attributes) {
-                logger.debug("AttributeData  for encoding -  attData:{}", attData);
+                logger.error("RequestReaderInterceptor::AttributeData  for encoding -  attData:{}", attData);
                 GluuAttribute gluuAttribute = attributeService.getAttributeUsingName(attData.getName());
-                logger.debug("Attribute details  gluuAttribute:{}", gluuAttribute);
+                logger.error("RequestReaderInterceptor::Attribute details  gluuAttribute:{}", gluuAttribute);
                 if(gluuAttribute!=null) {
                     AttributeDataType attributeDataType = gluuAttribute.getDataType();
-                    logger.debug(" attributeDataType:{}", attributeDataType);
-                    if (AttributeDataType.DATE.equals(attributeDataType)) {
-                       /* final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-                        if (value instanceof Date) {
-                            attribute = value;
-                        } else if (value != null) {
-                            attribute = entryManager.decodeTime(user.getDn(), value.toString());
-                        }*/
+                    logger.error(" attributeDataType:{}", attributeDataType);
+                    if (attributeDataType!=null && AttributeDataType.DATE.equals(attributeDataType)) {
+                        if (attributeDataType.getValue() != null) {
+                            Date date = persistenceEntryManager.decodeTime(null, attributeDataType.getValue());
+                            logger.error(" attributeDataType.getDisplayName():{}, date:{}", attributeDataType.getDisplayName(), date);
+                        }
                     }
                 }
                 
             }
             
         }
-
+        
+        //
+        Class<?> entryClass = obj.getClass();
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        logger.error("RequestReaderInterceptor::Object propertiesAnnotations:{}", propertiesAnnotations);
+        processObjectProperties(obj,propertiesAnnotations);
+    }
+    
+    private <T> void processObjectProperties(T obj, List<PropertyAnnotation> propertiesAnnotations) {
+        logger.error("RequestReaderInterceptor::Object propertiesAnnotations:{}", propertiesAnnotations);
+        Map<String, List<AttributeData>> attributeDataMap = persistenceEntryManager.getAttributesMap(obj, propertiesAnnotations);
+        
+        logger.error("RequestReaderInterceptor::Object propertiesAnnotations:{}", propertiesAnnotations);
     }
 
 }
