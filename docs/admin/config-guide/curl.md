@@ -20,7 +20,7 @@ For the client_id and client_secret, contact your administrator.
 
 ```
 curl -u "client_inum:client_secret" https://<your.jans.server>/jans-auth/restv1/token \
-    -d  "grant_type=client_credentials&scope=put_scope_name_here
+    -d  "grant_type=client_credentials&scope=put_scope_name_here"
 ```
 
 **Example**: 
@@ -65,15 +65,65 @@ Examples of `name_of_the_script` ( Authentication methods that are present in th
 
 ### Client creation
 
-#### Steps:
+1. Creating a client with minimal upfront configuration requires only `redirectUris` in following format. Add following content in a text file and save it as client.json. 
+```json
+{
+  "redirectUris": [
+  "http://localhost:8080"
+  ]  
+}
+```
+In place of `http://localhost:8080` uri used above, any valid redirect URI can be used.
+To provide full client configuration at the time of creation, Download and use this 
+[json format](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/server/src/test/resources/feature/openid/clients/client.json), 
+update the values and save it as client.json. Few important fields to populate are `scope`,`responseTypes`,
+`redirectUris` (The only mandatory field), `grantTypes`. If there is a need to update the attributes of the client after 
+creation, then make sure that the client is created with `grantTypes` list having `client_credentials` grant type as well.
 
-1. Download this [json file](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/server/src/test/resources/feature/openid/clients/client.json), update the values and save it as client.json.
-   <br/>Few important fields to populate are `scope`,`responseTypes`,`redirectUris` (The only mandatory field), `grantTypes`
 1. Run curl command
 ```
 curl -X POST https://my.jans.server/jans-auth/restv1/register \ 
      -H "Content-Type: application/json"  -d @/some/directory/client.json
 ```
+
+If client is created successfully, response similar to below will be received:
+
+```json
+{
+    "allow_spontaneous_scopes": false,
+    "application_type": "web",
+    "rpt_as_jwt": false,
+    "registration_client_uri": "https://my.jans.server/jans-auth/restv1/register?client_id=994ec0a7-1143-456c-85ca-66ba592d7f9a",
+    "tls_client_auth_subject_dn": "",
+    "run_introspection_script_before_jwt_creation": false,
+    "registration_access_token": "d34f30ff-ae31-4760-8b67-ef071ba9ee68",
+    "client_id": "994ec0a7-1143-456c-85ca-66ba592d7f9a",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "scope": "openid profile permission https://jans.io/auth/ssa.portal uma_protection work_phone phone address test https://jans.io/auth/ssa.admin user_name email clientinfo device_sso org_name https://jans.io/auth/ssa.developer offline_access",
+    "client_secret": "da4c17de-b6bc-4f25-b642-4c7b887c7860",
+    "client_id_issued_at": 1672221633,
+    "backchannel_logout_uri": [],
+    "backchannel_logout_session_required": false,
+    "par_lifetime": 600,
+    "spontaneous_scopes": [],
+    "id_token_signed_response_alg": "RS256",
+    "access_token_as_jwt": false,
+    "grant_types": [
+        "authorization_code",
+        "refresh_token"
+    ],
+    "subject_type": "pairwise",
+    "keep_client_authorization_after_expiration": false,
+    "require_par": false,
+    "redirect_uris_regex": "",
+    "additional_audience": [],
+    "frontchannel_logout_session_required": false,
+    "client_secret_expires_at": 1672308033,
+    "access_token_signing_alg": "RS256",
+    "response_types": ["code"]
+}
+```
+Response contains `client_id` and `client_secret` apart from other client configuration details.
 
 ### Get Client Scopes
 
