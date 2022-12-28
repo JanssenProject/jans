@@ -34,11 +34,22 @@ get_prometheus_opt() {
     echo "${prom_opt}"
 }
 
+get_prometheus_lib() {
+    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
+        prom_agent_version="0.17.2"
+
+        if [ ! -f /opt/prometheus/jmx_prometheus_javaagent.jar ]; then
+            wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${prom_agent_version}/jmx_prometheus_javaagent-${prom_agent_version}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar
+        fi
+    fi
+}
+
 # ==========
 # ENTRYPOINT
 # ==========
 
 move_builtin_jars
+get_prometheus_lib
 python3 /app/scripts/wait.py
 python3 /app/scripts/bootstrap.py
 python3 /app/scripts/jks_sync.py &
