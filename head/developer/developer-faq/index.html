@@ -8507,6 +8507,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#how-to-enable-debug-logs-for-jans-cli-and-tui-configuration-tools" class="md-nav__link">
+    How to enable debug logs for jans-cli and TUI configuration tools
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-to-install-janssen-server-openbanking-for-testing" class="md-nav__link">
     How to install Janssen Server OpenBanking for testing?
   </a>
@@ -8570,8 +8577,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#testing-using-commnd-line-mode" class="md-nav__link">
-    Testing using commnd line mode
+  <a href="#testing-using-command-line-mode" class="md-nav__link">
+    Testing using command line mode
   </a>
   
 </li>
@@ -8707,6 +8714,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#how-to-enable-debug-logs-for-jans-cli-and-tui-configuration-tools" class="md-nav__link">
+    How to enable debug logs for jans-cli and TUI configuration tools
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-to-install-janssen-server-openbanking-for-testing" class="md-nav__link">
     How to install Janssen Server OpenBanking for testing?
   </a>
@@ -8770,8 +8784,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#testing-using-commnd-line-mode" class="md-nav__link">
-    Testing using commnd line mode
+  <a href="#testing-using-command-line-mode" class="md-nav__link">
+    Testing using command line mode
   </a>
   
 </li>
@@ -8820,6 +8834,19 @@
 
 <h1 id="developer-faqs">Developer FAQs<a class="headerlink" href="#developer-faqs" title="Permanent link">#</a></h1>
 <hr />
+<h2 id="how-to-enable-debug-logs-for-jans-cli-and-tui-configuration-tools">How to enable debug logs for jans-cli and TUI configuration tools<a class="headerlink" href="#how-to-enable-debug-logs-for-jans-cli-and-tui-configuration-tools" title="Permanent link">#</a></h2>
+<p>By default, logging is not enabled for CLI or TUI tools on Janssen Server. Follow the steps below
+to enable and configure logging for CLI and TUI tools:</p>
+<ul>
+<li>Log in as root user</li>
+<li>open config file for editing <code>~/.config/jans-cli.ini</code></li>
+<li>Update value for <code>debug</code> to <code>true</code> and add new entry for <code>log_dir</code> key with value pointing to directory where logs need to be generated. e.g 
+  <div class="highlight"><pre><span></span><code>debug = true
+log_dir = /opt/jans
+</code></pre></div></li>
+<li>Close currently open TUI session if any and open a new one</li>
+<li>Logs should get available at location configured in <code>log_dir</code> in files <code>cli_debug.log</code> and <code>dev-tui.log</code></li>
+</ul>
 <h2 id="how-to-install-janssen-server-openbanking-for-testing">How to install Janssen Server OpenBanking for testing?<a class="headerlink" href="#how-to-install-janssen-server-openbanking-for-testing" title="Permanent link">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -8854,7 +8881,7 @@
 <p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
 </code></pre></div>
 further testing is same as jans server</p>
-<h3 id="testing-using-commnd-line-mode">Testing using commnd line mode<a class="headerlink" href="#testing-using-commnd-line-mode" title="Permanent link">#</a></h3>
+<h3 id="testing-using-command-line-mode">Testing using command line mode<a class="headerlink" href="#testing-using-command-line-mode" title="Permanent link">#</a></h3>
 <p>we can run below command at command line.
 for ex:
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
@@ -8867,7 +8894,7 @@ rest is same for jans and openbanking</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-21T08:51:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-28T07:28:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-28</span>
       
         <br>
         Created:
