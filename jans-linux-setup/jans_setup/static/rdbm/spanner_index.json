@@ -82,7 +82,7 @@
       "`del`, `exp`"
     ]
   },
-  "token": {
+  "jansToken": {
     "fields": [
       "authzCode",
       "grtId",
