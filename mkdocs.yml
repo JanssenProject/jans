@@ -183,8 +183,18 @@ nav:
         - 'Web Services': 'admin/vm-ops/web-services.md'
         - 'FAQ': 'admin/vm-ops/faq.md'
     - 'Configuration Guide':
-        - 'Config TUI': 'admin/config-guide/tui.md'
-        - 'Configuration CLI':
+        - 'Config API':
+            - 'admin/config-api/README.md'
+            - 'Settings': 'admin/config-api/config.md'
+            - 'Attributes': 'admin/config-api/attribute.md'
+            - 'OpenID Client': 'admin/config-api/openid-client.md'
+            - 'Security': 'admin/config-api/security.md'
+            - 'Logs': 'admin/config-api/logs.md'
+            - 'Monitoring': 'admin/config-api/monitoring.md'
+            - 'Plugins': 'admin/config-api/plugins.md'
+        - 'CURL Guide': 'admin/config-guide/curl.md'
+        - 'Text-Based User Interface (TUI)': 'admin/config-guide/tui.md'
+        - 'Command Line Interface (CLI)':
             - 'admin/config-guide/jans-cli/README.md'
             - 'Standalone Installation': 'admin/config-guide/jans-cli/install.md'
             - 'Attribute': 'admin/config-guide/jans-cli/cli-attribute.md'
@@ -204,7 +214,6 @@ nav:
             - 'SCIM User Resources': 'admin/config-guide/jans-cli/cli-user.md'
             - 'SCIM Group Management': 'admin/config-guide/jans-cli/cli-group.md'
             - 'Authentication via Device Flow': 'admin/config-guide/jans-cli/device-flow.md'
-        - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'SCIM CLI': 'admin/config-guide/scim-cli.md'
     - 'Database Guide':
         - 'admin/reference/database/README.md'
@@ -235,7 +244,7 @@ nav:
         - 'Converting Data': 'admin/reference/database/converting-data.md'
     - 'Auth Server Admin Guide':
         - 'admin/auth-server/README.md'
-        - 'Configuration': 'admin/auth-server/config.md'
+        - 'Auth Server Config': 'admin/auth-server/config.md'
         - 'Session Management':
             - 'admin/auth-server/session-management/README.md'
             - 'What is a session?': 'admin/auth-server/session-management/what-is.md'
@@ -251,7 +260,7 @@ nav:
             - 'UMA RPT Token': 'admin/auth-server/tokens/uma-rpt-token.md'
         - 'Endpoints':
             - 'admin/auth-server/endpoints/README.md'
-            - 'Configuration': 'admin/auth-server/endpoints/configuration.md'
+            - 'OpenID Configuration': 'admin/auth-server/endpoints/configuration.md'
             - 'Client Registration': 'admin/auth-server/endpoints/client-registration.md'
             - 'Authorization': 'admin/auth-server/endpoints/authorization.md'
             - 'Token': 'admin/auth-server/endpoints/token.md'
@@ -266,9 +275,9 @@ nav:
             - 'Backchannel Authentication': 'admin/auth-server/endpoints/backchannel-authentication.md'
         - 'Crypto':
             - 'admin/auth-server/crypto/README.md'
-            - 'Supported Algorithms': 'admin/auth-server/crypto/supported-algorithms.md'
+            - 'Keys': 'admin/auth-server/crypto/keys.md'
             - 'Key Storage': 'admin/auth-server/crypto/key-storage.md'
-            - 'Key Generation': 'admin/auth-server/crypto/key-generation.md'
+            - 'Key Rotation and Generation': 'admin/auth-server/crypto/key-generation.md'
         - 'OpenID Features':
             - 'admin/auth-server/openid-features/README.md'
             - 'Pairwise/Public Subject Identifiers': 'admin/auth-server/openid-features/subject-identifiers.md'
@@ -441,15 +450,6 @@ nav:
         - 'Security Considerations': 'admin/scim/security.md'
         - 'Bulk Adding Users': 'admin/scim/bulk-users.md'
         - 'Adding Custom Attributes': 'admin/scim/custom-attributes.md'
-    - 'Config API Admin Guide':
-        - 'admin/config-api/README.md'
-        - 'Configuration': 'admin/config-api/config.md'
-        - 'Attributes': 'admin/config-api/attribute.md'
-        - 'OpenID Client': 'admin/config-api/openid-client.md'
-        - 'Security': 'admin/config-api/security.md'
-        - 'Logs': 'admin/config-api/logs.md'
-        - 'Monitoring': 'admin/config-api/monitoring.md'
-        - 'Plugins': 'admin/config-api/plugins.md'
     - 'Janssen Recipes':
         - 'admin/recipes/README.md'
         - 'Returning Group/Role User Information': 'admin/recipes/returning-group.md'
