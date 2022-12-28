@@ -17,7 +17,7 @@ from setup_app.installers.base import BaseInstaller
 from setup_app.utils.ldif_utils import myLdifParser, schema2json
 from setup_app.pylib.schema import ObjectClass
 from setup_app.pylib.ldif4.ldif import LDIFWriter
-
+from setup_app.pylib.jproperties import Properties
 
 class TestDataLoader(BaseInstaller, SetupUtils):
 
@@ -214,6 +214,26 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             ignoredirs.append(os.path.join(self.template_base, 'jans-config-api'))
 
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
+
+        if Config.get('jca_client_id') or Config.get('jca_test_client_id'):
+            config_oxauth_test_data_server_properties_fn = os.path.join(Config.output_dir, 'test/jans-auth/server/config-oxauth-test-data.properties')
+            config_oxauth_test_data_server_properties = Properties()
+
+            with open(config_oxauth_test_data_server_properties_fn, 'rb') as f:
+                config_oxauth_test_data_server_properties.load(f, 'utf-8')
+
+            keep_clients = config_oxauth_test_data_server_properties["test.keep.clients"].data.split(',')
+            keep_clients = [client_id.strip() for client_id in keep_clients]
+
+            if Config.get('jca_client_id'):
+                keep_clients.append(Config.jca_client_id)
+            if Config.get('jca_test_client_id'):
+                keep_clients.append(Config.jca_test_client_id)
+
+            config_oxauth_test_data_server_properties["test.keep.clients"] = ', '.join(keep_clients)
+
+            with open(config_oxauth_test_data_server_properties_fn, 'wb') as w:
+                config_oxauth_test_data_server_properties.store(w)
 
         self.logIt("Loading test ldif files")
         Config.pbar.progress(self.service_name, "Importing ldif files", False)
