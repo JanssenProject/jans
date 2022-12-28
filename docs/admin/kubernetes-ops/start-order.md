@@ -6,6 +6,6 @@ tags:
   - start order
 ---
 
-## Jans components start order
+## Service Start Order
 
-![svg](../../../assets/jans-start-order.svg)
+![svg](../../../assets/kubernetes-services-start-order.svg)
