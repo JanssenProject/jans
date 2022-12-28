@@ -116,7 +116,7 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/crypto/supported-algorithms/</loc>
+         <loc>https://jans.io/docs/head/admin/auth-server/crypto/keys/</loc>
          <lastmod>2022-12-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -491,46 +491,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/config-api/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/config-api/attribute/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/config-api/config/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/config-api/logs/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/config-api/monitoring/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/config-api/openid-client/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/config-api/plugins/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/config-api/security/</loc>
-         <lastmod>2022-12-28</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/config-guide/curl/</loc>
          <lastmod>2022-12-28</lastmod>
          <changefreq>daily</changefreq>
@@ -542,6 +502,46 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/config-guide/tui/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/attribute/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/config/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/logs/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/monitoring/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/openid-client/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/plugins/</loc>
+         <lastmod>2022-12-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/config-api/security/</loc>
          <lastmod>2022-12-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
