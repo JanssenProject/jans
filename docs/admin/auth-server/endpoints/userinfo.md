@@ -33,6 +33,8 @@ Since userinfo endpoint is an OAuth2 protected resource, a valid access token wi
 access the endpoint. More information about request and response of the userinfo endpoint can be found in 
 the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
 
+
+
 ## Disabling The Endpoint Using Feature Flag
 
 Using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo)
@@ -53,6 +55,16 @@ TODO: Add better description to properties
 - [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
 - [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
 - [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
+
+## Using Scopes To Control Claim Release
+
+In context of OpenID Connect specification, claim information released by userinfo endpoint can be controlled using 
+scopes. Janssen Server supports all [standard scopes](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
+and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and 
+define claims to be linked to each standard scope.
+
+In addition to standard scopes, Janssen server allows defining [custom scopes](TODO: how to define custom scopes and link claims) 
+which can be associated to user-defined list of claims. This allows administrators to create custom groupings of claims.
 
 ## Interception Scripts
 
