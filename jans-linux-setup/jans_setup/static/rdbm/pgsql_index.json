@@ -72,7 +72,12 @@
     ]
   },
   "jansToken": {
-    "fields": [],
+    "fields": [
+      "authzCode",
+      "grtId",
+      "ssnId",
+      "tknCde"
+    ],
     "custom": [
       "(\"del\", \"exp\")"
     ]
@@ -138,17 +143,6 @@
       "description"
     ],
     "custom": []
-  },
-  "token": {
-    "fields": [
-      "authzCode",
-      "grtId",
-      "ssnId",
-      "tknCde"
-    ],
-    "custom": [
-      "(\"del\", \"exp\")"
-    ]
   },
   "cache": {
     "fields": [],
