@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -1444,23 +1444,57 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#jans-liveness-and-readiness-probes" class="md-nav__link">
+    Jans Liveness and Readiness probes
+  </a>
+  
+    <nav class="md-nav" aria-label="Jans Liveness and Readiness probes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opendj" class="md-nav__link">
+    Opendj
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+        
+          <li class="md-nav__item">
+  <a href="#auth-server" class="md-nav__link">
+    auth-server
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-api" class="md-nav__link">
+    config-api
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fido2" class="md-nav__link">
+    fido2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scim" class="md-nav__link">
+    scim
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8649,23 +8683,57 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#jans-liveness-and-readiness-probes" class="md-nav__link">
+    Jans Liveness and Readiness probes
+  </a>
+  
+    <nav class="md-nav" aria-label="Jans Liveness and Readiness probes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opendj" class="md-nav__link">
+    Opendj
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+        
+          <li class="md-nav__item">
+  <a href="#auth-server" class="md-nav__link">
+    auth-server
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-api" class="md-nav__link">
+    config-api
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fido2" class="md-nav__link">
+    fido2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scim" class="md-nav__link">
+    scim
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8701,6 +8769,11 @@
         <span class="md-tag">operations</span>
       
     
+      
+      
+        <span class="md-tag">health checks</span>
+      
+    
   </nav>
 
 
@@ -8713,19 +8786,136 @@
 
   <h1>Health Check</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>Health checks are used to determine if a container is working as it should or not. This is done in Kubernetes using probes.</p>
+<p>Jans deployed components uses two types of probes:</p>
+<ol>
+<li>
+<p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Readiness probes</a>: used to know when a container is ready to start accepting traffic</p>
+</li>
+<li>
+<p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Liveness probes</a>: used to know when to restart a container</p>
+</li>
+</ol>
+<h2 id="jans-liveness-and-readiness-probes">Jans Liveness and Readiness probes<a class="headerlink" href="#jans-liveness-and-readiness-probes" title="Permanent link">#</a></h2>
+<p>Here is a list of the liveness and readiness probes of the deployed jans components</p>
+<h3 id="opendj">Opendj<a class="headerlink" href="#opendj" title="Permanent link">#</a></h3>
+<p>Opendj uses <a href="https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py">healthcheck.py</a> in liveness probe.
+This python script connects to opendj to test its liveness.</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Executes the python3 healthcheck.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/scripts/healthcheck.py</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the liveness healthcheck for the OpenDJ if needed.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">    </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w"></span>
+<span class="w">  </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">tcpSocket</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1636</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the readiness healthcheck for the OpenDJ if needed.  </span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w"></span>
+</code></pre></div>
+<h3 id="auth-server">auth-server<a class="headerlink" href="#auth-server" title="Permanent link">#</a></h3>
+<p>Auth-sever executes the python3 <a href="https://github.com/JanssenProject/jans/blob/main/docker-jans-auth-server/scripts/healthcheck.py">healthcheck.py</a> in liveness and readiness probes.
+This python scripts parses the healthcheck endpoint to make sure the status is up.</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Executes the python3 healthcheck.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/scripts/healthcheck.py</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the liveness healthcheck for the auth-server if needed.    </span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">  </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># Executes the python3 healthcheck.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/scripts/healthcheck.py</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the readiness healthcheck for the auth-server if needed.    </span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+</code></pre></div>
+<h3 id="config-api">config-api<a class="headerlink" href="#config-api" title="Permanent link">#</a></h3>
+<p>The health check of liveness and readiness probes is a HTTP GET request against a config-api endpoint</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># http liveness probe endpoint</span><span class="w"></span>
+<span class="w">    </span><span class="nt">httpGet</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/jans-config-api/api/v1/health/live</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8074</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the liveness healthcheck for the config-api if needed.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">  </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># http readiness probe endpoint</span><span class="w"></span>
+<span class="w">    </span><span class="nt">httpGet</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans-config-api/api/v1/health/ready</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8074</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the readiness healthcheck for the config-api if needed.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+</code></pre></div>
+<h3 id="fido2">fido2<a class="headerlink" href="#fido2" title="Permanent link">#</a></h3>
+<p>The health check of liveness and readiness probes is a HTTP GET request against a fido2 endpoint</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># http liveness probe endpoint</span><span class="w"></span>
+<span class="w">    </span><span class="nt">httpGet</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/jans-fido2/sys/health-check</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http-fido2</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the liveness healthcheck for the fido2 if needed.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">  </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># http readiness probe endpoint</span><span class="w"></span>
+<span class="w">    </span><span class="nt">httpGet</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/jans-fido2/sys/health-check</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http-fido2</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the readiness healthcheck for the fido2 if needed.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+</code></pre></div>
+<h3 id="scim">scim<a class="headerlink" href="#scim" title="Permanent link">#</a></h3>
+<p>The health check of liveness and readiness probes is a HTTP GET request against a scim endpoint</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">httpGet</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># http liveness probe endpoint</span><span class="w"></span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/jans-scim/sys/health-check</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the liveness healthcheck for the SCIM if needed.  </span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">  </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">httpGet</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># http readiness probe endpoint</span><span class="w"></span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/jans-scim/sys/health-check</span><span class="w"></span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Configure the readiness healthcheck for the SCIM if needed.  </span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-28T10:07:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-28</span>
       
         <br>
         Created:
