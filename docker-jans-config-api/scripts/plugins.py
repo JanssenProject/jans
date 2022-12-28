@@ -1,7 +1,6 @@
 import logging.config
 import os
 import shutil
-import sys
 
 from jans.pycloudlib.utils import cert_to_truststore
 
@@ -52,21 +51,8 @@ class AdminUiPlugin:
     def __init__(self, manager):
         self.manager = manager
 
-    def render_config(self):
-        prop_key = "plugins_admin_ui_properties"
-
-        if not self.manager.secret.get(prop_key):
-            logger.error(f"Unable to find {prop_key} from secret")
-            sys.exit(1)
-
-        self.manager.secret.to_file(
-            prop_key,
-            "/opt/jans/jetty/jans-config-api/custom/config/auiConfiguration.properties",
-        )
-
     def setup(self):
         logger.info("Configuring admin-ui plugin")
-        self.render_config()
         self.import_token_server_cert()
 
     def import_token_server_cert(self):
