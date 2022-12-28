@@ -9,7 +9,7 @@ package io.jans.fido2.service.u2f;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.fido2.model.u2f.DeviceRegistrationResult;
-import io.jans.as.server.service.SessionIdService;
+import io.jans.fido2.service.SessionIdService;
 import io.jans.fido2.ws.rs.controller.u2f.U2fAuthenticationWS;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;

@@ -6,20 +6,6 @@
 
 package io.jans.fido2.model.u2f.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.concurrent.ThreadFactory;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -29,9 +15,22 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-
 import io.jans.util.ArrayHelper;
 import io.jans.util.Util;
+import jakarta.ws.rs.core.CacheControl;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Madhumita S
@@ -40,7 +39,7 @@ import io.jans.util.Util;
 public class ServerUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ServerUtil.class);
-   
+
     private ServerUtil() {
     }
 
@@ -93,7 +92,7 @@ public class ServerUtil {
         return mapper.writeValueAsString(obj);
     }
 
-   
+
     public static ObjectMapper createJsonMapper() {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
@@ -120,7 +119,6 @@ public class ServerUtil {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
     }
 
-   
 
     public static String urlDecode(String str) {
         if (StringUtils.isNotBlank(str)) {
@@ -132,8 +130,6 @@ public class ServerUtil {
         }
         return str;
     }
-
-   
 
 
     public static String getFirstValue(Map<String, String[]> map, String key) {
@@ -148,8 +144,13 @@ public class ServerUtil {
     }
 
 
-
     public static Integer dateToSeconds(Date date) {
         return date != null ? (int) (date.getTime() / 1000) : null;
+    }
+
+    public static CacheControl cacheControl(boolean p_noStore) {
+        final CacheControl cacheControl = new CacheControl();
+        cacheControl.setNoStore(p_noStore);
+        return cacheControl;
     }
 }

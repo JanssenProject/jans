@@ -147,7 +147,10 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.faces</artifactId>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.kerby/kerby-asn1 -->
 		<dependency>
 			<groupId>org.apache.kerby</groupId>

@@ -29,6 +29,7 @@ import io.jans.fido2.service.u2f.UserSessionIdService;
 import io.jans.fido2.service.u2f.ValidationService;
 import io.jans.fido2.model.u2f.util.ServerUtil;
 import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -46,6 +47,7 @@ import jakarta.ws.rs.WebApplicationException;
  * @author Yuriy Movchan
  * @version August 9, 2017
  */
+@ApplicationScoped
 @Path("/fido/u2f/authentication")
 public class U2fAuthenticationWS {
 
@@ -69,6 +71,9 @@ public class U2fAuthenticationWS {
 
     @Inject
     private ValidationService u2fValidationService;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     @GET
     @Produces({"application/json"})

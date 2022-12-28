@@ -13,6 +13,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.u2f.U2fConfiguration;
 import io.jans.fido2.model.u2f.U2fErrorResponseType;
 import io.jans.fido2.model.u2f.util.ServerUtil;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -32,6 +33,7 @@ import jakarta.ws.rs.WebApplicationException;
  *
  * @author Yuriy Movchan Date: 05/13/2015
  */
+@ApplicationScoped
 @Path("/fido-configuration")
 public class U2fConfigurationWS {
 
@@ -40,7 +42,8 @@ public class U2fConfigurationWS {
 
     @Inject
     private AppConfiguration appConfiguration;
-
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     @GET
     @Produces({"application/json"})

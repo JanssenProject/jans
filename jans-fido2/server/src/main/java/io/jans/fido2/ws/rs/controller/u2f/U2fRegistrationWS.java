@@ -18,13 +18,12 @@ import io.jans.fido2.model.u2f.protocol.RegisterRequestMessage;
 import io.jans.fido2.model.u2f.protocol.RegisterResponse;
 import io.jans.fido2.model.u2f.protocol.RegisterStatus;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.fido2.service.SessionIdService;
+import io.jans.fido2.service.external.ExternalAuthenticationService;
 import io.jans.fido2.service.u2f.util.Constants;
 import io.jans.fido2.model.u2f.DeviceRegistration;
 import io.jans.fido2.model.u2f.DeviceRegistrationResult;
-import io.jans.fido2.model.u2f.AuthenticateRequestMessageLdap;
 import io.jans.fido2.model.u2f.RegisterRequestMessageLdap;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.fido2.service.u2f.DeviceRegistrationService;
 import io.jans.fido2.service.u2f.RegistrationService;
 import io.jans.fido2.service.u2f.UserSessionIdService;
@@ -32,6 +31,7 @@ import io.jans.fido2.service.u2f.ValidationService;
 import io.jans.fido2.model.u2f.util.ServerUtil;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -52,6 +52,7 @@ import java.util.List;
  * @author Yuriy Movchan
  * @version August 9, 2017
  */
+@ApplicationScoped
 @Path("/fido/u2f/registration")
 public class U2fRegistrationWS {
 
