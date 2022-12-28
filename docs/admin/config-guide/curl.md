@@ -125,7 +125,7 @@ If client is created successfully, response similar to below will be received:
 ```
 Response contains `client_id` and `client_secret` apart from other client configuration details.
 
-### Get Client Scopes
+### Get Client Details
 
 1. Obtain an Access Token with scope `https://jans.io/oauth/config/openid/clients.readonly`.
 ```
@@ -137,7 +137,95 @@ Response contains `client_id` and `client_secret` apart from other client config
 curl -X GET https://my.jans.server/jans-config-api/api/v1/openid/clients/client-s_inum_for_which_scope_to_be_added 
    -H "Authorization: Bearer put_access_token_here"
 ``` 
-3. Notice the `scope` field. It is a space-separated String of scope values e.g `"scope" : "openid user_name "`. 
+3. This will return JSON response similar to the one below. 
+```json
+{
+   "dn":"inum=994ec0a7-1143-456c-85ca-66ba592d7f9a,ou=clients,o=jans",
+   "expirationDate":"2022-12-29T10:00:33",
+   "deletable":true,
+   "clientSecret":"5Mlvuh0JRwl/WcpiUNGGXjtDO4+SprNBjiVFFcWqWB4gu7gYxqcSMw==",
+   "frontChannelLogoutSessionRequired":false,
+   "redirectUris":[
+      "http://localhost:8080"
+   ],
+   "responseTypes":[
+      "code"
+   ],
+   "grantTypes":[
+      "authorization_code",
+      "refresh_token",
+      "client_credentials"
+   ],
+   "applicationType":"web",
+   "clientName":"dd-test-client",
+   "clientNameLocalized":{
+
+   },
+   "logoUriLocalized":{
+
+   },
+   "clientUriLocalized":{
+
+   },
+   "policyUriLocalized":{
+
+   },
+   "tosUriLocalized":{
+
+   },
+   "subjectType":"pairwise",
+   "idTokenSignedResponseAlg":"RS256",
+   "tokenEndpointAuthMethod":"client_secret_basic",
+   "scopes":[
+      "inum=F0C4,ou=scopes,o=jans",
+      "inum=43F1,ou=scopes,o=jans",
+      "inum=C4F5,ou=scopes,o=jans",
+      "inum=SSA1-PTL1,ou=scopes,o=jans",
+      "inum=6D99,ou=scopes,o=jans",
+      "inum=7D02,ou=scopes,o=jans",
+      "inum=D491,ou=scopes,o=jans",
+      "inum=C17A,ou=scopes,o=jans",
+      "inum=0465-1DEA,ou=scopes,o=jans",
+      "inum=SSA1-AD01,ou=scopes,o=jans",
+      "inum=10B2,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans",
+      "inum=341A,ou=scopes,o=jans",
+      "inum=C4F8,ou=scopes,o=jans",
+      "inum=7D01,ou=scopes,o=jans",
+      "inum=SSA1-DEV1,ou=scopes,o=jans",
+      "inum=C4F6,ou=scopes,o=jans"
+   ],
+   "trustedClient":false,
+   "persistClientAuthorizations":true,
+   "includeClaimsInIdToken":false,
+   "customAttributes":[
+
+   ],
+   "customObjectClasses":[
+      "top"
+   ],
+   "rptAsJwt":false,
+   "accessTokenAsJwt":false,
+   "accessTokenSigningAlg":"RS256",
+   "disabled":false,
+   "attributes":{
+      "runIntrospectionScriptBeforeJwtCreation":false,
+      "keepClientAuthorizationAfterExpiration":false,
+      "allowSpontaneousScopes":false,
+      "backchannelLogoutSessionRequired":false,
+      "parLifetime":600,
+      "requirePar":false,
+      "jansDefaultPromptLogin":false,
+      "minimumAcrLevel":-1
+   },
+   "backchannelTokenDeliveryMode":"poll",
+   "backchannelUserCodeParameter":false,
+   "displayName":"dd-test-client",
+   "authenticationMethod":"client_secret_basic",
+   "baseDn":"inum=994ec0a7-1143-456c-85ca-66ba592d7f9a,ou=clients,o=jans",
+   "inum":"994ec0a7-1143-456c-85ca-66ba592d7f9a"
+}
+``` 
 
 ### Add New Scope to Client 
 
@@ -161,20 +249,6 @@ curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \
      ]'
 ```
 	
-### Get grant_types For Client
-
-1. Obtain an Access Token with scope `https://jans.io/oauth/config/openid/clients.readonly`.
-```
- curl -u "put_client_id:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
-      -d  "grant_type=client_credentials&scope=https://jans.io/oauth/config/openid/clients.readonly" 
-```
-2. Obtain client information using:
-```
- curl -X GET https://my.jans.server/jans-config-api/api/v1/openid/clients/client-s_inum_for_which_grant_types_to_check \ 
-      -H "Authorization: Bearer put_access_token_here"
-``` 
-3. Notice the `grant_types` field in the response.  
-
 ### Add OpenID scope and map to database attribute
 
 1. Obtain access token
