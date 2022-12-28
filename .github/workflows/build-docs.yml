@@ -126,7 +126,6 @@ jobs:
           git add . || echo "Nothing to add"
           git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
           cd ..
-         fi
          
          git push
 
