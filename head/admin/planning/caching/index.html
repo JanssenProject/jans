@@ -8648,7 +8648,9 @@
 <p>There are two reasons to use caching. First, to improve performance by
 reducing the number of writes to the disk. Second, to share session data
 in a clustered deployment. Janssen supports a few different options for
-caching.</p>
+caching, as controlled by the <code>cacheProviderType</code>. Also keep in mind that unless
+the <code>sessionIdPersistInCache</code> is set to <code>True</code>, Auth Server will store sessions
+in the database.</p>
 <ol>
 <li>
 <p><strong>In-Memory</strong> If you only have one server, you can use RAM as the cache.
@@ -8668,7 +8670,7 @@ for caching.</p>
 <li>
 <p><strong>Redis</strong> The best choice if you need a cache service for LDAP, RDBMS,
 or Spanner. Great performance and low cache miss rate. Commercial Redis
-supports TLS, which is a good option if you need secure communication. </p>
+supports TLS, which is a good option if you need secure communication.</p>
 </li>
 <li>
 <p><strong>Memcached</strong> Still a good choice, especially if that's what you already
@@ -8686,7 +8688,7 @@ and Memcached services. They work fine.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-23T19:45:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-28T23:29:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-28</span>
       
         <br>
         Created:

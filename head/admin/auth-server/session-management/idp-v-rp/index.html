@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#idp-versus-rp-session" class="md-skip">
           Skip to content
         </a>
       
@@ -2830,22 +2830,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#idp-versus-rp-session" class="md-nav__link">
+    IDP versus RP session
   </a>
   
 </li>
@@ -8655,22 +8641,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#idp-versus-rp-session" class="md-nav__link">
+    IDP versus RP session
   </a>
   
 </li>
@@ -8719,19 +8691,26 @@
 
   <h1>IDP v RP Sessions</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="idp-versus-rp-session">IDP versus RP session<a class="headerlink" href="#idp-versus-rp-session" title="Permanent link">#</a></h2>
+<p>Applications generally have their own session cookie (the "RP Session").
+This makes sense, because the RP only redirects to the IDP for authentication
+if it cannot find its own local cookie. If a user has a session with many
+RP's, achieving simultaneous logout across all sites is a challenge--something
+which your business leaders may not appreciate. While OpenID proposes several
+solutions to logout, none are idea. Fundamentally, logout is an asynchronous
+challenge. A given RP may be disconnected from the network. Thus logout
+messages sent to RP's that are not received must be replayed. The
+<a href="https://datatracker.ietf.org/doc/charter-ietf-secevent/01/">IETF Sec Events Workgroup</a> has been working on standards to handle logout (and other asynchronous
+requirements). But adoption of this architecture is not common.</p>
+<p>Another challenge of RP sessions is that they may have a different timeout
+for inactivity. See <a href="../../../planning/timeout-management/">Planning Guide Timeout Management</a> for more details.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-28T23:29:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-28</span>
       
         <br>
         Created:

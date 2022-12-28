@@ -8679,6 +8679,11 @@
         <span class="md-tag">session</span>
       
     
+      
+      
+        <span class="md-tag">Account Chooser</span>
+      
+    
   </nav>
 
 
@@ -8692,24 +8697,27 @@
   <h1>Multiple Sessions in One Browser</h1>
 
 <h2 id="select-account">Select Account<a class="headerlink" href="#select-account" title="Permanent link">#</a></h2>
-<p>AS supports different accounts. To be able select account or login as another user within same user-agent authorization request must have <code>prompt=select_account</code>.</p>
-<p>When user is logged in cookies looks as:
+<p>A person may have several accounts in a single Jans Auth Server instance. For
+example, you may have several diffent Gmail ids. An RP can enable a person
+to choose their account by sending an <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">OpenID Authentication Request</a> with the
+parameter <code>prompt=select_account</code>.</p>
+<p>For example, following an initial authentication, the session cookie on a person's browser would contain the following data:</p>
 <div class="highlight"><pre><span></span><code>session_id: de510ab6-b06c-4393-86d8-12a7c501aafe
 current_sessions: [&quot;de510ab6-b06c-4393-86d8-12a7c501aafe&quot;]
-</code></pre></div></p>
-<p>If RP sends Authorization Request with <code>prompt=select_account</code> and selects hits <code>Login as another user</code> button and authenticate then cookies looks as:
+</code></pre></div>
+<p>Continuing this example, if an RP sent an additional Authentication Request with <code>prompt=select_account</code>, Auth Server may return a page enabling the person
+to select their account, or even to login as a different account. Once authenticated as a different user, the <code>current_sessions</code> cookie would reference
+all the current sessions, like this:</p>
 <div class="highlight"><pre><span></span><code>session_id: c691e83d-eb1b-41f0-b453-fab905681b5b
 current_sessions: [&quot;de510ab6-b06c-4393-86d8-12a7c501aafe&quot;, &quot;c691e83d-eb1b-41f0-b453-fab905681b5b&quot;]
-</code></pre></div></p>
-<p>AS represents accounts based on <code>current_sessions</code> cookies. It may contain outdated references but AS will filter it out and update on request. Thus page represents always actual/active sessions.</p>
-<p><img alt="selectAccount" src="../img/admin-guide/selectAccount.png" /></p>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-23T20:57:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-28T23:29:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-28</span>
       
         <br>
         Created:
