@@ -34,37 +34,6 @@ def get_grpcio_package(data):
 
     return package
 
-def download_gcs():
-    gcs_dir = os.path.join(base.pylib_dir, 'gcs')
-
-    if os.path.exists(gcs_dir) and not base.argsp.force_download:
-        return
-
-    base.logIt("Downloading Spanner modules")
-    gcs_download_url = os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'spanner/gcs.tgz')
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-
-        target_fn = os.path.join(tmp_dir, 'gcs.tgz')
-        base.download(gcs_download_url, target_fn, verbose=True)
-        shutil.unpack_archive(target_fn, base.pylib_dir)
-
-        grpcio_fn = os.path.join(tmp_dir, 'grpcio_fn.json')
-        base.download('https://pypi.org/pypi/grpcio/1.46.0/json', grpcio_fn, verbose=True)
-        data = base.readJsonFile(grpcio_fn)
-
-        package = get_grpcio_package(data)
-
-        if package.get('url'):
-            target_whl_fn = os.path.join(tmp_dir, os.path.basename(package['url']))
-            base.download(package['url'], target_whl_fn, verbose=True)
-            whl_zip = zipfile.ZipFile(target_whl_fn)
-
-            for member in  whl_zip.filelist:
-                whl_zip.extract(member, gcs_dir)
-
-            whl_zip.close()
-
 
 def download_sqlalchemy():
     sqlalchemy_dir = os.path.join(base.pylib_dir, 'sqlalchemy')
@@ -101,6 +70,4 @@ def download_all():
 
 def download_apps():
     download_jans_acrhieve()
-    if base.current_app.profile == 'jans':
-        download_gcs()
     download_sqlalchemy()

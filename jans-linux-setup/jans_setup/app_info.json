@@ -6,7 +6,6 @@
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
   "JANS_MAVEN": "https://jenkins.jans.io",
-  "EXTERNAL_LIBS": "https://ox.gluu.org/icrby8xcvbcv/",
   "APPLE_WEBAUTHN": "https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem",
   "SQLALCHEMY": "https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip",
   "PYJWT": "https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip",

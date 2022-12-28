@@ -229,7 +229,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
 
                 if Config.rdbm_type == 'spanner':
-                    req = self.dbUtils.spanner.create_table(sql_cmd.strip(';'))
+                    req = self.dbUtils.spanner_client.exec_sql(sql_cmd.strip(';'))
                 else:
                     self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
@@ -242,9 +242,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             for sattr, sdt in self.dbUtils.sub_tables[Config.rdbm_type][subtable]:
                 subtable_columns = []
                 sql_cmd = 'CREATE TABLE `{0}_{1}` (`doc_id` STRING(64) NOT NULL, `dict_doc_id` STRING(64), `{1}` {2}) PRIMARY KEY (`doc_id`, `dict_doc_id`), INTERLEAVE IN PARENT `{0}` ON DELETE CASCADE'.format(subtable, sattr, sdt)
-                self.dbUtils.spanner.create_table(sql_cmd)
+                self.dbUtils.spanner_client.exec_sql(sql_cmd)
                 sql_cmd_index = 'CREATE INDEX `{0}_{1}Idx` ON `{0}_{1}` (`{1}`)'.format(subtable, sattr)
-                self.dbUtils.spanner.create_table(sql_cmd_index)
+                self.dbUtils.spanner_client.exec_sql(sql_cmd_index)
 
 
     def get_index_name(self, attrname):
@@ -269,11 +269,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         sql_indexes['__common__']['fields'].append(attr_name)
 
         if Config.rdbm_type == 'spanner':
-            tables = self.dbUtils.spanner.get_tables()
+            tables = self.dbUtils.spanner_client.get_tables()
             for tblCls in tables:
                 tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) + sql_indexes['__common__']['fields']
 
-                tbl_data = self.dbUtils.spanner.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
+                tbl_data = self.dbUtils.spanner_client.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
 
                 for attr in tbl_data.get('fields', []):
                     if attr['name'] == 'doc_id':
@@ -292,7 +292,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     tblCls,
                                     attr_name
                                 )
-                        self.dbUtils.spanner.create_table(sql_cmd)
+                        self.dbUtils.spanner_client.exec_sql(sql_cmd)
 
                 for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
                     sql_cmd = 'CREATE INDEX `{0}_CustomIdx{1}` ON {0} ({2})'.format(
@@ -300,7 +300,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     i+1, 
                                     custom_index
                                 )
-                    self.dbUtils.spanner.create_table(sql_cmd)
+                    self.dbUtils.spanner_client.exec_sql(sql_cmd)
 
         else:
             for tblCls in self.dbUtils.Base.classes.keys():
