@@ -17,11 +17,11 @@
     "parEndpoint":"https://%(hostname)s/jans-auth/restv1/par",
     "umaConfigurationEndpoint":"https://%(hostname)s/jans-auth/restv1/uma2-configuration",
     "sectorIdentifierEndpoint":"https://%(hostname)s/jans-auth/sectoridentifier",
-    "oxElevenGenerateKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/generateKey",
-    "oxElevenSignEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/sign",
-    "oxElevenVerifySignatureEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/verifySignature",
-    "oxElevenDeleteKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/deleteKey",
-    "oxElevenJwksEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/jwks",
+    "jansElevenGenerateKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/generateKey",
+    "jansElevenSignEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/sign",
+    "jansElevenVerifySignatureEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/verifySignature",
+    "jansElevenDeleteKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/deleteKey",
+    "jansElevenJwksEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/jwks",
     "backchannelAuthenticationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-authorize",
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
@@ -214,8 +214,8 @@
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
     "requestUriHashVerificationEnabled": false,
     "idTokenFilterClaimsBasedOnAccessToken": false,
-    "opPolicyUri":"http://www.jans.io/doku.php?id=jans:policy",
-    "opTosUri":"http://www.jans.io/doku.php?id=jans:tos",
+    "opPolicyUri":"https://%(hostname)s/opPolicy",
+    "opTosUri":"https://%(hostname)s/tos",
     "authorizationCodeLifetime":60,
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
@@ -237,8 +237,8 @@
     "keyRegenerationEnabled":false,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
-    "oxOpenIdConnectVersion":"openidconnect-1.0",
-    "oxId":"https://%(hostname)s/oxid/service/jans/inum",
+    "jansOpenIdConnectVersion":"openidconnect-1.0",
+    "jansId":"https://%(hostname)s/oxid/service/jans/inum",
     "dcrSignatureValidationEnabled": true,
     "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
     "dcrSignatureValidationSoftwareStatementJwksClaim": null,
@@ -394,5 +394,11 @@
     "staticKid": "%(staticKid)s",
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
     "redirectUrisRegexEnabled": false,
-    "useHighestLevelScriptIfAcrScriptNotFound": true
+    "useHighestLevelScriptIfAcrScriptNotFound": true,
+    "blockWebviewAuthorizationEnabled": false,
+    "userInfoConfiguration": {
+        "dateFormatterPattern": {
+            "birthdate": "yyyy-MM-dd"
+        }
+    }
 }

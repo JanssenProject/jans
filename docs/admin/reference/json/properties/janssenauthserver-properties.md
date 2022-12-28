@@ -112,6 +112,7 @@ tags:
 | expirationNotificatorIntervalInSeconds | The expiration notificator interval in second | [Details](#expirationnotificatorintervalinseconds) |
 | expirationNotificatorMapSizeLimit | The expiration notificator maximum size limit | [Details](#expirationnotificatormapsizelimit) |
 | externalLoggerConfiguration | The path to the external log4j2 logging configuration | [Details](#externalloggerconfiguration) |
+| externalUriWhiteList | This list specifies which external URIs can be called by AS (if empty any URI can be called) | [Details](#externaluriwhitelist) |
 | fapiCompatibility | Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode | [Details](#fapicompatibility) |
 | featureFlags | List of enabled feature flags | [Details](#featureflags) |
 | forceIdTokenHintPrecense | Boolean value specifying whether force id_token_hint parameter presence | [Details](#forceidtokenhintprecense) |
@@ -1180,6 +1181,15 @@ tags:
 ### externalLoggerConfiguration
 
 - Description: The path to the external log4j2 logging configuration
+
+- Required: No
+
+- Default value: None
+
+
+### externalUriWhiteList
+
+- Description: This list specifies which external URIs can be called by AS (if empty any URI can be called)
 
 - Required: No
 

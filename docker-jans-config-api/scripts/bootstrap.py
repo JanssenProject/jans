@@ -31,12 +31,12 @@ from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
 from plugins import discover_plugins
-from utils import parse_config_api_swagger
-from utils import generate_hex
+from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -227,8 +227,6 @@ def configure_logging():
         f.write(tmpl.safe_substitute(config))
 
 
-
-
 def configure_admin_ui_logging():
     # default config
     config = {
@@ -410,56 +408,24 @@ class PersistenceSetup:
         # finalize ctx
         return ctx
 
-    def get_scope_jans_ids(self):
-        if self.persistence_type in ("sql", "spanner"):
-            entries = self.client.search("jansScope", ["jansId"])
-            return [entry["jansId"] for entry in entries]
-
-        if self.persistence_type == "couchbase":
-            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            req = self.client.exec_query(
-                f"SELECT {bucket}.jansId FROM {bucket} WHERE objectClass = 'jansScope'",
-            )
-            results = req.json()["results"]
-            return [item["jansId"] for item in results]
-
-        # likely ldap
-        entries = self.client.search("ou=scopes,o=jans", "(objectClass=jansScope)", ["jansId"])
-        return [entry.entry_attributes_as_dict["jansId"][0] for entry in entries]
-
     def generate_scopes_ldif(self):
-        # jansId to compare to
-        existing_jans_ids = self.get_scope_jans_ids()
-
-        def generate_config_api_scopes():
-            swagger = parse_config_api_swagger()
-            scopes = swagger["components"]["securitySchemes"]["oauth2"]["flows"]["clientCredentials"]["scopes"]
-
-            generated_scopes = []
-            for jans_id, desc in scopes.items():
-                if jans_id in existing_jans_ids:
-                    continue
-
-                inum = f"1800.{generate_hex()}-{generate_hex()}"
-                attrs = {
-                    "creatorAttrs": [json.dumps({})],
-                    "description": [desc],
-                    "displayName": [f"Config API scope {jans_id}"],
-                    "inum": [inum],
-                    "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
-                    "jansId": [jans_id],
-                    "jansScopeTyp": ["oauth"],
-                    "objectClass": ["top", "jansScope"],
-                    "jansDefScope": ["false"],
-                }
-                generated_scopes.append(attrs)
-            return generated_scopes
-
         # prepare required scopes (if any)
         scopes = []
 
-        config_api_scopes = generate_config_api_scopes()
-        scopes += config_api_scopes
+        scope_mapping = get_config_api_scope_mapping()
+        for inum, meta in scope_mapping.items():
+            attrs = {
+                "creatorAttrs": [json.dumps({})],
+                "description": [f"Config API {meta['level']} {meta['name']}"],
+                "displayName": [f"Config API {meta['name']}"],
+                "inum": [inum],
+                "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
+                "jansId": [meta["name"]],
+                "jansScopeTyp": ["oauth"],
+                "objectClass": ["top", "jansScope"],
+                "jansDefScope": ["false"],
+            }
+            scopes.append(attrs)
 
         with open("/app/templates/jans-config-api/scopes.ldif", "wb") as fd:
             writer = LDIFWriter(fd, cols=1000)
@@ -467,11 +433,12 @@ class PersistenceSetup:
                 writer.unparse(f"inum={scope['inum'][0]},ou=scopes,o=jans", scope)
 
     def import_ldif_files(self) -> None:
-        # temporarily disable dynamic scopes creation
-        # see https://github.com/JanssenProject/jans/issues/2869
-        # self.generate_scopes_ldif()
+        # create missing scopes, saved as scopes.ldif (if enabled)
+        if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
+            logger.info("Missing scopes creation is enabled!")
+            self.generate_scopes_ldif()
 
-        files = ["config.ldif", "scopes.ldif", "clients.ldif"]
+        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:
