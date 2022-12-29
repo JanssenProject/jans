@@ -222,7 +222,6 @@
     "spontaneousScopeLifetime":86400,
     "accessTokenLifetime":300,
     "umaResourceLifetime":2592000,
-    "sessionAsJwt":false,
     "umaRptLifetime": 3600,
     "umaTicketLifetime": 3600,
     "umaPctLifetime": 2592000,
