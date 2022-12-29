@@ -4,7 +4,6 @@ tags:
   - developer
   - scripts
   - ConsentGathering
-  - ConsentGatheringType
 ---
 
 ## Overview
