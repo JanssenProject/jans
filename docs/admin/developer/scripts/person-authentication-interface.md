@@ -3,6 +3,9 @@ tags:
   - administration
   - developer
   - scripts
+  - PersonAuthenticationType
+  - authentication
+  - authentication workflow
 ---
 
 ## Person Authentication interface
@@ -55,8 +58,8 @@ Pseudo code:
 |7.|   `getAuthenticationMethodClaims` |   Array of strings that are identifiers for authentication methods used in the authentication. In OpenID Connect, if the identity provider supplies an "amr" claim in the ID Token resulting from a successful authentication, the relying party can inspect the values returned and thereby learn details about how the authentication was performed.|
 |8.| `isValidAuthenticationMethod`| This method is used to check if the authentication method is in a valid state. For example we can check there if a 3rd party mechanism is available to authenticate users. As a result it should either return True or False.|
 |9.| `getAlternativeAuthenticationMethod` | This method is called only if the current authentication method is in an invalid state. Hence authenticator calls it only if isValidAuthenticationMethod returns False. As a result it should return the reserved authentication method name.|
-|10.  `getLogoutExternalUrl` | Returns the 3rd-party URL that is used to end session routines. The control from this Third party URL should re-direct user back to /oxauth/logout.htm again with empty URL query string. Jans-Auth server will then continue of the extended logout flow, restore the original URL query string, and send user to `/jans-auth/end_session` to complete it.|
-|11. `logout` | This method is not mandatory. It can be used in cases when you need to execute specific logout logic in the authentication script when jans-auth receives an end session request to the /oxauth/logout.htm endpoint (which receives the same set of parameters than the usual end_session endpoint). This method should return True or False; when False jans-auth stops processing the end session request workflow.|
+|10. | `getLogoutExternalUrl` | Returns the 3rd-party URL that is used to end session routines. The control from this Third party URL should re-direct user back to /oxauth/logout.htm again with empty URL query string. Jans-Auth server will then continue of the extended logout flow, restore the original URL query string, and send user to `/jans-auth/end_session` to complete it.|
+|11. |`logout` | This method is not mandatory. It can be used in cases when you need to execute specific logout logic in the authentication script when jans-auth receives an end session request to the /oxauth/logout.htm endpoint (which receives the same set of parameters than the usual end_session endpoint). This method should return True or False; when False jans-auth stops processing the end session request workflow.|
 
 #### Objects
 | Object name | Object description |
@@ -64,7 +67,6 @@ Pseudo code:
 |`configurationAttributes`| `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes` |
 |`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
 |usageType|[AuthenticationScriptUsageType](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/AuthenticationScriptUsageType.java)|
-|step|Integer indicating step number|
 |step|Integer indicating step number|
 |requestParameters|Request parameters stored as Map<String, String[]>|
 
