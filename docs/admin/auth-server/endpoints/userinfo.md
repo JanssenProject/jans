@@ -52,6 +52,7 @@ Userinfo endpoint can be further configured using Janssen Server configuration p
 navigate via `Auth Server`->`Properties`.
 
 TODO: Add better description to properties
+TODO: not all properties are available in TUI
 
 - [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
 - [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
@@ -60,21 +61,32 @@ TODO: Add better description to properties
 - [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
 - [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
 
-
-
 ## Using Scopes To Control Claim Release
+
+### Standard Scopes
 
 In context of OpenID Connect specification, claim information released by userinfo endpoint can be controlled using 
 scopes. Janssen Server supports all [standard scopes](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
 and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and 
 define claims to be linked to each standard scope.
 
-In addition to standard scopes, Janssen server allows defining [custom scopes](TODO: how to define custom scopes and link claims) 
-which can be associated to user-defined list of claims. This allows administrators to create custom groupings of claims.
+When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the scopes, navigate via 
+`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `OpenID`->search for a standard scope like `address`
 
-## Interception Scripts
+### Dynamic Scopes
 
-Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script. 
+In addition to standard scopes, Janssen server allows defining custom scopes which can be associated to user-defined 
+list of claims. This allows administrators to create custom groupings of claims.
+
+When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md), navigate via
+`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
+
+### Interception Scripts
+
+Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script.
+
+Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/tui.md). 
+Navigate to `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`->`Dynamic Scope Script`
 
 ## Want to contribute?
 
