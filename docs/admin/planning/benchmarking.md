@@ -105,7 +105,7 @@ Download or build [config-cli-tui](../config-guide/tui.md) and run:
 ```
 
 1. Create users by pattern:
-Set the following [env vars](../../../demos/benchmarking/docker-loadtesting-jmeter/README.md#loading-users) 
+Set the following [env vars](../../../demos/benchmarking/docker-jans-loadtesting-jmeter/README.md#loading-users) 
 
 | ENV                          | Example            |
 |------------------------------|--------------------|
@@ -119,7 +119,7 @@ Set the following [env vars](../../../demos/benchmarking/docker-loadtesting-jmet
 | `USER_NUMBER_ENDING_POINT`   | 10000              |
 
 
-Run the following script [add_sequenced_jans_user_rdbm.py](../../../demos/benchmarking/docker-loadtesting-jmeter/scripts/add_users_rdbm.py)
+Run the following script [add_sequenced_jans_user_rdbm.py](../../../demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/add_users_rdbm.py)
 
 
 **Threads&RampUp**

@@ -2,12 +2,8 @@ apiVersion: v1
 data:
   AUTHZ_CLIENT_ID: "aa4c8edf-1d68-462b-ac49-178c7b1db8fd"
   AUTHZ_CLIENT_SECRET: "9c077c8a-dc84-4baa-abde-edc1a343e3e3"
-  # First batch is the users from min - max that login 10% every time
-  FIRST_BATCH_MAX: "1000"
-  FIRST_BATCH_MIN: "0"
-  # Second batch is the users from min - max that login 90% every time
-  SECOND_BATCH_MAX: "5000"
-  SECOND_BATCH_MIN: "1002"
+  USER_NUMBER_STARTING_POINT: 0
+  USER_NUMBER_ENDING_POINT: 10000000
   FQDN: demoexample.jans.io
   RUN_AUTHZ_TEST: "true" # or "false"
 kind: ConfigMap
@@ -40,13 +36,13 @@ spec:
       - envFrom:
         - configMapRef:
             name: load-testing-cm
-        image: janssenproject/demo_loadtesting:1.0.0_dev
+        image: janssenproject/demo_loadtesting:1.0.6_dev
         imagePullPolicy: Always
         name: load-testing
         resources:
           requests:
-            memory: "2000Mi"
-            cpu: "2000m"
+            memory: "8000Mi"
+            cpu: "1300m"
           limits:
-            memory: "2000Mi"
-            cpu: "2000m"
+            memory: "8000Mi"
+            cpu: "1300m"

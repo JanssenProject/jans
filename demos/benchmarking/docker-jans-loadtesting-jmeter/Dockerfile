@@ -10,7 +10,7 @@ RUN apt-get clean \
 && apt-get clean
 
 RUN apt-get update \
-    &&  apt-get install openjdk-8-jre-headless wget git bash python3-dev lsb-core python3-setuptools cmake build-essential apt-utils python3-pip -y
+    &&  apt-get install openjdk-8-jre-headless wget git bash python3 python3-dev lsb-core python3-setuptools cmake build-essential apt-utils python3-pip -y
 
 # ===============
 # Environmental Variables
@@ -48,23 +48,16 @@ ENV FQDN="https://demoexample.jans.io" \
     RDBMS_PASSWORD="" \
     RDBMS_HOST="localhost"
 
-# ===============
-# Install Couchbase Client
-# ===============
 
-RUN apt-get update \
-    && python3 -m pip install couchbase
 
-# =======================
-# Install Spanner package
-# =======================
+# ======
+# Python
+# ======
 
-RUN python3 -m pip install google-cloud-spanner
-
-# ===============
-# Packages
-# ===============
-RUN pip install joblib ldap3 pygtail psycopg2 PyMySQL
+COPY requirements.txt /scripts/requirements.txt
+RUN pip install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /scripts/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 COPY scripts /scripts
 
@@ -72,5 +65,13 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
     && wget -q https://dlcdn.apache.org//jmeter/binaries/apache-jmeter-5.5.tgz -O /scripts/apache-jmeter-5.5.tgz \
     && tar zxvf /scripts/apache-jmeter-5.5.tgz -C /root/.bzt/jmeter-taurus \
     && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.5 /root/.bzt/jmeter-taurus/5.5
+
+LABEL name="janssenproject/demo_loadtesting" \
+    maintainer="Janssen Project <support@jans.io>" \
+    vendor="Janssen Project" \
+    version="1.0.6" \
+    release="dev" \
+    summary="Janssen Jmeter tests" \
+    description="Janssen Jmeter and user loader image"
 
 ENTRYPOINT ["bash", "/scripts/entrypoint.sh"]

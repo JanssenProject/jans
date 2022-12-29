@@ -3,20 +3,23 @@ kind: ConfigMap
 metadata:
   labels:
     app: load-users
-  name: load-users-ldap-cm
+  name: load-users-mysql-cm
 data:
-  LDAP_URL: opendj:1636
-  LDAP_PW: Test1234#
-  LOAD_USERS_TO_LDAP: "true"
+  LOAD_USERS_TO_RDBMS: "true"
+  RDBMS_TYPE: 'mysql'
+  RDBMS_DB: "jans"
+  RDBMS_USER: "root"
+  RDBMS_PASSWORD: Test1234#
+  RDBMS_HOST: "my-release-mysql.mysql.svc.cluster.local"
   USER_NUMBER_STARTING_POINT: "0"
-  USER_NUMBER_ENDING_POINT: "100000"
+  USER_NUMBER_ENDING_POINT: "10000000"
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   labels:
     app: load-users
-  name: load-users-ldap
+  name: load-users
 spec:
   template:
     metadata:
@@ -24,15 +27,15 @@ spec:
         app: load-users
     spec:
       #hostAliases:
-      #  - ip: NGINX_IP
-      #    hostnames:
-      #      - FQDN
+       # - ip: NGINX_IP
+       #   hostnames:
+       #     - FQDN
       containers:
       - envFrom:
         - configMapRef:
-            name: load-users-ldap-cm
+            name: load-users-mysql-cm
         image: janssenproject/demo_loadtesting:1.0.0_dev
-        name: load-users
+        name: load-users-mysql
         resources:
           limits:
             cpu: 10000m

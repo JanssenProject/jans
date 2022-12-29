@@ -41,17 +41,19 @@ Installation depends on the set of environment variables shown below. These envi
 
 ### Running tests
 
-| ENV                              | Description                                                     | Default                                          |
-|----------------------------------|-----------------------------------------------------------------|--------------------------------------------------|
-| `FQDN`                           | The hostname janssen is using.                                  | `https://demoexample.jans.io`                    |
-| `AUTHZ_CLIENT_ID`                | Authorization code client id                                    | ``                                               |
-| `AUTHZ_CLIENT_SECRET`            | Authorization code client secret                                | ``                                               |
-| `ROPC_CLIENT_ID`                 | Resource grant client id                                        | ``                                               |
-| `ROPC_CLIENT_SECRET`             | Resource grant client secret                                    | ``                                               |
-| `RUN_AUTHZ_TEST`                 | Run the Authorization code test                                 | `false`                                          |
-| `RUN_ROPC_TEST`                  | Run the ROPC test                                               | `false`                                          |
-| `TEST_USERS_PREFIX_STRING`       | The user prefix string attached to the test users loaded        | `test_user`                                      |
-| `THREAD_COUNT`                   | Thread count in jmeter tests                                    | `200`                                            |
+| ENV                          | Description                                              | Default                       |
+|------------------------------|----------------------------------------------------------|-------------------------------|
+| `FQDN`                       | The hostname janssen is using.                           | `https://demoexample.jans.io` |
+| `AUTHZ_CLIENT_ID`            | Authorization code client id                             | ``                            |
+| `AUTHZ_CLIENT_SECRET`        | Authorization code client secret                         | ``                            |
+| `ROPC_CLIENT_ID`             | Resource grant client id                                 | ``                            |
+| `ROPC_CLIENT_SECRET`         | Resource grant client secret                             | ``                            |
+| `RUN_AUTHZ_TEST`             | Run the Authorization code test                          | `false`                       |
+| `RUN_ROPC_TEST`              | Run the ROPC test                                        | `false`                       |
+| `TEST_USERS_PREFIX_STRING`   | The user prefix string attached to the test users loaded | `test_user`                   |
+| `THREAD_COUNT`               | Thread count in jmeter tests                             | `200`                         |
+| `USER_NUMBER_STARTING_POINT` | The user number to start from .                          | `0`                           |
+| `USER_NUMBER_ENDING_POINT`   | The user number to end at.                               | `50000000`                    |
 
 
 ## How to run

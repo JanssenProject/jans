@@ -1,5 +1,5 @@
-CN_VERSION?=1.0.0
-IMAGE_NAME=demo_loadtesting
+CN_VERSION?=1.0.6
+IMAGE_NAME=janssenproject/demo_loadtesting
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 
 .PHONY: test clean all build-dev trivy-scan grype-scan

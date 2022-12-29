@@ -3,20 +3,20 @@ kind: ConfigMap
 metadata:
   labels:
     app: load-users
-  name: load-users-cb-cm
+  name: load-users-ldap-cm
 data:
-  COUCHBASE_PW: Test1234#
-  COUCHBASE_URL: cb.cbns.svc.cluster.local
-  LOAD_USERS_TO_COUCHBASE: "true"
+  LDAP_URL: opendj:1636
+  LDAP_PW: Test1234#
+  LOAD_USERS_TO_LDAP: "true"
   USER_NUMBER_STARTING_POINT: "0"
-  USER_NUMBER_ENDING_POINT: "100000"
+  USER_NUMBER_ENDING_POINT: "10000000"
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   labels:
     app: load-users
-  name: load-users-cb
+  name: load-users-ldap
 spec:
   template:
     metadata:
@@ -30,7 +30,7 @@ spec:
       containers:
       - envFrom:
         - configMapRef:
-            name: load-users-cb-cm
+            name: load-users-ldap-cm
         image: janssenproject/demo_loadtesting:1.0.0_dev
         name: load-users
         resources:
