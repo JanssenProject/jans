@@ -81,6 +81,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     self.enable('mariadb')
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
+                    self.enable('mysqld')
                 result, conn = self.dbUtils.mysqlconnection(log=False)
                 if not result:
                     sql_cmd_list = [
