@@ -130,9 +130,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Mutual TLS (mTLS) device authorization endpoint URL")
     private String mtlsDeviceAuthzEndpoint;
 
-    @DocProperty(description = "Boolean value true saves session data as a JWT", defaultValue = "false")
-    private Boolean sessionAsJwt = false;
-
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
 
@@ -1311,14 +1308,6 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaRptAsJwt(Boolean umaRptAsJwt) {
         this.umaRptAsJwt = umaRptAsJwt;
-    }
-
-    public Boolean getSessionAsJwt() {
-        return sessionAsJwt;
-    }
-
-    public void setSessionAsJwt(Boolean sessionAsJwt) {
-        this.sessionAsJwt = sessionAsJwt;
     }
 
     public Boolean getUmaAddScopesAutomatically() {

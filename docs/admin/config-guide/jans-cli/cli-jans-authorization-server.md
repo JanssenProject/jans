@@ -66,7 +66,6 @@ It returns all the information of the Jans Authorization server.
   "parEndpoint": "https://example.jans.io/jans-auth/restv1/par",
   "requirePar": false,
   "deviceAuthzEndpoint": "https://example.jans.io/jans-auth/restv1/device_authorization",
-  "sessionAsJwt": false,
   "requireRequestObjectEncryption": false,
   "requirePkce": false,
   "allowAllValueForRevokeEndpoint": false,
