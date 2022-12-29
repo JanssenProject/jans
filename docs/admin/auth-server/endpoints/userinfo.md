@@ -27,7 +27,20 @@ https://janssen.server.host/jans-auth/restv1/userinfo
 
 In response to a valid request, the userinfo endpoint returns user information in JSON format similar to below: 
 
-TODO: add sample response
+```
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+  {
+   "sub": "3482897610054",
+   "name": "Chad Wick",
+   "given_name": "Chad",
+   "family_name": "Wick",
+   "preferred_username": "c.wick",
+   "email": "cwick@jans.com",
+   "picture": "http://mysite.com/mypic.jpg"
+  }
+```
 
 Since userinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to 
 access the endpoint. More information about request and response of the userinfo endpoint can be found in 
