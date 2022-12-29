@@ -831,6 +831,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/developer/scripts/person-authentication-faq/</loc>
+         <lastmod>2022-12-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/person-authentication-interface/</loc>
          <lastmod>2022-12-29</lastmod>
          <changefreq>daily</changefreq>

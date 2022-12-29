@@ -5274,6 +5274,33 @@
     B. UI pages:
   </a>
   
+    <nav class="md-nav" aria-label="B. UI pages:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-server-side-actions-implemented-by-custom-script" class="md-nav__link">
+    a. Server-side actions implemented by custom script:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-web-page-in-xhtml" class="md-nav__link">
+    b. Web page in xhtml:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-page-customizations" class="md-nav__link">
+    c. Page customizations:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -8838,6 +8865,33 @@
     B. UI pages:
   </a>
   
+    <nav class="md-nav" aria-label="B. UI pages:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-server-side-actions-implemented-by-custom-script" class="md-nav__link">
+    a. Server-side actions implemented by custom script:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-web-page-in-xhtml" class="md-nav__link">
+    b. Web page in xhtml:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-page-customizations" class="md-nav__link">
+    c. Page customizations:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -9046,11 +9100,6 @@
         <span class="md-tag">weld</span>
       
     
-      
-      
-        <span class="md-tag">None</span>
-      
-    
   </nav>
 
 
@@ -9077,9 +9126,46 @@
 <p>Jans-auth server comprises of a number of beans, configuration files and Facelets (JSF) views, packaged as a WAR module. That means custom scripts and custom pages (JSF facelets) can make use of business logic already encapsulated in the Weld managed beans. The following sections explain how authentication flow can be built using a custom script.</p>
 <h3 id="a-custom-script">A. Custom script<a class="headerlink" href="#a-custom-script" title="Permanent link">#</a></h3>
 <p>The <strong>PersonAuthenticationType</strong> script is described by a java interface whose methods should be overridden to implement an authentication workflow.
-The <a href="./person-authentication-interface">article</a> talks about these methods in detail and the psuedo code for each method.</p>
+The <a href="../scripts/person-authentication-interface">article</a> talks about these methods in detail and the psuedo code for each method.</p>
 <h3 id="b-ui-pages">B. UI pages:<a class="headerlink" href="#b-ui-pages" title="Permanent link">#</a></h3>
-<p>All web pages are <strong>xhtml</strong> files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.</p>
+<p>All web pages are <strong>xhtml</strong> files. The Command-Action offering by JSF framework is used by the Jans-auth server to implement authentication flows.</p>
+<h4 id="a-server-side-actions-implemented-by-custom-script">a. Server-side actions implemented by custom script:<a class="headerlink" href="#a-server-side-actions-implemented-by-custom-script" title="Permanent link">#</a></h4>
+<p>The custom script's <code>authenticate</code> and <code>prepareForStep</code> implementations are called by the following java class - <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/auth/Authenticator.java">Authenticator</a>. These methods are mapped as command actions and view actions respectively in the web page.</p>
+<p>Relevant methods:</p>
+<table>
+<thead>
+<tr>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>boolean authenticate()</td>
+<td>Makes the authentication flow proceed by calling the <code>authenticate</code> method of the custom script</td>
+</tr>
+<tr>
+<td>String prepareAuthenticationForStep()</td>
+<td>Makes the authentication flow proceed by calling the <code>prepareForStep</code> method of the custom script</td>
+</tr>
+</tbody>
+</table>
+<h4 id="b-web-page-in-xhtml">b. Web page in xhtml:<a class="headerlink" href="#b-web-page-in-xhtml" title="Permanent link">#</a></h4>
+<ol>
+<li>The <code>f:metadata</code> and <code>f:viewAction</code> tags are used to load variables (prepared in the <code>prepareForStep</code> method of the custom script). These variables are rendered on the UI page.
+<div class="highlight"><pre><span></span><code>&lt;f:metadata&gt;
+   &lt;f:viewAction action=&quot;#{authenticator.prepareAuthenticationForStep}&quot;
+     if=&quot;#{not identity.loggedIn}&quot; /&gt;
+ &lt;/f:metadata&gt;
+</code></pre></div></li>
+<li>A form submit takes the flow to the <code>authenticate()</code> method of the custom script.
+<div class="highlight"><pre><span></span><code>&lt;h:commandButton id=&quot;updateButton&quot; value=&quot;Update&quot;
+               styleClass=&quot;btn btn-primary col-sm-4&quot;
+               action=&quot;#{authenticator.authenticate}&quot; style=&quot;margin:5px;&quot; /&gt;
+</code></pre></div></li>
+</ol>
+<h4 id="c-page-customizations">c. Page customizations:<a class="headerlink" href="#c-page-customizations" title="Permanent link">#</a></h4>
+<p>The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.</p>
 <p>This <a href="../../customization/customize-web-pages">article</a> covers all the details you need to write your own web page.</p>
 <h3 id="c-business-logic-in-custom-script">C. Business logic in Custom script:<a class="headerlink" href="#c-business-logic-in-custom-script" title="Permanent link">#</a></h3>
 <p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this <a href="../../managed-beans/">article</a></p>
@@ -9119,9 +9205,18 @@ Learn more about acr_values in the <a href="http://openid.net/specs/openid-conne
 <h2 id="usage-scenarios">Usage scenarios<a class="headerlink" href="#usage-scenarios" title="Permanent link">#</a></h2>
 <h3 id="a-implementing-2fa-authentication-mechanisms">A. Implementing 2FA authentication mechanisms<a class="headerlink" href="#a-implementing-2fa-authentication-mechanisms" title="Permanent link">#</a></h3>
 <ol>
-<li><a href="../../../script-catalog/person_authentication/fido2-external-authenticator/README">FIDO2</a> : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer</li>
-<li>SMS OTP :  </li>
-<li>Email OTP</li>
+<li>
+<p><a href="../../../script-catalog/person_authentication/fido2-external-authenticator/README">FIDO2</a> : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer</p>
+</li>
+<li>
+<p><a href="../../../script-catalog/person_authentication/otp-external-authenticator">OTP authentication</a> : Authentication mechanism using an app like <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=en">Google authenticator</a>, <a href="https://freeotp.github.io/">FreeOTP</a> or <a href="https://authy.com/">Authy</a> that implements the open standards <a href="https://tools.ietf.org/html/rfc4226">HOTP</a> and <a href="https://tools.ietf.org/html/rfc6238">TOTP</a></p>
+</li>
+<li>
+<p>SMS OTP :  </p>
+</li>
+<li>
+<p>Email OTP:</p>
+</li>
 </ol>
 <h3 id="b-implementing-multistep-authentication">B. Implementing Multistep authentication<a class="headerlink" href="#b-implementing-multistep-authentication" title="Permanent link">#</a></h3>
 <ol>
@@ -9219,7 +9314,7 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-20T12:14:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T15:53:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
       
         <br>
         Created:

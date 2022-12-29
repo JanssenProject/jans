@@ -8687,6 +8687,21 @@
         <span class="md-tag">scripts</span>
       
     
+      
+      
+        <span class="md-tag">PersonAuthenticationType</span>
+      
+    
+      
+      
+        <span class="md-tag">authentication</span>
+      
+    
+      
+      
+        <span class="md-tag">authentication workflow</span>
+      
+    
   </nav>
 
 
@@ -8818,14 +8833,14 @@
 <td align="left">This method is called only if the current authentication method is in an invalid state. Hence authenticator calls it only if isValidAuthenticationMethod returns False. As a result it should return the reserved authentication method name.</td>
 </tr>
 <tr>
-<td align="left">10.  <code>getLogoutExternalUrl</code></td>
+<td align="left">10.</td>
+<td align="left"><code>getLogoutExternalUrl</code></td>
 <td align="left">Returns the 3rd-party URL that is used to end session routines. The control from this Third party URL should re-direct user back to /oxauth/logout.htm again with empty URL query string. Jans-Auth server will then continue of the extended logout flow, restore the original URL query string, and send user to <code>/jans-auth/end_session</code> to complete it.</td>
-<td align="left"></td>
 </tr>
 <tr>
-<td align="left">11. <code>logout</code></td>
+<td align="left">11.</td>
+<td align="left"><code>logout</code></td>
 <td align="left">This method is not mandatory. It can be used in cases when you need to execute specific logout logic in the authentication script when jans-auth receives an end session request to the /oxauth/logout.htm endpoint (which receives the same set of parameters than the usual end_session endpoint). This method should return True or False; when False jans-auth stops processing the end session request workflow.</td>
-<td align="left"></td>
 </tr>
 </tbody>
 </table>
@@ -8849,10 +8864,6 @@
 <tr>
 <td align="left">usageType</td>
 <td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/AuthenticationScriptUsageType.java">AuthenticationScriptUsageType</a></td>
-</tr>
-<tr>
-<td align="left">step</td>
-<td align="left">Integer indicating step number</td>
 </tr>
 <tr>
 <td align="left">step</td>
@@ -8933,7 +8944,7 @@ def getPageForStep(self, configurationAttributes, step):
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-20T09:13:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T15:53:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
       
         <br>
         Created:
