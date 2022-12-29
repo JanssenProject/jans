@@ -37,9 +37,13 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 
 ## Disabling The Endpoint Using Feature Flag
 
-Using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo)
+`userinfo` endpoint can be enabled or disable using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo).
+Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
-TODO: add documentation on how to set-unset feature flags
+When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
+disable `USERINFO` flag as required.
+
+![](../../../assets/image-tui-enable-components.png)
 
 ## Configuration Properties
 
