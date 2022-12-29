@@ -2,16 +2,60 @@
 tags:
   - administration
   - auth-server
+  - authorization
   - endpoint
 ---
 
-## This content is in progress
+# Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen Server exposes authorization endpoint compliant with [OAuth2 framework](https://www.rfc-editor.org/rfc/rfc6749#section-3.1).
+A client uses authorization endpoint to obtain an authorization grant. Based on response type requested by the client, 
+the authorization endpoint issues an authorization code or an access token. Authorization endpoint is a protected endpoint
+which will require end-user authentication before issuing authorization code or access token.
 
-## Have questions in the meantime?
+URL to access authorization endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+```text
+https://<jans-server-host>/jans-auth/.well-known/openid-configuration
+```
+
+`authorization_endpoint` claim in the response specifies the URL for authorization endpoint. By default, authorization 
+endpoint looks like below:
+
+```
+https://janssen.server.host/jans-auth/restv1/authorize
+```
+
+More information about request and response of the authorization endpoint can be found in the OpenAPI specification 
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization).
+
+## Disabling The Endpoint Using Feature Flag
+
+TODO: It seems this endpoint can't be disabled using featureflags. Confirm this.
+
+
+## Configuration Properties
+
+TODO: Find properties relevant to this endpoint
+
+## Required Client Configuration
+
+TODO: elaborate on client must be registered with appropriate grant type (code and implicit) 
+
+## Configuring Authentication Methods
+
+TODO: Elaborate on interception scripts
+
+## Using PKCE
+
+## Using PAR
+
+## Using JARM
+
+## Authorization Flows
+
+TODO: Flows should be elaborated in separate documents if needed. Just add link here.
 
 ## Want to contribute?
 
