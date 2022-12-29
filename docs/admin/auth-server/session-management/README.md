@@ -65,7 +65,7 @@ is where the user can end their own session. See [OpenID Logout](../logout/READM
 
 To end another person's session, Jans Auth Server has a [Session Revocation Endpoint](../endpoints/session-revocation.md) (`/revoke_session`).
 
-## Session Event Interception Script
+## Session Event Interception Scripts
 
 It is possible to add custom business logic as Jans Auth Server detects
 session events, see:
