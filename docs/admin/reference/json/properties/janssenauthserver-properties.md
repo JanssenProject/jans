@@ -220,7 +220,6 @@ tags:
 | sectorIdentifierCacheLifetimeInMinutes | Sector Identifier cache lifetime in minutes | [Details](#sectoridentifiercachelifetimeinminutes) |
 | serverSessionIdLifetime | Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object | [Details](#serversessionidlifetime) |
 | serviceDocumentation | URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider | [Details](#servicedocumentation) |
-| sessionAsJwt | Boolean value true saves session data as a JWT | [Details](#sessionasjwt) |
 | sessionIdLifetime | The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends | [Details](#sessionidlifetime) |
 | sessionIdPersistInCache | Boolean value specifying whether to persist session_id in cache | [Details](#sessionidpersistincache) |
 | sessionIdPersistOnPromptNone | Boolean value specifying whether to persist session ID on prompt none | [Details](#sessionidpersistonpromptnone) |
@@ -2157,15 +2156,6 @@ tags:
 - Required: No
 
 - Default value: None
-
-
-### sessionAsJwt
-
-- Description: Boolean value true saves session data as a JWT
-
-- Required: No
-
-- Default value: false
 
 
 ### sessionIdLifetime
