@@ -7837,8 +7837,6 @@ components:
           type: string
         mtlsDeviceAuthzEndpoint:
           type: string
-        sessionAsJwt:
-          type: boolean
         requireRequestObjectEncryption:
           type: boolean
         requirePkce:
