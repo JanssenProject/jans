@@ -4,11 +4,12 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.service.fido.u2f;
+package io.jans.fido2.u2f.service;
 
-import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.server.BaseComponentTest;
+import io.jans.fido2.model.u2f.message.RawRegisterResponse;
+import io.jans.fido2.service.u2f.RawRegistrationService;
+import io.jans.fido2.u2f.BaseTest;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;
 
@@ -17,10 +18,7 @@ import javax.inject.Inject;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-public class RawRegistrationServiceTest extends BaseComponentTest {
-
-    @Inject
-    private RawRegistrationService rawRegistrationService;
+public class RawRegistrationServiceTest extends BaseTest {
 
     @Test
     public void testSecureClickRawRegistrationResponse() {
@@ -35,6 +33,7 @@ public class RawRegistrationServiceTest extends BaseComponentTest {
 
         // Base64 URL encode to allow consume by API
         String u2fResponseBase64 = Base64Util.base64urlencode(u2fClickResponseBytes);
+        RawRegistrationService rawRegistrationService = new RawRegistrationService();
 
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(u2fResponseBase64);
 

@@ -1,19 +1,19 @@
-package io.jans.as.server.service.fido.u2f;
-
-import static org.testng.Assert.assertTrue;
-
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import io.jans.as.server.crypto.signature.SHA256withECDSASignatureVerification;
-import io.jans.as.server.crypto.signature.SignatureVerification;
-import io.jans.as.model.exception.SignatureException;
-import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
-import io.jans.as.model.fido.u2f.protocol.ClientData;
-import io.jans.as.model.util.SecurityProviderUtility;
-import org.testng.annotations.Test;
+package io.jans.fido2.u2f.service;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import io.jans.as.model.exception.SignatureException;
+import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.fido2.model.u2f.message.RawAuthenticateResponse;
+import io.jans.fido2.model.u2f.protocol.ClientData;
+import io.jans.fido2.service.u2f.RawAuthenticationService;
+import io.jans.fido2.u2f.signature.SHA256withECDSASignatureVerification;
+import io.jans.fido2.u2f.signature.SignatureVerification;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertTrue;
 
 public class RawAuthenticationServiceUnitTest {
 

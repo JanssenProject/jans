@@ -8,6 +8,8 @@ package io.jans.as.server.comp;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.InumService;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.server.BaseComponentTest;
@@ -16,16 +18,13 @@ import io.jans.as.server.model.common.ClientCredentialsGrant;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.model.token.HandleTokenFactory;
-
 import io.jans.as.server.service.CleanerTimer;
 import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.GrantService;
-import io.jans.as.server.service.fido.u2f.DeviceRegistrationService;
-import io.jans.as.server.service.fido.u2f.RegistrationService;
-
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.authorization.UmaRPT;
+import io.jans.service.CacheService;
 import io.jans.util.security.StringEncrypter;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -40,8 +39,6 @@ import static org.testng.Assert.*;
  */
 public class CleanerTimerTest extends BaseComponentTest {
 
-
-
     @Inject
     private StaticConfiguration staticConfiguration;
     @Inject
@@ -52,23 +49,6 @@ public class CleanerTimerTest extends BaseComponentTest {
     private CleanerTimer cleanerTimer;
     @Inject
     private CacheService cacheService;
-    @Inject
-    private UmaRptService umaRptService;
-    @Inject
-    private UmaResourceService umaResourceService;
-    @Inject
-    private UmaPermissionService umaPermissionService;
-    @Inject
-    private UmaPctService umaPctService;
-    @Inject
-    private AuthorizationGrantList authorizationGrantList;
-    @Inject
-    private GrantService grantService;
-    @Inject
-    private RegistrationService u2fRegistrationService;
-    @Inject
-    private DeviceRegistrationService deviceRegistrationService;
-
 
     @Test(enabled = false) // disabled temporarily. It works perfectly locally but fails on jenkins. Reason is unclear.
     public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
@@ -140,90 +120,6 @@ public class CleanerTimerTest extends BaseComponentTest {
 
         // 4. client is in persistence (not removed)
         assertNotNull(getClientService().getClient(client.getClientId()));
-    }
-
-    @Test
-    public void u2fDevice_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
-        final Client client = createClient();
-        clientService.persist(client);
-
-        // 1. create device
-        String userInum = "";
-        String appId = "https://testapp.com";
-        final DeviceRegistration device = new DeviceRegistration();
-        device.setStatus(DeviceRegistrationStatus.ACTIVE);
-        device.setApplication(appId);
-        device.setId(String.valueOf(System.currentTimeMillis()));
-        device.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, device.getId()));
-
-        deviceRegistrationService.addOneStepDeviceRegistration(device);
-
-        // 2. device exists
-        assertNotNull(deviceRegistrationService.findUserDeviceRegistration(userInum, device.getId()));
-
-        // 3. clean up
-        cleanerTimer.processImpl();
-        cacheService.clear();
-
-        // 4. device exists
-        assertNotNull(deviceRegistrationService.findUserDeviceRegistration(userInum, device.getId()));
-
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, -10);
-        device.setExpirationDate(calendar.getTime());
-
-        deviceRegistrationService.merge(device);
-
-        // 5. clean up
-        cleanerTimer.processImpl();
-        cacheService.clear();
-
-        // 6. no device in persistence
-        try {
-            deviceRegistrationService.findUserDeviceRegistration(userInum, device.getId());
-            throw new AssertionError("No exception, expected EntryPersistenceException on find.");
-        } catch (EntryPersistenceException e) {
-            // ignore
-        }
-    }
-
-    @Test
-    public void u2fRequest_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
-        final Client client = createClient();
-        clientService.persist(client);
-
-        // 1. create token
-        String userInum = "";
-        String appId = "https://testapp.com";
-        final RequestMessageLdap request = u2fRegistrationService.storeRegisterRequestMessage(u2fRegistrationService.builRegisterRequestMessage(appId, userInum), userInum, userInum);
-
-        // 2. request exists
-        assertNotNull(u2fRegistrationService.getRegisterRequestMessage(request.getId()));
-
-        // 3. clean up
-        cleanerTimer.processImpl();
-        cacheService.clear();
-
-        // 4. request exists
-        assertNotNull(u2fRegistrationService.getRegisterRequestMessage(request.getId()));
-
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, -10);
-        request.setExpirationDate(calendar.getTime());
-
-        u2fRegistrationService.merge(request);
-
-        // 5. clean up
-        cleanerTimer.processImpl();
-        cacheService.clear();
-
-        // 6. no request in persistence
-        try {
-            u2fRegistrationService.getRegisterRequestMessage(request.getId());
-            throw new AssertionError("No exception, expected EntryPersistenceException on find request.");
-        } catch (EntryPersistenceException e) {
-            // ignore
-        }
     }
 
     @Test

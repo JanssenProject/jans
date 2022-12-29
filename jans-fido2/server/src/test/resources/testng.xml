@@ -1,0 +1,27 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="jansFido2Server" parallel="false">
+
+	<listeners>
+		<listener class-name="io.jans.fido2.u2f.RetryListener" />
+	</listeners>
+
+    <test name="RawAuthenticationServiceTest" enabled="true">
+        <classes>
+            <class name="io.jans.fido2.u2f.service.RawAuthenticationServiceTest" />
+        </classes>
+    </test>
+
+	<test name="RawAuthenticationServiceUnitTest" enabled="false">
+		<classes>
+			<class name="io.jans.fido2.u2f.service.RawAuthenticationServiceUnitTest" />
+		</classes>
+	</test>
+
+	<test name="RawRegistrationServiceTest" enabled="true">
+		<classes>
+			<class name="io.jans.fido2.u2f.service.RawRegistrationServiceTest" />
+		</classes>
+	</test>
+
+</suite>

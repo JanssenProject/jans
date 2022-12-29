@@ -4,22 +4,18 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.service.fido.u2f;
+package io.jans.fido2.u2f.service;
 
-import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.server.BaseComponentTest;
+import io.jans.fido2.model.u2f.message.RawAuthenticateResponse;
+import io.jans.fido2.service.u2f.RawAuthenticationService;
+import io.jans.fido2.u2f.BaseTest;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-
 import static org.testng.Assert.assertNotNull;
 
-public class RawAuthenticationServiceTest extends BaseComponentTest {
-
-    @Inject
-    private RawAuthenticationService rawAuthenticationService;
+public class RawAuthenticationServiceTest extends BaseTest {
 
     @Test
     public void testSecureClickRawAuthenticationResponse() {
@@ -28,7 +24,7 @@ public class RawAuthenticationServiceTest extends BaseComponentTest {
 
         // Base64 URL encode to allow consume by API
         String u2fResponseBase64 = Base64Util.base64urlencode(secureClickResponseBytes);
-
+        RawAuthenticationService rawAuthenticationService = new RawAuthenticationService();
         RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(u2fResponseBase64);
 
         assertNotNull(rawAuthenticateResponse);

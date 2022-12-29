@@ -125,7 +125,7 @@ public class U2fRegistrationWS {
 
                 if (removeEnrollment) {
                     // We allow to use enrollment code only one time
-                    user.setAttribute(io.jans.as.model.fido.u2f.U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, "", false);
+                    user.setAttribute(io.jans.fido2.model.u2f.U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, "", false);
                     userService.updateUser(user);
                 }
             }
@@ -152,11 +152,11 @@ public class U2fRegistrationWS {
 
             if (ex instanceof RegistrationNotAllowed) {
                 throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE)
-                        .entity(errorResponseFactory.getErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.REGISTRATION_NOT_ALLOWED)).build());
+                        .entity(errorResponseFactory.getErrorResponse(io.jans.fido2.model.u2f.U2fErrorResponseType.REGISTRATION_NOT_ALLOWED)).build());
             }
 
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getJsonErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.SERVER_ERROR)).build());
+                    .entity(errorResponseFactory.getJsonErrorResponse(io.jans.fido2.model.u2f.U2fErrorResponseType.SERVER_ERROR)).build());
         }
     }
 
@@ -175,7 +175,7 @@ public class U2fRegistrationWS {
             RegisterRequestMessageLdap registerRequestMessageLdap = u2fRegistrationService.getRegisterRequestMessageByRequestId(requestId);
             if (registerRequestMessageLdap == null) {
                 throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getJsonErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.SESSION_EXPIRED)).build());
+                        .entity(errorResponseFactory.getJsonErrorResponse(io.jans.fido2.model.u2f.U2fErrorResponseType.SESSION_EXPIRED)).build());
             }
             u2fRegistrationService.removeRegisterRequestMessage(registerRequestMessageLdap);
 
@@ -218,7 +218,7 @@ public class U2fRegistrationWS {
 
             if (ex instanceof BadInputException) {
                 throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.INVALID_REQUEST)).build());
+                        .entity(errorResponseFactory.getErrorResponse(io.jans.fido2.model.u2f.U2fErrorResponseType.INVALID_REQUEST)).build());
             }
 
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
