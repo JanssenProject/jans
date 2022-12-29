@@ -1424,11 +1424,13 @@ class JCA_CLI:
                     pdata = args.patch_replace
 
                 if pop:
-                    if pop != 'remove' and pdata.count(':') != 1:
-                        self.exit_with_error("Please provide --patch-data as colon delimited key:value pair")
+                    if pop != 'remove':
+                        try:
+                            ppath, pval = self.unescaped_split(pdata, ':')
+                        except Exception as e:
+                            self.exit_with_error("Please provide --patch-data as colon delimited key:value pair.\nUse escape if you need colon in value or key, i.e. mtlsUserInfoEndpoint:https\\:example.jans.io/userinfo")
 
                     if pop != 'remove':
-                        ppath, pval = pdata.split(':')
                         data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
                     else:
                         data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
