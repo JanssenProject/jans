@@ -218,6 +218,3 @@ public class ConsentGathering implements ConsentGatheringType {
     }
 }
 ```
-
-### Sample Scripts
-- []

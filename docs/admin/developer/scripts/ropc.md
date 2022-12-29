@@ -176,5 +176,5 @@ public class ResourceOwnerPasswordCredentials implements ResourceOwnerPasswordCr
 }
 ```
 ### Sample Scripts
-- [Super Gluu ROPW Script]()
-- [3 Step ROPW Script](../../../script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-2fa/))
+- [Super Gluu ROPW Script](https://github.com/GluuFederation/radius/blob/master/setup/scripts/super_gluu_ro.py)
+- [3 Step ROPW Script](../../../script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-2fa/)

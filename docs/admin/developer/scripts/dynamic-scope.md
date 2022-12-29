@@ -166,3 +166,10 @@ public class DynamicScope implements DynamicScopeType {
 }
 
 ```
+
+### Sample Scripts
+- [Dynamic Permission](../../../script-catalog/dynamic_scope/dynamic-permission/)
+- [MemberOf Attribute](../../../script-catalog/dynamic_scope/memberof-attribute/)
+- [Organization Name](../../../script-catalog/dynamic_scope/org-name/)
+- [Session Parameter](../../../script-catalog/dynamic_scope/session-parameter/)
+- [Work Phone](../../../script-catalog/dynamic_scope/work-phone/)
