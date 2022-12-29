@@ -12,6 +12,7 @@ import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.annotation.AttributesList;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 
 import jakarta.ws.rs.core.UriInfo;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -37,6 +39,7 @@ import jakarta.interceptor.InvocationContext;
 
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.reflect.util.ReflectHelper;
 
 @Interceptor
 @RequestInterceptor
@@ -60,7 +63,7 @@ public class RequestReaderInterceptor {
 
     @Inject
     AuthUtil authUtil;
-    
+
     @Inject
     AttributeService attributeService;
 
@@ -165,7 +168,8 @@ public class RequestReaderInterceptor {
 
                 Object obj = ctxParameters[i];
                 if (!clazz.isPrimitive()) {
-                    performAttributeDataConversion(obj);
+                    //performAttributeDataConversion(obj);
+                    processCustomAttributes(obj);
                     logger.error("RequestReaderInterceptor final - obj -  obj:{} ", obj);
                 }
             }
@@ -174,41 +178,85 @@ public class RequestReaderInterceptor {
 
     private <T> void performAttributeDataConversion(T obj) {
         List<AttributeData> attributes = persistenceEntryManager.getAttributeDataList(obj);
-        logger.error("RequestReaderInterceptor::Attribute List  for encoding -  obj.getClass():{}, attributes:{}", obj.getClass(), attributes);
-        
-        //get attribute details
-        if(attributes!=null && !attributes.isEmpty()) {
-            for(AttributeData attData : attributes) {
+        logger.error("RequestReaderInterceptor::Attribute List  for encoding -  obj.getClass():{}, attributes:{}",
+                obj.getClass(), attributes);
+
+        // get attribute details
+        if (attributes != null && !attributes.isEmpty()) {
+            for (AttributeData attData : attributes) {
                 logger.error("RequestReaderInterceptor::AttributeData  for encoding -  attData:{}", attData);
-                GluuAttribute gluuAttribute = attributeService.getAttributeUsingName(attData.getName());
-                logger.error("RequestReaderInterceptor::Attribute details  gluuAttribute:{}", gluuAttribute);
-                if(gluuAttribute!=null) {
+                GluuAttribute gluuAttribute = attributeService.getByLdapName(attData.getName());
+                AttributeData modifiedData = null;
+                logger.error("RequestReaderInterceptor::Attribute details - attData.getName():{}, gluuAttribute:{}",
+                        attData.getName(), gluuAttribute);
+                if (gluuAttribute != null) {
                     AttributeDataType attributeDataType = gluuAttribute.getDataType();
                     logger.error(" attributeDataType:{}", attributeDataType);
-                    if (attributeDataType!=null && AttributeDataType.DATE.equals(attributeDataType)) {
+                    if (attributeDataType != null && AttributeDataType.DATE.equals(attributeDataType)) {
                         if (attributeDataType.getValue() != null) {
                             Date date = persistenceEntryManager.decodeTime(null, attributeDataType.getValue());
-                            logger.error(" attributeDataType.getDisplayName():{}, date:{}", attributeDataType.getDisplayName(), date);
+                            logger.error(" attributeDataType.getDisplayName():{}, date:{}",
+                                    attributeDataType.getDisplayName(), date);
+                            
+                            modifiedData = new AttributeData(attributeDataType.getDisplayName(), date);
+                            logger.error("RequestReaderInterceptor::AttributeData  after encoding -  attData:{}, modifiedData:{}", attData, modifiedData);
                         }
                     }
                 }
-                
+
             }
-            
         }
-        
-        //
-        Class<?> entryClass = obj.getClass();
-        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-        logger.error("RequestReaderInterceptor::Object propertiesAnnotations:{}", propertiesAnnotations);
-        processObjectProperties(obj,propertiesAnnotations);
-    }
-    
-    private <T> void processObjectProperties(T obj, List<PropertyAnnotation> propertiesAnnotations) {
-        logger.error("RequestReaderInterceptor::Object propertiesAnnotations:{}", propertiesAnnotations);
-        Map<String, List<AttributeData>> attributeDataMap = persistenceEntryManager.getAttributesMap(obj, propertiesAnnotations);
-        
-        logger.error("RequestReaderInterceptor::Object propertiesAnnotations:{}", propertiesAnnotations);
+
     }
 
+    private <T> void processCustomAttributes(T obj) {
+        logger.error("RequestReaderInterceptor::processCustomAttributes() obj:{}", obj);
+        //
+        Class<?> entryClass = obj.getClass();
+        List<PropertyAnnotation> propertiesAnnotations = persistenceEntryManager
+                .getEntryPropertyAnnotations(entryClass);
+        logger.error("RequestReaderInterceptor::processCustomAttributes() -  propertiesAnnotations:{}", propertiesAnnotations);
+
+        for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+            String propertyName = propertiesAnnotation.getPropertyName();
+
+            // Process properties with @AttributesList annotation
+            Annotation ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
+                    AttributesList.class);
+            logger.error("RequestReaderInterceptor::processCustomAttributes() - AttributesList - ldapAttribute:{}",
+                    ldapAttribute);
+            if (ldapAttribute != null) {
+                List<AttributeData> listAttributes = persistenceEntryManager
+                        .getAttributeDataListFromCustomAttributesList(obj, (AttributesList) ldapAttribute,
+                                propertyName);
+                logger.error("RequestReaderInterceptor::processCustomAttributes() - AttributesList - listAttributes:{}",
+                        listAttributes);
+                if (listAttributes != null && !listAttributes.isEmpty()) {
+                    for (AttributeData attData : listAttributes) {
+                        logger.error(
+                                "RequestReaderInterceptor::processCustomAttributes() - AttributeData  for encoding -  attData:{}",
+                                attData);
+                        GluuAttribute gluuAttribute = attributeService.getByLdapName(attData.getName());
+                        logger.error(
+                                "RequestReaderInterceptor::Attribute details - attData.getName():{}, gluuAttribute:{}",
+                                attData.getName(), gluuAttribute);
+                        if (gluuAttribute != null) {
+                            AttributeDataType attributeDataType = gluuAttribute.getDataType();
+                            logger.error("RequestReaderInterceptor::processCustomAttributes() - attributeDataType:{}",
+                                    attributeDataType);
+                            if (attributeDataType != null && AttributeDataType.DATE.equals(attributeDataType)) {
+                                if (attributeDataType.getValue() != null) {
+                                    Date date = persistenceEntryManager.decodeTime(null, attributeDataType.getValue());
+                                    logger.error(
+                                            "RequestReaderInterceptor::processCustomAttributes() - attributeDataType.getDisplayName():{}, date:{}",
+                                            attributeDataType.getDisplayName(), date);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    }
 }
