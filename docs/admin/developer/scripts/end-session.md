@@ -3,6 +3,7 @@ tags:
   - administration
   - developer
   - scripts
+  - EndSession
 ---
 
 ## Overview
