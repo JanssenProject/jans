@@ -114,8 +114,8 @@ public class DynamicScope implements DynamicScopeType {
 	
     @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-      log.info("Dyanmic Scope. Initializing...");
-      log.info("Dyanmic Scope. Initialized");
+      log.info("Dynamic Scope. Initializing...");
+      log.info("Dynamic Scope. Initialized");
       return true;
     }
 

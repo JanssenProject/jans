@@ -33,6 +33,3 @@ to login as a different account, for example:
 You can override this page if you place a `selectAccount.xhtml` in
 `custom/pages`.
 
-Other ways to handle account selection are possible using the Person
-Authentication interception script, if you detect the `prompt=login`
-parameter.
