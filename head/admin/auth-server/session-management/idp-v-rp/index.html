@@ -8697,20 +8697,21 @@ This makes sense, because the RP only redirects to the IDP for authentication
 if it cannot find its own local cookie. If a user has a session with many
 RP's, achieving simultaneous logout across all sites is a challenge--something
 which your business leaders may not appreciate. While OpenID proposes several
-solutions to logout, none are idea. Fundamentally, logout is an asynchronous
+solutions to logout, none are ideal. Fundamentally, logout is an asynchronous
 challenge. A given RP may be disconnected from the network. Thus logout
 messages sent to RP's that are not received must be replayed. The
 <a href="https://datatracker.ietf.org/doc/charter-ietf-secevent/01/">IETF Sec Events Workgroup</a> has been working on standards to handle logout (and other asynchronous
 requirements). But adoption of this architecture is not common.</p>
 <p>Another challenge of RP sessions is that they may have a different timeout
-for inactivity. See <a href="../../../planning/timeout-management/">Planning Guide Timeout Management</a> for more details.</p>
+for inactivity. See the Janssen Planning Guide page on
+<a href="../../../planning/timeout-management/">Timeout Management</a> for more details.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-28T23:29:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T17:34:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
       
         <br>
         Created:

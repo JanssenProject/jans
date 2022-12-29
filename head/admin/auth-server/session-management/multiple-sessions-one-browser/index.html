@@ -8697,27 +8697,30 @@
   <h1>Multiple Sessions in One Browser</h1>
 
 <h2 id="select-account">Select Account<a class="headerlink" href="#select-account" title="Permanent link">#</a></h2>
-<p>A person may have several accounts in a single Jans Auth Server instance. For
-example, you may have several diffent Gmail ids. An RP can enable a person
-to choose their account by sending an <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">OpenID Authentication Request</a> with the
-parameter <code>prompt=select_account</code>.</p>
-<p>For example, following an initial authentication, the session cookie on a person's browser would contain the following data:</p>
+<p>A person may have several accounts on a single Jans Auth Server instance. For
+example, it is common to have several Gmail accounts. Jans Auth Server uses two
+cookies to track which accounts are associated with a browser: <code>session_id</code> and
+<code>current_sessions</code>.</p>
+<p>Below is an example or a person with two authenticated sessions:</p>
 <div class="highlight"><pre><span></span><code>session_id: de510ab6-b06c-4393-86d8-12a7c501aafe
-current_sessions: [&quot;de510ab6-b06c-4393-86d8-12a7c501aafe&quot;]
-</code></pre></div>
-<p>Continuing this example, if an RP sent an additional Authentication Request with <code>prompt=select_account</code>, Auth Server may return a page enabling the person
-to select their account, or even to login as a different account. Once authenticated as a different user, the <code>current_sessions</code> cookie would reference
-all the current sessions, like this:</p>
-<div class="highlight"><pre><span></span><code>session_id: c691e83d-eb1b-41f0-b453-fab905681b5b
 current_sessions: [&quot;de510ab6-b06c-4393-86d8-12a7c501aafe&quot;, &quot;c691e83d-eb1b-41f0-b453-fab905681b5b&quot;]
 </code></pre></div>
+<p>An RP trigger Auth Server's built in Account Chooser feature by sending an
+<a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">OpenID Authentication Request</a> with the parameter <code>prompt=select_account</code>. In
+this case, Auth Server renders the default page:
+<code>/opt/jans/jetty/jans-auth/custom/pages/selectAccount.xhtml</code></p>
+<p>This page iterates <code>current_sessions</code> and enables the person
+to login as a different account, for example:</p>
+<p><img alt="Sample Select Account login page screenshot" src="../../assets/auth_server_sessions_selectAccount.png" /></p>
+<p>You can override this page if you place a <code>selectAccount.xhtml</code> in
+<code>custom/pages</code>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-28T23:29:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T17:34:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
       
         <br>
         Created:
