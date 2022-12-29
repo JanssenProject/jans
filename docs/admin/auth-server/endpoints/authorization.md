@@ -2,16 +2,73 @@
 tags:
   - administration
   - auth-server
+  - authorization
   - endpoint
 ---
 
-## This content is in progress
+# Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen Server exposes authorization endpoint compliant with [OAuth2 framework](https://www.rfc-editor.org/rfc/rfc6749#section-3.1).
+A client uses authorization endpoint to obtain an authorization grant. Based on response type requested by the client, 
+the authorization endpoint issues an authorization code or an access token. Authorization endpoint is a protected endpoint
+which will require end-user authentication before issuing authorization code or access token.
 
-## Have questions in the meantime?
+URL to access authorization endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+```text
+https://<jans-server-host>/jans-auth/.well-known/openid-configuration
+```
+
+`authorization_endpoint` claim in the response specifies the URL for authorization endpoint. By default, authorization 
+endpoint looks like below:
+
+```
+https://janssen.server.host/jans-auth/restv1/authorize
+```
+
+More information about request and response of the authorization endpoint can be found in the OpenAPI specification 
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization).
+
+## Configuration Properties
+
+Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+navigate via `Auth Server`->`Properties`.
+
+- [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
+- [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
+- [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
+- [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
+- [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
+- [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
+
+## Using Scopes To Control Claim Release
+
+### Standard Scopes
+
+In context of OpenID Connect specification, claim information released by userinfo endpoint can be controlled using
+scopes. Janssen Server supports all [standard scopes](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
+and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and
+define claims to be linked to each standard scope.
+
+When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the scopes, navigate via
+`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `OpenID`->search for a standard scope like `address`
+
+### Dynamic Scopes
+
+In addition to standard scopes, Janssen server allows defining custom scopes which can be associated to user-defined
+list of claims. This allows administrators to create custom groupings of claims.
+
+When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md), navigate via
+`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
+
+### Interception Scripts
+
+Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script.
+
+Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/tui.md).
+Navigate to `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`->`Dynamic Scope Script`
 
 ## Want to contribute?
 
