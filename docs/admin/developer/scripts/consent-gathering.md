@@ -4,7 +4,6 @@ tags:
   - developer
   - scripts
   - ConsentGathering
-  - ConsentGatheringType
 ---
 
 ## Overview
@@ -219,3 +218,6 @@ public class ConsentGathering implements ConsentGatheringType {
     }
 }
 ```
+
+### Sample Scripts
+- []
