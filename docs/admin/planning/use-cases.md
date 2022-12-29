@@ -9,8 +9,8 @@ tags:
 
 Web browser SSO is one of the main use cases for Janssen. The OpenID Connect
 interfaces of the Auth Server provide the identity layer that manages
-authentication and B-SSO. Auth Server tracks web browser sessions via a cookie. An
-end user may actually have several active sessions, although only one session is
+authentication and B-SSO. Auth Server tracks web browser sessions via a cookie.
+An end user may actually have several active sessions, although only one session is
 active. For example, below is a hypothetical session cookie:
 
 ```

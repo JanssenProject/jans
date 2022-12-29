@@ -769,18 +769,8 @@ class CtxGenerator:
         if "sql" in opt_scopes:
             self.sql_ctx()
 
-        self.jans_cli_ctx()
-
         # populated config
         return self.ctx
-
-    def jans_cli_ctx(self):
-        self.set_config("role_based_client_id", lambda: f"2000.{uuid4()}")
-        role_based_client_pw = self.set_secret("role_based_client_pw", get_random_chars)
-        self.set_secret(
-            "role_based_client_encoded_pw",
-            partial(encode_text, role_based_client_pw, self.get_secret("encoded_salt")),
-        )
 
 
 def gen_idp3_key(storepass):
