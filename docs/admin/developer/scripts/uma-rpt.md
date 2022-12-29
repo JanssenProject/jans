@@ -126,8 +126,8 @@ public class UmaRptPolicy implements UmaRptPolicyType {
 
 	@Override
 	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-        log.info("Dyanmic Scope. Initializing...");
-        log.info("Dyanmic Scope. Initialized");
+        log.info("UMA RPT Policy Authorization. Initializing...");
+        log.info("UMA RPT Policy Authorization. Initialized");
 		return true;
 	}
 
