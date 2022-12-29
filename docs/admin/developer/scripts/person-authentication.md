@@ -8,7 +8,6 @@ tags:
   - PersonAuthenticationType
   - acr
   - weld
-  -
 
 ---
 
@@ -33,10 +32,38 @@ Jans-auth server comprises of a number of beans, configuration files and Facelet
 
 ### A. Custom script
 The **PersonAuthenticationType** script is described by a java interface whose methods should be overridden to implement an authentication workflow.
-The [article](./person-authentication-interface) talks about these methods in detail and the psuedo code for each method.
+The [article](../scripts/person-authentication-interface) talks about these methods in detail and the psuedo code for each method.
 
 ### B. UI pages:
-All web pages are **xhtml** files. The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.
+All web pages are **xhtml** files. The Command-Action offering by JSF framework is used by the Jans-auth server to implement authentication flows.
+
+#### a. Server-side actions implemented by custom script:
+The custom script's `authenticate` and `prepareForStep` implementations are called by the following java class - [Authenticator](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/auth/Authenticator.java). These methods are mapped as command actions and view actions respectively in the web page.
+
+Relevant methods:
+
+|Signature|Description|
+|-|-|
+|boolean authenticate()|Makes the authentication flow proceed by calling the `authenticate` method of the custom script|
+|String prepareAuthenticationForStep()|Makes the authentication flow proceed by calling the `prepareForStep` method of the custom script|
+
+#### b. Web page in xhtml:
+1. The `f:metadata` and `f:viewAction` tags are used to load variables (prepared in the `prepareForStep` method of the custom script). These variables are rendered on the UI page.
+```
+<f:metadata>
+   <f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+     if="#{not identity.loggedIn}" />
+ </f:metadata>
+```
+2. A form submit takes the flow to the `authenticate()` method of the custom script.
+```
+<h:commandButton id="updateButton" value="Update"
+               styleClass="btn btn-primary col-sm-4"
+               action="#{authenticator.authenticate}" style="margin:5px;" />
+```
+
+#### c. Page customizations:
+The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.
 
 This [article](../../customization/customize-web-pages) covers all the details you need to write your own web page.
 
@@ -84,8 +111,13 @@ Each authentication mechanism (script) has a "Level" assigned to it which descri
 
 ### A. Implementing 2FA authentication mechanisms
 1. [FIDO2](../../../script-catalog/person_authentication/fido2-external-authenticator/README) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
+
+2. [OTP authentication](../../../script-catalog/person_authentication/otp-external-authenticator) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
+
 2. SMS OTP :  
-3. Email OTP
+
+3. Email OTP:
+
 
 ### B. Implementing Multistep authentication
 1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here an example of how the number of steps can be varied depending on the context or business requirement.
