@@ -47,10 +47,10 @@ disable `USERINFO` flag as required.
 
 ## Configuration Properties
 
-Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. [Set property 
-values](link to CURL command that will be used to set properties) according to your need. 
+Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties, 
+navigate via `Auth Server`->`Properties`.
 
-TODO: add documentation about how to set properties
 TODO: Add better description to properties
 
 - [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
@@ -59,6 +59,8 @@ TODO: Add better description to properties
 - [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
 - [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
 - [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
+
+
 
 ## Using Scopes To Control Claim Release
 
