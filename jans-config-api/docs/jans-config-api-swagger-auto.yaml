@@ -7299,17 +7299,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
