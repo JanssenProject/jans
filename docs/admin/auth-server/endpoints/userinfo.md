@@ -64,9 +64,6 @@ Userinfo endpoint can be further configured using Janssen Server configuration p
 [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties, 
 navigate via `Auth Server`->`Properties`.
 
-TODO: Add better description to properties
-TODO: not all properties are available in TUI
-
 - [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
 - [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
 - [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
