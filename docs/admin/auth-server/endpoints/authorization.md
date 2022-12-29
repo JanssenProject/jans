@@ -30,45 +30,32 @@ https://janssen.server.host/jans-auth/restv1/authorize
 More information about request and response of the authorization endpoint can be found in the OpenAPI specification 
 of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization).
 
+## Disabling The Endpoint Using Feature Flag
+
+TODO: It seems this endpoint can't be disabled using featureflags. Confirm this.
+
+
 ## Configuration Properties
 
-Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
-navigate via `Auth Server`->`Properties`.
+TODO: Find properties relevant to this endpoint
 
-- [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
-- [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
-- [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
-- [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
-- [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
-- [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
+## Required Client Configuration
 
-## Using Scopes To Control Claim Release
+TODO: elaborate on client must be registered with appropriate grant type (code and implicit) 
 
-### Standard Scopes
+## Configuring Authentication Methods
 
-In context of OpenID Connect specification, claim information released by userinfo endpoint can be controlled using
-scopes. Janssen Server supports all [standard scopes](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
-and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and
-define claims to be linked to each standard scope.
+TODO: Elaborate on interception scripts
 
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the scopes, navigate via
-`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `OpenID`->search for a standard scope like `address`
+## Using PKCE
 
-### Dynamic Scopes
+## Using PAR
 
-In addition to standard scopes, Janssen server allows defining custom scopes which can be associated to user-defined
-list of claims. This allows administrators to create custom groupings of claims.
+## Using JARM
 
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md), navigate via
-`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
+## Authorization Flows
 
-### Interception Scripts
-
-Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script.
-
-Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/tui.md).
-Navigate to `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`->`Dynamic Scope Script`
+TODO: Flows should be elaborated in separate documents if needed. Just add link here.
 
 ## Want to contribute?
 
