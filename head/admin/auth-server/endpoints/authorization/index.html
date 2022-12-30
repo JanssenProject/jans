@@ -3125,13 +3125,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuring-authentication-methods" class="md-nav__link">
-    Configuring Authentication Methods
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#using-pkce" class="md-nav__link">
     Using PKCE
   </a>
@@ -3148,6 +3141,13 @@
         <li class="md-nav__item">
   <a href="#using-jarm" class="md-nav__link">
     Using JARM
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-authentication-methods" class="md-nav__link">
+    Configuring Authentication Methods
   </a>
   
 </li>
@@ -8724,13 +8724,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuring-authentication-methods" class="md-nav__link">
-    Configuring Authentication Methods
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#using-pkce" class="md-nav__link">
     Using PKCE
   </a>
@@ -8747,6 +8740,13 @@
         <li class="md-nav__item">
   <a href="#using-jarm" class="md-nav__link">
     Using JARM
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-authentication-methods" class="md-nav__link">
+    Configuring Authentication Methods
   </a>
   
 </li>
@@ -8830,14 +8830,51 @@ of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/J
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p>TODO: It seems this endpoint can't be disabled using featureflags. Confirm this.</p>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
-<p>TODO: Find properties relevant to this endpoint</p>
+<p>Authorization endpoint can be further configured using Janssen Server configuration properties listed below. When using
+<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> to configure the properties,
+navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
+<ul>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#issuer">issuer</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepkce">requirePkce</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#fapicompatibility">fapiCompatibility</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#forcesignedrequestobject">forceSignedRequestObject</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#authorizationcodelifetime">authorizationCodeLifetime</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#returndevicesecretfromauthzendpoint">returnDeviceSecretFromAuthzEndpoint</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requesturiblocklist">requestUriBlockList</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirerequestobjectencryption">requireRequestObjectEncryption</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#staticdecryptionkid">staticDecryptionKid</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requesturihashverificationenabled">requestUriHashVerificationEnabled</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#legacyidtokenclaims">legacyIdTokenClaims</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#customheaderswithauthorizationresponse">customHeadersWithAuthorizationResponse</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#includesidinresponse">includeSidInResponse</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#sessionidrequestparameterenabled">sessionIdRequestParameterEnabled</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#returndevicesecretfromauthzendpoint">returnDeviceSecretFromAuthzEndpoint</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar">requirePar</a></li>
+<li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#cibamaxexpirationtimeallowedsec">cibaMaxExpirationTimeAllowedSec</a></li>
+</ul>
+<p>TODO: can we organise above properties in logical groupings? Like pertaining to request, response etc?</p>
 <h2 id="required-client-configuration">Required Client Configuration<a class="headerlink" href="#required-client-configuration" title="Permanent link">#</a></h2>
-<p>TODO: elaborate on client must be registered with appropriate grant type (code and implicit) </p>
+<p>Clients must be registered with Janssen Server as using <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.1">code</a> 
+and/or <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.2">implicit</a> grant types in order to use authorization endpoint.</p>
+<p>Using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>, client can be registered for appropriate grant type by
+navigating to <code>Auth-Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code></p>
+<h2 id="using-pkce">Using PKCE<a class="headerlink" href="#using-pkce" title="Permanent link">#</a></h2>
+<p>Janssen Server <a href="../../oauth-features/pkce/">supports PKCE</a>, which recommended and more secure method for using <code>code</code>
+grant. </p>
+<p>PKCE can be enabled/disable by setting <a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepkce">requirePkce</a>
+property. Janssen server supports <code>plain</code> as well as <code>s256</code> code challenge methods. </p>
+<h2 id="using-par">Using PAR<a class="headerlink" href="#using-par" title="Permanent link">#</a></h2>
+<p>TODO: PAR is a separate endpoint, should it be part of this document for authorization endpoint?</p>
+<p>Janssen Server <a href="../../oauth-features/par/">supports PAR</a>(Pushed Authorization Requests) to enable authorization using 
+more complex authorization requests and making it more secure at the same time. </p>
+<p>Use Janssen Server configuration property <a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar">requirePar</a>
+to accept only PAR requests. </p>
+<h2 id="using-jarm">Using JARM<a class="headerlink" href="#using-jarm" title="Permanent link">#</a></h2>
+<p>Authorization endpoint supports JWT Secured Authorization Response Mode, or <a href="../../openid-features/jarm/">JARM</a>. Using 
+JARM makes authorization responses more secure and compliant to be used in FAPI deployments. </p>
+<p>Janssen Server supports all response modes as defined in <a href="https://openid.net//specs/openid-financial-api-jarm.html#response-encoding">JARM specification</a> </p>
 <h2 id="configuring-authentication-methods">Configuring Authentication Methods<a class="headerlink" href="#configuring-authentication-methods" title="Permanent link">#</a></h2>
 <p>TODO: Elaborate on interception scripts</p>
-<h2 id="using-pkce">Using PKCE<a class="headerlink" href="#using-pkce" title="Permanent link">#</a></h2>
-<h2 id="using-par">Using PAR<a class="headerlink" href="#using-par" title="Permanent link">#</a></h2>
-<h2 id="using-jarm">Using JARM<a class="headerlink" href="#using-jarm" title="Permanent link">#</a></h2>
 <h2 id="authorization-flows">Authorization Flows<a class="headerlink" href="#authorization-flows" title="Permanent link">#</a></h2>
 <p>TODO: Flows should be elaborated in separate documents if needed. Just add link here.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
@@ -8848,7 +8885,7 @@ of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/J
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T16:33:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-30T12:31:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-30</span>
       
         <br>
         Created:
