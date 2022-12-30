@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#openid-connect-id_token" class="md-skip">
+        <a href="#openid-connect-id-token" class="md-skip">
           Skip to content
         </a>
       
@@ -2957,8 +2957,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#openid-connect-id_token" class="md-nav__link">
-    OpenID Connect id_token
+  <a href="#openid-connect-id-token" class="md-nav__link">
+    OpenID Connect ID Token
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#obtaining-an-id-token" class="md-nav__link">
+    Obtaining an ID Token
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validating-an-id-token" class="md-nav__link">
+    Validating an ID Token
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-id-token-as-an-access-token-for-apis" class="md-nav__link">
+    Using the ID Token as an access token for API's
   </a>
   
 </li>
@@ -8641,8 +8662,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#openid-connect-id_token" class="md-nav__link">
-    OpenID Connect id_token
+  <a href="#openid-connect-id-token" class="md-nav__link">
+    OpenID Connect ID Token
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#obtaining-an-id-token" class="md-nav__link">
+    Obtaining an ID Token
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validating-an-id-token" class="md-nav__link">
+    Validating an ID Token
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-id-token-as-an-access-token-for-apis" class="md-nav__link">
+    Using the ID Token as an access token for API's
   </a>
   
 </li>
@@ -8691,14 +8733,73 @@
 
   <h1>OpenID id_token</h1>
 
-<h2 id="openid-connect-id_token">OpenID Connect <code>id_token</code><a class="headerlink" href="#openid-connect-id_token" title="Permanent link">#</a></h2>
+<h2 id="openid-connect-id-token">OpenID Connect ID Token<a class="headerlink" href="#openid-connect-id-token" title="Permanent link">#</a></h2>
+<p>Defined in <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken">Section 2</a>
+of <code>OpenID Connect Core 1.0</code>:</p>
+<blockquote>
+<p>The primary extension that OpenID Connect makes to OAuth 2.0 to enable End-Users to be Authenticated is the ID Token data structure. The ID Token is a security token that contains Claims about the Authentication of an End-User by an Authorization Server when using a Client, and potentially other requested Claims. The ID Token is represented as a JSON Web Token (JWT) [JWT].</p>
+</blockquote>
+<p>The ID Token is similar to a
+<a href="http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-tech-overview-2.0.html">SAML 2.0</a>
+Assertion, which must contain an Authentication statement, and may optionally
+contain an Attribute statement, defined in the spec as:</p>
+<blockquote>
+<ul>
+<li>
+<p>Authentication statements: These are created by the party that successfully authenticated a user. At a minimum, they describe the particular means used to authenticate the user and the specific time at which the authentication took place.</p>
+</li>
+<li>
+<p>Attribute statements: These contain specific identifying attributes about the subject (for example, that user “John Doe” has “Gold” card status).</p>
+</li>
+</ul>
+</blockquote>
+<p>The ID Token is a standard JWT, and can use signing and encryption depending on
+the configuration preferences of the client. A sample payload for a Jans Auth
+Server <code>id_token</code> is below:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;iss&quot;: &quot;https://idp.example.tld&quot;,                 &lt;-- OP hostname
+  &quot;aud&quot;: &quot;bd0469f7-f80a-4595-bd52-df9826f0a2f4&quot;,    &lt;-- client_id  
+  &quot;sub&quot;: &quot;0a9ca356-6130-4032-91c6-a2dfe4e19804&quot;,    &lt;-- in this case, a pairwise identifer
+  &quot;iat&quot;: 1672373703,                                &lt;-- issued at
+  &quot;auth_time&quot;: 1672373700,                          &lt;-- when user authenticated
+  &quot;acr&quot;: &quot;basic&quot;,                                   &lt;-- how user authenticated
+  &quot;amr&quot;: [&quot;10&quot;],                                    &lt;-- Extra authn details
+  &quot;nonce&quot;: &quot;1u0y3ii&quot;,                               &lt;-- client should verify
+  &quot;sid&quot;: &quot;5f01565c-f2dc-4b4b-af8a-ab1578a5dbe3&quot;,    &lt;-- session id handle
+  &quot;jansOpenIDConnectVersion&quot;: &quot;openidconnect-1.0&quot;   &lt;-- OpenID version
+}
+</code></pre></div>
+<p>A great tool if you want to decode a JWT is Auth0's <a href="https://jwt.io/">https://jwt.io/</a>.</p>
+<p>Notice that a basic ID Token, like the one above, contains details about the
+authentication event, not user claims. You can configure the client to "include
+claims in id_token", or you can set a Auth Server configuration property,
+<code>legacyIdTokenClaims</code> to <code>True</code> to set the behavior for all clients.</p>
+<h2 id="obtaining-an-id-token">Obtaining an ID Token<a class="headerlink" href="#obtaining-an-id-token" title="Permanent link">#</a></h2>
+<p>The client may obtain an ID Token in the authorization response, from the
+token endpoint, or both. Note, if you intend to use the Code Flow, and you
+don't intend to validate the <code>c_hash</code> or <code>s_hash</code> values in the ID Token
+returned from the authorization endpoint, don't check <code>id_token</code> in the
+response_type for the authorization endpoint, as it will waste compute and
+storage generating a token you don't need.</p>
+<h2 id="validating-an-id-token">Validating an ID Token<a class="headerlink" href="#validating-an-id-token" title="Permanent link">#</a></h2>
+<p>At a minimum, client developers should always validate the following:
+- Signature of the ID token
+- <code>iss</code> make sure the ID Token was issued by the OP you trust
+- <code>aud</code> make sure the ID Token was issued to your <code>client_id</code>
+- <code>exp</code> make sure the token is not expired
+- <code>nonce</code> make sure the id_token correlates to your original authn request</p>
+<h2 id="using-the-id-token-as-an-access-token-for-apis">Using the ID Token as an access token for API's<a class="headerlink" href="#using-the-id-token-as-an-access-token-for-apis" title="Permanent link">#</a></h2>
+<p>Don't do this. The ID Token is an identity assertion, not an access token. It
+may be passed in the payload to an API, but it should not be used in lieu of
+an OAuth access token! Fundamentally, the <code>id_token</code> details how a person
+was authenticated, not which API's a client is authorized to call.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T17:34:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-30T05:16:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-30</span>
       
         <br>
         Created:

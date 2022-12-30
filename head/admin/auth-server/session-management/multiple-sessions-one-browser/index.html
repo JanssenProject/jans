@@ -8705,13 +8705,13 @@ cookies to track which accounts are associated with a browser: <code>session_id<
 <div class="highlight"><pre><span></span><code>session_id: de510ab6-b06c-4393-86d8-12a7c501aafe
 current_sessions: [&quot;de510ab6-b06c-4393-86d8-12a7c501aafe&quot;, &quot;c691e83d-eb1b-41f0-b453-fab905681b5b&quot;]
 </code></pre></div>
-<p>An RP trigger Auth Server's built in Account Chooser feature by sending an
+<p>An RP can trigger Auth Server's built in Account Chooser feature by sending an
 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">OpenID Authentication Request</a> with the parameter <code>prompt=select_account</code>. In
 this case, Auth Server renders the default page:
 <code>/opt/jans/jetty/jans-auth/custom/pages/selectAccount.xhtml</code></p>
 <p>This page iterates <code>current_sessions</code> and enables the person
 to login as a different account, for example:</p>
-<p><img alt="Sample Select Account login page screenshot" src="../../assets/auth_server_sessions_selectAccount.png" /></p>
+<p><img alt="Sample Select Account login page screenshot" src="../../../../assets/auth_server_sessions_selectAccount.png" /></p>
 <p>You can override this page if you place a <code>selectAccount.xhtml</code> in
 <code>custom/pages</code>.</p>
 
@@ -8720,7 +8720,7 @@ to login as a different account, for example:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T17:34:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-30T05:16:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-30</span>
       
         <br>
         Created:
