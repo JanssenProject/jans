@@ -5135,6 +5135,19 @@
     RRF
   </a>
   
+    <nav class="md-nav" aria-label="RRF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-param-variant" class="md-nav__link">
+    3-param variant
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -9200,6 +9213,19 @@
     RRF
   </a>
   
+    <nav class="md-nav" aria-label="RRF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-param-variant" class="md-nav__link">
+    3-param variant
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -9954,6 +9980,7 @@ the callback URL by the external site (twitter.com), the flow continues ignoring
 -->
 
 <p>Agama engine's callback URL is <code>https://&lt;your-server&gt;/jans-auth/fl/callback</code>. This resource is only available for a given browser session while <code>RFAC</code> is in execution. Once the callback is visited or the flow times out (whichever occurs first), subsequent requests will respond with an HTTP 404 error. </p>
+<p>The mechanism used for redirection is a "302 Found" HTTP redirect that entails a subsequent GET request to the external site. In cases where a POST is expected, the 3-param version of <a href="#3-param-variant">RRF</a> can be useful.   </p>
 <h3 id="rrf">RRF<a class="headerlink" href="#rrf" title="Permanent link">#</a></h3>
 <p><code>RRF</code> (stands for <em>Render-Reply-Fetch</em>) abstracts the process of rendering a UI template, send the produced markup to the browser and grab user-provided data back at the server side.</p>
 <table>
@@ -9992,11 +10019,12 @@ result = RRF &quot;survey.ftl&quot; obj
 <li>The template location must be specified with a string literal only (not a variable). Normally the template must submit a POST to the current URL with the desired data. In HTML terms, it would look like <code>&lt;form method="post" enctype="application/x-www-form-urlencoded"&gt;...</code> for instance.</li>
 <li>Use <em>map</em> variables - not literals - for the second argument of <code>RRF</code>. Objects obtained from Java can be used except collections, arrays, strings, numbers, or boolean values.</li>
 </ul>
-<p><code>RRF</code> can be passed a third parameter, that is, <code>RRF templatePath variable boolean</code>. When the boolean value is <code>false</code>, it exhibits the regular two-param behavior. Otherwise (truthy value) the callback URL (see <a href="#rfac">RFAC</a>) will be available while <code>RRF</code> is in execution. In this case, if the callback is visited, data passed to it will be set as the result of the <code>RRF</code> call unless a POST to the current URL is received first, where behavior will be as usual. Finally, the callback resource is disabled.</p>
-<p>The three-param variant can be used when:</p>
+<h4 id="3-param-variant">3-param variant<a class="headerlink" href="#3-param-variant" title="Permanent link">#</a></h4>
+<p><code>RRF</code> can be passed a third parameter: <code>RRF templatePath variable boolean</code>. When the boolean value is <code>true</code> a callback URL will be available while <code>RRF</code> is in execution (see <a href="#rfac">RFAC</a>). In this case, if the callback is visited, data passed to it will be set as the result of the <code>RRF</code>. If a POST to the current URL is received first, i.e. callback not hit, behavior will be as in the two-param <code>RRF</code> invocation. This is also the case when a <code>false</code> value is passed for the third parameter.</p>
+<p>The three-param variant of <code>RRF</code> can be useful when:</p>
 <ul>
 <li>The decision to redirect to an external site can only be done from the browser itself</li>
-<li>The external site expects to receive an HTTP POST</li>
+<li>The external site expects to receive an HTTP POST. In this case, the rendered template may contain a form with fields as needed plus auto-submission logic in Javascript to perform the actual POST. This typically occurs in inbound-identity flows where identity providers require authentication requests serialized in <code>application/x-www-form-urlencoded</code> format as is the case of SAML HTTP POST binding, for example  </li>
 </ul>
 <h2 id="looping">Looping<a class="headerlink" href="#looping" title="Permanent link">#</a></h2>
 <p>There are two constructs available for looping in Agama: <code>Repeat</code> and <code>Iterate over</code>.</p>
@@ -10556,7 +10584,7 @@ x[2] = &quot;polo&quot;    //adds the key/value pair &quot;2&quot; / &quot;polo&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-19T12:54:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-19</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-30T13:51:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-30</span>
       
         <br>
         Created:

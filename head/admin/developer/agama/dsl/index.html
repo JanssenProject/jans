@@ -9223,7 +9223,7 @@ Finish it
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>result = RFAC &quot;https://login.twitter.com/?blah..&amp;boo=...&quot;
 </code></pre></div>
-<p>This redirects to the given URL. Once the user browser is taken to the callback by the external site (e.g. twitter.com), the data included in the query string or payload is stored in <code>result</code> (a <em>map</em>) for further processing. See the <a href="../dsl-full/#rfac">full reference</a> to learn more.</p>
+<p>This redirects to the given URL by issuing an HTTP redirect ("302 Found"). Once the user browser is taken to the callback by the external site (e.g. twitter.com), the data included in the query string or payload is stored in <code>result</code> (a <em>map</em>) for further processing. See the <a href="../dsl-full/#rfac">full reference</a> to learn more.</p>
 <h3 id="rrf">RRF<a class="headerlink" href="#rrf" title="Permanent link">#</a></h3>
 <p>The <code>RRF</code> (Render-Reply-Fetch) instruction expresses the concept of "show a page and grab user data after interaction". It takes the path to a template and injects a value into it. The produced (<strong>R</strong>endered) markup is sent (<strong>R</strong>eplied) to the browser and finally, the result of the interaction of the user with the page can be retrieved (<strong>F</strong>etched).</p>
 <table>
@@ -9309,7 +9309,7 @@ Log &quot;subflow returned with success?&quot; outcome.success
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-30T13:51:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-30</span>
       
         <br>
         Created:
