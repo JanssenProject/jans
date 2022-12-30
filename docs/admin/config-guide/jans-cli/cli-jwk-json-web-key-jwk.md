@@ -15,7 +15,7 @@ This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS
 There are few operations we can do using `jans-cli` commands. To get list of operations id run below command:
 
 ```
-/opt/jans/jans-cli/config-cli.py --info ConfigurationJWKJSONWebKeyJWK
+/opt/jans/jans-cli/config-cli.py --info ConfigurationJwkJsonWebKeyJwk
 ```
 
 It returns operations id with details information.
@@ -147,7 +147,7 @@ So, let's get the schema file and update it with keys data:
 }
 ```
 
-Let's update the json file; In our case, I have added sample data for testing purpose only. 
+Let's update the json file; In our case, I have added sample data for testing purpose only.
 
 ```
 "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
@@ -174,7 +174,7 @@ Now let's post this keys into the list using below command:
 
 ## Update / Replace JSON Web Key (JWK)
 
-To `update / replace` any JWK configuration, let get the schema first. 
+To `update / replace` any JWK configuration, let get the schema first.
 
 ```
 Operation ID: put-config-jwks

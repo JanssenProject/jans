@@ -53,6 +53,12 @@
 	 "serialVersionUID",
 	 "enabled"
      ]
+  },
+  "auditLogConf": {
+     "enabled": true,
+     "headerAttributes": [
+	  "User-inum"
+     ]
   }
 }
 

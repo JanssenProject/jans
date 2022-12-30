@@ -222,7 +222,6 @@
     "spontaneousScopeLifetime":86400,
     "accessTokenLifetime":300,
     "umaResourceLifetime":2592000,
-    "sessionAsJwt":false,
     "umaRptLifetime": 3600,
     "umaTicketLifetime": 3600,
     "umaPctLifetime": 2592000,
@@ -395,5 +394,10 @@
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
     "redirectUrisRegexEnabled": false,
     "useHighestLevelScriptIfAcrScriptNotFound": true,
-    "blockWebviewAuthorizationEnabled": false
+    "blockWebviewAuthorizationEnabled": false,
+    "userInfoConfiguration": {
+        "dateFormatterPattern": {
+            "birthdate": "yyyy-MM-dd"
+        }
+    }
 }

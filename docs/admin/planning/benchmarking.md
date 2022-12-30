@@ -55,30 +55,19 @@ justified.
 
 ## Load test
 
-### Authorization Code Flow jmeter test
-
-For load testing jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/jmeter/test/Authorization%20Code%20Flow_jans.jmx)
-
 **Prerequisite**
 
 1. Create OpenID Connect client with 
    1. Response Types: ['code', 'id_token]
    1. Grant Types: ['authorization_code', `implicit`, 'refresh_token']
    1. Redirect Uri: valid redirect uri which is resolvable by machine which runs this load test
+   1. Set client trusted (`jansTrustedClnt: true`)
 1. Create users by pattern:
    1. username: `test_user1`, `test_user2`, ... `test_userN` 
    1. secret: `test_user_password`
    Following script can be used [add_sequenced_jans_user_rdbm.py](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/tools/benchmark/add_sequenced_jans_user_rdbm.py)
-1. Configure Script
-   1. Open jmeter script by GUI
-   1. Set Host: `"Authorization Code Flow" -> "User Defined Variables"`: `host`
-   1. Update Location Regular Expression: `"Authorization Code Flow" -> "User Defined Variables"`: `location_regexp` - It must match `redirect_uri` correctly to extract `code` returned back by AS.
-      Consider following location header: `Location: https://yuriyz-modern-gnat.gluu.info/?code=626651bf-9d3c-430c-b0ec-8724dd065742&scope=openid&session_state=6255bbb4443a76a0f509b604cf651ad281bacbbde241389f2d05859783e41e1f.87f6112c-cb2c-4fe5-bd49-80e46b47e41f`
-      RegExp for it is : `Location: https:\/\/yuriyz-modern-gnat\.gluu\.info(.*)`
-   1. Put Client details: `"Authorization Code Flow" -> "User Defined Variables"`: `client_id`, `client_secret`, `redirect_uri`
-   1. Put User details: set user password to`test_user_password`. 
-      If any modification or logic is required for setting username and password please change code in: `Authorization Code Flow` -> `Main` -> `Simple Controller` -> `/login` -> `JSR223 PreProcessor : identify user credentials`
-      
+
+**User Selection Logic**
 
 `JSR223 PreProcessor : identify user credentials` has following logic for user selection      
 
@@ -106,7 +95,37 @@ vars.put("username", username);
 ```
 
 Please change it if needed.
-         
+
+**Threads&RampUp**
+
+Configure test script threads properties in `<Root> -> Main` Thread Group inside script, like:
+
+- Number Of Threads
+- Ramp-Up Period (in seconds)
+- Loop Count (or Forever)
+
+**jmeter in non-GUI mode**
+
+Don't run jmeter in GUI mode for real load. Use non-GUI mode.
+```bash
+jmeter -n -t Authorization_Code_Flow_jans.jmx
+```
+
+### Authorization Code Flow jmeter test
+
+For load testing with Authorization Code Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/Authorization%20Code%20Flow_jans.jmx)
+
+1. Configure Script
+   1. Open jmeter script by GUI
+   1. Set Thread properties according to your needs: `Authorization Code Flow -> Main`
+   1. Set Host: `"Authorization Code Flow" -> "User Defined Variables"`: `host`
+   1. Update Location Regular Expression: `"Authorization Code Flow" -> "User Defined Variables"`: `location_regexp` - It must match `redirect_uri` correctly to extract `code` returned back by AS.
+      Consider following location header: `Location: https://yuriyz-modern-gnat.gluu.info/?code=626651bf-9d3c-430c-b0ec-8724dd065742&scope=openid&session_state=6255bbb4443a76a0f509b604cf651ad281bacbbde241389f2d05859783e41e1f.87f6112c-cb2c-4fe5-bd49-80e46b47e41f`
+      RegExp for it is : `Location: https:\/\/yuriyz-modern-gnat\.gluu\.info(.*)`
+   1. Put Client details: `"Authorization Code Flow" -> "User Defined Variables"`: `client_id`, `client_secret`, `redirect_uri`
+   1. Put User details: set user password to`test_user_password`. 
+      If any modification or logic is required for setting username and password please change code in: `Authorization Code Flow` -> `Main` -> `Simple Controller` -> `/login` -> `JSR223 PreProcessor : identify user credentials`
+               
 If everything was done correctly you should see:
 1. in jmeter log correctly parsed code:
 ```code
@@ -115,8 +134,16 @@ If everything was done correctly you should see:
 ```
 2. `/token` step must be passed successfully (marked=passed which confirmed that `access_token` and `id_token` are present in response).
 
-Don't run jmeter in GUI mode for real load. Use non-GUI mode.
-```bash
-jmeter -n -t Authorization_Code_Flow_jans.jmx
-```
+### Resource Owner Password Grant (ROPC) Flow jmeter test
+
+For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/ResourceOwnerPasswordCredentials_jans.jmx)
+
+1. Configure Script
+   1. Open jmeter script by GUI
+   1. Set Thread properties according to your needs: `ROPC -> Main`
+   1. Set Host: `"ROPC" -> "User Defined Variables"`: `host`
+   1. Put Client details: `"ROPC" -> "User Defined Variables"`: `client_id`, `client_secret`
+   1. Put User details: set user password to`test_user_password`. 
+      If any modification or logic is required for setting username and password please change code in: `ROPC` -> `Main` -> `Simple Controller` -> `/token` -> `JSR223 PreProcessor : identify user credentials`
+
    

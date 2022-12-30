@@ -262,3 +262,6 @@ public class ClientRegistration implements ClientRegistrationType {
 }
 
 ```
+
+### Sample Scripts
+- [OpenBanking](../../../script-catalog/client_registration/OpenBanking/)

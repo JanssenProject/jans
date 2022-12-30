@@ -66,6 +66,7 @@ tags:
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
+| dateFormatterPattern | List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc. | [Details](#dateformatterpattern) |
 | dcrAuthorizationWithClientCredentials | Boolean value indicating if DCR authorization to be performed using client credentials | [Details](#dcrauthorizationwithclientcredentials) |
 | dcrAuthorizationWithMTLS | Boolean value indicating if DCR authorization allowed with MTLS | [Details](#dcrauthorizationwithmtls) |
 | dcrIssuers | List of DCR issuers | [Details](#dcrissuers) |
@@ -111,6 +112,7 @@ tags:
 | expirationNotificatorIntervalInSeconds | The expiration notificator interval in second | [Details](#expirationnotificatorintervalinseconds) |
 | expirationNotificatorMapSizeLimit | The expiration notificator maximum size limit | [Details](#expirationnotificatormapsizelimit) |
 | externalLoggerConfiguration | The path to the external log4j2 logging configuration | [Details](#externalloggerconfiguration) |
+| externalUriWhiteList | This list specifies which external URIs can be called by AS (if empty any URI can be called) | [Details](#externaluriwhitelist) |
 | fapiCompatibility | Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode | [Details](#fapicompatibility) |
 | featureFlags | List of enabled feature flags | [Details](#featureflags) |
 | forceIdTokenHintPrecense | Boolean value specifying whether force id_token_hint parameter presence | [Details](#forceidtokenhintprecense) |
@@ -218,7 +220,6 @@ tags:
 | sectorIdentifierCacheLifetimeInMinutes | Sector Identifier cache lifetime in minutes | [Details](#sectoridentifiercachelifetimeinminutes) |
 | serverSessionIdLifetime | Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object | [Details](#serversessionidlifetime) |
 | serviceDocumentation | URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider | [Details](#servicedocumentation) |
-| sessionAsJwt | Boolean value true saves session data as a JWT | [Details](#sessionasjwt) |
 | sessionIdLifetime | The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends | [Details](#sessionidlifetime) |
 | sessionIdPersistInCache | Boolean value specifying whether to persist session_id in cache | [Details](#sessionidpersistincache) |
 | sessionIdPersistOnPromptNone | Boolean value specifying whether to persist session ID on prompt none | [Details](#sessionidpersistonpromptnone) |
@@ -259,6 +260,7 @@ tags:
 | useHighestLevelScriptIfAcrScriptNotFound | Enable/Disable usage of highest level script in case ACR script does not exist | [Details](#usehighestlevelscriptifacrscriptnotfound) |
 | useLocalCache | Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds | [Details](#uselocalcache) |
 | useNestedJwtDuringEncryption | Boolean value specifying whether to use nested Jwt during encryption | [Details](#usenestedjwtduringencryption) |
+| userInfoConfiguration | UserInfo Configuration | [Details](#userinfoconfiguration) |
 | userInfoEncryptionAlgValuesSupported | This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionalgvaluessupported) |
 | userInfoEncryptionEncValuesSupported | This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionencvaluessupported) |
 | userInfoEndpoint | The User Info endpoint URL | [Details](#userinfoendpoint) |
@@ -770,6 +772,15 @@ tags:
 - Default value: None
 
 
+### dateFormatterPattern
+
+- Description: List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc.
+
+- Required: No
+
+- Default value: None
+
+
 ### dcrAuthorizationWithClientCredentials
 
 - Description: Boolean value indicating if DCR authorization to be performed using client credentials
@@ -1169,6 +1180,15 @@ tags:
 ### externalLoggerConfiguration
 
 - Description: The path to the external log4j2 logging configuration
+
+- Required: No
+
+- Default value: None
+
+
+### externalUriWhiteList
+
+- Description: This list specifies which external URIs can be called by AS (if empty any URI can be called)
 
 - Required: No
 
@@ -2138,15 +2158,6 @@ tags:
 - Default value: None
 
 
-### sessionAsJwt
-
-- Description: Boolean value true saves session data as a JWT
-
-- Required: No
-
-- Default value: false
-
-
 ### sessionIdLifetime
 
 - Description: The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends
@@ -2505,6 +2516,15 @@ tags:
 - Required: No
 
 - Default value: true
+
+
+### userInfoConfiguration
+
+- Description: UserInfo Configuration
+
+- Required: No
+
+- Default value: None
 
 
 ### userInfoEncryptionAlgValuesSupported
