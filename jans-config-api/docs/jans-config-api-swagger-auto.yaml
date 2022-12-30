@@ -7297,19 +7297,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        adminCanView:
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9208,10 +9208,6 @@ components:
           type: string
         permissionGranted:
           type: boolean
-        isJwt:
-          type: boolean
-        jwt:
-          type: string
         permissionGrantedMap:
           $ref: '#/components/schemas/SessionIdAccessMap'
         sessionAttributes:

@@ -201,6 +201,7 @@ public class RequestReaderInterceptor {
                                 propertyName);
                 logger.error("RequestReaderInterceptor::processCustomAttributes() - AttributesList - listAttributes:{}",
                         listAttributes);
+                
                 if (listAttributes != null && !listAttributes.isEmpty()) {
                     for (AttributeData attData : listAttributes) {
                         logger.error("RequestReaderInterceptor::processCustomAttributes() - attData:{}", attData);
@@ -209,17 +210,28 @@ public class RequestReaderInterceptor {
                         logger.error(
                                 "RequestReaderInterceptor::Attribute details - attData.getName():{}, attData.getValue():{},gluuAttribute:{}",
                                 attData.getName(), attData.getValue(), gluuAttribute);
-                        if (gluuAttribute != null) {
+                        
+                        if (attData != null && attData.getValue() != null && gluuAttribute != null) {
                             AttributeDataType attributeDataType = gluuAttribute.getDataType();
-                            logger.error("RequestReaderInterceptor::processCustomAttributes() - attributeDataType:{}",
-                                    attributeDataType);
-                            if (AttributeDataType.DATE.equals(attributeDataType)) {
-                                decodeTime(attData);
+                            logger.error("RequestReaderInterceptor::processCustomAttributes() - attributeDataType:{}, AttributeDataType.DATE.getValue():{}",
+                                    attributeDataType, AttributeDataType.DATE.getValue());
+                            if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())) {
+                                logger.error("RequestReaderInterceptor::processCustomAttributes() - Calling decodeTime() - attData.getValue():{}", attData.getValue());
+                                AttributeData attributeData = decodeTime(attData);
+                                listAttributes.remove(attData);
+                                listAttributes.add(attributeData);
                             }
                         }
                     }
-
+                    
+                    logger.error("RequestReaderInterceptor::processCustomAttributes() - calling getCustomAttributesListFromAttributeDataList() ");
+                    List<Object> data = persistenceEntryManager.getCustomAttributesListFromAttributeDataList(obj,  (AttributesList) ldapAttribute, propertyName, listAttributes);
+                    logger.error("RequestReaderInterceptor::processCustomAttributes() - data:{}", data);
+                    
+                    
                 }
+                
+                
 
             } catch (Exception ex) {
                 logger.error("Error while processing Custom Attributes", ex);
@@ -232,15 +244,19 @@ public class RequestReaderInterceptor {
         if (attributeData == null) {
             return attributeData;
         }
-        if (attributeData.getValue() != null) {
-            Object attValue = attributeData.getValue();
+        AttributeData atrData = attributeData;
+        if (atrData.getValue() != null) {
+            Object attValue = atrData.getValue();
             if (attValue != null) {
                 Date date = persistenceEntryManager.decodeTime(null, attValue.toString());
+                date.setTime(System.currentTimeMillis());
                 logger.error(
-                        "RequestReaderInterceptor::processCustomAttributes() - attributeData.getName():{}, date:{}",
-                        attributeData.getName(), date);
+                        "RequestReaderInterceptor::decodeTime() - atrData.getName():{}, date:{}",
+                        atrData.getName(), date);
+                atrData = new AttributeData(atrData.getName(), date);
+                atrData.setMultiValued(attributeData.getMultiValued());
             }
         }
-        return attributeData;
+        return atrData;
     }
 }
