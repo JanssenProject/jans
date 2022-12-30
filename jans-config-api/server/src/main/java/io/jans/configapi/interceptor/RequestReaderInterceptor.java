@@ -8,6 +8,7 @@ package io.jans.configapi.interceptor;
 
 import io.jans.model.GluuAttribute;
 import io.jans.model.attribute.AttributeDataType;
+import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.util.AuthUtil;
@@ -37,8 +38,12 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
 import io.jans.orm.model.AttributeData;
+import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
+
+import java.lang.reflect.InvocationTargetException;
 
 @Interceptor
 @RequestInterceptor
@@ -62,6 +67,9 @@ public class RequestReaderInterceptor {
 
     @Inject
     AuthUtil authUtil;
+    
+    @Inject
+    DataUtil dataUtil;
 
     @Inject
     AttributeService attributeService;
@@ -224,9 +232,15 @@ public class RequestReaderInterceptor {
                         }
                     }
                     
-                    logger.error("RequestReaderInterceptor::processCustomAttributes() - calling getCustomAttributesListFromAttributeDataList() ");
+                    logger.error("RequestReaderInterceptor::processCustomAttributes() - calling getCustomAttributesListFromAttributeDataList() - propertyName:{}", propertyName);
                     List<Object> data = persistenceEntryManager.getCustomAttributesListFromAttributeDataList(obj,  (AttributesList) ldapAttribute, propertyName, listAttributes);
                     logger.error("RequestReaderInterceptor::processCustomAttributes() - data:{}", data);
+                    
+                    
+                    logger.error("RequestReaderInterceptor::processCustomAttributes() - before calling calling setObjectData() - propertyName:{}, data:{} ", propertyName, data);
+                    setObjectData(obj, propertyName, data);
+                    logger.error("RequestReaderInterceptor::processCustomAttributes() - after calling setObjectData() - propertyName:{}, data:{} ", propertyName, data);
+                    
                     
                     
                 }
@@ -258,5 +272,21 @@ public class RequestReaderInterceptor {
             }
         }
         return atrData;
+    }
+    
+    private void setObjectData(Object obj, String propertyName, Object propertyValue) throws IllegalAccessException, IllegalArgumentException,
+    InvocationTargetException {
+        logger.error("RequestReaderInterceptor::setObjectData() - obj:{}, propertyName:{},propertyValue:{}", obj, propertyValue);
+        Setter setterMethod = DataUtil.getSetterMethod(obj.getClass(), propertyName);
+        propertyValue = setterMethod.getMethod().invoke(obj, propertyValue);
+        logger.error("RequestReaderInterceptor::setObjectData() - After setterMethod invoked key:{}, propertyValue:{} ", propertyName, propertyValue);
+
+        Getter getterMethod = DataUtil.getGetterMethod(obj.getClass(), propertyName);
+        logger.error("RequestReaderInterceptor::setObjectData() - propertyName:{}, getterMethod:{} ", propertyName, getterMethod);
+
+        propertyValue = getterMethod.get(obj);
+        logger.error("Final RequestReaderInterceptor::setObjectData() - key:{}, propertyValue:{} ", propertyName, propertyValue);
+        
+   
     }
 }

@@ -7297,19 +7297,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8474,6 +8474,17 @@ components:
           type: boolean
         userInfoConfiguration:
           $ref: '#/components/schemas/UserInfoConfiguration'
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
+        fapi:
+          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8501,17 +8512,6 @@ components:
             - STAT
             - PAR
             - SSA
-        fapi:
-          type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
     AuthenticationFilter:
       required:
       - baseDn
