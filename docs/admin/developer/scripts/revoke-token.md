@@ -3,6 +3,7 @@ tags:
   - administration
   - developer
   - scripts
+  - RevokeToken
 ---
 
 ## Overview

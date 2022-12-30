@@ -3,6 +3,7 @@ tags:
   - administration
   - developer
   - scripts
+  - DynamicScope
 ---
 
 ## Overview
@@ -114,8 +115,8 @@ public class DynamicScope implements DynamicScopeType {
 	
     @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-      log.info("Dyanmic Scope. Initializing...");
-      log.info("Dyanmic Scope. Initialized");
+      log.info("Dynamic Scope. Initializing...");
+      log.info("Dynamic Scope. Initialized");
       return true;
     }
 
@@ -165,3 +166,10 @@ public class DynamicScope implements DynamicScopeType {
 }
 
 ```
+
+### Sample Scripts
+- [Dynamic Permission](../../../script-catalog/dynamic_scope/dynamic-permission/)
+- [MemberOf Attribute](../../../script-catalog/dynamic_scope/memberof-attribute/)
+- [Organization Name](../../../script-catalog/dynamic_scope/org-name/)
+- [Session Parameter](../../../script-catalog/dynamic_scope/session-parameter/)
+- [Work Phone](../../../script-catalog/dynamic_scope/work-phone/)
