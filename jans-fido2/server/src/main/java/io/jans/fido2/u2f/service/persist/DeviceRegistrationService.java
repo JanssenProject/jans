@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.u2f.service.persist;
+package io.jans.fido2.u2f.service.persist;
 
 import java.io.IOException;
 import java.util.Collections;

@@ -37,7 +37,7 @@ import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.service.net.NetworkService;
-import io.jans.u2f.service.persist.DeviceRegistrationService;
+import io.jans.fido2.u2f.service.persist.DeviceRegistrationService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
