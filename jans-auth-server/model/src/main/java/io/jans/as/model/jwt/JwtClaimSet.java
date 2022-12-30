@@ -276,8 +276,7 @@ public abstract class JwtClaimSet {
         if (attribute instanceof JSONArray) {
             claims.put(key, JsonApplier.getStringList((JSONArray) attribute));
         } else {
-            String value = (String) attribute;
-            claims.put(key, value);
+            claims.put(key, attribute);
         }
     }
 
