@@ -37,8 +37,6 @@ import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
-import io.jans.fido2.model.u2f.DeviceRegistration;
-import io.jans.fido2.model.u2f.RegisterRequestMessageLdap;
 import io.jans.model.ApplicationType;
 import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.orm.PersistenceEntryManager;
@@ -192,8 +190,6 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getClients(), Client.class);
         cleanServiceBaseDns.put(umaPctService.branchBaseDn(), UmaPCT.class);
         cleanServiceBaseDns.put(umaResourceService.getBaseDnForResource(), UmaResource.class);
-        cleanServiceBaseDns.put(String.format("ou=registration_requests,%s", u2fBase), RegisterRequestMessageLdap.class);
-        cleanServiceBaseDns.put(String.format("ou=registered_devices,%s", u2fBase), DeviceRegistration.class);
         cleanServiceBaseDns.put(metricService.buildDn(null, null, ApplicationType.OX_AUTH), MetricEntry.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenEntity.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);

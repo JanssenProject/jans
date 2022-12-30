@@ -132,7 +132,6 @@
             <artifactId>resteasy-servlet-initializer</artifactId>
         </dependency>
 
-
         <!-- Weld -->
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
