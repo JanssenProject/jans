@@ -493,6 +493,8 @@ the callback URL by the external site (twitter.com), the flow continues ignoring
 
 Agama engine's callback URL is `https://<your-server>/jans-auth/fl/callback`. This resource is only available for a given browser session while `RFAC` is in execution. Once the callback is visited or the flow times out (whichever occurs first), subsequent requests will respond with an HTTP 404 error. 
 
+The mechanism used for redirection is a "302 Found" HTTP redirect that entails a subsequent GET request to the external site. In cases where a POST is expected, the 3-param version of [RRF](#3-param-variant) can be useful.   
+
 ### RRF
 
 `RRF` (stands for _Render-Reply-Fetch_) abstracts the process of rendering a UI template, send the produced markup to the browser and grab user-provided data back at the server side.
@@ -535,12 +537,14 @@ result = RRF "survey.ftl" obj
 - The template location must be specified with a string literal only (not a variable). Normally the template must submit a POST to the current URL with the desired data. In HTML terms, it would look like `<form method="post" enctype="application/x-www-form-urlencoded">...` for instance.
 - Use _map_ variables - not literals - for the second argument of `RRF`. Objects obtained from Java can be used except collections, arrays, strings, numbers, or boolean values.
 
-`RRF` can be passed a third parameter, that is, `RRF templatePath variable boolean`. When the boolean value is `false`, it exhibits the regular two-param behavior. Otherwise (truthy value) the callback URL (see [RFAC](#rfac)) will be available while `RRF` is in execution. In this case, if the callback is visited, data passed to it will be set as the result of the `RRF` call unless a POST to the current URL is received first, where behavior will be as usual. Finally, the callback resource is disabled.
+#### 3-param variant
 
-The three-param variant can be used when:
+`RRF` can be passed a third parameter: `RRF templatePath variable boolean`. When the boolean value is `true` a callback URL will be available while `RRF` is in execution (see [RFAC](#rfac)). In this case, if the callback is visited, data passed to it will be set as the result of the `RRF`. If a POST to the current URL is received first, i.e. callback not hit, behavior will be as in the two-param `RRF` invocation. This is also the case when a `false` value is passed for the third parameter.
+
+The three-param variant of `RRF` can be useful when:
 
 - The decision to redirect to an external site can only be done from the browser itself
-- The external site expects to receive an HTTP POST
+- The external site expects to receive an HTTP POST. In this case, the rendered template may contain a form with fields as needed plus auto-submission logic in Javascript to perform the actual POST. This typically occurs in inbound-identity flows where identity providers require authentication requests serialized in `application/x-www-form-urlencoded` format as is the case of SAML HTTP POST binding, for example  
 
 ## Looping
 
