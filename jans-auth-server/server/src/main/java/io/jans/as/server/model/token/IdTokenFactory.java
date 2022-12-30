@@ -142,7 +142,7 @@ public class IdTokenFactory {
 
         jwr.getClaims().setExpirationTime(expiration);
         jwr.getClaims().setIssuedAt(issuedAt);
-        jwr.setClaim("code", UUID.randomUUID().toString());
+        jwr.setClaim("random", UUID.randomUUID().toString()); // provided uniqueness of id_token for same RP requests, oxauth: 1493
 
         if (executionContext.getPreProcessing() != null) {
             executionContext.getPreProcessing().apply(jwr);
