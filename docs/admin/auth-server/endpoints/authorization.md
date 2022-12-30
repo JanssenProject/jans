@@ -37,7 +37,27 @@ TODO: It seems this endpoint can't be disabled using featureflags. Confirm this.
 
 ## Configuration Properties
 
-TODO: Find properties relevant to this endpoint
+Authorization endpoint can be further configured using Janssen Server configuration properties listed below. When using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+navigate via `Auth Server`->`Properties`.
+
+- [issuer](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#issuer)
+- [requirePar](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar)
+- [requirePkce](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepkce)
+- [fapiCompatibility](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#fapicompatibility)
+- [forceSignedRequestObject](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#forcesignedrequestobject)
+- [authorizationCodeLifetime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#authorizationcodelifetime)
+- [returnDeviceSecretFromAuthzEndpoint](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#returndevicesecretfromauthzendpoint)
+- [requestUriBlockList](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requesturiblocklist)
+- [requireRequestObjectEncryption](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirerequestobjectencryption)
+- [staticDecryptionKid](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#staticdecryptionkid)
+- [requestUriHashVerificationEnabled](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requesturihashverificationenabled)
+- [legacyIdTokenClaims](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#legacyidtokenclaims)
+- [customHeadersWithAuthorizationResponse](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#customheaderswithauthorizationresponse)
+- [includeSidInResponse](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#includesidinresponse)
+- [sessionIdRequestParameterEnabled](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#sessionidrequestparameterenabled)
+- [returnDeviceSecretFromAuthzEndpoint](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#returndevicesecretfromauthzendpoint)
+- [cibaMaxExpirationTimeAllowedSec](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#cibamaxexpirationtimeallowedsec)
 
 ## Required Client Configuration
 
