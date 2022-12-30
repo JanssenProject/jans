@@ -241,7 +241,7 @@ Example:
 result = RFAC "https://login.twitter.com/?blah..&boo=..."
 ```
 
-This redirects to the given URL. Once the user browser is taken to the callback by the external site (e.g. twitter.com), the data included in the query string or payload is stored in `result` (a _map_) for further processing. See the [full reference](./dsl-full.md#rfac) to learn more.
+This redirects to the given URL by issuing an HTTP redirect ("302 Found"). Once the user browser is taken to the callback by the external site (e.g. twitter.com), the data included in the query string or payload is stored in `result` (a _map_) for further processing. See the [full reference](./dsl-full.md#rfac) to learn more.
 
 ### RRF
 
