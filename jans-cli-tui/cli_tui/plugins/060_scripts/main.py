@@ -136,8 +136,17 @@ class Plugin():
 
         buttons = []
 
+        f = open("hopa.dev", "a")
+        f.write('start: '+str(self.data['start'])+'\n')
+        f.write('totalEntriesCount: '+str(self.data['totalEntriesCount'])+'\n')
+        f.write('entriesCount: '+str(self.data['entriesCount'])+'\n')
+        f.write('Prev: '+str(self.data['start']-self.app.entries_per_page-1)+'\n')        
+        f.write('**************************'+'\n')
+        f.close()
+
+
         if self.data['start'] > 1:
-            handler_partial = partial(self.get_scripts, self.data['start']-self.app.entries_per_page+1, pattern)
+            handler_partial = partial(self.get_scripts, self.data['start']-self.app.entries_per_page-1, pattern)
             prev_button = Button(_("Prev"), handler=handler_partial)
             prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
             buttons.append(prev_button)
