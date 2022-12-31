@@ -217,7 +217,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         self.myparent.getTitledRadioButton(
                                 _("Authn Method token endpoint"), 
                                 name='tokenEndpointAuthMethod', 
-                                values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
+                                values=[('none', 'none'), ('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
                                 current_value=self.data.get('tokenEndpointAuthMethod'),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethod'),
                                 style='class:outh-client-radiobutton'),
