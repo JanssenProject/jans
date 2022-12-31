@@ -307,7 +307,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             style='class:outh-client-radiobutton'),
 
                         self.myparent.getTitledCheckBox(
-                            _("Incliude Claims in id_token"),
+                            _("Include Claims in id_token"),
                             name='includeClaimsInIdToken',
                             checked=self.data.get('includeClaimsInIdToken'),
                             jans_help=self.myparent.get_help_from_schema(schema, 'includeClaimsInIdToken'),
