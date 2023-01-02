@@ -451,6 +451,7 @@ nav:
         - 'Adding Custom Attributes': 'admin/scim/custom-attributes.md'
     - 'Janssen Recipes':
         - 'admin/recipes/README.md'
+        - 'Benchmark': /admin/recipes/benchmark.md
         - 'Returning Group/Role User Information': 'admin/recipes/returning-group.md'
         - 'Passwordless': 'admin/recipes/passwordless.md'
         - 'Forcing Re-Authentication': 'admin/recipes/forcing-reauthn.md'
