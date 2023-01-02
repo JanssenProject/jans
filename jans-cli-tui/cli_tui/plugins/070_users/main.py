@@ -103,7 +103,7 @@ class Plugin(DialogUtils):
 
         self.app.invalidate()
 
-    def get_users(self, start_index: int=1, pattern: Optional[str]='') -> None:
+    def get_users(self, start_index: int=0, pattern: Optional[str]='') -> None:
         """Gets Users from server.
         """
 
@@ -263,8 +263,5 @@ class Plugin(DialogUtils):
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.app.center_container)
-            return
         self.get_users(pattern=tbuffer.text)
 

@@ -89,17 +89,14 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             prop['hide'] = prop_[2]
                         data[prop_container.jans_name].append(prop)
 
-        
-        data['locationType'] = 'ldap' if data['location'] == 'db' else 'file'
+        data['locationType'] = data.get('locationType')
         data['internal'] = self.data.get('internal', False)
         data['modified'] = self.data.get('modified', False)
         data['revision'] = self.data.get('revision', 0) + 1
         data['script'] = self.script
 
-        del data['location']
-
-        if not data['inum']:
-            del data['inum']
+        if data['locationType'] != 'file':
+            data.pop('locationPath', None)
 
         if self.data.get('baseDn'):
             data['baseDn'] = self.data['baseDn']
@@ -154,12 +151,12 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.location_widget = self.myparent.getTitledText(
             _("          Path"), 
             name='locationPath', 
-            value=self.data.get('locationPath',''), 
+            value=self.data.get('locationPath',''),
             style='class:script-titledtext', 
             jans_help="locationPath"
             )
 
-        self.set_location_widget_state(self.data.get('locationPath') == 'file')
+        self.set_location_widget_state(self.data.get('locationType') == 'file')
 
         config_properties_title = _("Conf. Properties: ")
         add_property_title = _("Add Property")
@@ -233,9 +230,9 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
                     self.myparent.getTitledRadioButton(
                             _("Location"),
-                            name='location',
-                            values=[('db', _("Database")), ('file', _("File System"))],
-                            current_value= 'file' if self.data.get('locationPath') else 'db',
+                            name='locationType',
+                            values=[('ldap', _("Database")), ('file', _("File System"))],
+                            current_value= 'file' if self.data.get('locationType') == 'file' else 'ldap',
                             jans_help=_("Where to save script"),
                             style='class:outh-client-radiobutton',
                             on_selection_changed=self.script_location_changed,
