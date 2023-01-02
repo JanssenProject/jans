@@ -61,7 +61,6 @@ Response:
 
 ```
 
-
 #### 2. Update `loggingLevel` or `loggingLayout`:
   Steps:
   A. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1 and
@@ -74,6 +73,6 @@ Response:
   C. restart `jans-fido2`
      `service fido2 restart` or `systemctl restart fido2`
 
-  ### Location of logs in FIDO2 server:
+### Location of logs in FIDO2 server:
 
-  Logs can be found at `/opt/jans/jetty/jans-fido2/logs`
+Logs can be found at `/opt/jans/jetty/jans-fido2/logs`
