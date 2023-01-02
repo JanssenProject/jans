@@ -30,7 +30,7 @@ from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.dimension import AnyDimension
 
 from cli import config_cli
-from utils.static import DialogResult, CLI_STYLE
+from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils
 from utils.multi_lang import _
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
@@ -141,21 +141,21 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 values=scope_types,
                                 on_selection_changed=self.scope_selection_changed,
                                 jans_help=self.myparent.get_help_from_schema(self.schema, 'scopeType'),
-                                style=CLI_STYLE.radio_button),
+                                style=cli_style.radio_button),
 
                 self.myparent.getTitledText(
                     _("id"), 
                     name='id', 
                     value=self.data.get('id',''), 
                     jans_help=self.myparent.get_help_from_schema(self.schema, 'id'),
-                    style=CLI_STYLE.edit_text_required),
+                    style=cli_style.edit_text_required),
 
                 self.myparent.getTitledText(
                     _("inum"), 
                     name='inum', 
                     value=self.data.get('inum',''), 
                     jans_help=self.myparent.get_help_from_schema(self.schema, 'inum'),
-                    style=CLI_STYLE.edit_text,
+                    style=cli_style.edit_text,
                     read_only=True,),
 
                 self.myparent.getTitledText(
@@ -163,14 +163,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     name='displayName', 
                     value=self.data.get('displayName',''),
                     jans_help=self.myparent.get_help_from_schema(self.schema, 'displayName'),
-                    style=CLI_STYLE.edit_text),
+                    style=cli_style.edit_text),
 
                 self.myparent.getTitledText(
                     _("Description"), 
                     name='description', 
                     value=self.data.get('description',''), 
                     jans_help=self.myparent.get_help_from_schema(self.schema, 'description'),
-                    style=CLI_STYLE.edit_text),
+                    style=cli_style.edit_text),
 
                 DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
             ], style='class:outh-scope-tabs'),
@@ -269,7 +269,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
                                     jans_help=self.myparent.get_help_from_schema(self.schema, 'defaultScope'),
-                                    style=CLI_STYLE.check_box,
+                                    style=cli_style.check_box,
                             ),
 
                             self.myparent.getTitledCheckBox(
@@ -277,7 +277,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     name='showInConfigurationEndpoint',
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint',''),
                                     jans_help='Configuration Endpoint',
-                                    style=CLI_STYLE.check_box,
+                                    style=cli_style.check_box,
                             ),
 
                         ],width=D(),)
@@ -289,7 +289,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
                                     jans_help=self.myparent.get_help_from_schema(self.schema, 'defaultScope'),
-                                    style=CLI_STYLE.check_box,
+                                    style=cli_style.check_box,
                             ),
 
                             self.myparent.getTitledCheckBox(
@@ -297,7 +297,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                     name='showInConfigurationEndpoint',
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint',''),
                                     jans_help='Configuration Endpoint',
-                                    style=CLI_STYLE.check_box,
+                                    style=cli_style.check_box,
                             ),
 
                             # Window(char='-', height=1),
@@ -338,13 +338,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
                             jans_help=self.myparent.get_help_from_schema(self.schema, 'dynamicScopeScripts'),
                             height=3, 
-                            style=CLI_STYLE.edit_text),
+                            style=cli_style.edit_text),
                         
                         self.myparent.getTitledText(
                                 _("Search"), 
                                 name='__search_claims__',
                                 style='class:outh-scope-textsearch',width=10,
-                                jans_help=_("Press enter to perform search"), ),#accept_handler=self.search_scopes
+                                jans_help=_("Press enter to perform search"),
+                                )
 
                         self.myparent.getTitledText(
                                 _("Claims"),
@@ -352,7 +353,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 value='\n'.join(self.data.get('claims', [])),
                                 height=3, 
                                 jans_help=self.myparent.get_help_from_schema(self.schema, 'claims'),
-                                style=CLI_STYLE.edit_text),
+                                style=cli_style.edit_text),
 
                         ],width=D(),
                     )
@@ -362,7 +363,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         _("Associated Client"), 
                         name='none', 
                         value=self.data.get('none',''), 
-                        style=CLI_STYLE.edit_text,
+                        style=cli_style.edit_text,
                         read_only=True,
                         jans_help=self.myparent.get_help_from_schema(self.schema, 'none'),
                         height=3,),## Not fount
@@ -372,7 +373,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         name='creationDate', 
                         value=self.data.get('creationDate',''), 
                         jans_help=self.myparent.get_help_from_schema(self.schema, 'creationDate'),
-                        style=CLI_STYLE.edit_text,
+                        style=cli_style.edit_text,
                         read_only=True,),
 
                                                 ],width=D(),
@@ -387,7 +388,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         name='iconUrl', 
                         value=self.data.get('iconUrl',''), 
                         jans_help=self.myparent.get_help_from_schema(self.schema, 'iconUrl'),
-                        style=CLI_STYLE.edit_text),
+                        style=cli_style.edit_text),
                     
 
                     self.myparent.getTitledText(_("Authorization Policies"),
@@ -395,14 +396,14 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                             value='\n'.join(self.data.get('umaAuthorizationPolicies', [])),
                             height=3, 
                             jans_help=self.myparent.get_help_from_schema(self.schema, 'umaAuthorizationPolicies'),
-                            style=CLI_STYLE.edit_text),
+                            style=cli_style.edit_text),
 
                     self.myparent.getTitledText(
                         _("Associated Client"), 
                         name='none', 
                         value=self.data.get('none',''), 
                         jans_help=self.myparent.get_help_from_schema(self.schema, 'none'),
-                        style=CLI_STYLE.edit_text,
+                        style=cli_style.edit_text,
                         read_only=True,
                         height=3,), ## Not fount
 
@@ -411,13 +412,13 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                         name='description', 
                         value=self.data.get('description',''), 
                         jans_help=self.myparent.get_help_from_schema(self.schema, 'description'),
-                        style=CLI_STYLE.edit_text,
+                        style=cli_style.edit_text,
                         read_only=True,),
 
                     self.myparent.getTitledText(
                                     _("Creator"), 
                                     name='Creator',
-                                    style=CLI_STYLE.edit_text,
+                                    style=cli_style.edit_text,
                                     jans_help=self.myparent.get_help_from_schema(self.schema, 'Creator'),
                                     read_only=True,
                                     value=uma_creator

@@ -5,7 +5,7 @@ class DialogResult(Enum):
     ACCEPT = 1
     OK = 2
 
-class CLI_STYLE:
+class cli_style:
     edit_text = 'class:plugin-text'
     edit_text_required = 'class:plugin-textrequired'
     check_box = 'class:plugin-checkbox'
@@ -16,6 +16,6 @@ class CLI_STYLE:
     navbar_headcolor = "class:plugin-navbar-headcolor"
     navbar_entriescolor = "class:plugin-navbar-entriescolor"
 
-class COMMON_STRINGS:
+class common_strings:
     enter_to_search = "Press enter to perform search"
     no_matching_result = "No matching result"

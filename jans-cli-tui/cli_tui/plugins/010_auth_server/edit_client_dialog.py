@@ -15,7 +15,7 @@ from prompt_toolkit.widgets import (
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from asyncio import Future, ensure_future
-from utils.static import DialogResult, CLI_STYLE
+from utils.static import DialogResult, cli_style
 from utils.multi_lang import _
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
@@ -186,35 +186,35 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 value=self.data.get('inum',''),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'inum'),
                                 read_only=True,
-                                style=CLI_STYLE.edit_text),
+                                style=cli_style.edit_text),
 
                         self.myparent.getTitledCheckBox(
                             _("Active"), 
                             name='disabled', 
                             checked= not self.data.get('disabled'), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'disabled'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             _("Client Name"), 
                             name='clientName', 
                             value=self.data.get('clientName',''), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'clientName'),
-                            style=CLI_STYLE.edit_text),
+                            style=cli_style.edit_text),
 
                         self.myparent.getTitledText(
                             _("Client Secret"), 
                             name='clientSecret', 
                             value=self.data.get('clientSecret',''), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'clientSecret'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             _("Description"), 
                             name='description', 
                             value=self.data.get('description',''), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'description'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledRadioButton(
                                 _("Authn Method token endpoint"), 
@@ -222,7 +222,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 values=[('none', 'none'), ('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
                                 current_value=self.data.get('tokenEndpointAuthMethod'),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'tokenEndpointAuthMethod'),
-                                style=CLI_STYLE.radio_button),
+                                style=cli_style.radio_button),
 
                         self.myparent.getTitledRadioButton(
                                 _("Subject Type"), 
@@ -230,14 +230,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 values=[('public', 'Public'),('pairwise', 'Pairwise')],
                                 current_value=self.data.get('subjectType'),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'subjectType'),
-                                style=CLI_STYLE.radio_button),
+                                style=cli_style.radio_button),
 
                         self.myparent.getTitledText(
                             _("Sector Identifier URI"), 
                             name='sectorIdentifierUri', 
                             value=self.data.get('sectorIdentifierUri',''), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'sectorIdentifierUri'), 
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledCheckBoxList(
                                 _("Grant"), 
@@ -261,7 +261,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration'), 
                                     'tokenEndpointAuthMethodsSupported'),
-                                style=CLI_STYLE.check_box),
+                                style=cli_style.check_box),
 
                         self.myparent.getTitledRadioButton(
                             _("Application Type"), 
@@ -269,7 +269,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             values=['native','web'], 
                             current_value=self.data.get('applicationType'), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'applicationType'),
-                            style=CLI_STYLE.radio_button),
+                            style=cli_style.radio_button),
 
                         self.myparent.getTitledText(
                             _("Redirect Uris"), 
@@ -286,17 +286,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH),
                                     'redirectUrisRegex'),
-                            style=CLI_STYLE.check_box), 
+                            style=cli_style.check_box), 
 
                         self.myparent.getTitledText(_("Scopes"), 
                             name='scopes',
                             value='\n'.join(self.data.get('scopes', [])),
                             height=3, 
                             jans_help=self.myparent.get_help_from_schema(schema, 'scopes'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         ],width=D(),
-                        style=CLI_STYLE.tabs
+                        style=cli_style.tabs
                     )
 
         self.tabs['Tokens'] = HSplit([
@@ -306,14 +306,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             values=[('jwt', 'JWT'), ('reference', 'Reference')],
                             current_value= 'jwt' if self.data.get('accessTokenAsJwt') else 'reference',
                             jans_help=self.myparent.get_help_from_schema(schema, 'accessTokenAsJwt'),
-                            style=CLI_STYLE.radio_button),
+                            style=cli_style.radio_button),
 
                         self.myparent.getTitledCheckBox(
                             _("Include Claims in id_token"),
                             name='includeClaimsInIdToken',
                             checked=self.data.get('includeClaimsInIdToken'),
                             jans_help=self.myparent.get_help_from_schema(schema, 'includeClaimsInIdToken'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledCheckBox(
                             _("Run introspection script before JWT access token creation"),
@@ -322,14 +322,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                                     'runIntrospectionScriptBeforeJwtCreation'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             title=_("Token binding confirmation  method for id_token"),
                             name='idTokenTokenBindingCnf',
                             value=self.data.get('idTokenTokenBindingCnf',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'idTokenTokenBindingCnf'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             title=_("Access token additional audiences"),
@@ -338,7 +338,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                                     'additionalAudience'),
-                            style=CLI_STYLE.check_box,
+                            style=cli_style.check_box,
                             height = 3),
 
                         self.myparent.getTitledText(
@@ -347,7 +347,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value=self.data.get('accessTokenLifetime',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'accessTokenLifetime'),
                             text_type='integer',
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             _("Refresh token lifetime"), 
@@ -355,7 +355,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value=self.data.get('refreshTokenLifetime',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'refreshTokenLifetime'),
                             text_type='integer',
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             _("Defult max authn age"), 
@@ -363,9 +363,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value=self.data.get('defaultMaxAge',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'defaultMaxAge'),
                             text_type='integer',
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
-                    ],width=D(),style=CLI_STYLE.tabs)
+                    ],width=D(),style=cli_style.tabs)
 
         self.tabs['Logout'] = HSplit([
 
@@ -374,14 +374,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='frontChannelLogoutUri', 
                             value=self.data.get('frontChannelLogoutUri',''), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'frontChannelLogoutUri'), ## No Descritption
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             _("Post logout redirect URIs"), 
                             name='postLogoutRedirectUris', 
                             value='\n'.join(self.data.get('postLogoutRedirectUris',[])), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'postLogoutRedirectUris'),
-                            height=3, style=CLI_STYLE.check_box),
+                            height=3, style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             _("Back channel logout URI"), 
@@ -390,7 +390,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                                     'backchannelLogoutUri'), 
-                            height=3, style=CLI_STYLE.check_box
+                            height=3, style=cli_style.check_box
                             ),
 
                         self.myparent.getTitledCheckBox(
@@ -400,7 +400,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                                     'backchannelLogoutSessionRequired'),
-                            style=CLI_STYLE.check_box
+                            style=cli_style.check_box
                             ),
                         
                         self.myparent.getTitledCheckBox(
@@ -408,9 +408,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='frontChannelLogoutSessionRequired', 
                             checked=self.data.get('frontChannelLogoutSessionRequired'),
                             jans_help=self.myparent.get_help_from_schema(schema, 'frontChannelLogoutSessionRequired'),## No Descritption
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
-                        ],width=D(),style=CLI_STYLE.tabs
+                        ],width=D(),style=cli_style.tabs
                     )
 
         self.tabs['SoftwareInfo'] =  HSplit([
@@ -420,37 +420,37 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             value='\n'.join(self.data.get('contacts', [])), 
                             height=3,
                             jans_help=self.myparent.get_help_from_schema(schema, 'contacts'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
             self.myparent.getTitledText(_("Authorized JS origins"),  ### height =3 insted of the <+> button
                             name='authorizedOrigins',
                             value='\n'.join(self.data.get('authorizedOrigins', [])), 
                             height=3,
                             jans_help=self.myparent.get_help_from_schema(schema, 'authorizedOrigins'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
             self.myparent.getTitledText(
                 title =_("Software id"), 
                 name='softwareId', 
                 value=self.data.get('softwareId',''),
                 jans_help=self.myparent.get_help_from_schema(schema, 'softwareId'),
-                style=CLI_STYLE.check_box),
+                style=cli_style.check_box),
 
             self.myparent.getTitledText(
                 title =_("Software version"), 
                 name='softwareVersion', 
                 value=self.data.get('softwareVersion',''), 
                 jans_help=self.myparent.get_help_from_schema(schema, 'softwareVersion'),
-                style=CLI_STYLE.check_box),
+                style=cli_style.check_box),
 
             self.myparent.getTitledText(
                 title =_("Software statement"), 
                 name='softwareStatement', 
                 value=self.data.get('softwareStatement',''), 
                 jans_help=self.myparent.get_help_from_schema(schema, 'softwareStatement'),
-                style=CLI_STYLE.check_box),
+                style=cli_style.check_box),
 
-        ],width=D(),style=CLI_STYLE.tabs)
+        ],width=D(),style=cli_style.tabs)
 
 
         self.uma_resources = HSplit([],width=D())
@@ -464,35 +464,35 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         width=D(),
                         ),
                     DynamicContainer(lambda: self.uma_resources)
-                    ],style=CLI_STYLE.tabs)
+                    ],style=cli_style.tabs)
 
         self.tabs['CIBA/PAR/UMA'] = HSplit([
-                        Label(text=_("CIBA"),style=CLI_STYLE.label),
+                        Label(text=_("CIBA"),style=cli_style.label),
                         self.myparent.getTitledRadioButton(
                             _("Token delivery method"), 
                             name='backchannelTokenDeliveryMode', 
                             current_value=self.data.get('backchannelTokenDeliveryMode'), 
                             values=['poll','push', 'ping'],
                             jans_help=self.myparent.get_help_from_schema(schema, 'backchannelTokenDeliveryMode'),
-                            style=CLI_STYLE.radio_button),
+                            style=cli_style.radio_button),
 
                         self.myparent.getTitledText(
                             title =_("Client notification endpoint"), 
                             name='backchannelClientNotificationEndpoint', 
                             value=self.data.get('backchannelClientNotificationEndpoint',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'backchannelClientNotificationEndpoint'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
                         
                         self.myparent.getTitledCheckBox(
                             _("Require user code param"), 
                             name='backchannelUserCodeParameter',   
                             checked=self.data.get('backchannelUserCodeParameter', ''),
-                            style=CLI_STYLE.check_box,
+                            style=cli_style.check_box,
                             jans_help=self.myparent.get_help_from_schema(schema, 'backchannelUserCodeParameter'),
 
                             ),
 
-                        Label(text=_("PAR"),style=CLI_STYLE.label),
+                        Label(text=_("PAR"),style=cli_style.label),
 
                         self.myparent.getTitledText(
                             title =_("Request lifetime"),
@@ -502,17 +502,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                                     'parLifetime'),  
                             text_type='integer',
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledCheckBox(
                             _("Request PAR"), 
                             name='requirePar', 
                             checked=self.data.get('attributes', {}).get('requirePar',''),
-                            style=CLI_STYLE.check_box,
+                            style=cli_style.check_box,
                             jans_help=self.myparent.get_help_from_schema(schema, 'requirePar'),
                                 ),
 
-                        Label(_("UMA"), style=CLI_STYLE.label),
+                        Label(_("UMA"), style=cli_style.label),
 
                         self.myparent.getTitledRadioButton(
                             _("PRT token type"),
@@ -520,7 +520,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             values=[('jwt', 'JWT'), ('reference', 'Reference')], 
                             current_value='jwt' if self.data.get('rptAsJwt') else 'reference',
                             jans_help=self.myparent.get_help_from_schema(schema, 'rptAsJwt'),
-                            style=CLI_STYLE.radio_button),
+                            style=cli_style.radio_button),
 
                         self.myparent.getTitledText(
                             title =_("Claims redirect URI"),
@@ -528,13 +528,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
                               value='\n'.join(self.data.get('claimRedirectUris','')),
                               jans_help=self.myparent.get_help_from_schema(schema, 'claimRedirectUris'),
                               height=3,
-                              style=CLI_STYLE.check_box),
+                              style=cli_style.check_box),
 
                         self.myparent.getTitledText(_("RPT Modification Script"),
                             name='rptClaimsScripts',  
                             value='\n'.join(self.data.get('attributes', {}).get('rptClaimsScripts',[]) ),
                             height=3,
-                            style=CLI_STYLE.check_box,
+                            style=cli_style.check_box,
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Scope'), 
                                     'rptClaimsScripts'),
@@ -542,7 +542,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                     self.resources if self.data.get('inum','') else  HSplit([],width=D())
 
-                        ],width=D(),style=CLI_STYLE.tabs
+                        ],width=D(),style=cli_style.tabs
                             )
 
 
@@ -552,14 +552,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='jwksUri', 
                             value=self.data.get('jwksUri',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'jwksUri'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             title =_("Client JWKS"), 
                             name='jwks', 
                             value=self.data.get('jwks',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'jwks'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
                         ]
 
 
@@ -617,7 +617,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                             'spontaneousScopeScriptDns'),
                     height=3,
-                    style=CLI_STYLE.check_box)
+                    style=cli_style.check_box)
 
 
         self.tabs['Advanced Client Properties'] = HSplit([
@@ -630,7 +630,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                                     'jansDefaultPromptLogin'),
 
-                            style=CLI_STYLE.check_box
+                            style=cli_style.check_box
                             ),
 
                         self.myparent.getTitledCheckBox(
@@ -638,7 +638,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='persistClientAuthorizations', 
                             checked=self.data.get('persistClientAuthorizations'), 
                             jans_help=self.myparent.get_help_from_schema(schema, 'persistClientAuthorizations'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledCheckBox(
                             _("Allow spontaneos scopes"), 
@@ -648,14 +648,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                                     'allowSpontaneousScopes'),
-                            style=CLI_STYLE.check_box
+                            style=cli_style.check_box
                             ),
 
                         self.spontaneous_scopes,
 
 
                         VSplit([  
-                                Label(text=_("Spontaneous scopes"),style=CLI_STYLE.label,width=len(_("Spontaneous scopes")*2)), ## TODO
+                                Label(text=_("Spontaneous scopes"),style=cli_style.label,width=len(_("Spontaneous scopes")*2)), ## TODO
                                 Button(
                                     _("View current"), 
                                     handler=self.show_client_scopes,
@@ -670,21 +670,21 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             name='initiateLoginUri', 
                             value=self.data.get('initiateLoginUri',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'initiateLoginUri'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(_("Request URIs"), ### height =3 insted of the <+> button
                             name='requestUris',
                             value='\n'.join(self.data.get('requestUris', [])),
                             height=3,
                             jans_help=self.myparent.get_help_from_schema(schema, 'requestUris'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(_("Default  ACR"), ### height =3 >> "the type is array" cant be dropdown
                             name='defaultAcrValues',
                             value='\n'.join(self.data.get('defaultAcrValues', [])), 
                             height=3,
                             jans_help=self.myparent.get_help_from_schema(schema, 'defaultAcrValues'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(_("Allowed  ACR"), ### height =3 insted of the <+> button
                             name='jansAuthorizedAcr',
@@ -693,13 +693,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                             self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                             'jansAuthorizedAcr'),
-                            style=CLI_STYLE.check_box),
+                            style=cli_style.check_box),
 
                         self.myparent.getTitledText(
                             _("TLS Subject DN"), 
                             name='tlsClientAuthSubjectDn',  
                             value='\n'.join(self.data.get('attributes', {}).get('tlsClientAuthSubjectDn',[])),
-                            height=3, style=CLI_STYLE.check_box,
+                            height=3, style=cli_style.check_box,
                             jans_help=self.myparent.get_help_from_schema(
                             self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                             'tlsClientAuthSubjectDn'),
@@ -715,7 +715,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 style='class:outh-client-widget'
                                 ),
 
-                        ],width=D(),style=CLI_STYLE.tabs
+                        ],width=D(),style=cli_style.tabs
                     )
 
         self.tabs['Client Scripts'] = HSplit([
@@ -728,7 +728,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                     'spontaneousScopes'),
-                style=CLI_STYLE.check_box),
+                style=cli_style.check_box),
 
             self.myparent.getTitledText(_("Update Token"),
                 name='updateTokenScriptDns',
@@ -737,7 +737,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                     'updateTokenScriptDns'),
-                style=CLI_STYLE.check_box),
+                style=cli_style.check_box),
 
             self.myparent.getTitledText(_("Post Authn"),
                 name='postAuthnScripts',
@@ -746,7 +746,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                     'postAuthnScripts'),
-                style=CLI_STYLE.check_box),
+                style=cli_style.check_box),
 
             self.myparent.getTitledText(_("Introspection"),
                 name='introspectionScripts',
@@ -755,13 +755,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                     'introspectionScripts'),
-                style=CLI_STYLE.check_box),
+                style=cli_style.check_box),
 
             self.myparent.getTitledText(_("Password Grant"),  
                 name='ropcScripts',
                 value='\n'.join(self.data.get('attributes', {}).get('ropcScripts',[])), 
                 height=3,
-                style=CLI_STYLE.check_box,
+                style=cli_style.check_box,
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                     'ropcScripts'),
@@ -774,8 +774,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH), 
                     'consentGatheringScripts'),
-                style=CLI_STYLE.check_box),
-                        ],width=D(),style=CLI_STYLE.tabs
+                style=cli_style.check_box),
+                        ],width=D(),style=cli_style.tabs
                         )
 
         self.left_nav = list(self.tabs.keys())[0]

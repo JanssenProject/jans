@@ -11,7 +11,7 @@ from prompt_toolkit.widgets import (
     RadioList,
     Dialog,
  )
-from utils.static import DialogResult, CLI_STYLE
+from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils
 from wui_components.jans_cli_dialog import JansGDialog
 from typing import Optional, Sequence
@@ -189,7 +189,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                 self.property, 
                 name=self.property, 
                 value=self.value, 
-                style=CLI_STYLE.edit_text
+                style=cli_style.edit_text
                 ),
                 ],width=D())
 
@@ -199,7 +199,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                 name=self.property, 
                 value=self.value, 
                 text_type='integer',
-                style=CLI_STYLE.edit_text
+                style=cli_style.edit_text
                 ),
                 ],width=D())
 
@@ -209,7 +209,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 name=self.property, 
                                 height=3,
                                 value='\n'.join(self.value), 
-                                style=CLI_STYLE.edit_text
+                                style=cli_style.edit_text
                                 ),
                                 ],width=D())
 
@@ -246,7 +246,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             item ,
                             name=item, 
                             value=tab[item], 
-                            style=CLI_STYLE.edit_text
+                            style=cli_style.edit_text
                             ),
                             ],width=D()))
 
@@ -256,7 +256,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             name=item, 
                             value=tab[item], 
                             text_type='integer',
-                            style=CLI_STYLE.edit_text
+                            style=cli_style.edit_text
                             ),
                             ],width=D()))
 
@@ -266,7 +266,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             name=item, 
                             height=3,
                             value='\n'.join(tab[item]), 
-                            style=CLI_STYLE.edit_text
+                            style=cli_style.edit_text
                             ),
                             ],width=D()))
 
@@ -276,7 +276,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 item,
                                 name=item,
                                 checked= tab[item],
-                                style=CLI_STYLE.checkbox),
+                                style=cli_style.checkbox),
                         ],width=D()))  
                                     
                     self.tabs[tab_temp.format(self.value.index(tab))] = HSplit(tab_list,width=D())
@@ -300,7 +300,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                     self.property, 
                     name=self.property, 
                     checked= self.value, 
-                    style=CLI_STYLE.checkbox),
+                    style=cli_style.checkbox),
             ],width=D())
 
         elif prop_type == 'dict':
@@ -311,7 +311,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         item ,
                         name=item, 
                         value=self.value[item], 
-                        style=CLI_STYLE.edit_text
+                        style=cli_style.edit_text
                         ),
                         ],width=D()))
 
@@ -321,7 +321,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         name=item, 
                         value=self.value[item], 
                         text_type='integer',
-                        style=CLI_STYLE.edit_text
+                        style=cli_style.edit_text
                         ),
                         ],width=D()))
 
@@ -331,7 +331,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         name=item, 
                         height=3,
                         value='\n'.join(self.value[item]), 
-                        style=CLI_STYLE.edit_text
+                        style=cli_style.edit_text
                         ),
                         ],width=D()))
 
@@ -341,7 +341,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             item, 
                             name=item, 
                             checked= self.value[item], 
-                            style=CLI_STYLE.checkbox),
+                            style=cli_style.checkbox),
                     ],width=D()))
 
                 else :
@@ -349,7 +349,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                                             item, 
                                             name=item, 
                                             value="No Items Here", 
-                                            style=CLI_STYLE.edit_text,
+                                            style=cli_style.edit_text,
                                             read_only=True,
                                             ),
                                             ],width=D()))  
