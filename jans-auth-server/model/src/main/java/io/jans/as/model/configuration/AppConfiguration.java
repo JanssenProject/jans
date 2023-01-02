@@ -14,6 +14,7 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
+import io.jans.as.model.userinfo.UserInfoConfiguration;
 import io.jans.doc.annotation.DocProperty;
 
 import java.util.ArrayList;
@@ -128,9 +129,6 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Mutual TLS (mTLS) device authorization endpoint URL")
     private String mtlsDeviceAuthzEndpoint;
-
-    @DocProperty(description = "Boolean value true saves session data as a JWT", defaultValue = "false")
-    private Boolean sessionAsJwt = false;
 
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
@@ -569,6 +567,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "JMS Password")
     private String jmsPassword;
 
+    @DocProperty(description = "This list specifies which external URIs can be called by AS (if empty any URI can be called)")
+    private List<String> externalUriWhiteList;
+
     @DocProperty(description = "This list specifies which client redirection URIs are white-listed")
     private List<String> clientWhiteList;
 
@@ -811,6 +812,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Enable/Disable block authorizations that originate from Webview (Mobile apps).", defaultValue = "false")
     private Boolean blockWebviewAuthorizationEnabled = false;
+
+    @DocProperty(description = "UserInfo Configuration")
+    private UserInfoConfiguration userInfoConfiguration;
 
     public List<SsaValidationConfig> getDcrSsaValidationConfigs() {
         if (dcrSsaValidationConfigs == null) dcrSsaValidationConfigs = new ArrayList<>();
@@ -1304,14 +1308,6 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaRptAsJwt(Boolean umaRptAsJwt) {
         this.umaRptAsJwt = umaRptAsJwt;
-    }
-
-    public Boolean getSessionAsJwt() {
-        return sessionAsJwt;
-    }
-
-    public void setSessionAsJwt(Boolean sessionAsJwt) {
-        this.sessionAsJwt = sessionAsJwt;
     }
 
     public Boolean getUmaAddScopesAutomatically() {
@@ -2469,6 +2465,15 @@ public class AppConfiguration implements Configuration {
         this.jmsPassword = jmsPassword;
     }
 
+    public List<String> getExternalUriWhiteList() {
+        if (externalUriWhiteList == null) externalUriWhiteList = new ArrayList<>();
+        return externalUriWhiteList;
+    }
+
+    public void setExternalUriWhiteList(List<String> externalUriWhiteList) {
+        this.externalUriWhiteList = externalUriWhiteList;
+    }
+
     public List<String> getClientWhiteList() {
         return clientWhiteList;
     }
@@ -3095,5 +3100,13 @@ public class AppConfiguration implements Configuration {
 
     public void setBlockWebviewAuthorizationEnabled(Boolean blockWebviewAuthorizationEnabled) {
         this.blockWebviewAuthorizationEnabled = blockWebviewAuthorizationEnabled;
+    }
+
+    public UserInfoConfiguration getUserInfoConfiguration() {
+        return userInfoConfiguration;
+    }
+
+    public void setUserInfoConfiguration(UserInfoConfiguration userInfoConfiguration) {
+        this.userInfoConfiguration = userInfoConfiguration;
     }
 }

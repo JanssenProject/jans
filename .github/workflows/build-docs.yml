@@ -25,6 +25,9 @@ on:
         description: 'Version tag (e.g."v1.0.5")'
         default: "v1.0.5"
         required: false
+concurrency:
+  group: run-once
+  cancel-in-progress: false
 jobs:
   build:
     if: github.repository_owner == 'JanssenProject'
@@ -86,10 +89,14 @@ jobs:
 
       - name: Generate docs
         continue-on-error: true
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
          echo "Custom work on generating docs can go here."
+          
          # Run cn docs 
          sudo bash ./automation/docs/generated-cn-docs.sh
+          
          # Generate property docs and push to main
          sudo bash ./automation/docs/generate-property-docs.sh 
          cd docs
@@ -97,6 +104,16 @@ jobs:
          git commit -a -S -m "docs: automated property doc generation" || echo "Nothing to commit"
          git push
          cd ..
+          
+         # Replace release number markers with actual release number
+         if [ ! -z "$VERSION" ]; then
+           cd docs
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/$VERSION/g"
+           git add . || echo "Nothing to add"
+           git commit -a -S -m "docs: replace release marker with release number" || echo "Nothing to commit"
+           git push
+           cd ..
+         fi
 
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-

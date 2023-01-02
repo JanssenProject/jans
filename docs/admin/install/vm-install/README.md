@@ -8,6 +8,7 @@ tags:
 # Overview
 
 Installing the Janssen software on a VM is a three step process:
+
 1. Check: VM requirements
 1. Install: package or docker container
 1. Run: `setup.py` to configure

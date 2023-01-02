@@ -87,18 +87,14 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', os.path.join(Config.jetty_base, self.service_name)])
 
 
-    def read_config_api_swagger(self):
-        config_api_swagger_yaml_fn = os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml')
-        yml_str = self.readFile(config_api_swagger_yaml_fn)
-        yml_str = yml_str.replace('\t', ' ')
-        cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
-        return cfg_yml
-
+    def get_scope_defs(self):
+        config_api_rs_protect_fn = os.path.join(Config.data_dir, 'config-api-rs-protect.json')
+        scopes_def = base.readJsonFile(config_api_rs_protect_fn)
+        return scopes_def
 
     def generate_configuration(self):
 
-        config_api_rs_protect_fn = os.path.join(Config.data_dir, 'config-api-rs-protect.json')
-        scopes_def = base.readJsonFile(config_api_rs_protect_fn)
+        scopes_def = self.get_scope_defs()
 
         scope_type = 'oauth'
         self.check_clients([('jca_client_id', '1800.')])

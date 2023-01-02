@@ -61,15 +61,16 @@ justified.
    1. Response Types: ['code', 'id_token]
    1. Grant Types: ['authorization_code', `implicit`, 'refresh_token']
    1. Redirect Uri: valid redirect uri which is resolvable by machine which runs this load test
-
+Change the `FQDN` below and execute:
 ```bash
+FQDN=example.gluu.info
 cat << EOF > auth_code_client.json
 {
     "dn": null,
     "inum": null,
     "displayName": "Auth Code Flow Load Test Client",
     "redirectUris": [
-      "https://FQDN"
+      "https://$FQDN"
     ],
     "responseTypes": [
       "id_token",

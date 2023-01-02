@@ -6,7 +6,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 ## Administration Guide
 
-The Janssen Server is highly extensible and customizable. Resources for deployment, operation, and maintenance of the Janssen environment are available in the [Administration guide](admin/README.md). We recommend a holistic approach to identity, planning the environment thoroughly using the [Deployment Guide](admin/planning/platform-goal.md). For a quick start for testing, you can jump right into [Installation](admin/install/vm-install/vm-requirements.md).
+The Janssen Server is highly extensible and customizable. Resources for deployment, operation, and maintenance of the Janssen environment are available in the [Administration guide](admin/README.md). We recommend a holistic approach to identity, planning the environment thoroughly using the [Deployment Guide](admin/planning/platform-goal.md). For a quick start for testing, you can jump right into [Installation](admin/install/vm-install/).
 
 ## Developer Guide
 
