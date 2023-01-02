@@ -332,20 +332,22 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.alt_tabs['openid'] = HSplit(open_id_widgets, width=D())
 
         self.alt_tabs['dynamic'] = HSplit([
-                        
-                        self.myparent.getTitledText(_("Dynamic Scope Script"),
+
+                        self.myparent.getTitledText(
+                            _("Dynamic Scope Script"),
                             name='dynamicScopeScripts',
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
                             jans_help=self.myparent.get_help_from_schema(self.schema, 'dynamicScopeScripts'),
                             height=3, 
-                            style=cli_style.edit_text),
-                        
+                            style=cli_style.edit_text
+                            ),
+
                         self.myparent.getTitledText(
                                 _("Search"), 
                                 name='__search_claims__',
                                 style='class:outh-scope-textsearch',width=10,
-                                jans_help=_("Press enter to perform search"),
-                                )
+                                jans_help=_("Press enter to perform search")
+                                ),
 
                         self.myparent.getTitledText(
                                 _("Claims"),
@@ -353,7 +355,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                                 value='\n'.join(self.data.get('claims', [])),
                                 height=3, 
                                 jans_help=self.myparent.get_help_from_schema(self.schema, 'claims'),
-                                style=cli_style.edit_text),
+                                style=cli_style.edit_text
+                                ),
 
                         ],width=D(),
                     )
