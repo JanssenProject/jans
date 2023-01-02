@@ -30,7 +30,7 @@ from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.dimension import AnyDimension
 
 from cli import config_cli
-from utils.static import DialogResult
+from utils.static import DialogResult, CLI_STYLE
 from utils.utils import DialogUtils
 from utils.multi_lang import _
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
@@ -39,8 +39,6 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from view_uma_dialog import ViewUMADialog
-
-
 
 
 class EditScopeDialog(JansGDialog, DialogUtils):
@@ -474,8 +472,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         values_uniqe = []
 
         for k in values:
-            if k[0][0] in current_data:
-            else:
+            if k[0][0] not in current_data:
                 values_uniqe.append(k)
 
         if not values_uniqe:
