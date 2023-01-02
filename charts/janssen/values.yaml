@@ -367,12 +367,12 @@ config-api:
       # -- CPU limit.
       cpu: 1000m
       # -- Memory limit.
-      memory: 400Mi
+      memory: 1000Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 400Mi
+      memory: 1000Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
