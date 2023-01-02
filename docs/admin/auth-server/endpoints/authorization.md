@@ -124,6 +124,14 @@ sessions for.
 
 ## Configuring Authentication Methods
 
+`acr_values` request parameter is used to specify authentication methods to be used by Janssen Server to authenticate
+the end user. Multiple acr values can be specified by separating them with a space.
+
+In order to use a particular acr value, the client needs to be authorized to use all the acr values in the list. If no
+the request doesn't specify any acr value then the default acr value configured for respective client is used by Janssen
+server for end user authentication.
+
+### Customizing Authentication using Interception Scripts
 TODO: Elaborate on interception scripts
 
 ## Authorization Flows
