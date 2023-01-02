@@ -6589,7 +6589,12 @@
   
 </li>
         
-          <li class="md-nav__item">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#load-test" class="md-nav__link">
     Load-test
   </a>
@@ -6631,11 +6636,6 @@
   <a href="#setup-client" class="md-nav__link">
     Setup Client
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -8786,7 +8786,12 @@
   
 </li>
         
-          <li class="md-nav__item">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#load-test" class="md-nav__link">
     Load-test
   </a>
@@ -8828,11 +8833,6 @@
   <a href="#setup-client" class="md-nav__link">
     Setup Client
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -9109,9 +9109,9 @@ sudo snap <span class="nb">alias</span> microk8s.kubectl kubectl
  helm install janssen janssen/janssen -n jans -f override.yaml
 </code></pre></div></li>
 </ol>
-<h3 id="load-test">Load-test<a class="headerlink" href="#load-test" title="Permanent link">#</a></h3>
+<h2 id="load-test">Load-test<a class="headerlink" href="#load-test" title="Permanent link">#</a></h2>
 <p>Our tests used 10 million users that were loaded. We have created a docker image to load users. That same image is also used to load test Janssen using jmeter tests for the <code>Authorization code</code> flow. More tests will come!. This image will load users and use a unique password for each user.</p>
-<h4 id="loading-users">Loading users<a class="headerlink" href="#loading-users" title="Permanent link">#</a></h4>
+<h3 id="loading-users">Loading users<a class="headerlink" href="#loading-users" title="Permanent link">#</a></h3>
 <p>Loading users requires a hefty but temporary amount of resources. By default, the resources ask for <code>10</code> vCPU and <code>5</code> Gis. However, to speed up the process increase the number of CPUs as the job in step two below uses parallel tasks. If left as is 10 million users would load in around 17 hours or so.</p>
 <ol>
 <li>
@@ -9136,9 +9136,9 @@ sudo snap <span class="nb">alias</span> microk8s.kubectl kubectl
 </li>
 </ol>
 <p>Wait until all the users are up before moving forward. Tail the logs by running <code>kubectl logs deployment/load-users -n load</code>.</p>
-<h4 id="load-testing">Load testing<a class="headerlink" href="#load-testing" title="Permanent link">#</a></h4>
-<h5 id="authorization-code-client">Authorization code client<a class="headerlink" href="#authorization-code-client" title="Permanent link">#</a></h5>
-<h6 id="resources-needed-for-authorization-code-client-jmeter-test">Resources needed for Authorization code client jmeter test<a class="headerlink" href="#resources-needed-for-authorization-code-client-jmeter-test" title="Permanent link">#</a></h6>
+<h3 id="load-testing">Load testing<a class="headerlink" href="#load-testing" title="Permanent link">#</a></h3>
+<h4 id="authorization-code-client">Authorization code client<a class="headerlink" href="#authorization-code-client" title="Permanent link">#</a></h4>
+<h5 id="resources-needed-for-authorization-code-client-jmeter-test">Resources needed for Authorization code client jmeter test<a class="headerlink" href="#resources-needed-for-authorization-code-client-jmeter-test" title="Permanent link">#</a></h5>
 <p>The below resources were <a href="#kubernetes-cluster-load-test-resources">calculated</a> when creating the nodes above.</p>
 <table>
 <thead>
@@ -9170,7 +9170,7 @@ sudo snap <span class="nb">alias</span> microk8s.kubectl kubectl
 </tr>
 </tbody>
 </table>
-<h6 id="setup-client">Setup Client<a class="headerlink" href="#setup-client" title="Permanent link">#</a></h6>
+<h5 id="setup-client">Setup Client<a class="headerlink" href="#setup-client" title="Permanent link">#</a></h5>
 <p>Create the client needed to run the test by executing the following. Make sure to change the <code>FQDN</code>  :</p>
 <ol>
 <li>
@@ -9247,7 +9247,7 @@ cat <span class="s">&lt;&lt; EOF &gt; auth_code_client.json</span>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-02T10:45:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-02</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-02T14:21:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-02</span>
       
         <br>
         Created:
