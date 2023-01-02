@@ -59,8 +59,6 @@ navigate via `Auth Server`->`Properties`.
 - [requirePar](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar)
 - [cibaMaxExpirationTimeAllowedSec](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#cibamaxexpirationtimeallowedsec)
 
-TODO: can we organise above properties in logical groupings? Like pertaining to request, response etc?
-
 ## Required Client Configuration
 
 Clients must be registered with Janssen Server as using [code](https://www.rfc-editor.org/rfc/rfc6749#section-4.1) 
@@ -79,7 +77,7 @@ property. Janssen server supports `plain` as well as `s256` code challenge metho
 
 ## Using PAR
 
-TODO: PAR is a separate endpoint, should it be part of this document for authorization endpoint?
+TODO: Question: PAR is a separate endpoint, should it be part of this document for authorization endpoint?
 
 Janssen Server [supports PAR](../oauth-features/par.md)(Pushed Authorization Requests) to enable authorization using 
 more complex authorization requests and making it more secure at the same time. 
@@ -131,12 +129,13 @@ In order to use a particular acr value, the client needs to be authorized to use
 the request doesn't specify any acr value then the default acr value configured for respective client is used by Janssen
 server for end user authentication.
 
-### Customizing Authentication using Interception Scripts
-TODO: Elaborate on interception scripts
+## Customizing using Interception Scripts
 
-## Authorization Flows
-
-TODO: Flows should be elaborated in separate documents if needed. Just add link here.
+[Interception scripts](https://docs.jans.io/replace-janssen-version/admin/developer/interception-scripts/) allows
+flexibility to configure and customize multiple aspects in Janssen Server. For example, see this documentation to learn
+how [person authentication](https://docs.jans.io/replace-janssen-version/admin/developer/scripts/person-authentication/)
+and [consent gathering](https://docs.jans.io/replace-janssen-version/admin/developer/scripts/consent-gathering/) can be 
+customized using interception scripts.
 
 ## Want to contribute?
 
