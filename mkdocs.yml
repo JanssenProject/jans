@@ -382,7 +382,6 @@ nav:
             - 'Person Authentication': 'admin/developer/scripts/person-authentication.md'
             - 'Consent Gathering': 'admin/developer/scripts/consent-gathering.md'
             - 'Post Authentication': 'admin/developer/scripts/post-authentication.md'
-            - 'id_token': 'admin/developer/scripts/id-token.md'
             - 'Resource Owner Password Credentials': 'admin/developer/scripts/ropc.md'
             - 'CIBA End User Notification': 'admin/developer/scripts/ciba.md'
             - 'OpenID Configuration': 'admin/developer/scripts/openid-config.md'
