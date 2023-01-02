@@ -121,11 +121,11 @@ jobs:
          fi
           
          echo "Generating javadocs"
-          . ./automation/docs/generate-javadocs.sh
-          cd docs
-          git add . || echo "Nothing to add"
-          git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
-          cd ..
+         sudo bash ./automation/docs/generate-javadocs.sh
+         cd docs
+         git add . || echo "Nothing to add"
+         git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
+         cd ..
          
          git push
 
