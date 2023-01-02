@@ -1,4 +1,4 @@
-title Jans Auth Server / NWD OTP
+title 2FA Resource Owner Password Credentials
 
 actor Subject
 participant mobile
