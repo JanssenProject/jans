@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#userinfo-jwt" class="md-skip">
           Skip to content
         </a>
       
@@ -2784,7 +2784,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../session-management/what-is/" class="md-nav__link">
+      <a href="../../session-management/what-is.md" class="md-nav__link">
         What is a session?
       </a>
     </li>
@@ -2971,22 +2971,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#userinfo-jwt" class="md-nav__link">
+    Userinfo JWT
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#selective-disclosure" class="md-nav__link">
+    Selective disclosure
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#requesting-individual-claims" class="md-nav__link">
+    Requesting individual claims
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-scopes-interception-script" class="md-nav__link">
+    Dynamic Scopes / Interception Script
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#userinfo-formatter" class="md-nav__link">
+    Userinfo formatter
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#language-support" class="md-nav__link">
+    Language support
   </a>
   
 </li>
@@ -8655,22 +8676,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#userinfo-jwt" class="md-nav__link">
+    Userinfo JWT
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#selective-disclosure" class="md-nav__link">
+    Selective disclosure
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#requesting-individual-claims" class="md-nav__link">
+    Requesting individual claims
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-scopes-interception-script" class="md-nav__link">
+    Dynamic Scopes / Interception Script
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#userinfo-formatter" class="md-nav__link">
+    Userinfo formatter
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#language-support" class="md-nav__link">
+    Language support
   </a>
   
 </li>
@@ -8719,19 +8761,64 @@
 
   <h1>OpenID Userinfo Token</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="userinfo-jwt"><code>Userinfo</code> JWT<a class="headerlink" href="#userinfo-jwt" title="Permanent link">#</a></h2>
+<p>An OpenID Connect client, after obtaining an access token, can present it
+at the Userinfo endpoint to obtain the Userinfo JWT token. The Userinfo response
+is is described in <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponseValidation">OpenID Core 5.4.3</a>, and directs the developer to:</p>
+<ul>
+<li>
+<p>Verify that the OP that responded was the intended OP through a TLS server certificate check</p>
+</li>
+<li>
+<p>If the Client has provided a <code>userinfo_encrypted_response_alg</code> parameter
+during Registration, decrypt the UserInfo Response using the keys specified
+during Registration.</p>
+</li>
+<li>
+<p>If the response was signed, the Client SHOULD validate the signature.</p>
+</li>
+</ul>
+<p>Below is an example of the Userinfo claims for the default Jans Admin user:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;sub&quot;: &quot;e25c4146-ce9d-465e-9b59-b9d959bdfe3a&quot;,
+  &quot;email&quot;: &quot;admin@issuer.tld&quot;,
+  &quot;given_name&quot;: &quot;Admin&quot;,
+  &quot;family_name&quot;: &quot;User&quot;,
+  &quot;name&quot;: &quot;Default Admin User&quot;,
+  &quot;middle_name&quot;: &quot;Admin&quot;,
+  &quot;nickname&quot;: &quot;Admin&quot;,
+  &quot;email_verified&quot;: true,
+  &quot;inum&quot;: &quot;e25c4146-ce9d-465e-9b59-b9d959bdfe3a&quot;,
+  &quot;jansAdminUIRole&quot;: [&quot;api-admin&quot;]
+}
+</code></pre></div>
+<h2 id="selective-disclosure">Selective disclosure<a class="headerlink" href="#selective-disclosure" title="Permanent link">#</a></h2>
+<p>Domains can limit the claims released to a client from the Userinfo endpoint
+by associating only the OpenID scopes required by that client. You can also
+define new scopes, and associate any user claims with them. Note, clients still
+must request the scopes they need for an access token. For example, a client
+may be authorize</p>
+<h2 id="requesting-individual-claims">Requesting individual claims<a class="headerlink" href="#requesting-individual-claims" title="Permanent link">#</a></h2>
+<p>If you want to use the <code>claims</code> parameter, you will have to first enable this feature in the Auth Server properties: set <code>claimsParameterSupported=True</code>.
+This is not a recommended configuration, because the claims parameter bypasses
+the privacy protection of the OpenID scopes construct.</p>
+<h2 id="dynamic-scopes-interception-script">Dynamic Scopes / Interception Script<a class="headerlink" href="#dynamic-scopes-interception-script" title="Permanent link">#</a></h2>
+<p>If you need to call an API to render scopes or scope values on the fly,
+you should see the <a href="../developer/scripts/dynamic-scope.md">Dynamic Scopes</a> interception script.</p>
+<h2 id="userinfo-formatter">Userinfo formatter<a class="headerlink" href="#userinfo-formatter" title="Permanent link">#</a></h2>
+<p>There is a configuration property <code>userInfoConfiguration</code> which has a default
+value of <code>{'dateFormatterPattern': {'birthdate':'yyyy-MM-dd'}}</code>.</p>
+<h2 id="language-support">Language support<a class="headerlink" href="#language-support" title="Permanent link">#</a></h2>
+<p>The default value for the configuration parameter <code>claimsLocalesSupported</code> is <code>['en']</code>. Currently, only the name and description supports localization. You
+will also need to make a proper request and provide the associated values for
+the claim in the database.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-02T22:06:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-02</span>
       
         <br>
         Created:

@@ -441,11 +441,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/session-management/what-is/</loc>
-         <lastmod>2023-01-02</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/</loc>
          <lastmod>2023-01-02</lastmod>
          <changefreq>daily</changefreq>
