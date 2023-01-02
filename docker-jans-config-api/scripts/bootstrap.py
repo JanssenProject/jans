@@ -165,6 +165,9 @@ def configure_logging():
         "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
+        "audit_log_target": "FILE",
+        "audit_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -207,6 +210,7 @@ def configure_logging():
         "persistence_duration_log_target": "JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE",
         "ldap_stats_log_target": "JANS_CONFIGAPI_PERSISTENCE_LDAP_STATISTICS_FILE",
         "script_log_target": "JANS_CONFIGAPI_SCRIPT_LOG_FILE",
+        "audit_log_target": "AUDIT_FILE",
     }
 
     for key, value in config.items():
@@ -218,10 +222,13 @@ def configure_logging():
         else:
             config[key] = file_aliases[key]
 
-    logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
-    with open(logfile) as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
 
+    logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
@@ -234,6 +241,7 @@ def configure_admin_ui_logging():
         "admin_ui_log_level": "INFO",
         "admin_ui_audit_log_target": "FILE",
         "admin_ui_audit_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -284,7 +292,10 @@ def configure_admin_ui_logging():
         else:
             config[key] = file_aliases[key]
 
-    with open("/app/plugins/admin-ui/log4j2-adminui.xml.tmpl") as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/plugins/admin-ui/log4j2-adminui.xml") as f:
         txt = f.read()
 
     tmpl = Template(txt)

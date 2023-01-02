@@ -127,8 +127,16 @@ The following key-value pairs are the defaults:
     "ldap_stats_log_target": "FILE",
     "ldap_stats_log_level": "INFO",
     "script_log_target": "FILE",
-    "script_log_level": "INFO"
+    "script_log_level": "INFO",
+    "audit_log_target": "FILE",
+    "audit_log_level": "INFO"
 }
+```
+
+To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
+
+```
+{"config_api_log_target":"STDOUT","script_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
 ### Configure plugin loggers
@@ -158,6 +166,12 @@ The following key-value pairs are the defaults:
     "admin_ui_audit_log_target": "FILE",
     "admin_ui_audit_log_level": "INFO"
 }
+```
+
+To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
+
+```
+{"admin_ui_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
 ### Hybrid mapping
