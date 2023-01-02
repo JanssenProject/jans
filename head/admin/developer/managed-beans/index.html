@@ -5194,6 +5194,27 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#8-sessionidservice" class="md-nav__link">
+    8. SessionIdService
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-grantservice" class="md-nav__link">
+    9. GrantService
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-clientservice-provides-operations-with-clients" class="md-nav__link">
+    10. ClientService : Provides operations with clients.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#7-httpservice-httpservice" class="md-nav__link">
     7. HttpService: HttpService
   </a>
@@ -5293,6 +5314,13 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-base64util" class="md-nav__link">
+    14. Base64Util
+  </a>
   
 </li>
         
@@ -8990,6 +9018,27 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#8-sessionidservice" class="md-nav__link">
+    8. SessionIdService
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-grantservice" class="md-nav__link">
+    9. GrantService
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-clientservice-provides-operations-with-clients" class="md-nav__link">
+    10. ClientService : Provides operations with clients.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#7-httpservice-httpservice" class="md-nav__link">
     7. HttpService: HttpService
   </a>
@@ -9092,6 +9141,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#14-base64util" class="md-nav__link">
+    14. Base64Util
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -9148,7 +9204,7 @@
 
 <h2 id="ready-to-use-code-in-custom-script">Ready-to-use code in Custom script:<a class="headerlink" href="#ready-to-use-code-in-custom-script" title="Permanent link">#</a></h2>
 <p>Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans.
-The most important aspects of business logic are implemented through a set of beans</p>
+The most useful functions are implemented through a set of beans which can be re-used in all custom scripts.</p>
 <h3 id="obtaining-a-bean-inside-a-custom-script">Obtaining a bean inside a custom script:<a class="headerlink" href="#obtaining-a-bean-inside-a-custom-script" title="Permanent link">#</a></h3>
 <p><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/service/cdi/util/CdiUtil.java">CdiUtil</a> used to obtain managed beans inside a custom script.</p>
 <p>Relevant methods:</p>
@@ -9168,8 +9224,8 @@ The most important aspects of business logic are implemented through a set of be
 </table>
 <p>Usage (jython code):
 Suppose UserService and AuthenticationService beans have to be referenced in the code, it can be done as below:</p>
-<div class="highlight"><pre><span></span><code>from org.gluu.oxauth.service import UserService
-from org.gluu.oxauth.service import AuthenticationService
+<div class="highlight"><pre><span></span><code>from io.jans.as.server.service import UserService
+from io.jans.as.server.service import AuthenticationService
 ...
 userService = CdiUtil.bean(UserService)
 authenticationService = CdiUtil.bean(AuthenticationService)
@@ -9327,30 +9383,49 @@ userService.updateUser(found_user)
 <p>A class employed to represent a user entry in the persistence. Provides getters and setters to retrieve and assign value(s) for attributes</p>
 <h3 id="5-customattribute">5. <a href="https://github.com/JanssenProject/jans/blob/main/jans-orm/model/src/main/java/io/jans/orm/model/base/CustomAttribute.java">CustomAttribute</a><a class="headerlink" href="#5-customattribute" title="Permanent link">#</a></h3>
 <p>A class that models an attribute. An attribute has a name and a collection of associated values</p>
-<h3 id="6-identity">6. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/model/security/Identity.java">Identity</a><a class="headerlink" href="#6-identity" title="Permanent link">#</a></h3>
-<p>Mainly used to carry data between steps of authentication flows.</p>
-<table>
-<thead>
-<tr>
-<th>Signature</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Object getWorkingParameter(String name)</code></td>
-<td>Retrieves a working parameter by name previously set via <code>setWorkingParameter</code></td>
-</tr>
-<tr>
-<td><code>void setWorkingParameter(String name, Object value)</code></td>
-<td>Binds data to a name for further use in an authentication flow. Recommended values to store are <code>String</code>s</td>
-</tr>
-<tr>
-<td><code>SessionId getSessionId()</code></td>
-<td>Retrieves a reference to the associated server session object, see <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/SessionId.java">SessionId</a></td>
-</tr>
-</tbody>
-</table>
+<h3 id="6-identity">6. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/security/Identity.java">Identity</a><a class="headerlink" href="#6-identity" title="Permanent link">#</a></h3>
+<p>The authentication flow in jans-auth server is stateless and the instance is preserved because the Identity parameters (another name for session parameters) are persisted in databases.
+A function in the <code>PersonAuthenticationType</code> script called <code>getExtraParametersForStep</code> should be overridden to include any new session variable. The underlying Jans-auth server takes care of retrieving it, persisting it etc.</p>
+<p><div class="highlight"><pre><span></span><code>def getExtraParametersForStep(self, configurationAttributes, step):
+       return Arrays.asList(&quot;sessionParamName1&quot;, &quot;sessionParamName2&quot;, &quot;sessionParamName3&quot;)
+</code></pre></div>
+Bean details:
+|Signature|Description|
+|-|-|
+|<code>Object getWorkingParameter(String name)</code>|Retrieves a working parameter by name previously set via <code>setWorkingParameter</code>|
+|<code>void setWorkingParameter(String name, Object value)</code>|Binds data to a name for further use in an authentication flow. Recommended values to store are <code>String</code>s|
+|<code>SessionId getSessionId()</code>|Retrieves a reference to the associated server session object, see <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/SessionId.java">SessionId</a>|</p>
+<p>Usage
+<div class="highlight"><pre><span></span><code>from io.jans.as.server.security import Identity
+identity = CdiUtil.bean(Identity)
+
+#1.
+newExpDate = identity.getWorkingParameter(&quot;expDate&quot;)
+
+#2.
+identity.setWorkingParameter(&quot;expDate&quot;, expDate)
+
+#3.
+session_attributes = identity.getSessionId().getSessionAttributes()
+session_attributes.containsKey(&quot;remote_ip&quot;)
+</code></pre></div></p>
+<h3 id="8-sessionidservice">8. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/SessionIdService.java">SessionIdService</a><a class="headerlink" href="#8-sessionidservice" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>#1. get session
+sessionIdservice = CdiUtil.bean(SessionIdService).getSessionId()
+
+#2. update session
+
+sessionIdservice.getSessionAttributes().put(key, value)
+sessionIdservice.updateSessionId(session)
+</code></pre></div>
+<h3 id="9-grantservice">9. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/GrantService.java">GrantService</a><a class="headerlink" href="#9-grantservice" title="Permanent link">#</a></h3>
+<h3 id="10-clientservice-provides-operations-with-clients">10. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/ClientService.java">ClientService</a> : Provides operations with clients.<a class="headerlink" href="#10-clientservice-provides-operations-with-clients" title="Permanent link">#</a></h3>
+<p>Usage:
+<div class="highlight"><pre><span></span><code>from io.jans.as.server.service import ClientService
+
+clientService = CdiUtil.bean(ClientService)
+client = clientService.getClient(clientId)
+</code></pre></div></p>
 <h3 id="7-httpservice-httpservice">7. HttpService: <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/net/HttpService.java">HttpService</a><a class="headerlink" href="#7-httpservice-httpservice" title="Permanent link">#</a></h3>
 <p>Provides utility methods to execute HTTP requests, manipulate responses, etc</p>
 <p>Relevant methods:</p>
@@ -9529,9 +9604,7 @@ Usage:</p>
 encryptionService = CdiUtil.bean(EncryptionService)
 pwd_decrypted = encryptionService.decrypt(&quot;stringtobedecrypted&quot;)
 </code></pre></div>
-<ol>
-<li><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/model/src/main/java/io/jans/as/model/util/Base64Util.java">Base64Util</a></li>
-</ol>
+<h3 id="14-base64util">14. <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/model/src/main/java/io/jans/as/model/util/Base64Util.java">Base64Util</a><a class="headerlink" href="#14-base64util" title="Permanent link">#</a></h3>
 <p>Usage:</p>
 <div class="highlight"><pre><span></span><code>from io.jans.as.model.util import Base64Util
 ....
@@ -9546,7 +9619,7 @@ Base64Util.base64urlencode(input_string.encode(&#39;utf-8&#39;)));
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T15:53:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-02T06:28:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-02</span>
       
         <br>
         Created:

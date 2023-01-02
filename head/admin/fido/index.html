@@ -8681,24 +8681,21 @@
 <div class="highlight"><pre><span></span><code>https://&lt;myjans-server&gt;/.well-known/fido2-configuration
 </code></pre></div>
 <p>Response:</p>
-<div class="codehilite"><pre><span></span><code>```
-{
-  &quot;version&quot;: &quot;1.1&quot;,
-  &quot;issuer&quot;: &quot;https://&lt;myjans-server&gt;&quot;,
-  &quot;attestation&quot;: {
-    &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation&quot;,
-    &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/options&quot;,
-    &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/result&quot;
-  },
-  &quot;assertion&quot;: {
-    &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion&quot;,
-    &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/options&quot;,
-    &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/result&quot;
+<div class="highlight"><pre><span></span><code>  {
+    &quot;version&quot;: &quot;1.1&quot;,
+    &quot;issuer&quot;: &quot;https://&lt;myjans-server&gt;&quot;,
+    &quot;attestation&quot;: {
+      &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation&quot;,
+      &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/options&quot;,
+      &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/result&quot;
+    },
+    &quot;assertion&quot;: {
+      &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion&quot;,
+      &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/options&quot;,
+      &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/result&quot;
+    }
   }
-}
-```
 </code></pre></div>
-
 <h2 id="customization-authentication-flow-using-interception-script">Customization authentication flow using Interception script<a class="headerlink" href="#customization-authentication-flow-using-interception-script" title="Permanent link">#</a></h2>
 <p>In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found <a href="../../script-catalog/person_authentication/fido2-external-authenticator/README">here</a>.</p>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h2>
@@ -8718,7 +8715,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-05T05:24:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-05</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-02T06:28:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-02</span>
       
         <br>
         Created:
