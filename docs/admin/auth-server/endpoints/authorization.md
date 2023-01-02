@@ -59,8 +59,6 @@ navigate via `Auth Server`->`Properties`.
 - [requirePar](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar)
 - [cibaMaxExpirationTimeAllowedSec](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#cibamaxexpirationtimeallowedsec)
 
-TODO: can we organise above properties in logical groupings? Like pertaining to request, response etc?
-
 ## Required Client Configuration
 
 Clients must be registered with Janssen Server as using [code](https://www.rfc-editor.org/rfc/rfc6749#section-4.1) 
@@ -79,7 +77,7 @@ property. Janssen server supports `plain` as well as `s256` code challenge metho
 
 ## Using PAR
 
-TODO: PAR is a separate endpoint, should it be part of this document for authorization endpoint?
+TODO: Question: PAR is a separate endpoint, should it be part of this document for authorization endpoint?
 
 Janssen Server [supports PAR](../oauth-features/par.md)(Pushed Authorization Requests) to enable authorization using 
 more complex authorization requests and making it more secure at the same time. 
@@ -94,13 +92,50 @@ JARM makes authorization responses more secure and compliant to be used in FAPI 
 
 Janssen Server supports all response modes as defined in [JARM specification](https://openid.net//specs/openid-financial-api-jarm.html#response-encoding) 
 
+## Using Prompt Parameter
+
+`prompt` request parameter is an ASCII string value that specifies whether the Authorization Server prompts the End-User
+for re-authentication and consent. Janssen Server supports `none`, `login`, `consent` and `select_account` values for
+`prompt` parameter. Multiple values can be specified by separating them with single space. Based on value/s of this 
+request parameter Authorization Server prompts the End-User for re-authentication and consent. 
+
+### none
+
+`none` value will instruct Janssen Server NOT to display any authentication or consent user interface pages. 
+An error is returned if the End-User is not already authenticated or the Client does not have pre-configured consent for
+the requested scopes. This can be used as a method to check for existing authentication and/or consent.
+
+### login
+
+`login` value will instruct Janssen Server to prompt the End-User for re-authentication.
+
+### consent
+
+`consent` value will instruct Janssen Server to prompt the End-User for consent before returning information to the 
+Client.
+
+### select_account
+
+`select_account` value will instruct Janssen Server to prompt the End-User to select a user account. This allows a user
+who has multiple accounts at the Authorization Server to select amongst the multiple accounts that they may have current
+sessions for.
+
 ## Configuring Authentication Methods
 
-TODO: Elaborate on interception scripts
+`acr_values` request parameter is used to specify authentication methods to be used by Janssen Server to authenticate
+the end user. Multiple acr values can be specified by separating them with a space.
 
-## Authorization Flows
+In order to use a particular acr value, the client needs to be authorized to use all the acr values in the list. If no
+the request doesn't specify any acr value then the default acr value configured for respective client is used by Janssen
+server for end user authentication.
 
-TODO: Flows should be elaborated in separate documents if needed. Just add link here.
+## Customizing using Interception Scripts
+
+[Interception scripts](https://docs.jans.io/replace-janssen-version/admin/developer/interception-scripts/) allows
+flexibility to configure and customize multiple aspects in Janssen Server. For example, see this documentation to learn
+how [person authentication](https://docs.jans.io/replace-janssen-version/admin/developer/scripts/person-authentication/)
+and [consent gathering](https://docs.jans.io/replace-janssen-version/admin/developer/scripts/consent-gathering/) can be 
+customized using interception scripts.
 
 ## Want to contribute?
 
