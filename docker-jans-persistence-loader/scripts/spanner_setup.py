@@ -421,6 +421,10 @@ class SpannerBackend:
         for mod in [
             ("jansPerson", "jansMobileDevices"),
             ("jansPerson", "jansOTPDevices"),
+            ("jansToken", "clnId"),
+            ("jansUmaRPT", "clnId"),
+            ("jansUmaPCT", "clnId"),
+            ("jansCibaReq", "clnId"),
         ]:
             column_from_array(mod[0], mod[1])
 
