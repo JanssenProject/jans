@@ -3146,6 +3146,47 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#using-prompt-parameter" class="md-nav__link">
+    Using Prompt Parameter
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Prompt Parameter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#none" class="md-nav__link">
+    none
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#login" class="md-nav__link">
+    login
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consent" class="md-nav__link">
+    consent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#select_account" class="md-nav__link">
+    select_account
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuring-authentication-methods" class="md-nav__link">
     Configuring Authentication Methods
   </a>
@@ -3153,8 +3194,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#authorization-flows" class="md-nav__link">
-    Authorization Flows
+  <a href="#customizing-using-interception-scripts" class="md-nav__link">
+    Customizing using Interception Scripts
   </a>
   
 </li>
@@ -8729,6 +8770,47 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#using-prompt-parameter" class="md-nav__link">
+    Using Prompt Parameter
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Prompt Parameter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#none" class="md-nav__link">
+    none
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#login" class="md-nav__link">
+    login
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consent" class="md-nav__link">
+    consent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#select_account" class="md-nav__link">
+    select_account
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuring-authentication-methods" class="md-nav__link">
     Configuring Authentication Methods
   </a>
@@ -8736,8 +8818,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#authorization-flows" class="md-nav__link">
-    Authorization Flows
+  <a href="#customizing-using-interception-scripts" class="md-nav__link">
+    Customizing using Interception Scripts
   </a>
   
 </li>
@@ -8836,7 +8918,6 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar">requirePar</a></li>
 <li><a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#cibamaxexpirationtimeallowedsec">cibaMaxExpirationTimeAllowedSec</a></li>
 </ul>
-<p>TODO: can we organise above properties in logical groupings? Like pertaining to request, response etc?</p>
 <h2 id="required-client-configuration">Required Client Configuration<a class="headerlink" href="#required-client-configuration" title="Permanent link">#</a></h2>
 <p>Clients must be registered with Janssen Server as using <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.1">code</a> 
 and/or <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.2">implicit</a> grant types in order to use authorization endpoint.</p>
@@ -8848,7 +8929,7 @@ grant. </p>
 <p>PKCE can be enabled/disable by setting <a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepkce">requirePkce</a>
 property. Janssen server supports <code>plain</code> as well as <code>s256</code> code challenge methods. </p>
 <h2 id="using-par">Using PAR<a class="headerlink" href="#using-par" title="Permanent link">#</a></h2>
-<p>TODO: PAR is a separate endpoint, should it be part of this document for authorization endpoint?</p>
+<p>TODO: Question: PAR is a separate endpoint, should it be part of this document for authorization endpoint?</p>
 <p>Janssen Server <a href="../../oauth-features/par/">supports PAR</a>(Pushed Authorization Requests) to enable authorization using 
 more complex authorization requests and making it more secure at the same time. </p>
 <p>Use Janssen Server configuration property <a href="https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar">requirePar</a>
@@ -8857,10 +8938,36 @@ to accept only PAR requests. </p>
 <p>Authorization endpoint supports JWT Secured Authorization Response Mode, or <a href="../../openid-features/jarm/">JARM</a>. Using 
 JARM makes authorization responses more secure and compliant to be used in FAPI deployments. </p>
 <p>Janssen Server supports all response modes as defined in <a href="https://openid.net//specs/openid-financial-api-jarm.html#response-encoding">JARM specification</a> </p>
+<h2 id="using-prompt-parameter">Using Prompt Parameter<a class="headerlink" href="#using-prompt-parameter" title="Permanent link">#</a></h2>
+<p><code>prompt</code> request parameter is an ASCII string value that specifies whether the Authorization Server prompts the End-User
+for re-authentication and consent. Janssen Server supports <code>none</code>, <code>login</code>, <code>consent</code> and <code>select_account</code> values for
+<code>prompt</code> parameter. Multiple values can be specified by separating them with single space. Based on value/s of this 
+request parameter Authorization Server prompts the End-User for re-authentication and consent. </p>
+<h3 id="none">none<a class="headerlink" href="#none" title="Permanent link">#</a></h3>
+<p><code>none</code> value will instruct Janssen Server NOT to display any authentication or consent user interface pages. 
+An error is returned if the End-User is not already authenticated or the Client does not have pre-configured consent for
+the requested scopes. This can be used as a method to check for existing authentication and/or consent.</p>
+<h3 id="login">login<a class="headerlink" href="#login" title="Permanent link">#</a></h3>
+<p><code>login</code> value will instruct Janssen Server to prompt the End-User for re-authentication.</p>
+<h3 id="consent">consent<a class="headerlink" href="#consent" title="Permanent link">#</a></h3>
+<p><code>consent</code> value will instruct Janssen Server to prompt the End-User for consent before returning information to the 
+Client.</p>
+<h3 id="select_account">select_account<a class="headerlink" href="#select_account" title="Permanent link">#</a></h3>
+<p><code>select_account</code> value will instruct Janssen Server to prompt the End-User to select a user account. This allows a user
+who has multiple accounts at the Authorization Server to select amongst the multiple accounts that they may have current
+sessions for.</p>
 <h2 id="configuring-authentication-methods">Configuring Authentication Methods<a class="headerlink" href="#configuring-authentication-methods" title="Permanent link">#</a></h2>
-<p>TODO: Elaborate on interception scripts</p>
-<h2 id="authorization-flows">Authorization Flows<a class="headerlink" href="#authorization-flows" title="Permanent link">#</a></h2>
-<p>TODO: Flows should be elaborated in separate documents if needed. Just add link here.</p>
+<p><code>acr_values</code> request parameter is used to specify authentication methods to be used by Janssen Server to authenticate
+the end user. Multiple acr values can be specified by separating them with a space.</p>
+<p>In order to use a particular acr value, the client needs to be authorized to use all the acr values in the list. If no
+the request doesn't specify any acr value then the default acr value configured for respective client is used by Janssen
+server for end user authentication.</p>
+<h2 id="customizing-using-interception-scripts">Customizing using Interception Scripts<a class="headerlink" href="#customizing-using-interception-scripts" title="Permanent link">#</a></h2>
+<p><a href="https://docs.jans.io/replace-janssen-version/admin/developer/interception-scripts/">Interception scripts</a> allows
+flexibility to configure and customize multiple aspects in Janssen Server. For example, see this documentation to learn
+how <a href="https://docs.jans.io/replace-janssen-version/admin/developer/scripts/person-authentication/">person authentication</a>
+and <a href="https://docs.jans.io/replace-janssen-version/admin/developer/scripts/consent-gathering/">consent gathering</a> can be 
+customized using interception scripts.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
@@ -8869,7 +8976,7 @@ JARM makes authorization responses more secure and compliant to be used in FAPI 
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-30T12:31:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-02T10:37:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-02</span>
       
         <br>
         Created:
