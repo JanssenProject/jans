@@ -70,7 +70,7 @@ public class RequestReaderInterceptor {
     
     @Inject
     DataUtil dataUtil;
-
+    
     @Inject
     AttributeService attributeService;
 
@@ -225,22 +225,22 @@ public class RequestReaderInterceptor {
                                     attributeDataType, AttributeDataType.DATE.getValue());
                             if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())) {
                                 logger.error("RequestReaderInterceptor::processCustomAttributes() - Calling decodeTime() - attData.getValue():{}", attData.getValue());
-                                AttributeData attributeData = decodeTime(attData);
+                                AttributeData attributeData = decodeTime(attData);                                
                                 listAttributes.remove(attData);
                                 listAttributes.add(attributeData);
                             }
                         }
                     }
                     
-                    logger.error("RequestReaderInterceptor::processCustomAttributes() - calling getCustomAttributesListFromAttributeDataList() - propertyName:{}", propertyName);
+                    logger.error("RequestReaderInterceptor::processCustomAttributes() - calling getCustomAttributesListFromAttributeDataList() - propertyName:{} , listAttributes:{} ", propertyName, listAttributes);
                     List<Object> data = persistenceEntryManager.getCustomAttributesListFromAttributeDataList(obj,  (AttributesList) ldapAttribute, propertyName, listAttributes);
                     logger.error("RequestReaderInterceptor::processCustomAttributes() - data:{}", data);
                     
                     
                     logger.error("RequestReaderInterceptor::processCustomAttributes() - before calling calling setObjectData() - propertyName:{}, data:{} ", propertyName, data);
+                    //set data
                     setObjectData(obj, propertyName, data);
                     logger.error("RequestReaderInterceptor::processCustomAttributes() - after calling setObjectData() - propertyName:{}, data:{} ", propertyName, data);
-                    
                     
                     
                 }
@@ -262,8 +262,11 @@ public class RequestReaderInterceptor {
         if (atrData.getValue() != null) {
             Object attValue = atrData.getValue();
             if (attValue != null) {
-                Date date = persistenceEntryManager.decodeTime(null, attValue.toString());
-                date.setTime(System.currentTimeMillis());
+                Date date = authUtil.parseStringToDateObj(attValue.toString());
+                if (date == null) {
+                    date = persistenceEntryManager.decodeTime(null, attValue.toString());
+                }
+                
                 logger.error(
                         "RequestReaderInterceptor::decodeTime() - atrData.getName():{}, date:{}",
                         atrData.getName(), date);
@@ -286,7 +289,7 @@ public class RequestReaderInterceptor {
 
         propertyValue = getterMethod.get(obj);
         logger.error("Final RequestReaderInterceptor::setObjectData() - key:{}, propertyValue:{} ", propertyName, propertyValue);
-        
+       
    
     }
 }

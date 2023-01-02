@@ -22,10 +22,13 @@ import io.jans.configapi.service.auth.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -415,6 +418,19 @@ public class AuthUtil {
         log.debug("Get all scopeList:{} ", scopeList);
         return scopeList;
 
+    }
+    
+    public Date parseStringToDateObj(String dateString) {
+        String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
+
+        Date date = null;
+        try {
+            date = dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ", DATE_PATTERN_YYYY_MM_DD, dateString);
+        }
+        return date;
     }
 
 }

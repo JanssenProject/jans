@@ -302,13 +302,13 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
                 return user;
             }
 
-            Date date = mgtUtil.parseStringToDateObj(optionalBithdate.get().toString());
+            //Date date = mgtUtil.parseStringToDateObj(optionalBithdate.get().toString());
             // parse date with persistenceEntryManager.decodeTime if it is null
-            if (date == null) {
-                date = persistenceEntryManager.decodeTime(null, optionalBithdate.get().toString());
-            }
-            user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
-            user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
+            //if (date == null) {
+           //     date = persistenceEntryManager.decodeTime(null, optionalBithdate.get().toString());
+           // }
+           // user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
+           // user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
         }
         return user;
     }
