@@ -94,6 +94,34 @@ JARM makes authorization responses more secure and compliant to be used in FAPI 
 
 Janssen Server supports all response modes as defined in [JARM specification](https://openid.net//specs/openid-financial-api-jarm.html#response-encoding) 
 
+## Using Prompt Parameter
+
+`prompt` request parameter is an ASCII string value that specifies whether the Authorization Server prompts the End-User
+for re-authentication and consent. Janssen Server supports `none`, `login`, `consent` and `select_account` values for
+`prompt` parameter. Multiple values can be specified by separating them with single space. Based on value/s of this 
+request parameter Authorization Server prompts the End-User for re-authentication and consent. 
+
+### none
+
+`none` value will instruct Janssen Server NOT to display any authentication or consent user interface pages. 
+An error is returned if the End-User is not already authenticated or the Client does not have pre-configured consent for
+the requested scopes. This can be used as a method to check for existing authentication and/or consent.
+
+### login
+
+`login` value will instruct Janssen Server to prompt the End-User for re-authentication.
+
+### consent
+
+`consent` value will instruct Janssen Server to prompt the End-User for consent before returning information to the 
+Client.
+
+### select_account
+
+`select_account` value will instruct Janssen Server to prompt the End-User to select a user account. This allows a user
+who has multiple accounts at the Authorization Server to select amongst the multiple accounts that they may have current
+sessions for.
+
 ## Configuring Authentication Methods
 
 TODO: Elaborate on interception scripts
