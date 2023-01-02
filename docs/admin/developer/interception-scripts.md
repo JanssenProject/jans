@@ -237,7 +237,7 @@ value for getApiVersion is greater than 10
 ### Building business logic in a custom script
 
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most
-important aspects of business logic are implemented through a set of beans. This
+common business functions are implemented through a set of beans. This
 [article](https://jans.io/docs/admin/developer/managed-beans/) presents many
 ready-to-use beans which can be used to build a script.
 
