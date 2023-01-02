@@ -10,6 +10,7 @@ import sys
 import asyncio
 import concurrent.futures
 
+from enum import Enum
 from pathlib import Path
 from itertools import cycle
 from requests.models import Response
@@ -392,8 +393,7 @@ class JansCliApp(Application):
         self.bindings.add(Keys.Vt100MouseEvent)(self.mouse)
 
 
-
-    def mouse(self,event):  ### mouse: [<35;108;20M
+    def mouse(self, event):  ### mouse: [<35;108;20M
 
         pieces = event.data.split(";")  ##['LEFT', 'MOUSE_DOWN', '146', '10']
         mouse_click=int(pieces[0][3:])
@@ -425,21 +425,23 @@ class JansCliApp(Application):
         style_tmp = '<style >{}</style>'
         style_tmp_red = '<style fg="ansired" bg="#00FF00">{}</style>'
 
-        res=[]
-        res.append(HTML(style_tmp.format("Copy")))
-        res.append("\n")
-        res.append(HTML(style_tmp.format("Cut")))
-        res.append("\n")
-        res.append(HTML(style_tmp.format("Paste")))
-        res.append("\n")
+        class mouse_operations(Enum):
+            Copy = 1
+            Cut = 2
+            Paste = 3
 
-        content= Window(
+        res=[]
+        for mouse_op in mouse_operations:
+            res.append(HTML(style_tmp.format(mouse_op.name)))
+            res.append("\n")
+
+        content = Window(
             content=FormattedTextControl(
                 text=merge_formatted_text(res),
                 focusable=True,
             ), height=D())
-        floa=Float(content=content, left=x,top=y)
-        floa.name='mouse'
+        mouse_float_container = Float(content=content, left=x,top=y)
+        mouse_float_container.name = 'mouse'
 
         # ------------------------------------------------------------------------------------ #
         # ------------------------------------------------------------------------------------ #
@@ -447,112 +449,81 @@ class JansCliApp(Application):
 
         if mouse_click == "RIGHT" and mouse_event == MouseEventType.MOUSE_DOWN :
             if self.mouse_float == True :
-                self.root_layout.floats.append(floa)
+                self.root_layout.floats.append(mouse_float_container)
                 self.mouse_cord=(x,y)
                 self.mouse_float = False
             else:
                 try:
-                    if get_app().layout.container.floats:
-                        if get_app().layout.container.floats[-1].name =='mouse':
-                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
-                            self.root_layout.floats.append(floa)
+                    if self.layout.container.floats:
+                        if self.layout.container.floats[-1].name =='mouse':
+                            self.layout.container.floats.remove(self.layout.container.floats[-1])
+                            self.root_layout.floats.append(mouse_float_container)
                             self.mouse_cord=(x,y)
                             self.mouse_float = False
                         else:
-                            self.root_layout.floats.append(floa)
+                            self.root_layout.floats.append(mouse_float_container)
                             self.mouse_cord=(x,y)
                             self.mouse_float = False
                     else:
-                        self.root_layout.floats.append(floa)
+                        self.root_layout.floats.append(mouse_float_container)
                         self.mouse_cord=(x,y)
                         self.mouse_float = False
                 except Exception:
                     pass
-        
+
         elif mouse_click == "LEFT" and mouse_event == MouseEventType.MOUSE_DOWN and self.mouse_float == False:
             try:
-                if get_app().layout.container.floats:
-                    if get_app().layout.container.floats[-1].name =='mouse':
-                       
-                        if self.mouse_select =='Copy':
-                            data = get_app().current_buffer.copy_selection(False)
-                            get_app().clipboard.set_data(data) 
-                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
-                            self.mouse_float = True
-                           
-                        elif self.mouse_select =='Paste':
-                            data = get_app().clipboard.get_data()
-                            get_app().current_buffer.paste_clipboard_data(data)
-                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
-                            self.mouse_float = True
-
-                        elif self.mouse_select =='Cut':
-                            data = get_app().current_buffer.copy_selection(True)
-                            get_app().clipboard.set_data(data) 
-                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
-                            self.mouse_float = True
-                         
-                        else:
-                            get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
-                            self.mouse_float = True
-
+                if self.layout.container.floats:
+                    if self.layout.container.floats[-1].name == 'mouse':
+                        self.layout.container.floats.remove(self.layout.container.floats[-1])
+                        self.mouse_float = True
+                        if self.mouse_select == mouse_operations.Copy.name:
+                            data = self.current_buffer.copy_selection(False)
+                            self.clipboard.set_data(data) 
+                        elif self.mouse_select == mouse_operations.Paste.name:
+                            data = self.clipboard.get_data()
+                            self.current_buffer.paste_clipboard_data(data)
+                        elif self.mouse_select == mouse_operations.Cut.name:
+                            data = self.current_buffer.copy_selection(True)
+                            self.clipboard.set_data(data) 
             except Exception:
                 pass
-        
-    
-        if get_app().layout.container.floats:
+
+        if self.layout.container.floats:
             try :
-                get_float_name = get_app().layout.container.floats[-1].name 
+                get_float_name = self.layout.container.floats[-1].name 
             except Exception:
                 get_float_name = ''
 
-            if get_float_name =='mouse':
+            if get_float_name == 'mouse':
+
                 if self.mouse_cord[0] <= x and self.mouse_cord[0] >= x-5:
-                    if self.mouse_cord[1] == y-1:
-                        res = []
-                        res.append(HTML(style_tmp_red.format("Copy ")))
-                        res.append("\n")
-                        res.append(HTML(style_tmp.format("Cut")))
-                        res.append("\n")
-                        res.append(HTML(style_tmp.format("Paste")))
-                        res.append("\n")
-                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
-                        self.mouse_select = 'Copy'
-                    elif self.mouse_cord[1] == y-2:
-                        res = []
-                        res.append(HTML(style_tmp.format("Copy")))
-                        res.append("\n")
-                        res.append(HTML(style_tmp_red.format("Cut  ")))
-                        res.append("\n")
-                        res.append(HTML(style_tmp.format("Paste")))
-                        res.append("\n")
-                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res)
-                        self.mouse_select = 'Cut'
-                    elif self.mouse_cord[1] == y-3:
-                        res = []
-                        res.append(HTML(style_tmp.format("Copy")))
-                        res.append("\n")
-                        res.append(HTML(style_tmp.format("Cut")))
-                        res.append("\n")
-                        res.append(HTML(style_tmp_red.format("Paste")))
-                        res.append("\n")
-                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
-                        self.mouse_select = 'Paste'
+                    res = []
+                    if self.mouse_cord[1] in [y - mouse_op.value for mouse_op in mouse_operations]:
+                        for mouse_op in mouse_operations:
+                            tmp_ = style_tmp
+                            if self.mouse_cord[1] == y - mouse_op.value:
+                                self.mouse_select = mouse_op.name
+                                tmp_ = style_tmp_red
+                            res.append(HTML(tmp_.format(mouse_op.name.ljust(5))))
+                            res.append("\n")
                     else:
-                        self.mouse_select = 'None'
+                        self.mouse_select = None
+
+                    if res:
+                        self.layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
+
                 else:
-                        res = []
-                        res.append(HTML(style_tmp.format("Copy")))
+                    res = []
+                    for mouse_op in mouse_operations:
+                        res.append(HTML(style_tmp.format(mouse_op.name)))
                         res.append("\n")
-                        res.append(HTML(style_tmp.format("Cut")))
-                        res.append("\n")
-                        res.append(HTML(style_tmp.format("Paste")))
-                        res.append("\n")
-                        get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res)
-                        self.mouse_select = 'None'
+                    self.layout.container.floats[-1].content.content.text=merge_formatted_text(res)
+                    self.mouse_select = None
+
 
     def up(self, ev: KeyPressEvent) -> None:
-        get_app().layout.focus(Frame(self.nav_bar.nav_window))
+        self.layout.focus(Frame(self.nav_bar.nav_window))
 
     def focus_next(self, ev: KeyPressEvent) -> None:
         focus_next(ev)
@@ -567,13 +538,13 @@ class JansCliApp(Application):
         
     def escape(self,ev: KeyPressEvent) -> None:
         try:
-            if get_app().layout.container.floats:
-                if len(get_app().layout.container.floats) >=2 :
-                    get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
-                    get_app().layout.focus(get_app().layout.container.floats[-1].content)
+            if self.layout.container.floats:
+                if len(self.layout.container.floats) >=2 :
+                    self.layout.container.floats.remove(self.layout.container.floats[-1])
+                    self.layout.focus(self.layout.container.floats[-1].content)
                 else:
-                    get_app().layout.container.floats.remove(get_app().layout.container.floats[0])
-                    get_app().layout.focus(self.center_frame)
+                    self.layout.container.floats.remove(self.layout.container.floats[0])
+                    self.layout.focus(self.center_frame)
         except Exception as e:
             pass
 
