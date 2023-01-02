@@ -59,6 +59,23 @@ style = Style.from_dict(
 
         "outh-titledtext":"green",
         "outh-label":"blue",
+        
+        # PLUGINS
+        "plugin-navbar":"#2600ff",
+        "plugin-navbar-headcolor":"green",
+        "plugin-navbar-entriescolor":"blue",
+        "plugin-tabs":"",
+        "plugin-text":"green",
+        "plugin-textsearch":"",
+        "plugin-label":"bold",
+        "plugin-textrequired":"#8b000a",
+        "plugin-checkbox":"green",
+        "plugin-checkboxlist":"green",
+        "plugin-radiobutton":"green",
+        "plugin-dropdown":"green",
+        "plugin-widget":"green",
+        
+        
         ## edit_client_dialog
         "outh-client-navbar":"#2600ff",
         "outh-client-navbar-headcolor":"green",

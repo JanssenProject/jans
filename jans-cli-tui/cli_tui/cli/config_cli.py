@@ -1427,7 +1427,7 @@ class JCA_CLI:
                     if pop != 'remove':
                         try:
                             ppath, pval = self.unescaped_split(pdata, ':')
-                        except Exception as e:
+                        except Exception:
                             self.exit_with_error("Please provide --patch-data as colon delimited key:value pair.\nUse escape if you need colon in value or key, i.e. mtlsUserInfoEndpoint:https\\:example.jans.io/userinfo")
 
                     if pop != 'remove':

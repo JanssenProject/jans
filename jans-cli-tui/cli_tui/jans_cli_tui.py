@@ -422,12 +422,15 @@ class JansCliApp(Application):
         # ------------------------------------------------------------------------------------ #
         # ------------------------------------------------------------------------------------ #
         # ------------------------------------------------------------------------------------ #
+        style_tmp = '<style >{}</style>'
+        style_tmp_red = '<style fg="ansired" bg="#00FF00">{}</style>'
+
         res=[]
-        res.append(HTML('<style >{}</style>'.format("Copy")))
-        res.append("\n")        
-        res.append(HTML('<style >{}</style>'.format("Cut")))
+        res.append(HTML(style_tmp.format("Copy")))
         res.append("\n")
-        res.append(HTML('<style >{}</style>'.format("Paste")))
+        res.append(HTML(style_tmp.format("Cut")))
+        res.append("\n")
+        res.append(HTML(style_tmp.format("Paste")))
         res.append("\n")
 
         content= Window(
@@ -437,7 +440,7 @@ class JansCliApp(Application):
             ), height=D())
         floa=Float(content=content, left=x,top=y)
         floa.name='mouse'
-        
+
         # ------------------------------------------------------------------------------------ #
         # ------------------------------------------------------------------------------------ #
         # ------------------------------------------------------------------------------------ #
@@ -463,7 +466,7 @@ class JansCliApp(Application):
                         self.root_layout.floats.append(floa)
                         self.mouse_cord=(x,y)
                         self.mouse_float = False
-                except Exception as e:
+                except Exception:
                     pass
         
         elif mouse_click == "LEFT" and mouse_event == MouseEventType.MOUSE_DOWN and self.mouse_float == False:
@@ -493,7 +496,7 @@ class JansCliApp(Application):
                             get_app().layout.container.floats.remove(get_app().layout.container.floats[-1])
                             self.mouse_float = True
 
-            except Exception as e:
+            except Exception:
                 pass
         
     
@@ -507,33 +510,31 @@ class JansCliApp(Application):
                 if self.mouse_cord[0] <= x and self.mouse_cord[0] >= x-5:
                     if self.mouse_cord[1] == y-1:
                         res = []
-                        res.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#00FF00', "Copy ")))
+                        res.append(HTML(style_tmp_red.format("Copy ")))
                         res.append("\n")
-                        res.append(HTML('<style >{}</style>'.format("Cut")))
+                        res.append(HTML(style_tmp.format("Cut")))
                         res.append("\n")
-                        res.append(HTML('<style >{}</style>'.format("Paste")))
+                        res.append(HTML(style_tmp.format("Paste")))
                         res.append("\n")
                         get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
-                        self.mouse_select = 'Copy' 
-                        
+                        self.mouse_select = 'Copy'
                     elif self.mouse_cord[1] == y-2:
                         res = []
-                        res.append(HTML('<style >{}</style>'.format("Copy")))
+                        res.append(HTML(style_tmp.format("Copy")))
                         res.append("\n")
-                        res.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#00FF00', "Cut  ")))
+                        res.append(HTML(style_tmp_red.format("Cut  ")))
                         res.append("\n")
-                        res.append(HTML('<style >{}</style>'.format("Paste")))
+                        res.append(HTML(style_tmp.format("Paste")))
                         res.append("\n")
                         get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res)
-                        self.mouse_select = 'Cut'   
-                    
+                        self.mouse_select = 'Cut'
                     elif self.mouse_cord[1] == y-3:
                         res = []
-                        res.append(HTML('<style >{}</style>'.format("Copy")))
+                        res.append(HTML(style_tmp.format("Copy")))
                         res.append("\n")
-                        res.append(HTML('<style >{}</style>'.format("Cut")))
+                        res.append(HTML(style_tmp.format("Cut")))
                         res.append("\n")
-                        res.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#00FF00', "Paste")))
+                        res.append(HTML(style_tmp_red.format(style_tmp_red, "Paste")))
                         res.append("\n")
                         get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
                         self.mouse_select = 'Paste'
@@ -541,11 +542,11 @@ class JansCliApp(Application):
                         self.mouse_select = 'None'
                 else:
                         res = []
-                        res.append(HTML('<style >{}</style>'.format("Copy")))
+                        res.append(HTML(style_tmp.format("Copy")))
                         res.append("\n")
-                        res.append(HTML('<style >{}</style>'.format("Cut")))
+                        res.append(HTML(style_tmp.format("Cut")))
                         res.append("\n")
-                        res.append(HTML('<style >{}</style>'.format("Paste")))
+                        res.append(HTML(style_tmp.format("Paste")))
                         res.append("\n")
                         get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res)
                         self.mouse_select = 'None'
