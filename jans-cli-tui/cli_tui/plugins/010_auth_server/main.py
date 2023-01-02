@@ -730,7 +730,7 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-    def delete_UMAresource(self, **kwargs: Any):
+    def delete_uma_resource(self, **kwargs: Any):
         """This method for the deletion of the UMAresource
 
         Returns:
