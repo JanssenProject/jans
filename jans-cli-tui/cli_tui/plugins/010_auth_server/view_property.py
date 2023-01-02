@@ -11,7 +11,7 @@ from prompt_toolkit.widgets import (
     RadioList,
     Dialog,
  )
-from utils.static import DialogResult
+from utils.static import DialogResult, CLI_STYLE
 from utils.utils import DialogUtils
 from wui_components.jans_cli_dialog import JansGDialog
 from typing import Optional, Sequence
@@ -151,7 +151,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         prop_type= 'list-list'
                     else:
                         prop_type= 'long-TitledText'
-        except:
+        except Exception:
             prop_type = None
 
         return prop_type
@@ -172,7 +172,7 @@ class ViewProperty(JansGDialog, DialogUtils):
             else:
                 list_values= self.schema.get('properties', {})[prop]['items']['items']['enum']
 
-        except:
+        except Exception:
             list_values = []
 
         return list_values
@@ -181,6 +181,7 @@ class ViewProperty(JansGDialog, DialogUtils):
         """This method build the main value_content to edit the properties
         """
 
+        tab_temp = 'tab{}'
         prop_type = self.get_type(self.property)
 
         if prop_type == 'TitledText':
@@ -188,7 +189,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                 self.property, 
                 name=self.property, 
                 value=self.value, 
-                style='class:outh-scope-text'
+                style=CLI_STYLE.edit_text
                 ),
                 ],width=D())
 
@@ -198,7 +199,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                 name=self.property, 
                 value=self.value, 
                 text_type='integer',
-                style='class:outh-scope-text'
+                style=CLI_STYLE.edit_text
                 ),
                 ],width=D())
 
@@ -208,9 +209,9 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 name=self.property, 
                                 height=3,
                                 value='\n'.join(self.value), 
-                                style='class:outh-scope-text'
+                                style=CLI_STYLE.edit_text
                                 ),
-                                ],width=D())    
+                                ],width=D())
 
         elif prop_type == 'list-list':
             self.value_content= HSplit([
@@ -219,7 +220,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 name=self.property, 
                                 values=self.get_listValues(self.property,'nasted'), 
                                 style='class:outh-client-checkboxlist'),
-                                ],width=D())  
+                                ],width=D())
 
         elif prop_type == 'checkboxlist':
             self.value_content= HSplit([
@@ -228,14 +229,14 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 name=self.property, 
                                 values=self.get_listValues(self.property), 
                                 style='class:outh-client-checkboxlist'),
-                                ],width=D())    
+                                ],width=D())
 
-        elif prop_type == 'list-dict':  
+        elif prop_type == 'list-dict':
             tab_num = len(self.value)
             tabs = []
             for i in range(tab_num) :
-                tabs.append(('tab{}'.format(i),'tab{}'.format(i)))
-            
+                tabs.append((tab_temp.format(i), tab_temp.format(i)))
+
 
             for tab in self.value:  
                 tab_list=[]
@@ -245,7 +246,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             item ,
                             name=item, 
                             value=tab[item], 
-                            style='class:outh-scope-text'
+                            style=CLI_STYLE.edit_text
                             ),
                             ],width=D()))
 
@@ -255,7 +256,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             name=item, 
                             value=tab[item], 
                             text_type='integer',
-                            style='class:outh-scope-text'
+                            style=CLI_STYLE.edit_text
                             ),
                             ],width=D()))
 
@@ -265,20 +266,20 @@ class ViewProperty(JansGDialog, DialogUtils):
                             name=item, 
                             height=3,
                             value='\n'.join(tab[item]), 
-                            style='class:outh-scope-text'
+                            style=CLI_STYLE.edit_text
                             ),
                             ],width=D()))
 
                     elif type(tab[item]) == bool:
                         tab_list.append(HSplit([
                             self.app.getTitledCheckBox(
-                                item, 
-                                name=item, 
-                                checked= tab[item], 
-                                style='class:outh-client-checkbox'),
+                                item,
+                                name=item,
+                                checked= tab[item],
+                                style=CLI_STYLE.checkbox),
                         ],width=D()))  
                                     
-                    self.tabs['tab{}'.format(self.value.index(tab))] = HSplit(tab_list,width=D())
+                    self.tabs[tab_temp.format(self.value.index(tab))] = HSplit(tab_list,width=D())
 
             self.value_content=HSplit([
                             self.app.getTitledRadioButton(
@@ -299,7 +300,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                     self.property, 
                     name=self.property, 
                     checked= self.value, 
-                    style='class:outh-client-checkbox'),
+                    style=CLI_STYLE.checkbox),
             ],width=D())
 
         elif prop_type == 'dict':
@@ -310,7 +311,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         item ,
                         name=item, 
                         value=self.value[item], 
-                        style='class:outh-scope-text'
+                        style=CLI_STYLE.edit_text
                         ),
                         ],width=D()))
 
@@ -320,7 +321,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         name=item, 
                         value=self.value[item], 
                         text_type='integer',
-                        style='class:outh-scope-text'
+                        style=CLI_STYLE.edit_text
                         ),
                         ],width=D()))
 
@@ -330,7 +331,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         name=item, 
                         height=3,
                         value='\n'.join(self.value[item]), 
-                        style='class:outh-scope-text'
+                        style=CLI_STYLE.edit_text
                         ),
                         ],width=D()))
 
@@ -340,7 +341,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             item, 
                             name=item, 
                             checked= self.value[item], 
-                            style='class:outh-client-checkbox'),
+                            style=CLI_STYLE.checkbox),
                     ],width=D()))
 
                 else :
@@ -348,7 +349,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                                             item, 
                                             name=item, 
                                             value="No Items Here", 
-                                            style='class:outh-scope-text',
+                                            style=CLI_STYLE.edit_text,
                                             read_only=True,
                                             ),
                                             ],width=D()))  

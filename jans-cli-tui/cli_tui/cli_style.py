@@ -74,8 +74,9 @@ style = Style.from_dict(
         "plugin-radiobutton":"green",
         "plugin-dropdown":"green",
         "plugin-widget":"green",
-        
-        
+        "plugin-container":"",
+        "plugin-container.text":"green",
+
         ## edit_client_dialog
         "outh-client-navbar":"#2600ff",
         "outh-client-navbar-headcolor":"green",

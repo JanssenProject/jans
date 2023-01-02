@@ -10,4 +10,12 @@ class CLI_STYLE:
     edit_text_required = 'class:plugin-textrequired'
     check_box = 'class:plugin-checkbox'
     radio_button = 'class:plugin-radiobutton'
-    
+    tabs = 'class:plugin-tabs'
+    label = 'class:plugin-label'
+    container = 'class:plugin-container'
+    navbar_headcolor = "class:plugin-navbar-headcolor"
+    navbar_entriescolor = "class:plugin-navbar-entriescolor"
+
+class COMMON_STRINGS:
+    enter_to_search = "Press enter to perform search"
+    no_matching_result = "No matching result"

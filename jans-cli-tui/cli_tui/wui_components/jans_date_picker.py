@@ -24,6 +24,8 @@ import time
 import datetime
 import cli_style
 
+DATE_TIME_TEMP = '%Y-%m-%dT%H:%M:%S'
+
 class JansSelectDate:
     """_summary_
     """
@@ -86,7 +88,6 @@ class JansSelectDate:
             ),
             height=5,
             cursorline=False,
-            # width=D(),  #15,
             style="class:date-picker-day",  ### days window style
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True,
@@ -99,7 +100,6 @@ class JansSelectDate:
             ),
             height=2,
             cursorline=False,
-            # width=D(),  #15,
             style="class:date-picker-time",  ### time window style
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True
@@ -167,7 +167,7 @@ class JansSelectDate:
             try :
                 day_index = week.index(day)
                 break
-            except:
+            except Exception:
                 day_index = 0
         week_index = self.entries.index(dum_week)
         self.cord_y = week_index 
@@ -279,7 +279,6 @@ class JansSelectDate:
                 self.dec_month(day=1)
             else:
                 self.cord_y = (self.cord_y - 1)# % 5
-                #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
             self.selected_cord = (self.cord_x, self.cord_y)
         else:
             self.adjust_time(1)
@@ -290,7 +289,6 @@ class JansSelectDate:
                 self.inc_month(day=28)
             else:
                 self.cord_y = (self.cord_y + 1)# % 5
-            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
             self.selected_cord = (self.cord_x, self.cord_y)
         else:
             self.adjust_time(-1)
@@ -303,9 +301,7 @@ class JansSelectDate:
                 self.cord_x = (self.cord_x + 1) #% 7
             self.selected_cord = (self.cord_x, self.cord_y)
         else:
-            if self.cord_x >= 2 :
-                pass
-            else :
+            if not self.cord_x >= 2 :
                 self.cord_x = (self.cord_x + 1) #% 7
 
     def left(self)-> None:
@@ -318,9 +314,7 @@ class JansSelectDate:
             self.selected_cord = (self.cord_x, self.cord_y)
             self.date_changed = True
         else:
-            if self.cord_x <=0 :
-                pass
-            else :
+            if not self.cord_x <=0 :
                 self.cord_x = (self.cord_x - 1) #% 7
 
     def next(self)-> None:
@@ -356,7 +350,7 @@ class DateSelectWidget:
 
         if  value:
             self.text = value
-            ts = time.strptime(value[:19], "%Y-%m-%dT%H:%M:%S")     # "2023-11-27"
+            ts = time.strptime(value[:19], DATE_TIME_TEMP)     # "2023-11-27"
             self.date = time.strftime("%m/%d/%Y", ts)               # "11/27/2023"
             self.hours = int(time.strftime("%H",ts)) 
             self.minuts =int(time.strftime("%M",ts))
@@ -398,8 +392,7 @@ class DateSelectWidget:
         self, 
         value:str,
         )-> None:
-        #passed_value = self.value  
-        self._value = self.value  
+        self._value = self.value
 
     def make_time(
         self, 
@@ -410,7 +403,7 @@ class DateSelectWidget:
         Args:
             text (str): the text that appear on the wigdet
         """
-        ts = time.strptime(text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+        ts = time.strptime(text[:19], DATE_TIME_TEMP) # "2023-11-27"
         years =int(time.strftime("%Y",ts))
         months = int(time.strftime("%m",ts))
         days =  int(time.strftime("%d",ts))
@@ -420,7 +413,7 @@ class DateSelectWidget:
 
         t = (years, months,days,self.hours,self.minuts,self.seconds,0,0,0)  ## the up increment
         t = time.mktime(t)
-        self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+        self.text= (time.strftime(DATE_TIME_TEMP, time.gmtime(t)))
 
     def _get_text(self)-> AnyFormattedText:
         """To get The selected value
@@ -459,7 +452,7 @@ class DateSelectWidget:
 
                 t = (years, months,days,(self.select_box.hours-8),self.select_box.minuts,self.select_box.seconds,0,0,0)  ## the up increment
                 t = time.mktime(t)  
-                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+                self.text= (time.strftime(DATE_TIME_TEMP, time.gmtime(t)))
                 get_app().layout.container.floats.remove(self.select_box_float)
 
         @kb.add("up")

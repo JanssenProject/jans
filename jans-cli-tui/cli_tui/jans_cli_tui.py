@@ -299,7 +299,7 @@ class JansCliApp(Application):
                     await self.show_dialog_as_float(dialog)
                     try:
                         app.layout.focus(focused_before)
-                    except:
+                    except Exception:
                         app.layout.focus(self.center_frame)
 
                     self.start_progressing()
@@ -373,7 +373,7 @@ class JansCliApp(Application):
             result = await self.show_dialog_as_float(dialog)
             try:
                 app.layout.focus(focused_before)
-            except:
+            except Exception:
                 app.layout.focus(self.center_frame)
 
             self.create_cli()
@@ -503,7 +503,7 @@ class JansCliApp(Application):
         if get_app().layout.container.floats:
             try :
                 get_float_name = get_app().layout.container.floats[-1].name 
-            except:
+            except Exception:
                 get_float_name = ''
 
             if get_float_name =='mouse':
@@ -534,7 +534,7 @@ class JansCliApp(Application):
                         res.append("\n")
                         res.append(HTML(style_tmp.format("Cut")))
                         res.append("\n")
-                        res.append(HTML(style_tmp_red.format(style_tmp_red, "Paste")))
+                        res.append(HTML(style_tmp_red.format("Paste")))
                         res.append("\n")
                         get_app().layout.container.floats[-1].content.content.text=merge_formatted_text(res) 
                         self.mouse_select = 'Paste'
@@ -804,7 +804,7 @@ class JansCliApp(Application):
             result = await self.show_dialog_as_float(dialog)
             try:
                 self.layout.focus(focused_before)
-            except:
+            except Exception:
                 self.layout.focus(self.center_frame)
 
             return result

@@ -17,7 +17,7 @@ from prompt_toolkit.widgets import (
 import cli_style
 from utils.multi_lang import _
 from utils.utils import DialogUtils
-from utils.static import DialogResult
+from utils.static import DialogResult, CLI_STYLE
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 
@@ -80,7 +80,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='id',
                                 value=self.data.get('id',''),
                                 read_only=True,
-                                style='class:outh-uma-text',
+                                style=CLI_STYLE.edit_text,
                             ),
 
             self.myparent.getTitledText(
@@ -88,14 +88,14 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='name',
                                 value=self.data.get('name',''),
                                 read_only=True,
-                                style='class:outh-uma-text'),
+                                style=CLI_STYLE.edit_text),
 
             self.myparent.getTitledText(
                                 _("IconURL"),
                                 name='iconUri',
                                 value=self.data.get('iconUri',''),
                                 read_only=True,
-                                style='class:outh-uma-text'),    
+                                style=CLI_STYLE.edit_text),    
 
 
             VSplit([
@@ -112,14 +112,14 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='clients',
                                 value=self.data.get('clients',''),
                                 read_only=True,
-                                style='class:outh-uma-text'), 
+                                style=CLI_STYLE.edit_text), 
 
             self.myparent.getTitledText(
                                 _("Creation time"),
                                 name='creationDate',
                                 value=self.data.get('creationDate',''),
                                 read_only=True,
-                                style='class:outh-uma-text'), 
+                                style=CLI_STYLE.edit_text), 
 
         ], padding=1,width=100,style='class:outh-uma-tabs'
         # key_bindings=self.get_uma_dialog_key_bindings()
@@ -147,7 +147,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='scopes',
                                 value='\n'.join(self.data.get('scopes',[])),
                                 read_only=True,
-                                style='class:outh-uma-text',
+                                style=CLI_STYLE.edit_text,
                                 height=3,
                             )
         ],width=D())
@@ -158,7 +158,7 @@ class ViewUMADialog(JansGDialog, DialogUtils):
                                 name='scopeExpression',
                                 value='\n'.join(self.data.get('scopeExpression',[])),
                                 read_only=True,
-                                style='class:outh-uma-text',
+                                style=CLI_STYLE.edit_text,
                                  height=3,
                             ),
         ],width=D())
