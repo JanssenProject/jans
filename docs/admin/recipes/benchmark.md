@@ -165,11 +165,11 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
     helm install janssen janssen/janssen -n jans -f override.yaml
    ```
 
-### Load-test
+## Load-test
 
 Our tests used 10 million users that were loaded. We have created a docker image to load users. That same image is also used to load test Janssen using jmeter tests for the `Authorization code` flow. More tests will come!. This image will load users and use a unique password for each user.
 
-#### Loading users
+### Loading users
 
 Loading users requires a hefty but temporary amount of resources. By default, the resources ask for `10` vCPU and `5` Gis. However, to speed up the process increase the number of CPUs as the job in step two below uses parallel tasks. If left as is 10 million users would load in around 17 hours or so.
 
@@ -197,11 +197,11 @@ Loading users requires a hefty but temporary amount of resources. By default, th
 
 Wait until all the users are up before moving forward. Tail the logs by running `kubectl logs deployment/load-users -n load`.
 
-#### Load testing
+### Load testing
 
-##### Authorization code client
+#### Authorization code client
 
-###### Resources needed for Authorization code client jmeter test
+##### Resources needed for Authorization code client jmeter test
 
  The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
 
@@ -210,7 +210,7 @@ Wait until all the users are up before moving forward. Tail the logs by running 
 | Authorization code flow jmeter test | 20        | 8        | 1.3 | 190            | 24        |
 | Grand Total                         |           |          |     | 190 GiB        | 24        |
 
-###### Setup Client
+##### Setup Client
 
 Create the client needed to run the test by executing the following. Make sure to change the `FQDN`  :
 
