@@ -1,0 +1,48 @@
+apiVersion: v1
+data:
+  AUTHZ_CLIENT_ID: "aa4c8edf-1d68-462b-ac49-178c7b1db8fd"
+  AUTHZ_CLIENT_SECRET: "9c077c8a-dc84-4baa-abde-edc1a343e3e3"
+  USER_NUMBER_STARTING_POINT: 0
+  USER_NUMBER_ENDING_POINT: 10000000
+  FQDN: demoexample.jans.io
+  RUN_AUTHZ_TEST: "true" # or "false"
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-testing
+  name: load-testing-cm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: load-testing
+  name: load-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-testing
+  template:
+    metadata:
+      labels:
+        app: load-testing
+    spec:
+      #hostAliases:
+      #- ip: 35.159.30.85
+      #  hostnames:
+      #  - demoexample.jans.io
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-testing-cm
+        image: janssenproject/demo_loadtesting:1.0.6_dev
+        imagePullPolicy: Always
+        name: load-testing
+        resources:
+          requests:
+            memory: "8000Mi"
+            cpu: "1300m"
+          limits:
+            memory: "8000Mi"
+            cpu: "1300m"
