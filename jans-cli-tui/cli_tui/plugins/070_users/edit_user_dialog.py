@@ -93,6 +93,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
                             return val
                     if multi:
                         return values
+                    while None in values:
+                        values.remove(None)
                     ret_val = ', '.join(values)
                     return ret_val
             return [] if multi else ''
@@ -242,7 +244,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         for claim in common_data.users.claims:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
-            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive'):
+            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive', 'updatedAt'):
                 continue
             claims_list.append((claim['name'], claim['displayName']))
 

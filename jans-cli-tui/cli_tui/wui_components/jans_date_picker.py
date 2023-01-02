@@ -1,29 +1,20 @@
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout.containers import Float, HSplit, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import Float, FloatContainer, HSplit, Window, VSplit
-from prompt_toolkit.widgets import Button, Label, TextArea
+from prompt_toolkit.widgets import Button, Label
 from prompt_toolkit.layout.containers import (
-    ConditionalContainer,
     Float,
     HSplit,
     VSplit,
-    VerticalAlign,
-    HorizontalAlign,
     DynamicContainer,
-    FloatContainer,
     Window
 )
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
-from typing import Optional, Sequence, Union
+from typing import Optional
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.widgets import Button, Dialog
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
@@ -33,6 +24,8 @@ import time
 import datetime
 import cli_style
 
+date_time_temp = '%Y-%m-%dT%H:%M:%S'
+
 class JansSelectDate:
     """_summary_
     """
@@ -40,9 +33,9 @@ class JansSelectDate:
     def __init__(
         self,
         date: Optional[str] = '',
-        months: Optional[list] = [],
-        mytime: Optional[list] = [],
-        )-> HSplit:  
+        months: Optional[list] = None,
+        mytime: Optional[list] = None,
+        )-> HSplit:
         
         """_summary_
 
@@ -51,10 +44,10 @@ class JansSelectDate:
             months (list, optional): _description_. Defaults to [].
             mytime (list, optional): _description_. Defaults to [].
         """
-        self.hours , self.minuts , self.seconds = mytime
+        self.hours , self.minuts , self.seconds = mytime if mytime else [0,0,0]
         self.change_date = True
         self.date = date  #"11/27/2023"
-        self.months = months 
+        self.months = months if months else []
         self.cord_y = 0
         self.cord_x = 0
         self.old_cord_x = 0
@@ -95,7 +88,6 @@ class JansSelectDate:
             ),
             height=5,
             cursorline=False,
-            # width=D(),  #15,
             style="class:date-picker-day",  ### days window style
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True,
@@ -108,7 +100,6 @@ class JansSelectDate:
             ),
             height=2,
             cursorline=False,
-            # width=D(),  #15,
             style="class:date-picker-time",  ### time window style
             right_margins=[ScrollbarMargin(display_arrows=True),],
             wrap_lines=True
@@ -176,7 +167,7 @@ class JansSelectDate:
             try :
                 day_index = week.index(day)
                 break
-            except:
+            except Exception:
                 day_index = 0
         week_index = self.entries.index(dum_week)
         self.cord_y = week_index 
@@ -288,7 +279,6 @@ class JansSelectDate:
                 self.dec_month(day=1)
             else:
                 self.cord_y = (self.cord_y - 1)# % 5
-                #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
             self.selected_cord = (self.cord_x, self.cord_y)
         else:
             self.adjust_time(1)
@@ -299,7 +289,6 @@ class JansSelectDate:
                 self.inc_month(day=28)
             else:
                 self.cord_y = (self.cord_y + 1)# % 5
-            #self.depug=Label(text="entries = "+str(self.entries[self.cord_y][self.cord_x])+':',)
             self.selected_cord = (self.cord_x, self.cord_y)
         else:
             self.adjust_time(-1)
@@ -312,9 +301,7 @@ class JansSelectDate:
                 self.cord_x = (self.cord_x + 1) #% 7
             self.selected_cord = (self.cord_x, self.cord_y)
         else:
-            if self.cord_x >= 2 :
-                pass
-            else :
+            if not self.cord_x >= 2 :
                 self.cord_x = (self.cord_x + 1) #% 7
 
     def left(self)-> None:
@@ -327,9 +314,7 @@ class JansSelectDate:
             self.selected_cord = (self.cord_x, self.cord_y)
             self.date_changed = True
         else:
-            if self.cord_x <=0 :
-                pass
-            else :
+            if not self.cord_x <=0 :
                 self.cord_x = (self.cord_x - 1) #% 7
 
     def next(self)-> None:
@@ -365,7 +350,7 @@ class DateSelectWidget:
 
         if  value:
             self.text = value
-            ts = time.strptime(value[:19], "%Y-%m-%dT%H:%M:%S")     # "2023-11-27"
+            ts = time.strptime(value[:19], date_time_temp)     # "2023-11-27"
             self.date = time.strftime("%m/%d/%Y", ts)               # "11/27/2023"
             self.hours = int(time.strftime("%H",ts)) 
             self.minuts =int(time.strftime("%M",ts))
@@ -407,8 +392,7 @@ class DateSelectWidget:
         self, 
         value:str,
         )-> None:
-        #passed_value = self.value  
-        self._value = self.value  
+        self._value = self.value
 
     def make_time(
         self, 
@@ -419,7 +403,7 @@ class DateSelectWidget:
         Args:
             text (str): the text that appear on the wigdet
         """
-        ts = time.strptime(text[:19], "%Y-%m-%dT%H:%M:%S") # "2023-11-27"
+        ts = time.strptime(text[:19], date_time_temp) # "2023-11-27"
         years =int(time.strftime("%Y",ts))
         months = int(time.strftime("%m",ts))
         days =  int(time.strftime("%d",ts))
@@ -429,7 +413,7 @@ class DateSelectWidget:
 
         t = (years, months,days,self.hours,self.minuts,self.seconds,0,0,0)  ## the up increment
         t = time.mktime(t)
-        self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+        self.text= (time.strftime(date_time_temp, time.gmtime(t)))
 
     def _get_text(self)-> AnyFormattedText:
         """To get The selected value
@@ -468,7 +452,7 @@ class DateSelectWidget:
 
                 t = (years, months,days,(self.select_box.hours-8),self.select_box.minuts,self.select_box.seconds,0,0,0)  ## the up increment
                 t = time.mktime(t)  
-                self.text= (time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)))
+                self.text= (time.strftime(date_time_temp, time.gmtime(t)))
                 get_app().layout.container.floats.remove(self.select_box_float)
 
         @kb.add("up")
@@ -490,16 +474,6 @@ class DateSelectWidget:
         def _left(event):
             if self.select_box_float  in get_app().layout.container.floats:
                 self.select_box.left()
-
-        # @kb.add("+")
-        # def _plus(event):
-        #     if self.select_box_float not in get_app().layout.container.floats:
-        #         self.make_time(self.text)
-
-        # @kb.add("-")
-        # def _minus(event):
-        #     if self.select_box_float not in get_app().layout.container.floats:
-        #         self.make_time(self.text)
 
         @kb.add("tab")
         def _tab(event):
