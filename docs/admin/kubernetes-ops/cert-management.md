@@ -3,8 +3,8 @@ tags:
   - administration
   - kubernetes
   - operations
-  - certificate
-  - management
+  - certificate management
+  - certification and key rotation
 ---
 
 ## Overview
