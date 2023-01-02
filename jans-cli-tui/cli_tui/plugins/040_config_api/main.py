@@ -476,9 +476,6 @@ class Plugin():
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.app.center_container)
-            return
 
         self.adminui_update_permissions(0, tbuffer.text)
 
@@ -632,9 +629,6 @@ class Plugin():
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"),tobefocused=self.containers['mapping'])
-            return
 
         self.adminui_update_mapping(tbuffer.text)
 
