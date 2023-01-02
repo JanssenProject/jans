@@ -126,13 +126,13 @@ jobs:
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.7
-        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} == 'loadtesting-jmeter'
+        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
         uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
       - name: Install Python dependencies
-        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} == 'loadtesting-jmeter'
+        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
         run: |
           sudo apt-get update
           sudo python3 -m pip install --upgrade pip
@@ -142,7 +142,7 @@ jobs:
           sudo apt-get install jq
 
       - name: Update Build date in Dockerfile
-        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} == 'loadtesting-jmeter'
+        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
         id: update_build_date_in_dockerfile
         run: |
           sudo python3 ./automation/auto_update_build_date.py
