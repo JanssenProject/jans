@@ -184,14 +184,14 @@ nav:
         - 'FAQ': 'admin/vm-ops/faq.md'
     - 'Configuration Guide':
         - 'Config API':
-            - 'admin/config-api/README.md'
-            - 'Settings': 'admin/config-api/config.md'
-            - 'Attributes': 'admin/config-api/attribute.md'
-            - 'OpenID Client': 'admin/config-api/openid-client.md'
-            - 'Security': 'admin/config-api/security.md'
-            - 'Logs': 'admin/config-api/logs.md'
-            - 'Monitoring': 'admin/config-api/monitoring.md'
-            - 'Plugins': 'admin/config-api/plugins.md'
+            - 'admin/config-guide/config-api/README.md'
+            - 'Settings': 'admin/config-guide/config-api/config.md'
+            - 'Attributes': 'admin/config-guide/config-api/attribute.md'
+            - 'OpenID Client': 'admin/config-guide/config-api/openid-client.md'
+            - 'Security': 'admin/config-guide/config-api/security.md'
+            - 'Logs': 'admin/config-guide/config-api/logs.md'
+            - 'Monitoring': 'admin/config-guide/config-api/monitoring.md'
+            - 'Plugins': 'admin/config-guide/config-api/plugins.md'
         - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'Text-Based User Interface (TUI)': 'admin/config-guide/tui.md'
         - 'Command Line Interface (CLI)':
