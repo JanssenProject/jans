@@ -16,7 +16,6 @@ from utils.utils import DialogUtils
 from wui_components.jans_cli_dialog import JansGDialog
 from typing import Optional, Sequence
 from utils.multi_lang import _
-import cli_style
 
 class ViewProperty(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details
@@ -276,7 +275,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 item,
                                 name=item,
                                 checked= tab[item],
-                                style=cli_style.checkbox),
+                                style=cli_style.check_box),
                         ],width=D()))  
                                     
                     self.tabs[tab_temp.format(self.value.index(tab))] = HSplit(tab_list,width=D())
@@ -300,7 +299,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                     self.property, 
                     name=self.property, 
                     checked= self.value, 
-                    style=cli_style.checkbox),
+                    style=cli_style.check_box),
             ],width=D())
 
         elif prop_type == 'dict':
@@ -341,7 +340,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                             item, 
                             name=item, 
                             checked= self.value[item], 
-                            style=cli_style.checkbox),
+                            style=cli_style.check_box),
                     ],width=D()))
 
                 else :
