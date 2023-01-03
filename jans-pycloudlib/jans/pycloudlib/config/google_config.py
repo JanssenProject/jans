@@ -25,8 +25,8 @@ class GoogleConfig(BaseConfig):
 
     Supported environment variables:
 
-    - `CN_SECRET_GOOGLE_SECRET_VERSION_ID`: Deprecated in favor of `CN_GOOGLE_SECRET_VERSION_ID`.
-    - `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Deprecated in favor of `CN_GOOGLE_SECRET_NAME_PREFIX`.
+    - `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Deprecated in favor of `CN_GOOGLE_SECRET_VERSION_ID`.
+    - `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Deprecated in favor of `CN_GOOGLE_SECRET_NAME_PREFIX`.
 
     - `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
     - `GOOGLE_PROJECT_ID`: ID of Google project.
@@ -37,23 +37,23 @@ class GoogleConfig(BaseConfig):
     def __init__(self) -> None:
         self.project_id = os.getenv("GOOGLE_PROJECT_ID", "")
 
-        if "CN_SECRET_GOOGLE_SECRET_VERSION_ID" in os.environ:
+        if "CN_CONFIG_GOOGLE_SECRET_VERSION_ID" in os.environ:
             logger.warning(
-                "Found CN_SECRET_GOOGLE_SECRET_VERSION_ID environment variable. "
+                "Found CN_CONFIG_GOOGLE_SECRET_VERSION_ID environment variable. "
                 "Note that this environment variable is deprecated in favor of "
                 "CN_GOOGLE_SECRET_VERSION_ID and soon will be removed."
             )
-            self.version_id = os.environ["CN_SECRET_GOOGLE_SECRET_VERSION_ID"] or "latest"
+            self.version_id = os.environ["CN_CONFIG_GOOGLE_SECRET_VERSION_ID"] or "latest"
         else:
             self.version_id = os.getenv("CN_GOOGLE_SECRET_VERSION_ID", "latest")
 
-        if "CN_SECRET_GOOGLE_SECRET_NAME_PREFIX" in os.environ:
+        if "CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX" in os.environ:
             logger.warning(
-                "Found CN_SECRET_GOOGLE_SECRET_NAME_PREFIX environment variable. "
+                "Found CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX environment variable. "
                 "Note that this environment variable is deprecated in favor of "
                 "CN_GOOGLE_SECRET_NAME_PREFIX and soon will be removed."
             )
-            prefix = os.environ["CN_SECRET_GOOGLE_SECRET_NAME_PREFIX"] or "jans"
+            prefix = os.environ["CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX"] or "jans"
         else:
             prefix = os.getenv("CN_GOOGLE_SECRET_NAME_PREFIX", "jans")
 
