@@ -547,6 +547,7 @@ class Plugin(DialogUtils):
                 [
                 d['name'],
                 exps,
+                d['kid']
                 ]
             )
 
@@ -554,9 +555,9 @@ class Plugin(DialogUtils):
 
             keys = JansVerticalNav(
                     myparent=self.app,
-                    headers=['Name', 'Expiration'],
+                    headers=['Name', 'Expiration','Kid'],
                     data=data,
-                    preferred_size=[0,0],
+                    preferred_size=[0,0,0],
                     on_display=self.app.data_display_dialog,
                     selectes=0,
                     headerColor=cli_style.navbar_headcolor,
