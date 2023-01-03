@@ -247,7 +247,6 @@ nav:
         - 'Auth Server Config': 'admin/auth-server/config.md'
         - 'Session Management':
             - 'admin/auth-server/session-management/README.md'
-            - 'What is a session?': 'admin/auth-server/session-management/what-is.md'
             - 'IDP v RP Sessions': 'admin/auth-server/session-management/idp-v-rp.md'
             - 'Multiple Sessions in One Browser': 'admin/auth-server/session-management/multiple-sessions-one-browser.md'
             - 'Multiple Browser Sessions': 'admin/auth-server/session-management/multiple-browser-sessions.md'
