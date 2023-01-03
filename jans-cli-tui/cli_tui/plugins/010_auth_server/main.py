@@ -233,6 +233,7 @@ class Plugin(DialogUtils):
                     ]
                 )
 
+            res = self.get_scopes(result['entries'])
             if data:
                 clients = JansVerticalNav(
                     myparent=self.app,
@@ -246,7 +247,7 @@ class Plugin(DialogUtils):
                     selectes=0,
                     headerColor=cli_style.navbar_headcolor,
                     entriesColor=cli_style.navbar_entriescolor,
-                    all_data=result['entries']
+                    all_data=res
                 )
                 buttons = []
                 if start_index > 0:
@@ -273,6 +274,46 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Oops"), _(common_strings.no_matching_result),tobefocused = self.oauth_containers['clients'])
 
         asyncio.ensure_future(coroutine())
+
+
+    def get_scopes(self,client_data) -> None:
+
+        async def coroutine():
+            cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': ''}
+            self.app.start_progressing(_("Retreiving client Scopes..."))
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+            if response.status_code not in (200, 201):
+                self.app.show_message(_("Error getting client Scopes"), str(response.text),tobefocused=self.oauth_containers['clients'])
+                return
+
+            try:
+                result = response.json()
+            except Exception:
+                self.app.show_message(_("Error getting client Scopes"), str(response.text),tobefocused=self.oauth_containers['clients'])
+                return
+
+            data_displayName =[]
+            data_baseDn =[]
+
+            for d in result.get('entries', []):
+                if d.get('displayName'):
+                    data_displayName.append(d.get('displayName'))
+                    data_baseDn.append(d.get('baseDn'))
+
+            for k in range(len(client_data)) : 
+                for i in range(len(client_data[k]['scopes'])) :  ### Scopes of the client
+                    if client_data[k]['scopes'][i] in data_baseDn:
+                        client_data[k]['scopes'][i] = data_displayName[data_baseDn.index(client_data[k]['scopes'][i])]
+                    
+                    ##  threr are scopes that didn't exist in `get-oauth-scopes` so leave it as it is -fow now-!!
+                    # else:  
+                    #     client_data[0]['scopes'][i] = ''
+
+
+        asyncio.ensure_future(coroutine())
+        return client_data
 
     def delete_client(self, **kwargs: Any) -> None:
         """This method for the deletion of the clients data
