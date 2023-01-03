@@ -294,18 +294,18 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Error getting client Scopes"), str(response.text),tobefocused=self.oauth_containers['clients'])
                 return
 
-            data_displayName =[]
-            data_baseDn =[]
+            data_display_name =[]
+            data_base_dn =[]
 
             for d in result.get('entries', []):
                 if d.get('displayName'):
-                    data_displayName.append(d.get('displayName'))
-                    data_baseDn.append(d.get('baseDn'))
+                    data_display_name.append(d.get('displayName'))
+                    data_base_dn.append(d.get('baseDn'))
 
             for k in range(len(client_data)) : 
                 for i in range(len(client_data[k]['scopes'])) :  ### Scopes of the client
-                    if client_data[k]['scopes'][i] in data_baseDn:
-                        client_data[k]['scopes'][i] = data_displayName[data_baseDn.index(client_data[k]['scopes'][i])]
+                    if client_data[k]['scopes'][i] in data_base_dn:
+                        client_data[k]['scopes'][i] = data_display_name[data_base_dn.index(client_data[k]['scopes'][i])]
                     
                     ##  threr are scopes that didn't exist in `get-oauth-scopes` so leave it as it is -fow now-!!
                     # else:  

@@ -166,7 +166,7 @@ class Plugin(DialogUtils):
                                 "value": "{}".format(self.new_password.me.text)}]}
                     }
                 self.app.start_progressing(_("Changing Password ..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
             asyncio.ensure_future(coroutine())
 
