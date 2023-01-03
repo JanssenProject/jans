@@ -1,18 +1,52 @@
 ---
 tags:
-  - administration
-  - auth-server
-  - endpoint
+- administration
+- auth-server
+- session-revocation
+- endpoint
 ---
 
-## This content is in progress
+# Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen Server provides session revocation endpoint to enable the client to revoke all sessions of a users.
+Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater 
+control and better management of sessions on OP.
 
-## Have questions in the meantime?
+URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
 
-## Want to contribute?
+`session_revocation_endpoint` claim in the response specifies the URL for revocation endpoint. By default, revocation endpoint
+looks like below:
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+```
+https://janssen.server.host/jans-auth/restv1/revoke_session
+```
+
+More information about request and response of the revocation endpoint can be found in
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Session_Management/revoke-session).
+
+## Usage
+
+A request to this endpoint can revoke all sessions of one particular user. Use the request parameters to specify 
+criteria to select the user. If there are multiple users matching the given criteria, the first found user will be affected.
+
+## Disabling The Endpoint Using Feature Flag
+
+`Session revocation` endpoint can be enabled or disable using [REVOKE_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#revokesession).
+Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+
+When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
+disable `REVOKE_SESSION` flag as required.
+
+![](../../../assets/image-tui-enable-components.png)
+
+## Required Scopes
+
+A client must have the following scope in order to use this endpoint:
+
+- `revoke_session`
+

@@ -8,7 +8,7 @@ tags:
 
 # Overview
 
-Janssen Server supports token revocation endpoint to enables a client to notify the server that previously obtained 
+Janssen Server supports token revocation endpoint enables a client to notify the server that previously obtained 
 refresh or access token is no longer needed, allowing the server to clean up security credentials. Implementation 
 conforms with [token revocation specification](https://datatracker.ietf.org/doc/html/rfc7009).
 
