@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Configuration packages="io.jans.log">
+    <Properties>
+        <Property name="log.console.prefix" value="config-api" />
+    </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+            <PatternLayout pattern="$log_prefix%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
         </Console>
 
         <RollingFile name="ADMINUI-AUDIT" fileName="${sys:log.base}/logs/adminuiAudit.log" filePattern="${sys:log.base}/logs/adminuiAudit-%d{yyyy-MM-dd}-%i.log">
@@ -31,11 +34,11 @@
 
     <Loggers>
         <Logger name="io.jans.ca.plugin.adminui.rest.logging" level="$admin_ui_audit_log_level" additivity="false">
-            <!-- <AppenderRef ref="ADMINUI-AUDIT" /> -->
+            <Property name="log.console.group">/admin-ui-audit</Property>
             <AppenderRef ref="$admin_ui_audit_log_target" />
         </Logger>
         <Logger name="io.jans.ca.plugin.adminui" level="$admin_ui_log_level" additivity="false">
-            <!-- <AppenderRef ref="ADMINUI-LOG" /> -->
+            <Property name="log.console.group">/admin-ui</Property>
             <AppenderRef ref="$admin_ui_log_target" />
         </Logger>
     </Loggers>

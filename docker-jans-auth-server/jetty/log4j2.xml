@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Configuration packages="org.gluu.log">
+    <Properties>
+        <Property name="log.console.prefix" value="auth" />
+    </Properties>
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="$log_prefix%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 		</Console>
 
 		<RollingFile name="JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE" fileName="${sys:log.base}/logs/http_request_response.log" filePattern="${sys:log.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log">
@@ -100,53 +103,66 @@
 		<Logger name="org.hibernate" level="error" />
 
 		<Logger name="io.jans.as.server.audit.debug" level="$http_log_level" additivity="false">
+            <Property name="log.console.group">-http</Property>
 			<AppenderRef ref="$http_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.orm" level="$persistence_log_level" additivity="false">
+            <Property name="log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</Logger>
 
 		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="$persistence_log_level" additivity="false">
+            <Property name="log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</Logger>
 		<logger name="com.couchbase.client" level="$persistence_log_level" additivity="false">
+            <Property name="log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</logger>
 
 		<Logger name="io.jans.orm.ldap.operation.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
 			<AppenderRef ref="$persistence_duration_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.orm.couchbase.operation.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
 			<AppenderRef ref="$persistence_duration_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.orm.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
 			<AppenderRef ref="$persistence_duration_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.as.server.service.status.ldap" level="$ldap_stats_log_level" additivity="false">
+            <Property name="log.console.group">-ldap-stats</Property>
 			<AppenderRef ref="$ldap_stats_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.service.PythonService" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.service.custom.script" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.as.server.service.custom" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.agama.engine.script.LogUtils" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.as.server.audit.ApplicationAuditLogger" level="$audit_log_level" additivity="false">
+            <Property name="log.console.group">-audit</Property>
 			<AppenderRef ref="$audit_log_target" />
 		</Logger>
 

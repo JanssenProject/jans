@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -57,7 +57,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
     && zip -d jans-scim.war WEB-INF/jetty-web.xml \
     && zip -r jans-scim.war WEB-INF/jetty-env.xml \
     && cp jans-scim.war ${JETTY_BASE}/jans-scim/webapps/jans-scim.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-module=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate,jmx,stats \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-module=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-scim.war /tmp/WEB-INF
 
 # ======
@@ -225,8 +225,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     /usr/share/java
 
-COPY --chown=1000:0 jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
+COPY jetty/log4j2.xml /app/templates/
 COPY conf/*.tmpl /app/templates/
 COPY templates /app/templates
 
@@ -236,8 +235,10 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
+COPY --chown=1000:0 jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
+
 # adjust ownership
-RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
+RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-scim/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
