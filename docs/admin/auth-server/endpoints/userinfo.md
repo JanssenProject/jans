@@ -15,7 +15,7 @@ URL to access userinfo endpoint on Janssen Server is listed in the response of J
 [configuration endpoint](./configuration.md) given below. 
 
 ```text
-https://<jans-server-host>/jans-auth/.well-known/openid-configuration
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
 `userinfo_endpoint` claim in the response specifies the URL for userinfo endpoint. By default, userinfo endpoint looks
