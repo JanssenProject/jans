@@ -21,7 +21,9 @@ from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
-from jans.pycloudlib.utils import cert_to_truststore, generate_base64_contents
+from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import generate_base64_contents
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 
@@ -134,6 +136,7 @@ def configure_logging():
         "fido2_log_level": "INFO",
         "persistence_log_target": "FILE",
         "persistence_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -178,10 +181,13 @@ def configure_logging():
         if config[key] == "FILE":
             config[key] = value
 
-    logfile = "/opt/jans/jetty/jans-fido2/resources/log4j2.xml"
-    with open(logfile) as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
 
+    logfile = "/opt/jans/jetty/jans-fido2/resources/log4j2.xml"
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
