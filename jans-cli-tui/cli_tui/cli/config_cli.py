@@ -1126,7 +1126,11 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
-        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': 'application/json-patch+json'})
+        content_key = 'application/json-patch+json'
+        for content_key in endpoint.info.get('requestBody', {}).get('content', {}):
+            break
+
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': content_key})
         data = data
         response = requests.patch(
             url=url,
@@ -1361,17 +1365,18 @@ class JCA_CLI:
             except ValueError as ve:
                 self.exit_with_error(str(ve))
 
-            if not isinstance(data, list):
+            if ('configuser' not in endpoint.path) and (not isinstance(data, list)):
                 self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
 
-        op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        if 'configuser' not in endpoint.path:
+            op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
 
-        for item in data:
-            if not item['op'] in op_modes:
-                print("op must be one of {}".format(', '.join(op_modes)))
-                sys.exit()
-            if not item['path'].startswith('/'):
-                item['path'] = '/' + item['path']
+            for item in data:
+                if not item['op'] in op_modes:
+                    print("op must be one of {}".format(', '.join(op_modes)))
+                    sys.exit()
+                if not item['path'].startswith('/'):
+                    item['path'] = '/' + item['path']
 
         response = self.patch_requests(endpoint, suffix_param, data)
 
@@ -1419,11 +1424,13 @@ class JCA_CLI:
                     pdata = args.patch_replace
 
                 if pop:
-                    if pop != 'remove' and pdata.count(':') != 1:
-                        self.exit_with_error("Please provide --patch-data as colon delimited key:value pair")
+                    if pop != 'remove':
+                        try:
+                            ppath, pval = self.unescaped_split(pdata, ':')
+                        except Exception:
+                            self.exit_with_error("Please provide --patch-data as colon delimited key:value pair.\nUse escape if you need colon in value or key, i.e. mtlsUserInfoEndpoint:https\\:example.jans.io/userinfo")
 
                     if pop != 'remove':
-                        ppath, pval = pdata.split(':')
                         data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
                     else:
                         data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
