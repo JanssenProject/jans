@@ -1,18 +1,56 @@
 ---
 tags:
-  - administration
-  - auth-server
-  - endpoint
+- administration
+- auth-server
+- token-revocation
+- endpoint
 ---
 
-## This content is in progress
+# Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen Server supports token revocation endpoint to enables a client to notify the server that previously obtained 
+refresh or access token is no longer needed, allowing the server to clean up security credentials. Implementation 
+conforms with [token revocation specification](https://datatracker.ietf.org/doc/html/rfc7009).
 
-## Have questions in the meantime?
+Since a token is part of a grant, when the token is invalidated, all other token within the same grant are also revoked.
+i.e when a refresh token related to a grant is invalidated, all access tokens from the same grant are also invalidated 
+and vice-versa.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
 
-## Want to contribute?
+```text
+https://<jans-server-host>/jans-auth/.well-known/openid-configuration
+```
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+`revocation_endpoint` claim in the response specifies the URL for revocation endpoint. By default, revocation endpoint
+looks like below:
+
+```
+https://jans-dynamic-ldap/jans-auth/restv1/revoke
+```
+
+More information about request and response of the revocation endpoint can be found in
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+
+
+
+## Disabling The Endpoint Using Feature Flag
+
+`Token revocation` endpoint can be enabled or disable using [REVOKE_TOKEN feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#revoketoken).
+Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+
+When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
+disable `REVOKE_TOKEN` flag as required.
+
+![](../../../assets/image-tui-enable-components.png)
+
+## Configuration Properties
+
+Token revocation endpoint can be further configured using Janssen Server configuration properties listed below. When using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+navigate via `Auth Server`->`Properties`.
+
+- [mtlstokenrevocationendpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlstokenrevocationendpoint)
+- [tokenRevocationEndpoint](../../reference/json/properties/janssenauthserver-properties.md#tokenrevocationendpoint)
+
