@@ -73,6 +73,7 @@ data:
   | replace "scriptLogLevel" "script_log_level"
   | replace "auditStatsLogTarget" "audit_log_target"
   | replace "auditStatsLogLevel" "audit_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- if index .Values "global" "config-api" "enabled" }}
@@ -88,6 +89,7 @@ data:
   | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- end }}
@@ -152,6 +154,7 @@ data:
   | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- end }}
@@ -162,6 +165,7 @@ data:
   | replace "fido2LogLevel" "fido2_log_level"
   | replace "persistenceLogTarget" "persistence_log_target"
   | replace "persistenceLogLevel" "persistence_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- end }}
