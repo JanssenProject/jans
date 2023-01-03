@@ -23,6 +23,7 @@ class JansVerticalNav():
         on_enter: Callable= None,
         get_help: Tuple= None,
         on_delete: Callable= None,
+        change_password: Callable= None,        
         all_data: Optional[list]= [], 
         preferred_size: Optional[list]= [], 
         data: Optional[list]= [], 
@@ -84,6 +85,7 @@ class JansVerticalNav():
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
+        self.change_password = change_password
         if get_help:
             self.get_help, self.scheme = get_help
             if self.data :
@@ -294,6 +296,13 @@ class JansVerticalNav():
             size = self.myparent.output.get_size()
             if self.on_enter :
                 self.on_enter(passed=self.data[self.selectes], event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes, jans_name=self.jans_name)
+
+        @kb.add('p')
+        def _(event):
+            if not self.data:
+                return
+            if self.change_password :
+                self.change_password(data=self.all_data[self.selectes])
 
 
         @kb.add('d')
