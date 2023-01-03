@@ -85,7 +85,8 @@ class Plugin(DialogUtils):
                 selectes=0,
                 headerColor='class:outh-verticalnav-headcolor',
                 entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=self.users['entries']
+                all_data=self.users['entries'],
+                jans_help = "Press p to change password"
             )
 
         self.user_list_container = self.users_list_box
@@ -164,7 +165,7 @@ class Plugin(DialogUtils):
                                 "multiValued": False,
                                 "value": "{}".format(self.new_password.me.text)}]}
                     }
-                self.app.start_progressing(_("Changing old Password ..."))
+                self.app.start_progressing(_("Changing Password ..."))
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
             asyncio.ensure_future(coroutine())
@@ -187,7 +188,7 @@ class Plugin(DialogUtils):
                     handler=save,
                 ) ,            ]
 
-        dialog = JansGDialog(self.app, title="Change Password for {}".format(data['userId']), body=body,buttons=buttons)
+        dialog = JansGDialog(self.app, title="Change Password for {}".format(data['userId']), body=body, buttons=buttons)
 
         self.app.show_jans_dialog(dialog)
 
