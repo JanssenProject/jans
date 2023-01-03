@@ -138,6 +138,12 @@ The following key-value pairs are the defaults:
 }
 ```
 
+To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
+
+```
+{"auth_log_target":"STDOUT","script_log_target":"STDOUT","enable_stdout_log_prefix":true}
+```
+
 ### Hybrid mapping
 
 As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:

@@ -518,6 +518,8 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e auth-server-script ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- jans-auth.log target
       authLogTarget: "STDOUT"
       # -- jans-auth.log level
@@ -611,13 +613,15 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e config-api_persistence ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- configapi.log target
       configApiLogTarget: "STDOUT"
       # -- configapi.log level
       configApiLogLevel: "INFO"
       # -- config-api_persistence.log target
       persistenceLogTarget: "FILE"
-      # -- jans-auth_persistence.log level
+      # -- config-api_persistence.log level
       persistenceLogLevel: "INFO"
       # -- config-api_persistence_duration.log target
       persistenceDurationLogTarget: "FILE"
@@ -644,6 +648,8 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e fido2 ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- fido2.log target
       fido2LogTarget: "STDOUT"
       # -- fido2.log level
@@ -693,6 +699,8 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- jans-scim.log target
       scimLogTarget: "STDOUT"
       # -- jans-scim.log level
