@@ -77,9 +77,7 @@ property. Janssen server supports `plain` as well as `s256` code challenge metho
 
 ## Using PAR
 
-TODO: Question: PAR is a separate endpoint, should it be part of this document for authorization endpoint?
-
-Janssen Server [supports PAR](../oauth-features/par.md)(Pushed Authorization Requests) to enable authorization using 
+As a separate endpoint, Janssen Server [supports PAR](../oauth-features/par.md)(Pushed Authorization Requests) to enable authorization using 
 more complex authorization requests and making it more secure at the same time. 
 
 Use Janssen Server configuration property [requirePar](../../reference/json/properties/janssenauthserver-properties.md#requirepar)
