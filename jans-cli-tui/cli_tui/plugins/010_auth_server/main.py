@@ -486,6 +486,7 @@ class Plugin(DialogUtils):
 
 
         if data:
+            data.sort()
             buttons = []
 
             if len(data)/20 >=1:
