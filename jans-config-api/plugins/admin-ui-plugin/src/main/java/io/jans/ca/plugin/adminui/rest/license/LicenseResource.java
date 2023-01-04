@@ -5,9 +5,11 @@ import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
 import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
+import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
 
+import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -53,7 +55,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @GET
     @Path(IS_ACTIVE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_READ })
     @Produces(MediaType.APPLICATION_JSON)
     public Response isActive() {
         LicenseApiResponse licenseResponse = null;
@@ -79,7 +81,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @POST
     @Path(ACTIVATE_LICENSE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_WRITE })
     @Produces(MediaType.APPLICATION_JSON)
     public Response activateLicense(@Valid @NotNull LicenseRequest licenseRequest) {
         LicenseApiResponse licenseResponse = null;
@@ -105,7 +107,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @POST
     @Path(SAVE_API_CREDENTIALS)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_WRITE })
     @Produces(MediaType.APPLICATION_JSON)
     public Response saveLicenseCredentials(@Valid @NotNull LicenseSpringCredentials licenseSpringCredentials) {
         LicenseApiResponse licenseResponse = null;
@@ -130,7 +132,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
     @Path(LICENSE_DETAILS)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_READ })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLicenseDetails() {
         try {
