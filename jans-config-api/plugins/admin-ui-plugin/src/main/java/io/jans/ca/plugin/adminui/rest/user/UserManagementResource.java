@@ -62,7 +62,7 @@ public class UserManagementResource {
     @GET
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_ROLE_READ)
+    @ProtectedApi(scopes = {SCOPE_ROLE_READ}, groupScopes = {SCOPE_ROLE_WRITE})
     public Response getAllRoles() {
         try {
             log.info("Get all Admin-UI roles.");
@@ -145,7 +145,7 @@ public class UserManagementResource {
     @GET
     @Path(ROLES + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_ROLE_READ)
+    @ProtectedApi(scopes = {SCOPE_ROLE_READ}, groupScopes = {SCOPE_ROLE_WRITE})
     public Response getRole(@PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get all Admin-UI roles.");
@@ -199,7 +199,7 @@ public class UserManagementResource {
     @GET
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_PERMISSION_READ)
+    @ProtectedApi(scopes = {SCOPE_PERMISSION_READ}, groupScopes = {SCOPE_PERMISSION_WRITE})
     public Response getAllPermissions() {
         try {
             log.info("Get all Admin-UI permissions.");
@@ -282,7 +282,7 @@ public class UserManagementResource {
     @GET
     @Path(PERMISSIONS + PERMISSION_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_PERMISSION_READ)
+    @ProtectedApi(scopes = {SCOPE_PERMISSION_READ}, groupScopes = {SCOPE_PERMISSION_WRITE})
     public Response getPermission(@PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
         try {
             log.info("Get Admin-UI permission.");
@@ -336,7 +336,7 @@ public class UserManagementResource {
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_ROLE_PERMISSION_MAPPING_READ)
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE})
     public Response getAllAdminUIRolePermissionsMapping() {
         try {
             log.info("Get all Admin-UI role-permissions mapping.");
@@ -419,7 +419,7 @@ public class UserManagementResource {
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = SCOPE_ROLE_PERMISSION_MAPPING_READ)
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE})
     public Response getAdminUIRolePermissionsMapping(@PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get Admin-UI role-permissions mapping by role-name.");
