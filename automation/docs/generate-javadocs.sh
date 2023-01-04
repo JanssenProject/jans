@@ -9,7 +9,7 @@ for module in $JVM_PROJECTS
    echo "Move generated javadocs to respective doc site location"
 
    echo "getting locations where javadocs got generated"
-   generated_doc_paths=($(find "$module" -type d  -path '*/target/site/apidocs' | sed -r 's|/[^/]+$||' | sed -r 's|/[^/]+$||' | sed -r 's|/[^/]+$||'))
+   mapfile -t generated_doc_paths < <(find "$module" -type d  -path '*/target/site/apidocs' | sed -r 's|/[^/]+$||' | sed -r 's|/[^/]+$||' | sed -r 's|/[^/]+$||')
 
    echo "move javadocs from each location to respective documentation site location"
    for source_path in "${generated_doc_paths[@]}"
