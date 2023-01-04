@@ -54,6 +54,13 @@ navigate via `Auth Server`->`Properties`.
 - [allowPostLogoutRedirectWithoutValidation](../../reference/json/properties/janssenauthserver-properties.md#allowpostlogoutredirectwithoutvalidation)
 - [forceIdTokenHintPrecense](../../reference/json/properties/janssenauthserver-properties.md#forceidtokenhintprecense)
 
+Apart from above mentioned server properties, some of the properties relevant to individual clients can be configured
+during client registration or can be edited later. When using 
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties, navigate via `Auth Server`->
+`Clients`->`logout` as show in image below:
+
+![](../../../assets/image-logout-client-config.png)
+
 ### Interception Scripts
 
 Response from userinfo can be further customized using [end session](../../developer/scripts/end-session.md) 
