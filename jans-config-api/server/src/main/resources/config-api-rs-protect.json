@@ -1802,7 +1802,7 @@
           ],
           "groupScopes": [
             {
-              "inum": "1800.03.2",
+              "inum": "1800.04.2",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write"
             }
           ],
