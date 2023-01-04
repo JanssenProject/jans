@@ -68,7 +68,7 @@ class Plugin(DialogUtils):
 
     async def get_appconfiguration(self) -> None:
         'Coroutine for getting application configuration.'
-         
+
         cli_args = {'operation_id': 'get-properties'}
         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
@@ -119,7 +119,7 @@ class Plugin(DialogUtils):
                         self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first {} OpenID Connect clients").format(self.app.entries_per_page), handler=self.oauth_update_clients),
                         self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
                         self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
-                        
+
                         ],
                         padding=3,
                         width=D(),
@@ -140,15 +140,22 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['properties'] = HSplit([
                     VSplit([
-                        self.app.getTitledText(
-                            _("Search"), 
-                            name='oauth:properties:search', 
-                            jans_help=_(common_strings.enter_to_search), 
-                            accept_handler=self.search_properties,
-                            style='class:outh_containers_scopes.text')
+                            self.app.getTitledText(
+                                _("Search"), 
+                                name='oauth:properties:search', 
+                                jans_help=_(common_strings.enter_to_search), 
+                                accept_handler=self.search_properties,
+                                style='class:outh_containers_scopes.text'
+                            ),
+                            self.app.getButton(
+                                _("Add Property"),
+                                name='oauth:properties:add',
+                                jans_help=_("Press this button to add a missing preperty"),
+                                handler=self.add_property
+                            ),
                         ],
-                        padding=3,
-                        width=D(),
+                    padding=3,
+                    width=D(),
                     ),
                     DynamicContainer(lambda: self.oauth_data_container['properties'])
                     ],style='class:outh_containers_scopes')
@@ -437,6 +444,51 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
+
+    def add_property(self):
+        missing_properties = []
+
+        for prop in self.schema['properties']:
+            if prop not in self.app_configuration:
+                missing_properties.append(prop)
+        missing_properties.sort()
+        missing_properties_data = [ [prop] for prop in missing_properties ]
+
+        def add_property(**params: Any) -> None:
+            self.add_property_dialog.future.set_result('add_property')
+            prop_name = params['passed'][0]
+            prop_val = ''
+            prop_type = self.schema['properties'][prop_name]['type']
+
+            if prop_type == 'string':
+                prop_val = ''
+            elif prop_type == 'array':
+                prop_val = []
+
+            passed = [prop_name, prop_val]
+
+            self.view_property(passed=passed, op_type='add')
+
+        properties = JansVerticalNav(
+                myparent=self.app,
+                headers=['Property Name'],
+                preferred_size=[0],
+                data=missing_properties_data,
+                on_enter=add_property,
+                #on_display=self.properties_display_dialog,
+                get_help=(self.get_help,'AppConfiguration'),
+                selectes=0,
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+                all_data=missing_properties
+            )
+
+        body = HSplit([properties])
+        buttons = [Button(_("Cancel"))]
+        self.add_property_dialog = JansGDialog(self.app, title=_("Select Property"), body=body, buttons=buttons)
+        self.app.show_jans_dialog(self.add_property_dialog)
+
+
     def oauth_update_properties(
         self,
         start_index: Optional[int]= 0,
@@ -456,29 +508,16 @@ class Plugin(DialogUtils):
         # ------------------------------------------------------------------------------- #
         # ----------------------------------- Search ------------------------------------ #
         # ------------------------------------------------------------------------------- #
-        porp_schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
         data =[]
         
         if pattern:
             for k in self.app_configuration:
                 if pattern.lower() in k.lower():
-                    if k in porp_schema.get('properties', {}):
-                        data.append(
-                            [
-                            k,
-                            self.app_configuration[k],
-                            ]
-                        )
+                    data.append([k, self.app_configuration[k]])
         else:
             for d in self.app_configuration:
-                if d in porp_schema.get('properties', {}):
-                    data.append(
-                        [
-                        d,
-                        self.app_configuration[d],
-                        ]
-                    )
+                data.append([d, self.app_configuration[d]])
 
         # ------------------------------------------------------------------------------- #
         # --------------------------------- View Data ----------------------------------- #
@@ -527,7 +566,7 @@ class Plugin(DialogUtils):
             if tofocus:
                 self.app.layout.focus(properties)
         else:
-            self.app.show_message(_("Oops"), _(common_strings.no_matching_result),tobefocused = self.oauth_containers['properties'])
+            self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused= self.oauth_containers['properties'])
 
     def properties_display_dialog(self, **params: Any) -> None:
         """Display the properties as Text
@@ -557,7 +596,7 @@ class Plugin(DialogUtils):
 
         title = _("Edit property")
 
-        dialog = ViewProperty(app=self.app, parent=self, title=title, data=selected_line_data)
+        dialog = ViewProperty(app=self.app, parent=self, title=title, data=selected_line_data, op_type=params.get('op_type', 'replace'))
 
         self.app.show_jans_dialog(dialog)
  

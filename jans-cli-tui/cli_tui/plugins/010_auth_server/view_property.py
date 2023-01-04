@@ -25,8 +25,9 @@ class ViewProperty(JansGDialog, DialogUtils):
             app,
             parent,
             data:tuple,
-            title: AnyFormattedText= "",
-            buttons: Optional[Sequence[Button]]= []
+            title: AnyFormattedText='',
+            buttons: Optional[Sequence[Button]]=[],
+            op_type: Optional[str]='replace'
             )-> None:
         """init for `ViewProperty`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
@@ -41,15 +42,16 @@ class ViewProperty(JansGDialog, DialogUtils):
             button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
         """
         super().__init__(app, title, buttons)
-        self.property, self.value = data[0],data[1]
+        self.property, self.value = data[0], data[1]
         self.app = app
         self.myparent = parent
+        self.op_type = op_type
         self.value_content = HSplit([],width=D())
         self.tabs = {}
         self.selected_tab = 'tab0'
         self.prepare_properties()
         self.create_window()
-        
+
     def cancel(self) -> None:
         """method to invoked when canceling changes in the dialog (Cancel button is pressed)
         """
@@ -68,8 +70,8 @@ class ViewProperty(JansGDialog, DialogUtils):
                 prop_type = self.get_item_data(wid)
             data = prop_type['value']
 
-        elif (type(self.value)==list and (type(self.value[0]) not in  [dict,list])):
-            
+        elif (type(self.value)==list and (type(self.value[0]) not in [dict,list])):
+
             for wid in self.value_content.children:
                 prop_type = self.get_item_data(wid)
             
@@ -103,7 +105,7 @@ class ViewProperty(JansGDialog, DialogUtils):
         # ------------------------------------------------------------#
         if data :
 
-            cli_args = {'operation_id': 'patch-properties', 'data': [ {'op':'replace', 'path': self.property, 'value': data } ]}
+            cli_args = {'operation_id': 'patch-properties', 'data': [ {'op':self.op_type, 'path': self.property, 'value': data } ]}
 
             async def coroutine():
                 self.app.start_progressing()
@@ -123,33 +125,29 @@ class ViewProperty(JansGDialog, DialogUtils):
         Returns:
             str: the widget type to implement
         """
-        try :
-            proper = self.myparent.schema.get('properties', {})[prop]
+        proper = self.myparent.schema.get('properties', {})[prop]
 
-            if proper['type'] == 'string':
-                prop_type= 'TitledText'
+        prop_type= 'TitledText'
 
-            elif proper['type'] == 'integer':
-                prop_type= 'int-TitledText'
+        if proper['type'] == 'integer':
+            prop_type= 'int-TitledText'
 
-            elif proper['type'] == 'boolean':
-                prop_type= 'TitledCheckBox'
+        elif proper['type'] == 'boolean':
+            prop_type= 'TitledCheckBox'
 
-            elif proper['type'] == 'object':
-                prop_type= 'dict'
+        elif proper['type'] == 'object':
+            prop_type= 'dict'
 
-            elif proper['type'] == 'array':
-                if 'enum' in proper or ('enum' in proper['items']):
-                   prop_type= 'checkboxlist' 
+        elif proper['type'] == 'array':
+            if 'enum' in proper or ('enum' in proper['items']):
+               prop_type= 'checkboxlist' 
+            else:
+                if self.value and isinstance(self.value[0], dict):
+                    prop_type= 'list-dict'
+                elif self.value and isinstance(self.value[0], list):
+                    prop_type= 'list-list'
                 else:
-                    if type(self.value[0]) == dict:
-                        prop_type= 'list-dict'
-                    elif type(self.value[0]) == list:
-                        prop_type= 'list-list'
-                    else:
-                        prop_type= 'long-TitledText'
-        except Exception:
-            prop_type = None
+                    prop_type= 'long-TitledText'
 
         return prop_type
 
