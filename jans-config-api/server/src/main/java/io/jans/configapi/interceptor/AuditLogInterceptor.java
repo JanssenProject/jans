@@ -12,7 +12,6 @@ import io.jans.configapi.util.AuthUtil;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
@@ -24,7 +23,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,15 +57,14 @@ public class AuditLogInterceptor {
         try {
             LOG.info("Audit Log Interceptor - context:{}, info:{}, request:{}, httpHeaders:{}, AUDIT_LOG:{}", context,
                     info, request, httpHeaders, AUDIT_LOG);
-            AUDIT_LOG.info("\n ********************** Request Details ********************** ");
 
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
-            LOG.info("auditLogConf:{}", auditLogConf);
+            LOG.info("auditLogConf:{}, ignoreMethod():{}", auditLogConf, ignoreMethod());
 
             // Log if enabled
-            if (ignoreMethod()) {
-
+            if (!ignoreMethod()) {
+                AUDIT_LOG.info("\n ********************** Audit Request Detail Start ********************** ");
                 // Request audit
                 String beanClassName = context.getClass().getName();
                 String method = context.getMethod().getName();
@@ -81,10 +78,11 @@ public class AuditLogInterceptor {
 
                 // Request object audit
                 processRequest(context, auditLogConf);
+                AUDIT_LOG.info("\n ********************** Audit Request Detail End ********************** ");
             }
 
         } catch (Exception ex) {
-            throw new WebApplicationException(ex);
+            LOG.error("Not able to log audit details due to error:{}", ex);
         }
         return context.proceed();
     }
@@ -118,16 +116,18 @@ public class AuditLogInterceptor {
     private AuditLogConf getAuditLogConf() {
         return this.authUtil.getAuditLogConf();
     }
-    
+
     private boolean ignoreMethod() {
-       
-        LOG.debug("request.getMethod():{}, getAuditLogConf().getIgnoreHttpMethod():{}, getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod()):{}", request.getMethod() ,getAuditLogConf().getIgnoreHttpMethod(), getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod()));
-        if(getAuditLogConf()!=null && getAuditLogConf().getIgnoreHttpMethod()!=null && getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod())) {
-            return true;
+        LOG.debug(
+                "request.getMethod():{}, getAuditLogConf().getIgnoreHttpMethod():{}, getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod()):{}",
+                request.getMethod(), getAuditLogConf().getIgnoreHttpMethod(),
+                getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod()));
+        boolean flag = false;
+        if (getAuditLogConf() != null && getAuditLogConf().getIgnoreHttpMethod() != null
+                && getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod())) {
+            flag = true;
         }
-        
-        return false;
-        
+        return flag;
     }
 
     private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf) {
