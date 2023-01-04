@@ -7,9 +7,9 @@ tags:
 # Config-api-configuration
 
 ## Overview
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) configuration enables to manage application-level configuration.
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/replace-janssen-version/jans-config-api) configuration enables to manage application-level configuration.
 
-![](https://github.com/JanssenProject/jans/raw/main/docs/assets/config-api-configuration.png)
+![](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/assets/config-api-configuration.png)
 
 ### Existing Config-api dynamic configuration
 
@@ -76,7 +76,7 @@ tags:
 ## Revision update
 
 `jansRevision` property of the configuration is used to manage any change
-![](https://github.com/JanssenProject/jans/raw/main/docs/assets/config-api-configuration-revision)
+![](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/assets/config-api-configuration-revision)
 
 ### Two options to make effect of the changes done to the configuration
 
