@@ -30,6 +30,8 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import AnyFormattedText
 from typing import Optional, Sequence
 from typing import Callable
+from prompt_toolkit.eventloop import get_event_loop
+import asyncio
 
 import json
 
@@ -288,12 +290,20 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     'redirectUrisRegex'),
                             style=cli_style.check_box), 
 
-                        self.myparent.getTitledText(_("Scopes"), 
-                            name='scopes',
-                            value='\n'.join(self.data.get('scopes', [])),
-                            height=3, 
-                            jans_help=self.myparent.get_help_from_schema(schema, 'scopes'),
-                            style=cli_style.check_box),
+                        JansVerticalNav(
+                        myparent=self.myparent,
+                        headers=['baseDn','displayName'],
+                        preferred_size= [15,0],
+                        data=self.data.get('scopes', []),
+                        # on_enter=self.edit_client_dialog,
+                        on_display=self.myparent.data_display_dialog,
+                        # on_delete=self.delete_client,
+                        # get_help=(self.get_help,'Client'),
+                        selectes=0,
+                        headerColor=cli_style.navbar_headcolor,
+                        entriesColor=cli_style.navbar_entriescolor,
+                        all_data=self.data.get('scopes', [])
+                    ),
 
                         ],width=D(),
                         style=cli_style.tabs

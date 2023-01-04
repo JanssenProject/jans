@@ -286,7 +286,7 @@ class Plugin(DialogUtils):
     def get_scopes(self,client_data) -> None:
 
         async def coroutine():
-            cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': ''}
+            cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':'limit:200,startIndex:0'}
             self.app.start_progressing(_("Retreiving client Scopes..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
@@ -305,19 +305,13 @@ class Plugin(DialogUtils):
             data_base_dn =[]
 
             for d in result.get('entries', []):
-                if d.get('displayName'):
-                    data_display_name.append(d.get('displayName'))
-                    data_base_dn.append(d.get('baseDn'))
+                data_display_name.append(d.get('displayName',d.get('baseDn')))
+                data_base_dn.append(d.get('baseDn'))
 
             for k in range(len(client_data)) : 
                 for i in range(len(client_data[k]['scopes'])) :  ### Scopes of the client
                     if client_data[k]['scopes'][i] in data_base_dn:
-                        client_data[k]['scopes'][i] = data_display_name[data_base_dn.index(client_data[k]['scopes'][i])]
-                    
-                    ##  threr are scopes that didn't exist in `get-oauth-scopes` so leave it as it is -fow now-!!
-                    # else:  
-                    #     client_data[0]['scopes'][i] = ''
-
+                        client_data[k]['scopes'][i] = [ client_data[k]['scopes'][i] ,data_display_name[data_base_dn.index(client_data[k]['scopes'][i])]  ]
 
         asyncio.ensure_future(coroutine())
         return client_data
