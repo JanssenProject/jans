@@ -91,29 +91,50 @@ jobs:
         continue-on-error: true
         env:
           VERSION: ${{ github.event.release.tag_name }}
+          JVM_PROJECTS: |
+            jans-auth-server
+            jans-orm
+            jans-config-api
+            jans-scim
+            jans-core
+            jans-notify
+            jans-fido2
+            jans-eleven
+            agama
         run: |
          echo "Custom work on generating docs can go here."
           
          # Run cn docs 
          sudo bash ./automation/docs/generated-cn-docs.sh
           
-         # Generate property docs and push to main
+         echo "Generating property docs and push to main"
          sudo bash ./automation/docs/generate-property-docs.sh 
          cd docs
          git add . || echo "Nothing to add"
          git commit -a -S -m "docs: automated property doc generation" || echo "Nothing to commit"
-         git push
          cd ..
           
-         # Replace release number markers with actual release number
+         echo "Replacing release number markers with actual release number"
          if [ ! -z "$VERSION" ]; then
+          MVERSION="${VERSION:1}"
            cd docs
            egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/$VERSION/g"
+           # strip v from v1.x.x
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-image-version/${VERSION:1}/g"
            git add . || echo "Nothing to add"
            git commit -a -S -m "docs: replace release marker with release number" || echo "Nothing to commit"
-           git push
            cd ..
          fi
+          
+         echo "Generating javadocs"
+         sudo bash ./automation/docs/generate-javadocs.sh
+         cd docs
+         git add . || echo "Nothing to add"
+         git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
+         cd ..
+         
+         git push
+
 
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
