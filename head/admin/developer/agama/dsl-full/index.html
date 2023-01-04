@@ -5316,6 +5316,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#arguments-conversion" class="md-nav__link">
+    Arguments conversion
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#oop-prose-warning" class="md-nav__link">
     OOP prose warning
   </a>
@@ -9394,6 +9401,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#arguments-conversion" class="md-nav__link">
+    Arguments conversion
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#oop-prose-warning" class="md-nav__link">
     OOP prose warning
   </a>
@@ -9657,11 +9671,6 @@
 <td><code>x</code> implements <code>java.util.Map</code> and keys are of type<code>java.lang.String</code></td>
 <td>map</td>
 <td>Changing the map contents can only be achieved if the Java map is modifiable</td>
-</tr>
-<tr>
-<td><code>x</code> is a <code>java.lang.(Double|Float|Long|Integer|Short|Byte)</code> or an equivalent primitive</td>
-<td>number</td>
-<td></td>
 </tr>
 <tr>
 <td><code>x</code> is a <code>java.lang.(Double|Float|Long|Integer|Short|Byte)</code> or an equivalent primitive</td>
@@ -10353,7 +10362,7 @@ When E is not null
     <tr>
 <td>
 
-<div class="highlight"><pre><span></span><code>| E = Call com.acme.NotifyExternalSystem
+<div class="highlight"><pre><span></span><code>| E = Call com.acme.Worker#notifyExternalSystem
 //Do something with E
 //... 
 </code></pre></div>
@@ -10399,9 +10408,40 @@ hasOne = Call map.numbers contains 1
 
 <p>The usage of a hash sign (or spaces) before a method name helps disambiguate whether the invocation is on a static class method or an object method. This is so because an expression like <code>hey.You</code> may reference the class <code>You</code> on package <code>hey</code>, or the value of key <code>You</code> in a map named <code>hey</code>.</p>
 <h3 id="highlights">Highlights<a class="headerlink" href="#highlights" title="Permanent link">#</a></h3>
-<p>Any method that meets the conditions above (public or interface static) and that is reachable in the JVM <a href="../java-classpath/">classpath</a> can be called; developers are not restricted solely to <code>java.*</code> packages. </p>
-<p>When using <code>Call</code>, the method to execute is picked based on the name (e.g. after the <code>#</code> sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), there is no way to know which of the available variants will be called. The <code>java.util.Arrays</code> class has several methods of this kind for instance.</p>
-<p>Once a concrete method is picked, a best effort is made to convert (if required) the values passed as arguments so that they match the expected parameter types in the method signature. If a conversion fails, this will degenerate in an <code>IllegalArgumentException</code>.</p>
+<p>Any method that meets the conditions mentioned (public or interface static) and that is reachable in the JVM <a href="../java-classpath/">classpath</a> can be called; developers are not restricted solely to <code>java.*</code> packages. </p>
+<p>When using <code>Call</code>, the method to execute is picked based on the name (e.g. after the <code>#</code> sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), there is <strong>no way to know</strong> which of the available variants will be called. The <code>java.util.Arrays</code> class has several methods of this kind for instance.</p>
+<p>For non-static method invocations, i.e. no hash sign, the class used for method lookup is that of the instance passed (the first parameter in the <code>Call</code> directive). When the instance does not hold a Java but an Agama value, the following is used to pick a class:</p>
+<table>
+<thead>
+<tr>
+<th>Agama type</th>
+<th>Java class for method lookup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>string</code></td>
+<td><code>String</code></td>
+</tr>
+<tr>
+<td><code>boolean</code></td>
+<td><code>Boolean</code></td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td><code>Double</code></td>
+</tr>
+<tr>
+<td><code>list</code></td>
+<td><code>java.util.List</code></td>
+</tr>
+<tr>
+<td><code>map</code></td>
+<td><code>java.util.Map</code></td>
+</tr>
+</tbody>
+</table>
+<p>Once a concrete method is selected, a best effort is made to convert (if required) the values passed as arguments so that they match the expected parameter types in the method signature. If a conversion fails, this will degenerate in an <code>IllegalArgumentException</code>. More on conversions <a href="#arguments-conversion">here</a>.</p>
 <p><strong>Limitations:</strong></p>
 <ul>
 <li>
@@ -10412,7 +10452,117 @@ hasOne = Call map.numbers contains 1
 </li>
 </ul>
 <h3 id="exception-handling">Exception handling<a class="headerlink" href="#exception-handling" title="Permanent link">#</a></h3>
-<p>As seen in the examples Agama can deal with Java exceptions, however, this feature should be used sparingly. When exception handling is really required, create wrapper methods in Java to do it instead of delegating that to the DSL.</p>
+<p>As seen in the examples Agama can deal with Java exceptions, however, this feature should be used sparingly. When exception handling adds undesired complexity to your code, create wrapper methods in Java and do the processing there instead of delegating that to the DSL.</p>
+<h3 id="arguments-conversion">Arguments conversion<a class="headerlink" href="#arguments-conversion" title="Permanent link">#</a></h3>
+<p><a href="#data-types">Agama types</a> do not match Java types. This means passing a "native" Agama value as parameter in a method <code>Call</code> requires some form of compatibility with the target (Java) type in the method signature. <a href="#java-objects">Earlier</a>, we saw how some Java values returned from <code>Call</code>s can be treated in Agama code in a very straightforward manner, here we make an analysis in the reverse direction: from Agama to Java.</p>
+<p>An argument (Agama value) is compatible with a method parameter if it can be "converted" successfully. As we'll see, conversion feels pretty natural in practice. If this process fails a <code>java.lang.IllegalArgumentException</code> is thrown and the flow will crash unless the exception is caught. Note however the recommended practice is to let flows <a href="../lifecycle/#about-crashes">crash</a>.</p>
+<p>The following lists some of the most common successful conversions:</p>
+<table>
+<thead>
+<tr>
+<th>Agama value</th>
+<th>Can be converted to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>string</code></td>
+<td><code>String</code> or <code>char[]</code></td>
+</tr>
+<tr>
+<td><code>boolean</code></td>
+<td><code>Boolean</code> or primitive equivalent</td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td><code>Double</code>/<code>Float</code>/<code>Integer</code>/<code>Long</code>/<code>Short</code>/<code>Byte</code> or primitive equivalent</td>
+</tr>
+<tr>
+<td><code>null</code></td>
+<td>Any non-primitive</td>
+</tr>
+<tr>
+<td><code>list</code></td>
+<td>Array or class implementing <code>Collection&lt;T&gt;</code> as long as items can be converted to type <code>T</code></td>
+</tr>
+<tr>
+<td><code>map</code></td>
+<td>Class implementing <code>Map&lt;K, V&gt;</code> as long as keys and values can be converted to types <code>K</code> and <code>V</code>, respectively</td>
+</tr>
+<tr>
+<td><code>map</code></td>
+<td>Java bean. Unrecognized properties in Agama value are ignored</td>
+</tr>
+</tbody>
+</table>
+<p>The below table shows some examples of interesting and handy conversions:</p>
+<table>
+<thead>
+<tr>
+<th>Agama value</th>
+<th>Param data type in target Java method</th>
+<th>Argument value (Agama)</th>
+<th>Received param value (in method)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Positive <code>number</code> having fractional part</td>
+<td><code>Integer</code>/<code>Long</code>/<code>Short</code>/<code>Byte</code> or primitive equivalent</td>
+<td>2.6</td>
+<td>2</td>
+<td>Integer part kept</td>
+</tr>
+<tr>
+<td>Negative <code>number</code> having fractional part</td>
+<td><code>Integer</code>/<code>Long</code>/<code>Short</code>/<code>Byte</code> or primitive equivalent</td>
+<td>-2.4</td>
+<td>2</td>
+<td>Integer part kept</td>
+</tr>
+<tr>
+<td>Integer <code>number</code></td>
+<td><code>Float</code>/<code>Double</code> or primitive equivalent</td>
+<td>1</td>
+<td>1.0</td>
+<td></td>
+</tr>
+<tr>
+<td><code>list</code> of <code>number</code>s</td>
+<td><code>List&lt;Integer&gt;</code></td>
+<td>[1, 2.0, 3.1, -4.2]</td>
+<td>[1, 2, 3, -4]</td>
+<td>Only integer parts kept</td>
+</tr>
+<tr>
+<td><code>list</code> of integer <code>number</code>s</td>
+<td><code>List&lt;Float&gt;</code>/<code>List&lt;Double&gt;</code></td>
+<td>[1, 2, 3, -4]</td>
+<td>[1.0, 2.0, 3.0, -4.0]</td>
+<td></td>
+</tr>
+<tr>
+<td><code>string</code> of length 1</td>
+<td><code>Character</code> or primitive equivalent</td>
+<td>a</td>
+<td>a</td>
+<td>Passing a zero, two, or more lengthed string will make the call fail</td>
+</tr>
+</tbody>
+</table>
+<p>When the argument is not an Agama but a Java object/primitive, the following rules apply:</p>
+<ul>
+<li>If the value can be cast to the target type, no conversion is needed, otherwise</li>
+<li>If it is an instance of <code>java.lang.Number</code> and the type is a numeric primitive or wrapper (e.g. <code>Integer</code>), the value is truncated if required, otherwise</li>
+<li>The value is serialized to JSON - if possible - and then an attempt to create a Java instance based on the given JSON contents is made. For this purpose, the FasterXML Jackson library is used</li>
+</ul>
+<p>This is powerful because it allows to send data of similar shape/structure when data types do not necessarily match. Consider the following example:</p>
+<div class="highlight"><pre><span></span><code>s = &quot;a man&#39;s gotta do what a man&#39;s gotta do&quot;
+jStrArr = Call s split &quot; &quot;
+words = Call java.util.Collections#unmodifiableSet jStrArr
+</code></pre></div>
+<p>This Agama snippet creates the (Java) <code>Set</code> of different words found in a given (Agama) <code>string</code>. Note <code>jStrArr</code> is of type <code>String[]</code> and is passed directly to method <code>unmodifiableSet</code> which originally expects an instance of <code>Set</code> as parameter.</p>
 <h3 id="oop-prose-warning">OOP prose warning<a class="headerlink" href="#oop-prose-warning" title="Permanent link">#</a></h3>
 <p>Java support adds the ability to execute pieces of business logic required to build up a flow. These “pieces of logic” match well to Java methods, however situations like this must be avoided:</p>
 <div class="highlight"><pre><span></span><code>x = … // A java object obtained in some way
@@ -10661,7 +10811,7 @@ x[2] = &quot;polo&quot;    //adds the key/value pair &quot;2&quot; / &quot;polo&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-30T13:51:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-04T15:51:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-04</span>
       
         <br>
         Created:
