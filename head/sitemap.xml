@@ -421,6 +421,26 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/scopes/</loc>
+         <lastmod>2023-01-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/scopes/oauth/</loc>
+         <lastmod>2023-01-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/scopes/openid/</loc>
+         <lastmod>2023-01-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/scopes/uma/</loc>
+         <lastmod>2023-01-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/session-management/</loc>
          <lastmod>2023-01-04</lastmod>
          <changefreq>daily</changefreq>
