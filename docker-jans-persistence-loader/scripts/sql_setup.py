@@ -5,6 +5,7 @@ from collections import defaultdict
 from string import Template
 from pathlib import Path
 
+from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -322,9 +323,28 @@ class SQLBackend:
                 for row in self.client.search(table_name, ["doc_id", col_name])
             }
 
-            # to change the storage format of a JSON column, drop the column and
-            # add the column back specifying the new storage format
             with self.client.engine.connect() as conn:
+                # mysql will raise error if dropping column which has functional index,
+                # hence the associated index must be dropped first
+                if self.client.dialect == "mysql":
+                    for idx in conn.execute(
+                        text(
+                            "SELECT index_name "
+                            "FROM information_schema.statistics "
+                            "WHERE table_name = :table_name "
+                            "AND index_name LIKE :index_name '%' "
+                            "AND expression LIKE '%' :col_name '%';"
+                        ),
+                        {
+                            "table_name": table_name,
+                            "index_name": f"{table_name}_json_",
+                            "col_name": col_name
+                        },
+                    ):
+                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+
+                # to change the storage format of a JSON column, drop the column and
+                # add the column back specifying the new storage format
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
 
@@ -333,8 +353,10 @@ class SQLBackend:
 
             # pre-populate the modified column
             for doc_id, value in values.items():
-                if value and "v" in value and value["v"]:
+                if self.client.dialect == "mysql" and value and value.get("v", []):
                     new_value = value["v"][0]
+                elif self.client.dialect == "pgsql" and value:
+                    new_value = value[0]
                 else:
                     new_value = ""
                 self.client.update(table_name, doc_id, {col_name: new_value})
@@ -427,6 +449,10 @@ class SQLBackend:
         for mod in [
             ("jansPerson", "jansMobileDevices"),
             ("jansPerson", "jansOTPDevices"),
+            ("jansToken", "clnId"),
+            ("jansUmaRPT", "clnId"),
+            ("jansUmaPCT", "clnId"),
+            ("jansCibaReq", "clnId"),
         ]:
             column_from_json(mod[0], mod[1])
 

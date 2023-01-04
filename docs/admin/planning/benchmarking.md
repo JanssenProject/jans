@@ -61,39 +61,67 @@ justified.
    1. Response Types: ['code', 'id_token]
    1. Grant Types: ['authorization_code', `implicit`, 'refresh_token']
    1. Redirect Uri: valid redirect uri which is resolvable by machine which runs this load test
-1. Create users by pattern:
-   1. username: `test_user1`, `test_user2`, ... `test_userN` 
-   1. secret: `test_user_password`
-   Following script can be used [add_sequenced_jans_user_rdbm.py](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/tools/benchmark/add_sequenced_jans_user_rdbm.py)
-
-**User Selection Logic**
-
-`JSR223 PreProcessor : identify user credentials` has following logic for user selection      
-
-```java
-double weight = 0.7d;
-
-int min = 1;
-int max = 1000;
-
-int minX = 1001;
-int maxX = 100000;
-
-float chance = new Random().nextFloat();
-if (chance <= weight) {
-	min = minX;
-	max = maxX;
+Change the `FQDN` below and execute:
+```bash
+FQDN=example.gluu.info
+cat << EOF > auth_code_client.json
+{
+    "dn": null,
+    "inum": null,
+    "displayName": "Auth Code Flow Load Test Client",
+    "redirectUris": [
+      "https://$FQDN"
+    ],
+    "responseTypes": [
+      "id_token",
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "implicit",
+      "refresh_token"
+    ],
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "user_name"
+    ],
+    "trustedClient": true,
+    "includeClaimsInIdToken": false,
+    "accessTokenAsJwt": false,
+    "disabled": false,
+    "deletable": false,
+    "description": "Auth Code Flow Load Testing Client"
 }
-
-int userNumber = new Random().nextInt(max - min + 1) + min;
-String username = "test_user" + userNumber;
-
-//log.info("username: " + username);
-
-vars.put("username", username);
+EOF
 ```
 
-Please change it if needed.
+Download or build [config-cli-tui](../config-guide/tui.md) and run:
+
+```bash
+# add -noverify if your fqdn is not registered
+./config-cli-tui.pyz --host <FQDN> --client-id <ROLE_BASED_CLIENT_ID> --client-secret <ROLE_BASED_CLIENT_SECRET> --no-tui --operation-id=post-oauth-openid-client --data=auth_code_client.json
+```
+
+1. Create users by pattern:
+Set the following [env vars](../../../demos/benchmarking/docker-jans-loadtesting-jmeter/README.md#loading-users) 
+
+| ENV                          | Example            |
+|------------------------------|--------------------|
+| `LOAD_USERS_TO_RDBMS`        | `true`             |
+| `RDBMS_TYPE`                 | `mysql` or `pgsql` |
+| `RDBMS_DB`                   | `jans`             |
+| `RDBMS_USER`                 | `root`             |
+| `RDBMS_PASSWORD`             | `Secret`           |
+| `RDBMS_HOST`                 | `mysql.jans.io`    |
+| `USER_NUMBER_STARTING_POINT` | 0                  |
+| `USER_NUMBER_ENDING_POINT`   | 10000              |
+
+
+Run the following script [add_sequenced_jans_user_rdbm.py](../../../demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/add_users_rdbm.py)
+
 
 **Threads&RampUp**
 

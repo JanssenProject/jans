@@ -1459,6 +1459,14 @@ public class Client extends DeletableEntity implements Serializable {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
     }
 
+    public String getDisplayName() {
+        return getClientName();
+    }
+
+    public void setDisplayName(String displayName) {
+        setClientName(displayName);
+    }
+
     public String getDescription() {
         return description;
     }

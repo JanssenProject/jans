@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -56,7 +56,7 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # ===========
 
 ENV CN_VERSION=1.0.6-SNAPSHOT
-ENV CN_BUILD_DATE='2022-12-01 12:38'
+ENV CN_BUILD_DATE='2022-12-29 08:15'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -67,7 +67,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
     && zip -d jans-auth.war WEB-INF/jetty-web.xml \
     && zip -r jans-auth.war WEB-INF/jetty-env.xml \
     && cp jans-auth.war ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-auth.war /tmp/WEB-INF
 
 # ===========
@@ -88,8 +88,8 @@ ARG CASA_CONFIG_BUILD_DATE="2022-05-26 13:56"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
 
 # A workaround for Fido2 integration
-ARG FIDO2_CLIENT_VERSION=1.0.1
-ARG FIDO2_CLIENT_BUILD_DATE="2022-07-06 12:49"
+ARG FIDO2_CLIENT_VERSION=1.0.6-SNAPSHOT
+ARG FIDO2_CLIENT_BUILD_DATE="2022-12-27 10:01"
 RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
 
 # =====================
@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
+ENV JANS_SOURCE_VERSION=d95fc492ca00ccee0ecc88132376c128203faefb
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -145,11 +145,7 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
-ARG PROMETHEUS_JAVAAGENT_VERSION=0.17.2
 COPY conf/prometheus-config.yaml /opt/prometheus/
-RUN mkdir -p /opt/prometheus \
-    && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JAVAAGENT_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JAVAAGENT_VERSION}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=jmx,stats
 
 # =======
 # Cleanup
@@ -278,7 +274,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/agama_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
+COPY jetty/log4j2.xml /app/templates
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
@@ -290,7 +286,7 @@ COPY --chown=1000:0 jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
-    && chmod -R g=u ${JETTY_BASE}/jans-auth/resources \
+    && chmod 664 ${JETTY_BASE}/jans-auth/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-auth/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
@@ -300,7 +296,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
     && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
-    && chown -R 1000:0 /usr/share/java
+    && chown -R 1000:0 /usr/share/java \
+    && chown -R 1000:0 /opt/prometheus
 
 USER 1000
 

@@ -7,7 +7,7 @@ sys.path.append("./cli_tui/")
 jans_main = importlib.import_module("jans-cli-tui") 
  
 from cli_tui.wui_components.jans_drop_down import DropDownWidget 
-from cli_tui.wui_components.jans_data_picker import DateSelectWidget 
+from cli_tui.wui_components.jans_date_picker import DateSelectWidget 
 from prompt_toolkit import prompt
 
 

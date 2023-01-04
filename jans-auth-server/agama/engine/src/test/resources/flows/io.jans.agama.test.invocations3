@@ -1,0 +1,80 @@
+Flow io.jans.agama.test.invocations3
+    Basepath ""
+
+s = "agama"
+
+// invoke an interface static method
+| E = Call java.util.Set#of "a" "ga" "ma" s
+When E is not null
+    Finish false
+    
+// invoke a default method
+test = Call co.Test#new
+| E = Call test echo s
+When E is not null
+    Finish false
+
+// invoke a "Groovy" method
+foo = Call co.coo.Foobar#new
+s | E = Call foo sayHello
+When s is null or E is not null
+    Finish false
+
+// pass agama maps to a method expecting Java objects
+obj1 = { name: s, id: "1" }
+obj2 = { id: "2" }
+| E = Call co.Test#sum obj1 obj2
+When E is not null
+    Finish false
+    
+// pass a Java object (obj1) that requires type narrowing
+obj1 = Call co.SubTest#new "1" s
+obj2 = Call co.Test#new
+Call obj2 setId "2"
+| E = Call co.Test#sum obj1 obj2
+When E is not null
+    Finish false
+
+// pass a list of agama numbers to a method expecting a list of Integers
+l = [ 1, 2, 3.5 ]
+x | E = Call co.ListUtil#sum l
+When E is not null or x is not 6  
+    Finish false
+
+// pass a list of objects that look like instances of co.Test
+l = [ { name: "three", id: "3" }, obj1, obj2 ]
+| E = Call co.ListUtil#ensureNotNull l
+When E is not null
+    Finish false
+
+// pass a list of objects that look like instances of co.Test
+| E = Call co.ListUtil#ensureArrayNotNull l
+When E is not null
+    Finish false
+    
+// create a Java array of primitive ints
+i = Call java.lang.Integer#valueOf "0" 10
+l = Call java.lang.reflect.Array#newInstance i.TYPE 3
+// pass a Java array to a method expecting a list of Integers
+| E = Call co.ListUtil#sum l
+When E is not null
+    Finish false
+
+// create a Java array of Test instances
+cls = Call co.Test#class
+l = Call java.lang.reflect.Array#newInstance cls 2
+// assign value using Java
+Call java.lang.reflect.Array#set l 0 obj1
+// assign value using straight agama
+l[1] = obj2
+// pass a Java array to a method expecting a list of Test instances
+| E = Call co.ListUtil#ensureNotNull l
+When E is not null
+    Finish false
+
+// pass a Java array of Test instances to a method expecting a list of Integers
+| E = Call co.ListUtil#sum l
+When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+    Finish false
+
+Finish true

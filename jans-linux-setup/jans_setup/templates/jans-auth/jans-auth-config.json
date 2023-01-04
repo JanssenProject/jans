@@ -294,15 +294,14 @@
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
     "requestUriHashVerificationEnabled": false,
     "idTokenFilterClaimsBasedOnAccessToken": false,
-    "opPolicyUri":"http://www.jans.io/doku.php?id=jans:policy",
-    "opTosUri":"http://www.jans.io/doku.php?id=jans:tos",
+    "opPolicyUri":"https://%(hostname)s/opPolicy",
+    "opTosUri":"https://%(hostname)s/tos",
     "authorizationCodeLifetime":60,
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
     "spontaneousScopeLifetime":86400,
     "accessTokenLifetime":300,
     "umaResourceLifetime":1728000,
-    "sessionAsJwt":false,
     "umaRptLifetime": 3600,
     "umaTicketLifetime": 3600,
     "umaPctLifetime": 1728000,
@@ -498,5 +497,10 @@
             "Cache-Control": "max-age=0, no-store"
         }
     },
-    "blockWebviewAuthorizationEnabled": false
+    "blockWebviewAuthorizationEnabled": false,
+    "userInfoConfiguration": {
+        "dateFormatterPattern": {
+            "birthdate": "yyyy-MM-dd"
+        }
+    }
 }

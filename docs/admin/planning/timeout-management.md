@@ -12,7 +12,8 @@ is rarely attainable. Normally the application needs to handle gracefully the
 case when the IDP session expires first. And if the application session expires
 first, it may need to trigger a logout event at the OpenID Provider.
 
-Below is a list of some of the timeouts to consider:
+Below is a list of some of the Auth Server configuration properties for timeouts
+that you should consider:
 
 1. **sessionIdLifetime**:
 

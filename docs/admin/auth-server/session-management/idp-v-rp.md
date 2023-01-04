@@ -5,14 +5,19 @@ tags:
   - session
 ---
 
-## This content is in progress
+## IDP versus RP session
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Applications generally have their own session cookie (the "RP Session").
+This makes sense, because the RP only redirects to the IDP for authentication
+if it cannot find its own local cookie. If a user has a session with many
+RP's, achieving simultaneous logout across all sites is a challenge--something
+which your business leaders may not appreciate. While OpenID proposes several
+solutions to logout, none are ideal. Fundamentally, logout is an asynchronous
+challenge. A given RP may be disconnected from the network. Thus logout
+messages sent to RP's that are not received must be replayed. The
+[IETF Sec Events Workgroup](https://datatracker.ietf.org/doc/charter-ietf-secevent/01/) has been working on standards to handle logout (and other asynchronous
+requirements). But adoption of this architecture is not common.
 
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
-
-## Want to contribute?
-
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+Another challenge of RP sessions is that they may have a different timeout
+for inactivity. See the Janssen Planning Guide page on
+[Timeout Management](../../planning/timeout-management.md) for more details.

@@ -2,12 +2,38 @@
 tags:
   - administration
   - developer
+  - bean
+  - CdiUtil
+
 ---
 
 ## Ready-to-use code in Custom script:  
-Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans some of which are listed below:
+Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans.
+The most useful functions are implemented through a set of beans which can be re-used in all custom scripts.
 
-### 1. [AuthenticationService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/AuthenticationService.java) 
+### Obtaining a bean inside a custom script:
+[CdiUtil](https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/service/cdi/util/CdiUtil.java) used to obtain managed beans inside a custom script.
+
+Relevant methods:
+
+|Signature|Description|
+|-|-|
+|<T> T bean(Class<T> clazz)|Gets the managed bean belonging to the class passed as parameter|
+
+Usage (jython code):
+Suppose UserService and AuthenticationService beans have to be referenced in the code, it can be done as below:
+
+```
+from io.jans.as.server.service import UserService
+from io.jans.as.server.service import AuthenticationService
+...
+userService = CdiUtil.bean(UserService)
+authenticationService = CdiUtil.bean(AuthenticationService)
+```
+
+## Commonly used beans:
+
+### 1. [AuthenticationService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/AuthenticationService.java)
 
 Allows to authenticate a user or obtain the current authenticated user
 <br/>
@@ -19,17 +45,28 @@ Relevant methods:
 |`boolean authenticate(String userName, String password)`|Performs authentication for the user whose identifier (`userName`) is passed as parameter. The `password` supplied must be the correct password of the user in question|
 |`User getAuthenticatedUser()`|Returns a representation of the currently authenticated user. `null` if no user is currently authenticated. See [User](#class-user) data object|
 
-### 2.  [Authenticator](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/auth/Authenticator.java) 
-This class is mainly used in facelets templates for authentication flows to proceed in the sequence of steps.
-Relevant methods:
+Usage:
+```
 
-|Signature|Description|
-|-|-|
-|boolean authenticate()|Makes the authentication flow proceed by calling the `authenticate` method of the custom script|
-|String prepareAuthenticationForStep()|Makes the authentication flow proceed by calling the `prepareForStep` method of the custom script|
+from io.jans.as.server.service import AuthenticationService
+...
 
-### 3.  [UserService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/UserService.java)
-Allows CRUD of users in the local persistence.
+#1. authenticate a user using username and password
+authenticationService = CdiUtil.bean(AuthenticationService)
+logged_in = authenticationService.authenticate(user_name, user_password)
+
+# 2. authenticate method without passing password parameter
+logged_in = authenticationService.authenticate(user_name, user_password)
+
+#3. obtain an authenticated user
+user = authenticationService.getAuthenticatedUser()
+userName = user.getUserId()
+emailIds = user.getAttribute("oxEmailAlternate")
+
+```
+
+### 2.  [UserService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/service/common/UserService.java)
+Allows CRUD operations for users to the local persistence.
 
 Relevant methods:
 
@@ -49,22 +86,118 @@ Relevant methods:
 |`void setCustomAttribute(User user, String attributeName, String attributeValue)`|Sets the value of the attribute `attributeName` with the single value `attributeValue` for the user representation passes as parameter. This method does not persist changes|
 |`User updateUser(User user)`|Updates the user represented by `user` object in the database|
 
+#### Usage
+
+#### a. Add a user
+```
+from  io.jans.as.common.service.common import UserService
+...
+
+new_user = User()
+new_user.setAttribute("uid", user_email, True)
+new_user.setAttribute("givenName", username, True)
+new_user.setAttribute("displayName", username, True)
+new_user.setAttribute("sn", "-", True)
+new_user.setAttribute("mail", user_email, True)
+new_user.setAttribute("gluuStatus", "active", True)
+new_user.setAttribute("password", user_password)
+
+new_user = CdiUtil.bean(UserService).addUser(new_user, True)
+```
+#### b. Add user attributes
+```
+userObject = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid)
+```
+#### c. Get User
+```
+# example 1 - get User by userId
+user = userService.getUser(user_name)
+
+# example 2 - get User by User-Id only if attribute oxExternalUid is populated
+user = userService.getUser(user_name, "oxExternalUid")
+customAttributeValue = userService.getCustomAttribute(user, "oxExternalUid")
+```
+#### d. Get specific User attribute
+```
+status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "gluuStatus")
+```
+#### e. Replace user attributes
+```
+userService.replaceUserAttribute(user_name, "oxOTPCache", cachedOTP, localTotpKey)
+```
+#### f. Remove user attribute
+```
+userService.removeUserAttribute(user.getUserId(),"oxTrustExternalId", "wwpass:%s"%puid)
+```
+#### g. Update users
+```
+found_user = userService.getUser(user_name)
+found_user.setAttribute("userPassword", new_password)
+userService.updateUser(found_user)
+```
+
 ### 4.  [User](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java)
 A class employed to represent a user entry in the persistence. Provides getters and setters to retrieve and assign value(s) for attributes
 
-### 5. [CustomAttribute](https://github.com/JanssenProject/jans/blob/main/jans-orm/model/src/main/java/io/jans/orm/model/base/CustomAttribute.java) 
+### 5. [CustomAttribute](https://github.com/JanssenProject/jans/blob/main/jans-orm/model/src/main/java/io/jans/orm/model/base/CustomAttribute.java)
 A class that models an attribute. An attribute has a name and a collection of associated values
 
-### 6. [Identity](https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/model/security/Identity.java) 
-Mainly used to carry data between steps of authentication flows.
+### 6. [Identity](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/security/Identity.java)
+The authentication flow in jans-auth server is stateless and the instance is preserved because the Identity parameters (another name for session parameters) are persisted in databases.
+A function in the `PersonAuthenticationType` script called `getExtraParametersForStep` should be overridden to include any new session variable. The underlying Jans-auth server takes care of retrieving it, persisting it etc.
 
+```
+def getExtraParametersForStep(self, configurationAttributes, step):
+	   return Arrays.asList("sessionParamName1", "sessionParamName2", "sessionParamName3")
+
+```
+Bean details:
 |Signature|Description|
 |-|-|
 |`Object getWorkingParameter(String name)`|Retrieves a working parameter by name previously set via `setWorkingParameter`|
 |`void setWorkingParameter(String name, Object value)`|Binds data to a name for further use in an authentication flow. Recommended values to store are `String`s|
 |`SessionId getSessionId()`|Retrieves a reference to the associated server session object, see [SessionId](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/SessionId.java)|
 
-### 7. HttpService: [HttpService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/net/HttpService.java) 
+Usage
+```
+from io.jans.as.server.security import Identity
+identity = CdiUtil.bean(Identity)
+
+#1.
+newExpDate = identity.getWorkingParameter("expDate")
+
+#2.
+identity.setWorkingParameter("expDate", expDate)
+
+#3.
+session_attributes = identity.getSessionId().getSessionAttributes()
+session_attributes.containsKey("remote_ip")
+```
+
+### 8. [SessionIdService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/SessionIdService.java)
+
+```
+#1. get session
+sessionIdservice = CdiUtil.bean(SessionIdService).getSessionId()
+
+#2. update session
+
+sessionIdservice.getSessionAttributes().put(key, value)
+sessionIdservice.updateSessionId(session)
+```
+
+### 9. [GrantService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/GrantService.java)
+
+### 10. [ClientService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/ClientService.java) : Provides operations with clients.
+
+Usage:
+```
+from io.jans.as.server.service import ClientService
+
+clientService = CdiUtil.bean(ClientService)
+client = clientService.getClient(clientId)
+```
+### 7. HttpService: [HttpService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/net/HttpService.java)
 
 Provides utility methods to execute HTTP requests, manipulate responses, etc
 
@@ -76,7 +209,7 @@ Relevant methods:
 |`HttpServiceResponse executeGet(HttpClient httpClient, String requestUri)`|Perform a GET on the URI requested. Returns an instance of [io.jans.as.server.model.net.HttpServiceResponse](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/net/HttpServiceResponse.java)  (a wrapper on `org.apache.http.HttpResponse`)|
 |`byte[] getResponseContent(HttpResponse httpResponse)`|Consumes the bytes of the associated response. Returns `null` if the response status code is not 200 (OK)|
 
-### 8.  [CacheService](https://github.com/JanssenProject/jans/blob/main/jans-core/cache/src/main/java/io/jans/service/CacheService.java) 
+### 8.  [CacheService](https://github.com/JanssenProject/jans/blob/main/jans-core/cache/src/main/java/io/jans/service/CacheService.java)
 Provides a unified means to interact with the underlying cache provider configured in the Jans-auth Server
 
 Relevant methods:
@@ -98,7 +231,7 @@ Relevant methods:
 |`void redirectToExternalURL(String url)`|Redirects the user's browser to the URL passed as parameter|
 |`String encodeParameters(String url, Map<String, Object> parameters)`|Builds a URL by appending query parameters as supplied in `parameters` map. Every value in the map is properly URL-encoded|
 
-### 10.  [FacesMessages](https://github.com/JanssenProject/jans/blob/main/jans-core/jsf-util/src/main/java/io/jans/jsf2/message/FacesMessages.java) 
+### 10.  [FacesMessages](https://github.com/JanssenProject/jans/blob/main/jans-core/jsf-util/src/main/java/io/jans/jsf2/message/FacesMessages.java)
 Allows manipulation of JSF context messages
 
 Relevant methods:
@@ -111,28 +244,48 @@ Relevant methods:
 |`void setKeepMessages()`|Sets the "keep messages" property of the JSF flash|
 
 
-### 11. [CdiUtil](https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/service/cdi/util/CdiUtil.java) : Allows to obtain references of managed beans. This is particularly useful in custom scripts
-
-Relevant methods:
-
-|Signature|Description|
-|-|-|
-|<T> T bean(Class<T> clazz)|Gets the managed bean belonging to the class passed as parameter|
-
-Example (jython code):
-
-```
-from org.gluu.oxauth.service import UserService
-from org.gluu.oxauth.service import AuthenticationService
-...
-userService = CdiUtil.bean(UserService)
-authenticationService = CdiUtil.bean(AuthenticationService)
-```
-
-### 12. [StringHelper](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/util/StringHelper.java) 
+### 11. [StringHelper](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/util/StringHelper.java)
  Provides many utility methods that often arise in the manipulation of Strings
+Usage:
 
-### 13. [EncryptionService](https://github.com/JanssenProject/jans/blob/main/jans-scim/service/src/main/java/io/jans/scim/service/EncryptionService.java) 
+```
+from io.jans.util import StringHelper
+```
+
+1. #### isNotEmptyString
+```
+if StringHelper.isNotEmptyString(user_name):
+  # do something
+```
+
+2. #### equalsIgnoreCase
+```
+if StringHelper.equalsIgnoreCase(authentication_mode, "one_step"):
+  # do something
+```
+
+3. #### isEmpty
+```
+if StringHelper.isEmpty(auth_method):
+  # do something
+```
+
+4. #### split
+```
+allowedClientsListArray = StringHelper.split(allowedClientsList, ",")
+```
+
+5. #### toLowerCase
+```
+remoteAttribute = StringHelper.toLowerCase(remoteAttributesListArray[i])
+```
+6. #### base64urlencode
+```
+StringUtils.base64urlencode(input);
+```
+
+
+### 13. [EncryptionService](https://github.com/JanssenProject/jans/blob/main/jans-scim/service/src/main/java/io/jans/scim/service/EncryptionService.java)
  Allows to encrypt/decrypt strings using a 3DES cipher whose salt is found in `/etc/jans/conf/salt`
 
 Relevant methods:
@@ -142,3 +295,26 @@ Relevant methods:
 |String decrypt(String encryptedString)|Decrypts the encrypted string supplied|
 |Properties decryptAllProperties(Properties connectionProperties)|Returns a `java.util.Properties` object with all decrypted values found in `connectionProperties`|
 |`String encrypt(String unencryptedString)`|Encrypts the string supplied|
+
+#### Usage:
+```
+from io.jans.as.common.service.common import EncryptionService
+....
+
+encryptionService = CdiUtil.bean(EncryptionService)
+pwd_decrypted = encryptionService.decrypt("stringtobedecrypted")
+
+```
+
+### 14. [Base64Util](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/model/src/main/java/io/jans/as/model/util/Base64Util.java)
+
+Usage:
+
+```
+from io.jans.as.model.util import Base64Util
+....
+
+Base64Util.base64urldecodeToString(input_string)
+
+Base64Util.base64urlencode(input_string.encode('utf-8')));
+```

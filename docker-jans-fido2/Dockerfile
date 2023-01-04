@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -35,7 +35,7 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.6-SNAPSHOT
-ENV CN_BUILD_DATE='2022-12-01 12:39'
+ENV CN_BUILD_DATE='2022-12-29 08:50'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -47,14 +47,14 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
     && zip -d jans-fido2.war WEB-INF/jetty-web.xml \
     && zip -r jans-fido2.war WEB-INF/jetty-env.xml \
     && cp jans-fido2.war ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-fido2.war /tmp/WEB-INF
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
+ENV JANS_SOURCE_VERSION=d95fc492ca00ccee0ecc88132376c128203faefb
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -110,11 +110,7 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
-ARG PROMETHEUS_JAVAAGENT_VERSION=0.17.2
 COPY conf/prometheus-config.yaml /opt/prometheus/
-RUN mkdir -p /opt/prometheus \
-    && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JAVAAGENT_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JAVAAGENT_VERSION}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=jmx,stats
 
 # =======
 # Cleanup
@@ -226,8 +222,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     /usr/share/java
 
-COPY --chown=1000:0 jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
+COPY jetty/log4j2.xml /app/templates/
 COPY conf/*.tmpl /app/templates/
 
 COPY scripts /app/scripts
@@ -236,8 +231,10 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
+COPY --chown=1000:0 jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
+
 # adjust ownership and permission
-RUN chmod -R g=u ${JETTY_BASE}/jans-fido2/resources \
+RUN chmod 664 ${JETTY_BASE}/jans-fido2/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-fido2/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
@@ -246,7 +243,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-fido2/resources \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 /etc/jans/conf/fido2/mds/toc \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
-    && chown -R 1000:0 /usr/share/java
+    && chown -R 1000:0 /usr/share/java \
+    && chown -R 1000:0 /opt/prometheus
 
 USER 1000
 
