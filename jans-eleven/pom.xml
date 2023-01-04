@@ -24,7 +24,7 @@
 		<bouncycastle.version>1.54</bouncycastle.version>
 
 		<httpcore.version>4.4.6</httpcore.version>
-		<httpclient.version>4.5.3</httpclient.version>
+		<httpclient.version>4.5.13</httpclient.version>
 
 		<jetty.version>11.0.8</jetty.version>
 
