@@ -5,6 +5,7 @@ from setup_app.version import __version__
 from setup_app.utils import base
 
 OPENBANKING_PROFILE = 'openbanking'
+DISA_STIG_PROFILE = 'disa-stig'
 PROFILE = os.environ.get('JANS_PROFILE')
 
 parser_description='''Use this script to configure your Jans Server and to add initial data required for
@@ -21,6 +22,7 @@ parser.add_argument('-n', help="No interactive prompt before install starts. Run
 parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
 parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
 parser.add_argument('-csx', help="Collect setup properties, save and exit", action='store_true')
+parser.add_argument('-j', help="Use Java existing on system", action='store_true')
 rdbm_group = parser.add_mutually_exclusive_group()
 rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
 rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server")
@@ -60,7 +62,18 @@ parser.add_argument('--import-ldif', help="Render ldif templates from directory 
 parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
 parser.add_argument('-disable-script', action='append', help="inum of script to enable", required=False)
 
-if PROFILE != OPENBANKING_PROFILE:
+if PROFILE == OPENBANKING_PROFILE:
+
+    # openbanking
+    parser.add_argument('--no-external-key', help="Don't use external key", action='store_true')
+    parser.add_argument('-ob-key-fn', help="Openbanking key filename", default='/root/obsigning-axV5umCvTMBMjPwjFQgEvb_NO_UPLOAD.key')
+    parser.add_argument('-ob-cert-fn', help="Openbanking certificate filename", default='/root/obsigning.pem')
+    parser.add_argument('-ob-alias', help="Openbanking key alias", default='GkwIzWy88xWSlcWnLiEc8ip9s2M')
+    parser.add_argument('-static-kid', help="Openbanking static kid")
+    parser.add_argument('-jwks-uri', help="Openbanking jwksUri", default="https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks")
+    parser.add_argument('--disable-ob-auth-script', help="Disable Openbanking authentication script and use default backend", action='store_true')
+
+else:
 
     parser.add_argument('-stm', '--enable-scim-test-mode', help="Enable Scim Test Mode", action='store_true')
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
@@ -101,16 +114,9 @@ if PROFILE != OPENBANKING_PROFILE:
     spanner_cred_group.add_argument('-spanner-emulator-host', help="Use Spanner emulator host")
     spanner_cred_group.add_argument('-google-application-credentials', help="Path to Google application credentials json file")
 
-else:
-    # openbanking
-    parser.add_argument('--no-external-key', help="Don't use external key", action='store_true')
-    parser.add_argument('-ob-key-fn', help="Openbanking key filename", default='/root/obsigning-axV5umCvTMBMjPwjFQgEvb_NO_UPLOAD.key')
-    parser.add_argument('-ob-cert-fn', help="Openbanking certificate filename", default='/root/obsigning.pem')
-    parser.add_argument('-ob-alias', help="Openbanking key alias", default='GkwIzWy88xWSlcWnLiEc8ip9s2M')
-    parser.add_argument('-static-kid', help="Openbanking static kid")
-    parser.add_argument('-jwks-uri', help="Openbanking jwksUri", default="https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks")
-    parser.add_argument('--disable-ob-auth-script', help="Disable Openbanking authentication script and use default backend", action='store_true')
+if PROFILE == DISA_STIG_PROFILE:
 
+    parser.add_argument('-opendj-keystore-type', help="OpenDJ keystore type (Ony for 'disa-stig' profile)", choices=['pkcs11', 'bcfks'], default='bcfks')
 
 def add_to_me(you):
 

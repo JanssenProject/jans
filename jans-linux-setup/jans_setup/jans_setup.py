@@ -13,8 +13,8 @@ import code
 import site
 
 from pathlib import Path
-
 from queue import Queue
+from setup_app.static import SetupProfiles
 
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
 queue = Queue()
@@ -27,7 +27,9 @@ if os.path.exists(profile_fn):
     with open(profile_fn) as f:
         profile = f.read().strip()
 else:
-    profile = 'jans'
+    profile = SetupProfiles.JANS
+
+print("Read 'profile' = {}".format(profile))
 
 os.environ['LC_ALL'] = 'C'
 os.environ['JANS_PROFILE'] = profile
@@ -118,7 +120,7 @@ from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
 from setup_app.installers.opendj import OpenDjInstaller
 
-if base.current_app.profile == 'jans':
+if base.current_app.profile == SetupProfiles.JANS or base.current_app.profile == SetupProfiles.DISA_STIG:
     from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
@@ -146,8 +148,7 @@ if paths.IAMPACKAGED:
 # initialize config object
 Config.init(paths.INSTALL_DIR)
 
-
-if Config.profile != 'jans':
+if Config.profile != SetupProfiles.JANS and Config.profile != SetupProfiles.DISA_STIG:
     argsp.t = False
 
 if os.path.exists(Config.jans_properties_fn):
@@ -229,7 +230,7 @@ jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
 openDjInstaller = OpenDjInstaller()
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     couchbaseInstaller = CouchbaseInstaller()
 
 rdbmInstaller = RDBMInstaller()
@@ -237,7 +238,7 @@ httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
 configApiInstaller = ConfigApiInstaller()
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
@@ -275,7 +276,7 @@ def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     if argsp.t:
         testDataLoader = TestDataLoader()
 
@@ -305,7 +306,7 @@ if argsp.shell:
     code.interact(local=locals())
     sys.exit()
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     # re-calculate memory usage
     Config.calculate_mem()
 
@@ -359,10 +360,13 @@ def main():
                 jansInstaller.copy_scripts()
                 jansInstaller.encode_passwords()
 
-                if Config.profile == 'jans':
-                    Config.ldapCertFn = Config.opendj_cert_fn
-                    Config.ldapTrustStoreFn = Config.opendj_p12_fn
-                    Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
+#                if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
+#                    Config.ldapCertFn = Config.opendj_cert_fn
+#                    Config.ldapTrustStoreFn = Config.opendj_trust_store_fn
+#                    Config.encoded_ldapTrustStorePass = Config.opendj_truststore_pass_enc
+
+#                    Config.ldapTrustStoreFn = Config.opendj_p12_fn
+#                    Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
 
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
@@ -375,10 +379,12 @@ def main():
                 jansInstaller.setup_init_scripts()
 
                 # Installing jans components
-                if Config.profile == 'jans':
+                if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
+                    print("Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG")
+                    print("Config.opendj_install = {}".format(Config.opendj_install))
+                    jansAuthInstaller.pre_installation()
                     if Config.opendj_install:
-                        openDjInstaller.start_installation()
-
+                        openDjInstaller.start_installation()                
                     if Config.cb_install:
                         couchbaseInstaller.start_installation()
 
@@ -399,7 +405,7 @@ def main():
                 if argsp.t or getattr(argsp, 'load_config_api_test', None):
                     configApiInstaller.load_test_data()
 
-            if Config.profile == 'jans':
+            if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
 
                 if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.installFido2):
@@ -466,7 +472,7 @@ def main():
                     key_fn = os.path.join(ca_dir, 'client.key')
                     msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
                 msg.installation_completed +="\n"
-            #if  Config.profile == 'jans' and Config.install_scim_server:
+            #if  Config.profile == SetupProfiles.JANS and Config.install_scim_server:
             #    msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(

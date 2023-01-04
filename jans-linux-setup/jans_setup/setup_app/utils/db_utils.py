@@ -21,7 +21,7 @@ from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
-if base.current_app.profile == 'jans':
+if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
     from setup_app.utils.spanner import Spanner
 
 my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))

@@ -71,12 +71,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
             txt += 'Install Jans Config API'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
-            if Config.profile == 'jans':
+            if Config.profile == 'jans' or  Config.profile == 'disa-stig':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
-            if Config.profile == 'jans' and Config.installEleven:
+            if Config.profile == 'jans' and Config.installEleven or Config.profile == 'disa-stig' and Config.installEleven:
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
 
             if base.argsp.t:
@@ -106,29 +106,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
             print("Please ensure that you are running this script inside Jans container.")
             sys.exit(1)
 
-        #Download jans-auth-client-jar-with-dependencies
-        if not os.path.exists(Config.non_setup_properties['jans_auth_client_jar_fn']):
-            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
-            self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
-            base.download(oxauth_client_jar_url, Config.non_setup_properties['jans_auth_client_jar_fn'])
-
-        self.logIt("Determining key generator path")
-        oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['jans_auth_client_jar_fn'])
-
-        for f in oxauth_client_jar_zf.namelist():
-            if os.path.basename(f) == 'KeyGenerator.class':
-                p, e = os.path.splitext(f)
-                Config.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
-            elif os.path.basename(f) == 'KeyExporter.class':
-                p, e = os.path.splitext(f)
-                Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
-
-        if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
-            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['jans_auth_client_jar_fn']), True, True)
-        else:
-            self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
-
         self.extract_scripts()
+        
+        if not Config.installed_instance and Config.profile == static.SetupProfiles.DISA_STIG:
+            self.remove_pcks11_keys()
+            
+        self.profile_templates(Config.templateFolder)            
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -215,6 +198,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             Config.ce_templates[Config.ox_ldap_properties] = False
 
         for fullPath in templates:
+            self.logIt("Rendering templates: fullPath = {0}".format(fullPath))
             try:
                 self.renderTemplate(fullPath)
             except:
@@ -484,9 +468,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeFile(os.path.join(base.snap_common, 'etc/hosts.jans'), Config.ip + '\t' + Config.hostname)
 
         else:
-            self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
+#            self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
+            self.run([paths.cmd_chown, '-R', 'jetty:jans', Config.certFolder])
             self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
-            self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
+            self.run([paths.cmd_chmod, 'ug+X', Config.certFolder])
 
             self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
             for p in Path(Config.jansBaseFolder).rglob("*"):

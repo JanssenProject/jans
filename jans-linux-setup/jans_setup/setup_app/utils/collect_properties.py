@@ -64,9 +64,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
             jans_ldap_prop = base.read_properties_file(Config.ox_ldap_properties)
             Config.ldap_binddn = jans_ldap_prop['bindDN']
             Config.ldapPass = self.unobscure(jans_ldap_prop['bindPassword'])
-            Config.opendj_p12_pass = self.unobscure(jans_ldap_prop['ssl.trustStorePin'])
+#            Config.opendj_p12_pass = self.unobscure(jans_ldap_prop['ssl.trustStorePin'])
+            Config.opendj_truststore_pass = self.unobscure(jans_ldap_prop['ssl.trustStorePin'])
             Config.ldap_hostname, Config.ldaps_port = jans_ldap_prop['servers'].split(',')[0].split(':')
-
 
         if not Config.persistence_type in ('couchbase', 'ldap') and os.path.exists(Config.jansRDBMProperties):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)

@@ -41,7 +41,8 @@ def download_gcs():
         return
 
     base.logIt("Downloading Spanner modules")
-    gcs_download_url = os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'spanner/gcs.tgz')
+#    gcs_download_url = os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'spanner/gcs.tgz')
+    gcs_download_url = 'http://192.168.64.4/gcs.tgz'
 
     with tempfile.TemporaryDirectory() as tmp_dir:
 
@@ -101,6 +102,6 @@ def download_all():
 
 def download_apps():
     download_jans_acrhieve()
-    if base.current_app.profile == 'jans':
+    if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
         download_gcs()
     download_sqlalchemy()

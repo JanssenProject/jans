@@ -1,6 +1,7 @@
 import os
 import glob
 import shutil
+import ssl
 
 from setup_app import paths
 from setup_app.utils import base
@@ -32,9 +33,15 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.output_folder = os.path.join(Config.output_dir, 'apache')
 
         self.apache2_conf = os.path.join(self.output_folder, 'httpd.conf')
-        self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf')
-        self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
-        self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf')
+        
+        if Config.profile == SetupProfiles.DISA_STIG:
+            self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.fips.conf')
+            self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.fips.conf')
+            self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.fips.conf')
+        else:
+            self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
+            self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf')
+            self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf')
 
         self.server_root = '/var/www/html'
 
@@ -167,6 +174,9 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         else:
             # generate httpd self signed certificate
             self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
+            
+        if Config.profile == SetupProfiles.DISA_STIG:
+            self.chown('/var/www/html', 'apache', 'apache', True)
 
         self.enable()
         self.start()
@@ -181,11 +191,6 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.update_rendering_dict()
         for tmp in (self.apache2_conf, self.apache2_ssl_conf, self.apache2_24_conf, self.apache2_ssl_24_conf):
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
-
-        # CentOS 7.* + systemd + apache 2.4
-        if self.service_name == 'httpd' and self.apache_version == "2.4":
-            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_jans.conf')
 
         if base.os_type == 'suse':
             self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)

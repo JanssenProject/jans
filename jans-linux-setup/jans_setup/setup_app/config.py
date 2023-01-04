@@ -4,10 +4,14 @@ import time
 import pprint
 import inspect
 import json
+import glob
+import shutil
+
+from pathlib import Path
 from collections import OrderedDict
 
 from setup_app.paths import INSTALL_DIR, LOG_DIR
-from setup_app.static import InstallTypes
+from setup_app.static import InstallTypes, SetupProfiles
 from setup_app.utils.printVersion import get_war_info
 from setup_app.utils import base
 
@@ -36,6 +40,12 @@ class Config:
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     dist_app_dir = os.path.join(distFolder, 'app')
     dist_jans_dir = os.path.join(distFolder, 'jans')
+
+
+    default_store_type = 'pkcs12'
+    opendj_truststore_format = 'pkcs12'
+    default_client_test_store_type = 'pkcs12'
+    
 
     installed_instance = False
 
@@ -79,11 +89,19 @@ class Config:
         self.install_dir = install_dir
         self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
         self.profile = base.current_app.profile 
+        
+        self.use_existing_java = base.argsp.j
 
         self.thread_queue = None
         self.jetty_user = self.jetty_group = 'jetty'
         self.root_user = self.root_group = 'root'
         self.ldap_user = self.ldap_group = 'ldap'
+
+        self.jans_user = 'jans'
+        self.jans_group = 'jans'
+
+#        self.gluu_user = 'gluu'
+#        self.gluu_group = 'gluu'
 
         self.dump_config_on_error = False
         if not self.output_dir:
@@ -94,7 +112,8 @@ class Config:
             self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
-        self.default_store_type = 'JKS'
+        self.default_store_type = 'pkcs12'
+        self.opendj_truststore_format = 'pkcs12'
 
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(LOG_DIR, 'progress-bar.log')
@@ -135,9 +154,28 @@ class Config:
                                      }
 
         # java commands
-        self.cmd_java = os.path.join(self.jre_home, 'bin/java')
-        self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
-        self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
+#        self.cmd_java = os.path.join(self.jre_home, 'bin/java')
+#        self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
+#        self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
+#        os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
+        if self.profile == SetupProfiles.DISA_STIG:
+            self.use_existing_java = True
+            self.cmd_java = shutil.which('java')
+            self.jre_home = Path(self.cmd_java).resolve().parent.parent.as_posix()
+            self.cmd_keytool = shutil.which('keytool')
+            self.cmd_jar = shutil.which('jar')
+#            os.environ['GLUU_SERVICES'] = 'installHttpd installOxd installCasa installScimServer'
+            self.default_store_type = 'bcfks'
+            self.opendj_truststore_format = base.argsp.opendj_keystore_type
+            self.default_client_test_store_type = 'pkcs12'
+#            self.bc_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bc-fips-*.jar')))
+#            self.bcpkix_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bcpkix-fips-*.jar')))
+        else:
+#            self.profile = SetupProfiles.JANS
+            self.cmd_java = os.path.join(self.jre_home, 'bin/java')
+            self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
+            self.cmd_jar = os.path.join(self.jre_home, 'bin/jar') 
+
         os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
 
         if self.profile == OPENBANKING_PROFILE:
@@ -250,12 +288,25 @@ class Config:
 
         self.encoded_ldapTrustStorePass = None
 
+#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
+
+#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
+#        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
+
+#        if Config.profile == SetupProfiles.DISA_STIG:
+#            self.default_store_type = 'bcfks'
+#            self.opendj_truststore_format = base.argsp.opendj_keystore_type
+
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
+        if self.opendj_truststore_format.lower() == 'pkcs11':
+            self.opendj_trust_store_fn = self.opendj_cert_fn
+        else:
+            self.opendj_trust_store_fn = os.path.join(self.certFolder, 'opendj.' + self.opendj_truststore_format)
 
         self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
 
-        self.opendj_p12_pass = None
+#        self.opendj_p12_pass = None
+        self.opendj_truststore_pass = None
 
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = 'localhost'
@@ -420,3 +471,28 @@ class Config:
                 }
 
         Config.addPostSetupService = []
+
+    @classmethod
+    def init_ext(cls):
+
+#        if cls.profile == SetupProfiles.DISA_STIG:
+        cls.bc_fips_jar = max(glob.glob(os.path.join(cls.dist_app_dir, 'bc-fips-*.jar')))
+        cls.bcpkix_fips_jar = max(glob.glob(os.path.join(cls.dist_app_dir, 'bcpkix-fips-*.jar')))
+
+#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
+#        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
+        
+#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
+#        if self.opendj_truststore_format.lower() == 'pkcs11':
+#            self.opendj_trust_store_fn = self.opendj_cert_fn
+#        else:
+#            self.opendj_trust_store_fn = os.path.join(self.certFolder, 'opendj.' + self.opendj_truststore_format)
+ 
+#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
+#        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
+        
+#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
+#        if self.opendj_truststore_format.lower() == 'pkcs11':
+#            self.opendj_trust_store_fn = self.opendj_cert_fn
+#        else:
+#            self.opendj_trust_store_fn = os.path.join(self.certFolder, 'opendj.' + self.opendj_truststore_format)

@@ -14,7 +14,7 @@ def get_setup_options():
         'installOxAuth': True,
         'install_config_api': True,
         'installHTTPD': True,
-        'install_scim_server': True if base.current_app.profile == 'jans' else False,
+        'install_scim_server': True if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig' else False,
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
@@ -60,7 +60,7 @@ def get_setup_options():
         if base.argsp.rdbm_password:
             setupOptions['rdbm_password'] = base.argsp.rdbm_password
 
-        if base.current_app.profile == 'jans':
+        if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
             if base.argsp.spanner_project:
                 setupOptions['spanner_project'] = base.argsp.spanner_project
             if base.argsp.spanner_instance:
@@ -73,7 +73,7 @@ def get_setup_options():
                 setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
 
 
-    if base.current_app.profile == 'jans':
+    if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
         if base.argsp.disable_local_ldap:
             setupOptions['opendj_install'] = InstallTypes.NONE
 

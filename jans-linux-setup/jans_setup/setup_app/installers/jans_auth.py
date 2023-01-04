@@ -6,6 +6,8 @@ import uuid
 import shutil
 import json
 import tempfile
+import zipfile
+import re
 
 from urllib.parse import urlparse
 
@@ -19,7 +21,12 @@ class JansAuthInstaller(JettyInstaller):
 
     source_files = [
                     (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version'])))
+                    ]
+
+    source_fips_files = [
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-fips.war'), "http://192.168.64.4/jans/jans-auth-server-fips.war"),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar'), "http://192.168.64.4/jans/jans-auth-client-jar-without-provider-dependencies.jar")
                     ]
 
     def __init__(self):
@@ -49,11 +56,21 @@ class JansAuthInstaller(JettyInstaller):
             Config.enable_ob_auth_script = '0' if base.argsp.disable_ob_auth_script else '1'
             Config.jwks_uri = base.argsp.jwks_uri
 
+    def pre_install(self):
+        if Config.profile == SetupProfiles.DISA_STIG:
+            self.extract_bcfips_jars()
+            Config.init_ext()
+            
+            self.logIt("Config.opendj_truststore_format = %s" % Config.opendj_truststore_format)            
+
     def install(self):
+        self.init_key_gen()
+    
         self.logIt("Copying auth.war into jetty webapps folder...")
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
+        
         self.setup_agama()
         self.enable()
 
@@ -195,6 +212,69 @@ class JansAuthInstaller(JettyInstaller):
         tmp_dir = os.path.join(Config.templateFolder, 'jetty')
         src_xml = os.path.join(tmp_dir, 'agama_web_resources.xml')
         self.renderTemplateInOut(src_xml, tmp_dir, self.jetty_service_webapps)
+
         self.chown(os.path.join(self.jetty_service_webapps, os.path.basename(src_xml)), Config.jetty_user, Config.jetty_group)
 
+    def extract_bcfips_jars(self):
+#        Config.bc_fips_jar;
+#        Config.bcpkix_fips_jar;
+#        self.source_files[2][0];
+
+        war_zip = zipfile.ZipFile(self.source_fips_files[0][0], "r")
+        for fn in war_zip.namelist():
+            if re.search('bc-fips-(.*?).jar$', fn) or re.search('bcpkix-fips-(.*?).jar$', fn):
+                file_name = os.path.basename(fn)
+                target_fn = os.path.join(Config.dist_app_dir, file_name)
+#                print("Extracting", fn, "to", target_fn)
+                file_content = war_zip.read(fn)
+                with open(target_fn, 'wb') as w:
+                    w.write(file_content)
+        war_zip.close()
+
+#    self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
+
+#    if argsp.profile == 'DISA-STIG':
+#        war_zip = zipfile.ZipFile(oxauth_war_fn, "r")
+#        for fn in war_zip.namelist():
+#            if re.search('bc-fips-(.*?).jar$', fn) or re.search('bcpkix-fips-(.*?).jar$', fn):
+#                file_name = os.path.basename(fn)
+#                target_fn = os.path.join(app_dir, file_name)
+#                print("Extracting", fn, "to", target_fn)
+#                file_content = war_zip.read(fn)
+#                with open(target_fn, 'wb') as w:
+#                    w.write(file_content)
+#        war_zip.close()
+
+#    Config.profile == SetupProfiles.OPENBANKING
         
+            
+            
+#   dist_app_dir = os.path.join(distFolder, 'app')
+#    dist_jans_dir = os.path.join(distFolder, 'jans')
+        
+        
+#            self.bc_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bc-fips-*.jar')))
+#            self.bcpkix_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bcpkix-fips-*.jar')))
+
+    def init_key_gen(self):
+#        #Download jans-auth-client-jar-with-dependencies
+#        if not os.path.exists(Config.non_setup_properties['jans_auth_client_jar_fn']):
+#            jans_auth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
+#            self.logIt("Downloading {}".format(os.path.basename(jans_auth_client_jar_url)))
+#            base.download(jans_auth_client_jar_url, Config.non_setup_properties['jans_auth_client_jar_fn'])
+
+        self.logIt("Determining key generator path")
+        jans_auth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['jans_auth_client_jar_fn'])
+
+        for f in jans_auth_client_jar_zf.namelist():
+            if os.path.basename(f) == 'KeyGenerator.class':
+                p, e = os.path.splitext(f)
+                Config.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
+            elif os.path.basename(f) == 'KeyExporter.class':
+                p, e = os.path.splitext(f)
+                Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
+
+        if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['jans_auth_client_jar_fn']), True, True)
+        else:
+            self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))

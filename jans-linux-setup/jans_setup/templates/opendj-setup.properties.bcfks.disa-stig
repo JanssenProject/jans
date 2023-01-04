@@ -1,0 +1,13 @@
+hostname                        =%(ldap_hostname)s
+ldapPort                        =%(ldap_port)s
+generateSelfSignedCertificate   =false
+enableStartTLS                  =false
+certNickname                    =server-cert admin-cert
+useBcfksKeystore                =%(opendj_trust_store_fn)s
+keyStorePasswordFile            =%(opendj_trusstore_setup_key_fn)s
+ldapsPort                       =%(ldaps_port)s
+adminConnectorPort              =%(ldap_admin_port)s
+rootUserDN                      =%(ldap_binddn)s
+rootUserPasswordFile            =%(ldapPassFn)s
+baseDN                          =o=gluu
+backendType                     =%(ldap_backend_type)s

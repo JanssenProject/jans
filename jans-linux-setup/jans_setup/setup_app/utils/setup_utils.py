@@ -39,6 +39,12 @@ class SetupUtils(Crypto64):
         else:
             return base.run(*args)
 
+    def run_1(self, *args, **kwargs):
+        if kwargs:
+            return base.run_1(*args, **kwargs)
+        else:
+            return base.run_1(*args)
+
     def logOSChanges(self, *args):
         base.logOSChanges(*args)
 
@@ -540,3 +546,77 @@ class SetupUtils(Crypto64):
         usr_grp = '{}:{}'.format(user, group) if group else user
         cmd += [usr_grp, fn]
         self.run(cmd)
+
+    def opendj_used_ports(self):
+        ports = []
+        for port in (Config.ldaps_port, Config.ldap_admin_port):
+            if self.port_used(port):
+                ports.append(port)
+        return ports
+
+    def apply_fapolicyd_rules(self, rules):
+
+        if os.path.exists('/etc/fapolicyd/rules.d'):
+            fapolicyd_rules_fn = '/etc/fapolicyd/rules.d/15-gluu.rules'
+            if not os.path.exists(fapolicyd_rules_fn):
+                self.writeFile(fapolicyd_rules_fn, '', backup=False)
+                self.chown(fapolicyd_rules_fn, 'root', 'fapolicyd')
+                self.run([paths.cmd_chmod, '644', fapolicyd_rules_fn])
+        else:
+            fapolicyd_rules_fn = '/etc/fapolicyd/fapolicyd.rules'
+
+        fapolicyd_rules = []
+        fapolicyd_startn = -1
+
+        with open(fapolicyd_rules_fn) as f:
+            for i, l in enumerate(f):
+                ls = l.strip()
+                if ls.startswith('%languages'):
+                    fapolicyd_startn = i
+                fapolicyd_rules.append(ls)
+
+        write_facl = False
+        for rule in rules:
+            if rule not in fapolicyd_rules:
+                fapolicyd_rules.insert(fapolicyd_startn + 1, rule)
+                write_facl = True
+
+        if write_facl:
+            fapolicyd_rules.insert(fapolicyd_startn + 1, '\n')
+            self.writeFile(fapolicyd_rules_fn, '\n'.join(fapolicyd_rules) + "\n")
+            self.run_service_command('restart', 'fapolicyd')
+
+    def fapolicyd_access(self, uid, service_dir, additional_rules=[]):
+
+        self.jettyAbsoluteDir = Path('/opt/jetty').resolve().parent.as_posix()
+        self.jythonAbsoluteDir = Path('/opt/jython').resolve().as_posix()
+
+        facl_tmp = [
+                'allow perm=any uid=%(uid)s : dir=%(jre_home)s/',
+                'allow perm=any uid=%(uid)s : dir=%(gluuOptFolder)s/',
+                'allow perm=any uid=%(uid)s : dir=%(distFolder)s/',
+                'allow perm=any uid=%(uid)s : dir=%(jettyAbsoluteDir)s/',
+                'allow perm=any uid=%(uid)s : dir=%(jythonAbsoluteDir)s/',
+                'allow perm=any uid=%(uid)s : dir=%(service_dir)s/',
+                'allow perm=any uid=%(uid)s : dir=%(osDefault)s/',
+                'allow perm=any uid=%(uid)s : dir=%(gluuBaseFolder)s/',
+                'allow perm=any uid=%(uid)s : dir=%(gluuOptPythonFolder)s/',
+                'allow perm=any uid=%(uid)s : dir=%(gluuOptPythonFolder)s/libs/',
+                '# give access to gluu service %(uid)s',
+                ]
+
+        for a_rule in additional_rules:
+            facl_tmp.insert(0, a_rule)
+
+        rules = []
+        for acl in facl_tmp:
+            facl = acl % self.merge_dicts(Config.templateRenderingDict, Config.__dict__, self.__dict__, {'uid': uid, 'service_dir': service_dir})
+            rules.append(facl)
+
+#tmp        self.apply_fapolicyd_rules(rules)
+
+    def get_keystore_fn(self, keystore_name):
+        return keystore_name + '.' + Config.default_store_type
+
+    def get_client_test_keystore_fn(self, keystore_name):
+        return keystore_name + '.' + Config.default_client_test_store_type

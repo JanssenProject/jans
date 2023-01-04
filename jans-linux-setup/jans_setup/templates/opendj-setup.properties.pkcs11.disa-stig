@@ -1,0 +1,13 @@
+hostname                        =%(hostname)s
+ldapPort                        =%(ldap_port)s
+generateSelfSignedCertificate   =false
+enableStartTLS                  =false
+certNickname                    =server-cert admin-cert
+usePkcs11Keystore               =true
+keyStorePasswordFile            =%(opendj_pck11_setup_key_fn)s
+ldapsPort                       =%(ldaps_port)s
+adminConnectorPort              =%(ldap_admin_port)s
+rootUserDN                      =%(ldap_binddn)s
+rootUserPasswordFile            =%(ldapPassFn)s
+baseDN                          =o=gluu
+backendType                     =%(ldap_backend_type)s

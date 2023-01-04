@@ -24,7 +24,7 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
 
-if base.current_app.profile == 'jans':
+if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
     from setup_app.utils.spanner import Spanner
 
 
@@ -110,7 +110,7 @@ class PropertiesUtils(SetupUtils):
         if not Config.admin_password:
             Config.admin_password = self.getPW()
 
-        if Config.profile == 'jans':
+        if Config.profile == 'jans' or Config.profile == 'disa-stig':
 
             if not (Config.cb_install or Config.rdbm_install):
                 Config.opendj_install = InstallTypes.LOCAL
@@ -137,8 +137,8 @@ class PropertiesUtils(SetupUtils):
 
             self.set_persistence_type()
 
-            if not Config.opendj_p12_pass:
-                Config.opendj_p12_pass = self.getPW()
+#            if not Config.opendj_p12_pass:
+#                Config.opendj_p12_pass = self.getPW()
 
             self.check_oxd_server_https()
 

@@ -354,8 +354,11 @@ class Crypto64:
                 Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
             if Config.get('cb_password'):
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
-            if Config.get('opendj_p12_pass'):
-                Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
+#            if Config.get('opendj_p12_pass'):
+#                Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
+            if not Config.get('opendj_truststore_pass'):
+                Config.opendj_truststore_pass = os.urandom(6).hex()
+            Config.opendj_truststore_pass_enc = self.obscure(Config.opendj_truststore_pass)
         except:
             self.logIt("Error encoding passwords", True, True)
 
@@ -400,3 +403,12 @@ class Crypto64:
         except Exception as e:
             print("{}Can't download certificate{}".format(static.colors.DANGER, static.colors.ENDC))
             print(e)
+
+    def remove_pcks11_keys(self, keys=['server-cert', 'admin-cert', 'dummy']):
+        output = self.run([Config.cmd_keytool, '-list', '-keystore', 'NONE', '-storetype', 'PKCS11', '-storepass', 'changeit'])
+        for l in output.splitlines():
+            ls = l.strip()
+            if ls.startswith(tuple(keys)):
+                alias = ls.split(',')[0]
+                if alias in keys:
+                    self.run([Config.cmd_keytool, '-delete', '-alias', alias, '-keystore', 'NONE', '-storetype', 'PKCS11', '-storepass', 'changeit'])
