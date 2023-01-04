@@ -489,7 +489,7 @@ class Plugin(DialogUtils):
             data.sort()
             buttons = []
 
-            if len(data)/20 >=1:
+            if len(data) > 20:
 
                 if start_index!=0:
                     handler_partial = partial(self.oauth_update_properties, start_index-1, pattern)

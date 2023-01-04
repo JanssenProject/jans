@@ -47,8 +47,6 @@ class ViewProperty(JansGDialog, DialogUtils):
         self.value_content = HSplit([],width=D())
         self.tabs = {}
         self.selected_tab = 'tab0'
-        self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
-
         self.prepare_properties()
         self.create_window()
         
@@ -126,7 +124,7 @@ class ViewProperty(JansGDialog, DialogUtils):
             str: the widget type to implement
         """
         try :
-            proper = self.schema.get('properties', {})[prop]
+            proper = self.myparent.schema.get('properties', {})[prop]
 
             if proper['type'] == 'string':
                 prop_type= 'TitledText'
@@ -155,7 +153,7 @@ class ViewProperty(JansGDialog, DialogUtils):
 
         return prop_type
 
-    def get_listValues(self,prop,type=None):
+    def get_list_values(self, prop, property_type=None):
         """This method get list values for properties own Enum values
 
         Args:
@@ -166,10 +164,10 @@ class ViewProperty(JansGDialog, DialogUtils):
             list: List of the properties enum to choose from
         """
         try :
-            if type !='nasted':
-                list_values= self.schema.get('properties', {})[prop]['items']['enum']
+            if property_type !='nasted':
+                list_values= self.myparent.schema.get('properties', {})[prop]['items']['enum']
             else:
-                list_values= self.schema.get('properties', {})[prop]['items']['items']['enum']
+                list_values= self.myparent.schema.get('properties', {})[prop]['items']['items']['enum']
 
         except Exception:
             list_values = []
@@ -207,7 +205,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                                 self.property, 
                                 name=self.property, 
                                 height=3,
-                                value='\n'.join(self.value), 
+                                value='\n'.join(self.value),
                                 style=cli_style.edit_text
                                 ),
                                 ],width=D())
@@ -217,7 +215,7 @@ class ViewProperty(JansGDialog, DialogUtils):
                         self.app.getTitledCheckBoxList(
                                 self.property, 
                                 name=self.property, 
-                                values=self.get_listValues(self.property,'nasted'), 
+                                values=self.get_list_values(self.property, 'nasted'),
                                 style='class:outh-client-checkboxlist'),
                                 ],width=D())
 
@@ -226,7 +224,8 @@ class ViewProperty(JansGDialog, DialogUtils):
                         self.app.getTitledCheckBoxList(
                                 self.property, 
                                 name=self.property, 
-                                values=self.get_listValues(self.property), 
+                                values=self.get_list_values(self.property),
+                                current_values=self.value,
                                 style='class:outh-client-checkboxlist'),
                                 ],width=D())
 
