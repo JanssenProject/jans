@@ -1757,23 +1757,16 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write"
             }
           ],
-          "superScopes": []
-        },
-        {
-          "httpMethods": [
-            "POST"
-          ],
-          "scopes": [
+          "superScopes": [
             {
-              "inum": "1800.04.2",
-              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write"
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
             }
-          ],
-          "groupScopes": [],
-          "superScopes": []
+          ]
         },
         {
           "httpMethods": [
+            "POST",
             "PUT"
           ],
           "scopes": [
@@ -1783,7 +1776,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
+            }
+          ]
         }
       ]
     },
@@ -1806,7 +1804,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write"
             }
           ],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
+            }
+          ]
         },
         {
           "httpMethods": [
@@ -1819,7 +1822,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.14",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/delete-all"
+            }
+          ]
         }
       ]
     },
@@ -1842,23 +1850,16 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write"
             }
           ],
-          "superScopes": []
-        },
-        {
-          "httpMethods": [
-            "POST"
-          ],
-          "scopes": [
+          "superScopes": [
             {
-              "inum": "1800.04.5",
-              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write"
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
             }
-          ],
-          "groupScopes": [],
-          "superScopes": []
+          ]
         },
         {
           "httpMethods": [
+            "POST",
             "PUT"
           ],
           "scopes": [
@@ -1868,7 +1869,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
+            }
+          ]
         }
       ]
     },
@@ -1891,7 +1897,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write"
             }
           ],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
+            }
+          ]
         },
         {
           "httpMethods": [
@@ -1904,7 +1915,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.14",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/delete-all"
+            }
+          ]
         }
       ]
     },
@@ -1927,23 +1943,16 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write"
             }
           ],
-          "superScopes": []
-        },
-        {
-          "httpMethods": [
-            "POST"
-          ],
-          "scopes": [
+          "superScopes": [
             {
-              "inum": "1800.04.8",
-              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write"
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
             }
-          ],
-          "groupScopes": [],
-          "superScopes": []
+          ]
         },
         {
           "httpMethods": [
+            "POST",
             "PUT"
           ],
           "scopes": [
@@ -1953,7 +1962,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
+            }
+          ]
         }
       ]
     },
@@ -1976,7 +1990,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write"
             }
           ],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
+            }
+          ]
         },
         {
           "httpMethods": [
@@ -1989,7 +2008,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.14",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/delete-all"
+            }
+          ]
         }
       ]
     },
@@ -2012,7 +2036,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write"
             }
           ],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
+            }
+          ]
         }
       ]
     },
@@ -2030,7 +2059,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
+            }
+          ]
         }
       ]
     },
@@ -2053,7 +2087,12 @@
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/license.write"
             }
           ],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
+            }
+          ]
         }
       ]
     },
@@ -2071,7 +2110,12 @@
             }
           ],
           "groupScopes": [],
-          "superScopes": []
+          "superScopes": [
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
+            }
+          ]
         }
       ]
     }
