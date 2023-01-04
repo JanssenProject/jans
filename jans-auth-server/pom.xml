@@ -27,7 +27,7 @@
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
 		<activemq.version>5.15.14</activemq.version>
 
-		<jettison.version>1.5.1</jettison.version>
+		<jettison.version>1.5.2</jettison.version>
 
 		<slf4j.version>1.7.25</slf4j.version>
 
