@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -1386,22 +1386,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#web-ingress" class="md-nav__link">
+    Web (Ingress)
+  </a>
+  
+    <nav class="md-nav" aria-label="Web (Ingress)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rotate" class="md-nav__link">
+    Rotate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-from-existing-source" class="md-nav__link">
+    Load from existing source
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server" class="md-nav__link">
+    Auth-server
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#ldap" class="md-nav__link">
+    LDAP
   </a>
   
 </li>
@@ -8633,22 +8660,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#web-ingress" class="md-nav__link">
+    Web (Ingress)
+  </a>
+  
+    <nav class="md-nav" aria-label="Web (Ingress)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rotate" class="md-nav__link">
+    Rotate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-from-existing-source" class="md-nav__link">
+    Load from existing source
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server" class="md-nav__link">
+    Auth-server
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#ldap" class="md-nav__link">
+    LDAP
   </a>
   
 </li>
@@ -8685,6 +8739,16 @@
         <span class="md-tag">operations</span>
       
     
+      
+      
+        <span class="md-tag">certificate management</span>
+      
+    
+      
+      
+        <span class="md-tag">certification and key rotation</span>
+      
+    
   </nav>
 
 
@@ -8697,19 +8761,239 @@
 
   <h1>Certificate Management</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>Rotating Certificates and Keys in Kubernetes setup</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>janssen-config-cm</code> in all examples refer to jans installation configuration parameters where <code>janssen</code> is the <code>helm-release-name</code>.</p>
+</div>
+<h2 id="web-ingress">Web (Ingress)<a class="headerlink" href="#web-ingress" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Associated certificates and keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/etc/certs/web_https.crt</td>
+</tr>
+<tr>
+<td>/etc/certs/web_https.key</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rotate">Rotate<a class="headerlink" href="#rotate" title="Permanent link">#</a></h3>
+<ol>
+<li>
+<p>Create a file named <code>web-key-rotation.yaml</code> with the following contents :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key-rotation</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">sidecar.istio.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="w">                  </span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key-rotation</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/certmanager:1.0.5-1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"> </span><span class="c1"># This may be differnet in Helm</span><span class="w"></span>
+<span class="w">          </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;patch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;web&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;valid-to:365&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+</code></pre></div>
+</li>
+<li>
+<p>Apply job      <br />
+    <div class="highlight"><pre><span></span><code>kubectl apply -f web-key-rotation.yaml -n &lt;jans-namespace&gt;
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="load-from-existing-source">Load from existing source<a class="headerlink" href="#load-from-existing-source" title="Permanent link">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This will load <code>web_https.crt</code> and <code>web_https.key</code> from <code>/etc/certs</code>.</p>
+</div>
+<ol>
+<li>
+<p>Create a secret with <code>web_https.crt</code> and <code>web_https.key</code>. Note that this may already exist in your deployment.</p>
+<div class="highlight"><pre><span></span><code>kubectl create secret generic web-cert-key --from-file<span class="o">=</span>web_https.crt --from-file<span class="o">=</span>web_https.key -n &lt;jans-namespace&gt;<span class="sb">`</span> 
+</code></pre></div>
+</li>
+<li>
+<p>Create a file named <code>load-web-key-rotation.yaml</code> with the following contents :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">load-web-key-rotation</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">sidecar.istio.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="w">                  </span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-cert</span><span class="w"></span>
+<span class="w">        </span><span class="nt">secret</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">secretName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-cert-key</span><span class="w"></span>
+<span class="w">          </span><span class="nt">items</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.crt</span><span class="w"></span>
+<span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.crt</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key</span><span class="w"></span>
+<span class="w">        </span><span class="nt">secret</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">secretName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-cert-key</span><span class="w"></span>
+<span class="w">          </span><span class="nt">items</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span><span class="w"></span>
+<span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span><span class="w">                              </span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">load-web-key-rotation</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/certmanager:1.0.5-1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w">  </span><span class="c1">#This may be differnet in Helm</span><span class="w"></span>
+<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-cert</span><span class="w"></span>
+<span class="w">              </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/certs/web_https.crt</span><span class="w"></span>
+<span class="w">              </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.crt</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key</span><span class="w"></span>
+<span class="w">              </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/certs/web_https.key</span><span class="w"></span>
+<span class="w">              </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span><span class="w"></span>
+<span class="w">          </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;patch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;web&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;source:from-files&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+</code></pre></div>
+</li>
+<li>
+<p>Apply job</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>kubectl apply -f load-web-key-rotation.yaml -n &lt;jans-namespace&gt;
+</code></pre></div>
+<h2 id="auth-server">Auth-server<a class="headerlink" href="#auth-server" title="Permanent link">#</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>key rotation CronJob is usually installed with jans. Please make sure before deploying using <code>kubectl get cronjobs -n &lt;jans-namespace&gt;</code></p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Associated certificates and keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/etc/certs/auth-keys.json</td>
+</tr>
+<tr>
+<td>/etc/certs/auth-keys.jks</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>
+<p>Create a file named <code>auth-key-rotation.yaml</code> with the following contents :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CronJob</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-key-rotation</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/48</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">concurrencyPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Forbid</span><span class="w"></span>
+<span class="w">  </span><span class="nt">jobTemplate</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">sidecar.istio.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-key-rotation</span><span class="w"></span>
+<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/certmanager:1.0.5-1</span><span class="w"></span>
+<span class="w">              </span><span class="nt">resources</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nt">requests</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300Mi&quot;</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300m&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="nt">limits</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300Mi&quot;</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300m&quot;</span><span class="w"></span>
+<span class="w">              </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"></span>
+<span class="w">              </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;patch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;auth&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;interval:48&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;key-strategy:OLDER&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;privkey-push-delay:300&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;privkey-push-strategy:NEWER&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">          </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
+</code></pre></div>
+</li>
+<li>
+<p>Apply cron job</p>
+<div class="highlight"><pre><span></span><code>kubectl apply -f auth-key-rotation.yaml -n &lt;jans-namespace&gt;
+</code></pre></div>
+</li>
+</ol>
+<h2 id="ldap">LDAP<a class="headerlink" href="#ldap" title="Permanent link">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Subject Alt Name must match opendj service.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Associated certificates and keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/etc/certs/opendj.crt</td>
+</tr>
+<tr>
+<td>/etc/certs/opendj.key</td>
+</tr>
+<tr>
+<td>/etc/certs/opendj.pem</td>
+</tr>
+<tr>
+<td>/etc/certs/opendj.pkcs12</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>
+<p>Create a file named <code>ldap-key-rotation.yaml</code> with the following contents :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ldap-key-rotation</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">sidecar.istio.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="w">              </span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ldap-key-rotation</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/certmanager:1.0.5-1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"></span>
+<span class="w">          </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;patch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;ldap&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;subj-alt-name:opendj&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--opts&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;valid-to:365&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span>
+</code></pre></div>
+</li>
+<li>
+<p>Apply job</p>
+<div class="highlight"><pre><span></span><code>kubectl apply -f ldap-key-rotation.yaml -n &lt;jans-namespace&gt;
+</code></pre></div>
+</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-04T08:04:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-04</span>
       
         <br>
         Created:
