@@ -38,7 +38,7 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 
 COPY requirements.txt /app/requirements.txt
 RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
 
@@ -72,9 +72,7 @@ ENV CN_CONFIG_ADAPTER=consul \
     CN_CONFIG_CONSUL_NAMESPACE=jans \
     CN_CONFIG_KUBERNETES_NAMESPACE=default \
     CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
-    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_CONFIG_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ==========
 # Secret ENV
@@ -93,10 +91,7 @@ ENV CN_SECRET_ADAPTER=vault \
     CN_SECRET_VAULT_NAMESPACE=jans \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
-    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
-    CN_SECRET_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_SECRET_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ===========
 # Generic ENV
@@ -106,6 +101,9 @@ ENV CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     GOOGLE_PROJECT_ID="" \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
+    CN_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_CONFIGURATION_SKIP_INITIALIZED=false \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
