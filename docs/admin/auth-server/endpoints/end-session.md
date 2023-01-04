@@ -9,7 +9,7 @@ tags:
 # Overview
 
 Janssen Server's `/end_session` endpoint supports logout using [OpenId Connect Front Channel Logout](https://openid.net/specs/openid-connect-frontchannel-1_0.html) mechanism.
-When using OpenID Connect Logout, it is recommeneded to use Front-Channel Logout. In Front-Channel Logout the browser 
+When using OpenID Connect Logout, it is recommended to use Front-Channel Logout. In Front-Channel Logout the browser 
 receives a page with a list of application logout urls within an iframe. This prompts the browser to call each 
 application logout individually and the OpenID Connect end-session endpoint via Javascript.
 
@@ -54,7 +54,7 @@ navigate via `Auth Server`->`Properties`.
 - [allowPostLogoutRedirectWithoutValidation](../../reference/json/properties/janssenauthserver-properties.md#allowpostlogoutredirectwithoutvalidation)
 - [forceIdTokenHintPrecense](../../reference/json/properties/janssenauthserver-properties.md#forceidtokenhintprecense)
 
-Apart from above mentioned server properties, some of the properties relevant to individual clients can be configured
+Apart from the above-mentioned server properties, the properties relevant to individual clients can be configured
 during client registration or can be edited later. When using 
 [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties, navigate via `Auth Server`->
 `Clients`->`logout` as show in image below:
@@ -63,7 +63,7 @@ during client registration or can be edited later. When using
 
 ### Interception Scripts
 
-Response from userinfo can be further customized using [end session](../../developer/scripts/end-session.md) 
+Response from end session endpoint can be further customized using [end session](../../developer/scripts/end-session.md) 
 interception script.
 
 This script can be used to customize the HTML response generated from end session endpoint.
