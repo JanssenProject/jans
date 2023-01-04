@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -54,7 +54,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
     && zip -d jans-config-api.war WEB-INF/jetty-web.xml \
     && zip -r jans-config-api.war WEB-INF/jetty-env.xml \
     && cp jans-config-api.war ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-config-api.war /tmp/WEB-INF
 
 # Ports exposed by config-api
@@ -256,7 +256,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase
 
 RUN touch /etc/hosts.back
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
+COPY jetty/log4j2.xml /app/templates/
 COPY conf/*.tmpl /app/templates/
 COPY plugins /app/plugins
 COPY templates /app/templates
@@ -273,7 +273,7 @@ COPY --chown=1000:0 jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/weba
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
-    && chmod -R g=u ${JETTY_BASE}/jans-config-api/resources \
+    && chmod 664 ${JETTY_BASE}/jans-config-api/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-config-api/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
@@ -284,7 +284,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod -R g=u /app/templates/jans-config-api \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
-    && chown -R 1000:0 /opt/prometheus
+    && chown -R 1000:0 /opt/prometheus \
+    && chown -R 1000:0 /app/plugins
 
 USER 1000
 

@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -47,7 +47,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
     && zip -d jans-fido2.war WEB-INF/jetty-web.xml \
     && zip -r jans-fido2.war WEB-INF/jetty-env.xml \
     && cp jans-fido2.war ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-fido2.war /tmp/WEB-INF
 
 # =====================
@@ -222,8 +222,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     /usr/share/java
 
-COPY --chown=1000:0 jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
+COPY jetty/log4j2.xml /app/templates/
 COPY conf/*.tmpl /app/templates/
 
 COPY scripts /app/scripts
@@ -232,8 +231,10 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
+COPY --chown=1000:0 jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
+
 # adjust ownership and permission
-RUN chmod -R g=u ${JETTY_BASE}/jans-fido2/resources \
+RUN chmod 664 ${JETTY_BASE}/jans-fido2/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-fido2/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
