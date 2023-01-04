@@ -20,7 +20,7 @@
 
 		<jans.bom.version>${project.version}</jans.bom.version>
 
-		<jettison.version>1.5.1</jettison.version>
+		<jettison.version>1.5.2</jettison.version>
 		<bouncycastle.version>1.54</bouncycastle.version>
 
 		<httpcore.version>4.4.6</httpcore.version>
