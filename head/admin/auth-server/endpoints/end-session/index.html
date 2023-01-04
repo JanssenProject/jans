@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -3237,6 +3237,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           End Session
@@ -3253,6 +3255,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -3261,16 +3265,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+    Disabling The Endpoint Using Feature Flag
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#configuration-properties" class="md-nav__link">
+    Configuration Properties
   </a>
+  
+    <nav class="md-nav" aria-label="Configuration Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8724,6 +8741,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8732,16 +8751,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+    Disabling The Endpoint Using Feature Flag
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#configuration-properties" class="md-nav__link">
+    Configuration Properties
   </a>
+  
+    <nav class="md-nav" aria-label="Configuration Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8781,6 +8813,11 @@
     
       
       
+        <span class="md-tag">end-session</span>
+      
+    
+      
+      
         <span class="md-tag">endpoint</span>
       
     
@@ -8794,12 +8831,49 @@
   </a>
 
 
-  <h1>End Session</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
+<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
+<p>Janssen Server's <code>/end_session</code> endpoint supports logout using <a href="https://openid.net/specs/openid-connect-frontchannel-1_0.html">OpenId Connect Front Channel Logout</a> mechanism.
+When using OpenID Connect Logout, it is recommended to use Front-Channel Logout. In Front-Channel Logout the browser 
+receives a page with a list of application logout urls within an iframe. This prompts the browser to call each 
+application logout individually and the OpenID Connect end-session endpoint via Javascript.</p>
+<p>URL to access end session endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+<a href="../configuration/">configuration endpoint</a> given below.</p>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
+</code></pre></div>
+<p><code>end_session_endpoint</code> claim in the response specifies the URL for end session endpoint. By default, end session 
+ndpoint looks like below:</p>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/end_session
+</code></pre></div>
+<p>Refer to <a href="https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-connect-single-log-out-slo">this</a> article from 
+Gluu Server documentation to understand how end session endpoint works in Janssen Server.  </p>
+<h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
+<p><code>/end_session</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#endsession">END_SESSION feature flag</a>.
+Use <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
+<p>When using TUI, navigate via <code>Auth Server</code>-&gt;<code>Properties</code>-&gt;<code>enabledFeatureFlags</code> to screen below. From here, enable or
+disable <code>END_SESSION</code> flag as required.</p>
+<p><img alt="" src="../../../../assets/image-tui-enable-components.png" /></p>
+<h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
+<p>End session endpoint can be further configured using Janssen Server configuration properties listed below. When using
+<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> to configure the properties,
+navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
+<ul>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#allowendsessionwithunmatchedsid">allowEndSessionWithUnmatchedSid</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#endsessionendpoint">endSessionEndpoint</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#endsessionwithaccesstoken">endSessionWithAccessToken</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#mtlsendsessionendpoint">mtlsEndSessionEndpoint</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#rejectendsessionifidtokenexpired">rejectEndSessionIfIdTokenExpired</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#allowpostlogoutredirectwithoutvalidation">allowPostLogoutRedirectWithoutValidation</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#forceidtokenhintprecense">forceIdTokenHintPrecense</a></li>
+</ul>
+<p>Apart from the above-mentioned server properties, the properties relevant to individual clients can be configured
+during client registration or can be edited later. When using 
+<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> to configure the properties, navigate via <code>Auth Server</code>-&gt;
+<code>Clients</code>-&gt;<code>logout</code> as show in image below:</p>
+<p><img alt="" src="../../../../assets/image-logout-client-config.png" /></p>
+<h3 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h3>
+<p>Response from end session endpoint can be further customized using <a href="../../../developer/scripts/end-session/">end session</a> 
+interception script.</p>
+<p>This script can be used to customize the HTML response generated from end session endpoint.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
@@ -8808,7 +8882,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-04T11:59:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-04</span>
       
         <br>
         Created:
