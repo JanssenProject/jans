@@ -294,7 +294,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
     }
 
     public User parseBirthDateAttribute(User user) {
-        if (user.getAttributeObjectValues(BIRTH_DATE) != null) {
+     /*   if (user.getAttributeObjectValues(BIRTH_DATE) != null) {
 
             Optional<Object> optionalBithdate = user.getAttributeObjectValues(BIRTH_DATE).stream().findFirst();
 
@@ -310,6 +310,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
            // user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
            // user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
         }
+        */
         return user;
     }
 

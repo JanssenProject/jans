@@ -181,9 +181,11 @@ public class RequestReaderInterceptor {
                 if (attData.getValue() != null && gluuAttribute != null) {
                     AttributeDataType attributeDataType = gluuAttribute.getDataType();
                     logger.error(
-                            "AttributeDataType - attData.getName():{}, attributeDataType:{}, AttributeDataType.DATE.getValue():{}",
-                            attData.getName(), attributeDataType, AttributeDataType.DATE.getValue());
-                    if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())) {
+                            "AttributeDataType - attData.getName():{}, attributeDataType:{}, AttributeDataType.DATE.getValue():{}, isDateAttributes(attData.getName()):{}",
+                            attData.getName(), attributeDataType, AttributeDataType.DATE.getValue(),
+                            isDateAttributes(attData.getName()));
+                    if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())
+                            || isDateAttributes(attData.getName())) {
                         logger.error(" Calling decodeTime() - attData.getValue():{}", attData.getValue());
                         AttributeData attributeData = decodeTime(attData);
                         listAttributes.remove(attData);
@@ -211,23 +213,24 @@ public class RequestReaderInterceptor {
 
     private AttributeData decodeTime(AttributeData attributeData) {
         logger.error("Date data to decode attributeData:{}", attributeData);
-        if (attributeData == null) {
-            return attributeData;
-        }
         AttributeData atrData = attributeData;
-        if (atrData.getValue() != null) {
-            Object attValue = atrData.getValue();
-            if (attValue != null) {
-                Date date = authUtil.parseStringToDateObj(attValue.toString());
-                if (date == null) {
-                    date = persistenceEntryManager.decodeTime(null, attValue.toString());
-                    logger.error("atrData.getName():{}, date:{}", atrData.getName(), date);
-                    atrData = new AttributeData(atrData.getName(), date);
-                    atrData.setMultiValued(attributeData.getMultiValued());
-                }
-
-            }
+        if (atrData == null || atrData.getValue() == null) {
+            return atrData;
         }
+
+        Object attValue = atrData.getValue();
+        if (attValue != null) {
+            Date date = authUtil.parseStringToDateObj(attValue.toString());
+            logger.error("\n\n\n Date data to decode date:{}", date);
+            if (date != null) {
+                date = persistenceEntryManager.decodeTime(null, date.toString());
+                logger.error("\n\n\n Set decoded date atrData.getName():{}, date:{}", atrData.getName(), date);
+                atrData = new AttributeData(atrData.getName(), date);
+                atrData.setMultiValued(attributeData.getMultiValued());
+            }
+
+        }
+
         return atrData;
     }
 
@@ -254,8 +257,7 @@ public class RequestReaderInterceptor {
         if (getDataFormatConversionConf() == null) {
             return false;
         }
-        logger.error("getDataFormatConversionConf().isEnabled():{}",
-                getDataFormatConversionConf().isEnabled());
+        logger.error("getDataFormatConversionConf().isEnabled():{}", getDataFormatConversionConf().isEnabled());
         return getDataFormatConversionConf().isEnabled();
     }
 
@@ -272,6 +274,19 @@ public class RequestReaderInterceptor {
 
         return ignoreFlag;
 
+    }
+
+    private boolean isDateAttributes(String propertyName) {
+        logger.error("Check if date attribute  - propertyName:{}, getDataFormatConversionConf()", propertyName,
+                getDataFormatConversionConf());
+        boolean flag = false;
+        if (getDataFormatConversionConf() != null && getDataFormatConversionConf().getConversionAttributes() != null
+                && getDataFormatConversionConf().getConversionAttributes().getDateAttributes() != null
+                && getDataFormatConversionConf().getConversionAttributes().getDateAttributes().contains(propertyName)) {
+            flag = true;
+        }
+
+        return flag;
     }
 
 }

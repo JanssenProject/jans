@@ -428,7 +428,7 @@ public class AuthUtil {
     public Date parseStringToDateObj(String dateString) {
         String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
-
+        log.debug("parseStringToDateObj:{} ", dateString);
         Date date = null;
         try {
             date = dateFormat.parse(dateString);

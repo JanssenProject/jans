@@ -7297,17 +7297,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8474,8 +8474,6 @@ components:
           type: boolean
         userInfoConfiguration:
           $ref: '#/components/schemas/UserInfoConfiguration'
-        fapi:
-          type: boolean
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8512,6 +8510,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8812,13 +8812,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
