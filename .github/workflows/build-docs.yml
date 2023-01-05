@@ -91,16 +91,6 @@ jobs:
         continue-on-error: true
         env:
           VERSION: ${{ github.event.release.tag_name }}
-          JVM_PROJECTS: |
-            jans-auth-server
-            jans-orm
-            jans-config-api
-            jans-scim
-            jans-core
-            jans-notify
-            jans-fido2
-            jans-eleven
-            agama
         run: |
          echo "Custom work on generating docs can go here."
           
