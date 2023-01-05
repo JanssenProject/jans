@@ -545,7 +545,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+    public void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+        if (isTrue(appConfiguration.getDisablePromptLogin())) {
+            log.trace("Disabled prompt=login (because disablePromptLogin=true).");
+            prompts.remove(Prompt.LOGIN);
+            return;
+        }
         if (prompts.contains(Prompt.LOGIN)) {
             boolean sessionUnauthenticated = false;
 
